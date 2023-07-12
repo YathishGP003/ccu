@@ -37,6 +37,7 @@ import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
+import static a75f.io.device.mesh.MeshUtil.getSetTemp;
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
 /**
@@ -190,7 +191,7 @@ public class LSmartStat {
     private static void fillSmartStatControls(SmartStatControls_t controls, String equipId, short node){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + node + "\"");
-        controls.setTemperature.set((short)(getDesiredTemp(node) * 2)); //for Smartstat we always send desired temp as fixed values??? doubts over here? kumar
+        controls.setTemperature.set((short)(getSetTemp(equipId) * 2)); //for Smartstat we always send desired temp as fixed values??? doubts over here? kumar
         controls.fanSpeed.set(getOperationalMode("fan",equipId));
         controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",equipId)]);
         if (device != null && device.size() > 0) {

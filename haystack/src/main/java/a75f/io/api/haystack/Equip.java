@@ -22,6 +22,17 @@ public class Equip extends Entity
     private String floorRef;
     private String createByApplication;
     private String ccuRef;
+    private String equipRef;
+    private String pipeRef;
+    private String equipType;
+
+    public String getEquipType() {
+        return equipType;
+    }
+
+    public void setEquipType(String equipType) {
+        this.equipType = equipType;
+    }
 
     private String domainName;
 
@@ -41,8 +52,26 @@ public class Equip extends Entity
         this.model = model;
     }
 
+    public String getPipeRef() {
+        return pipeRef;
+    }
+
+    public String getCell() { return cell; }
+
+    public String getCapacity() { return capacity; }
+
+    public void setCell(String cell) { this.cell = cell; }
+
+    public void setCapacity(String capacity) { this.capacity = capacity; }
+
+    public void setPipeRef(String pipeRef) {
+        this.pipeRef = pipeRef;
+    }
+
     private String vendor;
     private String model;
+    private String cell;
+    private String capacity;
     public void setAhuRef(String ahuRef)
     {
         this.ahuRef = ahuRef;
@@ -136,6 +165,16 @@ public class Equip extends Entity
         this.ccuRef = ccuRef;
     }
 
+
+    public String getEquipRef() {
+        return equipRef;
+    }
+
+    public void setEquipRef(String equipRef) {
+        this.equipRef = equipRef;
+    }
+
+
     public String getDomainName() {
         return domainName;
     }
@@ -158,6 +197,11 @@ public class Equip extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+        private String equipRef;
+        private String equipType;
+        private String pipeRef;
+        private String cell;
+        private String capacity;
 
         private String domainName;
 
@@ -271,6 +315,30 @@ public class Equip extends Entity
             this.createdByApplication = createdByApplication;
             return this;
         }
+        public Builder setCell(String cell) {
+            this.cell = cell;
+            return this;
+        }
+        public Builder setCapacity(String capacity){
+            this.capacity = capacity;
+            return this;
+        }
+
+        public Builder setEquipRef(String equipRef){
+            this.equipRef = equipRef;
+            return this;
+        }
+
+        public Builder setEquipType(String equipType){
+            this.equipType = equipType;
+            return this;
+        }
+
+        public Builder setPipeRef(String pipeRef){
+            this.pipeRef = pipeRef;
+            return this;
+        }
+
 
         public Builder setDomainName(String domainName) {
             this.domainName = domainName;
@@ -302,6 +370,11 @@ public class Equip extends Entity
             q.setCreatedDateTime(createdDateTime);
             q.setLastModifiedDateTime(lastModifiedDateTime);
             q.setLastModifiedBy(lastModifiedBy);
+            q.equipRef = this.equipRef;
+            q.equipType = this.equipType;
+            q.pipeRef = this.pipeRef;
+            q.cell= this.cell;
+            q.capacity = this.capacity;
             q.setDomainName(domainName);
             q.tags = this.tags;
             return q;
@@ -396,6 +469,21 @@ public class Equip extends Entity
                     this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
+                else if(pair.getKey().equals("equipRef")){
+                    this.equipRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("equipType")){
+                    this.equipType = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals(Tags.PIPEREF)){
+                    this.pipeRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("cell")) {
+                    this.cell = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("capacity")) {
+                    this.capacity = pair.getValue().toString();
+                }
             }
             return this;
         }

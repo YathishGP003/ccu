@@ -1,6 +1,8 @@
 package a75f.io.messaging.client;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,6 +13,7 @@ import java.io.File;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -40,7 +43,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
     private final String siteId;
     private final String ccuId;
     private final String messagingUrl;
-
+    private SharedPreferences defaultSharedPrefs;
     private MessagingService messagingService;
 
     @Inject DatabaseHelper messagingDbHelper;
@@ -51,6 +54,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
         this.siteId = siteId;
         this.ccuId = ccuId;
         this.messagingUrl = messagingUrl;
+        this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
     }
 
     @Override
@@ -78,6 +82,13 @@ public class MessagingListener implements ServerSentEvent.Listener {
         JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
         JsonElement messageContents = payload.getAsJsonObject().get("message");
 
+        if(CCUHsApi.getInstance().isCCURegistered() && isOldMessage(payload)){
+            acknowledge(payload);
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "the message is acknowledged and ignored [messageId: "+payload.get("messageId").getAsString()+"" +
+                    ", timetoken: "+payload.get("timetoken").getAsString()+"]");
+            return;
+        }
+
         // Special case for "Restart CCU" and "Restart Tablet" remote commands:
         // The message needs to be synchronously acknowledged before it's acted upon to prevent the app
         // from entering a restart-loop, where un-ack'd restart messages are continuously received at start-up
@@ -87,6 +98,22 @@ public class MessagingListener implements ServerSentEvent.Listener {
             acknowledgeAsync(payload);
         }
         handleMessage(payload);
+    }
+
+    private boolean isOldMessage(JsonObject message) {
+        try {
+            long registrationTimeStamp = defaultSharedPrefs.getLong("ccuRegistrationTimeStamp", 0);
+            long messageTimeStamp = message.get("timetoken").getAsLong();
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING,
+                    "registrationTimeStamp:" +registrationTimeStamp+ ", " +
+                            " messageTimeStamp:" +messageTimeStamp+", " +
+                            " isMessageOlder:" +(registrationTimeStamp > messageTimeStamp));
+            return registrationTimeStamp > messageTimeStamp;
+        }catch (NullPointerException exception){
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, Objects.requireNonNull(exception.getMessage()));
+            exception.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -168,7 +195,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     private void handleMessage(JsonObject payload) {
         if (!CCUHsApi.getInstance().isCCURegistered()) {
-            CcuLog.d(L.TAG_CCU_MESSAGING,"CCU does not have active registration, Ignore message "
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING,"CCU does not have active registration, Ignore message "
                     +payload);
             return;
         }

@@ -23,6 +23,7 @@ import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -32,6 +33,7 @@ import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -191,6 +193,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     protected Void doInBackground(final String... params) {
                         setupCcuAsZoneProfile();
                         L.saveCCUState();
+                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         return null;
                     }
                 

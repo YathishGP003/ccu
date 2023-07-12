@@ -112,7 +112,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
 				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
-                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 continue;
             }
 			setTempCooling = cpuDevice.getDesiredTempCooling();

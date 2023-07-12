@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
@@ -171,11 +169,17 @@ public class HisSyncHandler
 
             List<HashMap> allPointsForZone =
                 ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
-            CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
+            List<HashMap> hvacModePoint =
+                    ccuHsApi.readAll("hvacMode and his and zone and roomRef == \""+ roomId +"\"");
+            CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points"+hvacModePoint);
             List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForZone);
+            List<HashMap> hvacModePointForEquip = getEntitiesWithGuidForSyncing(hvacModePoint);
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " zone points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
                 syncPoints(roomId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
+            }
+            if (!hvacModePointForEquip.isEmpty()) {
+                syncPoints(roomId, hvacModePointForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
             }
         }
     }
@@ -222,7 +226,7 @@ public class HisSyncHandler
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsBatch(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {

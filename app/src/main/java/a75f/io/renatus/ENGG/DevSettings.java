@@ -346,20 +346,19 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
-            /*Log.d("CCU"," ResetAppState ");
+            Log.d("CCU"," ResetAppState ");
             L.ccu().systemProfile.reset();
             for (ZoneProfile p : L.ccu().zoneProfiles) {
                 p.reset();
             }
             L.ccu().zoneProfiles.clear();
-            Globals.getInstance().loadEquipProfiles();*/
-            test();
+            Globals.getInstance().loadEquipProfiles();
         });
 
     }
     void test(){
         DomainService api = new DomainService();
-        /*api.readModbusModelsList("emr", new ResponseCallback() {
+        api.readModbusModelsList("emr", new ResponseCallback() {
             @Override
             public void onSuccessResponse(@Nullable String response) {
                 Log.i("DomainService", "onSuccessResponse: "+response.toString());
@@ -369,8 +368,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             public void onErrorResponse(@Nullable String response) {
                 Log.i("DomainService", "onSuccessResponse: "+response.toString());
             }
-        });*/
-        //
+        });
+
         api.readModelById("632c375873bc782363669e37", new ResponseCallback() {
             @Override
             public void onSuccessResponse(@Nullable String response) {

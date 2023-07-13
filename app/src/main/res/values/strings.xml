@@ -1267,6 +1267,8 @@
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
     <string name="desired_temperature">Desired Temperature</string>
+    <string name="backFill_duration">Backfill Time</string>
+    <string name="backFill_duration_description">Please choose backfill time according to site for appropriate offline storage.</string>
 
 
     <!-- Named Schedule-->
@@ -1324,4 +1326,5 @@
     <string name="latest_version">Latest Version: </string>
     <string name="download_size">  | Download Size: </string>
     <string name="bacnet_admin">admin@75f</string>
+    <string name="display_toast_message">display toast message</string>
 </resources>

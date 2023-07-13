@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
@@ -36,6 +37,10 @@ public class HisSyncHandler
     private static final String SYNC_TYPE_DEVICE = "device";
 
     private static final int HIS_ITEM_BATCH_SIZE = 500;
+
+    //For testing
+    private int totalHisItemCount = 0;
+    int numberOfPoints = 0;
 
     CCUHsApi ccuHsApi;
 
@@ -139,6 +144,7 @@ public class HisSyncHandler
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
         List<HashMap> allEquips = ccuHsApi.readAll("equip");
         List<HashMap> equipsToSync = getEntitiesWithGuidForSyncing(allEquips);
+        int totalNumberOfEquipPoints = 0;
 
         for (HashMap equipToSync : equipsToSync) {
             String equipId = equipToSync.get("id").toString();
@@ -148,11 +154,13 @@ public class HisSyncHandler
             List<HashMap> allPointsForEquip = ccuHsApi.readAll("point and his and equipRef == \""+ equipId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForEquip.size() + " equip points");
             List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForEquip);
+            totalNumberOfEquipPoints = totalNumberOfEquipPoints + getEntitiesWithGuidForSyncing(allPointsForEquip).size();
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " equip points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
                 syncPoints(equipId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
             }
         }
+        numberOfPoints = numberOfPoints + totalNumberOfEquipPoints;
     }
 
     /**
@@ -163,6 +171,7 @@ public class HisSyncHandler
     private void syncHistorizedZonePoints(boolean timeForQuarterHourSync) {
         List<HashMap> allZones = ccuHsApi.readAll("room");
         List<HashMap> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
+        int totalNumberOfZonePoints = 0;
 
         for (HashMap zone : zonesToSync) {
             String roomId = zone.get("id").toString();
@@ -174,6 +183,7 @@ public class HisSyncHandler
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points"+hvacModePoint);
             List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForZone);
             List<HashMap> hvacModePointForEquip = getEntitiesWithGuidForSyncing(hvacModePoint);
+            totalNumberOfZonePoints = totalNumberOfZonePoints + pointsToSyncForEquip.size() + hvacModePointForEquip.size();
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " zone points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
                 syncPoints(roomId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
@@ -182,12 +192,21 @@ public class HisSyncHandler
                 syncPoints(roomId, hvacModePointForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
             }
         }
+        numberOfPoints = numberOfPoints + totalNumberOfZonePoints;
+        //For testing purpose, will be removed before merging
+        Log.d("BHARATH_CCU_LOGS", "syncPoints: total number of points " + numberOfPoints);
+        numberOfPoints = 0;
+        Log.d("BHARATH_CCU_LOGS", "syncPoints: total number of hisItems " + totalHisItemCount);
+        Log.d("BHARATH_CCU_LOGS", " available memory  " + ccuHsApi.readHisValByQuery("available and memory"));
+        Log.d("BHARATH_CCU_LOGS", "is the system on low memory? " + ccuHsApi.readHisValByQuery("memory and low"));
+        Log.d("BHARATH_CCU_LOGS", "total memory  " + ccuHsApi.readHisValByQuery("memory and total"));
+        totalHisItemCount = 0;
     }
 
     private void syncHistorizedDevicePoints(boolean timeForQuarterHourSync) {
     List<HashMap> allEquips = ccuHsApi.readAll("device");
     List<HashMap> devicesToSync = getEntitiesWithGuidForSyncing(allEquips);
-
+        int totalNumberOfDevicePoints = 0;
         for (HashMap deviceToSync : devicesToSync) {
             String deviceId = deviceToSync.get("id").toString();
             if (!CCUHsApi.getInstance().hasEntitySynced(deviceId)) {
@@ -196,11 +215,13 @@ public class HisSyncHandler
             List<HashMap> allPointsForDevice = ccuHsApi.readAll("point and his and deviceRef == \""+ deviceId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForDevice.size() + " device points");
             List<HashMap> pointsToSyncForDevice = getEntitiesWithGuidForSyncing(allPointsForDevice);
+            totalNumberOfDevicePoints = totalNumberOfDevicePoints + pointsToSyncForDevice.size();
             CcuLog.d(TAG,"Found " + pointsToSyncForDevice.size() + " device points that have a GUID for syncing");
             if (!pointsToSyncForDevice.isEmpty()) {
                 syncPoints(deviceId, pointsToSyncForDevice, timeForQuarterHourSync, SYNC_TYPE_DEVICE);
             }
         }
+        numberOfPoints = numberOfPoints + totalNumberOfDevicePoints;
     }
 
 
@@ -225,8 +246,9 @@ public class HisSyncHandler
             }
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
+            int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint(ccuHsApi);
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID, numberOfHisEntryPerPoint);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {
@@ -263,7 +285,7 @@ public class HisSyncHandler
                     CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis"));
                 }
             }
-            
+            totalHisItemCount = totalHisItemCount + hisItemsToSyncForDeviceOrEquip.size();
             if (hisItemsToSyncForDeviceOrEquip.size() > HIS_ITEM_BATCH_SIZE) {
                 doHisWrite(hDictList, syncType, deviceOrEquipGuid, hisItemsToSyncForDeviceOrEquip );
                 hisItemsToSyncForDeviceOrEquip = new ArrayList<>();
@@ -382,8 +404,15 @@ public class HisSyncHandler
                     CcuLog.d(TAG, "doPurge ->");
                     try {
                         ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
+
+                        //For testing purpose, will be removed before merging
+                        int backFillDurationSelected = getBackFillDurationSelected(ccuHsApi);
+                        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint(ccuHsApi);
+                        Log.d("BHARATH_CCU_LOGS", "backfill duration selected  " + backFillDurationSelected);
+                        Log.d("BHARATH_CCU_LOGS", "number of his entry per point to be backfilled  " + numberOfHisEntryPerPoint);
+
                         for (HashMap<Object, Object> point : allHisPoints) {
-                            ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
+                            ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()), backFillDurationSelected);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -397,7 +426,31 @@ public class HisSyncHandler
             purgeThread.start();
         }
     }
-    
+
+    private int getNumberOfHisEntriesPerPoint(CCUHsApi ccuHsApi) {
+        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
+        int numberOfEntryPerMinute;
+        if (equipCount > 40) {
+            numberOfEntryPerMinute = 12;
+        } else if (equipCount > 30) {
+            numberOfEntryPerMinute = 16;
+        } else if (equipCount > 20) {
+            numberOfEntryPerMinute = 24;
+        } else {
+            numberOfEntryPerMinute = 12;
+        }
+        return numberOfEntryPerMinute;
+    }
+
+    private int getBackFillDurationSelected(CCUHsApi ccuHsApi) {
+        int backFillDurationSelected = 24;
+        String backFillQuery = "backfill and duration";
+        if (!ccuHsApi.readEntity(backFillQuery).isEmpty()) {
+            backFillDurationSelected = ccuHsApi.readDefaultVal(backFillQuery).intValue();
+        }
+        return backFillDurationSelected;
+    }
+
     public void scheduleSync(boolean syncAll, long delaySeconds) {
         if (mSyncTimerTask != null) {
             return;

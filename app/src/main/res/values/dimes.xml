@@ -2,7 +2,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="action_bar_height">55dp</dimen>
     <dimen name="action_bar_height_large">69dp</dimen>
-    <dimen name="margin_20">24dp</dimen>
+    <dimen name="margin_20">24sp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_medium">18sp</dimen>
     <dimen name="layout_wi">250dp</dimen>

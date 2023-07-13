@@ -1,32 +1,26 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HRow;
-import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackFillUtil;
+import a75f.io.logic.bo.building.BackfillPref;
+import a75f.io.logic.bo.building.BackfillUtil;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.Units;
@@ -36,13 +30,10 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
-import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.PreferenceUtil;
 
-import static a75f.io.logic.L.app;
 import static a75f.io.logic.L.ccu;
 
 /**
@@ -785,7 +776,7 @@ public abstract class SystemProfile
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
-        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        BackfillUtil.Companion.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
 
     }
 
@@ -847,7 +838,7 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
 
-        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        BackfillUtil.Companion.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
 
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }

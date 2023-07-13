@@ -30,7 +30,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackFillUtil;
+import a75f.io.logic.bo.building.BackfillPref;
+import a75f.io.logic.bo.building.BackfillUtil;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
@@ -165,7 +166,7 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
             JsonElement backFillVal = msgObject.get("val");
             if (!backFillVal.isJsonNull()){
-                BackFillUtil.updateBackfillDuration(backFillVal.getAsDouble());
+                BackfillUtil.updateBackfillDuration(backFillVal.getAsDouble());
             }
         }
         

@@ -73,6 +73,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
+import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -561,6 +562,7 @@ public class FloorPlanFragment extends Fragment {
         } else {
             moduleListView.setAdapter(null);
         }
+        BackFillViewModel.setBackFillDuration();
     }
 
     private ArrayList<String> createAddressList(List<Equip> equips) {

@@ -29,6 +29,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
@@ -42,6 +44,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.service.DomainService;
+import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -342,15 +346,46 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
-            Log.d("CCU"," ResetAppState ");
+            /*Log.d("CCU"," ResetAppState ");
             L.ccu().systemProfile.reset();
             for (ZoneProfile p : L.ccu().zoneProfiles) {
                 p.reset();
             }
             L.ccu().zoneProfiles.clear();
-            Globals.getInstance().loadEquipProfiles();
+            Globals.getInstance().loadEquipProfiles();*/
+            test();
         });
 
+    }
+    void test(){
+        DomainService api = new DomainService();
+        /*api.readModbusModelsList("emr", new ResponseCallback() {
+            @Override
+            public void onSuccessResponse(@Nullable String response) {
+                Log.i("DomainService", "onSuccessResponse: "+response.toString());
+            }
+
+            @Override
+            public void onErrorResponse(@Nullable String response) {
+                Log.i("DomainService", "onSuccessResponse: "+response.toString());
+            }
+        });*/
+        //
+        api.readModelById("632c375873bc782363669e37", new ResponseCallback() {
+            @Override
+            public void onSuccessResponse(@Nullable String response) {
+                try{
+                    Log.i("DomainService", "onSuccessResponse: "+ new JSONObject(response));
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onErrorResponse(@Nullable String response) {
+                Log.i("DomainService", "onSuccessResponse: "+ response);
+            }
+        });
     }
 
 

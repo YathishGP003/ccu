@@ -30,6 +30,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -96,6 +97,8 @@ import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.service.DomainService;
+import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -275,9 +278,7 @@ public abstract class UtilityApplication extends Application {
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
-
     }
-
     private void isDataSyncRestartRequired() {
         if(getDataSyncProcessing()) {
             CcuLog.i("CCU_READ_CHANGES", "Data Sync restarted " + new Date(getSyncStartTime()));

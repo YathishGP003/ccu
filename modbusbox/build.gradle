@@ -93,4 +93,6 @@ dependencies {
 
     implementation project(':haystack')
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
+    implementation project(path: ':domain')
+
 }

@@ -21,25 +21,32 @@ android {
         }
         dev {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-dev.azurewebsites.net/\"'
         }
         dev_qa {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-qa.azurewebsites.net/\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-75f-service.azurewebsites.net/\"'
         }
         qa {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-qa.azurewebsites.net/\"'
+
         }
         staging {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-staging.azurewebsites.net/\"'
         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-daikin_prod.azurewebsites.net/\"'
         }
     }
     compileOptions {
@@ -79,6 +86,8 @@ dependencies {
     implementation "com.squareup.moshi:moshi:1.8.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.8.0"
     implementation("com.squareup.moshi:moshi-adapters:1.8.0")
-
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 }

@@ -39,6 +39,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
  */
 
 class HyperStatFragment : BaseDialogFragment() {
+    private var adapterAnalogOutMapping: AnalogOutAdapter? = null
     private val disposables = CompositeDisposable()
     private val configurationDisposable = CompositeDisposable()
 
@@ -696,7 +697,30 @@ class HyperStatFragment : BaseDialogFragment() {
                     selector.setSelection(viewState.stagedFanUis[index])
                 }
             }
+
+            if (isNoFanStageEnabled()) {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,false)
+                analogOutUIs.forEach {
+                    if (it.selector.selectedItemPosition == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) it.selector.setSelection(1)
+                }
+            } else {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,true)
+            }
         }
+    }
+
+    private fun isNoFanStageEnabled(): Boolean {
+        relayUIs.forEach {
+            if (it.switch.isChecked && (it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_1.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_2.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_3.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_1.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_2.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_3.ordinal )) {
+                return false
+            }
+        }
+        return true
     }
 
     private fun isViewModelCPUViewModel(viewModel: HyperStatModel): Boolean {
@@ -878,7 +902,7 @@ class HyperStatFragment : BaseDialogFragment() {
         th2Label.text = viewModel.getTh2SensorLabel()
 
         val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
-        val adapterAnalogOutMapping = getAdapter(viewModel.getAnalogOutMapping())
+        adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping()) }
         var relayPos = 0
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
@@ -889,9 +913,6 @@ class HyperStatFragment : BaseDialogFragment() {
         }
     }
 
-    private fun getAdapter(values: Array<String>): ArrayAdapter<*> {
-        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
-    }
     private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
         return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
     }

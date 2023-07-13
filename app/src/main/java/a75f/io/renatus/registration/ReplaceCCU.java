@@ -258,7 +258,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         RecyclerView ccuListRecyclerView = dialogView.findViewById(R.id.ccus);
         TextView ccuVersionTextView = dialogView.findViewById(R.id.curr_ccu_version);
         ImageView close = dialogView.findViewById(R.id.close_button);
-        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this);
+        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this, getParentFragmentManager());
         ccuListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ccuListRecyclerView.setHasFixedSize(true);
         ccuListRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -338,7 +338,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private AlertDialog replaceCCUDailog;
     @Override
     public void onCCUSelect(CCU ccu) {
-        replaceCCUDailog = new AlertDialog.Builder(getContext()).create();
+        replaceCCUDailog = new AlertDialog.Builder(requireContext()).create();
         replaceCCUDailog.setTitle("Do you want to replace "+ ccu.getName()+"?");
         replaceCCUDailog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", (dialogInterface, i) -> {
             alertDialog.dismiss();
@@ -458,7 +458,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         EquipResponseCallback equipResponseCallback = getEquipResponseCallback(ccu);
 
         currentReplacementProgress.values().forEach(v ->{
-            if(((String) v).equals(ReplaceStatus.COMPLETED.toString())){
+            if(v.equals(ReplaceStatus.COMPLETED.toString())){
                 equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
             }
         });
@@ -514,8 +514,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private void replaceEquipsParallelly(ReplaceCCUTracker replaceCCUTracker, EquipResponseCallback equipResponseCallback,
                                          ConcurrentHashMap<String, ?> currentReplacementProgress,
                                          RetryCountCallback retryCountCallback) {
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()
-                -1);
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() -1);
         for (String equipId : currentReplacementProgress.keySet()) {
             if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.COMPLETED.toString())){
                 continue;

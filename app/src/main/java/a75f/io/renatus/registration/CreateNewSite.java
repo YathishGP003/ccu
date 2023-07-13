@@ -49,8 +49,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -116,7 +114,7 @@ public class CreateNewSite extends Fragment {
 
     private ImageView imgEditSite;
     private ImageView imgUnregisterSite;
-
+    View toastLayout;
     Context mContext;
     LinearLayout btnSetting;
     Prefs prefs;
@@ -131,9 +129,13 @@ public class CreateNewSite extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
-
+        LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+        }
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
@@ -951,7 +953,7 @@ public class CreateNewSite extends Fragment {
 
     private void goTonext() {
         prefs.setBoolean("CCU_SETUP", false);
-        ((FreshRegistration) getActivity()).selectItem(4);
+        ((FreshRegistration) getActivity()).selectItem(21);
     }
 
     private Spanned getHTMLCodeForHints( int resource){

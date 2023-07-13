@@ -11,20 +11,27 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilder
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 class DeviceBuilderTest {
 
     private lateinit var dmModel: SeventyFiveFDeviceDirective
+    private val mockHayStack = MockCcuHsApi()
     @Before
     fun setUp() {
         dmModel = ResourceHelper.loadDeviceModelDefinition("DeviceBuilder_TestModel.json")
     }
 
+    @After
+    fun tearDown() {
+        mockHayStack.closeDb()
+        mockHayStack.clearDb()
+    }
+
     @Test
     fun testCreateDevice() {
-        val mockHayStack = MockCcuHsApi()
 
         val s = Site.Builder()
             .setDisplayName("75F")
@@ -78,20 +85,6 @@ class DeviceBuilderTest {
         println(thermistor)
         println(supplyAirTemp)
         assert(thermistor["pointRef"].toString() == supplyAirTemp["id"].toString())
-
-    }
-
-    @Test
-    fun testCreatePoints() {
-        val mockHayStack = MockCcuHsApi()
-
-        dmModel?.let {
-            val equipBuilder = EquipBuilder(mockHayStack)
-            equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
-        }
-
-        val points = mockHayStack.readAllEntities("point")
-        assert(points.size == 4)
 
     }
 

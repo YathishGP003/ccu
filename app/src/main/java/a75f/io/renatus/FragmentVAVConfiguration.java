@@ -3,7 +3,6 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -52,6 +51,7 @@ import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -547,6 +547,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                             CCUHsApi.getInstance().syncEntityTree();
                             CCUHsApi.getInstance().setCcuReady();
                             LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         },
                         ()->{
                             ProgressDialogUtils.hideProgressDialog();

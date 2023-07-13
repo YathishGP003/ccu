@@ -6,20 +6,27 @@ import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.EquipBuilder
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 class EquipBuilderTest {
      private lateinit var dmModel: ModelDirective
 
+    private var mockHayStack = MockCcuHsApi()
     @Before
     fun setUp() {
         dmModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
     }
 
+    @After
+    fun tearDown() {
+        mockHayStack.closeDb()
+        mockHayStack.clearDb()
+    }
+
     @Test
     fun testCreateEquip() {
-        val mockHayStack = MockCcuHsApi()
 
         dmModel?.let {
             val equipBuilder = EquipBuilder(mockHayStack)
@@ -36,7 +43,6 @@ class EquipBuilderTest {
 
     @Test
     fun testCreatePoints() {
-        val mockHayStack = MockCcuHsApi()
 
         dmModel?.let {
             val equipBuilder = EquipBuilder(mockHayStack)
@@ -44,7 +50,7 @@ class EquipBuilderTest {
         }
 
         val points = mockHayStack.readAllEntities("point")
-        assert(points.size == 4)
+        assert(points.size == 5)
 
     }
 
@@ -54,7 +60,6 @@ class EquipBuilderTest {
      */
     @Test
     fun testUpdatePoints() {
-        val mockHayStack = MockCcuHsApi()
         val equipBuilder = EquipBuilder(mockHayStack)
 
         dmModel?.let {
@@ -90,7 +95,6 @@ class EquipBuilderTest {
 
     @Test
     fun testVerifyEquipTagValType() {
-        val mockHayStack = MockCcuHsApi()
 
         dmModel?.let {
             val equipBuilder = EquipBuilder(mockHayStack)
@@ -108,17 +112,15 @@ class EquipBuilderTest {
 
     @Test
     fun testVerifyPointTagValType() {
-        val mockHayStack = MockCcuHsApi()
 
         dmModel?.let {
             val equipBuilder = EquipBuilder(mockHayStack)
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
         }
 
-        val pointDict = mockHayStack.readHDict("point")
+        val pointDict = mockHayStack.readHDict("point and domainName == \"coolingStage1"+"\"")
 
         val point = Point.Builder().setHDict(pointDict).build()
-
         assert(point.tags.isNotEmpty())
         point.tags.entries.forEach{println(it)}
 

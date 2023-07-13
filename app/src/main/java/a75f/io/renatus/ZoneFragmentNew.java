@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.getDesiredTempDisplayMode;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
@@ -60,13 +62,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.javolution.text.Text;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -100,6 +102,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -438,11 +441,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
                             specialScheduleStatusText.setText(specialScheduleStatus);
+                            int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                                    " == \"" + zoneId + "\"").intValue();
                             try {
                             if(isCelsiusTunerAvailableStatus()) {
-                                scheduleStatus.setText(StatusCelsiusVal(status));
+                                scheduleStatus.setText(StatusCelsiusVal(status, temperatureMode));
                             } else {
-                                scheduleStatus.setText(status);
+                                scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode]));
                             }
                             } catch (Exception e) {
                             e.printStackTrace();
@@ -781,6 +786,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+        int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                " == \"" + p.getRoomRef() + "\"").intValue();
         Log.i("ProfileTypes", "p:" + p.toString());
         double currentAverageTemp = 0;
         int noTempSensor = 0;
@@ -922,15 +929,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         try {
         if( isCelsiusTunerAvailableStatus()) {
+
             Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
+                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status, temperatureMode)));
         } else {
             Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(status -> scheduleStatus.setText(status));
+                    .subscribe(status -> scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode])));
         }
         } catch (Exception e) {
         e.printStackTrace();
@@ -1150,12 +1158,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
-
-        Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);
+        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
+        Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband+" modeType"+modeType);
         seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax,
                         (float) heatLowerlimit, (float) heatUpperlimit, (float) coolLowerlimit,
                         (float) coolUpperlimit, (float) pointheatDT, (float) pointcoolDT,
-                        (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
+                        (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband, modeType);
 
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1474,6 +1482,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones");
 
         Equip p = equipOpen;
+        int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                " == \"" + p.getRoomRef() + "\"").intValue();
         View zoneDetails = zonePointsOpen;
         SeekArc seekArc = seekArcOpen;
         String equipId = p.getId();
@@ -1565,12 +1575,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, p.getId()))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
+                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status, temperatureMode)));
         } else {
             Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, p.getId()))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(status -> scheduleStatus.setText(status));
+                    .subscribe(status -> scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode])));
         }
         } catch (Exception e) {
         e.printStackTrace();
@@ -1805,12 +1815,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
         double pointheatDB = TunerUtil.getZoneHeatingDeadband(p.getRoomRef());
         double pointcoolDB = TunerUtil.getZoneCoolingDeadband(p.getRoomRef());
-
-        if (!seekArc.isDetailedView()) {
-            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
-        } else {
-            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
-        }
+        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
+        seekArc.setData(seekArc.isDetailedView(), (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL,
+                (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT,
+                (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB, modeType);
 
         linearLayoutZonePoints.removeAllViews();
         for (int k = 0; k < openZoneMap.size(); k++) {
@@ -2266,6 +2274,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ll_schedule.setVisibility(View.GONE);
 
                             List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
+                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +
+                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
+
+                            for(EquipmentDevice equipmentDevice : modbusDevices){
+                                if(null != equipmentDevice.getEquips()) {
+                                    modbusDevices.addAll(equipmentDevice.getEquips());
+                                }
+                            }
 
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
@@ -2287,22 +2303,42 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
-                                List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
-                                String equipType = equipTypes.get(0);
-                                equipType = equipType.trim();
-                                tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
+
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                                HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+                                TextView textViewUpdatedTimeHeading =
+                                        zoneDetails.findViewById(R.id.last_updated);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-                                textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+
+                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
+                                String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
+                                StringBuffer equipString = new StringBuffer();
+                                for(String equipType : equipTypes){
+                                    equipString.append(StringUtils.capitalize(equipType.trim()));
+                                    equipString.append(" ");
+                                }
+                                tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                if((Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
+                                null == modbusDevices.get(i).getEquipRef()) ||
+                                        (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId())) {
+                                    textViewModule.setVisibility(View.VISIBLE);
+                                    textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+                                    textViewUpdatedTime.setVisibility(View.VISIBLE);
+                                    HeartBeatUtil.moduleStatus(textViewModule,
+                                            Integer.toString(modbusDevices.get(i).getSlaveId()));
+                                    textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
+                                            Integer.toString(modbusDevices.get(i).getSlaveId())));
+                                }
+                                else{
+                                    textViewModule.setVisibility(View.GONE);
+                                    textViewUpdatedTimeHeading.setVisibility(View.GONE);
+                                    textViewUpdatedTime.setVisibility(View.GONE);
+                                }
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
                                         new ZoneRecyclerModbusParamAdapter(getContext(),
-                                                                           modbusDevices.get(i).getEquipRef(),
-                                                                           parameterList,
-                                                                           modbusDevices.get(i).getSlaveId());
+                                                                           modbusDevices.get(i).getDeviceEquipRef(),
+                                                                           parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

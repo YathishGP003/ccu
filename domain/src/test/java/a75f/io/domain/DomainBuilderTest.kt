@@ -10,6 +10,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EquipBuilder
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -17,14 +18,20 @@ class DomainBuilderTest {
 
     private lateinit var dmModel: ModelDirective
 
+    val hayStack = MockCcuHsApi()
     @Before
     fun setUp() {
         dmModel = ResourceHelper.loadProfileModelDefinition("DomainBuilder_TestModel.json")
     }
 
+    @After
+    fun tearDown() {
+        hayStack.closeDb()
+        hayStack.clearDb()
+    }
+
     @Test
     fun buildDomain() {
-        val hayStack = MockCcuHsApi()
 
         val s = Site.Builder()
             .setDisplayName("75F")

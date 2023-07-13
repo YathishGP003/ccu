@@ -234,7 +234,7 @@ public class DabProfile extends ZoneProfile
             dabEquip.setNormalizedDamperPos(damperPos, "primary");
             dabEquip.setNormalizedDamperPos(damperPos, "secondary");
             CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
     

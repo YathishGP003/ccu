@@ -32,6 +32,7 @@ public class Point extends Entity
     private String            enums;
     private String            minVal;
     private String            maxVal;
+    private String            cell;
     private String            incrementVal;
     private String            tunerGroup;
     private String            hisInterpolate;
@@ -141,7 +142,6 @@ public class Point extends Entity
     public void setCcuRef(String ccuRef) {
         this.ccuRef = ccuRef;
     }
-
     public String getDomainName() {
         return domainName;
     }
@@ -151,6 +151,12 @@ public class Point extends Entity
 
     public Map<String, HVal> getTags() {
         return tags;
+    }
+    public String getCell() {
+        return cell;
+    }
+    public void setCell(String cell) {
+        this.cell = cell;
     }
     private Point(){
     }
@@ -168,6 +174,7 @@ public class Point extends Entity
         private String enums;
         private String minVal;
         private String maxVal;
+        private String cell;
         private String incrementVal;
         private String tunerGroup;
         private String hisInterpolate;
@@ -280,6 +287,11 @@ public class Point extends Entity
             this.maxVal = max;
             return this;
         }
+        public Builder setCell(String cell)
+        {
+            this.cell = cell;
+            return this;
+        }
         public Builder setIncrementVal(String inc)
         {
             this.incrementVal = inc;
@@ -329,6 +341,7 @@ public class Point extends Entity
             p.enums = this.enums;
             p.minVal = this.minVal;
             p.maxVal = this.maxVal;
+            p.cell = this.cell;
             p.incrementVal = this.incrementVal;
             p.tunerGroup = this.tunerGroup;
             p.hisInterpolate = this.hisInterpolate;

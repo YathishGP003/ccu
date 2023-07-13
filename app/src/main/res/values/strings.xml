@@ -425,6 +425,7 @@
     <!--Fragment Titles-->
     <string name="installtype">Select Type Of Install</string>
     <string name="connectwifi">Connect to WiFi</string>
+    <string name="add_new_ccu">ADD NEW CCU</string>
 
     <string name="installcreatenew">Create New Site</string>
     <string name="desccreatenew">Use this option to create a new site. This will be used for a site\'s first CCU.</string>
@@ -501,6 +502,8 @@
     <string name="input_siteid">Enter Site ID</string>
     <string name="title_viewlist">VIEW LIST OF ASSIGNED SITES</string>
     <string name="hint_password">Password</string>
+    <string name="ccu_nameq">  CCU Name</string>
+    <string name="ccu_name">CCU Name</string>
 
     <!--Preconfigured CCU-->
     <string name="title_preconfig">PRECONFIGURED CCU</string>
@@ -1030,6 +1033,7 @@
     <string name="title_temperature_setpoint">Temperature Setpoint</string>
     <string name="title_heater_on_off_status">Heater ON/OFF status</string>
     <string name="title_humidity_setpoint">Humidity Setpoint</string>
+    <string name="title_select_all_params">Select All Parameters</string>
 
     <string-array name="equipment_type">
         <item>Company PAC model 1</item>
@@ -1202,7 +1206,6 @@
     <string name="p2pm">PM2.5</string>
 
 
-
     <string-array name="hyperstate_medium_high_fanmode">
         <item>  Off </item>
         <item>  Auto </item>
@@ -1264,8 +1267,6 @@
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
     <string name="desired_temperature">Desired Temperature</string>
-    <string name="backFill_duration">Backfill Time</string>
-    <string name="backFill_duration_description">Please choose backfill time according to site for appropriate offline storage.</string>
 
 
     <!-- Named Schedule-->
@@ -1317,6 +1318,10 @@
     <!-- Safe mode -->
     <string name="in_safe_mode">CCU is in Safe Mode</string>
     <string name="exit_safe_mode">EXIT SAFE MODE</string>
-
+    <string name="updateAppToRecommendedVersion">Please update the App to continue.. </string>
+    <string name="server_down_string">Operation cannot be performed till CCU is connected to server </string>
+    <string name="current_version">Current Version: </string>
+    <string name="latest_version">Latest Version: </string>
+    <string name="download_size">  | Download Size: </string>
     <string name="bacnet_admin">admin@75f</string>
 </resources>

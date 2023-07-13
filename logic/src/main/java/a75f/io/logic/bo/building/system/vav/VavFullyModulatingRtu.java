@@ -33,6 +33,9 @@ import a75f.io.logic.util.SystemProfileUtil;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
+
 /**
  * Default System handles PI controlled op
  */
@@ -184,7 +187,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             writeSystemLoopOutputValue(Tags.HEATING,systemHeatingLoopOp);
             systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
         }
-        
+
         setSystemLoopOp("heating", systemHeatingLoopOp);
         if (getConfigVal("analog3 and output and enabled") > 0)
         {
@@ -847,6 +850,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
 
             CCUHsApi.getInstance().syncEntityTree();
         }
+        setSystemModeForVav(CCUHsApi.getInstance());
     }
     
     private void addTunerPoints(String equipref) {

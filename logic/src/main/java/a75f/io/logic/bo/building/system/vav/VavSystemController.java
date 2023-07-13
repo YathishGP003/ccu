@@ -938,7 +938,7 @@ public class VavSystemController extends SystemController
     }
     
     public double getStatus(String nodeAddr) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
     
     private boolean isDamperOverrideActive(HashMap<Object, Object> equipMap) {

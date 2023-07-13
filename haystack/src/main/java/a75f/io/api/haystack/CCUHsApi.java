@@ -71,7 +71,7 @@ public class CCUHsApi
 {
 
     public static final String TAG = CCUHsApi.class.getSimpleName();
-
+    private SharedPreferences defaultSharedPrefs;
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
@@ -127,6 +127,7 @@ public class CCUHsApi
 
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
         updateJwtValidity();
+        this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -382,7 +383,7 @@ public class CCUHsApi
     //TODO - Replace CCU support
     public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
         Point occupancy = new Point.Builder()
-                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              .setDisplayName("occupancyState")
                               //.setEquipRef(equipRef)
                               .setSiteRef(zone.getSiteRef())
                               .setRoomRef(zoneRef)
@@ -404,7 +405,23 @@ public class CCUHsApi
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         addZoneOccupancyPoint(zoneId, z);
+        addZoneTemperatureModePoint(zoneId, z);
         return zoneId;
+    }
+
+    public void addZoneTemperatureModePoint(String zoneId, Zone zone) {
+        Point ZoneTemperatureMode = new Point.Builder()
+                .setDisplayName(Tags.ZONE_HVAC_MODE)
+                .setSiteRef(zone.getSiteRef())
+                .setRoomRef(zoneId)
+                .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                .addMarker(Tags.ZONE).addMarker(Tags.HVAC_MODE)
+                .addMarker("his")
+                .setEnums("DUAL_TEMP, SINGLE_COOLING, SINGLE_HEATING")
+                .setTz(getTimeZone())
+                .build();
+        String ZoneTemperatureModeId = CCUHsApi.getInstance().addPoint(ZoneTemperatureMode);
+        CCUHsApi.getInstance().writeHisValById(ZoneTemperatureModeId, 0.0);
     }
 
     // From EntityPullHandler
@@ -450,6 +467,10 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateEquipLocally(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
     }
 
     public void updatePoint(RawPoint r, String id)
@@ -1199,6 +1220,10 @@ public class CCUHsApi
             for (HashMap<Object, Object> point : points) {
                 deleteEntityItem(point.get("id").toString());
             }
+            HashMap<Object, Object> zoneHvacModePoint =
+                    readEntity("hvacMode and zone and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete TemperatureMode point of room "+zoneHvacModePoint);
+                deleteEntityItem(zoneHvacModePoint.get("id").toString());
             
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
@@ -1482,10 +1507,9 @@ public class CCUHsApi
                     hsApi.setSynced(equiUuid);
                 }
                 //Points
-                for (Point p : points)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
+                ArrayList<HDict> hDicts = new ArrayList<>();
+                for (Point p : points) {
+                    if (p.getEquipRef().equals(q.getId())) {
                         String pointId = StringUtils.prependIfMissing(p.getId(), "@");
                         HashMap<Object, Object> point = readMapById(pointId);
                         if (point.isEmpty()) {
@@ -1495,13 +1519,21 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
-                            CcuLog.i(TAG, "Added Building Tuner "+p);
+                            CcuLog.i(TAG, "Added Building Tuner " + p);
+                            HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                            hDicts.add(pid);
                         } else {
-                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                            CcuLog.i(TAG, "Point already imported " + p.getId());
+                            double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                            if (defaultVal == 0) {
+                                HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                                hDicts.add(pid);
+                                Log.d(TAG, "No default value for point: " + pid.dis());
+                            }
                         }
-
                     }
                 }
+                importPointArrays(hDicts, hClient);
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
@@ -2159,7 +2191,7 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-
+                            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                             });
@@ -2725,4 +2757,16 @@ public class CCUHsApi
         CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
     }
 
+    public Double readDefaultValByLevel(String id, int level)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level - 1));
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else
+        {
+            return 0.0;
+        }
+    }
 }

@@ -31,6 +31,7 @@ import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -162,6 +163,16 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tvOffsetValue1) TextView tvOffsetValue;
 
+    @BindView(R.id.fdInputView) View fdInputView;
+
+    @BindView(R.id.etFdIP) EditText etFdIp;
+
+    @BindView(R.id.etFdPort) EditText etFdPort;
+
+    @BindView(R.id.etFdTime) EditText etFdTime;
+
+    @BindView(R.id.tvFdSubmit) View tvFdSubmit;
+
     SharedPreferences sharedPreferences;
     JSONObject config;
     JSONObject networkObject;
@@ -266,8 +277,51 @@ public class Communication extends Fragment {
             RadioButton radioButton = view.findViewById(checkedId);
             String label = radioButton.getText().toString();
             Log.d(L.TAG_CCU_BACNET, "radioButton selected-->"+label);
-            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
+            handleConfigurationType(label);
         });
+
+        fdInputView.setVisibility(View.GONE);
+        tvFdSubmit.setOnClickListener(view1 -> {
+            if (validateFdData()) {
+                Toast.makeText(context, "device configured as fd", Toast.LENGTH_SHORT).show();
+                RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
+                String label = radioButton.getText().toString();
+                Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
+                intent.putExtra("message", label);
+                intent.putExtra("ip", etFdIp.getText().toString().trim());
+                intent.putExtra("port", etFdPort.getText().toString().trim());
+                intent.putExtra("time", etFdTime.getText().toString().trim());
+                context.sendBroadcast(intent);
+            }
+        });
+    }
+
+    private boolean validateFdData() {
+        if (etFdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etFdIp.getText().toString().trim()))) {
+            etFdIp.setError(getString(R.string.error_ip_address));
+            return false;
+        }
+        if (etFdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFdPort.getText().toString()), 4069, 65535, 1))) {
+            etFdPort.setError(getString(R.string.txt_error_port));
+            return false;
+        }
+        if (etFdTime.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFdTime.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+            etFdTime.setError(getString(R.string.txt_valid_number));
+            return false;
+        }
+        etFdIp.setError(null);
+        etFdPort.setError(null);
+        etFdTime.setError(null);
+        return true;
+    }
+
+    private void handleConfigurationType(String label){
+        if(label.equalsIgnoreCase(getString(R.string.label_foreign_device))){
+            fdInputView.setVisibility(View.VISIBLE);
+        }else{
+            fdInputView.setVisibility(View.GONE);
+            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
+        }
     }
 
     private void setBACnetConfigurationValues() {
@@ -662,7 +716,7 @@ public class Communication extends Fragment {
                     validateAndSetValue(etScheduleObjects, NUMBER_OF_SCHEDULE_OBJECTS, etScheduleObjects.getText().toString(), objectConf, 0, 10, 1, getString(R.string.error_schedule_objects));
                     break;
                 case R.id.etOffsetValues:
-                    validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 0, 100, 1, getString(R.string.error_offset_values));
+                    validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 1, 100, 1, getString(R.string.error_offset_values));
                     break;
             }
         }

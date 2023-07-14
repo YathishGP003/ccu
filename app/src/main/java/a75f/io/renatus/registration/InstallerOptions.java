@@ -57,7 +57,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackfillUtil;
+import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -78,6 +78,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
+
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -497,7 +498,7 @@ public class InstallerOptions extends Fragment {
             int index = selectedSpinnerItem > 0 ? Math.min(selectedSpinnerItem , durations.length - 1) : 0;
             int backFillDurationSelected = durations[index];
 
-            BackfillUtil.updateBackfillDuration(backFillDurationSelected);
+            BackfillUtilKt.updateBackfillDuration(backFillDurationSelected);
 
             if (!isFreshRegister) {
                 generateToastMessage(toastLayout);
@@ -580,7 +581,7 @@ public class InstallerOptions extends Fragment {
                 .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(initialise ? "":getEditGateWay(editGateway)).build();
         CCUHsApi.getInstance().addPoint(bacnetGateway);
 
-        BackfillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        BackfillUtilKt.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
     }
 
     private String getEditGateWay(EditText editGateway) {

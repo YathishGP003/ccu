@@ -12,14 +12,6 @@ class DomainAPITest{
 
     @Test
     fun testApi() {
-        val service = DomainService()
-        service.readModbusModelsList("emr", object : ResponseCallback {
-            override fun onSuccessResponse(response: String?) {
-                println(" ================================$response")
-            }
-            override fun onErrorResponse(response: String?) {
-                println(" ================================$response")
-            }
-        })
+
     }
 }

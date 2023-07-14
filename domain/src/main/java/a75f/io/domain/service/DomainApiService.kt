@@ -22,8 +22,7 @@ interface DomainModelerService {
     fun getModbusModelsList(
         @retrofit2.http.Query("tag-names") tagNames: String?
     ): retrofit2.Call<ResponseBody>
-
-    @GET("/models/{modelId}")
+    @GET("/models/modbus/{modelId}/modbus-json")
     fun getModelById(
         @retrofit2.http.Path("modelId") modelId: String?
     ): retrofit2.Call<ResponseBody>

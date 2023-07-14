@@ -356,39 +356,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
 
     }
-    void test(){
-        DomainService api = new DomainService();
-        api.readModbusModelsList("emr", new ResponseCallback() {
-            @Override
-            public void onSuccessResponse(@Nullable String response) {
-                Log.i("DomainService", "onSuccessResponse: "+response.toString());
-            }
-
-            @Override
-            public void onErrorResponse(@Nullable String response) {
-                Log.i("DomainService", "onSuccessResponse: "+response.toString());
-            }
-        });
-
-        api.readModelById("632c375873bc782363669e37", new ResponseCallback() {
-            @Override
-            public void onSuccessResponse(@Nullable String response) {
-                try{
-                    Log.i("DomainService", "onSuccessResponse: "+ new JSONObject(response));
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onErrorResponse(@Nullable String response) {
-                Log.i("DomainService", "onSuccessResponse: "+ response);
-            }
-        });
-    }
-
-
-    
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)

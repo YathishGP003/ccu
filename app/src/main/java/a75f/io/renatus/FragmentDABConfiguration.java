@@ -3,12 +3,10 @@ package a75f.io.renatus;
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -19,7 +17,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
@@ -50,16 +47,18 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import androidx.annotation.Nullable;
 
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
+import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
+
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -202,8 +201,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                                                         .getColor(R.color.transparent));
         }
     }
-    
-    @Nullable
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -458,6 +456,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                             L.saveCCUState();
                             CCUHsApi.getInstance().setCcuReady();
                             LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         },()->{
                             ProgressDialogUtils.hideProgressDialog();
                             FragmentDABConfiguration.this.closeAllBaseDialogFragments();

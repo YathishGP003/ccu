@@ -101,7 +101,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 if (!curStatus.equals("Zone Temp Dead")) {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
-                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 continue;
 
             }

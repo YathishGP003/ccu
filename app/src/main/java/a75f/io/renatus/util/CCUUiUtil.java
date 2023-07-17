@@ -10,29 +10,20 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -151,4 +142,19 @@ public class CCUUiUtil {
         return !matcher.find();
     }
 
+    public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
+        String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
+        int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);
+        for (int i = 0; i < minLength; i++) {
+            int currentVersion = Integer.parseInt(currentVersionComponents[i]);
+            int recommendedVersion = Integer.parseInt(recommendedVersionComponents[i]);
+            if (recommendedVersion > currentVersion) {
+                return true;
+            } else if (currentVersion > recommendedVersion) {
+                return false;
+            }
+        }
+        return false;
+    }
 }

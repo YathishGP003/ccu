@@ -18,23 +18,23 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 public class SyncManager {
-    
+
     public static final String TAG = "CCU_HS_SyncManager";
-    
+
     public static final long SYNC_SCHEDULE_INTERVAL_MILLIS = 30000;
-    
+
     public static final String SYNC_WORK_TAG = "SYNC_WORK";
     public static final String POINT_WRITE_WORK_TAG = "SYNC_WORK";
-    
+
     Timer     mSyncTimer     = new Timer();
     TimerTask mSyncTimerTask = null;
-    
+
     Context appContext;
-    
+
     public SyncManager(Context context) {
         appContext = context;
     }
-    
+
     /**
      * Fires a sync work.
      * When workPolicyKeep is true ,sync work is kept in queue and retried until it is successful
@@ -43,23 +43,23 @@ public class SyncManager {
      * When workPolicyKeep is false, any previous sync work in queue is removed and a new work is scheduled immediately.
      */
     public void syncEntities(boolean workPolicyKeep) {
-    
+
         CcuLog.d(TAG, "syncEntities");
         if (mSyncTimerTask != null) {
             mSyncTimerTask.cancel();
             mSyncTimerTask = null;
         }
-        
+
         if (SyncStatusService.getInstance(appContext).isSyncNotRequired()) {
             CcuLog.d(TAG, "<- syncEntities : No pending items to sync");
             return;
         }
-        
+
         if (SyncWorker.isSyncWorkInProgress()) {
             CcuLog.d(TAG, "<- syncEntities : SyncWork in progress");
             return;
         }
-        
+
         if (isMigrationRequired()) {
             CcuLog.d(TAG, "Migration Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
@@ -75,17 +75,17 @@ public class SyncManager {
                                                 .enqueue();
         }
     }
-    
+
     public void syncPointArray() {
-    
+
         CcuLog.d(TAG, "syncPointArray : Migration not required");
         WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
                                                             ExistingWorkPolicy.REPLACE,
                                                             getPointWriteWorkRequest())
                                             .enqueue();
-    
+
     }
-    
+
     /**
      * Queue a sync work followed by pointWrite work replacing any pending work in queue.
      */
@@ -93,19 +93,19 @@ public class SyncManager {
         CcuLog.d(TAG, "syncEntitiesWithPointWrite");
         syncEntitiesWithPointWriteWithDelay(0);
     }
-    
+
     public void syncEntitiesWithPointWriteWithDelay(long delaySeconds) {
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
             return;
         }
-    
+
         CcuLog.d(TAG, "syncEntities");
         if (mSyncTimerTask != null) {
             mSyncTimerTask.cancel();
             mSyncTimerTask = null;
         }
-    
+
         if (isMigrationRequired()) {
             CcuLog.d(TAG, "Migration Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
@@ -123,17 +123,17 @@ public class SyncManager {
                        .enqueue();
         }
     }
-    
-    
-    
+
+
+
     private Constraints getSyncConstraints() {
         return new Constraints.Builder()
                    .setRequiredNetworkType(NetworkType.CONNECTED)
                    .build();
     }
-    
+
     private OneTimeWorkRequest getMigrationWorkRequest() {
-        
+
         return new OneTimeWorkRequest.Builder(MigrationWorker.class)
                    .setConstraints(getSyncConstraints())
                    .setBackoffCriteria(
@@ -142,13 +142,13 @@ public class SyncManager {
                        TimeUnit.MILLISECONDS)
                    .addTag(SYNC_WORK_TAG)
                    .build();
-        
+
     }
-    
+
     private OneTimeWorkRequest getSyncWorkRequest() {
         return getSyncWorkRequestBuilder().build();
     }
-    
+
     private OneTimeWorkRequest.Builder getSyncWorkRequestBuilder() {
         return new OneTimeWorkRequest.Builder(SyncWorker.class)
                    .setConstraints(getSyncConstraints())
@@ -158,11 +158,11 @@ public class SyncManager {
                        TimeUnit.MILLISECONDS)
                    .addTag(SYNC_WORK_TAG);
     }
-    
+
     private OneTimeWorkRequest getSyncWorkRequestWithDelay(long delaySeconds) {
         return getSyncWorkRequestBuilder().setInitialDelay(delaySeconds, TimeUnit.SECONDS).build();
     }
-    
+
     private OneTimeWorkRequest getPointWriteWorkRequest() {
         return new OneTimeWorkRequest.Builder(PointWriteWorker.class)
                                         .setConstraints(getSyncConstraints())

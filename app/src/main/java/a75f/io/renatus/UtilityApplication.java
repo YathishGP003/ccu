@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
+import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 import android.annotation.SuppressLint;
@@ -76,6 +78,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,6 +91,7 @@ import javax.inject.Inject;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
+import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
@@ -99,6 +103,7 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.MessageHandlerSubscriber;
+import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
@@ -234,7 +239,7 @@ public abstract class UtilityApplication extends Application {
         initializeCrashReporting();
 
         Globals.getInstance().setApplicationContext(this);
-
+        isDataSyncRestartRequired();
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
@@ -264,6 +269,7 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+        EveryDaySchedulerService.scheduleJobForDay(context);
 
         initMessaging();
         OtaCache cache = new OtaCache();
@@ -272,6 +278,13 @@ public abstract class UtilityApplication extends Application {
 
     }
 
+    private void isDataSyncRestartRequired() {
+        if(getDataSyncProcessing()) {
+            CcuLog.i("CCU_READ_CHANGES", "Data Sync restarted " + new Date(getSyncStartTime()));
+            DataSyncHandler dataSyncHandler = new DataSyncHandler();
+            dataSyncHandler.syncCCUData(getSyncStartTime());
+        }
+    }
     private void initializeCrashReporting() {
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
 
@@ -320,6 +333,8 @@ public abstract class UtilityApplication extends Application {
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            RenatusApp.rebootTablet();
         }
     }
     private List<String> getCrashTimestampsWithinLastHour() {
@@ -692,7 +707,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
 
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName() + " IP:" + localDevice.getNetwork().getAllLocalAddresses()[0] + " IP2:" + localDevice.getNetwork().getAllLocalAddresses()[1] + " IP3:" + localDevice.getNetwork().getAllLocalAddresses()[2]);
 
@@ -731,7 +746,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported();
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
         } catch (Exception e) {
             e.printStackTrace();
         }

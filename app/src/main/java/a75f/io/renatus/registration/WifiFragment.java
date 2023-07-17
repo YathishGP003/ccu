@@ -42,6 +42,8 @@ import java.util.Set;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
     // TODO: Rename parameter arguments, choose names that match
@@ -76,6 +78,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     private BroadcastReceiver mNetworkReceiver;
     private BroadcastReceiver mWifiReceiver;
 
+    private final CompositeDisposable disposable = new CompositeDisposable();
     public WifiFragment() {
         // Required empty public constructor
     }
@@ -315,6 +318,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     @Override
     public void onDestroy() {
         super.onDestroy();
+        disposable.dispose();
         if (getActivity() != null && mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
         }
@@ -339,7 +343,15 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             return;
           }
           ProgressDialogUtils.showProgressDialog(getActivity(),"Connecting...");
-          connectWifi(ssid, editText_Password.getText().toString());
+
+          disposable.add(RxjavaUtil.executeBackgroundWithDisposable(() ->connectWifi(ssid, editText_Password.getText().toString())));
+
+            new Handler().postDelayed(() -> {
+                if(getActivity()!= null && isAdded() && !isOnline(getActivity())){
+                    Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
+                    ProgressDialogUtils.hideProgressDialog();
+                }
+            }, 30000);
 
           dialog.dismiss();
         });
@@ -384,13 +396,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
         mainWifiObj.addNetwork(conf);
         mainWifiObj.startScan();
-
-        new Handler().postDelayed(() -> {
-            if(getActivity()!= null && isAdded() && !isOnline(getActivity())){
-                Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
-                ProgressDialogUtils.hideProgressDialog();
-            }
-        }, 30000);
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {

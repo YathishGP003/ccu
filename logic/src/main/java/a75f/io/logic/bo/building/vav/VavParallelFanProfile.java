@@ -84,10 +84,8 @@ public class VavParallelFanProfile extends VavProfile
             } else {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-    
-            if (systemMode != SystemMode.OFF) {
-                updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
-            }
+
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
     
             //When in the system is in heating, REHEAT control does not follow RP-1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
@@ -277,7 +275,7 @@ public class VavParallelFanProfile extends VavProfile
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
             vavDevice.setFanOn("parallel", false);
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"",
                                                                             "Zone Temp Dead"+vavDevice.getFanStatusMessage());
         }

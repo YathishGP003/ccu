@@ -322,8 +322,8 @@ public class Site extends Entity
             tz.equals(site.tz) &&
             organization.equals(site.organization) &&
             installerEmail.equals(site.installerEmail) &&
-            fcManagerEmail.equals(site.fcManagerEmail) &&
-            weatherRef.equals(site.weatherRef)) {
+            fcManagerEmail.equals(site.fcManagerEmail) /*&&
+            weatherRef.equals(site.weatherRef)*/) {
             return true;
         }
         return false;

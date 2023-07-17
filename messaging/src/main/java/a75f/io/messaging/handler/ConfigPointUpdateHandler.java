@@ -67,14 +67,18 @@ class ConfigPointUpdateHandler {
         if (configType == null) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Invalid config point update "+configPoint);
         }
-    
+
         SystemProfile systemProfile = L.ccu().systemProfile;
         double val = msgObject.get("val").getAsDouble();
-    
+
         if (systemProfile instanceof DabFullyModulatingRtu) {
             ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
-        } else if (systemProfile instanceof VavFullyModulatingRtu) {
+        } else if (systemProfile instanceof DabStagedRtu) {
+            ((DabStagedRtu) systemProfile).setConfigEnabled(configType, val);
+        }else if (systemProfile instanceof VavFullyModulatingRtu) {
             ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
+        } else if (systemProfile instanceof VavStagedRtu) {
+            ((VavStagedRtu) systemProfile).setConfigEnabled(configType, val);
         }
     }
     

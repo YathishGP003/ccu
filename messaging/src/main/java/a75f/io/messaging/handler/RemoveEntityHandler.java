@@ -1,6 +1,7 @@
 package a75f.io.messaging.handler;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -32,12 +33,12 @@ public class RemoveEntityHandler implements MessageHandler
                                                 .disableHtmlEscaping()
                                                 .create();
             HashMap m = gsonBuilder.fromJson(msgObject, HashMap.class);
-            
+
             Type listType = new TypeToken<List<HashMap<String, String>>>() {
             }.getType();
             List<HashMap<String, String>> idList = gsonBuilder.fromJson(m.get("ids").toString(), listType);
-            System.out.println(idList.toString());
-    
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "Received message to delete: "+idList);
+
             for (HashMap id : idList) {
                 String uuid = "@" + id.get("val").toString();
                 if (CCUHsApi.getInstance().entitySynced(uuid)) {

@@ -19,19 +19,19 @@ import io.objectbox.BoxStore;
 import io.objectbox.query.QueryBuilder;
 public class EquipProcessor
 {
-    private ArrayList<EquipmentDevice> equipmentDevices;
-    private ArrayList<EquipmentDevice> energyMeterDevices;
+    private List<EquipmentDevice> equipmentDevices;
+    private List<EquipmentDevice> energyMeterDevices;
     /**
      * Hold the Modbus BTU Meter Device List
      */
-    private ArrayList<EquipmentDevice> modbusBTUMeterDevices;
+    private List<EquipmentDevice> modbusBTUMeterDevices;
 
     ModbusParser parser;
     Context mContext;
     private BoxStore boxStore;
     private Box<EquipmentDevice> modbusBox;
     ObjectMapper objectMapper;
-    private ArrayList<EquipmentDevice> energyMeterSystemDevices;
+    private List<EquipmentDevice> energyMeterSystemDevices;
 
     EquipProcessor(Context c) {
         mContext = c;
@@ -152,11 +152,11 @@ public class EquipProcessor
         }
     }
 
-    public EquipmentDevice getConfig(String equipRef){
+    /*public EquipmentDevice getConfig(String equipRef){
         QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
         configQuery.equal(EquipmentDevice_.equipRef, equipRef);
         return configQuery.build().findFirst();
-    }
+    }*/
     public EquipmentDevice getEquipBySlave(int slaveId){
         QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
         configQuery.equal(EquipmentDevice_.slaveId, slaveId);

@@ -1,7 +1,5 @@
 package a75f.io.messaging.handler;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -10,9 +8,9 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageEquipUtil;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 
 class SSEConfigHandler {
     
@@ -32,9 +30,12 @@ class SSEConfigHandler {
             SingleStageEquipUtil.updateAnalogIn1Config(inputActuatorType, configPoint, true);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
-        
-        
-        
+    }
+
+    public static void updateTemperatureMode(Point configPoint, CCUHsApi ccuHsApi) {
+        if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+            DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), ccuHsApi);
+        }
     }
     
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {

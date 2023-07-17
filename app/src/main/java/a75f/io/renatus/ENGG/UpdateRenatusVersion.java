@@ -74,7 +74,7 @@ public class UpdateRenatusVersion extends Fragment {
         if(apkName.startsWith("75f") || apkName.startsWith("75F"))
             AppInstaller.getHandle().downloadHomeInstall(apkName);
         else
-            AppInstaller.getHandle().downloadCCUInstall(apkName);
+            AppInstaller.getHandle().downloadCCUInstall(apkName, null);
     }
 
 

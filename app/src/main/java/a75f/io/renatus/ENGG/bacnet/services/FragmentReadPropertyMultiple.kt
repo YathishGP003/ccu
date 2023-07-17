@@ -1,0 +1,222 @@
+package a75f.io.renatus.ENGG.bacnet.services
+
+import a75f.io.renatus.R
+import a75f.io.renatus.UtilityApplication
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import com.google.gson.Gson
+
+
+class FragmentReadPropertyMultiple : Fragment() {
+
+    private val TAG = "BacnetServicesFragment"
+    private lateinit var btnReadProperty: Button
+    private lateinit var btnAddObject: Button
+    private lateinit var containerObject: ViewGroup
+
+    private val objectTypeArray = BacNetConstants.ObjectType.values()
+    private val propertyTypeArray = BacNetConstants.PropertyType.values()
+
+    private var objectCounter = 0
+
+    private lateinit var etDestinationIp: EditText
+    private lateinit var etPort: EditText
+
+
+    override fun onCreateView(
+        inflator: LayoutInflater,
+        container: ViewGroup?,
+        saveInstanceState: Bundle?
+    ): View? {
+        return inflator.inflate(R.layout.lyt_frag_read_property_multiple, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        containerObject = view.findViewById(R.id.container_property);
+
+        btnAddObject = view.findViewById(R.id.btnAddObject)
+        btnAddObject.setOnClickListener {
+            containerObject.addView(addNewObject())
+        }
+
+        etDestinationIp = view.findViewById(R.id.et_destination_ip)
+        etPort = view.findViewById(R.id.etPort)
+
+        btnReadProperty = view.findViewById(R.id.btnReadProperty)
+        btnReadProperty.setOnClickListener {
+            Log.d(TAG, "total objects -> ${containerObject.childCount}")
+            if(!validateData()){
+                return@setOnClickListener
+            }
+
+            val destination =
+                Destination(etDestinationIp.text.toString(), etPort.text.toString().toInt())
+            val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
+
+
+            val totalObjectCount = containerObject.childCount - 1
+            for (i in 1..totalObjectCount) {
+                val chileView = containerObject.getChildAt(i)
+                val objectIdentifier = getDetailsFromObjectLayout(chileView, i)
+                val propertyReference = getDetailsOfProperties(chileView, i)
+                readAccessSpecification.add(
+                    ReadRequestMultiple(
+                        objectIdentifier,
+                        propertyReference
+                    )
+                )
+            }
+
+            val rpmRequest = RpmRequest(readAccessSpecification)
+            val readRequestMultiple =
+                Gson().toJson(BacnetReadRequestMultiple(destination, rpmRequest)).toString()
+            Log.d(TAG, "readRequestMultiple-->$readRequestMultiple")
+        }
+    }
+
+    private fun validateData(): Boolean {
+        var isDataFilled = true
+        val totalObjectCount = containerObject.childCount - 1
+        for (i in 1..totalObjectCount) {
+            val childView = containerObject.getChildAt(i)
+            val etObjectId = childView.findViewById<EditText>(R.id.etObjectId)
+            if (etObjectId.text.toString().isEmpty()) {
+                etObjectId.error = getString(R.string.txt_error_object_id)
+                etObjectId.findFocus()
+                isDataFilled = false
+                break
+            }
+        }
+        return isDataFilled
+    }
+
+    private fun getDetailsFromObjectLayout(childView: View, i: Int): ObjectIdentifierBacNet {
+        Log.d(TAG, "--------------------checking object-->$i<------------------------------- ->")
+        val spin = childView.findViewById(R.id.sp_object_types) as Spinner
+        val objectId = childView.findViewById<EditText>(R.id.etObjectId)
+        Log.d(
+            TAG,
+            "selected object type->${spin.selectedItem} <----object id>--->${objectId.text.toString()}"
+        )
+        return ObjectIdentifierBacNet(
+            BacNetConstants.ObjectType.valueOf(spin.selectedItem.toString()).value,
+            objectId.text.toString().toInt()
+        )
+    }
+
+    private fun getDetailsOfProperties(chileView: View, i: Int): MutableList<PropertyReference> {
+        val list = mutableListOf<PropertyReference>()
+        Log.d(TAG, "----checking properties-->$i<------- ->")
+        val containerHoldingProperties =
+            chileView.findViewById<LinearLayout>(R.id.containerToAddProperties)
+        val totalObjectCount = containerHoldingProperties.childCount - 1
+        Log.d(TAG, "----no of properties-->$totalObjectCount<------- ->")
+        for (i in 0..totalObjectCount) {
+            val childView = containerHoldingProperties.getChildAt(i)
+            val propertySpinner = childView.findViewById<Spinner>(R.id.sp_property_types)
+            val etArrayIndex = childView.findViewById<EditText>(R.id.etArrayIndex)
+            Log.d(TAG, "selected property is->${(propertySpinner).selectedItem}")
+
+            var arrayIndex: Int? = if (etArrayIndex.text.toString().isNotEmpty()) {
+                etArrayIndex.text.toString().toInt()
+            } else {
+                null
+            }
+
+            list.add(
+                PropertyReference(
+                    BacNetConstants.PropertyType.valueOf(propertySpinner.selectedItem.toString()).value,
+                    arrayIndex
+                )
+            )
+        }
+        return list
+    }
+
+    private fun addNewObject(): View? {
+        var propertyCounter = 0
+        val view = layoutInflater.inflate(R.layout.lyt_add_obj, null)
+
+        val tvRemove = view.findViewById<TextView>(R.id.label_object_remove)
+        objectCounter++
+        tvRemove.text = "Object $objectCounter"
+
+        configureObjectTypeSpinner(view)
+        view.findViewById<View>(R.id.label_object_remove).setOnClickListener {
+            containerObject.removeView(view)
+        }
+        view.findViewById<Button>(R.id.btnAddProperty).setOnClickListener {
+            val parent = view.findViewById<LinearLayout>(R.id.containerToAddProperties)
+            propertyCounter++
+            val propertyView = addNewProperty(propertyCounter)
+            parent.addView(propertyView)
+            propertyView?.findViewById<TextView>(R.id.label_property_remove)?.setOnClickListener {
+                parent.removeView(propertyView)
+            }
+        }
+        return view
+    }
+
+    private fun addNewProperty(propertyCounter: Int): View? {
+        val view = layoutInflater.inflate(R.layout.lyt_add_property, null)
+        val tvRemoveProperty = view.findViewById<TextView>(R.id.label_property_remove)
+        tvRemoveProperty.text = "Property $propertyCounter"
+
+        configurePropertySpinner(view)
+        return view
+    }
+
+    private fun configureObjectTypeSpinner(view: View) {
+
+        val spin = view.findViewById(R.id.sp_object_types) as Spinner
+        spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                Log.d(TAG, "selected item is ${objectTypeArray[position]}")
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                Log.d(TAG, "onNothingSelected")
+            }
+
+        }
+        val aa: ArrayAdapter<*> = ArrayAdapter<Any?>(
+            requireContext(), R.layout.spinner_item_type_1, objectTypeArray
+        )
+        aa.setDropDownViewResource(R.layout.spinner_item_type_2)
+        spin.adapter = aa
+    }
+
+    private fun configurePropertySpinner(view: View) {
+
+        val spin = view.findViewById(R.id.sp_property_types) as Spinner
+        spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                Log.d(TAG, "selected item is ${propertyTypeArray[position]}")
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                Log.d(TAG, "onNothingSelected")
+            }
+
+        }
+        val aa: ArrayAdapter<*> = ArrayAdapter<Any?>(
+            requireContext(), R.layout.spinner_item_type_1, propertyTypeArray
+        )
+        aa.setDropDownViewResource(R.layout.spinner_item_type_2)
+        spin.adapter = aa
+    }
+}

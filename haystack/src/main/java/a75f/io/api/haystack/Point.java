@@ -34,6 +34,9 @@ public class Point extends Entity
     private String            hisInterpolate;
     private String            shortDis;
     private String ccuRef;
+    private int            bacnetId;
+    private String            bacnetType;
+    private String curStatus;
 
     public void setDisplayName(String displayName)
     {
@@ -127,6 +130,12 @@ public class Point extends Entity
     public void setCcuRef(String ccuRef) {
         this.ccuRef = ccuRef;
     }
+    public int getBacnetId() { return bacnetId; }
+    public void setBacnetId(int bacnetId) { this.bacnetId = bacnetId; }
+    public String getBacnetType() { return bacnetType; }
+    public void setBacnetType(String bacnetType) { this.bacnetType = bacnetType; }
+    public String getCurStatus() { return curStatus;}
+    public void setCurStatus(String curStatus) { this.curStatus = curStatus;}
 
     public String getCell() {
         return cell;
@@ -161,6 +170,9 @@ public class Point extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+        private int            bacnetId;
+        private String            bacnetType;
+        private String curStatus;
 
         public Builder setKind(Kind kind)
         {
@@ -285,6 +297,22 @@ public class Point extends Entity
             this.shortDis = shortDis;
             return this;
         }
+
+        public Builder setBacnetId(int bacnetId) {
+            this.bacnetId = bacnetId;
+            return this;
+        }
+
+        public Builder setBacnetType(String bacnetType) {
+            this.bacnetType = bacnetType;
+            return this;
+        }
+
+        public Builder setCurStatus(String curStatus) {
+            this.curStatus = curStatus;
+            return this;
+        }
+
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -310,6 +338,9 @@ public class Point extends Entity
             p.tunerGroup = this.tunerGroup;
             p.hisInterpolate = this.hisInterpolate;
             p.shortDis = this.shortDis;
+            p.bacnetId = this.bacnetId;
+            p.bacnetType = this.bacnetType;
+            p.curStatus = this.curStatus;
             return p;
         }
     
@@ -415,6 +446,19 @@ public class Point extends Entity
                 {
                     this.lastModifiedBy = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("bacnetId"))
+                {
+                    this.bacnetId = Integer.parseInt(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("bacnetType"))
+                {
+                    this.bacnetType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("curStatus"))
+                {
+                    this.curStatus = pair.getValue().toString();
+                }
+
                 //it.remove();
             }
             return this;

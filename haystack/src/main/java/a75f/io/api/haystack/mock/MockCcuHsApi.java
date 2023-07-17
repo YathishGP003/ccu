@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.mock;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
@@ -121,7 +122,7 @@ public class MockCcuHsApi extends CCUHsApi {
     }
     
     @Override
-    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
-        hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+    public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
+        return hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
     }
 }

@@ -1,5 +1,16 @@
 package a75f.io.logic.bo.haystack.device;
 
+import static a75f.io.logic.BacnetUtilKt.ANALOG_VALUE;
+import static a75f.io.logic.BacnetUtilKt.BINARY_VALUE;
+import static a75f.io.logic.BacnetUtilKt.CO2;
+import static a75f.io.logic.BacnetUtilKt.CO2EQUIVALENT;
+import static a75f.io.logic.BacnetUtilKt.HUMIDITY;
+import static a75f.io.logic.BacnetUtilKt.ILLUMINANCE;
+import static a75f.io.logic.BacnetUtilKt.OCCUPANCY;
+import static a75f.io.logic.BacnetUtilKt.SOUND;
+import static a75f.io.logic.BacnetUtilKt.VOC;
+import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -315,7 +326,34 @@ public class HyperStatDevice {
         if (hasAirMarker) {
             equipSensor.addMarker(Tags.AIR);
         }
-        String pointRef = CCUHsApi.getInstance().addPoint(equipSensor.build());
+
+        Point sensorPoint = equipSensor.build();
+
+        switch (p.getPortSensor()){
+            case OCCUPANCY:
+                addBacnetTags(sensorPoint, 40, BINARY_VALUE, hyperStatNodeAddress);
+                break;
+            case HUMIDITY:
+                addBacnetTags(sensorPoint, 38, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case ILLUMINANCE:
+                addBacnetTags(sensorPoint, 39, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case CO2:
+                addBacnetTags(sensorPoint, 4, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case VOC:
+                addBacnetTags(sensorPoint, 45, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case CO2EQUIVALENT:
+                addBacnetTags(sensorPoint, 5, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case SOUND:
+                addBacnetTags(sensorPoint, 44, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+        }
+
+        String pointRef = CCUHsApi.getInstance().addPoint(sensorPoint);
 
 
         RawPoint deviceSensor = new RawPoint.Builder()

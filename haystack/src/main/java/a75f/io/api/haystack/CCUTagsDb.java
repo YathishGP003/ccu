@@ -2,8 +2,10 @@ package a75f.io.api.haystack;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -75,7 +77,9 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
     private static final String TAG_CCU_HS = "CCU_HS";
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
-    
+    private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
+    private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
+    private static final String TAG_CCU_BACNET = "CCU_BACNET";
     private static final long MAX_DB_SIZE_IN_KB = 5 * 1024 * 1024;
     private static final long MAX_DB_SIZE_IN_KB_RECOVERY = 6 * 1024 * 1024;
     
@@ -625,9 +629,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -669,6 +671,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+
        /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
@@ -1046,10 +1049,21 @@ public class CCUTagsDb extends HServer {
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+        HRef id = (HRef) b.get("id");
+        if(z.getBacnetId() != 0)
+        {
+            b.add(Tags.BACNET_ID, z.getBacnetId());
+            b.add(Tags.BACNET_TYPE, Tags.DEVICE);
+            CcuLog.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
+            CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
+            Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
+            intent.putExtra("message", "@"+id.val);
+            appContext.sendBroadcast(intent);
+        }
+        /*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
-        HRef id = (HRef) b.get("id");
+
         tagsMap.put(id.toVal(), b.toDict());
     }
 

@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -159,6 +161,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                     systemProfile = new DabStagedRtuWithVfd();
                     systemProfile.addSystemEquip();
                     L.ccu().systemProfile = systemProfile;
+                    setSystemModeForDab(CCUHsApi.getInstance());
                     return null;
                 }
             

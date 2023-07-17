@@ -6,13 +6,11 @@ import a75f.io.alerts.AlertManager
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
-import a75f.io.data.message.MESSAGE_ATTRIBUTE_MESSAGE_ID
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.cloud.RenatusServicesEnvironment
 import a75f.io.messaging.MessageHandler
 import android.content.Context
-import com.google.common.annotations.VisibleForTesting
 import com.google.gson.JsonObject
 import io.reactivex.rxjava3.schedulers.Schedulers
 
@@ -83,6 +81,23 @@ class AlertMessageHandler(
          return
       }
       val alertsService = alertManager.alertsService
+
+         /*
+         * This below block of code works when
+         * user is updating the custom alert definition when it is still in active
+         * */
+      if(msgObject.get("command").asString.equals(UPDATE_CUSTOM_ALERT_DEF_CMD)){
+         for ((index, alert) in alertManager.activeAlerts.withIndex()){
+            if(alert.alertDefId.equals(msgObject.get("id").asString) && !alert.isFixed){
+               /*
+               * The 'removeAlertDefinition' function removes the older definition and occurrences from the map.
+               *  This is necessary to avoid having multiple definitions in the alert shared preference.*/
+               alertManager.repo.removeAlertDefinition(alertManager.activeAlerts[index].alertDefId)
+               alertManager.fixAlert(alertManager.activeAlerts[index]);
+               CcuLog.w("CCU_ALERTS", "fixing alert, alert definition ID - ${msgObject.get("id").asString}")
+            }
+         }
+      }
 
       // Note: Following existing logic, we are not saving the ref to the disposable here.  We should, if
       // we were to follow best practice to a T, keep the disposable and dispose it if the app needs to exit

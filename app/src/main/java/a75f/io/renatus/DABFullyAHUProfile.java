@@ -45,6 +45,7 @@ import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 /**
@@ -163,6 +164,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                                                       systemProfile = new DabFullyModulatingRtu();
                                                       systemProfile.addSystemEquip();
                                                       L.ccu().systemProfile = systemProfile;
+                                                      setSystemModeForDab(CCUHsApi.getInstance());
                                                     },
                                               ()-> { setupAnalogLimitSelectors();
                                                      ProgressDialogUtils.hideProgressDialog();

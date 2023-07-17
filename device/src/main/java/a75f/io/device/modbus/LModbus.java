@@ -27,22 +27,8 @@ public class LModbus {
     public static final String MODBUS_REGISTER_READ_COIL = "readCoil";
     public static final String MODBUS_REGISTER_WRITE_COIL = "writeCoil";
     public static final String MODBUS_REGISTER_COIL = "coil";
-
-    private static boolean heartbeatUpdateReceived = false;
-
-    
-    
     private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
     private static SerialCommLock modbusCommLock = new SerialCommLock();
-
-    public static void setHeartbeatUpdateReceived(boolean receivedUpdate ){
-        heartbeatUpdateReceived = receivedUpdate;
-    }
-
-    public static boolean getHeartbeatUpdateReceived() {
-        return heartbeatUpdateReceived;
-    }
-    
     public static SerialCommLock getModbusCommLock() {
         return modbusCommLock;
     }

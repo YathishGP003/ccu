@@ -1,4 +1,5 @@
 package a75f.io.renatus;
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.messaging.handler.DataSyncHandler.getMessageExpiryTime;
 import static a75f.io.messaging.handler.DataSyncHandler.isMessageTimeExpired;
 
@@ -72,10 +73,19 @@ public class NotificationHandler {
         if (bIsConnected) {
             CcuLog.i(L.TAG_CCU_READ_CHANGES, "CCU IS CONNECTED TO WIFI " + new Date(System.currentTimeMillis()));
             long lastCCUUpdateTime = PreferenceUtil.getLastCCUUpdatedTime();
-            if (isMessageTimeExpired(lastCCUUpdateTime)) {
-               syncCCUData(lastCCUUpdateTime);
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is message expired "+isMessageTimeExpired(lastCCUUpdateTime) +
+                    "Is data sync processing"+getDataSyncProcessing());
+            if(getDataSyncProcessing()){
+                CcuLog.i(L.TAG_CCU_READ_CHANGES,"Data sync is already processing ");
+                return;
             }
-            PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
+            if (isMessageTimeExpired(lastCCUUpdateTime)) {
+                DataSyncHandler dataSyncHandler = new DataSyncHandler();
+                dataSyncHandler.syncCCUData(lastCCUUpdateTime);
+            }else {
+                CcuLog.i(L.TAG_CCU_READ_CHANGES,"Set last updated date time "+new Date(System.currentTimeMillis()));
+                PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
+            }
             CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
             prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP, "");
         } else {
@@ -90,31 +100,6 @@ public class NotificationHandler {
         notification.when = new Date().getTime();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         mHandler.mNM.notify(mHandler.mServerConnectionStatusID, notification);
-    }
-
-
-
-    private static void syncCCUData(long lastCCUUpdateTime) {
-        CcuLog.i(L.TAG_CCU_READ_CHANGES, "Call Data Sync ");
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                DataSyncHandler dataSyncHandler = new DataSyncHandler();
-                dataSyncHandler.initialiseDataSync(lastCCUUpdateTime, CCUHsApi.getInstance(), getMessageExpiryTime());
-                Log.i(L.TAG_CCU_READ_CHANGES," All Entitiesare Synced");
-                initialisePointWrite();
-            }
-        }, DELAY_FOR_DATA_SYNC);
-    }
-
-    private static void initialisePointWrite() {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CcuLog.i(L.TAG_CCU_READ_CHANGES, "After Data Sync, pointwrite ");
-                CCUHsApi.getInstance().syncEntityWithPointWrite();
-            }
-        }, DELAY_FOR_POINT_WRITE);
     }
 
     public static void setCMConnectionStatus(boolean bIsConnected) {

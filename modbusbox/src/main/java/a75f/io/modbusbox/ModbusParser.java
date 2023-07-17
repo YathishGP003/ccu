@@ -15,8 +15,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,21 +28,21 @@ public class ModbusParser {
 
 
     // Hold Existing Devices to avoid duplication
-    private List<EquipmentDevice> deviceList = new ArrayList<>();
-    public ArrayList<EquipmentDevice> parseAllEquips(Context c) {
-        ArrayList<EquipmentDevice> allEquips = parseEquips(c);
+    private List<EquipmentDevice> deviceList = new CopyOnWriteArrayList<>();
+    public List<EquipmentDevice> parseAllEquips(Context c) {
+        List<EquipmentDevice> allEquips = parseEquips(c);
         return allEquips;
     }
 
-    public ArrayList<EquipmentDevice> parseEquips(Context c) {
-        ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
+    public List<EquipmentDevice> parseEquips(Context c) {
+        List<EquipmentDevice> assetEquipments = new CopyOnWriteArrayList<>();
 
         try {
             String[] fileList;
             fileList = c.getAssets().list("modbus");
             for (String filename : fileList) {
                 String equipJson = readFileFromAssets(c, "modbus/" + filename);
-                EquipmentDevice device =parseModbusDataFromString(equipJson);
+                EquipmentDevice device = parseModbusDataFromString(equipJson);
                 deviceList.add(device);
                 assetEquipments.add(device);
             }
@@ -100,8 +100,8 @@ public class ModbusParser {
     /**
      * Read all the Energy Meter details JSON file
      */
-    public ArrayList<EquipmentDevice> parseEneryMeterEquips(Context c) {
-        ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
+    public List<EquipmentDevice> parseEneryMeterEquips(Context c) {
+        List<EquipmentDevice> assetEquipments = new CopyOnWriteArrayList<>();
 
         try {
             String[] fileList;
@@ -121,8 +121,8 @@ public class ModbusParser {
     /**
      * Read all the Energy Meter details JSON file
      */
-    public ArrayList<EquipmentDevice> parseEneryMeterSystemEquips(Context c) {
-        ArrayList<EquipmentDevice> energyMeterDevices = new ArrayList<>();
+    public List<EquipmentDevice> parseEneryMeterSystemEquips(Context c) {
+        List<EquipmentDevice> energyMeterDevices = new CopyOnWriteArrayList<>();
         try {
             String[] fileList = c.getAssets().list("modbus-em-system");
             for (String filename : fileList) {
@@ -144,8 +144,8 @@ public class ModbusParser {
      * @param context
      * @return
      */
-    public ArrayList<EquipmentDevice> readBTUMeterDeviceDetails(Context context) {
-        ArrayList<EquipmentDevice> btuMeterDevices = new ArrayList<>();
+    public List<EquipmentDevice> readBTUMeterDeviceDetails(Context context) {
+        List<EquipmentDevice> btuMeterDevices = new CopyOnWriteArrayList<>();
 
         try {
             String[] fileList;

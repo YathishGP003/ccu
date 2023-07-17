@@ -26,6 +26,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.util.TemperatureMode;
 
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -145,6 +146,8 @@ public class MeshNetwork extends DeviceNetwork
                                 Equip equip = new Equip.Builder()
                                                   .setHashMap(CCUHsApi.getInstance()
                                                                       .read("equip and group ==\""+d.getAddr()+ "\"")).build();
+                                int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + equip.getRoomRef() + "\"").intValue();
+                                TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 
 
                                 if (bSeedMessage) {
@@ -152,15 +155,15 @@ public class MeshNetwork extends DeviceNetwork
                                                               "SEEDS ===================== "+d.getAddr());
                                     if (equip.getMarkers().contains("vrv")) {
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU Controls ===================== "+d.getAddr());
-                                        HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false);
+                                        HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false, temperatureMode);
                                         HyperStatMessageSender.sendIduSeedControlMessage(Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
                                     } else {
                                         HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                d.getEquipRef(), false);
+                                                d.getEquipRef(), false, temperatureMode);
                                     }
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
-                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                    HyperStatMessageSender.sendSettingsMessage(zone, Integer.parseInt(d.getAddr()), d.getEquipRef());
 
                                     if (!equip.getMarkers().contains("vrv") ) {
                                         /** Sending the setting2 and setting3 messages */
@@ -176,7 +179,8 @@ public class MeshNetwork extends DeviceNetwork
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Controls ===================== "+d.getAddr());
                                         if(sendControlMessage){
                                             HyperStat.HyperStatControlsMessage_t.Builder controls =
-                                                    HyperStatMessageGenerator.getControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                                    HyperStatMessageGenerator.getControlMessage(
+                                                            Integer.parseInt(d.getAddr()), d.getEquipRef(), temperatureMode);
                                             HyperStatMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
                                                     MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
                                         }

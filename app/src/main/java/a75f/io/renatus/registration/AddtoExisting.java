@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +42,6 @@ import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
-import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
@@ -79,6 +78,7 @@ public class AddtoExisting extends Fragment {
     Prefs prefs;
     EditText mEt1, mEt2, mEt3, mEt4, mEt5, mEt6;
     View toastLayout, toast_Fail;
+    View ccuUpdateToast;
     public AddtoExisting() {
         // Required empty public constructor
     }
@@ -113,6 +113,7 @@ public class AddtoExisting extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
         try {
@@ -120,6 +121,11 @@ public class AddtoExisting extends Fragment {
             LayoutInflater li = getLayoutInflater();
             toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
             toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
+            ccuUpdateToast = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+            if(!CCUHsApi.getInstance().isCCURegistered()) {
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+                updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), ccuUpdateToast, getContext(), requireActivity());
+            }
 
             mContext = getContext().getApplicationContext();
 
@@ -534,7 +540,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving site...This may take upto 5~10 mins");
+                ProgressDialogUtils.showProgressDialog(requireContext(), "Saving site...This may take upto 5~10 mins");
             }
 
             @Override
@@ -569,7 +575,6 @@ public class AddtoExisting extends Fragment {
     private void navigateToCCUScreen() {
         prefs.setBoolean(PreferenceConstants.ADD_CCU, true);
         prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
-        Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);
-        startActivity(intent);
+        ((FreshRegistration) requireActivity()).selectItem(23);
     }
 }

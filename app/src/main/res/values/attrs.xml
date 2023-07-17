@@ -209,6 +209,7 @@
     <attr name="SwitchTheme" format="reference" />
     <attr name="DefaultNumberPickerTheme" format="reference" />
     <attr name="error_appearance" format="reference" />
+    <attr name="error_appearance_add_ccu" format="reference" />
     <attr name="tunerButton" format="reference" />
     <attr name="spinner_label_orange" format="reference" />
     <attr name="tuner_group_title" format="reference" />

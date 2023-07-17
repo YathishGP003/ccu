@@ -60,6 +60,8 @@ public class AlertManager
         );
     }
 
+    public AlertsRepository getRepo(){ return repo; }
+
     public AlertsService getAlertsService() {
         return alertsService;
     }

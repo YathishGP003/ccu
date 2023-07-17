@@ -895,6 +895,12 @@ public class FourPipeFanCoilUnitEquip  {
         }
         return config;
     }
+    public FourPipeFanCoilUnitConfiguration getWaterValueConfigurations(){
+        FourPipeFanCoilUnitConfiguration config = new FourPipeFanCoilUnitConfiguration();
+        config.enableRelay4 = getConfigNumVal("enable and relay4") > 0;
+        config.enableRelay6 = getConfigNumVal("enable and relay6") > 0;
+        return config;
+    }
     public double getCurrentTemp()
     {
         currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and standalone and group == \""+nodeAddr+"\"");

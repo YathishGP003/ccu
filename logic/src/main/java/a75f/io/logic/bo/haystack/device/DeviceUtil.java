@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.logic.Globals;
 
 public class DeviceUtil {
     public static void updatePhysicalPointType(int addr, String port, String type) {

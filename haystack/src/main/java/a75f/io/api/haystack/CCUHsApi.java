@@ -1524,10 +1524,9 @@ public class CCUHsApi
                     hsApi.setSynced(equiUuid);
                 }
                 //Points
-                for (Point p : points)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
+                ArrayList<HDict> hDicts = new ArrayList<>();
+                for (Point p : points) {
+                    if (p.getEquipRef().equals(q.getId())) {
                         String pointId = StringUtils.prependIfMissing(p.getId(), "@");
                         HashMap<Object, Object> point = readMapById(pointId);
                         if (point.isEmpty()) {
@@ -1537,13 +1536,21 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
-                            CcuLog.i(TAG, "Added Building Tuner "+p);
+                            CcuLog.i(TAG, "Added Building Tuner " + p);
+                            HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                            hDicts.add(pid);
                         } else {
-                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                            CcuLog.i(TAG, "Point already imported " + p.getId());
+                            double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                            if (defaultVal == 0) {
+                                HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                                hDicts.add(pid);
+                                Log.d(TAG, "No default value for point: " + pid.dis());
+                            }
                         }
-
                     }
                 }
+                importPointArrays(hDicts, hClient);
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
@@ -2767,6 +2774,18 @@ public class CCUHsApi
         CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
     }
 
+    public Double readDefaultValByLevel(String id, int level)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level - 1));
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else
+        {
+            return 0.0;
+        }
+    }
     public String readPointArr(String id) {
 
         ArrayList values = readPoint(id);

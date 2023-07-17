@@ -131,6 +131,10 @@ public class CCUHsApi
         this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
+    public boolean isBacNetEnabled() {
+        return defaultSharedPrefs.getBoolean("UseBACnet", false);
+    }
+
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
     private void checkSiloMigration(Context context) {
         boolean hasMigratedToSilo = PreferenceManager.getDefaultSharedPreferences(context)
@@ -1246,10 +1250,11 @@ public class CCUHsApi
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntityItem(point.get("id").toString());
-
-                intent = new Intent(INTENT_POINT_DELETED);
-                intent.putExtra("message", point.get("id").toString());
-                context.sendBroadcast(intent);
+                if(isBacNetEnabled()) {
+                    intent = new Intent(INTENT_POINT_DELETED);
+                    intent.putExtra("message", point.get("id").toString());
+                    context.sendBroadcast(intent);
+                }
             }
             deleteEntityItem(id);
         } else if (entity.get("device") != null) {

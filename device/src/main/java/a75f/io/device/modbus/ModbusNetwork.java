@@ -3,17 +3,20 @@ package a75f.io.device.modbus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.pubnub.ModbusWritableDataInterface;
-import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.interfaces.ModbusWritableDataInterface;
+import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataInterface
@@ -33,19 +36,23 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             return;
         }
     
-        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
-                                                                  .readAllEntities("equip and modbus");
+        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
+                "equipRef and modbus");
         for (HashMap equip : modbusEquips) {
             try {
                 Short slaveId = Short.parseShort(equip.get("group").toString());
-                EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
-                LModbus.setHeartbeatUpdateReceived(false);
-                for (Register register : modbusDevice.getRegisters()) {
-                    LModbus.readRegister(slaveId, register, getRegisterCount(register));
+                EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
+                List<EquipmentDevice> modbusDeviceList = new ArrayList<>();
+                modbusDeviceList.add(equipmentDevice);
+                if(null != equipmentDevice.getEquips()) {
+                    modbusDeviceList.addAll(equipmentDevice.getEquips());
                 }
-                if (LModbus.getHeartbeatUpdateReceived())
-                    updateHeartBeat(slaveId,CCUHsApi.getInstance());
 
+                for(EquipmentDevice modbusDevice : modbusDeviceList){
+                    for (Register register : modbusDevice.getRegisters()) {
+                        LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
@@ -53,20 +60,14 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         }
     }
 
-    private static void updateHeartBeat(int slaveId, CCUHsApi hayStack){
-        HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
-        HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
-        if(heartBeatPoint.size() == 0){
-            return;
-        }
-        hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-    }
-
     private int getRegisterCount(Register register) {
         
-        if (register.getParameterDefinitionType().equals("long") || register.getParameterDefinitionType().equals("unsigned long") || register.getParameterDefinitionType().equals("int64")) {
+        if (register.getParameterDefinitionType().equals("int64")) {
             return READ_REGISTER_FOUR;
-        } else if (register.getParameterDefinitionType().equals("float")) {
+        } else if (register.getParameterDefinitionType().equals("float") ||
+                register.getParameterDefinitionType().equals("int32") ||
+                register.getParameterDefinitionType().equals("long") ||
+                register.getParameterDefinitionType().equals("unsigned long")) {
             return READ_REGISTER_TWO;
         } else {
             return READ_REGISTER_ONE;
@@ -84,22 +85,32 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             return;
         }
 
-        short groupId = Short.parseShort(writablePoint.get("group").toString());
-        EquipmentDevice modbusDevice = EquipsManager.getInstance()
-                .fetchProfileBySlaveId(groupId);
+        Point point = new Point.Builder().setHashMap(writablePoint).build();
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
+        short groupId = Short.parseShort(writablePoint.get("group").toString());
+
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (null != equip.getEquipRef()) {
+            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+        } else {
+            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(groupId));
+        }
         HashMap<Object, Object> physicalPoint = CCUHsApi.getInstance()
                 .readEntity("point and pointRef == \""+writablePoint.get("id").toString()+"\"");
         
         if (!physicalPoint.isEmpty()) {
-            for (Register register : modbusDevice.getRegisters()) {
-                if (Integer.parseInt(physicalPoint.get("registerAddress").toString())
-                                                == register.getRegisterAddress()) {
-                    int priorityVal = (int) HSUtil.getPriorityVal(id);
-                    CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
-                                            +register.getRegisterAddress()+" val "+priorityVal);
-                    if (LSerial.getInstance().isModbusConnected()) {
-                        LModbus.writeRegister(groupId, register, priorityVal);
+            for (EquipmentDevice modbusDevice : modbusSubEquipList){
+                for (Register register : modbusDevice.getRegisters()) {
+                    if (Integer.parseInt(physicalPoint.get("registerAddress").toString())
+                            == register.getRegisterAddress()) {
+                        int priorityVal = (int) HSUtil.getPriorityVal(id);
+                        CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
+                                + register.getRegisterAddress() + " val " + priorityVal);
+                        if (LSerial.getInstance().isModbusConnected()) {
+                            LModbus.writeRegister(groupId, register, priorityVal);
+                        }
                     }
                 }
             }

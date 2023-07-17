@@ -139,7 +139,7 @@ public class MasterControl extends View {
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
 
         matrix.reset();
-        matrix.postTranslate(xPos - mHitBoxPadding, yPos - mHitBoxPadding);
+        matrix.postTranslate( xPos - mHitBoxPadding,   yPos - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
         matrix.preScale(2.0f, 2.0f);
@@ -151,12 +151,12 @@ public class MasterControl extends View {
         //Text centered left to right and 1/3 the way down the icon.
         if(isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
-                    xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
-                    (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
+                    xPos +  bitmaps[stateReflected.ordinal()].getWidth() / 2,
+                    (yPos +  bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         } else {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
-                    xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
-                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
+                     xPos +  bitmaps[stateReflected.ordinal()].getWidth() / 2,
+                     (yPos + bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         }
     }
 
@@ -187,18 +187,6 @@ public class MasterControl extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float selectedTemp = getTempForPX((int) event.getX());
-
-                Log.i("DEV_DEBUG", "mSelected - " + mSelected.name() +
-                        "onTouchEvent: selected temp "+selectedTemp+
-                        "\n UPPER_HEATING_LIMIT "+temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()]+
-                        "\n LOWER_COOLING_LIMIT "+temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]+
-                        "\n UPPER_COOLING_LIMIT "+temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]+
-                        "\n hdb"+hdb+ "cdb "+cdb+
-                        "\n first "+(selectedTemp>= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb)+
-                        "\n second old"+(selectedTemp <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()])+
-                        "\n second new"+(selectedTemp <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()])
-
-                );
                 if (selectedTemp >= mLowerBound && selectedTemp <= mUpperBound) {
 
                     if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
@@ -457,7 +445,7 @@ public class MasterControl extends View {
         if (mMeasured) {
             drawTempLine(canvas);
             drawWhiteDelimiters(canvas);
-            drawArrowText(canvas, "BUILDING LIMITS", mBuildingLimitSpacing + 50, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
+            drawArrowText(canvas, "BUILDING LIMITS",  mBuildingLimitSpacing + 50, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
                     temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()],
                     Color.parseColor("#5E000000"),
                     Color.parseColor("#5E231f20"));
@@ -512,14 +500,14 @@ public class MasterControl extends View {
                 }
 
                 if (mSelected == MasterControlState.LOWER_COOLING_LIMIT && temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] - cdb)) {
-                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 105, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND",  mEnergySavingsSpacing - 105, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
                             temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT && temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - hdb)) {
-                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 125, temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND",  mEnergySavingsSpacing - 125, temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()],
                             temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
@@ -590,7 +578,7 @@ public class MasterControl extends View {
 
         float textXLocation = (getPXForTemp(uTemp) + getPXForTemp(lTemp)) / 2.0f;
         float textYLocation = getTempLineYLocation() - yValue +
-                (yValue > 0 ? bounds.height() / 2 : -(bounds.height() / 2));
+                (yValue > 0 ? bounds.height() / 2 : -((float) bounds.height() / 2));
 
         StaticLayout mTextLayout = new StaticLayout(text, mDiffTextPaint, canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
 
@@ -617,9 +605,9 @@ public class MasterControl extends View {
         mTempLinePaint.setColor(parseColor);
 
         //draw two more circle for shadow effect
-        canvas.drawLine(getPXForTemp(mLowerHeatingTemp), getTempLineYLocation() + yDisplacement, getPXForTemp(mUpperHeatingTemp), getTempLineYLocation() + yDisplacement, mTempLinePaint);
+        canvas.drawLine(getPXForTemp(mLowerHeatingTemp),  getTempLineYLocation() + yDisplacement, getPXForTemp(mUpperHeatingTemp), (float) getTempLineYLocation() + yDisplacement, mTempLinePaint);
         canvas.drawCircle(getPXForTemp(mLowerHeatingTemp), getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
-        canvas.drawCircle(getPXForTemp(mUpperHeatingTemp), getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
+        canvas.drawCircle(getPXForTemp(mUpperHeatingTemp),  getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
 
     }
 
@@ -649,11 +637,11 @@ public class MasterControl extends View {
 
         matrix.reset();
         hitBoxes[controlState.ordinal()].set(0, 0, bitmaps[controlState.ordinal()].getWidth() - 10,
-                bitmaps[controlState.ordinal()].getHeight() - 10);
+                (float) bitmaps[controlState.ordinal()].getHeight() - 10);
 
 
         matrix.reset();
-        matrix.postTranslate(xLoc - mHitBoxPadding, yLoc - mHitBoxPadding);
+        matrix.postTranslate((float) xLoc - mHitBoxPadding, yLoc - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
         matrix.preScale(2.0f, 2.0f);
@@ -700,7 +688,7 @@ public class MasterControl extends View {
                                float uTemp, int lineColor, int textColor) {
 
         mDebugTextAlignCenterPaint.setColor(textColor);
-        mDebugTextAlignCenterPaint.setTextSize(mArrowTextSize+5);
+        mDebugTextAlignCenterPaint.setTextSize( mArrowTextSize+5);
         mDebugTextAlignCenterPaint.getTextBounds(text, 0, text.length(), bounds);
 
         float textXLocation = (getPXForTemp(uTemp) + getPXForTemp(lTemp)) / 2.0f;
@@ -744,7 +732,7 @@ public class MasterControl extends View {
         mLinePaint.setStrokeWidth(mTempLineHeight);
 
         //why 10
-        canvas.drawLine(mPaddingPX - 10, getTempLineYLocation(), mViewWidth - mPaddingPX + 10, getTempLineYLocation(), mLinePaint);
+        canvas.drawLine( mPaddingPX - 10, getTempLineYLocation(), mViewWidth - mPaddingPX + 10, getTempLineYLocation(), mLinePaint);
     }
 
     private int getTempLineYLocation() {

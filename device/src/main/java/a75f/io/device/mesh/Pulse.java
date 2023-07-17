@@ -1,5 +1,14 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
@@ -51,21 +61,12 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
-import static a75f.io.api.haystack.CCUHsApi.TAG;
-import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -413,6 +414,9 @@ public class Pulse
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 		if( equip == null ) return;
+		double coolingDesiredTemp = 0;
+		double heatingDesiredTemp = 0;
+		double averageTemp;
 		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
 		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
@@ -427,30 +431,42 @@ public class Pulse
 				+ equip.getId()+"\"");
 		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
 				+equip.getId()+"\"");
+		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
+		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
+		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+				" == \"" + equip.getRoomRef() + "\"").intValue();
+		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
+		if(temperatureMode == TemperatureMode.COOLING){
+			coolingDesiredTemp = dt;
+			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(heatingDtPoint.get("id").toString())) / 2;
+		}else if(temperatureMode == TemperatureMode.HEATING) {
+			heatingDesiredTemp = dt;
+			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString())) / 2;
+		}
+		else {
+			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
+					buildingTuner.getMinCoolingUserLimit()
+			);
 
-		double coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
-				buildingTuner.getMinCoolingUserLimit()
-		);
+			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
+					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
+					buildingTuner.getMinHeatingUserLimit()
+			);
+			averageTemp = dt;
+		}
 
-		double heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-				dt,heatingDeadband,buildingTuner.getMaxHeatingUserLimit(),
-				buildingTuner.getMinHeatingUserLimit()
-		);
 
-		
-		CcuLog.d(L.TAG_CCU_DEVICE,"updateDesiredTemp : dt "+dt+" cdb : "+cdb+" hdb: "+hdb+" coolingDesiredTemp: "+coolingDesiredTemp+" heatingDesiredTemp: "+heatingDesiredTemp);
-		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
+		CcuLog.d(L.TAG_CCU_DEVICE,"updateDesiredTemp : dt "+dt+" cdb : "+cdb+" hdb: "+hdb+" coolingDesiredTemp: "+coolingDesiredTemp+" heatingDesiredTemp: "+heatingDesiredTemp+" desiredTemp: "+averageTemp);
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
 		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 
-		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
-		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+		if (heatingDtPoint == null || heatingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+		CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+equip.getId()+"\"");
@@ -458,8 +474,11 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
-		
-		SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), new Point.Builder().setHashMap(heatinDtPoint).build(), new Point.Builder().setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp, dt);
+
+		DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+				new Point.Builder().setHashMap(heatingDtPoint).build(),
+				new Point.Builder().setHashMap(singleDtPoint).build(),
+				coolingDesiredTemp, heatingDesiredTemp, dt, CCUHsApi.getInstance());
 		sendSNControlMessage((short)node,equip.getId());
 		sendSetTemperatureAck((short)node);
 
@@ -469,40 +488,56 @@ public class Pulse
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 		if( equip == null ) return;
-
+		double coolingDesiredTemp = 0;
+		double heatingDesiredTemp= 0;
+		double averageTemp = 0;
+		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+				" == \"" + equip.getRoomRef() + "\"").intValue();
+		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
 		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
 				+ equip.getId()+"\"");
 		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
 				+equip.getId()+"\"");
 
-		double coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
-				buildingTuner.getMinCoolingUserLimit()
-		);
+		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
+		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
+		if(temperatureMode == TemperatureMode.COOLING){
+			coolingDesiredTemp = dt;
+			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(heatinDtPoint.get("id").toString())) / 2;
+		}else if(temperatureMode == TemperatureMode.HEATING){
+			heatingDesiredTemp = dt;
+			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString())) / 2;
+		}else {
+			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
+					buildingTuner.getMinCoolingUserLimit()
+			);
 
-		double heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-				dt,heatingDeadband,buildingTuner.getMaxHeatingUserLimit(),
-				buildingTuner.getMinHeatingUserLimit()
-		);
+			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
+					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
+					buildingTuner.getMinHeatingUserLimit()
+			);
+		}
 
-
-        HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
         if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
         try{
-            CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+			if(!(temperatureMode == TemperatureMode.HEATING)) {
+				CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+			}
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
         if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
         try{
-            CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+			if(!(temperatureMode == TemperatureMode.COOLING)) {
+				CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+			}
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -516,7 +551,10 @@ public class Pulse
         }catch (Exception e){
 		    e.printStackTrace();
         }
-	    SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
+	    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+				new Point.Builder().setHashMap(heatinDtPoint).build(),
+				new Point.Builder().setHashMap(singleDtPoint).build(),
+				coolingDesiredTemp,heatingDesiredTemp,dt, CCUHsApi.getInstance());
         if(sendAck) {
 			sendSmartStatControlMessage((short) node, equip.getId());
 			sendSetTemperatureAck((short) node);
@@ -879,7 +917,7 @@ public class Pulse
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
@@ -887,7 +925,7 @@ public class Pulse
 				if(oldCurTempVal != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 					}
 				}
@@ -939,17 +977,14 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 
-
-		String cause = DeviceUtil.parseNodeStatusMessage(snRebootIndicationMsgs.nodeStatus.get());
-
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
-				", "+snRebootIndicationMsgs.rebootCause+ "Node Status "+cause);
+				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 		String firmwareVersion =
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
-			String str = "addr:"+address+ " Node status: "+cause;
+			String str = "addr:"+address+ " Node status: ";
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:

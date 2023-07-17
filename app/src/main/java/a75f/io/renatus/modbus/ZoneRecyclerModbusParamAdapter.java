@@ -2,6 +2,7 @@ package a75f.io.renatus.modbus;
 
 import android.content.Context;
 
+import a75f.io.api.haystack.Equip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import androidx.annotation.NonNull;
@@ -17,26 +18,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.modbus.LModbus;
-import a75f.io.logic.pubnub.ModbusDataInterface;
-import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ModbusDataInterface;
+import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.CCUUiUtil;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -45,12 +48,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     String equipRef;
     String deviceRef;
 
-    public ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam,
-                                          int slaveId) {
+    public ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam) {
         this.context = context;
         this.modbusParam = modbusParam;
         this.equipRef = equipRef;
-        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+slaveId+"\"");
+        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and equipRef == \""+equipRef+ "\"");
         if (!device.isEmpty()) {
             this.deviceRef = device.get("id").toString();
         }
@@ -78,6 +80,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 case "integer":
                 case "boolean":
                 case "digital":
+                case "int32":
                 case "int64":
                 case "unsigned long":
                     if (modbusParam.get(position).getUserIntentPointTags() != null && modbusParam.get(position).getUserIntentPointTags().size() > 0) {
@@ -262,17 +265,26 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     public void refreshScreen(String id) {
         HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(id);
         Point point = new Point.Builder().setHashMap(pointMap).build();
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         double value = readVal(id);
         //write to modbus
-        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup()));
-        for (Register register : modbusDevice.getRegisters()) {
-            for (Parameter pam : register.getParameters()) {
-                if (pam.getUserIntentPointTags() != null) {
-                    if (pam.getName().equals(point.getShortDis())) {
-                        if (LSerial.getInstance().isModbusConnected()) {
-                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (null != equip.getEquipRef()) {
+            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+        } else {
+            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
+        }
+        for (EquipmentDevice modbusDevice : modbusSubEquipList) {
+            for (Register register : modbusDevice.getRegisters()) {
+                for (Parameter pam : register.getParameters()) {
+                    if (pam.getUserIntentPointTags() != null) {
+                        if (pam.getName().equals(point.getShortDis())) {
+                            if (LSerial.getInstance().isModbusConnected()) {
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
@@ -315,17 +327,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         if (logPoint.isEmpty()) {
             return null;
         }
-        
-        /*StringBuilder tags = new StringBuilder();
-        for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
-            if (!Objects.nonNull(marker.getTagValue())) {
-                tags.append(" and ").append(marker.getTagName());
-            }
-        }
-        HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == " +
-                                                         "\"" + equipRef + "\"");
-        Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
-        return logicalPoint;*/
         return new Point.Builder().setHashMap(logPoint).build();
     }
 
@@ -349,19 +350,29 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     }
 
     private void writePoint(Point point, String value, Parameter parameter) {
+
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
         if (point.getMarkers().contains("his")) {
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
         }
-        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup()));
-        for (Register register : modbusDevice.getRegisters()) {
-            for (Parameter pam : register.getParameters()) {
-                if (pam.getUserIntentPointTags() != null) {
-                    if (pam.getName().equals(parameter.getName())) {
-                        if (LSerial.getInstance().isModbusConnected()) {
-                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (null != equip.getEquipRef()) {
+            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+        } else {
+            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
+        }
+        for (EquipmentDevice modbusDevice : modbusSubEquipList) {
+            for (Register register : modbusDevice.getRegisters()) {
+                for (Parameter pam : register.getParameters()) {
+                    if (pam.getUserIntentPointTags() != null) {
+                        if (pam.getName().equals(parameter.getName())) {
+                            if (LSerial.getInstance().isModbusConnected()) {
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }

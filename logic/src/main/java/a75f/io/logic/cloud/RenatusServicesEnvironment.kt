@@ -31,6 +31,7 @@ private const val HAYSTACK_EXT = ":8085/v1/"
 private const val FILESTORAGE_EXT = ":8081"
 private const val MESSAGING_EXT = ":8082"
 private const val WEATHER_EXT = ":3001/api/v1"
+private const val CCU_VERSION_EXT = ""
 
 private const val PREF_LOCAL_BASE_IP_VALUE = "pref_local_base_ip_value"
 private const val PREF_LOCAL_BASE_IP_ALL_VALUES = "pref_local_base_ip_all_values"
@@ -75,7 +76,9 @@ class RenatusServicesEnvironment(
             BuildConfig.ALERTS_API_BASE,
             BuildConfig.FILE_STORAGE_API_BASE,
             BuildConfig.MESSAGING_API_BASE,
-            BuildConfig.WEATHER_API_BASE
+            BuildConfig.WEATHER_API_BASE,
+            BuildConfig.CCU_VERSION_API_BASE,
+            BuildConfig.CCU_FILE_SIZE_API_BASE
          )
       }
 
@@ -88,9 +91,10 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + ALERTS_EXT,
             HTTP + baseIp + FILESTORAGE_EXT,
             HTTP + baseIp + MESSAGING_EXT,
-                 HTTP + baseIp + WEATHER_EXT,
-
-         )
+            HTTP + baseIp + WEATHER_EXT,
+            HTTP + baseIp + CCU_VERSION_EXT,
+            HTTP + baseIp + CCU_VERSION_EXT
+            )
       }
 
    @SuppressLint("ApplySharedPref")
@@ -148,7 +152,9 @@ data class RenatusServicesUrls(
    val alertsUrl: String,
    val remoteStorageUrl: String,
    val messagingUrl: String,
-   val weatherUrl: String
+   val weatherUrl: String,
+   val recommendedCCUVersion : String,
+   val getCCUFileSize : String
 ) {
    // useful for local environment
    val base: String

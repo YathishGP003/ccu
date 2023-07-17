@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -27,26 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.tabs.TabItem;
-import com.google.android.material.tabs.TabLayout;
-
-import a75f.io.alerts.AlertManager;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
-import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
-import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
-import a75f.io.renatus.registration.CustomViewPager;
-import a75f.io.renatus.schedules.SchedulerFragment;
-import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CloudConnetionStatusThread;
-import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
-import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
-import a75f.io.usbserial.UsbServiceActions;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -56,7 +38,36 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+
+import java.util.HashMap;
+
+import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.LSmartNode;
+import a75f.io.device.mesh.LSmartStat;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
+import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+import a75f.io.renatus.registration.CustomViewPager;
+import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CloudConnetionStatusThread;
+import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.usbserial.UsbServiceActions;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -207,7 +218,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 mDrawerLayout.openDrawer(drawer_screen);
                             }
                         }
-                    }else{
+                    } else{
                         startCountDownTimer(INTERVAL);
                     }
 
@@ -226,30 +237,32 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onUserInteraction() {
         super.onUserInteraction();
-        Log.d(TAG,"in userinteraction");
+        Log.i(TAG,"in user interaction");
         resetCountDownTimer();
     }
 
     private void resetCountDownTimer(){
-        Log.d(TAG,"in reset");
+        Log.i(TAG,"resetCountDownTimer ");
         stopCountdownTimer();
         startCountDownTimer(DISCONNECT_TIMEOUT);
     }
 
     @SuppressLint("LogNotTimber")
     private void startCountDownTimer(long interval) {
+        Log.i(TAG,"startCountDownTimer ");
         mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
+
+        if (countDownTimer != null)
+            countDownTimer.cancel();
+
         countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, interval) {
             @Override
             public void onTick(long l) {
             }
-
             @Override
             public void onFinish() {
-                final long millisLeft = mStopTimeInFuture - System.currentTimeMillis();
-                if (millisLeft <= 10000) {
-                    launchZoneFragment();
-                }
+                Log.i(TAG,"onFinish ");
+                launchZoneFragment();
                 stopCountdownTimer();
             }
         };
@@ -257,6 +270,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void launchZoneFragment() {
+        Log.i(TAG,"launch ZoneFragment");
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)
@@ -270,12 +284,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 }
                 for (Fragment fragment : fm.getFragments()) {
-                    if (fragment.getClass().toString().contains("CreateNewSite")) {
+                    if (!fragment.getClass().toString().contains("ZoneFragmentNew")) {
                             fm.beginTransaction().remove(fragment).commit();
                     }
                 }
             }
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e){
             e.printStackTrace();
         }
     }
@@ -283,7 +297,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @SuppressLint("LogNotTimber")
     private  void stopCountdownTimer() {
-        Log.d(TAG,"in stop");
+        Log.i(TAG,"stopCountdownTimer");
         if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
@@ -575,7 +589,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
-        CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
+        CcuLog.d("RemoteCommand","RenatusLandingActivity="+commands+","+cmdLevel);
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
     }
 
@@ -602,5 +616,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }
         }
     };
+
 
 }

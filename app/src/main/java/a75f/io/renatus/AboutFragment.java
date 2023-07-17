@@ -11,6 +11,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,8 +32,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,12 +50,20 @@ import java.util.HashMap;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.HttpConstants;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.cloud.OtpManager;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -72,6 +87,47 @@ public class AboutFragment extends Fragment {
     TextView otpCountDown;
     @BindView(R.id.tvSiteId)
     TextView tvSiteId;
+    @BindView(R.id.download_size_about)
+    TextView downloadSize;
+    @BindView(R.id.download_size_abou)
+    TextView downloadSizeText;
+    @BindView(R.id.latestVersion)
+    TextView latestVersion;
+    @BindView(R.id.update_ccu_screen)
+    LinearLayout updateScreenLayout;
+    @BindView(R.id.update_ccu)
+    TextView updateCCU;
+    @BindView(R.id.update_app_text)
+    LinearLayout updateAppText;
+    @BindView(R.id.layoutId)
+    LinearLayout linearLayout;
+    @BindView(R.id.progress_bar)
+    LinearProgressIndicator progressBar;
+    @BindView(R.id.downloaded_size)
+    TextView totalDownloadedSize;
+    @BindView(R.id.file_size)
+    TextView totalFileSize;
+    @BindView(R.id.downloading_text)
+    TextView downloadingText;
+    String versionLabelString;
+    String fileSize;
+    Long downloadTd;
+    @BindView((R.id.imageViewCancel))
+    ImageView cancel;
+    @BindView(R.id.update_status)
+    TextView updateStatus;
+    @BindView(R.id.version_text)
+    TextView verSionText;
+    @BindView(R.id.latest_version_text)
+    TextView latest_version_text;
+    @BindView(R.id.connectivityIssues)
+    LinearLayout connectivityIssues;
+    @BindView(R.id.layout_connection_up)
+    LinearLayout connectionUpLayout;
+    @BindView(R.id.connection_down_layout)
+    LinearLayout connectionDownLayout;
+    boolean isNotFirstInvocation ;
+
 
     EditText code1;
     EditText code2;
@@ -163,9 +219,117 @@ public class AboutFragment extends Fragment {
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         setOTPOnAboutPage();
-        return rootView;
+
+        checkIsCCUHasRecommendedVersion(getActivity());
+        updateCCU.setOnClickListener(updateOnClickListener);
+        cancel.setOnClickListener(cancelOnClickListener);
+
+       return rootView;
     }
 
+    public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
+        RxjavaUtil.executeBackgroundTaskWithDisposable(()->{
+                    ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version");
+                },
+                ()->{String response = getRecommendedCCUVersion();
+                    updateAboutFragmentUI(response);
+                },
+                ProgressDialogUtils::hideProgressDialog);
+    }
+
+    View.OnClickListener updateOnClickListener = view -> {
+        progressBar.setVisibility(View.VISIBLE);
+        cancel.setVisibility(View.VISIBLE);
+        updateCCU.setEnabled(false);
+        updateAppText.setVisibility(View.GONE);
+        linearLayout.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        connectivityIssues.setVisibility(View.GONE);
+        cancel.setEnabled(true);
+        cancel.setVisibility(View.VISIBLE);
+        RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this);
+    };
+
+    View.OnClickListener cancelOnClickListener = view -> {
+        connectivityIssues.setVisibility(View.GONE);
+        DownloadManager manager =
+                (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
+        if(downloadTd != null) {
+            Log.i("amardebug","downloadTd "+downloadTd);
+            manager.remove(downloadTd);
+            updateCCU.setEnabled(true);
+            updateAppText.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            cancel.setEnabled(false);
+            cancel.setVisibility(View.GONE);
+            Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+            isNotFirstInvocation = false;
+        }
+    };
+
+    private void updateAboutFragmentUI(String response) {
+        if (response != null) {
+            try {
+                JSONArray array = new JSONArray(response);
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject jsonObject = array.getJSONObject(i);
+                    if (jsonObject.getBoolean("recommended")) {
+                        String majorVersion = jsonObject.getString("majorVersion");
+                        String minorVersion = jsonObject.getString("minorVersion");
+                        String patchVersion = jsonObject.getString("patchVersion");
+                        versionLabelString = jsonObject.getString("versionLabel");
+                        fileSize = jsonObject.getString("size");
+                        isNotFirstInvocation = false;
+                        String size = jsonObject.get("size") +" MB";
+                        String recommendedVersion = majorVersion+"."+minorVersion+"."+patchVersion;
+                        String currentAppVersion =  CCUUiUtil.getCurrentCCUVersion();
+
+                        if (getActivity() != null) {
+                            new Handler(Looper.getMainLooper()).post(() ->  {
+                                if (CCUUiUtil.isCCUNeedsToBeUpdated(currentAppVersion, recommendedVersion)){
+                                    cancel.setEnabled(true);
+                                    updateScreenLayout.setVisibility(View.VISIBLE);
+                                    latestVersion.setText(recommendedVersion);
+                                    downloadSize.setText(size);
+                                    totalFileSize.setText(size);
+                                }else {
+                                    downloadSizeText.setVisibility(View.GONE);
+                                    updateStatus.setText("CCU is up to date");
+                                    updateAppText.setVisibility(View.GONE);
+                                    updateCCU.setVisibility(View.GONE);
+                                    verSionText.setVisibility(View.VISIBLE);
+                                    latest_version_text.setVisibility(View.GONE);
+                                    latestVersion.setText(currentAppVersion);
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (getActivity() != null) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    connectionUpLayout.setVisibility(View.GONE);
+                    connectionDownLayout.setVisibility(View.VISIBLE);
+                });
+            }
+        }
+    }
+
+    private String getRecommendedCCUVersion(){
+        String response = HttpUtil.executeJson(
+                RenatusServicesEnvironment.getInstance().getUrls().getRecommendedCCUVersion(),
+                null,
+                a75f.io.api.haystack.BuildConfig.HAYSTACK_API_KEY,
+                true,
+                HttpConstants.HTTP_METHOD_GET
+        );
+        CcuLog.i(L.TAG_CCU_UPDATE,"Response of recommended CCU version API "+response);
+        return response;
+    }
     private void setOTPOnAboutPage(){
         ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
@@ -585,4 +749,32 @@ public class AboutFragment extends Fragment {
             }
         });
     }
-}
+
+    public void setProgress(int value, long downloadId, int columnIndex) {
+        CcuLog.i("CCU_DOWNLOAD", "progress " + value);
+        this.downloadTd = downloadId;
+        DecimalFormat df = new DecimalFormat("#.##");
+        double downloadSize = Double.parseDouble(df.format(value * .01 * Double.parseDouble(
+                fileSize)));
+        String downloadedSize = downloadSize + " MB/";
+        if (getActivity() != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                    totalDownloadedSize.setText((downloadedSize));
+                    progressBar.setProgressCompat(value, true);
+                    connectivityIssues.setVisibility(View.GONE);
+                    if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
+                        connectivityIssues.setVisibility(View.VISIBLE);
+                    }
+                    isNotFirstInvocation = true;
+                    if (value == 100) {
+                        totalDownloadedSize.setVisibility(View.INVISIBLE);
+                        totalFileSize.setVisibility(View.INVISIBLE);
+                        downloadingText.setText("Installing..");
+                        progressBar.setVisibility(View.GONE);
+                        cancel.setVisibility(View.GONE);
+                    }
+            });
+        }
+    }
+    }
+

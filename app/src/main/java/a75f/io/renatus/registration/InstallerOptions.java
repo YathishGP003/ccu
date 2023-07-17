@@ -1,11 +1,11 @@
 package a75f.io.renatus.registration;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,9 +14,11 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,6 +26,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -46,6 +49,7 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -56,10 +60,10 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -69,11 +73,13 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
@@ -129,17 +135,18 @@ public class InstallerOptions extends Fragment {
     TextInputLayout textInputIP;
     RadioGroup radioGroupConfig;
     Button buttonSendIAM;
+    LinearLayout linearLayout;
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
-    
+
     private ToggleButton toggleCoolingLockout;
     private ToggleButton toggleHeatingLockout;
     private TextView textCoolingLockoutTemp;
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;
     private Spinner spinnerHeatingLockoutTemp;
-    
+
     private TextView textCoolingLockout;
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
@@ -202,6 +209,7 @@ public class InstallerOptions extends Fragment {
         getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -215,10 +223,6 @@ public class InstallerOptions extends Fragment {
         isFreshRegister = getActivity() instanceof FreshRegistration;
         CCU_ID = prefs.getString("CCU_ID");
         utilityApplication = new RenatusApp();
-        if (!isFreshRegister) {
-            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
-            p.setMargins(50, 0, 0, 0);
-        }
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
@@ -243,7 +247,9 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-        
+        linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
+        LayoutInflater li = getLayoutInflater();
+
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
         textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
@@ -346,50 +352,7 @@ public class InstallerOptions extends Fragment {
                     return;
                 }
                 mNext.setEnabled(false);
-                String ccuId = ccu.get("id").toString();
-                ccuId = ccuId.replace("@", "");
-                String ccuName = ccu.get("dis").toString();
-                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
-                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-                SettingPoint snBand = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-smartNodeBand")
-                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-                CCUHsApi.getInstance().addPoint(snBand);
-
-
-
-                SettingPoint useBacnet = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-useBacnet")
-                        .addMarker("bacnet").addMarker("enabled").addMarker("sp").setVal(toggleBACnet.isChecked() ? "true":"false").build();
-                CCUHsApi.getInstance().addPoint(useBacnet);
-                SettingPoint bacnetConfig = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetConfig")
-                        .addMarker("bacnet").addMarker("config").addMarker("sp")/*.setVal(radioGroup_config.getCheckedRadioButtonId() == R.id.rbAuto ? "0" :"1")*/.build();
-                CCUHsApi.getInstance().addPoint(bacnetConfig);
-                SettingPoint bacnetIp = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetIp")
-                        .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
-                CCUHsApi.getInstance().addPoint(bacnetIp);
-                SettingPoint bacnetSubnet = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetSubnet")
-                        .addMarker("bacnet").addMarker("ipsubnet").addMarker("sp").setVal(editSubnet.getText() != null ? editSubnet.getText().toString() : "").build();
-                CCUHsApi.getInstance().addPoint(bacnetSubnet);
-                SettingPoint bacnetGateway = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetGateway")
-                        .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(editGateway.getText() != null ? editGateway.getText().toString() : "").build();
-                CCUHsApi.getInstance().addPoint(bacnetGateway);
+                createInstallerPoints(ccu, false);
                 // TODO Auto-generated method stub
                 goTonext();
             }
@@ -518,10 +481,92 @@ public class InstallerOptions extends Fragment {
         });
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
-
         getBACnetConfig();
 
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewTreeObserver vto = view.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                if (!isFreshRegister) {
+                    ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                    p.setMargins(50, 0, 0, 0);
+                    view.setLayoutParams(p);
+                }
+            }
+        });
+    }
+
+    public void createInstallerPoints(HashMap ccu, boolean initialise) {
+        String ccuId = ccu.get("id").toString();
+        ccuId = ccuId.replace("@", "");
+        String ccuName = ccu.get("dis").toString();
+        CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        SettingPoint snBand = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-smartNodeBand")
+                .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+        CCUHsApi.getInstance().addPoint(snBand);
+
+
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                siteMap.get("dis").toString()+"-CCU",
+                ccu.get("equipRef").toString(),
+                ccu.get("siteRef").toString(),
+                siteMap.get(Tags.TZ).toString(),
+                CCUHsApi.getInstance()
+        );
+        SettingPoint useBacnet = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-useBacnet")
+                .addMarker("bacnet").addMarker("enabled").addMarker("sp").setVal(initialise? "false": getToggleForBacnet(toggleBACnet)).build();
+        CCUHsApi.getInstance().addPoint(useBacnet);
+        SettingPoint bacnetConfig = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetConfig")
+                .addMarker("bacnet").addMarker("config").addMarker("sp")/*.setVal(radioGroup_config.getCheckedRadioButtonId() == R.id.rbAuto ? "0" :"1")*/.build();
+        CCUHsApi.getInstance().addPoint(bacnetConfig);
+        SettingPoint bacnetIp = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetIp")
+                .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
+        CCUHsApi.getInstance().addPoint(bacnetIp);
+        SettingPoint bacnetSubnet = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetSubnet")
+                .addMarker("bacnet").addMarker("ipsubnet").addMarker("sp").setVal(initialise?"":getEditSubnet(editSubnet)).build();
+        CCUHsApi.getInstance().addPoint(bacnetSubnet);
+        SettingPoint bacnetGateway = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetGateway")
+                .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(initialise ? "":getEditGateWay(editGateway)).build();
+        CCUHsApi.getInstance().addPoint(bacnetGateway);
+    }
+
+    private String getEditGateWay(EditText editGateway) {
+        return editGateway.getText() != null ? editGateway.getText().toString() : "";
+    }
+
+    private String getEditSubnet(EditText editSubnet) {
+        return editSubnet.getText() != null ? editSubnet.getText().toString() : "";
+    }
+
+    private String getToggleForBacnet(ToggleButton toggleBACnet) {
+        return toggleBACnet.isChecked() ? "true":"false";
     }
 
     private void lockBACnetConfig(){

@@ -289,7 +289,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.exhaustFanHysteresis = Double.parseDouble(exFanHysteresis.getSelectedItem().toString());
         oaoConfig.smartPurgeMinDamperOpen = Double.parseDouble(smartPurgeOutsideDamperMinOpen.getSelectedItem().toString());
         oaoConfig.enhancedVentilationMinDamperOpen = Double.parseDouble(enhancedVentilationOutsideDamperMinOpen.getSelectedItem().toString());
-        oaoConfig.currentTranformerType = CT_INDEX_START + currentTransformerType.getSelectedItemPosition();
+        oaoConfig.currentTranformerType = (double) CT_INDEX_START + currentTransformerType.getSelectedItemPosition();
         oaoConfig.usePerRoomCO2Sensing = roomCO2Sensing.isChecked();
         oaoConfig.outsideDamperMinOpen = Double.parseDouble(oaDamperMinOpen.getSelectedItem().toString());
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());

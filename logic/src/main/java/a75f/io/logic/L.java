@@ -27,6 +27,7 @@ import a75f.io.logic.util.RxTask;
 public class L
 {
     public static final String TAG_CCU = "CCU";
+    public static final String TAG_CCU_INIT = "CCU_INIT";
     public static final String TAG_CCU_UI = "CCU_UI";
     public static final String TAG_CCU_ZONE = "CCU_ZONE";
     public static final String TAG_CCU_SYSTEM = "CCU_SYSTEM";
@@ -36,7 +37,7 @@ public class L
     public static final String TAG_CCU_DEVICE = "CCU_DEVICE";
     public static final String TAG_CCU_SERIAL = "CCU_SERIAL";
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
-    public static final String TAG_CCU_PUBNUB = "CCU_PUBNUB";
+    public static final String TAG_CCU_PUBNUB = "CCU_MESSAGING";
     public static final String TAG_CCU_WARN = "CCU_WARN";
     public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
@@ -53,6 +54,10 @@ public class L
     public static final String TAG_OTN = "CCU_OTN";
     public static final String TAG_CCU_BLE = "CCU_BLE";
     public static final String TAG_CCU_READ_CHANGES = "CCU_READ_CHANGES";
+    public static final String TAG_CCU_OTA_PROCESS= "OTA_PROCESS";
+    public static final String TAG_CCU_AUTO_COMMISSIONING = "CCU_AUTO_COMMISSIONING";
+    public static final String TAG_CCU_UPDATE = "CCU_UPDATE";
+    public static final String TAG_DESIRED_TEMP_MODE = "DESIRED_TEMP_MODE";
 
     public static Context app()
     {

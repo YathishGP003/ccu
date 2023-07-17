@@ -1,24 +1,32 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.Units;
@@ -28,10 +36,13 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.PreferenceUtil;
 
+import static a75f.io.logic.L.app;
 import static a75f.io.logic.L.ccu;
 
 /**
@@ -58,7 +69,7 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
-    
+
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();
@@ -773,6 +784,9 @@ public abstract class SystemProfile
         Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
+
+        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+
     }
 
     //VAV & DAB System profile common points are added here.
@@ -799,10 +813,7 @@ public abstract class SystemProfile
     }
     private boolean verifyPointsAvailability(String tags, String equipRef){
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and system and "+tags+" and equipRef == \"" + equipRef + "\"");
-        if (points != null && points.size() > 0) {
-            return  true;
-        }
-        return false;
+        return points != null && points.size() > 0;
     }
     public void addNewSystemUserIntentPoints(String equipref){
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -835,7 +846,9 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
-        
+
+        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }
     
@@ -902,8 +915,8 @@ public abstract class SystemProfile
     private void addLockoutTempTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
                                       String profileTag, String tz) {
         HashMap<Object, Object> coolingLockoutTemp = CCUHsApi.getInstance()
-                                                             .readEntity("tuner and system and dab and " +
-                                                                         "outsideTemp and cooling and lockout");
+                                                             .readEntity("tuner and system and outsideTemp " +
+                                                                     "and cooling and lockout and equipRef == \""+equipref+"\"");
         
         if (coolingLockoutTemp.isEmpty()) {
             SystemTuners.createCoolingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
@@ -912,8 +925,8 @@ public abstract class SystemProfile
         }
         
         HashMap<Object, Object> heatingLockoutTemp = CCUHsApi.getInstance()
-                                                             .readEntity("tuner and system and dab and " +
-                                                                         "outsideTemp and heating and lockout");
+                                                             .readEntity("tuner and system and outsideTemp " +
+                                                                     "and heating and lockout and equipRef == \""+equipref+"\"");
         
         if (heatingLockoutTemp.isEmpty()) {
             SystemTuners.createHeatingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
@@ -1037,5 +1050,16 @@ public abstract class SystemProfile
     
     public boolean isHeatingLockoutActive() {
         return !mechanicalHeatingAvailable;
+    }
+
+    public double getSystemLoopOutputValue(String state){
+         double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");
+         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
+         return systemLoopOPValue;
+    }
+
+    public void writeSystemLoopOutputValue(String state, double value){
+        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
+        CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 }

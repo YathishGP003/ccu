@@ -1,37 +1,275 @@
+ - Merged PR 7681: Fix for restoring equips paired with side loaded json
+ - Merged PR 7888: reverting equip type change to modbus and Fix for heartbeat
+ - Merged PR 7884: Data sync issues fix for master
+ - Merged PR 6405: Single and dual temp support for both standalone and system profiles
+ - Merged PR 6609: 16885 - Parsing nested modbus equip json file
+ - Merged PR 7874: Added some logs for remove entity call
+ - Merged PR 7841: printing large log message - mstr
+ - Merged PR 7834: added a length check to avoid arrayIndexOutOfBound risks
+ - added a length check to avoid arrayIndexOutOfBound risks
+ - Merged PR 7780: Periodic Reboot when OOM is thrown specifically caused by fragmentation
+ - Merged PR 7773: HS 2pipe tuner mis match issue
+ - Merged PR 7822: Out of memory error, handled review comments.
+ - Out of memory error, handled review comments.
+ - Merged PR 7806: Dynamic priority based on max load
+ - Dynamic priority based on max load
+ - Merged PR 7777: Use correct tag for read sense offset config
+ - Merged PR 7770: VAV No Fan Zone: For Reheat Type as 2 Stage, App crashed when tried to Open C...
+ - Merged PR 7370: Incorrect enum corrected
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
+ - Merged PR 7743: added changes to release broadcast receiver, and message queue on OnDestory o...
+ - Out of memory error, handled review comments.
+ - added try catch for string parser
+ - code refractor and added specific exception message parser to identify Fargemntation OOM
+ - Periodic Reboot when OOM is thrown specifically caused by fragmentation
+ - Merged PR 7599: Duplicate tuner creation fix
+ - Merged PR 7497: Sync CCU local data to cloud when it is restarted
+ - Merged PR 7772: Smartstat conditioning mode issue
+ - Merged PR 7735: passing the list of device ScanFilter while invoking the startScan method.
+ - VAV No Fan Zone: For Reheat Type as 2 Stage, App crashed when tried to Open Config Screen.
+ - Merged PR 7751: added a config file for hotfix branches
+ - Merged PR 7589: Seed message for every 24Hr
+ - added a hotfix config file
+ - Out of memory error, handled review comments.
+ - Merged PR 7739: We have added the logs in removeEntity related code
+ - added changes to release broadcast receiver, and message queue on OnDestory of fragment
+ - Merged PR 7557: Connect wifi on background thread
+ - crash fix
+ - Merged PR 7443: Exclude zone's in vacation from preconditioning
+ - Merged PR 7486: Ignore temp spikes from DAB/VAV system algo
+ - Merged PR 7377: Cumulative damper calculation to use 1% as floor value
+ - Merged PR 7546: Skip install request when package is invalid
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
+ - Use correct tag for read sense offset config
+ - Merged PR 7549: Use displayInUiDefault tag from Json
+ - Resolve merge conflicts
+ - Fix siteName migration issue for CM points
+ - Merged PR 7651: crash fix
+ - crash fix
+ - Merged PR 6872: 18211 Smartstat aux heat issue fix
+ - Merged PR 7622: Secondary PR against master UHG Silo Connectivity Issues while on UHG Network
+ - Merged PR 7470: Userintent tag and Writable tag fix
+ - Merged PR 7626: Removed BACnet password string
+ - Secondary PR against master UHG Silo Connectivity Issues while on UHG Network
+ - Remove TI migration that runs every time
+ - Fix mech cooling tuner duplication
+ - Merged PR 7576: Avoid handling any messages that come from the backend if the CCU is unregistered
+ - Merged PR 7530: Considering List of CCUs for replace CCU, only which has Diag Equip
+ - Merged PR 7578: Continue with replace process, if app is closed or killed
+ - Merged PR 7509: update spinner from portal message
+ - Merged PR 7575: Raygun crash fix for OTA
+ - Merged PR 7570: Screen fall back issue
+ - Merged PR 7529: Resolve named schedule issue
+ - Merged PR 7424: 18299 Audi trail multiple entries for desired temp change
+ - Merge branch 'master' into Bug/samjith/17669_cumulative_damper_floor_val
+ - Merge branch 'master' into Bug/samjith/15609_zone_preconditioning_vacation
+ - Merged PR 7526: 19727 - CCU: Auto Exit of Safe Mode
+ - backfill refractor
+ - Connect wifi on background thread
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/backfill_update_portal
+ - migration added
+ - migration added
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
+ - Merged PR 7502: Fix for sync issue after replace ccu
+ - Merged PR 7300: 18916 VAV not installed option
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18916/bharath_vav_rehat
+ - Merged PR 7426: Gracefully handle empty val field for hyperstat reconfig
+ - Merged PR 7439: Change composite conditioning logic.
+ - Merged PR 7496: Messaging persistence updates
+ - update spinner from portal message
+ - Merged PR 7507: Save Crash logs when crash  occurs
+ - handled portal message for  VAV reconfig
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18916/bharath_vav_rehat
+ - Merged PR 7016: sonar cloud bug fixes batch 3
+ - Merged PR 7018: sonar cloud fixes -- casting changes
+ - Merged PR 7046: sonar cloud bug fixes for alert module
+ - Merged PR 7047: sonar cloud bug fixes for algos module
+ - Merge branch 'master' into Bug/samjith/messaging_persistence_updates
+ - Merged PR 7441: Handled CCU_REF migration task preference.
+ - Merged PR 7490: Pull Request 7390: Handle lastModifiedDate as non marker in schedules
+ - Merged PR 7257: revert changes
+ - Handle update entity concurrentmodification exception
+ - Merged PR 7455: BISKIT support for dev_qa build
+ - Merged PR 7311: Remove Not Implemented Options in UI
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/9678_remove_not_implemented_ui
+ - Merged PR 7403: CCU is crashing when configuring MODBUS Equip
+ - WIP
+ - Merge branch 'master' into Bug/samjith/19455_hyperstat_reconfig_empty_val
+ - comments addressed
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/19402_modbus_equip_crash
+ - Merged PR 7318: setting the margin from xml file instead of adding from the java code.
+ - Merged PR 7410: OTA Upgradation Issue from 1.638.2/1.639.1 to 1.640.0
+ - Merged PR 7192: clearing floor list and fetching the list again
+ - skip preconditioning during vacatiomn
+ - Merged PR 7428: Add dev_qa build variant
+ - Add dev_qa build variant
+ - Fix conditioning mode selection for composite
+ - Add dev_qa build variant
+ - merge master
+ - Version bump to 1.640.0
+ - Merged PR 7425: Version downgrade
+ - Version downgrade
+ - Merged PR 7407: Smart Stat CPU fan relay issue fix
+ - reverse null check
+ - Skip install request when package is invalid
+ - Version bump to 1.640.0
+ - Merged PR 7364: OTA observations
+ - Merged PR 7342: Damper actuator type enum update
+ - refractor
+ - refractor
+ - added unit test
+ -  OTA Upgradation Issue from 1.638.2/1.639.1 to 1.640.0
+ -  CCU is crashing when configuring MODBUS Equip
+ - Gracefully handle empty val field for hyperstat reconfig
+ - Merged PR 7386: Master Version bump to 640
+ - Merged PR 7339: Added false check while getting element Hdict
+ - Merged PR 7304: Fix lastModifiedTime when adding new CCUs
+ - Dab Dual duct migration
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/9678_remove_not_implemented_ui
+ - Merged PR 7385: Enhance Replacement strategy
+ - Merged PR 7258: CCU - 18976 and 19273
+ - Merge branch 'master' into Bug/samjith/17669_cumulative_damper_floor_val
+ - Incorrect enum corrected
+ - Merged PR 7098:  Create a setting point to store backfill duration in hours
+ - updated to master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
+ - Merged PR 7331: User Story 16826: Ability to backfill the latest data first
+ - config value mapped to -1 when not installed is selected
+ - method name change
+ - Merged PR 6194: Auto commissioning US - 5380,6990,11476 and 12795
+ - sonar cloud bug fixes review comments
+ - sonar cloud bug fixes removed commented code alert module
+ - Merged PR 7173: disable relay2 for single stage dab reheat
+ - Merge branch 'master' into Bug/samjith/16925_disable_stage2_reheat
+ - Merged PR 6721: US - 16069
+ - Merged PR 7352: Update Mat throttle status when temp is below min
+ - Merged PR 7278: 19319- fix for floor rename crash
+ - Merged PR 7143: US - 18165
+ - Merged PR 7137: US - 16067
+ - Merged PR 7136: issue observed in staging resolved
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/14110_desired_ui_issue
+ - Merged PR 6747: - 17845 -
+ - Merged PR 7203: modbus equiptype made case sensitive
+ - Merged PR 7343: removed recycler view from the fragment_zones.xml file.
+ - Merged PR 7301: Raygun crash - 19421
+ - Merged PR 7327: removed the createdDateTime field from updateCCU and createCCU methods.
+ - Merged PR 6800: 16732 Ota Status diag point creation
+ - Merged PR 7057: sonar cloud bug fixes for app module casting fixes
+ - Merged PR 7051: sonar cloud bug fixes for app module seek arc, casting issues
+ - Merged PR 7070: sonar cloud bug fixes for app module wrong casting
+ - Merged PR 7085: sonar cloud bug fixes for app module wrong casting
+ - Merged PR 7087: Messaging persistence on CCU
+ - Merge master
+ - Merge branch 'master' into story/samjith/messaging_persistence
+ - Merged PR 7336: Handling messaging acknowledgement for update_ccu command
+ - Merged PR 7337: Avoid secondary CCU creating building schedule
+ - User Story 16826: Ability to backfill the latest data first
+ - User Story 16826: Ability to backfill the latest data first
+ - Review comments
+ - migration added
+ - Remove Not Implemented Options in UI
+ - Fix lastModifiedTime when adding new CCUs
+ - 18916 VAV not installed option
+ - 18916 VAV not installed option
+ - Merged PR 7201: HelioNode restart module fix
+ - Code review comments addressed
+ - revert changes
+ - revert changes
+ - Ignore temp spikes from DAB/VAV system algo
+ - Merge branch 'master' into Bug/samjith/16925_disable_stage2_reheat
+ - duplicate points created during fresh registration resolved
+ - Merge branch 'master' into Bug/samjith/19006_duplicate_upgrades
+ - Merge branch 'master' into Bug/samjith/13792_duplicate_building_schedule
+ - staticPressureSPTrim(INH2O) tuner discrepancy
+ - Merge branch 'US/16828/backfill_enhancement' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/14110_desired_ui_issue
+ - Merged PR 7188: Fix for 19085 - Added tags for building vacation and adding marker tags at th...
+ - equipRef added
+ - Merge master
+ - Fix retry issue for update_cmd message
+ - Fix for 19085 - Added tags for building vacation and adding marker tags at the end
+ - Recalibration issue fixed
+ - Merged PR 7176: migration fix voc and pm2p5 missing points
+ - UI fix to apply and cancel button
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/14110_desired_ui_issue
+ - avoid secondary CCUs creating building schedule
+ - Do message ack before sending upgrade command
+ - modbus equiptype made case sensitive
+ - modbus equiptype made case sensitive
+ - updated UI new requirement
+ - updated UI new requirement
+ - Fix for 19085 - Added tags for building vacation and adding marker tags at the end
+ - use floor value of 1 for cumulative damper adjustment
+ - disable relay2 for single stage dab reheat
+ - Version bump to 1.639.0
  - Merged PR 6301: Updating CCU's system time with Silo server time
  - Merged PR 6774: ccuRef for all entities related to CCU
  - Merged PR 6971: Operating mode descrepancy
+ - code refractor
+ - Merge remote-tracking branch 'origin/US/16828/backfill_enhancement' into US/16828/backfill_enhancement
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
  - Merged PR 7141: Fix merge issue for unauthrized token
+ - code review comments resolved
+ - Merge master
+ - Add received time column Reduce ack time interval to 30 sec
  - Fix merge issue for unauthrized token
+ - issue observed in staging resolved
+ - issue observed in staging resolved
+ - Recalibrate backfill duration on new zone pairing (30% review)
  - Merged PR 7017: US - 16065
  - Merged PR 7052: US - 16074
+ - Recalibrate backfill duration on new zone pairing (30% review)
  - Merged PR 6047: 3 VAPT issues resolved.
  - Merged PR 7121: 18555 Airflow temp configuration fix
+ - Migration code added
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/16828/backfill_enhancement
+ - Create a setting point to store backfill duration in hours
  - Merged PR 7058: Fallback for networkWatchdogTimeout tuner
+ - sonar cloud bug fixes for app module wrong casting
  - Merged PR 6934: 18288 CCU: Desired temperature adjustments reverting immediately
+ - Merge master and fix Beartoken dependency
+ - Merge master
  - Merge branch 'Bug/samjith/18166_fix_unauthorized_mode' into Bug/samjith/18250_network_watchdog_tuner_default
  - Merge master
  - Merged PR 6884: Refactor CCU authorization logic
  - Merge master
  - Merged PR 6987: Fix incorrect enum mapping
  - Fallback for networkWatchdogTimeout tuner
+ - Change retry time for update_ccu command to 15 mins
+ - sonar cloud bug fixes for app module wrong casting
  - Merged PR 6862: Bug 18225: Portals: discrepancy seen for 'AnalogIn1' heatmap runtime widget f...
  - Merged PR 6880: Bug 17427: SSE Fan should tun on in AutoForceOccupied & Forceoccupied conditions
  - Merged PR 4512: Bug 13189: CCU | Celsisus Support | Alerts generated shows temperature withou...
  - Merged PR 6980: Fix to find out pairing start  address of CCU during replace process
  - Merged PR 7069: 18410 Hyperstat VRV seed message fix
  - Merged PR 7000: fixed dependency when deleting the floor.
+ - Update Mat throttle status when temp is below min
  - Merged PR 6577: 17642 - HTTP Client Token Management
+ - sonar cloud bug fixes for app module casting fixes
  - Merged PR 6928:  "kind" should be  "Str" is the value is String
+ - sonar cloud bug fixes for app module seek arc, casting fixes
  - Merged PR 6689: Resolved Raygun crashes
  - Merged PR 7027: Handle cancel timer crash
  - Merged PR 7015: CCU tablet Back button exits "Safe mode"
+ - sonar cloud bug fixes for algos module
+ - sonar cloud bug fixes for alert module
+ - Pubnub clean up and max size limitation
+ - User Story 16810: Create a setting point to store backfill duration in hours Enahanced backfill strategy
+ - 16811 ui support for backfill
+ - Merge master
+ - sonar cloud fixes -- casting changes
+ - sonar cloud bug fixes batch 3
+ - Added Unit & instrumentation tests
  - Fahrenheit set to one decimal place in AlertsFragment.java
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
  - Fix incorrect enum mapping
+ - Upgrade handling
  - Initialze conditioning mode
  - Reset system PI loop when conditioning mode is changed.
  - comments resolved
+ - Add remote command handling. Remote logging support for messaging
  - Version bump to 1.638.0
  - Merged PR 6480: 16044 - Safe mode screen
  - Merged PR 6933: Fix tuner group name display
@@ -68,11 +306,13 @@
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
  - Merged PR 6819: - Auto forced tag name correction: `occupancy` to 'occupied'
  - Merged PR 6495: Bug 13402: CCU | 'Intrinsic Schedule' tiles discrepancy seen on CCU's system...
+ - Dependency injection and refactor for testing
  - Sync issue race condition
  - Merged PR 6811: Version Bump to 1.638.0
  - Merged PR 6461: Separate option to pair helionode
  - Migration support for Stage2- dab reheat
  - Version bump to 1.637.0
+ - Introduce unit test and instrumentation test frmaeworks and depedency corrections
  - Merged PR 6227: US - 16066
  - Merged PR 6523: Dab reheat AO2 reset
  - Reset AO2 out when logical map does not exist
@@ -115,8 +355,10 @@
  - Relay2 reheat config mapping
  - Reset AO2 when not in temp override
  - Reset output on disabled port
+ - Added data module
  - Merged PR 6492: Exclude deadzones without heartbeat from algo
  - Merged PR 6611: Resolve OTA crash
+ - WIP
  - Merged PR 6593: 16084 CCU: Special schedule accepting special characters
  - Merged PR 6022: User Story 15987: CCU TI Profile UI Refinement
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/15987_ccu_ti_profile_refinement
@@ -143,6 +385,7 @@
  - Merged PR 6509: 2pipe water valve issue
  - Merged PR 5966: With end time as 24:00 schedule,manually updated desired temperature fix
  - Fix tuner group name display
+ - DI using hilt
  - Merged PR 6429: Conditioning mode operations defined
  - Merged PR 6428: Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Defaul...
  - merge master
@@ -165,6 +408,7 @@
  - Conditioning mode operations defined
  - Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Default and increment for...
  - Exclude deadzones without heartbeat from algo
+ - Messaging module
  - Bug 16977: INT Portal: Discrepancy seen with unit assigned for few tuner i.e "standaloneCoolingAirflowTempLowerOffset" and BuildingTuner-standaloneAirflowSampleWaitTime
  - Zone status fan status update
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
@@ -439,8 +683,6 @@
  - Remove forced occupied handling for modbus equips
  - Remove forced occupied handling for modbus equips
  - AutforcedOccupied should consider next occupied temp
- - Version bump to 1.640.0
- - Version bump to 1.639.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

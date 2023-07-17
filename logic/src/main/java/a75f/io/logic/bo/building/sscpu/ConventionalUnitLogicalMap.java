@@ -25,11 +25,14 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.util.RxTask;
@@ -465,7 +468,8 @@ public class ConventionalUnitLogicalMap {
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "cpu", tz));
-///Create Physical points and map
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(Tags.SS+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, CCUHsApi.getInstance());
+
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
       
@@ -940,6 +944,16 @@ public class ConventionalUnitLogicalMap {
         }
         return config;
     }
+
+    public ConventionalUnitConfiguration getRelayConfiguration(){
+        ConventionalUnitConfiguration config = new ConventionalUnitConfiguration();
+        config.enableRelay1 = getConfigNumVal("enable and relay1") > 0;
+        config.enableRelay2 = getConfigNumVal("enable and relay2") > 0;
+        config.enableRelay4 = getConfigNumVal("enable and relay4") > 0;
+        config.enableRelay5 = getConfigNumVal("enable and relay5") > 0;
+        return config;
+    }
+
     public double getCurrentTemp()
     {
         currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and standalone and group == \""+nodeAddr+"\"");
@@ -1239,29 +1253,32 @@ public class ConventionalUnitLogicalMap {
     
     private void updateFanMode(Equip equip, ConventionalUnitConfiguration config, CCUHsApi hayStack) {
         
-        double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
-                                                     "mode and equipRef == \"" + equip.getId() + "\"");
-        
-        double fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
-        if (config.enableRelay6) {
-            if (config.relay6Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
-                fallbackFanSpeed = curFanSpeed; //Nothing to do.
-            } else {
+            double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
+                                                         "mode and equipRef == \"" + equip.getId() + "\"");
+
+            double fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
+            if (config.enableRelay6) {
+                if (config.relay6Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                    fallbackFanSpeed = curFanSpeed; //Nothing to do.
+                } else {
+                    fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
+                }
+            }
+            if (config.enableRelay3) {
                 fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
             }
+            CcuLog.i(L.TAG_CCU_ZONE, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
+            if (curFanSpeed > fallbackFanSpeed) {
+                //Fallback to AUTO or OFF depending atleast one fan is available.
+                fallbackFanSpeed = fallbackFanSpeed > StandaloneFanStage.OFF.ordinal() ?
+                                       StandaloneFanStage.AUTO.ordinal() : StandaloneFanStage.OFF.ordinal();
+                StandaloneScheduler.updateOperationalPoints(equip.getId(),
+                        "fan and operation and mode", fallbackFanSpeed);
+            }
+
+            if (!config.enableRelay3 && !config.enableRelay6) {
+                StandaloneScheduler.updateOperationalPoints(equip.getId(),
+                        "fan and operation and mode", StandaloneLogicalFanSpeeds.OFF.ordinal());
+            }
         }
-        if (config.enableRelay3) {
-            fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
-        }
-        CcuLog.i(L.TAG_CCU_ZONE, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
-        if (curFanSpeed > fallbackFanSpeed) {
-            //Fallback to AUTO or OFF depending atleast one fan is available.
-            fallbackFanSpeed = fallbackFanSpeed > StandaloneFanStage.OFF.ordinal() ?
-                                   StandaloneFanStage.AUTO.ordinal() : StandaloneFanStage.OFF.ordinal();
-            hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
-                                     "mode and equipRef == \"" + equip.getId() + "\"",
-                                     fallbackFanSpeed);
-        }
-    }
-    
 }

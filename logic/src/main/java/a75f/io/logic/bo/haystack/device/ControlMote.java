@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 
 /**
  * Created by samjithsadasivan on 12/6/18.
@@ -43,12 +44,20 @@ public class ControlMote
     public ControlMote(String systemEquipRef) {
         
         HashMap device = CCUHsApi.getInstance().read("device and cm");
+
         if ((device != null) && (device.size() > 0)) {
             Device d = new Device.Builder().setHashMap(device).build();
             d.setEquipRef(systemEquipRef);
             CCUHsApi.getInstance().updateDevice(d,d.getId());
             createNewCMPointsForUpgrades();
             CcuLog.d(L.TAG_CCU_DEVICE," CM device exists - update equipRef ="+systemEquipRef);
+            site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
+            OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                    site.getDisplayName()+"-"+Tags.CM,
+                    systemEquipRef, site.getId(),
+                    site.getTz(),
+                    CCUHsApi.getInstance()
+            );
             return;
         }
         site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
@@ -64,6 +73,13 @@ public class ControlMote
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         createPoints();
         addFirmwareVersionPoint();
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                site.getDisplayName()+"-"+Tags.CM,
+                systemEquipRef,
+                site.getId(),
+                site.getTz(),
+                CCUHsApi.getInstance()
+        );
     }
 	//For CCU as a zone part
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
@@ -421,7 +437,7 @@ public class ControlMote
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        Log.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -459,5 +475,25 @@ public class ControlMote
             hsApi.updatePoint(point.build(),point.build().getId());
         }
 
+    }
+
+    public static void setCMPointEnabled(String port, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and cm");
+        if (device == null)
+        {
+            return ;
+        }
+
+        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+                "point and th1 and physical and deviceRef == \"" + device.get("id").toString() + "\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+        }
     }
 }

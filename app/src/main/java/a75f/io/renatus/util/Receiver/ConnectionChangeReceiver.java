@@ -1,5 +1,7 @@
 package a75f.io.renatus.util.Receiver;
 
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,16 +14,15 @@ import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.pubnub.DataSyncHandler;
 import a75f.io.logic.util.PreferenceUtil;
-import a75f.io.renatus.NotificationHandler;
+import a75f.io.messaging.handler.DataSyncHandler;
+
 
 /**
  * Created by mahesh on 05-11-2020.
  */
 public class ConnectionChangeReceiver extends BroadcastReceiver {
 
-    Boolean isConnected = null;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Connection_Info", "Result Action: " + intent.getAction());
@@ -29,9 +30,10 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
-            if (isConnected != null && info.isConnected()) {
+            if (info.isConnected()) {
                 CcuLog.i("CCU_READ_CHANGES", " CONNECTION CHANGE RECEIVER");
-                if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime())) {
+                if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime()) &&
+                        !getDataSyncProcessing()) {
                     CcuLog.i("CCU_READ_CHANGES", " DATA SYNC NOT IN PROGRESS");
                     new Timer().schedule(new TimerTask() {
                         @Override
@@ -41,7 +43,6 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
                     }, 300000);
                 }
             }
-            isConnected = info.isConnected();
         }
     }
 }

@@ -100,12 +100,14 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
     @Override
     public boolean isCoolingAvailable() {
-        return (coolingStages > 0 || getConfigVal("analog1 and output and enabled") > 0);
+        return (coolingStages > 0 || getConfigVal("analog1 and output and enabled") > 0
+                                    || getConfigVal("analog4 and output and enabled") > 0);
     }
     
     @Override
     public boolean isHeatingAvailable() {
-        return (heatingStages > 0 || getConfigVal("analog3 and output and enabled") > 0);
+        return (heatingStages > 0 || getConfigVal("analog3 and output and enabled") > 0
+                                    || getConfigVal("analog4 and output and enabled") > 0);
     }
     
     @Override

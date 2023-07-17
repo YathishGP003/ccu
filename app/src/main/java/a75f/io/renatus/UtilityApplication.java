@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
+import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 import android.annotation.SuppressLint;
@@ -73,7 +75,10 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,9 +86,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
+import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
@@ -91,8 +99,17 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.MessageHandlerSubscriber;
+import a75f.io.messaging.handler.DataSyncHandler;
+import a75f.io.messaging.service.MessageCleanUpWork;
+import a75f.io.messaging.service.MessageRetryHandlerWork;
+import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.ota.OTAUpdateHandlerService;
+import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
@@ -110,6 +127,13 @@ public abstract class UtilityApplication extends Application {
     public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
+
+    private static MessagingAckJob messagingAckJob = null;
+    private static final int TASK_SEPARATION = 15;
+    private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
+    private static final int MESSAGING_ACK_INTERVAL = 30;
+    @Inject
+    MessageHandlerSubscriber messageHandlerSubscriber;
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
@@ -215,7 +239,7 @@ public abstract class UtilityApplication extends Application {
         initializeCrashReporting();
 
         Globals.getInstance().setApplicationContext(this);
-
+        isDataSyncRestartRequired();
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
@@ -245,10 +269,22 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+        EveryDaySchedulerService.scheduleJobForDay(context);
+
+        initMessaging();
+        OtaCache cache = new OtaCache();
+        cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
 
     }
 
+    private void isDataSyncRestartRequired() {
+        if(getDataSyncProcessing()) {
+            CcuLog.i("CCU_READ_CHANGES", "Data Sync restarted " + new Date(getSyncStartTime()));
+            DataSyncHandler dataSyncHandler = new DataSyncHandler();
+            dataSyncHandler.syncCCUData(getSyncStartTime());
+        }
+    }
     private void initializeCrashReporting() {
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
 
@@ -261,27 +297,7 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("daikin_prod") ||
                 BuildConfig.BUILD_TYPE.equals("qa")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
-                String crashMessage = getCrashMessage();
-                AlertManager.getInstance().fixPreviousCrashAlert();
-                AlertManager.getInstance().generateCrashAlert(
-                        "CCU CRASH",
-                        crashMessage);
-
-
-                SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
-                crashPreference.edit().putString("crash_message", crashMessage).commit();
-
-                List<String> crashTimesWithinLastHour = getCrashTimestampsWithinLastHour();
-
-                //add the new crash to the list
-                crashTimesWithinLastHour.add(String.valueOf(System.currentTimeMillis()));
-                Set<String> timeSet = new HashSet<>(crashTimesWithinLastHour);
-                crashPreference.edit().putStringSet("crash", timeSet).commit();
-
-                if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
-                    CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
-                }
-
+                handleSafeMode(paramThrowable);
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
@@ -292,6 +308,35 @@ public abstract class UtilityApplication extends Application {
     
     }
 
+    private void handleSafeMode(Throwable paramThrowable) {
+        StringWriter sw = new StringWriter();
+        paramThrowable.printStackTrace(new PrintWriter(sw));
+        String stackTrace = sw.toString();
+        SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
+        updateCrashStackTrace(crashPreference,stackTrace);
+
+        String crashMessage = getCrashMessage();
+        AlertManager.getInstance().fixPreviousCrashAlert();
+        AlertManager.getInstance().generateCrashAlert(
+                "CCU CRASH",
+                crashMessage);
+
+
+        crashPreference.edit().putString("crash_message", crashMessage).commit();
+
+        List<String> crashTimesWithinLastHour = getCrashTimestampsWithinLastHour();
+
+        //add the new crash to the list
+        crashTimesWithinLastHour.add(String.valueOf(System.currentTimeMillis()));
+        Set<String> timeSet = new HashSet<>(crashTimesWithinLastHour);
+        crashPreference.edit().putStringSet("crash", timeSet).commit();
+
+        if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
+            CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            RenatusApp.rebootTablet();
+        }
+    }
     private List<String> getCrashTimestampsWithinLastHour() {
         List<String> timeList = new ArrayList<>();
         SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
@@ -307,6 +352,16 @@ public abstract class UtilityApplication extends Application {
             }
         }
         return timeList;
+    }
+
+    private void updateCrashStackTrace(SharedPreferences crashPreference, String stackTrace){
+        if(crashPreference.getStringSet("crash", null) != null ){
+            int size = crashPreference.getStringSet("crash", null).size() + 1;
+            crashPreference.edit().putString("crash"+size, stackTrace).commit();
+
+        } else {
+            crashPreference.edit().putString("crash1", stackTrace).commit();
+        }
     }
 
     private String getCrashMessage(){
@@ -652,7 +707,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
 
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName() + " IP:" + localDevice.getNetwork().getAllLocalAddresses()[0] + " IP2:" + localDevice.getNetwork().getAllLocalAddresses()[1] + " IP3:" + localDevice.getNetwork().getAllLocalAddresses()[2]);
 
@@ -691,7 +746,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported();
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -941,6 +996,31 @@ public abstract class UtilityApplication extends Application {
         }
         String response = ipRoutes.get(0);
         return response;
+    }
+
+    private void initMessaging() {
+        if (CCUHsApi.getInstance().getSite() != null) {
+            if (CCUHsApi.getInstance().siteSynced()) {
+                MessagingClient.getInstance().init();
+            }
+        }
+        scheduleMessagingAckJob();
+        MessageRetryHandlerWork.Companion.scheduleMessageRetryWork(context);
+        MessageCleanUpWork.Companion.scheduleMessageCleanUpWork(context);
+        messageHandlerSubscriber.subscribeAllHandlers();
+    }
+
+    private void scheduleMessagingAckJob() {
+        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
+            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+        }
+    }
+
+    public static MessagingAckJob getMessagingAckJob() {
+        return messagingAckJob;
     }
 
 }

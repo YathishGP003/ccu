@@ -21,6 +21,8 @@ import com.google.android.material.color.MaterialColors;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -130,5 +132,29 @@ public class CCUUiUtil {
     public static boolean isInvalidName(String enteredName){
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");
+    }
+
+    public static boolean isValidOrgName(String orgName){
+        Pattern specialCharaters = Pattern.compile("[^a-z0-9_ -]", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = specialCharaters.matcher(orgName);
+        if(orgName.startsWith("_") || orgName.startsWith("-") || orgName.startsWith(" ") )
+            return false;
+        return !matcher.find();
+    }
+
+    public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
+        String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
+        int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);
+        for (int i = 0; i < minLength; i++) {
+            int currentVersion = Integer.parseInt(currentVersionComponents[i]);
+            int recommendedVersion = Integer.parseInt(recommendedVersionComponents[i]);
+            if (recommendedVersion > currentVersion) {
+                return true;
+            } else if (currentVersion > recommendedVersion) {
+                return false;
+            }
+        }
+        return false;
     }
 }

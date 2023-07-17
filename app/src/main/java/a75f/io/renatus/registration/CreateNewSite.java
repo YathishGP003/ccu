@@ -22,6 +22,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +32,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputLayout;
@@ -111,7 +114,7 @@ public class CreateNewSite extends Fragment {
 
     private ImageView imgEditSite;
     private ImageView imgUnregisterSite;
-
+    View toastLayout;
     Context mContext;
     LinearLayout btnSetting;
     Prefs prefs;
@@ -126,16 +129,15 @@ public class CreateNewSite extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
-
+        LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+        }
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
-
-        if (!isFreshRegister) {
-            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
-            p.setMargins(50, 50, 0, 0);
-        }
 
         prefs = new Prefs(mContext);
 
@@ -278,6 +280,7 @@ public class CreateNewSite extends Fragment {
             if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                 && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
                 && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+            && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
             ) {
 
                 ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
@@ -483,9 +486,26 @@ public class CreateNewSite extends Fragment {
 
         return rootView;
     }
-    
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewTreeObserver vto = view.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                if (!isFreshRegister) {
+                    ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                    p.setMargins(50, 50, 0, 0);
+                    view.setLayoutParams(p);
+                }
+            }
+        });
+    }
+
     private void handleRegistrationAsync(String installerEmail) {
-        
+        Log.d(TAG, "Register Button Clicked");
         RxjavaUtil.executeBackgroundTask(
             () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
             () -> {
@@ -541,13 +561,13 @@ public class CreateNewSite extends Fragment {
 
     private void showUnregisterAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
+        Log.d(TAG, "Unregister Button Clicked");
         builder.setIcon(R.drawable.ic_warning);
         builder.setTitle("Unregister CCU");
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
-
+            Log.d(TAG, "Unregister Button Clicked and Confirmed");
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String ahuRef = ccu.get("ahuRef").toString();
             String managerEmail = mSiteEmailId.getText().toString();
@@ -760,6 +780,14 @@ public class CreateNewSite extends Fragment {
                     } else {
                         mTextInputOrg.setError("");
                     }
+                    if(!CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())){
+                        if(mSiteOrg.getText().toString().startsWith("_") ||
+                                mSiteOrg.getText().toString().startsWith("-")  ||
+                                mSiteOrg.getText().toString().startsWith(" ") )
+                            mSiteOrg.setError("Cannot start with Special characters");
+                        else
+                            mSiteOrg.setError("Special characters are not allowed");
+                    }
 
                 case R.id.editFacilityEmail:
                     if (mSiteEmailId.getText().toString().trim().length() > 0) {
@@ -925,7 +953,7 @@ public class CreateNewSite extends Fragment {
 
     private void goTonext() {
         prefs.setBoolean("CCU_SETUP", false);
-        ((FreshRegistration) getActivity()).selectItem(4);
+        ((FreshRegistration) getActivity()).selectItem(21);
     }
 
     private Spanned getHTMLCodeForHints( int resource){

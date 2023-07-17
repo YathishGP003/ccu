@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +44,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -354,6 +355,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                         setupHPUZoneProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().setCcuReady();
+                        DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
                         return null;
                     }
                 
@@ -377,7 +379,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         hpuConfig.setNodeAddress(mSmartNodeAddress);
         hpuConfig.enableOccupancyControl = switchOccSensor.isChecked();
         hpuConfig.setPriority(ZonePriority.NONE);
-        hpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        hpuConfig.temperatureOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         hpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         hpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         hpuConfig.changeOverRelay6Type = hpChangeOverTypeSpinner.getSelectedItemPosition()+1;

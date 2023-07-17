@@ -117,18 +117,17 @@ public class VavReheatProfile extends VavProfile
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip);
             }
-    
-            logLoopParams(node, roomTemp, loopOp);
-            
-            updateTRResponse(node);
-    
+
             valve.applyLimits();
-            if (systemMode != SystemMode.OFF) {
-                updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
-            }
-            
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
+
+            logLoopParams(node, roomTemp, loopOp);
+
+            updateTRResponse(node);
+
             CcuLog.d(L.TAG_CCU_ZONE, "buildingLimitMaxBreached "+buildingLimitMaxBreached()+" buildingLimitMinBreached "+buildingLimitMinBreached());
             
             vavDevice.setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
@@ -168,7 +167,7 @@ public class VavReheatProfile extends VavProfile
             vavDevice.setDamperPos(damperPos);
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
         }
     }
     

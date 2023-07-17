@@ -898,8 +898,8 @@ public class SystemNumberPicker extends LinearLayout {
         final int inptTxtRight = inptTxtLeft + inptTxtMsrdWdth;
         final int inptTxtBottom = inptTxtTop + inptTxtMsrdHght;
         mSelectedText.layout(inptTxtLeft, inptTxtTop, inptTxtRight, inptTxtBottom);
-        mSelectedTextCenterX = mSelectedText.getX() + mSelectedText.getMeasuredWidth() / 2;
-        mSelectedTextCenterY = mSelectedText.getY() + mSelectedText.getMeasuredHeight() / 2;
+        mSelectedTextCenterX = mSelectedText.getX() + (float) mSelectedText.getMeasuredWidth() / 2;
+        mSelectedTextCenterY = mSelectedText.getY() + (float) mSelectedText.getMeasuredHeight() / 2;
 
         if (changed) {
             // need to do all this when we know our size
@@ -1767,12 +1767,12 @@ public class SystemNumberPicker extends LinearLayout {
         float x, y;
         if (isHorizontalMode()) {
             x = mCurrentScrollOffset;
-            y = mSelectedText.getBaseline() + mSelectedText.getTop();
+            y = (float) mSelectedText.getBaseline() + mSelectedText.getTop();
             if (mRealWheelItemCount < DEFAULT_WHEEL_ITEM_COUNT) {
                 canvas.clipRect(mLeftDividerLeft, 0, mRightDividerRight, getBottom());
             }
         } else {
-            x = (getRight() - getLeft()) / 2;
+            x = ((float) getRight() - getLeft()) / 2;
             y = mCurrentScrollOffset;
             if (mRealWheelItemCount < DEFAULT_WHEEL_ITEM_COUNT) {
                 canvas.clipRect(0, mTopDividerTop, getRight(), mBottomDividerBottom);
@@ -2087,13 +2087,13 @@ public class SystemNumberPicker extends LinearLayout {
                 + (int) mSelectedTextSize;
         float textGapCount = selectorIndices.length;
         if (isHorizontalMode()) {
-            float totalTextGapWidth = (getRight() - getLeft()) - totalTextSize;
+            float totalTextGapWidth = (float) (getRight() - getLeft()) - totalTextSize;
             mSelectorTextGapWidth = (int) (totalTextGapWidth / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapWidth;
             mInitialScrollOffset = (int) mSelectedTextCenterX
                     - (mSelectorElementSize * mWheelMiddleItemIndex);
         } else {
-            float totalTextGapHeight = (getBottom() - getTop()) - totalTextSize;
+            float totalTextGapHeight = (float) (getBottom() - getTop()) - totalTextSize;
             mSelectorTextGapHeight = (int) (totalTextGapHeight / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapHeight;
             mInitialScrollOffset = (int) mSelectedTextCenterY

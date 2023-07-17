@@ -45,7 +45,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -153,8 +155,8 @@ public class FloorPlanFragment extends Fragment {
     //
     private Zone roomToRename;
     private Floor floorToRename;
-    CopyOnWriteArrayList<Floor> siteFloorList = new CopyOnWriteArrayList<>();
-    CopyOnWriteArrayList<String> siteRoomList = new CopyOnWriteArrayList<>();
+    List<Floor> siteFloorList = new CopyOnWriteArrayList<>();
+    List<String> siteRoomList = new CopyOnWriteArrayList<>();
     private FloorListActionMenuListener floorListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
@@ -547,7 +549,7 @@ public class FloorPlanFragment extends Fragment {
 
     private void updateModules(Zone zone) {
         Log.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
-        ArrayList<Equip> zoneEquips = HSUtil.getEquips(zone.getId());
+        List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
         if (zoneEquips != null && (zoneEquips.size() > 0)) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
             getActivity().runOnUiThread(new Runnable() {
@@ -561,7 +563,7 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-    private ArrayList<String> createAddressList(ArrayList<Equip> equips) {
+    private ArrayList<String> createAddressList(List<Equip> equips) {
         Collections.sort(equips, new ModuleComparator());
         ArrayList<String> arrayList = new ArrayList<>();
 
@@ -882,7 +884,8 @@ public class FloorPlanFragment extends Fragment {
         if (floorToRename != null) {
             int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
             floorList.remove(floorToRename);
-            siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName().trim()));
+            siteFloorList = siteFloorList.stream().filter(floor -> !floor.getDisplayName().trim().
+                    equals(floorToRename.getDisplayName().trim())).collect(Collectors.toList());
             Floor hsFloor = new Floor.Builder()
                     .setDisplayName(addFloorEdit.getText().toString().trim())
                     .setSiteRef(floorToRename.getSiteRef())
@@ -969,11 +972,9 @@ public class FloorPlanFragment extends Fragment {
     private void addNewFloor(){
         if (addFloorEdit.getText().toString().length() > 0) {
             int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
-            ArrayList<String> flrMarkers = new ArrayList<>();
-            flrMarkers.add("writable");
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
             Floor hsFloor = new Floor.Builder()
-                    .setDisplayName(addFloorEdit.getText().toString().trim()).setMarkers(flrMarkers)
+                    .setDisplayName(addFloorEdit.getText().toString().trim())
                     .setSiteRef(siteMap.get("id").toString())
                     .build();
             for (Floor floor : siteFloorList) {
@@ -1306,6 +1307,11 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
                 }
+            }
+            if(HSUtil.isZoneHasSubEquips(selectedZone.getId())){
+                Toast.makeText(getActivity(), "No module can be paired as modbus with sub equips is paired",
+                        Toast.LENGTH_LONG).show();
+                return;
             }
         }
 

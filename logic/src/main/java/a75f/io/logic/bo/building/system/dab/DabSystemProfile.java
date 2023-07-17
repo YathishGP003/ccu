@@ -42,8 +42,13 @@ public abstract class DabSystemProfile extends SystemProfile
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
     {
-        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(relay1Op);
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput")
+                    .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
+                    .addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("sp")
+                    .addMarker("writable").setUnit("%").setTz(tz).build();
+            String loopOPPointId = hayStack.addPoint(relay1Op);
+            hayStack.writeDefaultValById(loopOPPointId,0.0);
     }
     
     private void addDabSystemPoints(String siteRef, String equipref, String equipDis, String tz)

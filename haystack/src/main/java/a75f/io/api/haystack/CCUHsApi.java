@@ -71,7 +71,7 @@ public class CCUHsApi
 {
 
     public static final String TAG = CCUHsApi.class.getSimpleName();
-
+    private SharedPreferences defaultSharedPrefs;
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
@@ -127,6 +127,7 @@ public class CCUHsApi
 
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
         updateJwtValidity();
+        this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -382,7 +383,7 @@ public class CCUHsApi
     //TODO - Replace CCU support
     public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
         Point occupancy = new Point.Builder()
-                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              .setDisplayName("occupancyState")
                               //.setEquipRef(equipRef)
                               .setSiteRef(zone.getSiteRef())
                               .setRoomRef(zoneRef)
@@ -404,7 +405,23 @@ public class CCUHsApi
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         addZoneOccupancyPoint(zoneId, z);
+        addZoneTemperatureModePoint(zoneId, z);
         return zoneId;
+    }
+
+    public void addZoneTemperatureModePoint(String zoneId, Zone zone) {
+        Point ZoneTemperatureMode = new Point.Builder()
+                .setDisplayName(Tags.ZONE_HVAC_MODE)
+                .setSiteRef(zone.getSiteRef())
+                .setRoomRef(zoneId)
+                .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                .addMarker(Tags.ZONE).addMarker(Tags.HVAC_MODE)
+                .addMarker("his")
+                .setEnums("DUAL_TEMP, SINGLE_COOLING, SINGLE_HEATING")
+                .setTz(getTimeZone())
+                .build();
+        String ZoneTemperatureModeId = CCUHsApi.getInstance().addPoint(ZoneTemperatureMode);
+        CCUHsApi.getInstance().writeHisValById(ZoneTemperatureModeId, 0.0);
     }
 
     // From EntityPullHandler
@@ -450,6 +467,10 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateEquipLocally(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
     }
 
     public void updatePoint(RawPoint r, String id)
@@ -1116,11 +1137,13 @@ public class CCUHsApi
 
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
+        CcuLog.d("CCU_HS", "deleteEntity: " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         removeId(id);
     }
 
     public void removeId(String id) {
+        CcuLog.d("CCU_HS", "removeId: " + id);
         //tagsDb.removeIdMap.remove(id.replace("@", ""));
         if (syncStatusService.getDeletedData().contains(id)) {
             syncStatusService.setDeletedEntitySynced(id);
@@ -1129,6 +1152,7 @@ public class CCUHsApi
 
     public void deleteWritableArray(String id)
     {
+        CcuLog.d("CCU_HS", "deleteWritableArray: " + id);
         tagsDb.writeArrays.remove(id.replace("@", ""));
     }
 
@@ -1138,6 +1162,7 @@ public class CCUHsApi
     }
 
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
+        CcuLog.d("CCU_HS", "deleteFloorEntityTreeLeavingRemoteFloorIntact: " + id);
         HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
         if (entity.get("floor") == null) {
             // not a floor :-(
@@ -1195,6 +1220,10 @@ public class CCUHsApi
             for (HashMap<Object, Object> point : points) {
                 deleteEntityItem(point.get("id").toString());
             }
+            HashMap<Object, Object> zoneHvacModePoint =
+                    readEntity("hvacMode and zone and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete TemperatureMode point of room "+zoneHvacModePoint);
+                deleteEntityItem(zoneHvacModePoint.get("id").toString());
             
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
@@ -1478,10 +1507,9 @@ public class CCUHsApi
                     hsApi.setSynced(equiUuid);
                 }
                 //Points
-                for (Point p : points)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
+                ArrayList<HDict> hDicts = new ArrayList<>();
+                for (Point p : points) {
+                    if (p.getEquipRef().equals(q.getId())) {
                         String pointId = StringUtils.prependIfMissing(p.getId(), "@");
                         HashMap<Object, Object> point = readMapById(pointId);
                         if (point.isEmpty()) {
@@ -1491,13 +1519,21 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
-                            CcuLog.i(TAG, "Added Building Tuner "+p);
+                            CcuLog.i(TAG, "Added Building Tuner " + p);
+                            HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                            hDicts.add(pid);
                         } else {
-                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                            CcuLog.i(TAG, "Point already imported " + p.getId());
+                            double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                            if (defaultVal == 0) {
+                                HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                                hDicts.add(pid);
+                                Log.d(TAG, "No default value for point: " + pid.dis());
+                            }
                         }
-
                     }
                 }
+                importPointArrays(hDicts, hClient);
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
@@ -1628,7 +1664,6 @@ public class CCUHsApi
         hDictBuilder.add("siteRef", getSiteIdRef());
         hDictBuilder.add("equipRef", equipRef);
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
-        hDictBuilder.add("createdDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -1659,7 +1694,6 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("createdDateTime", HDateTime.make(ccu.get("createdDateTime").toString()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
@@ -2084,6 +2118,7 @@ public class CCUHsApi
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
         setCcuReady();
+        Log.d("CCU_HS", "CCU Registered");
     }
 
     public void setCcuUnregistered() {
@@ -2092,6 +2127,7 @@ public class CCUHsApi
         editor.remove("isCcuRegistered");
         editor.commit();
         resetCcuReady();
+        Log.d("CCU_HS", "CCU Unregistered");
     }
 
     public boolean isNetworkConnected() {
@@ -2113,7 +2149,6 @@ public class CCUHsApi
 
         HashMap site = CCUHsApi.getInstance().read("site");
         Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-
         // tcase 05/26/21 -- this isNetworkConnected check is a bug.
         //  1) The check gives the wrong answer right after I fix network by connecting to wifi.
         //  2) If we think there is no network here, we silently fail the registration  :_(  This is like a puppy dying.
@@ -2124,7 +2159,6 @@ public class CCUHsApi
             HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
-
             if (! entitySynced(ccuLuid)) {
                 String facilityManagerEmail = site.get("fmEmail").toString();
                 String installEmail = installerEmail;
@@ -2137,7 +2171,6 @@ public class CCUHsApi
                 String equipRef = ccu.get("equipRef").toString();
 
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
-
                 if (ccuRegistrationRequest != null) {
                     Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
                     String ccuRegistrationResponse = HttpUtil.executeJson(
@@ -2158,7 +2191,7 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-
+                            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                             });
@@ -2467,6 +2500,7 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder()
                              .add("ccuId", HRef.copy(ccuId));
         HDict[] dictArr = {b.toDict()};
+        Log.d("CCU_HS", "removeCCU API call");
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
@@ -2612,13 +2646,19 @@ public class CCUHsApi
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
                                 .add("val", kind.equals(Kind.STRING.getValue()) ?
                                         HStr.make(val.toString()) : val);
+                        HDateTime lastModifiedDateTime;
+                        if (lastModifiedTimeTag != null) {
+                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                        } else {
+                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                        }
                         pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         hDictList.add(pid.toDict());
 
@@ -2717,4 +2757,16 @@ public class CCUHsApi
         CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
     }
 
+    public Double readDefaultValByLevel(String id, int level)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level - 1));
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else
+        {
+            return 0.0;
+        }
+    }
 }

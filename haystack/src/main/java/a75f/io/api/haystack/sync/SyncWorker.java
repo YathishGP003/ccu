@@ -56,7 +56,6 @@ public class SyncWorker extends Worker {
     
         isSyncWorkInProgress = true;
         try {
-
             if (!siteHandler.doSync()) {
                 CcuLog.e(TAG, "Site sync failed");
                 return Result.retry();

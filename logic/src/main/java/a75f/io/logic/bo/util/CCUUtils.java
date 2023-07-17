@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -56,16 +57,20 @@ public class CCUUtils
 
     public static Date getLastReceivedTimeForModBus(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
-        if(equip.size() == 0){
+        List<HashMap<Object, Object>> equipList =
+                hayStack.readAllEntities("equip and modbus and group == \"" + slaveId + "\"");
+        if(equipList.size() == 0){
             return null;
         }
-        HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
-        if(heartBeatPoint.size() == 0){
-            return null;
+        for( HashMap<Object, Object> equip : equipList){
+            HashMap<Object, Object> heartBeatPoint =
+                    hayStack.readEntity("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
+            if(heartBeatPoint.size() > 0){
+                HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+                return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+            }
         }
-        HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
-        return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        return null;
     }
 
     public static Date getLastReceivedTimeForCloudConnectivity(){

@@ -260,7 +260,8 @@ public class SyncStatusService {
     
         ArrayList<HDict> updatedDictList = new ArrayList<>();
         CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdList.size());
-        ListIterator<String> updatedItr = updatedIdList.listIterator();
+        ListIterator<String> updatedItr = new ArrayList<>(updatedIdList).listIterator();
+
         while(updatedItr.hasNext()) {
             String id = updatedItr.next();
             HDict entity = CCUHsApi.getInstance().readHDictById(id);

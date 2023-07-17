@@ -6,6 +6,8 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import android.util.Log
 import com.google.gson.JsonObject
 
@@ -37,8 +39,17 @@ class HyperstatReconfigurationHandler {
                     HyperStatReconfigureUtil.updateConfigValues(msgObject, hayStack,configPoint)
                 }
             }
+                for (i in 1.. 6 ) {
+                    if (configPoint.markers.contains("relay$i")) {
+                        DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
+                    }
+                }
+                if((configPoint.markers.contains("analog1") || configPoint.markers.contains("analog2")
+                    || configPoint.markers.contains("analog3")) && configPoint.markers.contains("output")) {
+                    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance());
+                }
             }catch (e: Exception){
-            e.printStackTrace()
+                e.printStackTrace()
                 Log.i(L.TAG_CCU_HSCPU, "updateConfigPoint: ${e.localizedMessage}")
             }
             pointUpdateOwner(configPoint, msgObject, hayStack)

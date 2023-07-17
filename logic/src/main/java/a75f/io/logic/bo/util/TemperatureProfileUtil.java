@@ -126,12 +126,12 @@ public class TemperatureProfileUtil {
     }
     
     public static double getStatus(int nodeAddr) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
     
     public static void setStatus(int nodeAddr, double status, boolean emergency) {
         if (getStatus(nodeAddr) != status ) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
         }
         
         String message;

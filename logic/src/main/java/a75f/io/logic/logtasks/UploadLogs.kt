@@ -49,9 +49,11 @@ class UploadLogs(
       val logFile = fileSystemTools.writeLogCat("Renatus_Logs_$dateStr.txt")
       val prefsFile = fileSystemTools.writePreferences("Renatus_Prefs_$dateStr.txt")
 
+      val messageFile = fileSystemTools.writeMessages("Renatus_Messages_$dateStr.txt")
+
       // This specific file id format is a requirement (Earth(CCU)-4726)
       val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
-      val zipFile = fileSystemTools.zipFiles(listOf(logFile, prefsFile), fileId)
+      val zipFile = fileSystemTools.zipFiles(listOf(logFile, prefsFile, messageFile), fileId)
 
       val siteRef = haystackApi.siteIdRef.toString()
 

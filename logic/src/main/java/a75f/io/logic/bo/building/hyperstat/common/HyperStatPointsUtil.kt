@@ -961,10 +961,10 @@ class HyperStatPointsUtil(
         val userIntentPointList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val fanOperationsModePointMarkers = arrayOf(
-            "fan", "writable", "zone", "operation", "mode", "his","sp"
+            "fan", "writable", "zone", "operation", "mode", "his","sp", "userIntent"
         )
         val conditioningModePointMarkers = arrayOf(
-             "writable", "zone", "mode", "his", "conditioning","sp"
+             "writable", "zone", "mode", "his", "conditioning","sp", "userIntent"
         )
         val dehumidifierPointMarkers = arrayOf(
             "userIntent", "writable", "zone", "dehumidifier", "sp", "his", "control", "target"

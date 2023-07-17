@@ -138,7 +138,7 @@ public class HNum extends HVal
     {
       // don't encode huge set of decimals if over 1.0
       double abs = val; if (abs < 0) abs = -abs;
-      if (abs > 1.0)
+      if (abs >= 1.0)
         s.append(new DecimalFormat("#0.####", new DecimalFormatSymbols(Locale.ENGLISH)).format(val));
       else
         s.append(val);

@@ -161,11 +161,6 @@
                     android:columnCount="4"
                     android:visibility="gone"
                     android:background="@android:color/background_light" />
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerEquip"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"/>
                 <ExpandableListView
                     android:id="@+id/expandableListView"
                     android:layout_height="match_parent"

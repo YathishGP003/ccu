@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctAnalogActuator;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -97,7 +98,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     @BindView(R.id.maxHeatingDamperPos) NumberPicker maxHeatingDamperPos;
     @BindView(R.id.minHeatingDamperPos) NumberPicker minHeatingDamperPos;
     
-    @BindView(R.id.enableOccupancyControl) ToggleButton enableOccupancyControl;
     @BindView(R.id.enableCO2Control) ToggleButton enableCO2Control;
     @BindView(R.id.enableIAQControl) ToggleButton enableIAQControl;
     @BindView(R.id.enableAFOControl) ToggleButton enableAutoForceOccupied;
@@ -430,7 +430,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMinDamperCooling()), false);
         ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMaxDamperCooling()), false);
     
-        enableOccupancyControl.setChecked(mProfileConfig.isEnableOccupancyControl());
         enableCO2Control.setChecked(mProfileConfig.isEnableCO2Control());
         enableIAQControl.setChecked(mProfileConfig.isEnableIAQControl());
         enableAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
@@ -482,6 +481,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                         setupDualDuctZoneProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().setCcuReady();
+                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         return null;
                     }
                     
@@ -513,7 +513,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     
         dualductConfig.setNodeType(mNodeType);
         dualductConfig.setNodeAddress(mSmartNodeAddress);
-        dualductConfig.setEnableOccupancyControl(enableOccupancyControl.isChecked());
         dualductConfig.setEnableCO2Control(enableCO2Control.isChecked());
         dualductConfig.setEnableIAQControl(enableIAQControl.isChecked());
         dualductConfig.enableAutoForceOccupied = enableAutoForceOccupied.isChecked();
@@ -524,7 +523,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setMinCoolingDamperPos(minCoolingDamperPos.getValue());
         dualductConfig.setMaxCoolingDamperPos(maxCoolingDamperPos.getValue());
     
-        dualductConfig.setTemperatureOffset(temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
+        dualductConfig.setTemperatureOffset((double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
     
         dualductConfig.setAnalog1OutAtMinDamperHeating(Double.parseDouble
                                                                   (ao1MinDamperHeatingSpinner.getSelectedItem().toString()));

@@ -1,12 +1,9 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.HayStackConstants
-import a75f.io.api.haystack.Occupied
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
@@ -14,7 +11,6 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
-import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import org.projecthaystack.HNum
@@ -288,12 +284,6 @@ class HSHaystackUtil(
         return haystack.readDefaultValById(id)
     }
 
-    fun setDesiredTemp(desiredTemp: Double) {
-        val id = readPointIdWithAll("air and temp and desired and average")
-        require(!(id === ""))
-        writeDefaultWithHisValue(id, desiredTemp)
-    }
-
     fun getDesiredTempCooling(): Double {
         val id = readPointIdWithAll("air and temp and desired and cooling")
         require(!(id === ""))
@@ -358,10 +348,6 @@ class HSHaystackUtil(
         return readPointPriorityVal("zone and fan and mode and operation")
     }
 
-    fun getOccupancyStatus(): Occupied {
-        return ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef))
-    }
-
     fun getTargetMinInsideHumidity(): Double {
         return readPointPriorityVal("target and humidifier and his")
     }
@@ -376,7 +362,7 @@ class HSHaystackUtil(
 
     fun setEquipStatus(status: Double) {
         haystack.writeHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\"", status
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\"", status
         )
     }
 
@@ -414,13 +400,13 @@ class HSHaystackUtil(
 
     fun getStatus(): Double {
         return haystack.readHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\""
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\""
         )
     }
 
     fun setStatus(status: Double) {
         haystack.writeHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\"", status
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\"", status
         )
     }
 

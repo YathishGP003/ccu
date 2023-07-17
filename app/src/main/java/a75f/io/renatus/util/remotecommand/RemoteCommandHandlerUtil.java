@@ -1,12 +1,13 @@
 package a75f.io.renatus.util.remotecommand;
 
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_PASSWORD;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_CM;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_PASSWORD;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_CCU;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_MODULE;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_TABLET;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
+
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -16,6 +17,8 @@ import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.fragment.app.Fragment;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
 import a75f.io.api.haystack.CCUHsApi;
@@ -23,6 +26,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.LSmartNode;
@@ -35,9 +39,13 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
@@ -73,45 +81,8 @@ public class RemoteCommandHandlerUtil {
                 LSerial.getInstance().setResetSeedMessage(true);
                 break;
             case UPDATE_CCU:
-                Log.d("CCU_DOWNLOAD", "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
-                RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
-
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String action = intent.getAction();
-                        if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                            long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                            Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
-                            if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
-                                if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
-                                    AppInstaller.getHandle().install(null, false, true, true);
-                                } else {
-                                    CcuLog.d("CCU_DOWNLOAD", "Update command ignored, Invalid version downloaded");
-                                    Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
-                                }
-                            } else if (downloadId == AppInstaller.getHandle().getHomeAppDownloadId()) {
-                                int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
-                                if (homeAppVersion >= 1) {
-                                    PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
-                                    AppInstaller.getHandle().install(null, true, false, true);
-                                }
-                            }
-                        }
-                    }
-
-                }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                if (id.startsWith("75f") || id.startsWith("75F"))
-                    AppInstaller.getHandle().downloadHomeInstall(id);
-                else if (id.startsWith("RENATUS_CCU") || id.startsWith("DAIKIN_CCU")) {
-                    if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
-                        Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
-                        AppInstaller.getHandle().downloadCCUInstall(id);
-                    } else {
-                        CcuLog.d("CCU_DOWNLOAD", "Update command ignored , previous update in progress "
-                                + Globals.getInstance().getCcuUpdateTriggerTimeToken());
-                    }
-
-                }
+                OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
+                updateCCU(id, null);
                 break;
             case RESTART_MODULE:
 
@@ -124,7 +95,7 @@ public class RemoteCommandHandlerUtil {
                                     if (d.getMarkers().contains("smartstat")) {
                                         sendSmartStatResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("smartnode") ||
-                                            d.getMarkers().contains("otn")) {
+                                            d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                         sendSmarNodeResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("hyperstat")) {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -138,7 +109,7 @@ public class RemoteCommandHandlerUtil {
                             if (d.getMarkers().contains("smartstat")) {
                                 sendSmartStatResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("smartnode") ||
-                                    d.getMarkers().contains("otn")) {
+                                    d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                 sendSmarNodeResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("hyperstat")) {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -150,7 +121,7 @@ public class RemoteCommandHandlerUtil {
                         if (equip.getMarkers().contains("smartstat")) {
                             sendSmartStatResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("smartnode") ||
-                                equip.getMarkers().contains("otn")) {
+                                equip.getMarkers().contains("otn") || equip.getMarkers().contains(Tags.HELIO_NODE)) {
                             sendSmarNodeResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
@@ -161,6 +132,49 @@ public class RemoteCommandHandlerUtil {
                         break;
                 }
                 break;
+        }
+    }
+
+    public static void updateCCU(String id, Fragment currentFragment) {
+        Log.d("CCU_DOWNLOAD", "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
+        RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                        if(CCUHsApi.getInstance().isCCURegistered()) {
+                            RxTask.executeAsync(() -> UtilityApplication.getMessagingAckJob().doMessageAck());
+                        }
+                        if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
+                            AppInstaller.getHandle().install(null, false, true, true);
+                        } else {
+                            CcuLog.d("CCU_DOWNLOAD", "Update command ignored, Invalid version downloaded");
+                            Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+                        }
+                    } else if (downloadId == AppInstaller.getHandle().getHomeAppDownloadId()) {
+                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
+                        if (homeAppVersion >= 1) {
+                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
+                            AppInstaller.getHandle().install(null, true, false, true);
+                        }
+                    }
+                }
+            }
+
+        }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        if (id.startsWith("75f") || id.startsWith("75F"))
+            AppInstaller.getHandle().downloadHomeInstall(id);
+        else if (id.startsWith("RENATUS_CCU") || id.startsWith("DAIKIN_CCU")) {
+            if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
+                Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
+                AppInstaller.getHandle().downloadCCUInstall(id, currentFragment);
+            } else {
+                CcuLog.d("CCU_DOWNLOAD", "Update command ignored , previous update in progress "
+                        + Globals.getInstance().getCcuUpdateTriggerTimeToken());
+            }
+
         }
     }
 

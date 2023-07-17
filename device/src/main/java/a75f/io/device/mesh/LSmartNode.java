@@ -39,6 +39,8 @@ import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.device.mesh.MeshUtil.getSetTemp;
+import static a75f.io.device.serial.DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT;
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
@@ -236,16 +238,10 @@ public class LSmartNode
         }
     }
 
-    /**
-     * Function which setup the damper actuator type for smart node setting message if profile type is Dab
-     * @param settings
-     * @param damperConfig
-     * @param damper2Config
-     * @param reheatConfig
-     */
+
     public static void setupDamperActuator(
             SmartNodeSettings_t settings,
-            int damperConfig,int damper2Config,int reheatConfig, String profileType
+            int damperConfig, int damper2Config, int reheatConfig, String profileType
     ){
 
         Map<DamperType, DamperActuator_t> damperTypeMap = new HashMap<>();
@@ -260,22 +256,64 @@ public class LSmartNode
         reheatTypeMap.put(ReheatType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
         reheatTypeMap.put(ReheatType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
         reheatTypeMap.put(ReheatType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
-        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_PULSED);
-        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_Staged);
-        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_Staged);
+        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_PULSED);
+        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_ONE_STAGE);
+        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_TWO_STAGE);
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
-        if (profileType.equals("vav")){
+        if (profileType.equals("vav") && reheatConfig != -1){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
         } else {
-            if (reheatConfig > 0) {
-                settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
-            } else {
-                settings.returnAirDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damper2Config])));
-            }
+            settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));
+
         }
     }
+    private static DamperActuator_t getReheatType(int damper2Config, int reheatConfig, Map<DamperType, DamperActuator_t> damperTypeMap) {
+        DamperType damperType = DamperType.values()[damper2Config];
+        if (reheatConfig == -1 ) {
+            return (damperTypeMap.get(DamperType.values()[damper2Config]));
+        } else {
+            if (damperType == DamperType.ZeroToTenV && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_10V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.ZeroToTenV && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_10V_REHEAT_TWO_STAGE;
+            }
+            if (damperType == DamperType.TwoToTenV && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_2_10V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.TwoToTenV && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_2_10V_REHEAT_TWO_STAGE;
+            }
+            if (damperType == DamperType.TenToTwov && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_10_2V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.TenToTwov && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_10_2V_REHEAT_TWO_STAGE;
+            }
+            if (damperType == DamperType.TenToZeroV && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_10_0V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.TenToZeroV && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_10_0V_REHEAT_TWO_STAGE;
+            }
+            ReheatType config = ReheatType.values()[reheatConfig];
+            if (damperType == DamperType.MAT ) {
+                switch (config) {
+                    case ZeroToTenV : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_0_10V;
+                    case TwoToTenV : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_2_10V;
+                    case TenToTwov : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_10_2V;
+                    case TenToZeroV : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_10_0V;
+                    case Pulse : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_PULSED;
+                    case OneStage : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_ONE_STAGE;
+                    case TwoStage : return DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_TWO_STAGE;
+                }
+            }
+        }
+        return DAMPER_ACTUATOR_NOT_PRESENT;
+    }
+
 
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
@@ -372,7 +410,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));
+            controls_t.setTemperature.set((short) (getSetTemp(equipRef) * 2));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
     
         }
@@ -535,7 +573,7 @@ public class LSmartNode
     }
     
     public static double getStatus(short nodeAddr) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
     
     public static double getConfigNumVal(String tags, short nodeAddr) {
@@ -613,7 +651,8 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controlsMessage.controls.setTemperature.set((short) (getDesiredTemp(Short.parseShort(node)) * 2));
+            Equip equip = HSUtil.getEquipForModule((Short) device.get("id"));
+            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

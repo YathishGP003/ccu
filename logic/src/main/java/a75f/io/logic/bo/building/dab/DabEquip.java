@@ -52,6 +52,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -464,12 +465,17 @@ public class DabEquip
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
 
+
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
             device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.SN;
         }else  {
             device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, roomRef, floorRef, nodeAddr, tz, hayStack);
 
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -634,22 +640,6 @@ public class DabEquip
         String damper2ShapeId = CCUHsApi.getInstance().addPoint(damper2Shape);
         CCUHsApi.getInstance().writeDefaultValById(damper2ShapeId, (double)config.damper2Shape);
         
-        
-        
-        Point enableOccupancyControl = new Point.Builder()
-                                               .setDisplayName(equipDis+"-enableOccupancyControl")
-                                               .setEquipRef(equipRef)
-                                               .setSiteRef(siteRef).setHisInterpolate("cov")
-                                               .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("his").addMarker("sp")
-                                               .setGroup(String.valueOf(nodeAddr))
-                                               .setEnums("false,true")
-                                               .setTz(tz)
-                                               .build();
-        String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
-        CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
                                          .setEquipRef(equipRef)
@@ -786,7 +776,6 @@ public class DabEquip
         config.damper2Size = (int)getConfigNumVal("damper and secondary and size");
         config.damper2Shape = (int)getConfigNumVal("damper and secondary and shape");
         
-        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal(IAQ_ENABLED) > 0;
 
@@ -898,8 +887,6 @@ public class DabEquip
         setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1 :0);
         setHisVal("auto and away",config.enableAutoAwayControl ? 1 :0);
 
-        setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
-        setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal(IAQ_ENABLED,config.enableIAQControl ? 1.0 : 0);
@@ -1112,13 +1099,13 @@ public class DabEquip
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
 
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status )
         {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
         }
 
         String message;

@@ -3,13 +3,12 @@ package a75f.io.renatus.registration;
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -21,37 +20,49 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.EquipResponseCallback;
+import a75f.io.logic.ccu.restore.ReplaceCCUTracker;
+import a75f.io.logic.ccu.restore.ReplaceStatus;
 import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
-import a75f.io.modbusbox.EquipsManager;
+import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUListAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -72,9 +83,19 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private String enteredPassCode;
     private View toastFail;
     private View toastCcuRestoreSuccess;
+    private final AtomicBoolean isProcessPaused;
+    private CopyOnWriteArrayList<Future<?>> futures;
+    private ExecutorService executorService;
+    private Handler handler;
+    private boolean isReplaceClosed;
 
     public ReplaceCCU() {
         // Required empty public constructor
+        futures = new CopyOnWriteArrayList<>();
+        isProcessPaused = new AtomicBoolean(false);
+        restoreCCU = new RestoreCCU();
+        handler = new Handler();
+        isReplaceClosed = false;
     }
 
     @Override
@@ -82,7 +103,16 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         super.onCreate(savedInstanceState);
 
     }
-    private ProgressDialog progressBar;
+    private AlertDialog progressAlertDialog;
+    private ProgressBar progressBar;
+    private TextView replaceStatus;
+    private TextView pauseStatus;
+    private TextView cancel;
+    private TextView pauseSync;
+    private TextView connectivityIssue;
+    private ImageView pauseAlert;
+    private ImageView connectivityAlert;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -96,11 +126,6 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         passCode_6 = rootView.findViewById(R.id.passcode_text6);
         next = rootView.findViewById(R.id.buttonNext);
 
-        progressBar = new ProgressDialog(getContext());
-        progressBar.setCancelable(false);
-        progressBar.setMessage("Restoring all modules...");
-        progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-
         passCode_1.requestFocus();
         addTextWatcher(passCode_1);
         addTextWatcher(passCode_2);
@@ -108,6 +133,42 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         addTextWatcher(passCode_4);
         addTextWatcher(passCode_5);
         addTextWatcher(passCode_6);
+
+        progressAlertDialog = new AlertDialog.Builder(getContext()).create();
+        View progressBarView = LayoutInflater.from(getContext()).inflate(R.layout.ccu_replace_progress_bar, null);
+        progressBar = progressBarView.findViewById(R.id.replace_progress_bar);
+        progressAlertDialog.setView(progressBarView);
+        progressAlertDialog.setCancelable(false);
+        replaceStatus = progressBarView.findViewById(R.id.completedStatus);
+        pauseStatus = progressBarView.findViewById(R.id.pauseStatus);
+        cancel = progressBarView.findViewById(R.id.btnCancel);
+        pauseSync = progressBarView.findViewById(R.id.btnPause);
+        connectivityIssue = progressBarView.findViewById(R.id.connectivityIssue);
+        pauseAlert = progressBarView.findViewById(R.id.pauseAlert);
+        connectivityAlert = progressBarView.findViewById(R.id.connectivityAlert);
+
+        cancel.setOnClickListener(view -> {
+            Toast.makeText(getActivity() , "Cancelling Replace CCU...", Toast.LENGTH_LONG).show();
+            deleteRenatusData();
+        });
+        pauseSync.setOnClickListener(view -> {
+            boolean currentPauseStatus = isProcessPaused.get();
+            isProcessPaused.set(!currentPauseStatus);
+            if(isProcessPaused.get()) {
+                Toast.makeText(getActivity(), "Pausing Replace CCU...", Toast.LENGTH_LONG).show();
+                pauseReplaceProcess();
+                pauseAlert.setVisibility(View.VISIBLE);
+                pauseStatus.setText("PAUSED");
+                pauseSync.setText("RESUME SYNCING");
+            }
+            else{
+                pauseAlert.setVisibility(View.INVISIBLE);
+                pauseStatus.setText("");
+                pauseSync.setText(" PAUSE SYNCING");
+                new Thread(() -> resumeRestoreCCUProcess()).start();
+
+            }
+        });
 
         toastFail = getLayoutInflater().inflate(R.layout.custom_toast_layout_failed,
                 (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
@@ -124,7 +185,24 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
             }
         });
+        if(RestoreCCU.isReplaceCCUUnderProcess()){
+            ProgressDialogUtils.showProgressDialog(getActivity(), "Retrieving Replace Status...");
+            isReplaceClosed = true;
+            pauseReplaceProcess();
+            passCode_1.setFocusable(false);
+            passCode_2.setFocusable(false);
+            passCode_3.setFocusable(false);
+            passCode_4.setFocusable(false);
+            passCode_5.setFocusable(false);
+            passCode_6.setFocusable(false);
+            next.setClickable(false);
+            SharedPreferences sharedPreferences =
+                    Globals.getInstance().getApplicationContext().getSharedPreferences(ReplaceCCUTracker.REPLACING_CCU_INFO,
+                            Context.MODE_PRIVATE);
+            CCU ccu =  new Gson().fromJson(sharedPreferences.getString("CCU", ""), CCU.class);
+            RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
 
+        }
         return rootView;
     }
 
@@ -180,7 +258,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         RecyclerView ccuListRecyclerView = dialogView.findViewById(R.id.ccus);
         TextView ccuVersionTextView = dialogView.findViewById(R.id.curr_ccu_version);
         ImageView close = dialogView.findViewById(R.id.close_button);
-        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this);
+        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this, getParentFragmentManager());
         ccuListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ccuListRecyclerView.setHasFixedSize(true);
         ccuListRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -258,65 +336,35 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         });
     }
     private AlertDialog replaceCCUDailog;
-    private AlertDialog replaceCCUErrorDailog;
     @Override
     public void onCCUSelect(CCU ccu) {
-        replaceCCUDailog = new AlertDialog.Builder(getContext()).create();
+        replaceCCUDailog = new AlertDialog.Builder(requireContext()).create();
         replaceCCUDailog.setTitle("Do you want to replace "+ ccu.getName()+"?");
         replaceCCUDailog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", (dialogInterface, i) -> {
             alertDialog.dismiss();
-            retriveCCUDetails(ccu);
+            retrieveCCUDetails(ccu);
         });
         replaceCCUDailog.setButton(DialogInterface.BUTTON_NEGATIVE, "No", (dialogInterface, i) -> replaceCCUDailog.dismiss());
         replaceCCUDailog.setIcon(R.drawable.ic_alert);
         replaceCCUDailog.show();
     }
 
-    private void retriveCCUDetails(CCU ccu){
+    private void retrieveCCUDetails(CCU ccu){
         ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
             public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String accessToken = response.getString("accessToken");
                 CCUHsApi.getInstance().setJwt(accessToken);
-                AtomicBoolean success = new AtomicBoolean(true);
-                RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-                            "Syncing Site Details. This may take more than a minute..."),
-                        () -> {
-                                try {
-                                    initRestoreCCUProcess(ccu);
-                                } catch(NullHGridException nullHGridException){
-                                    success.set(false);
-                                    Log.i(TAG_CCU_REPLACE, nullHGridException.getMessage());
-                                    nullHGridException.printStackTrace();
-                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            ProgressDialogUtils.hideProgressDialog();
-                                            replaceCCUErrorDailog = new AlertDialog.Builder(getContext()).create();
-                                            replaceCCUErrorDailog.setTitle("Error occurred while replacing "+ ccu.getName());
-                                            replaceCCUErrorDailog.setMessage( "Please check your wifi connection, and "
-                                                    + "try once again.");
-                                            replaceCCUErrorDailog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialogInterface, i) -> {
-                                                deleteRenatusData();
-                                            });
-                                            Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
-                                            replaceCCUErrorDailog.setIcon(R.drawable.ic_alert);
-                                            replaceCCUErrorDailog.show();
-                                        }
-                                  });
-                                }
-                            },
-                        ()-> {
-                            if(success.get()){
-                                displayToastMessageOnRestoreSuccess(ccu);
-                                loadRenatusLandingIntent();
-                                updatePreference();
-                                Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
-                            }
+                ProgressDialogUtils.showProgressDialog(getActivity(),
+                        "Fetching equip details...");
+                SharedPreferences.Editor editor =
+                        Globals.getInstance().getApplicationContext().getSharedPreferences(ReplaceCCUTracker.REPLACING_CCU_INFO,
+                        Context.MODE_PRIVATE).edit();
+                editor.putString("CCU", new Gson().toJson(ccu));
+                editor.commit();
+                RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
 
-                        }
-                    );
             }
             @Override
             public void onErrorResponse(JSONObject response) {
@@ -355,53 +403,152 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         }
     }
 
-    private void initRestoreCCUProcess(CCU ccu) {
-        Log.i(TAG_CCU_REPLACE, "Replace CCU Started");
+    public void restoreConfigAndModBusJsonFiles(CCU ccu, AtomicInteger deviceCount, EquipResponseCallback
+            equipResponseCallback, ReplaceCCUTracker replaceCCUTracker){
+        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CONFIG_FILES, ReplaceStatus.RUNNING.toString());
         Map<String, Integer> modbusConfigs = new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@"
                 , ""), ccu.getCcuId().replaceFirst("@", ""));
-                new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
+        new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
                 ccu.getCcuId().replaceFirst("@", ""));
-        RestoreCCU restoreCCU = new RestoreCCU();
-        restoreCCU.getCCUEquip(ccu.getCcuId());
         updateModbusConfigValues(modbusConfigs);
-        final int[] deviceCount = {restoreCCU.equipCountsInCCU(ccu.getCcuId(), ccu.getSiteCode())};
-        restoreCCU.syncExistingSite(ccu.getSiteCode());
-        restoreCCU.getSettingPointsByCCUId(ccu.getCcuId());
-        restoreCCU.getSystemProfileOfCCU(ccu.getCcuId(), ccu.getSiteCode());
-        restoreCCU.getCMDeviceOfCCU(ccu.getCcuId(), ccu.getSiteCode());
-        restoreCCU.getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode());
-        EquipsManager.getInstance().getProcessor().readExternalJsonData();
-        int total = deviceCount[0] - 1; // -1 because by now diag equip is already restored.
-        ProgressDialogUtils.hideProgressDialog();
-        new Handler(Looper.getMainLooper()).post(() -> {
+        equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CONFIG_FILES, ReplaceStatus.COMPLETED.toString());
+    }
+
+    private void resumeRestoreCCUProcess(){
+        Log.i(TAG_CCU_REPLACE, "Resuming Replace CCU process");
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.RUNNING.toString())){
+                replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.PENDING.toString());
+            }
+        }
+        replaceEquipsParallelly(replaceCCUTracker, getEquipResponseCallback(ccu), currentReplacementProgress,
+                getRetryCountCallback());
+    }
+
+    private CCU ccu;
+    private RestoreCCU restoreCCU;
+    private Map<String, Set<String>> floorAndZoneIds;
+    private int total;
+    private AtomicInteger deviceCount;
+
+    private void initRestoreCCUProcess(CCU ccu) {
+        this.ccu = ccu;
+        Log.i(TAG_CCU_REPLACE, "Replace CCU Started");
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        floorAndZoneIds = restoreCCU.getEquipDetailsOfCCU(ccu.getCcuId(), ccu.getSiteCode(),
+                replaceCCUTracker.getEditor(), isReplaceClosed);
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        restoreCCU.restoreCCUDevice(ccu, replaceCCUTracker);
+
+        deviceCount = new AtomicInteger();
+        deviceCount.set(currentReplacementProgress.size());
+        total = deviceCount.get();
+
+        handler.post(() -> {
+            ProgressDialogUtils.hideProgressDialog();
+            progressAlertDialog.dismiss();
             progressBar.setMax(total);
-            progressBar.show();
+            progressAlertDialog.show();
         });
-        EquipResponseCallback equipResponseCallback = remainingCount -> {
-            deviceCount[0] = remainingCount;
-            new Handler(Looper.getMainLooper()).post(() -> progressBar.setProgress((total - remainingCount) + 1));
-        };
-        restoreCCU.getModbusSystemEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
-        restoreCCU.getZoneEquipsOfCCU(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
-        restoreCCU.getOAOEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
-        L.saveCCUState();
-        HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
-        int pairingAddress = 1000;
-        if(!pointMaps.containsKey("val")){
-            ArrayList<HashMap<Object, Object>> devices = CCUHsApi.getInstance().readAllEntities("device and addr");
-            for(HashMap device : devices){
-                int devicePairingAddress  = Integer.parseInt(device.get("addr").toString());
-                if(devicePairingAddress > pairingAddress){
-                    pairingAddress = devicePairingAddress;
-                    break;
+        EquipResponseCallback equipResponseCallback = getEquipResponseCallback(ccu);
+
+        currentReplacementProgress.values().forEach(v ->{
+            if(v.equals(ReplaceStatus.COMPLETED.toString())){
+                equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+            }
+        });
+
+        replaceEquipsParallelly(replaceCCUTracker, equipResponseCallback, currentReplacementProgress,
+                getRetryCountCallback());
+    }
+
+    @NonNull
+    private EquipResponseCallback getEquipResponseCallback(CCU ccu) {
+        EquipResponseCallback equipResponseCallback = remainingCount -> handler.post(() -> {
+            progressBar.setProgress((total - remainingCount));
+            int percentCompleted = 100 - (int) ((remainingCount * 1.0 / total) * 100);
+            Log.i(TAG_CCU_REPLACE, "Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
+                    "%)");
+            replaceStatus.setText("Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
+                    "%)");
+            if (RestoreCCU.isReplaceCCUCompleted()) {
+                Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
+                progressAlertDialog.dismiss();
+                ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);
+                ReplaceCCU.this.loadRenatusLandingIntent();
+                ReplaceCCU.this.updatePreference();
+                MessagingClient.getInstance().init();
+            }
+        });
+        return equipResponseCallback;
+    }
+
+    @NonNull
+    private RetryCountCallback getRetryCountCallback(){
+        RetryCountCallback retryCountCallback = retryCount -> handler.post(() -> {
+            if (retryCount == 0) {
+                connectivityIssue.setText("");
+                connectivityAlert.setVisibility(View.INVISIBLE);
+            }
+            else{
+                connectivityAlert.setVisibility(View.VISIBLE);
+                connectivityIssue.setText("Connectivity issues. Retry attempt("+retryCount+")");
+                if(retryCount == 15){
+                    boolean currentPauseStatus = isProcessPaused.get();
+                    isProcessPaused.set(!currentPauseStatus);
+                    Toast.makeText(getActivity(), "Pausing Replace CCU...", Toast.LENGTH_LONG).show();
+                    pauseReplaceProcess();
+                    pauseStatus.setText("PAUSED");
+                    pauseSync.setText("RESUME SYNCING");
                 }
             }
-            pairingAddress = (pairingAddress/100) * 100;
+        });
+        return retryCountCallback;
+    }
+
+    private void replaceEquipsParallelly(ReplaceCCUTracker replaceCCUTracker, EquipResponseCallback equipResponseCallback,
+                                         ConcurrentHashMap<String, ?> currentReplacementProgress,
+                                         RetryCountCallback retryCountCallback) {
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() -1);
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.COMPLETED.toString())){
+                continue;
+            }
+            if (equipId.equalsIgnoreCase(RestoreCCU.CONFIG_FILES)) {
+                restoreConfigAndModBusJsonFiles(ccu, deviceCount, equipResponseCallback, replaceCCUTracker);
+                continue;
+            }
+            RestoreEntity restoreEntity = new RestoreEntity(ccu, restoreCCU, equipId, floorAndZoneIds,
+                    equipResponseCallback, deviceCount, replaceCCUTracker, retryCountCallback);
+            Future<?> future = executorService.submit(restoreEntity);
+            futures.add(future);
         }
-        else {
-            pairingAddress = Integer.parseInt(pointMaps.get("val").toString());
+        for (Future<?> future : futures) {
+            try {
+                if(!future.isCancelled()) {
+                    future.get();
+                }
+            } catch (CancellationException | InterruptedException | ExecutionException e ) {
+                Log.i(TAG_CCU_REPLACE,"Pausing replace process "+ e.toString());
+                e.printStackTrace();
+            }
         }
-        L.ccu().setSmartNodeAddressBand((short) pairingAddress);
+    }
+
+    private void pauseReplaceProcess(){
+        Log.i(TAG_CCU_REPLACE, "Pausing Replace CCU process");
+        for (Future<?> future : futures) {
+            future.cancel(true);
+        }
+        if(executorService != null) {
+            executorService.shutdown();
+        }
+        futures.clear();
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){

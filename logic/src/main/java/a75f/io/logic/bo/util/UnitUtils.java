@@ -12,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class UnitUtils {
@@ -106,8 +108,18 @@ public class UnitUtils {
 
     }
 
-    public static String StatusCelsiusVal(String temp)
-    {
+    public static String StatusCelsiusVal(String temp, int modeType) {
+        boolean tempContainsF = false;
+        CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"temp "+temp+ "modeType > "+modeType);
+
+        // Below method checks whether String "temp" cpntains "F" or not because based
+        // on this character below code converts temperature from fahrenheit to celsius.
+        tempContainsF = temp.contains("F");
+
+        if(!tempContainsF){
+            return temp;
+        }
+
         String s = "";
         ArrayList<Double> myDoubles = new ArrayList<Double>();
         Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
@@ -122,15 +134,58 @@ public class UnitUtils {
             double element = Double.parseDouble(matcher.group());
             myDoubles.add(Math.abs(element));
         }
-        if (myDoubles.size() > 0) {
-            try {
-                DecimalFormat timeFormatter = new DecimalFormat("00");
-                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
-            } catch (Exception e) {
-                e.printStackTrace();
+        final String f = s.substring(0, s.lastIndexOf("F")) + " ";
+        DecimalFormat timeFormatter = new DecimalFormat("00");
+        if(modeType == TemperatureMode.DUAL.ordinal()){
+            if (myDoubles.size() > 0) {
+                if(myDoubles.size() > 3) {
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
+                            + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))
+                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
+                }else {
+                    // When refresh screen is called then status is fetched from haystack there we
+                    // have single temperature so my doubles size will be only 3.
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
+                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" +
+                            timeFormatter.format(myDoubles.get(2).intValue()));
+                }
+            }else {
                 return temp;
             }
-        } else {
+        }
+        if (modeType == TemperatureMode.HEATING.ordinal()) {
+            if (myDoubles.size() > 0) {
+                if(myDoubles.size() > 3) {
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
+                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" +
+                            timeFormatter.format(myDoubles.get(3).intValue()));
+                }else {
+                    // When refresh screen is called then status is fetched from haystack there we have single temperature so mydoubles size will be only 3.
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
+                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" +
+                            timeFormatter.format(myDoubles.get(2).intValue()));
+                }
+            }else {
+                return temp;
+            }
+        }else if (modeType == TemperatureMode.COOLING.ordinal()) {
+            Log.i("fatal","mydoubles "+f+",,,  "+myDoubles);
+            if (myDoubles.size() > 0) {
+                if (myDoubles.size() > 3) {
+                    Log.i("fatal", "return  " + (f + (CCUUtils.roundToOneDecimal(
+                            fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " +
+                            (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue())));
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))
+                            + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format
+                            (myDoubles.get(3).intValue()));
+                }else {
+                    return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
+                            + " \u00B0C" + " at " + (myDoubles.get(1).intValue()) + ":" + myDoubles.get(2).intValue());
+                }
+            }else {
+                return temp;
+            }
+        }else {
             return temp;
         }
 
@@ -186,10 +241,4 @@ public class UnitUtils {
     public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {
         return   tunerItem.containsKey("deadband");
     }
-
-
-
-
-
-
 }

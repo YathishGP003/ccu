@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
@@ -282,11 +283,15 @@ public class PlcEquip {
                 siteRef, roomRef, floorRef, nodeAddr, "pid", tz, false));
         
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
             device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.SN;
         }else  {
             device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, roomRef, floorRef, nodeAddr, tz, CCUHsApi.getInstance());
 
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);

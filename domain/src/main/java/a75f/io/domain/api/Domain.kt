@@ -27,7 +27,7 @@ object Domain {
     /**
      * Retrieve the domain object of a point by it id and deviceRef.
      */
-    fun getDevicePoint(pointId : String, deviceRef : String) : RawPoint? {
+    fun getDevicePoint(pointId : String, deviceRef : String) : Point? {
         site?.floors?.entries?.forEach{
             val floor = it.value
             floor.rooms.entries.forEach { room ->

@@ -357,6 +357,12 @@
                     "kind": "MARKER",
                     "defaultValue": null,
                     "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
                 }
             ],
             "tagNames": [
@@ -368,7 +374,8 @@
                 "sp",
                 "enabled",
                 "point",
-                "dis"
+                "dis",
+                "writable"
             ],
             "rootTagNames": [
                 "config",

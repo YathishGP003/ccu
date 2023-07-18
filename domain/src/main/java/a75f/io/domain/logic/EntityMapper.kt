@@ -1,6 +1,5 @@
 package a75f.io.domain.logic
 
-import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration

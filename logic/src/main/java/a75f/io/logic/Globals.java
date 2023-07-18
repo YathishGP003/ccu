@@ -344,7 +344,6 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 MigrationUtil.doMigrationTasksIfRequired();
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);

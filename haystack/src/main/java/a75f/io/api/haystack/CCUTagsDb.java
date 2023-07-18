@@ -631,6 +631,16 @@ public class CCUTagsDb extends HServer {
         }
 
         HRef ref = (HRef) b.get("id");
+        if(p.getBacnetType() != null)
+        {
+            b.add(Tags.BACNET_ID, p.getBacnetId());
+            b.add(Tags.BACNET_TYPE, p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET,"addPoint:"+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+            Intent intent = new Intent(BROADCAST_BACNET_POINT_ADDED);
+            intent.putExtra("message", "@"+ref.val);
+            appContext.sendBroadcast(intent);
+        }
+
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
     }
@@ -672,9 +682,12 @@ public class CCUTagsDb extends HServer {
             b.add(m);
         }
 
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+        if(p.getBacnetType() != null)
+        {
+            b.add(Tags.BACNET_ID, p.getBacnetId());
+            b.add(Tags.BACNET_TYPE, p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+        }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }

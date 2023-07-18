@@ -1,5 +1,6 @@
 package a75f.io.domain.api
 
+import a75f.io.api.haystack.CCUHsApi
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
@@ -84,7 +85,27 @@ class CcuDevice(domainName : String, id : String) : Entity(domainName, id) {
         return points[domainName]
     }
 }
-class Point(domainName : String, id : String) : Entity(domainName, id)
+class Point(domainName : String, id : String) : Entity(domainName, id) {
+    fun readHisVal() : Double {
+        return CCUHsApi.getInstance().readHisValById(id)
+    }
+    fun writeHisVal(hisVal : Double) {
+        CCUHsApi.getInstance().writeHisValById(id, hisVal)
+    }
+
+    fun readPriorityVal() : Double {
+        return CCUHsApi.getInstance().readPointPriorityVal(id)
+    }
+
+    fun writeDefaultVal(defaultVal : Any) {
+        if (defaultVal is String) {
+            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+        } else if (defaultVal is Double) {
+            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+        }
+    }
+
+}
 class RawPoint(domainName : String, id : String) : Entity(domainName, id)
 class SettingPoint(domainName : String, id : String) : Entity(domainName, id)
 private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{

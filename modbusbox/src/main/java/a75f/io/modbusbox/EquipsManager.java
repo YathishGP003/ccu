@@ -3,8 +3,12 @@ package a75f.io.modbusbox;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 
 public class EquipsManager
@@ -56,9 +60,9 @@ public class EquipsManager
     public void saveProfile(EquipmentDevice equipmentDevice){
         processor.saveConfig(equipmentDevice);
     }
-    public EquipmentDevice fetchProfile(String equipRef){
+    /*public EquipmentDevice fetchProfile(String equipRef){
         return processor.getConfig(equipRef);
-    }
+    }*/
     public List<EquipmentDevice> getAllMbEquips(String zoneRef){
         return processor.getEquipByZoneRef(zoneRef);
     }
@@ -99,6 +103,23 @@ public class EquipsManager
     }
     public List<String> getAllModbusNamesByEquipType(String equipType){
         return processor.getEquipNamesByProfile(equipType);
+    }
+
+    public List<EquipmentDevice> getModbusSubEquip(Equip equip, Point point) {
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        HashMap<Object, Object> parentEquipHashMap = CCUHsApi.getInstance().readMapById(equip.getEquipRef());
+        Equip parentEquip = new Equip.Builder().setHashMap(parentEquipHashMap).build();
+        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(parentEquip.getGroup()));
+        for (EquipmentDevice modbusSubEquip : modbusDevice.getEquips()) {
+            if (Integer.parseInt(point.getGroup()) == modbusSubEquip.getSlaveId()) {
+                modbusSubEquipList.add(modbusSubEquip);
+            }
+        }
+        return modbusSubEquipList;
+    }
+
+    public void readExternalJSONFiles(){
+        processor.readExternalJsonData();
     }
 }
 

@@ -21,10 +21,18 @@ public class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerMod
     List<Parameter> modbusParam;
     List<Register> registerList;
     boolean isNewConfig;
-    public RecyclerModbusParamAdapter(Context context, List<Parameter> modbusParam, boolean isNewConfig) {
+    private SelectAllParameters selectAllParameters;
+    public RecyclerModbusParamAdapter(Context context, List<Parameter> modbusParam, boolean isNewConfig,
+                                      SelectAllParameters selectAllParameters) {
         this.context = context;
         this.modbusParam = modbusParam;
         this.isNewConfig = isNewConfig;
+        this.selectAllParameters = selectAllParameters;
+        if(isNewConfig) {
+            for (Parameter configParam : modbusParam) {
+                configParam.setDisplayInUI(configParam.isDisplayInUiDefault());
+            }
+        }
     }
 
     @NonNull
@@ -39,7 +47,11 @@ public class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerMod
         viewHolder.textParam.setText(modbusParam.get(position).getName());
         viewHolder.toggleButton.setChecked(modbusParam.get(position).isDisplayInUI());
         viewHolder.toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(!isChecked) {
+                selectAllParameters.enableAllParameters(false);
+            }
             modbusParam.get(position).setDisplayInUI(isChecked);
+
         });
     }
 

@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -244,7 +245,8 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         L.saveCCUState();
                         LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
                         CCUHsApi.getInstance().setCcuReady();
-                    },
+                        DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
+                        },
                     ()->{
                         ProgressDialogUtils.hideProgressDialog();
                         Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();

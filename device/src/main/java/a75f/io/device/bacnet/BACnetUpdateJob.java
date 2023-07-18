@@ -53,6 +53,10 @@ public class BACnetUpdateJob extends BaseJob implements WatchdogMonitor
                 CcuLog.d(L.TAG_CCU_JOB, "No CCU Registered ! <-BACnetUpdateJob ");
                 return;
             }
+            if (L.ccu().systemProfile == null) {
+                CcuLog.d(L.TAG_CCU_JOB, "System not initialized ! <-BACnetUpdateJob ");
+                return;
+            }
             BACnetNw.sendMessage(bacnetDevice);
             BACnetNw.sendSystemControl(bacnetDevice);
             CcuLog.d(L.TAG_CCU_JOB, "<-BACnetUpdateJob ");

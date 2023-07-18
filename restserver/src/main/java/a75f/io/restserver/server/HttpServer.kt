@@ -1,0 +1,229 @@
+package a75f.io.restserver.server
+
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
+import a75f.io.device.bacnet.readExternalBacnetJsonFile
+import a75f.io.device.bacnet.updateBacnetHeartBeat
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
+import android.content.Context
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
+import android.util.Log
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.request.receive
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.projecthaystack.HGrid
+import org.projecthaystack.HGridBuilder
+import org.projecthaystack.io.HZincReader
+import org.projecthaystack.io.HZincWriter
+
+class HttpServer {
+
+    private val PORT = 5001
+    private val HTTP_SERVER = "HttpServer"
+
+    companion object{
+        var sharedPreferences: SharedPreferences? = null
+        private var instance: HttpServer? = null
+        fun getInstance(context: Context): HttpServer? {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            if (instance == null) {
+                instance = HttpServer()
+            }
+            return instance
+        }
+    }
+    fun startServer() {
+        CoroutineScope(Dispatchers.IO).launch {
+            server.start(wait = true)
+        }
+        sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, true).apply()
+        Log.d(L.TAG_CCU_BACNET, "server started.")
+    }
+
+    fun stopServer() {
+        server.stop(1_000, 2_000)
+        instance = null
+        sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, false).apply()
+        Log.d(L.TAG_CCU_BACNET, "server stopped.")
+    }
+
+    val server by lazy {
+        embeddedServer(Netty, PORT, watchPaths = emptyList()) {
+            install(WebSockets)
+            install(CallLogging)
+            // provides the automatic content conversion of requests based on theirContent-Type
+            // and Accept headers. Together with the json() setting, this enables automatic
+            // serialization and deserialization to and from JSON – allowing
+            // us to delegate this tedious task to the framework.
+            install(ContentNegotiation) {
+                gson {
+                    setPrettyPrinting()
+                    disableHtmlEscaping()
+                }
+            }
+            // configures Cross-Origin Resource Sharing. CORS is needed to make calls from arbitrary
+            // JavaScript clients, and helps us prevent issues down the line.
+            install(CORS) {
+                method(HttpMethod.Get)
+                method(HttpMethod.Post)
+                method(HttpMethod.Delete)
+                anyHost()
+            }
+            // Greatly reduces the amount of data that's needed to be sent to the client by
+            // gzipping outgoing content when applicable.
+            install(Compression) {
+                gzip()
+            }
+            routing {
+
+                get("/read/{query}") {
+                    CcuLog.i(HTTP_SERVER," read: "+call.parameters["query"])
+                    val query = call.parameters["query"]
+                    if (query != null) {
+                        call.respond(HttpStatusCode.OK, BaseResponse(HZincWriter.gridToString(
+                            HGridBuilder.dictToGrid(CCUHsApi.getInstance()
+                                .getHSClient().read(query)))))
+                    }  else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                get("/hisRead/{query}") {
+                    CcuLog.i(HTTP_SERVER," hisRead: "+call.parameters["query"])
+                    val query = call.parameters["query"]
+                    if (query != null) {
+                        call.respond(HttpStatusCode.OK, BaseResponse(CCUHsApi.getInstance()
+                                .readHisValById(query)))
+                    }  else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                get("/readAll/{query}") {
+                    val query = call.parameters["query"]
+                    CcuLog.i(HTTP_SERVER, " query: $query")
+                    if (query != null) {
+                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query));
+                        CcuLog.i(HTTP_SERVER, " response: $response")
+                        call.respond(HttpStatusCode.OK, BaseResponse(response))
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                get("/bacnet/config") {
+                    CcuLog.i(HTTP_SERVER,"called API: /bacnet/config ")
+                    val response = readExternalBacnetJsonFile()
+                    CcuLog.i(HTTP_SERVER, " response: $response")
+                    call.respond(HttpStatusCode.OK, response)
+                }
+
+                get("/bacnet/heartbeat") {
+                    CcuLog.i(HTTP_SERVER,"called API: /bacnet/heartbeat ")
+                    updateBacnetHeartBeat();
+                }
+
+                post("/watchSub") {
+                    CcuLog.i(HTTP_SERVER," watch sub: ")
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchSubRequest = CCUHsApi.getInstance().hsClient.watchSubscribe(
+                            hGrid
+                        )
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
+                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                post("/watchUnSub") {
+                    CcuLog.i(HTTP_SERVER," watch un sub: ")
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchSubRequest = CCUHsApi.getInstance().hsClient.watchUnSubscribe(
+                            hGrid
+                        )
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
+                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                post("/watchPoll") {
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchPollResponse = CCUHsApi.getInstance().hsClient.watchPoll(
+                            hGrid
+                        )
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchPollResponse.isEmpty}")
+                        if(!watchPollResponse.isEmpty){
+                            CcuLog.i(HTTP_SERVER, "no of rows in response ${watchPollResponse.numRows()}")
+                        }
+                        if(!watchPollResponse.isErr){
+                            call.respondText(HZincWriter.gridToString(watchPollResponse), ContentType.Any , HttpStatusCode.OK)
+                        }else{
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                //example call = http://127.0.0.1:5001/pointWrite/6a1f6539-86dd-48d3-be6c-0ae0b50fa388
+                get("/pointWrite/{id}") {
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} ")
+                    val id = call.parameters["id"]
+                    val response = CCUHsApi.getInstance().readPointArr("@"+id);
+                    CcuLog.i(HTTP_SERVER, " response: $response")
+                    call.respond(HttpStatusCode.OK, BaseResponse(response))
+                }
+
+                //example call = http://127.0.0.1:5001/pointWrite?id=6a1f6539-86dd-48d3-be6c-0ae0b50fa388&level=1&val=7.5&who=bacnet&duration=200000
+                get("/pointWrite") {
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
+                    val id = call.parameters["id"]
+                    val level = call.parameters["level"]
+                    val value = call.parameters["val"]
+                    val who = call.parameters["who"]
+                    val duration = call.parameters["duration"]
+
+                    if(id == null || level == null || value == null || who == null || duration == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
+                    }else{
+                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value.toDouble(), duration.toInt())
+                        if (pointGrid != null) {
+                            if(!pointGrid.isEmpty || !pointGrid.isErr)
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK));
+                            else
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent));
+                        }else{
+                            call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun retrieveGridFromRequest(response: String): HGrid? {
+        val zReader = HZincReader(response)
+        return zReader.readGrid()
+    }
+}

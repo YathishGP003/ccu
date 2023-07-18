@@ -122,7 +122,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         val config = equip.getConfiguration()
         val hyperStatTuners = fetchHyperStatTuners(equip)
         val userIntents = fetchUserIntents(equip)
-        val averageDesiredTemp = updateAverageTemperature(equip, userIntents)
+        val averageDesiredTemp = getAverageTemp(userIntents)
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = HSHaystackUtil.getPipe2ActualFanMode(equip.node.toString(), fanModeSaved)
@@ -227,14 +227,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
-    private fun updateAverageTemperature(equip: HyperStatPipe2Equip, userIntents: UserIntents): Double{
-        val averageDesiredTemp = (userIntents.zoneCoolingTargetTemperature + userIntents.zoneHeatingTargetTemperature) / 2.0
-        if (averageDesiredTemp != equip.hsHaystackUtil.getDesiredTemp()) {
-            equip.hsHaystackUtil.setDesiredTemp(averageDesiredTemp)
-        }
-        return averageDesiredTemp
-    }
-
     private fun fetchBasicSettings(equip: HyperStatPipe2Equip) =
 
         BasicSettings(
@@ -307,7 +299,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             )
         }
         equip.haystack.writeHisValByQuery(
-            "point and status and his and group == \"${equip.node}\"",
+            "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }

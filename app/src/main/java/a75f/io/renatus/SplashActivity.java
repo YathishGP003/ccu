@@ -18,7 +18,9 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.SystemProperties;
+import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -28,7 +30,7 @@ import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
     
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
     
@@ -50,80 +52,69 @@ public class SplashActivity extends AppCompatActivity {
                 putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
         Log.i(TAG, "Splash activity");
         configSplashLogo();
-        registrationThread = new Thread() {
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                    SplashActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            HashMap site = CCUHsApi.getInstance().read("site");
-
-                            if (site.size() == 0) {
-                                Log.i(TAG,"No Site Synced navigate to Register");
-                                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                startActivity(i);
-                                finish();
-                            } else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP)) {
-                                Log.i(TAG,"CCU Setup is not completed");
-                                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 4);
-                                startActivity(i);
-                                finish();
-                            } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)
-                                           && !prefs.getBoolean("ADD_CCU")) {
-                                Log.i(TAG,"No profile synced navigate to create profile");
-                                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", getViewPagerPosition());
-                                startActivity(i);
-                                finish();
-                            } else if(prefs.getBoolean(PreferenceConstants.PROFILE_SETUP) && !prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
-                                Log.i(TAG,"No floor is Created");
-                                System.out.println("No Floor is Created");
-                                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", getViewPagerPosition());
-                                startActivity(i);
-                                finish();
-                            } else if(prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
-                                int recovery = SystemProperties.getInt("renatus_recovery",0);
-                                Intent i;
-                                if(Globals.getInstance().isSafeMode()){
-                                    new Thread() {
-                                        @Override
-                                        public void run() {
-                                            UploadLogs.instanceOf().saveCcuLogs();
-                                        }
-                                    }.start();
-
-
-                                    i = new Intent(SplashActivity.this, SafeModeActivity.class);
-                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                }
-                                else if (recovery == 1) {
-                                    i = new Intent(SplashActivity.this, RenatusEngineeringActivity.class);
-                                } else {
-                                    i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
-                                }
-                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
-                                finish();
-                            }else if(site.size() > 0 && prefs.getBoolean(PreferenceConstants.CCU_SETUP)
-                                    && prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
-                                Log.i(TAG,"ADD CCU is not completed");
-                                Intent intent = new Intent(SplashActivity.this, RegisterGatherCCUDetails.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        }
-                    });
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
         CcuLog.i("UI_PROFILING", "SplashActivity.onCreate Done");
+    }
 
+    private void launchUI() {
+        HashMap<Object, Object> site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0 || RestoreCCU.isReplaceCCUUnderProcess()) {
+            Log.i(TAG,"No Site Synced navigate to Register");
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            startActivity(i);
+            finish();
+        } else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP)) {
+            Log.i(TAG,"CCU Setup is not completed");
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 4);
+            startActivity(i);
+            finish();
+        } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)
+                && !prefs.getBoolean("ADD_CCU")) {
+            Log.i(TAG,"No profile synced navigate to create profile");
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", getViewPagerPosition());
+            startActivity(i);
+            finish();
+        } else if(prefs.getBoolean(PreferenceConstants.PROFILE_SETUP) && !prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
+            Log.i(TAG,"No floor is Created");
+            System.out.println("No Floor is Created");
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", getViewPagerPosition());
+            startActivity(i);
+            finish();
+        } else if(prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
+            int recovery = SystemProperties.getInt("renatus_recovery",0);
+            Intent i;
+            if(Globals.getInstance().isSafeMode()){
+                new Thread() {
+                    @Override
+                    public void run() {
+                        UploadLogs.instanceOf().saveCcuLogs();
+                    }
+                }.start();
+
+
+                i = new Intent(SplashActivity.this, SafeModeActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            }
+            else if (recovery == 1) {
+                i = new Intent(SplashActivity.this, RenatusEngineeringActivity.class);
+            } else {
+                i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
+            }
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        }else if(site.size() > 0 && prefs.getBoolean(PreferenceConstants.CCU_SETUP)
+                && prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
+            Log.i(TAG,"ADD CCU is not completed");
+            Intent i = new Intent(SplashActivity.this,
+                    FreshRegistration.class);
+            i.putExtra("viewpager_position", 23);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        }
     }
     
     @Override
@@ -132,7 +123,7 @@ public class SplashActivity extends AppCompatActivity {
     
         PermissionHandler permissionHandler = new PermissionHandler();
         if (permissionHandler.hasAppPermissions(this)) {
-            registrationThread.start();
+            Globals.getInstance().registerOnCcuInitCompletedListener(this);
         }
     }
     
@@ -147,7 +138,7 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         }
-        registrationThread.start();
+        Globals.getInstance().registerOnCcuInitCompletedListener(this);
     }
 
     // Yes, this essentially duplicates code in FreshRegistration{Activity}.  It's ok.  It's basically
@@ -203,6 +194,14 @@ public class SplashActivity extends AppCompatActivity {
             daikinSplash.setVisibility(View.VISIBLE);
         else
             splashLogo75f.setVisibility(View.VISIBLE);
+    }
+    @Override
+    public void onInitCompleted() {
+        CcuLog.i(L.TAG_CCU_INIT,"CCUInit Completed Callback");
+        SplashActivity.this.runOnUiThread(() -> {
+            launchUI();
+            Globals.getInstance().unRegisterOnCcuInitCompletedListener(this);
+        });
     }
 }
 

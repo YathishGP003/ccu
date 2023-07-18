@@ -142,6 +142,8 @@ public class Tags
     public static final String AUTO = "auto";
     public static final String AWAY = "away";
     public static final String SETBACK = "setback";
+    public static final String BACKFILL = "backfill";
+    public static final String DURATION = "duration";
 
 
     public static final String TEMP = "temp";
@@ -157,6 +159,9 @@ public class Tags
     public static final String HUMIDITY = "humidity";
     public static final String VOC = "voc";
     public static final String PM2P5 = "pm2p5";
+    public static final String HVAC_MODE = "hvacMode";
+    public static final String ZONE_HVAC_MODE = "zoneHvacMode";
+    public static final String OCCUPANCY_STATE = "occupancyState";
 
     public static final String TZ = "tz";
     public static final String HELIO_NODE = "helionode";
@@ -179,4 +184,11 @@ public class Tags
     public static final String NAMED = "named";
     public static final String LAST_MODIFIED_TIME = "lastModifiedDateTime";
     public static final String MODBUS = "modbus";
+
+    public static final String PIPEREF = "pipeRef";
+    public static final String CUR_STATUS = "curStatus";
+    public static final String BACNET_ID = "bacnetId";
+    public static final String BACNET_TYPE = "bacnetType";
+    public static final String MIN_VAL = "minVal";
+    public static final String MAX_VAL = "maxVal";
 }

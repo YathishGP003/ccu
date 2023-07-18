@@ -28,10 +28,6 @@ public class StandaloneConfigHandler {
             HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
         }
 
-        if (configPoint.getMarkers().contains(Tags.HIS)) {
-            CCUHsApi.getInstance().writeHisValById(configPoint.getId(),
-                    HSUtil.getPriorityVal(configPoint.getId()));
-        }
 
         if (configPoint.getMarkers().contains(Tags.USERINTENT)
                 && configPoint.getMarkers().contains(Tags.FAN)

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_75f">Renatus</string>
     <string name="app_daikin">Daikin</string>
     <string name="title_home">Home</string>
@@ -425,6 +425,7 @@
     <!--Fragment Titles-->
     <string name="installtype">Select Type Of Install</string>
     <string name="connectwifi">Connect to WiFi</string>
+    <string name="add_new_ccu">ADD NEW CCU</string>
 
     <string name="installcreatenew">Create New Site</string>
     <string name="desccreatenew">Use this option to create a new site. This will be used for a site\'s first CCU.</string>
@@ -501,6 +502,8 @@
     <string name="input_siteid">Enter Site ID</string>
     <string name="title_viewlist">VIEW LIST OF ASSIGNED SITES</string>
     <string name="hint_password">Password</string>
+    <string name="ccu_nameq">  CCU Name</string>
+    <string name="ccu_name">CCU Name</string>
 
     <!--Preconfigured CCU-->
     <string name="title_preconfig">PRECONFIGURED CCU</string>
@@ -995,7 +998,7 @@
     <string name="txt_smartstat">SmartStat</string>
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
-    <string name="txt_modbus_config">Modbus Config</string>
+    <string name="txt_configuration">Communication</string>
     <string name="txt_cancel_uppercase">CANCEL</string>
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
@@ -1030,6 +1033,7 @@
     <string name="title_temperature_setpoint">Temperature Setpoint</string>
     <string name="title_heater_on_off_status">Heater ON/OFF status</string>
     <string name="title_humidity_setpoint">Humidity Setpoint</string>
+    <string name="title_select_all_params">Select All Parameters</string>
 
     <string-array name="equipment_type">
         <item>Company PAC model 1</item>
@@ -1051,13 +1055,63 @@
 
 
     <string name="title_mb_config">MODBUS CONFIG</string>
-    <string name="txt_mb_baudRate">BaudRate:</string>
-    <string name="txt_mb_parity">Parity:</string>
-    <string name="txt_mb_dataBits">Data Bits:</string>
-    <string name="txt_mb_stopBits">Stop Bits:</string>
+    <string name="txt_mb_baudRate">BaudRate</string>
+    <string name="txt_mb_parity">Parity</string>
+    <string name="txt_mb_dataBits">Data Bits</string>
+    <string name="txt_mb_stopBits">Stop Bits</string>
 
-    <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
-    <string name="txt_restart">Restart Now</string>
+
+    <string name="title_bacnet_config">BACnet CONFIG</string>
+    <string name="title_bacnet_initialize">INITIALIZE BACNET</string>
+    <string name="title_disable_bacnet">DISABLE BACNET</string>
+    <string name="txt_ipDeviceObjectName">IP Device Object Name</string>
+    <string name="txt_zoneToVirtualDeviceMapping">Zone to Virtual Device Mapping</string>
+    <string name="txt_description">Description</string>
+    <string name="txt_location">Location</string>
+    <string name="txt_device_password">Device Password</string>
+    <string name="txt_device_password_hint">Hint: Alpha-Numeric Characters</string>
+    <string name="txt_IPAddress">IP Address <font color="#e5561a">*</font></string>
+    <string name="txt_LocalNetworkAddress">Local Network Number <font color="#e5561a">*</font></string>
+    <string name="txt_localNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_virtualNetworkAddress">Virtual Network Number <font color="#e5561a">*</font></string>
+    <string name="txt_virtualNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_port">Port <font color="#e5561a">*</font></string>
+    <string name="txt_port_hint">Recommended: 47808 to 47823</string>
+    <string name="txt_error_port">Port should be within 4096 to 65535</string>
+    <string name="txt_valid_number">Please input valid number</string>
+    <string name="txt_ip_device_instance_number">IP Device Instance Number  <font color="#e5561a">*</font></string>
+    <string name="txt_ip_device_instance_number_hint">In between 0 to 4194302</string>
+    <string name="txt_apdu_timeout">APDU Timeout  <font color="#e5561a">*</font></string>
+    <string name="txt_apdu_timeout_hint">In between 6000 to 65535</string>
+    <string name="txt_number_of_apdu_retries">Number of APDU Retries <font color="#e5561a">*</font></string>
+    <string name="txt_number_of_apdu_retries_hint">In between 0 to 255</string>
+    <string name="txt_apdu_segment_timeout">APDU Segment Timeout <font color="#e5561a">*</font></string>
+    <string name="txt_apdu_segment_timeout_hint">In between 5000 to 65535</string>
+    <string name="error_apdu_segment_timeout">APDU Segment Timeout should be within 5000 to 65535 in multiples of 1000</string>
+    <string name="error_zoneToVirtualDeviceMapping">every point at CCU level and zone level will be created with IP device created for CCU</string>
+    <string name="error_ip_address">Invalid IP address</string>
+    <string name="error_password">Invalid Password</string>
+    <string name="error_local_network_number">Local Network Number should be within 1 to 65535</string>
+    <string name="error_virtual_network_number">Virtual Network Number should be within 1 to 65535</string>
+    <string name="error_ip_device_instance_number">IP device instance Number should be within 0 to 4194302</string>
+    <string name="error_apdu_timeout">APDU Timeout should be within 6000 to 65535 in multiples of 1000</string>
+    <string name="error_apdu_retries">No. of APDU Retries should be within 0 to 255</string>
+    <string name="txt_notification_class_objects">Notification Class Objects <font color="#e5561a">*</font></string>
+    <string name="txt_notification_class_objects_hint">In between 0 to 10</string>
+    <string name="txt_trend_log_objects">Trend Log Objects <font color="#e5561a">*</font></string>
+    <string name="txt_trend_log_objects_hint">In between 0 to 10</string>
+    <string name="txt_schedule_objects">Schedule Objects <font color="#e5561a">*</font></string>
+    <string name="txt_offset_values">Offset Value(%) <font color="#e5561a">*</font></string>
+    <string name="txt_schedule_objects_hint">In between 0 to 10</string>
+    <string name="txt_offset_values_hint">In between 1 to 100</string>
+    <string name="error_notification_class_objects">Notification Class Objects should be within 0 to 10</string>
+    <string name="error_trend_log_objects">Trend Log Objects should be within 0 to 10</string>
+    <string name="error_schedule_objects">Schedule Objects should be within 0 to 10</string>
+    <string name="error_offset_values">Offset values be within 1 to 100</string>
+    <string name="error_vnn_and_lnn_not_same">Virtual Network Number and Local Network Number should not be Same</string>
+
+    <string name="txt_mb_restart_prompt">Disclaimer: Change in config requires app restart.</string>
+    <string name="txt_restart">RESTART CCU APP</string>
     <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
     <string name="alert_definitions">Alert Definitions:</string>
@@ -1202,7 +1256,6 @@
     <string name="p2pm">PM2.5</string>
 
 
-
     <string-array name="hyperstate_medium_high_fanmode">
         <item>  Off </item>
         <item>  Auto </item>
@@ -1264,8 +1317,6 @@
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
     <string name="desired_temperature">Desired Temperature</string>
-    <string name="backFill_duration">Backfill Time</string>
-    <string name="backFill_duration_description">Please choose backfill time according to site for appropriate offline storage.</string>
 
 
     <!-- Named Schedule-->
@@ -1317,4 +1368,39 @@
     <!-- Safe mode -->
     <string name="in_safe_mode">CCU is in Safe Mode</string>
     <string name="exit_safe_mode">EXIT SAFE MODE</string>
+    <string name="updateAppToRecommendedVersion">Please update the App to continue.. </string>
+    <string name="server_down_string">Operation cannot be performed till CCU is connected to server </string>
+    <string name="current_version">Current Version: </string>
+    <string name="latest_version">Latest Version: </string>
+    <string name="download_size">  | Download Size: </string>
+    <string name="bacnet_admin">admin@75f</string>
+    <string name="label_configure_as">Configure as</string>
+    <string name="label_bbmd">BBMD</string>
+    <string name="label_foreign_device">Foreign Device</string>
+    <string name="label_neither">Neither</string>
+    <string name="label_configure_service">Configure Service</string>
+    <string name="label_destination_ip_address">Destination IP Address <font color="#e5561a">*</font></string>
+    <string name="label_port">Port <font color="#e5561a">*</font></string>
+    <string name="label_object_type">Object Type <font color="#e5561a">*</font></string>
+    <string name="label_object_id">Object ID <font color="#e5561a">*</font></string>
+    <string name="label_array_index">Array Index</string>
+    <string name="label_property">Property <font color="#e5561a">*</font></string>
+    <string name="label_priority">Priority <font color="#e5561a">*</font></string>
+    <string name="txt_read_property">READ PROPERTY</string>
+    <string name="txt_write_property">WRITE PROPERTY</string>
+    <string name="txt_error_object_id">Object Id can not be empty</string>
+    <string name="label_data_type">Data Type <font color="#e5561a">*</font></string>
+    <string name="label_value">Value <font color="#e5561a">*</font></string>
+    <string name="label_delivery_method">Delivery Method <font color="#e5561a">*</font></string>
+    <string name="hint_enter_ip_address">Enter IP Address</string>
+    <string name="hint_enter_port_number">Enter Port Number</string>
+    <string name="hint_enter_low_limit">Enter Low Limit</string>
+    <string name="label_low_limit">Low Limit</string>
+    <string name="label_high_limit">High Limit</string>
+    <string name="hint_enter_high_limit">Enter High Limit</string>
+    <string name="txt_who_is">Who Is</string>
+    <string name="txt_add_object">ADD OBJECT</string>
+    <string name="txt_add_property">Add Property</string>
+    <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
+    <string name="txt_submit">Submit</string>
 </resources>

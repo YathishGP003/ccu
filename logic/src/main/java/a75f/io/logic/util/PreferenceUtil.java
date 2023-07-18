@@ -8,6 +8,8 @@ import android.util.Log;
 
 import java.util.Date;
 
+import a75f.io.logger.CcuLog;
+
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
@@ -56,7 +58,6 @@ public class PreferenceUtil {
     private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
-    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
 
     private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
@@ -66,8 +67,10 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
+    private static final String SINGLE_AND_DUAL_TEMP_SUPPORT="singleAndDualTempSupport";
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+    private static final String OCCUPANCY_MODE_POINT_MIGRATION = "occupancy_mode_point_migration";
 
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
@@ -81,6 +84,9 @@ public class PreferenceUtil {
 
     private static final String KIND_CORRECTION ="Kind_Correction";
 
+    private static final String REMOTE_DUP_COOLING_LOCKOUT_TUNER = "removeDupCoolingLockoutTuner";
+    private static final String SYNC_START_TIME = "syncStartTime";
+    private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     public static void setContext(Context c) {
         context= c;
     }
@@ -521,6 +527,13 @@ public class PreferenceUtil {
     public static void setSmartNodeDamperMigration() {
         setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
     }
+
+    public static boolean isZonesMigratedForSingleAndDualTempSupport() {
+        return getBooleanPreference(SINGLE_AND_DUAL_TEMP_SUPPORT);
+    }
+    public static void setZonesMigratedForSingleAndDualTempSupport() {
+        setBooleanPreference(SINGLE_AND_DUAL_TEMP_SUPPORT,true);
+    }
     public static boolean getSSEFanStageMigration() {
         return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
     }
@@ -535,12 +548,13 @@ public class PreferenceUtil {
     public static void setAirflowSampleWaitTimeMigration() {
         setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
     }
-    public static boolean getstaticPressureSpTrimMigration() {
-        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+
+    public static boolean getOccupancyModePointMigration() {
+        return getBooleanPreference(OCCUPANCY_MODE_POINT_MIGRATION);
     }
 
-    public static void setStaticPressureSpTrimMigration() {
-        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    public static void setOccupancyModePointMigration() {
+        setBooleanPreference(OCCUPANCY_MODE_POINT_MIGRATION, true);
     }
 
     public static boolean getNewOccupancyMode() {
@@ -670,5 +684,29 @@ public class PreferenceUtil {
     }
     public static boolean getScheduleMigration() {
         return getBooleanPreference(SCHEDULES_MIGRATION);
+    }
+
+    public static void setRemoveDupCoolingLockoutTuner() {
+        setBooleanPreference(REMOTE_DUP_COOLING_LOCKOUT_TUNER, true);
+    }
+    public static boolean getRemoveDupCoolingLockoutTuner() {
+        return getBooleanPreference(REMOTE_DUP_COOLING_LOCKOUT_TUNER);
+    }
+    public static long getSyncStartTime() {
+        return getLongPreference(SYNC_START_TIME);
+    }
+    public static void setSyncStartTime(long syncStartTime) {
+        CcuLog.i("CCU_READ_CHANGES", "syncStartTime " + new Date(syncStartTime));
+        setLongPreference(SYNC_START_TIME, syncStartTime);
+    }
+
+    public static void setDataSyncRunning() {
+        setBooleanPreference(DATA_SYNC_PROCESSING, true);
+    }
+    public static void setDataSyncStopped() {
+        setBooleanPreference(DATA_SYNC_PROCESSING, false);
+    }
+    public static boolean getDataSyncProcessing() {
+        return getBooleanPreference(DATA_SYNC_PROCESSING);
     }
 }

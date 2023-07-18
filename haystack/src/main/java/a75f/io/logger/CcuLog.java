@@ -191,4 +191,11 @@ public class CcuLog
 		e(tag, msg, null);
 	}
 
+	public static void printLongMessage(String tag, String str) {
+		if (str.length() > 4000) {
+			Log.i(tag, str);
+			printLongMessage(tag, str.substring(4000));
+		} else
+			Log.i(tag, str);
+	}
 }

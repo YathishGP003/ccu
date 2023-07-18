@@ -25,7 +25,7 @@ public abstract class SystemController
     public enum State {OFF, COOLING, HEATING}
     public enum EffectiveSatConditioning {SAT_OFF, SAT_COOLING, SAT_HEATING}
     public State systemState = OFF;
-    
+    public static final int MIN_DAMPER_FOR_CUMULATIVE_CALCULATION = 1;
     public boolean emergencyMode = false;
     
     public abstract int getCoolingSignal() ;
@@ -106,12 +106,17 @@ public abstract class SystemController
             }
         }
 
-        try {
-            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""
-                    + equipRef + "\"").equals("Zone Temp Dead");
-        } catch (UnknownRecException e) {
-            //Handle non-temp equips
-            return false;
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and temp and sensor and equipRef == \"" + equipRef + "\"");
+
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
+
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
+
+        if (currentTemp > (buildingLimitMax + tempDeadLeeway) || (currentTemp < buildingLimitMin - tempDeadLeeway)) {
+            CcuLog.e(L.TAG_CCU_SYSTEM, "Equip dead! "+equipRef+" , Current temp "+currentTemp);
+            return true;
         }
+        return false;
     }
 }

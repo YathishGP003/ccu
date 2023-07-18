@@ -140,4 +140,9 @@ public class DeviceUtilTest extends TestCase {
         assertEquals(DeviceUtil.getPercentageFromVoltage(6, "2-10v"), 50.0);
         assertEquals(DeviceUtil.getPercentageFromVoltage(6, "10-2v"), 50.0);
     }
+
+    public void testThermistorVal() {
+        double tempVal = ThermistorUtil.getThermistorValueToTemp(617580);
+        System.out.println(tempVal);
+    }
 }

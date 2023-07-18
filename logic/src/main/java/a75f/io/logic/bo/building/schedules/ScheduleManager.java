@@ -52,6 +52,8 @@ import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class ScheduleManager {
@@ -315,10 +317,6 @@ public class ScheduleManager {
                 CcuLog.i(TAG_CCU_SCHEDULER, "SchedulerCache : Reusing old occupied values");
                 return false;
             } else {
-                //TODO-Schedules - BPOS revisit
-                //if(!currentOccupiedMode.isOccupied()){
-                    //checkforOccUpdate(occupied);
-                //}
                 CcuLog.i(TAG_CCU_SCHEDULER, "SchedulerCache : Putting in new occupied values");
                 occupiedHashMap.put(id, occupied);
                 return true;
@@ -630,7 +628,10 @@ public class ScheduleManager {
                             .readEntity("point and scheduleStatus and equipRef == \""+equip.getId()+ "\"");
         if (!scheduleStatusPoint.isEmpty()) {
             String hisZoneStatus = CCUHsApi.getInstance().readDefaultStrValById(scheduleStatusPoint.get("id").toString());
-            String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
+            int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                    " == \"" + equip.getRoomRef() + "\"").intValue();
+            TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
+            String currentZoneStatus = DesiredTempDisplayMode.setPointStatusMessage(getZoneStatusMessage(equip.getRoomRef(), equip.getId()), temperatureMode);
             if (!hisZoneStatus.equals(currentZoneStatus)) {
                 CCUHsApi.getInstance().writeDefaultValById(scheduleStatusPoint.get("id").toString(), currentZoneStatus);
                 if(scheduleDataInterface !=null){

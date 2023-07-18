@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
+import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
 
@@ -29,7 +30,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	final private FloorPlanFragment floorPlanActivity;
 	private Menu            mMenu        = null;
 	private ArrayList<Zone> selectedRoom = new ArrayList<Zone>();
-	
+	private static final String INTENT_ZONE_DELETED = "a75f.io.renatus.ZONE_DELETED";
 	
 	/**
 	 * @param floorPlanFragment
@@ -117,6 +118,9 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			CCUHsApi.getInstance().saveTagsData();
 			floorPlanActivity.refreshScreen();
 			EquipsManager.getInstance().deleteEquipByZone(sZone.getId());
+			BacnetUtilKt.sendBroadCast(floorPlanActivity.requireContext(),
+					INTENT_ZONE_DELETED,
+					sZone.getId());
 		}
 		new AsyncTask<String, Void, Void>() {
 			@Override

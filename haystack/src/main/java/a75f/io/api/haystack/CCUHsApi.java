@@ -5,6 +5,7 @@ import static android.widget.Toast.LENGTH_LONG;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
@@ -71,11 +72,11 @@ public class CCUHsApi
 {
 
     public static final String TAG = CCUHsApi.class.getSimpleName();
-
+    private SharedPreferences defaultSharedPrefs;
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
-
+    private static final String INTENT_POINT_DELETED = "a75f.io.renatus.POINT_DELETED";
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
 
@@ -127,6 +128,11 @@ public class CCUHsApi
 
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
         updateJwtValidity();
+        this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
+    }
+
+    public boolean isBacNetEnabled() {
+        return defaultSharedPrefs.getBoolean("UseBACnet", false);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -382,7 +388,7 @@ public class CCUHsApi
     //TODO - Replace CCU support
     public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
         Point occupancy = new Point.Builder()
-                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              .setDisplayName("occupancyState")
                               //.setEquipRef(equipRef)
                               .setSiteRef(zone.getSiteRef())
                               .setRoomRef(zoneRef)
@@ -404,7 +410,23 @@ public class CCUHsApi
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         addZoneOccupancyPoint(zoneId, z);
+        addZoneTemperatureModePoint(zoneId, z);
         return zoneId;
+    }
+
+    public void addZoneTemperatureModePoint(String zoneId, Zone zone) {
+        Point ZoneTemperatureMode = new Point.Builder()
+                .setDisplayName(Tags.ZONE_HVAC_MODE)
+                .setSiteRef(zone.getSiteRef())
+                .setRoomRef(zoneId)
+                .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                .addMarker(Tags.ZONE).addMarker(Tags.HVAC_MODE)
+                .addMarker("his")
+                .setEnums("DUAL_TEMP, SINGLE_COOLING, SINGLE_HEATING")
+                .setTz(getTimeZone())
+                .build();
+        String ZoneTemperatureModeId = CCUHsApi.getInstance().addPoint(ZoneTemperatureMode);
+        CCUHsApi.getInstance().writeHisValById(ZoneTemperatureModeId, 0.0);
     }
 
     // From EntityPullHandler
@@ -450,6 +472,10 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateEquipLocally(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
     }
 
     public void updatePoint(RawPoint r, String id)
@@ -612,6 +638,15 @@ public class CCUHsApi
         return null;
     }
 
+    public HGrid readHDictByIds(HRef[] ids) {
+        try {
+            return hsClient.readByIds(ids);
+        } catch (UnknownRecException e) {
+            CcuLog.e("CCU_HS", "Entity does not exist ");
+        }
+        return null;
+    }
+
     public HDict readHDict(String query)
     {
         try
@@ -643,9 +678,9 @@ public class CCUHsApi
     /**
      * Write to a 'writable' point
      */
-    public void writePoint(String id, int level, String who, Double val, int duration)
+    public HGrid writePoint(String id, int level, String who, Double val, int duration)
     {
-        pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
+       return pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
     }
 
     /**
@@ -721,12 +756,12 @@ public class CCUHsApi
     }
 
 
-    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
-        pointWrite(id, level, who, val, dur, null);
+    public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
+       return pointWrite(id, level, who, val, dur, null);
     }
 
-    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
-        hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+    public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
+        HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
 
         if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
@@ -743,6 +778,7 @@ public class CCUHsApi
             CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
             HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         }
+        return hGrid;
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
@@ -1116,11 +1152,13 @@ public class CCUHsApi
 
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
+        CcuLog.d("CCU_HS", "deleteEntity: " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         removeId(id);
     }
 
     public void removeId(String id) {
+        CcuLog.d("CCU_HS", "removeId: " + id);
         //tagsDb.removeIdMap.remove(id.replace("@", ""));
         if (syncStatusService.getDeletedData().contains(id)) {
             syncStatusService.setDeletedEntitySynced(id);
@@ -1129,6 +1167,7 @@ public class CCUHsApi
 
     public void deleteWritableArray(String id)
     {
+        CcuLog.d("CCU_HS", "deleteWritableArray: " + id);
         tagsDb.writeArrays.remove(id.replace("@", ""));
     }
 
@@ -1138,6 +1177,7 @@ public class CCUHsApi
     }
 
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
+        CcuLog.d("CCU_HS", "deleteFloorEntityTreeLeavingRemoteFloorIntact: " + id);
         HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
         if (entity.get("floor") == null) {
             // not a floor :-(
@@ -1155,6 +1195,7 @@ public class CCUHsApi
     public void deleteEntityTree(String id) {
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);
         HashMap<Object, Object> entity = readEntity("id == " + id);
+        Intent intent = null;
         if (entity.get("site") != null) {
             //Deleting site from a CCU should not remove shared entities like site , floor or building tuner.
             ArrayList<HashMap<Object, Object>> equips = readAllEntities("equip and siteRef == \"" + id + "\"");
@@ -1195,6 +1236,10 @@ public class CCUHsApi
             for (HashMap<Object, Object> point : points) {
                 deleteEntityItem(point.get("id").toString());
             }
+            HashMap<Object, Object> zoneHvacModePoint =
+                    readEntity("hvacMode and zone and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete TemperatureMode point of room "+zoneHvacModePoint);
+                deleteEntityItem(zoneHvacModePoint.get("id").toString());
             
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
@@ -1205,6 +1250,11 @@ public class CCUHsApi
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntityItem(point.get("id").toString());
+                if(isBacNetEnabled()) {
+                    intent = new Intent(INTENT_POINT_DELETED);
+                    intent.putExtra("message", point.get("id").toString());
+                    context.sendBroadcast(intent);
+                }
             }
             deleteEntityItem(id);
         } else if (entity.get("device") != null) {
@@ -1224,6 +1274,7 @@ public class CCUHsApi
                 tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntityItem(entity.get("id").toString());
+            hsClient.clearPointFromWatch(HRef.copy(entity.get("id").toString()));
         }
         syncStatusService.saveSyncStatus();
     }
@@ -1478,10 +1529,9 @@ public class CCUHsApi
                     hsApi.setSynced(equiUuid);
                 }
                 //Points
-                for (Point p : points)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
+                ArrayList<HDict> hDicts = new ArrayList<>();
+                for (Point p : points) {
+                    if (p.getEquipRef().equals(q.getId())) {
                         String pointId = StringUtils.prependIfMissing(p.getId(), "@");
                         HashMap<Object, Object> point = readMapById(pointId);
                         if (point.isEmpty()) {
@@ -1491,13 +1541,21 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
-                            CcuLog.i(TAG, "Added Building Tuner "+p);
+                            CcuLog.i(TAG, "Added Building Tuner " + p);
+                            HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                            hDicts.add(pid);
                         } else {
-                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                            CcuLog.i(TAG, "Point already imported " + p.getId());
+                            double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                            if (defaultVal == 0) {
+                                HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                                hDicts.add(pid);
+                                Log.d(TAG, "No default value for point: " + pid.dis());
+                            }
                         }
-
                     }
                 }
+                importPointArrays(hDicts, hClient);
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
@@ -2082,6 +2140,7 @@ public class CCUHsApi
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
         setCcuReady();
+        Log.d("CCU_HS", "CCU Registered");
     }
 
     public void setCcuUnregistered() {
@@ -2090,6 +2149,7 @@ public class CCUHsApi
         editor.remove("isCcuRegistered");
         editor.commit();
         resetCcuReady();
+        Log.d("CCU_HS", "CCU Unregistered");
     }
 
     public boolean isNetworkConnected() {
@@ -2153,7 +2213,7 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-
+                            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                             });
@@ -2462,6 +2522,7 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder()
                              .add("ccuId", HRef.copy(ccuId));
         HDict[] dictArr = {b.toDict()};
+        Log.d("CCU_HS", "removeCCU API call");
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
@@ -2716,6 +2777,57 @@ public class CCUHsApi
             CcuLog.e(TAG, "updateJwtValidity : Token does not exist");
         }
         CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
+    }
+
+    public Double readDefaultValByLevel(String id, int level)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level - 1));
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else
+        {
+            return 0.0;
+        }
+    }
+    public String readPointArr(String id) {
+
+        ArrayList values = readPoint(id);
+        ArrayList<HashMap> resultPointArray = new ArrayList<>();
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    resultPointArray.add(valMap);
+                }
+            }
+        }else{
+            return HZincWriter.gridToString(HGrid.EMPTY);
+        }
+
+        HGridBuilder b = new HGridBuilder();
+        b.addCol("level");
+        b.addCol("val");
+        b.addCol("who");
+        b.addCol("duration");
+        b.addCol("lastModifiedDateTime");
+
+        for (int ii = 0; ii < resultPointArray.size(); ii++) {
+            HashMap pointArray = resultPointArray.get(ii);
+            int level = Integer.parseInt(pointArray.get("level").toString());
+            String val= pointArray.get("val").toString();
+            String who= (pointArray.containsKey("who")) ?pointArray.get("who").toString()  : null ;
+            b.addRow(new HVal[] {
+                    HNum.make(level),
+                    HNum.make(Double.parseDouble(val)),
+                    HStr.make(who),
+                    HNum.make(Double.parseDouble(pointArray.get("duration").toString())),
+                    HDateTime.make(pointArray.get("lastModifiedDateTime").toString())
+            });
+        }
+        return HZincWriter.gridToString(b.toGrid());
     }
 
 }

@@ -1,7 +1,8 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
+
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -10,7 +11,7 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +36,6 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -137,6 +137,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 						systemProfile = new VavFullyModulatingRtu();
 						systemProfile.addSystemEquip();
 						L.ccu().systemProfile = systemProfile;
+						setSystemModeForVav(CCUHsApi.getInstance());
 						return null;
 					}
 
@@ -479,6 +480,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			protected Void doInBackground( final String ... params ) {
 				systemProfile.setConfigEnabled(analog, selected ? 1: 0);
+				setSystemModeForVav(CCUHsApi.getInstance());
 				return null;
 			}
 			

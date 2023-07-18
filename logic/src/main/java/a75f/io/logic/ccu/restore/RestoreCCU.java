@@ -1,8 +1,8 @@
 package a75f.io.logic.ccu.restore;
 
 import android.content.SharedPreferences;
-import android.nfc.Tag;
 import android.util.Log;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -103,8 +104,10 @@ public class RestoreCCU {
                     lastUpdatedDatetimeString = "n/a";
                 }
                 String ccuId = ccuDetails.getString("deviceId");
-                ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
-                        ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
+                if(null != ccuVersionMap.get(ccuIdMap.get(ccuId))) {
+                    ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
+                            ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -114,13 +117,11 @@ public class RestoreCCU {
     }
 
     public void restoreCCUDevice(CCU ccu, ReplaceCCUTracker replaceCCUTracker){
-        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CCU_DEVICE, ReplaceStatus.RUNNING.toString());
         RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring CCU device "+ retryCount);
         restoreCCUHsApi.readCCUDevice(ccu.getCcuId(), retryCountCallback);
         getSettingPointsOfCCUDevice(ccu.getCcuId(), retryCountCallback);
         getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode(), retryCountCallback);
         L.saveCCUState();
-        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CCU_DEVICE, ReplaceStatus.COMPLETED.toString());
     }
 
     public void restoreSystemProfile(CCU ccu, AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
@@ -143,7 +144,6 @@ public class RestoreCCU {
     private void initReplaceStatusForSystemEntities(SharedPreferences.Editor editor){
         editor.putString(CONFIG_FILES, ReplaceStatus.PENDING.toString());
         editor.putString(SYNC_SITE, ReplaceStatus.PENDING.toString());
-        editor.putString(CCU_DEVICE, ReplaceStatus.PENDING.toString());
         editor.putString(SYSTEM_PROFILE, ReplaceStatus.PENDING.toString());
         editor.putString(ZONES, ReplaceStatus.PENDING.toString());
         editor.putString(ZONE_SCHEDULE, ReplaceStatus.PENDING.toString());
@@ -152,7 +152,7 @@ public class RestoreCCU {
     }
 
     public Map<String, Set<String>> getEquipDetailsOfCCU(String ccuId, String siteCode,
-                                                         SharedPreferences.Editor editor){
+                                                         SharedPreferences.Editor editor, boolean isReplaceClosed){
 
         HGrid equipGrid = getAllEquips(ccuId, siteCode);
         if(equipGrid == null){
@@ -162,11 +162,15 @@ public class RestoreCCU {
         Map<String, Set<String>> floorAndZoneIds = new HashMap<>();
         Set<String> floorRefSet = new HashSet<>();
         Set<String> roomRefSet = new HashSet<>();
-        initReplaceStatusForSystemEntities(editor);
+        if(!isReplaceClosed) {
+            initReplaceStatusForSystemEntities(editor);
+        }
         while(equipGridIterator.hasNext()) {
             HRow equipRow = (HRow) equipGridIterator.next();
             String equipID = equipRow.get(Tags.ID).toString();
-            editor.putString(equipID, ReplaceStatus.PENDING.toString());
+            if(!isReplaceClosed) {
+                editor.putString(equipID, ReplaceStatus.PENDING.toString());
+            }
             if(equipRow.has(Tags.ROOMREF) && !equipRow.get(Tags.ROOMREF).toString().contains(SYSTEM)){
                 roomRefSet.add(equipRow.get(Tags.ROOMREF).toString());
             }
@@ -271,9 +275,9 @@ public class RestoreCCU {
         if(equipGrid  == null){
             throw new NullHGridException("Null occurred while fetching modbus");
         }
-        getDeviceFromEquip(equipGrid, deviceCount, equipResponseCallback, retryCountCallback);
+        getDeviceFromEquip(equipId, equipGrid, deviceCount, equipResponseCallback, replaceCCUTracker,
+                retryCountCallback);
         L.saveCCUState();
-        replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
     }
 
     public void setStartingPairAddress(AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
@@ -318,8 +322,9 @@ public class RestoreCCU {
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
     }
 
-    private void getDeviceFromEquip(HGrid equipGrid, AtomicInteger deviceCount,
-                                    EquipResponseCallback equipResponseCallback, RetryCountCallback retryCountCallback) {
+    private void getDeviceFromEquip(String equipId, HGrid equipGrid, AtomicInteger deviceCount,
+                                    EquipResponseCallback equipResponseCallback, ReplaceCCUTracker replaceCCUTracker,
+                                    RetryCountCallback retryCountCallback) {
         if(equipGrid != null){
             Iterator equipGridIterator = equipGrid.iterator();
             while(equipGridIterator.hasNext()){
@@ -328,8 +333,8 @@ public class RestoreCCU {
                 if(equipRow.has(Tags.MODBUS)){
                     saveToBox(equipRow);
                 }
-                getDevicesFromEquips(equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
-                        retryCountCallback);
+                getDevicesFromEquips(equipId, equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
+                        replaceCCUTracker, retryCountCallback);
             }
         }
     }
@@ -394,7 +399,7 @@ public class RestoreCCU {
         modbusDevice.setPaired(true);
         String zoneRef = equipRow.get("roomRef").toString().replace("@SYSTEM","SYSTEM");
         String floorRef = equipRow.get("floorRef").toString().replace("@SYSTEM","SYSTEM");
-        modbusDevice.setEquipRef(equipRow.get("id").toString());
+        modbusDevice.setDeviceEquipRef(equipRow.get("id").toString());
         modbusDevice.setZoneRef(zoneRef);
         modbusDevice.setFloorRef(floorRef);
         modbusDevice.setSlaveId(Integer.parseInt(equipRow.get("group").toString()));
@@ -419,8 +424,9 @@ public class RestoreCCU {
         return restoreCCUHsApi.getEquip(equipId, retryCountCallback);
     }
 
-    private void getDevicesFromEquips(String equipRef, AtomicInteger deviceCount,
-                                      EquipResponseCallback equipResponseCallback, RetryCountCallback retryCountCallback){
+    private void getDevicesFromEquips(String equipId, String equipRef, AtomicInteger deviceCount,
+                                      EquipResponseCallback equipResponseCallback,
+                                      ReplaceCCUTracker replaceCCUTracker,RetryCountCallback retryCountCallback){
         HGrid deviceGrid = restoreCCUHsApi.getDevice(equipRef, retryCountCallback);
         if(deviceGrid == null){
             throw new NullHGridException("Null occurred while fetching device.");
@@ -429,6 +435,7 @@ public class RestoreCCU {
         while(deviceGridIterator.hasNext()) {
             HRow zoneDeviceRow = (HRow) deviceGridIterator.next();
             getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
+            replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
             equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
         }
     }
@@ -469,4 +476,35 @@ public class RestoreCCU {
         restoreCCUHsApi.restoreSettingPointsOfCCUDevice(ccuDeviceID, retryCountCallback);
         Log.i(TAG, "Saving Setting points completed");
     }
+
+    public static boolean isReplaceCCUUnderProcess(){
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.RUNNING.toString())){
+                replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.PENDING.toString());
+                return true;
+            }
+            else if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.PENDING.toString())){
+                return true;
+            }
+        }return false;
+    }
+
+    public static boolean isReplaceCCUCompleted(){
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.RUNNING.toString())){
+                return false;
+            }
+            else if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.PENDING.toString())){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

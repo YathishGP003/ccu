@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.hyperstat.actions.RelayActions
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
@@ -553,6 +554,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
     // To run specific fan speed while running aux heating
     enum class FanSpeed {
         OFF,LOW,MEDIUM,HIGH
+    }
+
+    fun getAverageTemp(userIntents: UserIntents): Double{
+        return (userIntents.zoneCoolingTargetTemperature + userIntents.zoneHeatingTargetTemperature) / 2.0
     }
 
 }

@@ -1,5 +1,8 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
+import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
 import android.annotation.SuppressLint;
@@ -218,7 +221,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 mDrawerLayout.openDrawer(drawer_screen);
                             }
                         }
-                    }else{
+                    } else{
                         startCountDownTimer(INTERVAL);
                     }
 
@@ -232,35 +235,39 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbEventReceiver, filter);
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Created");
+        populateBACnetConfiguration();
+        intializeBACnet();
     }
 
     @Override
     public void onUserInteraction() {
         super.onUserInteraction();
-        Log.d(TAG,"in userinteraction");
+        Log.i(TAG,"in user interaction");
         resetCountDownTimer();
     }
 
     private void resetCountDownTimer(){
-        Log.d(TAG,"in reset");
+        Log.i(TAG,"resetCountDownTimer ");
         stopCountdownTimer();
         startCountDownTimer(DISCONNECT_TIMEOUT);
     }
 
     @SuppressLint("LogNotTimber")
     private void startCountDownTimer(long interval) {
+        Log.i(TAG,"startCountDownTimer ");
         mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
+
+        if (countDownTimer != null)
+            countDownTimer.cancel();
+
         countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, interval) {
             @Override
             public void onTick(long l) {
             }
-
             @Override
             public void onFinish() {
-                final long millisLeft = mStopTimeInFuture - System.currentTimeMillis();
-                if (millisLeft <= 10000) {
-                    launchZoneFragment();
-                }
+                Log.i(TAG,"onFinish ");
+                launchZoneFragment();
                 stopCountdownTimer();
             }
         };
@@ -268,6 +275,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void launchZoneFragment() {
+        Log.i(TAG,"launch ZoneFragment");
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)
@@ -281,12 +289,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 }
                 for (Fragment fragment : fm.getFragments()) {
-                    if (fragment.getClass().toString().contains("CreateNewSite")) {
+                    if (!fragment.getClass().toString().contains("ZoneFragmentNew")) {
                             fm.beginTransaction().remove(fragment).commit();
                     }
                 }
             }
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e){
             e.printStackTrace();
         }
     }
@@ -294,7 +302,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @SuppressLint("LogNotTimber")
     private  void stopCountdownTimer() {
-        Log.d(TAG,"in stop");
+        Log.i(TAG,"stopCountdownTimer");
         if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
@@ -614,5 +622,20 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
     };
 
+    private void populateBACnetConfiguration() {
+        boolean isBacnetConfigFileCreated =  prefs.getBoolean(IS_BACNET_CONFIG_FILE_CREATED);
+        if(!isBacnetConfigFileCreated){
+            String confString= populateBacnetConfigurationObject().toString();
+            prefs.setString(BACNET_CONFIGURATION,confString);
+            prefs.setBoolean(IS_BACNET_CONFIG_FILE_CREATED,true);
+        }
+    }
+
+    private void intializeBACnet() {
+        if(UtilityApplication.isBACnetIntialized()) {
+            UtilityApplication.stopRestServer();
+            UtilityApplication.startRestServer();
+        }
+    }
 
 }

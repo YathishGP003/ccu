@@ -24,6 +24,8 @@ public class Zone extends Entity
     private String            vacationRef;
     private String            createdByApplication;
     private String ccuRef;
+    private int            bacnetId;
+    private String            bacnetType;
 
     public boolean isSystemSchedule()
     {
@@ -111,6 +113,20 @@ public class Zone extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public void setBacnetId(int bacnetId) {
+        this.bacnetId = bacnetId;
+    }
+
+    public int getBacnetId() {
+        return bacnetId;
+    }
+
+    public void setBacnetType(String bacnetType) {
+        this.bacnetType = bacnetType;
+    }
+
+    public String getBacnetType() { return bacnetType; }
+
     public HDict getHDict()
     {
         HDictBuilder b = new HDictBuilder()
@@ -138,6 +154,9 @@ public class Zone extends Entity
             b.add(m);
         }
 
+        b.add("bacnetId", getBacnetId());
+        b.add("bacnetType", getBacnetType());
+
         return b.toDict();
     }
 
@@ -156,6 +175,8 @@ public class Zone extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+        private int            bacnetId;
+        private String            bacnetType;
 
         public Builder setDisplayName(String displayName)
         {
@@ -214,6 +235,14 @@ public class Zone extends Entity
             return this;
         }
 
+        public void setBacnetId(int bacnetId) {
+            this.bacnetId = bacnetId;
+        }
+
+        public void setBacnetType(String bacnetType) {
+            this.bacnetType = bacnetType;
+        }
+
         public Zone build()
         {
             Zone z = new Zone();
@@ -229,6 +258,8 @@ public class Zone extends Entity
             z.setCreatedDateTime(createdDateTime);
             z.setLastModifiedDateTime(lastModifiedDateTime);
             z.setLastModifiedBy(lastModifiedBy);
+            z.setBacnetId(bacnetId);
+            z.setBacnetType(bacnetType);
             return z;
         }
 
@@ -278,6 +309,14 @@ public class Zone extends Entity
                 else if (pair.getKey().equals("lastModifiedBy"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("bacnetId"))
+                {
+                    this.bacnetId = Integer.parseInt(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("bacnetId"))
+                {
+                    this.bacnetType = pair.getValue().toString();
                 }
                 //it.remove();
             }

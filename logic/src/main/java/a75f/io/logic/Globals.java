@@ -344,6 +344,24 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                MigrationUtil.doMigrationTasksIfRequired();
+                performBuildingTunerUprades(site);
+                migrateHeartbeatPointForEquips(site);
+                migrateHeartbeatDiagPointForEquips(site);
+                migrateHeartbeatwithNewtags(site);
+                OAODamperOpenReasonMigration(site);
+                firmwareVersionPointMigration(site);
+                migrateIduPoints(site);
+                migrateSNPoints(site);
+                loadEquipProfiles();
+                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
+                Site siteObject = new Site.Builder().setHashMap(site).build();
+                CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),siteObject);
+
+                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);

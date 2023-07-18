@@ -240,10 +240,9 @@ public class Globals {
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-        if(!isSafeMode()){
-            importTunersAndScheduleJobs();
-            handleAutoCommissioning();
-        }
+
+        importTunersAndScheduleJobs();
+        handleAutoCommissioning();
 
         updateCCUAhuRef();
         setRecoveryMode();
@@ -325,21 +324,23 @@ public class Globals {
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                    MigrationUtil.doMigrationTasksIfRequired();
-                    performBuildingTunerUprades(site);
-                    migrateHeartbeatPointForEquips(site);
-                    migrateHeartbeatDiagPointForEquips(site);
-                    migrateHeartbeatwithNewtags(site);
-                    OAODamperOpenReasonMigration(site);
-                    firmwareVersionPointMigration(site);
-                    migrateIduPoints(site);
-                    migrateSNPoints(site);
-                    CcuLog.i(L.TAG_CCU_INIT,"Load Profiles");
-                    loadEquipProfiles();
-                    isInitCompleted = true;
-                    Site siteObject = new Site.Builder().setHashMap(site).build();
-                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                            HayStackConstants.USER, HayStackConstants.PASS),siteObject);
+                    if(!isSafeMode()) {
+                        MigrationUtil.doMigrationTasksIfRequired();
+                        performBuildingTunerUprades(site);
+                        migrateHeartbeatPointForEquips(site);
+                        migrateHeartbeatDiagPointForEquips(site);
+                        migrateHeartbeatwithNewtags(site);
+                        OAODamperOpenReasonMigration(site);
+                        firmwareVersionPointMigration(site);
+                        migrateIduPoints(site);
+                        migrateSNPoints(site);
+                        CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
+                        loadEquipProfiles();
+                        isInitCompleted = true;
+                        Site siteObject = new Site.Builder().setHashMap(site).build();
+                        CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                                HayStackConstants.USER, HayStackConstants.PASS), siteObject);
+                    }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);

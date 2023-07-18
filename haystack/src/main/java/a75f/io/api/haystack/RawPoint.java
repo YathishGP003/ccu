@@ -666,5 +666,29 @@ public class RawPoint extends Entity
         }
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (this.getClass() != obj.getClass()) return false;
+        RawPoint that = (RawPoint) obj;
+        if (!this.domainName.equals(that.domainName)) return false;
+        if (!this.displayName.equals(that.displayName)) return false;
+        if (!this.deviceRef.equals(that.deviceRef)) return false;
+        if (!this.pointRef.equals(that.pointRef)) return false;
+        if (!this.type.equals(that.type)) return false;
+        if (!this.unit.equals(that.unit)) return false;
+        if (!this.port.equals(that.port)) return false;
+        if (this.enabled != that.enabled) return false;
+        if (this.markers.size() != (that.markers.size())) return false;
+        for (String marker : this.markers) {
+            if (!this.markers.contains(marker)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 }

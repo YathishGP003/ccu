@@ -18,7 +18,7 @@ class DomainBuilderTest {
 
     private lateinit var dmModel: ModelDirective
 
-    val hayStack = MockCcuHsApi()
+    private val hayStack = MockCcuHsApi()
     @Before
     fun setUp() {
         dmModel = ResourceHelper.loadProfileModelDefinition("DomainBuilder_TestModel.json")
@@ -84,9 +84,17 @@ class DomainBuilderTest {
                 }
             }
         }
+    }
 
+    @Test
+    fun testDomainApi() {
+        buildDomain()
+        val point = hayStack.readEntity("point")
+        val pointId = point["id"].toString()
+        val equipRef = point["equipRef"].toString()
+        val domainObject = Domain.getEquipPoint(pointId, equipRef)
 
-
+        assert(point["domainName"].toString() == domainObject?.domainName)
     }
 
     private fun getTestProfileConfig() : ProfileConfiguration {

@@ -44,7 +44,6 @@ class DeviceBuilderTest {
 
         val siteMap: HashMap<*, *> = mockHayStack.read(Tags.SITE)
         val siteRef = siteMap[Tags.ID] as String?
-        val siteDis = siteMap["dis"] as String?
 
         val f = Floor.Builder()
             .setDisplayName("Floor1")
@@ -86,6 +85,61 @@ class DeviceBuilderTest {
         println(supplyAirTemp)
         assert(thermistor["pointRef"].toString() == supplyAirTemp["id"].toString())
 
+    }
+
+    @Test
+    fun testUpdateDevice() {
+        val s = Site.Builder()
+            .setDisplayName("75F")
+            .addMarker("site")
+            .setGeoCity("Burnsville")
+            .setGeoState("MN")
+            .setTz("Chicago")
+            .setArea(1000).build()
+        mockHayStack.addSite(s)
+
+        val siteMap: HashMap<*, *> = mockHayStack.read(Tags.SITE)
+        val siteRef = siteMap[Tags.ID] as String?
+
+        val f = Floor.Builder()
+            .setDisplayName("Floor1")
+            .setSiteRef(siteRef)
+            .build()
+
+        val floorRef = mockHayStack.addFloor(f)
+
+        val z = Zone.Builder()
+            .setDisplayName("Zone1")
+            .setFloorRef(floorRef)
+            .setSiteRef(siteRef)
+            .build()
+        val zoneRef = mockHayStack.addZone(z)
+
+        DomainManager.buildDomain(mockHayStack)
+
+        val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
+        val entityMapper = EntityMapper(profileModel)
+        val equipBuilder = EquipBuilder(mockHayStack)
+        val profileConfig = getTestProfileConfig()
+        profileConfig.floorRef = floorRef
+        profileConfig.roomRef = zoneRef
+
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel)
+
+        val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId)
+
+        TestUtil.dumpDomain()
+
+        val relay1 = mockHayStack.readEntity("point and domainName == \"relay1Output\"")
+        println(relay1)
+
+        val updatedConfig = HyperStat2PfcuDeviceUpdateConfiguration(1000,"HS",0, "","")
+        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel)
+        deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId)
+
+        val relay1Op = mockHayStack.readEntity("point and domainName == \"relay1Output\"")
+        println(relay1Op)
     }
 
     private fun getTestProfileConfig() : ProfileConfiguration {

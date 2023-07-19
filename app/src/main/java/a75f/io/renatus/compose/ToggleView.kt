@@ -24,14 +24,12 @@ fun ToggleButton(
     defaultSelection : Boolean,
     onEnabled: (Boolean) -> Unit,
     ) {
-        var isChecked by remember { mutableStateOf(defaultSelection) }
         Switch(
             modifier = Modifier.padding(PaddingValues(start = 0.dp, top = 0.dp)),
-            checked = isChecked,
-            onCheckedChange = { isChecked = it },
+            checked = defaultSelection,
+            onCheckedChange = { onEnabled(it) },
             colors = getColors()
         )
-        AnimatedVisibility(visible = isChecked) { onEnabled(isChecked) }
 }
 
 @Composable

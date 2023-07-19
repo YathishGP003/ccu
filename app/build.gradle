@@ -271,6 +271,8 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.5.0"
     kapt 'com.jakewharton:butterknife-compiler:10.2.0'
     implementation project(path: ':domain')
+    implementation "androidx.compose.foundation:foundation:1.4.3"
+
 }
 
 

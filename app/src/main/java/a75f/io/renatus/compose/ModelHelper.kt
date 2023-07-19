@@ -1,14 +1,7 @@
 package a75f.io.renatus.compose
 
-import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.modbusbox.ModbusParser
-import android.content.Context
-import android.util.Log
-import com.google.gson.JsonArray
 import com.google.gson.JsonParseException
 import org.json.JSONArray
-import org.json.JSONObject
-import java.io.IOException
 
 /**
  * Created by Manjunath K on 14-07-2023.
@@ -41,34 +34,4 @@ fun arrayToList(arr: JSONArray): List<String> {
         tagsList.add(arr.getString(i))
     }
     return tagsList
-}
-
-
-fun testModel(context: Context): EquipmentDevice? {
-
-    try {
-        var data = readFileFromAssets(context,"downloaded.json")
-        var device = ModbusParser().parseModbusDataFromString(data)
-        if(device != null){
-            Log.i("domain", "text: null")
-            return device
-        }
-    }catch (e: Exception){
-        e.printStackTrace()
-    }
-    return null
-}
-
-fun readFileFromAssets(context: Context, fileName: String): String {
-    try {
-        val inputStream = context.assets.open(fileName)
-        val size = inputStream.available()
-        val buffer = ByteArray(size)
-        inputStream.read(buffer)
-        inputStream.close()
-        return String(buffer)
-    } catch (e: IOException) {
-        e.printStackTrace()
-        return ""
-    }
 }

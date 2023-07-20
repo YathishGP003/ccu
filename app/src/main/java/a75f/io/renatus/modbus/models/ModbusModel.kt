@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
  */
 
 class EquipModel {
+    var slaveId = mutableStateOf(0)
     val selectAllParameters = mutableStateOf(false)
     var equipDevice = mutableStateOf(EquipmentDevice())
     var parameters = mutableListOf<RegisterItem>()

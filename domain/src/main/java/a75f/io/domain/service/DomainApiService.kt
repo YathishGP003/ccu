@@ -10,6 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by Manjunath K on 12-07-2023.
@@ -22,6 +23,7 @@ interface DomainModelerService {
     fun getModbusModelsList(
         @retrofit2.http.Query("tag-names") tagNames: String?
     ): retrofit2.Call<ResponseBody>
+
     @GET("/models/modbus/{modelId}/modbus-json")
     fun getModelById(
         @retrofit2.http.Path("modelId") modelId: String?
@@ -61,6 +63,7 @@ class ServiceGenerator {
                 response
             })
             .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
             .build()
     }
     private fun getRetrofitForCareTakerBaseUrl(): Retrofit {
@@ -70,5 +73,4 @@ class ServiceGenerator {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
 }

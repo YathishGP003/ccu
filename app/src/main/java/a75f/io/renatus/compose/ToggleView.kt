@@ -1,16 +1,17 @@
 package a75f.io.renatus.compose
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -19,25 +20,37 @@ import androidx.compose.ui.unit.dp
  * Created by Manjunath K on 12-06-2023.
  */
 
+var primaryColor = Color(android.graphics.Color.parseColor("#E24301"))
+var greyColor = Color(android.graphics.Color.parseColor("#A1A1A1"))
 @Composable
 fun ToggleButton(
     defaultSelection : Boolean,
     onEnabled: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         Switch(
-            modifier = Modifier.padding(PaddingValues(start = 0.dp, top = 0.dp)),
             checked = defaultSelection,
-            onCheckedChange = { onEnabled(it) },
-            colors = getColors()
+            onCheckedChange = {
+                onEnabled(it)
+            },
+            thumbContent = {
+                Icon(
+                    imageVector = if (defaultSelection) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor
+            )
         )
-}
-
-@Composable
-fun getColors(): SwitchColors {
-    return SwitchDefaults.colors(
-        checkedThumbColor = Color(android.graphics.Color.parseColor("#EC3C10")),
-        checkedTrackColor = Color(android.graphics.Color.parseColor("#FF5722")),
-        uncheckedThumbColor = Color(android.graphics.Color.parseColor("#ffffff")),
-        uncheckedTrackColor = Color(android.graphics.Color.parseColor("#C99393A1")),
-    )
+    }
 }

@@ -57,10 +57,6 @@ public class ModbusParser {
         EquipmentDevice equipmentDevice = null;
         try {
             Gson gson = new Gson();
-            //ObjectMapper objectMapper = new ObjectMapper();
-            //objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            //objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            //equipmentDevice = objectMapper.readValue(json, EquipmentDevice.class);
             equipmentDevice = gson.fromJson(json, EquipmentDevice.class);
         } catch (Exception e) {
             e.printStackTrace();

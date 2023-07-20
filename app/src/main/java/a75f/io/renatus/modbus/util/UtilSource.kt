@@ -1,7 +1,10 @@
-package a75f.io.renatus.modbus
+package a75f.io.renatus.modbus.util
 
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.renatus.modbus.models.RegisterItem
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import java.util.Objects
 
@@ -29,3 +32,26 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
     }
     return parameterList
 }
+
+ fun showToast(text: String, context: Context){
+    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+}
+fun log(msg: String) {
+    Log.i("DMModbus",msg)
+}
+
+const val MODBUS = "MODBUS"
+const val EQUIP_TYPE = "Equipment Type"
+const val LOADING = "Loading Modbus Models"
+const val SLAVE_ID = "Slave Id"
+const val SELECT_ALL = "Select All Parameters"
+const val SAVE = "Save"
+const val PARAMETER = "PARAMETER"
+const val SAME_AS_PARENT = "Same As Parent"
+const val DISPLAY_UI = "DISPLAY UI"
+const val SAVING = "Saving Modbus configuration"
+const val SAVED = "Saved all the configuration"
+const val NO_MODEL_DATA_FOUND = "No model data found..!"
+const val MODBUS_DEVICE_LIST_NOT_FOUND = "Modbus device list not found..!"
+const val WARNING = "Warning"
+const val OK = "Ok"

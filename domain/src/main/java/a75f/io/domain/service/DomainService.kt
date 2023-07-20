@@ -20,10 +20,10 @@ class DomainService {
                 if (response.isSuccessful)
                     callback.onSuccessResponse(response.body()?.string())
                  else
-                    callback.onErrorResponse(response.body()?.toString())
+                    callback.onErrorResponse(response.raw().message)
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                callback.onErrorResponse(t.stackTraceToString())
+                callback.onErrorResponse(t.message)
             }
         })
     }
@@ -36,10 +36,10 @@ class DomainService {
                 if (response.isSuccessful)
                     callback.onSuccessResponse(response.body()?.string())
                 else
-                    callback.onErrorResponse(response.body()?.string())
+                    callback.onErrorResponse(response.raw().message)
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                callback.onErrorResponse(t.stackTraceToString())
+                callback.onErrorResponse(t.message)
             }
         })
     }

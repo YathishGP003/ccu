@@ -64,7 +64,8 @@ public class FragmentModbusType  extends BaseDialogFragment {
         modbusequip.setOnClickListener(v -> {
             /*FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS30);
             showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);*/
-            showDialogFragment(new ModbusConfigView(), FragmentModbusConfiguration.ID);
+
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT), FragmentModbusConfiguration.ID);
         });
         modbusem.setOnClickListener(v -> {
             FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR_ZONE);

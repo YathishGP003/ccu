@@ -1,10 +1,14 @@
 package a75f.io.renatus.compose
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,13 +29,13 @@ import androidx.compose.ui.unit.sp
 fun HeaderTextView(text: String) {
     Text(
         modifier = Modifier
-            .padding(PaddingValues(top = 5.dp, start = 5.dp, end = 5.dp))
-            .width(200.dp),
+            .wrapContentSize().padding(5.dp),
         style = TextStyle(
             fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
-            color = Color.Black
+            color = Color.Black,
+            textAlign = TextAlign.Center,
         ),
         text = text
     )
@@ -59,8 +63,7 @@ fun TitleTextView(text: String) {
     Text(
         modifier = Modifier
             .padding(10.dp)
-            .height(100.dp)
-            .width(200.dp),
+            .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,
             fontFamily = FontFamily.SansSerif,
@@ -75,29 +78,29 @@ fun TitleTextView(text: String) {
 @Composable
 fun SubTitle(text: String) {
     Text(
-        modifier = Modifier
-            .height(50.dp),
+        modifier = Modifier.height(50.dp).padding(start = 5.dp),
         style = TextStyle(
             textAlign = TextAlign.Center,
             fontFamily = FontFamily.SansSerif,
             fontSize =  18.sp,
-            color = Color.Gray
+            fontWeight = FontWeight.SemiBold,
+            color = Color.DarkGray
         ),
         text = text
     )
 }
+
 @Composable
-fun SingleLineTitle(text: String) {
-    Text(
-        modifier = Modifier
-            .height(100.dp)
-            .fillMaxWidth(),
-        style = TextStyle(
-            textAlign = TextAlign.Left,
-            fontFamily = FontFamily.SansSerif,
-            fontSize =  18.sp,
-            color = Color.Gray
-        ),
-        text = text
-    )
+fun SaveTextView(text: String,onClick: () -> Unit) {
+    Button(
+        onClick = {onClick()},
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(android.graphics.Color.parseColor("#E24301")),
+            contentColor = Color.White // text color
+        )
+    ) {
+        Spacer(modifier = Modifier.width(width = 8.dp))
+        Text(text = text)
+        Spacer(modifier = Modifier.width(width = 4.dp))
+    }
 }

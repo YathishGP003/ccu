@@ -1,5 +1,8 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
+import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
 import android.annotation.SuppressLint;
@@ -234,6 +237,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbEventReceiver, filter);
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Created");
+        populateBACnetConfiguration();
+        intializeBACnet();
     }
 
     @Override
@@ -623,5 +628,20 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
     };
 
+    private void populateBACnetConfiguration() {
+        boolean isBacnetConfigFileCreated =  prefs.getBoolean(IS_BACNET_CONFIG_FILE_CREATED);
+        if(!isBacnetConfigFileCreated){
+            String confString= populateBacnetConfigurationObject().toString();
+            prefs.setString(BACNET_CONFIGURATION,confString);
+            prefs.setBoolean(IS_BACNET_CONFIG_FILE_CREATED,true);
+        }
+    }
+
+    private void intializeBACnet() {
+        if(UtilityApplication.isBACnetIntialized()) {
+            UtilityApplication.stopRestServer();
+            UtilityApplication.startRestServer();
+        }
+    }
 
 }

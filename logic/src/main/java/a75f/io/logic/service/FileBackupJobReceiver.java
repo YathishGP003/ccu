@@ -21,7 +21,7 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
         performConfigFileBackup();
         performModbusSideLoadedJsonsBackup();
     }
-    private static void performConfigFileBackup(){
+    public static void performConfigFileBackup(){
         try {
             String ccuId = getCcuId();
             if (Strings.isNullOrEmpty(ccuId)) {

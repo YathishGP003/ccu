@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_75f">Renatus</string>
     <string name="app_daikin">Daikin</string>
+    <string name="app_carrier">Carrier</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -1247,6 +1248,7 @@
     <!-- Building passcode -->
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
     <string name="Daikin_Environment">daikin_prod</string>
+    <string name="Carrier_Environment">carrier_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>
@@ -1324,4 +1326,5 @@
     <string name="latest_version">Latest Version: </string>
     <string name="download_size">  | Download Size: </string>
     <string name="bacnet_admin">admin@75f</string>
+    <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
 </resources>

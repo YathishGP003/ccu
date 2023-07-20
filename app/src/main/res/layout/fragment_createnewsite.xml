@@ -218,7 +218,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputCCU"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="?error_appearance">
+                app:errorTextAppearance="@style/CustomErrorTextAppearance">
 
                 <EditText
                     android:id="@+id/editFacilityEmail"
@@ -231,6 +231,7 @@
                     android:textColor="@color/input_textcolor"
                     android:textSize="19.5dp" />
             </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputInstallerEmail"

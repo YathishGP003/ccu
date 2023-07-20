@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -87,6 +88,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
+    private ImageView powerByLogoForCarrier;
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -596,10 +598,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private void configLogo(){
 
         if(CCUUiUtil.isDaikinEnvironment(this)){
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.d3, null));
             powerbylogo.setVisibility(View.VISIBLE);
-        }else{
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+        }else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));
             powerbylogo.setVisibility(View.GONE);
         }
 

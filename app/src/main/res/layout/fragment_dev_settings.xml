@@ -393,6 +393,22 @@
                     android:layout_gravity="center"
                     android:gravity="center" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Enable Carrier Theme"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <CheckBox
+                    android:id="@+id/carrier_theme_config"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center" />
+
                 <Button
                     android:id="@+id/btnRestart"
                     android:layout_width="wrap_content"

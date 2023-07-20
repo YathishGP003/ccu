@@ -43,6 +43,9 @@ android {
         qa {
             minifyEnabled false
         }
+        carrier_prod {
+            minifyEnabled false
+        }
         staging {
             minifyEnabled false
         }

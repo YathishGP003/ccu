@@ -63,6 +63,9 @@
     <color name="daikin_75f">#FF0097E0</color>
     <color name="accentDaikin_75f">#CC0097E0</color>
 
+    <!--Carrier Theme Color-->
+    <color name="carrier_75f">#152C73</color>
+    <color name="accentCarrier_75f">#CC152C73</color>
 
     <color name="min_temp">#E24301</color>
     <color name="max_temp">#5990B4</color>

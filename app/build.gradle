@@ -109,6 +109,13 @@ android {
             debuggable false
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
+        carrier_prod {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            versionNameSuffix "_" + 'carrier_prod' + "_" + versionSuffix
+            debuggable false
+            manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
+        }
         staging {
             minifyEnabled false
             signingConfig signingConfigs.debug

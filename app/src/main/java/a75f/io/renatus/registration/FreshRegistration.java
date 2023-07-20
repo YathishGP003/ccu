@@ -31,6 +31,7 @@ import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -1337,10 +1338,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     private void configLogo(){
         if(CCUUiUtil.isDaikinEnvironment(this))
-            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo_colored));
-        else
-        {
-            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_logo_svg));
+            imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_daikin_logo_colored, null));
+        else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
+            imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_logo_dark_blue, null));
+        } else {
+            imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_logo_svg, null));
             findViewById(R.id.main_layout).setBackgroundResource(R.drawable.bg_logoscreen);
         }
     }

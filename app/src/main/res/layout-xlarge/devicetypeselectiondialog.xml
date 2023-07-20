@@ -71,6 +71,7 @@
             android:layout_marginStart="440dp">
 
             <ImageView
+                android:id="@+id/smartNodeId"
                 android:layout_width="279dp"
                 android:layout_height="130dp"
                 android:layout_alignParentBottom="true"
@@ -191,6 +192,7 @@
 
             <!-- todo: replace with hyperstat image -->
             <ImageView
+                android:id="@+id/hyperstatImageId"
                android:layout_width="279dp"
                android:layout_height="62dp"
                android:layout_alignParentBottom="true"

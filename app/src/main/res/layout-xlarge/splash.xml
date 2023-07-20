@@ -36,4 +36,27 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/carrier_splash"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_marginTop="50dp"
+            android:layout_width="300dp"
+            android:src="@drawable/carrier_logo_splash_screen"
+            android:layout_height="300dp"
+            android:layout_gravity="top" />
+
+        <ImageView
+            android:layout_marginTop="60dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:src="@drawable/carrier_75f_powered_by" />
+
+    </LinearLayout>
+
 </LinearLayout>

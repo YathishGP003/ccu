@@ -101,6 +101,21 @@ android {
 
             minifyEnabled false
         }
+
+        //qa api for testing this will be replaced with the carrier_prod apis
+        carrier_prod {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-qa.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/getDetails\"'
+
+            minifyEnabled false
+        }
         staging {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-staging.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'

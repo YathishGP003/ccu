@@ -656,7 +656,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao1AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao1AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao1fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog1 and output and low"
@@ -687,7 +690,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao2AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao2AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao2fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog2 and output and low"
@@ -718,7 +724,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao3AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao3fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog3 and output and low"

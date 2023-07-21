@@ -1168,6 +1168,13 @@ class HyperStatPointsUtil(
                         0.0
                     )
                 )
+                createFanConfigForAnalogOut(
+                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State),
+                    hyperStatConfig.analogOut1State.perAtFanLow,
+                    hyperStatConfig.analogOut1State.perAtFanMedium,
+                    hyperStatConfig.analogOut1State.perAtFanHigh,
+                    "analog1", configLogicalPointsList
+                )
             }
 
         }
@@ -1219,6 +1226,13 @@ class HyperStatPointsUtil(
                         0.0
                     )
                 )
+                createFanConfigForAnalogOut(
+                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State),
+                    hyperStatConfig.analogOut1State.perAtFanLow,
+                    hyperStatConfig.analogOut1State.perAtFanMedium,
+                    hyperStatConfig.analogOut1State.perAtFanHigh,
+                    "analog1", configLogicalPointsList
+                )
             }
         }
 
@@ -1267,6 +1281,13 @@ class HyperStatPointsUtil(
                         Port.ANALOG_OUT_ONE,
                         0.0
                     )
+                )
+                createFanConfigForAnalogOut(
+                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State),
+                    hyperStatConfig.analogOut1State.perAtFanLow,
+                    hyperStatConfig.analogOut1State.perAtFanMedium,
+                    hyperStatConfig.analogOut1State.perAtFanHigh,
+                    "analog1", configLogicalPointsList
                 )
             }
         }

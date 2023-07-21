@@ -625,7 +625,8 @@ class HyperStatFragment : BaseDialogFragment() {
                 }
 
                 analogOutFanConfig.visibility =
-                    if (analogOutState.enabled && analogOutState.association == 1) View.VISIBLE else View.GONE
+                    if (analogOutState.enabled && (analogOutState.association == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
+                                analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))

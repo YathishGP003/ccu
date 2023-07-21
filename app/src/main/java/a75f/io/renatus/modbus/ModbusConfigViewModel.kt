@@ -1,10 +1,14 @@
 package a75f.io.renatus.modbus
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.modbus.EquipmentDevice
+import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.modbusbox.ModbusParser
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -20,7 +24,7 @@ import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.SAVING
 import a75f.io.renatus.modbus.util.WARNING
 import a75f.io.renatus.modbus.util.getParameters
-import a75f.io.renatus.modbus.util.log
+import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -48,12 +52,12 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     var slaveIdList = mutableStateOf(emptyList<String>())
     var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
-    var parentEquip = mutableStateOf(String())
 
+    lateinit var modbusProfile: ModbusProfile
     lateinit var zoneRef: String
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
-    lateinit var deviceModelList:  List<ModelMetaData>
+    lateinit var deviceModelList: List<ModelMetaData>
     lateinit var context: Context
 
     private var selectedSlaveId by Delegates.notNull<Short>()
@@ -68,6 +72,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         childSlaveIdList.value = getSlaveIds(false)
         slaveIdList.value = getSlaveIds(true)
         this.context = context
+
+        if (L.getProfile(selectedSlaveId) != null) {
+
+            if (L.getProfile(selectedSlaveId) != null) {
+                modbusProfile = L.getProfile(selectedSlaveId) as ModbusProfile
+                if (modbusProfile != null) {
+                    selectedSlaveId = modbusProfile.slaveId
+                }
+            }
+        }
     }
 
     fun holdBundleValues(bundle: Bundle) {
@@ -76,6 +90,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
+
+
     }
 
     private fun readDeviceModels() {
@@ -90,16 +106,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         }
                         deviceList.value = itemList
                     } else {
-                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND,true)
+                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND, true)
                     }
                 } catch (e: Exception) {
-                    showErrorDialog(context, e.localizedMessage!!,true)
+                    showErrorDialog(context, e.localizedMessage!!, true)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, response!!,true)
+                showErrorDialog(context, response!!, true)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -107,7 +123,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     fun fetchModelDetails(selectedDevice: String) {
         val modelId = getModelIdByName(selectedDevice)
-        domainService.readModelById(modelId, object : ResponseCallback{
+        domainService.readModelById(modelId, object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 if (!response.isNullOrEmpty()) {
                     try {
@@ -118,7 +134,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                             model.parameters = getParameters(equipmentDevice)
                             val subDeviceList = mutableListOf<MutableState<EquipModel>>()
                             equipModel.value = model
-                            if (equipmentDevice.equips!= null && equipmentDevice.equips.isNotEmpty()) {
+                            if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
                                 equipmentDevice.equips.forEach {
                                     val subEquip = EquipModel()
                                     subEquip.equipDevice.value = it
@@ -132,75 +148,142 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                                 equipModel.value.subEquips = mutableListOf()
                             }
                         } else {
-                            showErrorDialog(context,NO_MODEL_DATA_FOUND,false)
+                            showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
                         }
                     } catch (e: JsonParseException) {
-                        showErrorDialog(context, e.message!!,false)
+                        showErrorDialog(context, e.message!!, false)
                     }
                 } else {
-                    showErrorDialog(context, response!!,false)
+                    showErrorDialog(context, response!!, false)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, response!!,false)
+                showErrorDialog(context, response!!, false)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
     }
+
     private fun getSlaveIds(isParent: Boolean): List<String> {
         val slaveAddress: ArrayList<String> = ArrayList()
-        if (!isParent)
-            slaveAddress.add(SAME_AS_PARENT)
+        if (!isParent) slaveAddress.add(SAME_AS_PARENT)
         for (i in 1..247) slaveAddress.add(i.toString())
         return slaveAddress
     }
-    private fun getModelIdByName(name : String) : String {
+
+    private fun getModelIdByName(name: String): String {
         return deviceModelList.find { it.name == name }!!.id
     }
 
-    fun saveConfiguration() {
-
+    private fun isValidConfiguration(): Boolean {
         // TODO add all validations here
-        RxjavaUtil.executeBackgroundTask(
-            { ProgressDialogUtils.showProgressDialog(context,SAVING) },
-            {
-                CCUHsApi.getInstance().resetCcuReady()
-                saveModbusConfiguration()
-                L.saveCCUState()
-                CCUHsApi.getInstance().setCcuReady()
-            },
-            {
-                ProgressDialogUtils.hideProgressDialog()
-                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                showToast(SAVED,context)
-                _isDialogOpen.value = false
-            }
-        )
-        equipModel.value.parameters.forEach {
-            log("saveConfiguration: ${it.param.value.name} ${it.displayInUi} ${it.param.value.parameterId}")
-        }
-        equipModel.value.subEquips.forEach {subEquip ->
-            subEquip.value.parameters.forEach {
-                log("saveConfiguration: ${it.param.value.name} ${it.displayInUi} ${it.param.value.parameterId}")
-            }
+        return true
+    }
+
+    fun saveConfiguration() {
+        if (isValidConfiguration()) {
+            saveConfiguration(
+                equipModel.value.equipDevice.value,
+                equipModel.value.slaveId.value.toShort(),
+                getParametersList(equipModel.value)
+            )
         }
     }
-    fun onSelectAll(isSelected: Boolean){
-       if (equipModel != null) {
-           equipModel.value.parameters.forEach {
-               it.displayInUi.value = isSelected
-           }
-           if (equipModel.value.subEquips != null && equipModel.value.subEquips.isNotEmpty()) {
-               equipModel.value.subEquips.forEach { subEquip ->
-                   subEquip.value.selectAllParameters.value = isSelected
-                   subEquip.value.parameters.forEach {
-                       it.displayInUi.value = isSelected
-                   }
-               }
-           }
-       }
+
+    private fun saveConfiguration(
+        equipmentDev: EquipmentDevice,
+        selectedSlaveId: Short,
+        modbusParam: List<Parameter>
+    ) {
+        RxjavaUtil.executeBackgroundTask({
+            ProgressDialogUtils.showProgressDialog(
+                context,
+                SAVING
+            )
+        }, {
+            CCUHsApi.getInstance().resetCcuReady()
+            addModbusProfile(equipmentDev, selectedSlaveId, modbusParam)
+            L.saveCCUState()
+            CCUHsApi.getInstance().setCcuReady()
+        }, {
+            ProgressDialogUtils.hideProgressDialog()
+            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+            showToast(SAVED, context)
+            _isDialogOpen.value = false
+        })
+    }
+
+    private fun addModbusProfile(
+        equipmentDev: EquipmentDevice, selectedSlaveId: Short, modbusParam: List<Parameter>
+    ) {
+        val subEquipmentDevices: MutableList<EquipmentDevice> = java.util.ArrayList()
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach {
+                subEquipmentDevices.add(it.value.equipDevice.value)
+            }
+        }
+        setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam, subEquipmentDevices)
+    }
+
+    private fun setUpsModbusProfile(
+        equipmentDev: EquipmentDevice, selectedSlaveId: Short, modbusParam: List<Parameter>,
+        subEquipmentDevices: List<EquipmentDevice>
+    ): String {
+        val equipRef: String
+        equipmentDev.slaveId = selectedSlaveId.toInt()
+        if (getModbusEquipMap(selectedSlaveId)) {
+            equipRef = updateModbusProfile(selectedSlaveId.toInt(), equipmentDev, modbusParam)
+        }
+         else {
+            modbusProfile = ModbusProfile()
+            modbusProfile.addMbEquip(selectedSlaveId, floorRef, zoneRef, equipmentDev, modbusParam, ProfileType.MODBUS_DEFAULT, subEquipmentDevices)
+            L.ccu().zoneProfiles.add(modbusProfile)
+            equipRef = modbusProfile.equip.id
+            L.saveCCUState()
+        }
+        CcuLog.d(
+            L.TAG_CCU_UI,
+            "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size + "," + equipRef + "," + selectedSlaveId
+        )
+        return equipRef
+    }
+
+    private fun updateModbusProfile(
+        slave_id: Int,
+        equipmentDev: EquipmentDevice?,
+        modbusParam: List<Parameter?>?
+    ): String {
+        modbusProfile.updateMbEquip(
+            slave_id.toShort(),
+            floorRef,
+            zoneRef,
+            equipmentDev,
+            modbusParam
+        )
+        L.ccu().zoneProfiles.add(modbusProfile)
+        return modbusProfile.equip.id
+    }
+    private fun getModbusEquipMap(slaveId: Short):Boolean {
+        val mapDetails =  CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
+        return !mapDetails.isNullOrEmpty()
+    }
+
+    fun onSelectAll(isSelected: Boolean) {
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEach {
+                it.displayInUi.value = isSelected
+            }
+            if (equipModel.value.subEquips != null && equipModel.value.subEquips.isNotEmpty()) {
+                equipModel.value.subEquips.forEach { subEquip ->
+                    subEquip.value.selectAllParameters.value = isSelected
+                    subEquip.value.parameters.forEach {
+                        it.displayInUi.value = isSelected
+                    }
+                }
+            }
+        }
     }
 
     fun updateSelectAll() {
@@ -208,35 +291,21 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEach {
-                if (!it.displayInUi.value){
+                if (!it.displayInUi.value) {
                     isAllSelected = false
                 }
             }
         }
-
-        if (equipModel.value.subEquips != null && equipModel.value.subEquips.isNotEmpty()) {
+        if (!equipModel.value.subEquips.isEmpty() && equipModel.value.subEquips.isNotEmpty()) {
             equipModel.value.subEquips.forEach { subEquip ->
                 subEquip.value.parameters.forEach {
-                    if (!it.displayInUi.value){
+                    if (!it.displayInUi.value) {
                         isAllSelected = false
                     }
                 }
             }
         }
         equipModel.value.selectAllParameters.value = isAllSelected
-    }
-
-    private fun saveModbusConfiguration() {
-        /*val modbusProfile = ModbusProfile()
-        modbusProfile.addMbEquip(
-            equipModel.value.slaveId.value.toShort(),
-            floorRef, zoneRef, equipModel.value.equipDevice.value,
-            equipModel.value.equipDevice.value.!!,
-            ProfileType.MODBUS_DEFAULT, subEquipmentDevices
-        )
-        addMbEquip(selectedSlaveId, floorRef, zoneRef, equipmentDev, modbusParam,
-            ProfileType.MODBUS_BTU, subEquipmentDevices);*/
-
     }
 
     fun showErrorDialog(context: Context, message: String, wantToDismiss: Boolean) {
@@ -246,7 +315,9 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         builder.setMessage(message)
         builder.setCancelable(false)
         builder.setPositiveButton(OK) { dialog, _ ->
-            if (wantToDismiss) { _isDialogOpen.value = false }
+            if (wantToDismiss) {
+                _isDialogOpen.value = false
+            }
             dialog.dismiss()
         }
         builder.create().show()

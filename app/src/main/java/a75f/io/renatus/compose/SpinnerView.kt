@@ -33,79 +33,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import com.renovo.bacnet4j.type.enumerated.LifeSafetyMode.enabled
 
 /**
  * Created by Manjunath K on 12-06-2023.
  */
 
-/*
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomDropdownMenu1(
-    selected: Int,
-    items: MutableState<List<String>>,
-    itemSelected: (Int,String) -> Unit
-) {
-    val context = LocalContext.current
-    var selectedText by remember {
-        if (items.value.isEmpty()) mutableStateOf(String()) else mutableStateOf(
-            items.value[selected]
-        )
-    }
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp)
-    ) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = {
-                expanded = !expanded
-            }
-        ) {
-            TextField(
-                value = selectedText,
-                onValueChange = { selectedText = it },
-                label = { Text(text = "Start typing the name of the coffee") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
-            )
-
-            val filteredOptions =
-                items.value.filter { it.contains(selectedText, ignoreCase = true) }
-            if (filteredOptions.isNotEmpty()) {
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = {
-                        // We shouldn't hide the menu when the user enters/removes any character
-                    }
-                ) {
-                    filteredOptions.forEachIndexed { index, item ->
-                        DropdownMenuItem(
-                            text = { Text(text = item) },
-                            onClick = {
-                                selectedText = item
-                                expanded = false
-                                Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
-                                itemSelected(index,item)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-*/
-
 @Composable
 fun SpinnerView(
-    selected: Int,
-    items: MutableState<List<String>>,
-    itemSelected: (Int, String) -> Unit
+    selected: Int, items: MutableState<List<String>>, itemSelected: (Int, String) -> Unit
 ) {
     var selectedText by remember {
         if (items.value.isEmpty()) mutableStateOf("Select Device") else mutableStateOf(
@@ -119,19 +55,16 @@ fun SpinnerView(
         modifier = Modifier
             .padding(12.dp)
             .border(
-                border = BorderStroke(stroke.dp, Color.Black),
-                shape = RoundedCornerShape(4.dp)
+                border = BorderStroke(stroke.dp, Color.Black), shape = RoundedCornerShape(4.dp)
             )
             .clickable {
                 expand = true
                 stroke = if (expand) 2 else 1
-            },
-        contentAlignment = Alignment.Center
+            }, contentAlignment = Alignment.Center,
     ) {
 
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(6.dp)
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(6.dp)
         ) {
 
             Text(
@@ -143,7 +76,7 @@ fun SpinnerView(
                 modifier = Modifier
                     .padding(horizontal = 5.dp, vertical = 5.dp)
                     .width(200.dp)
-                    .wrapContentHeight()
+                    .wrapContentHeight(),
             )
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
@@ -152,17 +85,14 @@ fun SpinnerView(
                 modifier = Modifier.size(24.dp)
             )
             DropdownMenu(
-                expanded = expand,
-                onDismissRequest = {
+                expanded = expand, onDismissRequest = {
                     expand = false
                     stroke = if (expand) 2 else 1
-                },
-                properties = PopupProperties(
+                }, properties = PopupProperties(
                     focusable = false,
                     dismissOnBackPress = true,
                     dismissOnClickOutside = true,
-                ),
-                modifier = Modifier
+                ), modifier = Modifier
                     .background(White)
                     .padding(2.dp)
                     .width(400.dp)
@@ -176,14 +106,13 @@ fun SpinnerView(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
-                    },
-                        onClick = {
-                            selectedIndex = index
-                            expand = false
-                            stroke = if (expand) 2 else 1
-                            itemSelected(index, item)
-                            selectedText = item
-                        })
+                    }, onClick = {
+                        selectedIndex = index
+                        expand = false
+                        stroke = if (expand) 2 else 1
+                        itemSelected(index, item)
+                        selectedText = item
+                    })
                 }
             }
         }

@@ -1,6 +1,8 @@
 package a75f.io.renatus.modbus.util
 
 import a75f.io.api.haystack.modbus.EquipmentDevice
+import a75f.io.api.haystack.modbus.Parameter
+import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
 import android.util.Log
@@ -33,12 +35,25 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
     return parameterList
 }
 
+fun getParametersList(equipment: EquipModel): List<Parameter> {
+    val parameterList = mutableListOf<Parameter>()
+    if (Objects.nonNull(equipment.parameters.isNotEmpty())) {
+        equipment.parameters.forEach {
+            val param = it.param.value
+            param.isDisplayInUI = it.displayInUi.value
+            parameterList.add(param)
+        }
+    }
+    return parameterList
+}
+
  fun showToast(text: String, context: Context){
     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
 }
 fun log(msg: String) {
     Log.i("DMModbus",msg)
 }
+
 
 const val MODBUS = "MODBUS"
 const val EQUIP_TYPE = "Equipment Type"

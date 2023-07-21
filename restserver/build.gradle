@@ -40,6 +40,9 @@ android {
         qa {
             minifyEnabled false
         }
+        carrier_prod {
+            minifyEnabled false
+        }
         dev_qa {
             minifyEnabled false
         }

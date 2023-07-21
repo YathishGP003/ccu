@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
+import a75f.io.renatus.hyperstatsplit.HyperStatSplitProfileSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -132,6 +133,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
         HyperStatProfileSelectionFragment hyperStatProfiling = HyperStatProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(hyperStatProfiling, hyperStatProfiling.getIdString());
+    }
+
+    @OnClick(R.id.rl_hyperstatsplit) void onHyperStatSplitClick() {
+        if (isModbusPaired()) {
+            return;
+        }
+        HyperStatSplitProfileSelectionFragment hyperStatSplitProfiling = HyperStatSplitProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(hyperStatSplitProfiling, hyperStatSplitProfiling.getIdString());
     }
 
     @OnClick(R.id.rl_smartstat) void onSmartStatClick() {

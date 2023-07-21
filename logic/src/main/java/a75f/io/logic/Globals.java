@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
@@ -544,6 +545,13 @@ public class Globals {
                             vrv.addEquip(CCUHsApi.getInstance(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vrv);
                             break;
+
+                        case HYPERSTATSPLIT_CPU_ECON:
+                            HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile();
+                            cpuEcon.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(cpuEcon);
+                            break;
+
                         case MODBUS_PAC:
                         case MODBUS_RRS:
                         case MODBUS_VRF:

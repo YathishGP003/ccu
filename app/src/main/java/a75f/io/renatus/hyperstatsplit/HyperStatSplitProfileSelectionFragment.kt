@@ -1,0 +1,96 @@
+package a75f.io.renatus.hyperstatsplit
+
+import a75f.io.api.haystack.HSUtil
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.renatus.BASE.BaseDialogFragment
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.FragmentBLEInstructionScreen
+import a75f.io.renatus.HyperStatSensePairScreen
+import a75f.io.renatus.R
+import a75f.io.renatus.util.CCUUiUtil
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.widget.Toast
+import androidx.core.view.isVisible
+
+
+const val HYPERSTATSPLIT_PROFILE_SELECTION_ID = "HyperStatSplitProfileSelection"
+
+/**
+ * @author nprill@75f.io
+ * Created on 7/11/23.
+ */
+class HyperStatSplitProfileSelectionFragment : BaseDialogFragment() {
+
+   private val mNodeAddress: Short
+      get() = requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
+   private val mRoomName: String
+      get() = requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME)!!
+   private val mFloorName: String
+      get() = requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
+
+   companion object {
+
+      @JvmStatic
+      fun newInstance(meshAddress: Short, roomName: String, floorName: String): HyperStatSplitProfileSelectionFragment {
+         val args = Bundle()
+         args.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress)
+         args.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
+         args.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
+
+         val fragment = HyperStatSplitProfileSelectionFragment()
+         fragment.arguments = args
+         return fragment
+      }
+   }
+
+   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+      return inflater.inflate(R.layout.fragment_hyperstatsplit_module_selection, container, false)
+   }
+
+   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+      super.onViewCreated(view, savedInstanceState)
+      setupOnClickListeners(view)
+   }
+
+   override fun onStart() {
+      super.onStart()
+      // copied from existing smartstat dialog ui logic
+      dialog?.window?.setLayout(MATCH_PARENT, MATCH_PARENT)
+   }
+
+
+   override fun getIdString(): String {
+      return HYPERSTATSPLIT_PROFILE_SELECTION_ID
+   }
+
+   private fun setupOnClickListeners(view: View) {
+
+
+      val goBack = view.findViewById<View>(R.id.goBackImage)
+      val cpuEconCell = view.findViewById<View>(R.id.cpuEconCell)
+
+      goBack.setOnClickListener { removeDialogFragment(HYPERSTATSPLIT_PROFILE_SELECTION_ID) }
+      cpuEconCell.setOnClickListener { showCPUEconConfigFragment() }
+
+   }
+
+   private fun showCPUEconConfigFragment() {
+      showDialogFragment(
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTATSPLIT_CPU_ECON,
+            NodeType.HYPERSTATSPLIT
+         ), FragmentBLEInstructionScreen.ID
+      )
+   }
+
+}
+
+

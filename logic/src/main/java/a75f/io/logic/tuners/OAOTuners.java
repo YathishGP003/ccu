@@ -784,6 +784,208 @@ public class OAOTuners
         }
         
     }
+
+    public static void updateZoneOaoTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipdis,
+                                             String tz) {
+
+        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate",equipref)) {
+            Point co2DamperOpeningRate = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "co2DamperOpeningRate")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate").addMarker("system")
+                    .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setTz(tz)
+                    .build();
+            String co2DamperOpeningRateId = hayStack.addPoint(co2DamperOpeningRate);
+            HashMap co2DamperOpeningRatePoint = hayStack.read("point and tuner and default and oao and co2 and damper and opening and rate");
+            ArrayList<HashMap> co2DamperOpeningRatePointArr = hayStack.readPoint(co2DamperOpeningRatePoint.get("id").toString());
+            for (HashMap valMap : co2DamperOpeningRatePointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(co2DamperOpeningRateId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(co2DamperOpeningRateId, HSUtil.getPriorityVal(co2DamperOpeningRateId));
+        }
+        if (!verifyPointsAvailability("not default","enthalpy and duct and compensation and offset",equipref)) {
+            Point enthalpyDuctCompensationOffset = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "enthalpyDuctCompensationOffset")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("system")
+                    .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setTz(tz)
+                    .build();
+            String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
+            HashMap enthalpyDuctCompensationOffsetPoint = hayStack.read("point and tuner and default and oao and enthalpy and duct and compensation and offset");
+            ArrayList<HashMap> enthalpyDuctCompensationOffsetPointArr = hayStack.readPoint(enthalpyDuctCompensationOffsetPoint.get("id").toString());
+            for (HashMap valMap : enthalpyDuctCompensationOffsetPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(enthalpyDuctCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
+        }
+        if (!verifyPointsAvailability("not default","economizing and min and temp",equipref)) {
+            Point economizingMinTemperature = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingMinTemperature")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("system")
+                    .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
+            HashMap economizingMinTemperaturePoint = hayStack.read("point and tuner and default and oao and economizing and min and temp");
+            ArrayList<HashMap> economizingMinTemperaturePointArr = hayStack.readPoint(economizingMinTemperaturePoint.get("id").toString());
+            for (HashMap valMap : economizingMinTemperaturePointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(economizingMinTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingMinTemperatureId, HSUtil.getPriorityVal(economizingMinTemperatureId));
+        }
+        if(!verifyPointsAvailability("not default","economizing and max and temp",equipref)) {
+            Point economizingMaxTemperature = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingMaxTemperature")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("system")
+                    .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
+            HashMap economizingMaxTemperaturePoint = hayStack.read("point and tuner and default and oao and economizing and max and temp");
+            ArrayList<HashMap> economizingMaxTemperaturePointArr = hayStack.readPoint(economizingMaxTemperaturePoint.get("id").toString());
+            for (HashMap valMap : economizingMaxTemperaturePointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(economizingMaxTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingMaxTemperatureId, HSUtil.getPriorityVal(economizingMaxTemperatureId));
+        }
+        if(!verifyPointsAvailability("not default","economizing and min and humidity",equipref)) {
+            Point economizingMinHumidity = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingMinHumidity")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("system")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
+            HashMap economizingMinHumidityPoint = hayStack.read("point and tuner and default and oao and economizing and min and humidity");
+            ArrayList<HashMap> economizingMinHumidityPointArr = hayStack.readPoint(economizingMinHumidityPoint.get("id").toString());
+            for (HashMap valMap : economizingMinHumidityPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(economizingMinHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingMinHumidityId, HSUtil.getPriorityVal(economizingMinHumidityId));
+        }
+        if(!verifyPointsAvailability("not default","economizing and max and humidity",equipref)) {
+            Point economizingMaxHumidity = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingMaxHumidity")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("system")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
+            HashMap economizingMaxHumidityPoint = hayStack.read("point and tuner and default and oao and economizing and max and humidity");
+            ArrayList<HashMap> economizingMaxHumidityPointArr = hayStack.readPoint(economizingMaxHumidityPoint.get("id").toString());
+            for (HashMap valMap : economizingMaxHumidityPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(economizingMaxHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingMaxHumidityId, HSUtil.getPriorityVal(economizingMaxHumidityId));
+        }
+        if(!verifyPointsAvailability("not default","outside and damper and mat and target",equipref)) {
+            Point outsideDamperMixedAirTarget = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "outsideDamperMixedAirTarget")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("system")
+                    .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
+            HashMap outsideDamperMixedAirTargetPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and target");
+            ArrayList<HashMap> outsideDamperMixedAirTargetPointArr = hayStack.readPoint(outsideDamperMixedAirTargetPoint.get("id").toString());
+            for (HashMap valMap : outsideDamperMixedAirTargetPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(outsideDamperMixedAirTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(outsideDamperMixedAirTargetId, HSUtil.getPriorityVal(outsideDamperMixedAirTargetId));
+        }
+        if(!verifyPointsAvailability("not default","outside and damper and mat and min",equipref)) {
+            Point outsideDamperMixedAirMinimum = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "outsideDamperMixedAirMinimum")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("system")
+                    .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
+            HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and min");
+            ArrayList<HashMap> outsideDamperMixedAirMinimumPointArr = hayStack.readPoint(outsideDamperMixedAirMinimumPoint.get("id").toString());
+            for (HashMap valMap : outsideDamperMixedAirMinimumPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(outsideDamperMixedAirMinimumId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(outsideDamperMixedAirMinimumId, HSUtil.getPriorityVal(outsideDamperMixedAirMinimumId));
+        }
+        if(!verifyPointsAvailability("not default","economizing and main and cooling and loop and map",equipref)) {
+            Point economizingToMainCoolingLoopMap = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingToMainCoolingLoopMap")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("system")
+                    .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
+            HashMap economizingToMainCoolingLoopMapPoint = hayStack.read("point and tuner and default and oao and economizing and main and cooling and loop and map");
+            ArrayList<HashMap> economizingToMainCoolingLoopMapPointArr = hayStack.readPoint(economizingToMainCoolingLoopMapPoint.get("id").toString());
+            for (HashMap valMap : economizingToMainCoolingLoopMapPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(economizingToMainCoolingLoopMapId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
+        }
+    }
+
     private static void deleteNonUsableSystemPoints(String tags, String equipref){
         HashMap deletablePoint = CCUHsApi.getInstance().read("point and tuner and system and oao and "+tags+" and equipRef == \"" + equipref + "\"");
         if (deletablePoint != null && deletablePoint.size() > 0) {

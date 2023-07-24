@@ -76,7 +76,7 @@ public class HyperLiteDevice {
     }
 
     /**
-     * Reconstruct a HyperConnectDevice from haystack database using the address.
+     * Reconstruct a HyperLiteDevice from haystack database using the address.
      * @param address
      */
     public HyperLiteDevice(int address) {

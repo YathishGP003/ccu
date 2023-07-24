@@ -21,7 +21,8 @@ import android.util.Log
 import java.util.*
 
 /**
- * Created by Manjunath K on 30-07-2021.
+ * Created by Manjunath K for HyperStat on 30-07-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HyperStatSplitPointsUtil(
     private val profileName: String,
@@ -328,7 +329,8 @@ class HyperStatSplitPointsUtil(
         return pointsIdMap
     }
 
-    // Points to hold loop output value
+    // Points to hold loop output value for CPU algo
+    // OAO points are created separately
      fun createConditioningLoopOutputPoints(isHpu: Boolean): MutableList<Pair<Point, Any>> {
         val loopOutputPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
@@ -382,7 +384,11 @@ class HyperStatSplitPointsUtil(
         return loopOutputPointsList
     }
 
-    // Function to create Zone-Level OAO Points
+    /*
+        Function to create Zone-Level OAO Points
+        Same points and tuners as System-Level OAO Profile, just with a "zone" tag instead of "system".
+        (Also, no Return Air CO2.)
+     */
     fun createZoneOAOPoints(): MutableList<Pair<Point, Any>> {
 
         val zoneOAOPointsList: MutableList<Pair<Point, Any>> = LinkedList()
@@ -545,7 +551,6 @@ class HyperStatSplitPointsUtil(
     /**
      * Functions which creates configuration enable/disable Points
      */
-
     fun createIsSensorBusEnabledConfigPoints(
         address0: ConfigState, address1: ConfigState,
         address2: ConfigState, address3: ConfigState,
@@ -1996,6 +2001,7 @@ class HyperStatSplitPointsUtil(
         }
     }
 
+    // Create Logical Temperature point for Temp/Humidity Sensor on Sensor Bus
     fun sensorBusTempConfiguration(sensorBusState: SensorBusTempState): Point {
         return when {
 
@@ -2020,6 +2026,7 @@ class HyperStatSplitPointsUtil(
         }
     }
 
+    // Create Logical Humidity point for Temp/Humidity Sensor on Sensor Bus
     fun sensorBusHumidityConfiguration(sensorBusState: SensorBusTempState): Point {
         return when {
 
@@ -2044,6 +2051,7 @@ class HyperStatSplitPointsUtil(
         }
     }
 
+    // Create Logical Pressure point for Pressure Sensor on Sensor Bus
     fun sensorBusPressureConfiguration(sensorBusState: SensorBusPressState): Point {
         return when {
 
@@ -2060,8 +2068,7 @@ class HyperStatSplitPointsUtil(
     }
 
 
-    // TODO: native sensor points?
-    // Function to logicalPoints
+    // Logical points for HyperLite onboard sensors
     fun createLogicalSensorPoints(): MutableList<Triple<Point, Any, Any>> {
 
         val logicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()

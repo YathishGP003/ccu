@@ -23,7 +23,8 @@ import android.util.Log
 
 
 /**
- * Created by Manjunath K on 11-07-2022.
+ * Created by Manjunath K for HyperStat on 11-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutActions, DoorWindowKeycardActions {
@@ -250,7 +251,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         logIt("$relayPort = DeHumidifier  $relayStatus")
     }
 
-    fun doExhaustFanStage1(
+    override fun doExhaustFanStage1(
         relayPort: Port,
         outsideAirFinalLoopOutput: Int,
         exhaustFanStage1Threshold: Int,
@@ -274,7 +275,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
 
     }
 
-    fun doExhaustFanStage2(
+    override fun doExhaustFanStage2(
         relayPort: Port,
         outsideAirFinalLoopOutput: Int,
         exhaustFanStage2Threshold: Int,
@@ -332,8 +333,11 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         }
     }
 
-    // TODO: replace with OAO
-    // Analog Fan operation is common for all the modules
+    /*
+        Unlike HyperStat, there is no door/window sensor option on HyperStat Split at this time.
+        isDoorOpen argument is left in place for inheritance purposes, but this method will always
+        be called with isDoorOpen = false for now.
+     */
     override fun doAnalogOAOAction(
         port: Port,
         analogOutStages: HashMap<String, Int>,
@@ -355,7 +359,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
             updateLogicalPointIdValue(logicalPointsList[port]!!, damperOperationPercent)
             if (damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] =
                 damperOperationPercent.toInt()
-            logIt("$port = OutDCVDamper  analogSignal  $damperOperationPercent")
+            logIt("$port = OutOAODamper  analogSignal  $damperOperationPercent")
 
         } else if (co2Value < zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
             currentOperatingMode == Occupancy.VACATION.ordinal ||
@@ -365,6 +369,11 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         }
     }
 
+    /*
+        Right now, no usages for Door/Window or Key Card sensors in HyperStat Split.
+
+        Keeping these methods in place for future and for inheritance purposes, but they are not called in algos.
+     */
     override fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double) {
         hsSplitHaystackUtil.updateDoorWindowValues(doorWindowEnabled,doorWindowSensor)
     }
@@ -446,10 +455,10 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
 
     fun setOperatingMode(currentTemp: Double, averageDesiredTemp: Double, basicSettings: BasicSettings, equip: HyperStatSplitEquip){
         var zoneOperatingMode = ZoneState.DEADBAND.ordinal
-        if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY) {
+        if(currentTemp < averageDesiredTemp && basicSettings.effectiveConditioningMode != StandaloneConditioningMode.COOL_ONLY) {
             zoneOperatingMode = ZoneState.HEATING.ordinal
         }
-        else if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+        else if(currentTemp >= averageDesiredTemp && basicSettings.effectiveConditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
             zoneOperatingMode = ZoneState.COOLING.ordinal
         }
         logIt("averageDesiredTemp $averageDesiredTemp" + "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}")

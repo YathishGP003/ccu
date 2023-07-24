@@ -158,7 +158,7 @@ private fun setUpTemps(
     } catch (e: Exception) {
         Log.i(
             L.TAG_CCU_ZONE,
-            "Exception while setting fan ode: " + e.message + " fan Mode " + fanMode
+            "Exception while setting fan mode: " + e.message + " fan Mode " + fanMode
         )
         e.printStackTrace()
     }

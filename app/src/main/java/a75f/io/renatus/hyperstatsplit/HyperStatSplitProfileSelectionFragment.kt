@@ -6,9 +6,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FragmentBLEInstructionScreen
-import a75f.io.renatus.HyperStatSensePairScreen
 import a75f.io.renatus.R
-import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View

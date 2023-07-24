@@ -6,11 +6,11 @@ import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import android.util.Log
 
 /**
- * Created by Manjunath K on 22-07-2022.
+ * Created for HyperStat by Manjunath K on 22-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
@@ -155,17 +155,4 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Fan Speed  analogSignal   $fanLoopForAnalog")
         }
     }
-
-    override fun doExhaustFanStage1(relayPort: Port) {
-
-        // TODO: implementation
-
-    }
-
-    override fun doExhaustFanStage2(relayPort: Port) {
-
-        // TODO: implementation
-
-    }
-
 }

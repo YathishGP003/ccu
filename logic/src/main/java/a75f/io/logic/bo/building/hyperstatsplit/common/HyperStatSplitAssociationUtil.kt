@@ -8,7 +8,8 @@ import a75f.io.logic.bo.building.sensors.SensorType
 import android.util.Log
 
 /**
- * Created by Manjunath K on 30-07-2021.
+ * Created for HyperStat by Manjunath K on 30-07-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 class HyperStatSplitAssociationUtil {
@@ -100,7 +101,7 @@ class HyperStatSplitAssociationUtil {
 
         }
 
-        // Function which returns the Sensor Bus Mapped state
+        // Function which returns the Sensor Bus Mapped state on the Temp/Humidity addresses (0-2)
         fun getSensorBusTempStage(state: Int): CpuEconSensorBusTempAssociation {
             return when (state) {
                 // Order is important here
@@ -114,7 +115,7 @@ class HyperStatSplitAssociationUtil {
 
         }
 
-        // Function which returns the Sensor Bus Mapped state
+        // Function which returns the Sensor Bus Mapped state on the Pressure addresses (3)
         fun getSensorBusPressStage(state: Int): CpuEconSensorBusPressAssociation {
             return when (state) {
                 // Order is important here
@@ -205,10 +206,12 @@ class HyperStatSplitAssociationUtil {
             return (universalIn.association == UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)
         }
         //Function which checks the Universal in is Associated  to CONDENSATE_NO
+        // TODO: verify this point is included
         fun isUniversalInAssociatedToCondensateNO(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.CONDENSATE_NO)
         }
         //Function which checks the Universal in is Associated  to CONDENSATE_NC
+        // TODO: verify this point is included
         fun isUniversalInAssociatedToCondensateNC(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.CONDENSATE_NC)
         }
@@ -241,10 +244,12 @@ class HyperStatSplitAssociationUtil {
             return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_2)
         }
         //Function which checks the Universal in is Associated  to FILTER_NO
+        // TODO: verify this point is included
         fun isUniversalInAssociatedToFilterNO(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.FILTER_NO)
         }
         //Function which checks the Universal in is Associated  to FILTER_NC
+        // TODO: verify this point is included
         fun isUniversalInAssociatedToFilterNC(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.FILTER_NC)
         }
@@ -415,6 +420,7 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.FILTER_NO)
         }
+        // TODO: verify this point is included
         fun isAnyUniversalInMappedToCondensateNC(
             ui1: UniversalInState, ui2: UniversalInState,
             ui3: UniversalInState, ui4: UniversalInState,
@@ -423,6 +429,7 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NC)
         }
+        // TODO: verify this point is included
         fun isAnyUniversalInMappedToCondensateNO(
             ui1: UniversalInState, ui2: UniversalInState,
             ui3: UniversalInState, ui4: UniversalInState,
@@ -981,7 +988,7 @@ class HyperStatSplitAssociationUtil {
             return StandaloneFanStage.OFF.ordinal
         }
 
-        // TODO: tie this in
+        // Updated Sensor Manager class accordingly. 0-2" duct pressure is already included in HyperStat Sense.
         fun getSensorNameByType(sensorInputs: UniversalInAssociation): String {
             /**
              * These sensor names are constant do not change please refer Sensor Manager class for more info
@@ -993,6 +1000,10 @@ class HyperStatSplitAssociationUtil {
                 UniversalInAssociation.CURRENT_TX_0_10 -> "8"
                 UniversalInAssociation.CURRENT_TX_0_20 -> "9"
                 UniversalInAssociation.CURRENT_TX_0_50 -> "10"
+                UniversalInAssociation.CURRENT_TX_0_100 -> "12"
+                UniversalInAssociation.CURRENT_TX_0_150 -> "13"
+                UniversalInAssociation.DUCT_PRESSURE_0_1 -> "14"
+                UniversalInAssociation.DUCT_PRESSURE_0_2 -> "1"
                 else -> "8"
             }
         }

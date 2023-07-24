@@ -1,9 +1,11 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75.io.algos.ControlLoop
+import a75f.io.logic.L
 
 /**
- * Created by Manjunath K on 16-08-2021.
+ * Created for HyperStat by Manjunath K on 16-08-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HyperstatSplitLoopController {
 
@@ -59,7 +61,7 @@ class HyperstatSplitLoopController {
     }
 
     fun dumpLogs(){
-        heatingControlLoop.dumpWithTag("CCU_CPUECON-HSSPLIT")
-        coolingControlLoop.dumpWithTag("CCU_CPUECON-HSSPLIT")
+        heatingControlLoop.dumpWithTag(L.TAG_CCU_HSSPLIT_CPUECON)
+        coolingControlLoop.dumpWithTag(L.TAG_CCU_HSSPLIT_CPUECON)
     }
 }

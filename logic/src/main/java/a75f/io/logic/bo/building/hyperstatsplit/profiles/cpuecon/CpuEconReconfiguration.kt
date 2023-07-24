@@ -4,7 +4,8 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip.Companion.getHyperStatSplitEquipRef
 
 /**
- * Created by Manjunath K on 26-10-2021.
+ * Created by Manjunath K for HyperStat CPU on 26-10-2021.
+ * Created by Nick P for HyperStat Split CPU/Economiser on 07-24-2023.
  */
 class CpuEconReconfiguration {
 

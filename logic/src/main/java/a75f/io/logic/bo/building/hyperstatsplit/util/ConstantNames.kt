@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.util
 
 /**
  * Created by Manjunath K on 02-01-2023.
+ * Updated for CPU with Economiser by Nick P on 07-24-2023.
  */
 
 const val TRUE = "true"

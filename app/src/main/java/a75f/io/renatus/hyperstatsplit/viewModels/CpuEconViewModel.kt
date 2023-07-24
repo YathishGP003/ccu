@@ -5,7 +5,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
@@ -18,7 +17,8 @@ import android.app.Application
 import android.util.Log
 
 /**
- * Created by Manjunath K on 15-07-2022.
+ * Created for HyperStat by Manjunath K on 15-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(application)  {
@@ -101,6 +101,9 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
         return hyperStatSplitConfiguration != null
     }
 
+    /*
+
+     */
     override fun validateProfileConfig() : Boolean {
 
         val cpuConfig = currentState.toConfig() as HyperStatSplitCpuEconConfiguration

@@ -5,7 +5,6 @@ import a75f.io.api.haystack.Point
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.common.LogicalPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusPressAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
@@ -17,7 +16,8 @@ import android.util.Log
 import java.util.HashMap
 
 /**
- * Created by Manjunath K on 05-09-2022.
+ * Created for HyperStat by Manjunath K on 05-09-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 class LogicalPointsUtil {
@@ -377,7 +377,7 @@ class LogicalPointsUtil {
                 "cmd and logical and dehumidifier and equipRef == \"$equipRef\"")
         }
 
-        // CPU specific points reading
+        // CPU with Economiser-specific points reading
          fun readCoolingStage1RelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
                 "cmd and logical and cooling and stage1 and equipRef == \"$equipRef\"")
@@ -477,6 +477,7 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
         }
 
+        // TODO: to be verified. This uses all existing OAO damper tags, but replaces "system" with "zone".
          fun createAnalogOutPointForOaoDamper(
              equipDis: String, siteRef: String, equipRef: String,
              roomRef: String, floorRef: String, tz: String,
@@ -641,13 +642,12 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readOutsideAirHumiditySensor(equipRef)).build()
         }
 
-        // I don't think we will need to keep track of NC/NO at the Haystack level.
+        // TODO: verify if polarity will be reversible on this point or not.
         fun createPointForCondensateOverflowStatus(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
         ): Point {
 
-            // TODO: add enum
             val markers = arrayOf(
                 "condensate","overflow","status","sensor","his"
             )
@@ -705,7 +705,7 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readCurrentTransferSensor(equipRef,transformerTag)).build()
         }
 
-        // Sensor bus point configured from a native 75F Sensor
+        // Sensor bus point configured from a native 75F Pressure Sensor (DPS)
         fun createPointForDuctPressure(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
@@ -724,7 +724,7 @@ class LogicalPointsUtil {
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
-                    // TODO: min, max, inc
+                    // TODO: min, max, inc (verify with firmware once we get there)
                     .setUnit("Pa")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -732,7 +732,7 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,pressureTag)).build()
         }
 
-        // Duct Pressure point configured from a 0-10V sensor
+        // Duct Pressure point configured from a 0-10V sensor on a Universal Input
         fun createPointForDuctPressure(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
@@ -768,12 +768,13 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,pressureTag)).build()
         }
 
+        // TODO: verify if polarity will be reversible on this point or not.
         fun createPointForFilterStatus(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
         ): Point {
 
-            // TODO: add enum
+            // TODO: add enum (once polarity is determined)
             val markers = arrayOf(
                 "filter","pressure","status","sensor","his"
             )
@@ -886,11 +887,17 @@ class LogicalPointsUtil {
             if(!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(config))
                 removePoint(readAnalogOutOaoLogicalPoint(equipRef))
         }
+
+        /*
+            In CPU/Economiser profile, Outside/Mixed/Supply Air Temperature can all be sourced from either
+            a Universal Input or the sensor bus.
+
+            This method checks both locations before deleting an outsideAirTemperature, mixedAirTemperature,
+            or supplyAirTemperature logical point.
+         */
         private fun removeUniversalInLogicalPoints(
             equipRef: String, baseConfig: BaseProfileConfiguration, profileType: ProfileType
         ) {
-            // Mixed/Supply/Outside Air Temperatures can be sourced from thermistors or the sensor bus.
-            // Don't delete the temp point if it is enabled on the sensor bus elsewhere.
             var address0State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
             var address1State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)
             var address2State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)
@@ -1028,12 +1035,17 @@ class LogicalPointsUtil {
                 removePoint(readFilterSwitch(equipRef))
             }
         }
+
+        /*
+            In CPU/Economiser profile, Outside/Mixed/Supply Air Temperature can all be sourced from either
+            a Universal Input or the sensor bus.
+
+            This method checks both locations before deleting an outsideAirTemperature, mixedAirTemperature,
+            or supplyAirTemperature logical point.
+         */
         private fun removeSensorBusLogicalPoints(
             equipRef: String, baseConfig: BaseProfileConfiguration, profileType: ProfileType
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "removeSensorBusLogicalPoints()")
-            // Mixed/Supply/Outside Air Temperatures can be sourced from thermistors or the sensor bus.
-            // Don't delete the temp point if it is enabled on a thermistor elsewhere.
             var address0State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
             var address1State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)
             var address2State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)
@@ -1073,10 +1085,8 @@ class LogicalPointsUtil {
                         universalIn3State,universalIn4State,
                         universalIn5State,universalIn6State,
                         universalIn7State,universalIn8State)) {
-                    Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Mixed Air Temp Sensor")
                     removePoint(readMixedAirTempSensor(equipRef))
                 }
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Mixed Air Humidity Sensor")
                 removePoint(readMixedAirHumiditySensor(equipRef))
             }
             if(!HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToSupplyAir(
@@ -1086,10 +1096,8 @@ class LogicalPointsUtil {
                         universalIn3State,universalIn4State,
                         universalIn5State,universalIn6State,
                         universalIn7State,universalIn8State)) {
-                    Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Supply Air Temp Sensor")
                     removePoint(readSupplyAirTempSensor(equipRef))
                 }
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Spuply Air Humidity Sensor")
                 removePoint(readSupplyAirHumiditySensor(equipRef))
             }
             if(!HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToOutsideAir(
@@ -1099,10 +1107,8 @@ class LogicalPointsUtil {
                         universalIn3State,universalIn4State,
                         universalIn5State,universalIn6State,
                         universalIn7State,universalIn8State)) {
-                    Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Outside Air Temp Sensor")
                     removePoint(readOutsideAirTempSensor(equipRef))
                 }
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Removing Outside Air Humidity Sensor")
                 removePoint(readOutsideAirHumiditySensor(equipRef))
             }
             if(!HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToDuctPressure(

@@ -15,7 +15,8 @@ import a75f.io.logic.bo.haystack.device.HyperConnectDevice
 import android.util.Log
 
 /**
- * Created by Manjunath K on 11-07-2022.
+ * Created for HyperStat by Manjunath K on 11-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 open class HyperStatSplitEquip {
@@ -90,12 +91,10 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusTempState,
         sensorBusTag: String
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails: " + sensorBusTag)
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails complete for " + sensorBusTag)
     }
 
     // Function which updates the Sensor Bus Temp new configurations
@@ -103,12 +102,10 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusPressState,
         sensorBusTag: String
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails: " + sensorBusTag)
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails for " + sensorBusTag)
     }
 
     // Function which updates the Universal In new configurations
@@ -117,7 +114,6 @@ open class HyperStatSplitEquip {
         universalInTag: String,
         physicalPort: Port
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateUniversalInDetails: " + physicalPort)
         val universalInId = hsSplitHaystackUtil.readPointID("config and $universalInTag and input and enabled") as String
         val universalInAssociatedId = hsSplitHaystackUtil.readPointID("config and $universalInTag and input and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(universalInId, if (universalInState.enabled) 1.0 else 0.0)
@@ -137,8 +133,6 @@ open class HyperStatSplitEquip {
             val pointType = HyperStatSplitAssociationUtil.getSensorNameByType(universalInState.association)
             DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
         }
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateUniversalInDetails complete for " + physicalPort)
-
     }
 
     fun updatePm25Values(

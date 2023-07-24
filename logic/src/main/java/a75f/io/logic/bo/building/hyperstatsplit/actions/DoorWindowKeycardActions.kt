@@ -1,7 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatsplit.actions
 
 /**
- * Created by Manjunath K on 22-07-2022.
+ * Created by Nick P on 07-24-2023.
  */
 
 interface DoorWindowKeycardActions {

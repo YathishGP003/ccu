@@ -9,7 +9,6 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstatsplit.common.*
@@ -24,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 
 /**
- * @author tcase@75f.io
+ * @author tcase@75f.io (HyperStat CPU)
  * Created on 7/7/21.
+ *
+ * Created for HyperStat Split CPU/Econ by Nick P on 07-24-2023.
  */
 class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
@@ -110,6 +111,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         logicalPointsList = equip.getLogicalPointList()
         hsSplitHaystackUtil = HSSplitHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
+
         if (isZoneDead) {
             handleDeadZone(equip)
             return
@@ -124,7 +126,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
+
+        // At this point, effectiveConditioningMode will be set to OFF if Condensate Overflow is detected
         val basicSettings = fetchBasicSettings(equip)
+
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
 
@@ -212,12 +217,12 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             else -> logIt(" Zone is in deadband")
         }
 
-        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
+        if (coolingLoopOutput > 0 && (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.COOL_ONLY
+                    || basicSettings.effectiveConditioningMode == StandaloneConditioningMode.AUTO) ) {
             fanLoopOutput = ((coolingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
-        else if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+        else if (heatingLoopOutput > 0  && (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                    ||basicSettings.effectiveConditioningMode == StandaloneConditioningMode.AUTO)) {
             fanLoopOutput = ((heatingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
 
@@ -227,9 +232,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip) {
 
-        val standaloneOutsideDamperMinOpen = equip.getHisVal("standalone and outside and damper and min and open").toInt()
+        val outsideDamperMinOpen = equip.getHisVal("outside and damper and min and open").toInt()
         doEconomizing(equip)
-        doDcv(equip, standaloneOutsideDamperMinOpen)
+        doDcv(equip, outsideDamperMinOpen)
 
         outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
 
@@ -246,7 +251,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         matThrottle = false
 
-        if (outsideAirLoopOutput > standaloneOutsideDamperMinOpen) {
+        if (outsideAirLoopOutput > outsideDamperMinOpen) {
             if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                 if (matTemp > oaoDamperMatMin) {
                     outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
@@ -256,10 +261,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             }
             if (matTemp < oaoDamperMatTarget) matThrottle = true
         } else {
-            outsideAirFinalLoopOutput = standaloneOutsideDamperMinOpen
+            outsideAirFinalLoopOutput = outsideDamperMinOpen
         }
 
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , standaloneOutsideDamperMinOpen)
+        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
 
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON," economizingLoopOutput "+economizingLoopOutput+" dcvLoopOutput "+dcvLoopOutput
@@ -322,7 +327,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         If a user did this, it would mess with this mapping, but this will be far from the biggest operational issue
         introduced.
 
-        We should validate against these kinds of configurations in the future.
+        We should probably validate against these kinds of configurations in the future.
      */
     private fun getNumberConfiguredCoolingStages(equip: HyperStatSplitCpuEconEquip): Int {
         if (HyperStatSplitAssociationUtil.isAnyRelayAssociatedToCoolingStage3(equip.getConfiguration())) return 3
@@ -335,8 +340,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     	Economizing is enabled when:
     	    ○ Zone is in Cooling Mode AND
 		        ○ OAT < oaoEconomizingDryBulbTemperatureThreshold OR
-		        ○ Weather OAEnthalpy is in range OR
-		        ○ Local OAEnthalpy < IndoorEnthalpy - EnthalpyDuctCompensationOffset
+		        ○ Weather OAEnthalpy is in range AND Local OAEnthalpy < IndoorEnthalpy - EnthalpyDuctCompensationOffset
+
+        This works exactly the same as OAO profile logic, except that the failsafe logic upon weather
+        data loss now includes enthalpy if an OAT/H sensor is on the sensor bus
      */
     private fun canDoEconomizing(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double): Boolean {
 
@@ -362,7 +369,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             return true
         }
 
-        if (!isEconomizingEnabledOnWeatherData(equip, externalTemp, externalHumidity, economizingMinTemp)) return false
+        if (!isEconomizingTempAndHumidityInRange(equip, externalTemp, externalHumidity, economizingMinTemp)) return false
 
         if (isEconomizingEnabledOnEnthalpy(equip, insideEnthalpy, outsideEnthalpy)) {
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Economizer enabled based on enthalpy.")
@@ -373,6 +380,12 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
+    /*
+        Same dry-bulb enable logic as OAO Profile.
+
+        If outsideTemp is between economizingMinTemp (0°F, adj.) and dryBulbTemperatureThreshold (55°F, adj.), then enable economizing.
+        (for outsideTemp, start with systemOutsideTemp, and use Outside Air Temperature sensor if systemOutsideTemp is 0)
+     */
     private fun isEconomizingEnabledOnDryBulb(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
 
         var dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("oao and economizing and dry and bulb and " +
@@ -380,6 +393,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         var outsideAirTemp = externalTemp
 
+        //
         if (externalHumidity == 0.0 && externalTemp == 0.0) outsideAirTemp = equip.getHisVal("outside and air and temp")
 
         if (outsideAirTemp > economizingMinTemp) return outsideAirTemp < dryBulbTemperatureThreshold
@@ -388,7 +402,16 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
-    private fun isEconomizingEnabledOnWeatherData(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
+    /*
+        Same Temp/Humidity Lockouts as OAO Profile.
+
+        If any of the following is true, disable economizing:
+            * systemOutsideTemp < economizingMinTemp (0°F, adj.)
+            * systemOutsideTemp > economizingMaxTemp (70°F, adj.)
+            * systemOutsideHumidity < economizingMinHumidity (0%, adj.)
+            * systemOutsideHumidity > economizingMaxHumidity (100%, adj.)
+     */
+    private fun isEconomizingTempAndHumidityInRange(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
 
         val economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
                 "temp",equip.equipRef)
@@ -397,10 +420,25 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val economizingMaxHumidity = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
                 "humidity",equip.equipRef)
 
-        if (externalTemp > economizingMinTemp
-            && externalTemp < economizingMaxTemp
-            && externalHumidity > economizingMinHumidity
-            && externalHumidity < economizingMaxHumidity) return true
+        var outsideTemp = externalTemp
+        var outsideHumidity = externalHumidity
+
+        if (
+            outsideTemp == 0.0 &&
+            outsideHumidity == 0.0 &&
+            HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToOutsideAir(
+                equip.getConfiguration().address0State,
+                equip.getConfiguration().address1State,
+                equip.getConfiguration().address2State)
+        ) {
+            outsideTemp = equip.getHisVal("outside and air and temp")
+            outsideHumidity = equip.getHisVal("outside and air and humidity")
+        }
+
+        if (outsideTemp > economizingMinTemp
+            && outsideTemp < economizingMaxTemp
+            && outsideHumidity > economizingMinHumidity
+            && outsideHumidity < economizingMaxHumidity) return true
 
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Outside air not suitable for economizing Temp : "+externalTemp
                 +" Humidity : "+externalHumidity)
@@ -409,20 +447,41 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
+    /*
+        Same enthalpy-enable condition as OAO Profile.
+
+        If systemOutsideEnthalpy < insideEnthalpy + enthalpyDuctCompensationOffset (0 BTU/lb, adj.), enable economizing
+        (Start with systemOutsideEnthalpy. If it's not available and OAT/H sensor is on sensor bus, then calculate outsideEnthalpy
+        based on sensed Outside Air Temperature & Humidity.
+     */
     private fun isEconomizingEnabledOnEnthalpy (equip: HyperStatSplitCpuEconEquip, insideEnthalpy: Double, outsideEnthalpy: Double): Boolean {
 
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+ outsideEnthalpy)
 
+        var outsideEnthalpyToUse = outsideEnthalpy
+
+        if (
+            outsideEnthalpy == 0.0 &&
+            HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToOutsideAir(
+                equip.getConfiguration().address0State,
+                equip.getConfiguration().address1State,
+                equip.getConfiguration().address2State)
+        ) {
+            val sensorBusOutsideTemp = equip.getHisVal("outside and air and temp")
+            val sensorBusOutsideHumidity = equip.getHisVal("outside and air and humidity")
+            outsideEnthalpyToUse = getAirEnthalpy(sensorBusOutsideTemp, sensorBusOutsideHumidity)
+        }
+
         val enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",equip.equipRef)
 
-        return insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset
+        return insideEnthalpy > outsideEnthalpyToUse + enthalpyDuctCompensationOffset
 
     }
 
     /*
         DCV is enabled when:
             ○ Zone is in Occupied Mode AND
-            ○ Zone CO2 > Zone CO2 Threshold
+            ○ Zone CO2 (sensed on HyperLite) > Zone CO2 Threshold
      */
     private fun doDcv(equip: HyperStatSplitCpuEconEquip, standaloneOutsideAirDamperMinOpen: Int) {
 
@@ -450,10 +509,16 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
-    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip) = BasicSettings(
-            conditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()],
+    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip): BasicSettings {
+
+        val userIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentUserIntentConditioningMode().toInt()]
+
+        return BasicSettings(
+            userIntentConditioningMode = userIntentConditioningMode,
+            effectiveConditioningMode = getEffectiveConditioningMode(equip, userIntentConditioningMode),
             fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
         )
+    }
 
     private fun fetchUserIntents(equip: HyperStatSplitCpuEconEquip): UserIntents {
         return UserIntents(
@@ -574,8 +639,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         when {
             (HyperStatSplitAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if (basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                 ) {
                     runRelayForCooling(relayState, port, config, tuner, relayStages)
                 } else {
@@ -584,8 +649,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             }
             (HyperStatSplitAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if (basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                 ) {
                     runRelayForHeating(relayState, port, config, tuner, relayStages)
                 } else {
@@ -709,7 +774,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     ) {
         logIt(" $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
-            && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
+            && basicSettings.effectiveConditioningMode == StandaloneConditioningMode.OFF ) {
             logIt("Cond is Off , Fan is Auto  : ")
             resetPort(whichPort)
             return
@@ -744,16 +809,16 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
-                doAnalogCooling(port,basicSettings.conditioningMode,analogOutStages,coolingLoopOutput)
+                doAnalogCooling(port,basicSettings.effectiveConditioningMode,analogOutStages,coolingLoopOutput)
             }
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
-                doAnalogHeating(port,basicSettings.conditioningMode,analogOutStages,heatingLoopOutput)
+                doAnalogHeating(port,basicSettings.effectiveConditioningMode,analogOutStages,heatingLoopOutput)
             }
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 doAnalogFanAction(
                     port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
                     analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages
+                    basicSettings.effectiveConditioningMode, fanLoopOutput, analogOutStages
                 )
             }
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToOaoDamper(analogOutState)) -> {
@@ -782,11 +847,15 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         )
     }
 
-    private fun resetLoopOutputValues() {
-       logIt("Resetting all the loop output values: ")
-        coolingLoopOutput = 0
-        heatingLoopOutput = 0
-        fanLoopOutput = 0
+    /*
+        effectiveConditioningMode is forced OFF if Condensate Overflow is detected.
+        Upon a return to normal, revert effectiveConditioningMode to userIntentConditioningMode.
+    */
+    private fun getEffectiveConditioningMode(equip: HyperStatSplitCpuEconEquip, userIntentConditioningMode: StandaloneConditioningMode): StandaloneConditioningMode {
+        val condensateOverflowStatus = hsSplitHaystackUtil.getCondensateOverflowStatus()
+        if (condensateOverflowStatus == 1.0) return StandaloneConditioningMode.OFF
+
+        return userIntentConditioningMode
     }
 
     override fun getEquip(): Equip? {

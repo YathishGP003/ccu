@@ -21,7 +21,8 @@ import a75f.io.renatus.R
 import android.util.Log
 
 /**
- * Created by Manjunath K on 15-07-2022.
+ * Created for HyperStat by Manjunath K on 15-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
  data class ViewState(
@@ -105,7 +106,6 @@ import android.util.Log
                     config.analogOut2State.perAtFanMedium,
                     config.analogOut2State.perAtFanHigh,
                 ),
-
                 AnalogConfigState(
                     config.analogOut3State.enabled,
                     config.analogOut3State.association.ordinal,
@@ -115,7 +115,6 @@ import android.util.Log
                     config.analogOut3State.perAtFanMedium,
                     config.analogOut3State.perAtFanHigh,
                 ),
-
                 AnalogConfigState(
                     config.analogOut4State.enabled,
                     config.analogOut4State.association.ordinal,
@@ -315,7 +314,6 @@ import android.util.Log
 }
 
 // CPU & Econ Specific
-
 val CpuEconRelayAssociation.displayName: Int
     get() {
         return when (this) {

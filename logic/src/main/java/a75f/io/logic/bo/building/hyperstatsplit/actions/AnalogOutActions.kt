@@ -1,14 +1,11 @@
 package a75f.io.logic.bo.building.hyperstatsplit.actions
 
-import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
-
 
 /**
- * Created by Manjunath K on 11-07-2022.
+ * Created by Nick P on 07-24-2023.
  */
 
 interface AnalogOutActions {
@@ -25,7 +22,6 @@ interface AnalogOutActions {
 
     fun doAnalogOAOAction( port: Port,
                            analogOutStages: HashMap<String, Int>,
-                           // TODO: what else do we need here?
                            zoneCO2Threshold: Double,
                            zoneCO2DamperOpeningRate: Double,
                            isDoorOpen: Boolean)
@@ -38,5 +34,4 @@ interface AnalogOutActions {
                            conditioningMode: StandaloneConditioningMode,
                            fanLoopOutput: Int,
                            analogOutStages: HashMap<String, Int>)
-
 }

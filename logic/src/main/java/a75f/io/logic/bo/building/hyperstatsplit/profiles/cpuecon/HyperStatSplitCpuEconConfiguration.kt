@@ -3,10 +3,12 @@ package a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 
 /**
- * Models just the configuration for HyperStat CPU
+ * Models just the configuration for HyperStat Split CPU/Economiser
  *
- * @author tcase@75f.io
+ * @author tcase@75f.io (HyperStat CPU)
  * Created on 7/7/21.
+ *
+ * Created for HyperStat Split CPU/Economiser by Nick P on 07-24-2023.
  */
 class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
 
@@ -15,6 +17,13 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var isEnableAutoForceOccupied = false
    var isEnableAutoAway = false
 
+   /*
+      Addresses of each device on the sensor bus needs to be modeled here because they are part of the configuration screen.
+      (This is new for our profiles. Previously, the CCU did not have any knowledge of what was happening on the sensor bus.
+      It was completely within the node/stat firmware.)
+
+      This info is purely for configuration and should not need to be incorporated into control messages.
+    */
    var address0State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)
    var address1State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)
    var address2State = SensorBusTempState(false, CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)
@@ -80,16 +89,29 @@ data class AnalogOutState(
    val perAtFanHigh: Double,
 )
 
+/*
+   Universal Input states are the same as other configurable inputs.
+   There are more possible mappings for Universal Ins (thermistor, digital, or analog), but they
+   are always determined by the Association.
+ */
 data class UniversalInState(
    val enabled: Boolean,
    val association: UniversalInAssociation
 )
 
+/*
+   Per spec, Sensor Bus Temps are to reside on Addresses 0-2, and Pressures are to reside on Address 3.
+   So, configurations need to be kept separate.
+ */
 data class SensorBusTempState(
    val enabled: Boolean,
    val association: CpuEconSensorBusTempAssociation
 )
 
+/*
+   Per spec, Sensor Bus Temps are to reside on Addresses 0-2, and Pressures are to reside on Address 3.
+   So, configurations need to be kept separate.
+ */
 data class SensorBusPressState(
    val enabled: Boolean,
    val association: CpuEconSensorBusPressAssociation
@@ -124,6 +146,7 @@ enum class CpuEconAnalogOutAssociation {
 }
 
 // Order is important -- see comment above.
+// TODO: Still need to finalize these inputs
 enum class UniversalInAssociation {
    SUPPLY_AIR_TEMPERATURE,
    OUTSIDE_AIR_TEMPERATURE,

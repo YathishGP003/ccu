@@ -16,7 +16,8 @@ import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 
 /**
- * Created by Manjunath K on 06-08-2021.
+ * Created for HyperStat by Manjunath K on 06-08-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HSSplitHaystackUtil(
     val equipRef: String,
@@ -272,7 +273,7 @@ class HSSplitHaystackUtil(
         haystack.writeHisValById(id, desiredTemp)
     }
 
-    fun getCurrentConditioningMode(): Double {
+    fun getCurrentUserIntentConditioningMode(): Double {
         return readPointPriorityVal("zone and sp and conditioning and mode")
     }
 
@@ -355,6 +356,12 @@ class HSSplitHaystackUtil(
         )
     }
 
+    fun getCondensateOverflowStatus(): Double {
+        return haystack.readHisValByQuery(
+            "point and condensate " +
+                    "and overflow and status and his and equipRef == \"$equipRef\""
+        )
+    }
 
     fun updateOccupancyDetection() {
         val detectionPointId = readPointID("occupancy and detection and his")
@@ -392,21 +399,32 @@ class HSSplitHaystackUtil(
 
     fun updateOaoLoopOutput(economizingLoop: Int, dcvLoop: Int, oaoLoop: Int, oaoFinalLoop: Int) {
         haystack.writeHisValByQuery(
-            "point and  his and economizing and loop and output " +
+            "point and his and economizing and loop and output " +
                     "and equipRef  == \"$equipRef\"", economizingLoop.toDouble()
         )
-
+        haystack.writeHisValByQuery(
+            "point and his and dcv and loop and output " +
+                    "and equipRef  == \"$equipRef\"", dcvLoop.toDouble()
+        )
+        haystack.writeHisValByQuery(
+            "point and his and outside and air and not final and loop and output " +
+                    "and equipRef  == \"$equipRef\"", oaoLoop.toDouble()
+        )
+        haystack.writeHisValByQuery(
+            "point and his and outside and air and final and loop and output " +
+                    "and equipRef  == \"$equipRef\"", oaoFinalLoop.toDouble()
+        )
 
     }
 
 
     fun reWriteOccupancy() {
-        val ocupancyDetection = CCUHsApi.getInstance().read(
+        val occupancyDetection = CCUHsApi.getInstance().read(
             "point and cpu and occupancy and detection and his and equipRef  ==" +
                     " \"" + equipRef + "\"")
-        if (ocupancyDetection.size> 0) {
-            val pointValue = CCUHsApi.getInstance().readHisValById(ocupancyDetection["id"].toString())
-            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection["id"].toString(), pointValue)
+        if (occupancyDetection.size> 0) {
+            val pointValue = CCUHsApi.getInstance().readHisValById(occupancyDetection["id"].toString())
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyDetection["id"].toString(), pointValue)
         }
     }
 
@@ -454,6 +472,11 @@ class HSSplitHaystackUtil(
         )
     }
 
+    /*
+        No usages for Door/Window or Keycard sensors in HyperStat Split.
+
+        Keeping these methods for future and for inheritance purposes. But, these will not be called in algos right now.
+     */
     fun updateKeycardValues(keycardEnabled: Double, keycardSensor: Double){
         haystack.writeDefaultVal("keycard and sensing and enabled and equipRef == \"$equipRef\"",keycardEnabled)
         haystack.writeHisValByQuery("keycard and sensor and input and equipRef == \"$equipRef\"",keycardSensor)

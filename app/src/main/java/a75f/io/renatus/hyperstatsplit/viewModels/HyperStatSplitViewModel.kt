@@ -19,7 +19,8 @@ import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 /**
- * Created by Manjunath K on 15-07-2022.
+ * Created for HyperStat by Manjunath K on 15-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 abstract class HyperStatSplitViewModel(application: Application) : AndroidViewModel(application),
@@ -191,6 +192,7 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    // Applies to Sensor Bus Addresses 0-2
     override fun sensorBusTempSwitchChanged(index: Int, checked: Boolean) {
         val sensorBusTemps = currentState.sensorBusTemps
         val newSensorBusTemps = sensorBusTemps.updated(index, sensorBusTemps[index].copy(enabled = checked))
@@ -201,6 +203,7 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    // Applies to Sensor Bus Addresses 0-2
     override fun sensorBusTempMappingSelected(index: Int, position: Int) {
         val sensorBusTemps = currentState.sensorBusTemps
         val newSensorBusTemps = sensorBusTemps.updated(
@@ -213,6 +216,7 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    // Applies to Sensor Bus Address 3
     override fun sensorBusPressSwitchChanged(index: Int, checked: Boolean) {
         val sensorBusPress = currentState.sensorBusPress
         val newSensorBusPress = sensorBusPress.updated(index, sensorBusPress[index].copy(enabled = checked))
@@ -223,6 +227,7 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    // Applies to Sensor Bus Address 3
     override fun sensorBusPressMappingSelected(index: Int, position: Int) {
         val sensorBusPress = currentState.sensorBusPress
         val newSensorBusPress = sensorBusPress.updated(

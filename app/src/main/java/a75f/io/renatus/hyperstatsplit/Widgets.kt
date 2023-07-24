@@ -6,7 +6,8 @@ import android.widget.TextView
 import android.widget.ToggleButton
 
 /**
- * Created by Manjunath K on 18-07-2022.
+ * Created for HyperStat by Manjunath K on 18-07-2022.
+ * Created for HyperStatSplit by Nick P on 07-24-2023.
  */
 
 

@@ -35,7 +35,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 /**
- * Created by Manjunath K on 15-07-2022.
+ * Created for HyperStat by Manjunath K on 15-07-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 class HyperStatSplitFragment : BaseDialogFragment() {
@@ -70,6 +71,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var universalInUIs: List<UniversalInWidgets>
 
     // 4 rows, 1 for each sensor bus address
+    // Addresses 0-2 are for Temp/Humidity Sensors, Address 3 is for Pressure
     lateinit var sensorBusTemps: List<SensorBusWidgets>
     lateinit var sensorBusPress: List<SensorBusWidgets>
 
@@ -314,7 +316,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 0.rangeTo(100).toList()
             )
 
-            // TODO: control messages here
+            // TODO: control messages once they are designed
             relay1Test.setOnCheckedChangeListener { _, _ -> sendControl() }
             relay2Test.setOnCheckedChangeListener { _, _ -> sendControl() }
             relay3Test.setOnCheckedChangeListener { _, _ -> sendControl() }
@@ -520,10 +522,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
         /*
             On Click, save the CPU & Economizer configuration.
-            Outside Air Temp and Mixed Air Temp are required points if OAO Damper output is selected.
-            User will not be allowed to save configuration if minimum points are not met.
-
-
+            Unlike past 75F profiles, validation is important here. See CpuEconViewModel class for details.
          */
         setButton.setOnClickListener {
             if (!viewModel.validateProfileConfig()) {
@@ -688,7 +687,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    // TODO: Messaging
+    // TODO: Control message once structure is set
     @SuppressLint("LogNotTimber")
     private fun sendControl() {
         if (!viewModel.isProfileConfigured()) {
@@ -735,7 +734,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-
+    // TODO: Control message once structure is set
     private fun getControlMessage(): HyperStat.HyperStatControlsMessage_t {
         if (meshAddress != null) {
             val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()

@@ -5,12 +5,13 @@ import android.content.Context
 import android.content.SharedPreferences
 
 /**
- * Created by Manjunath K on 13-08-2021.
+ * Created for HyperStat by Manjunath K on 13-08-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class FanModeCacheStorage {
 
       private var sharedPreferences: SharedPreferences = Globals.getInstance()
-          .applicationContext.getSharedPreferences("HyperstatFanMode",Context.MODE_PRIVATE)
+          .applicationContext.getSharedPreferences("HyperstatSplitFanMode",Context.MODE_PRIVATE)
 
     fun saveFanModeInCache(equipId: String, value: Int){
         sharedPreferences.edit().putInt(equipId,value).apply()

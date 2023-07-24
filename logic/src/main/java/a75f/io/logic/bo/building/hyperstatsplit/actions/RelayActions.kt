@@ -3,14 +3,10 @@ package a75f.io.logic.bo.building.hyperstatsplit.actions
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
-
 
 /**
- * Created by Manjunath K on 11-07-2022.
+ * Created by Nick P on 07-24-2023.
  */
-
 interface RelayActions {
 
     fun doCoolingStage1( port: Port,
@@ -85,10 +81,15 @@ interface RelayActions {
                                  humidityHysteresis: Int,
                                  targetMaxInsideHumidity: Double)
 
-    // TODO: what else is needed here?
-    fun doExhaustFanStage1( relayPort: Port)
+    fun doExhaustFanStage1( relayPort: Port,
+                            outsideAirFinalLoopOutput: Int,
+                            exhaustFanStage1Threshold: Int,
+                            exhaustFanHysteresis: Int)
 
-    // TODO: what else is needed here?
-    fun doExhaustFanStage2( relayPort: Port)
+
+    fun doExhaustFanStage2( relayPort: Port,
+                            outsideAirFinalLoopOutput: Int,
+                            exhaustFanStage1Threshold: Int,
+                            exhaustFanHysteresis: Int)
 
 }

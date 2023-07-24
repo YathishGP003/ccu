@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.*
-import a75f.io.api.haystack.Queries.Companion.ANALOG1_IN
 import a75f.io.api.haystack.Queries.Companion.ANALOG1_OUT
-import a75f.io.api.haystack.Queries.Companion.ANALOG2_IN
 import a75f.io.api.haystack.Queries.Companion.ANALOG2_OUT
 import a75f.io.api.haystack.Queries.Companion.ANALOG3_OUT
 import a75f.io.api.haystack.Queries.Companion.ANALOG4_OUT
@@ -12,9 +10,6 @@ import a75f.io.api.haystack.Queries.Companion.OUT
 import a75f.io.api.haystack.Tags.*
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuReconfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HpuReconfiguration
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Reconfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconReconfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import android.util.Log
@@ -22,7 +17,8 @@ import com.google.gson.JsonObject
 import java.util.*
 
 /**
- * Created by Manjunath K on 19-10-2021.
+ * Created for HyperStat by Manjunath K on 19-10-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HyperStatSplitReconfigureUtil {
 
@@ -121,7 +117,6 @@ class HyperStatSplitReconfigureUtil {
             configType: String,
             portType: Port
         ) {
-            // TODO: verify
             if (equip.markers.contains(CPUECON)) {
                 CpuEconReconfiguration.updateConfiguration(
                     updatedConfigValue, equip, portType,
@@ -136,7 +131,6 @@ class HyperStatSplitReconfigureUtil {
             updatedConfigValue: Double,
             equip: Equip,
         ) {
-            // TODO: verify
             if (equip.markers.contains(CPUECON)) {
                 CpuEconReconfiguration.configAssociationPoint(
                     portType, updatedConfigValue, equip
@@ -222,7 +216,6 @@ class HyperStatSplitReconfigureUtil {
             if (markers.contains(ANALOG3) && markers.contains(OUT)) return ANALOG3_OUT
             if (markers.contains(ANALOG4) && markers.contains(OUT)) return ANALOG4_OUT
 
-            // TODO: verify
             if (markers.contains(UNIVERSAL1) && markers.contains(IN)) return UNIVERSAL1
             if (markers.contains(UNIVERSAL2) && markers.contains(IN)) return UNIVERSAL2
             if (markers.contains(UNIVERSAL3) && markers.contains(IN)) return UNIVERSAL3

@@ -2,13 +2,13 @@ package a75f.io.renatus.hyperstatsplit.viewModels
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.sensors.SensorType
 import android.content.Context
 import android.widget.ArrayAdapter
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 /**
- * Created by Manjunath K on 08-08-2022.
+ * Created for HyperStat by Manjunath K on 08-08-2022.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 interface HyperStatSplitModel {

@@ -5,7 +5,9 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 
 /**
  * @author tcase@75f.io
- * Created on 7/7/21.
+ * Created on 7/7/21 for HyperStat.
+ *
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
 
@@ -25,8 +27,20 @@ enum class HSSplitZoneStatus {
 /**
  * Basic settings a user in the space might set.  These might be included (moved to) UserIntents
  */
+
+/*
+   Per spec, Conditioning Mode is to be set to OFF when condensate overflow is detected.
+   Previously, Conditioning Mode has only been set from User Intents and is read-only in algos.
+   This now needs to be split into two values:
+      * userIntentConditioningMode: Conditioning Mode set by the user
+      * effectiveConditioningMode: If condensate overflow, OFF. Otherwise, same as userIntentConditioningMode.
+
+   This is tracked as two distinct values because the app needs to know what the conditioning mode
+   should be reverted to if Condensate Overflow returns to normal.
+ */
 data class BasicSettings(
-    val conditioningMode: StandaloneConditioningMode,
+    val userIntentConditioningMode: StandaloneConditioningMode,
+    var effectiveConditioningMode: StandaloneConditioningMode,
     var fanMode: StandaloneFanStage,
 )
 

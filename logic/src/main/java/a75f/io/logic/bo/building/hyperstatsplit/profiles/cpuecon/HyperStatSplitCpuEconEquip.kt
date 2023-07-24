@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Tags.CPUECON
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -31,17 +32,19 @@ import a75f.io.logic.util.RxTask
 import android.util.Log
 
 /**
- * Models CPU Equipment in its interface, calls through to datastore (haystack)
+ * Models CPU/Economiser Equipment in its interface, calls through to datastore (haystack)
  * to get its state.
  * We will have one of these for each HyperStat in the zone profile.
  *
- * @author tcase@75f.io
+ * @author tcase@75f.io (HyperStat CPU)
  * Created on 7/9/21.
+ *
+ * Created for HyperStat Split CPU/Economiser by Nick P on 07-24-2023.
  */
 class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
-    private val profileTag = "cpuecon"
+    private val profileTag = CPUECON
 
     private var masterPoints: HashMap<Any, String> = HashMap()
 
@@ -107,6 +110,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  logical points are created")
 
+        // HyperStat Split Equip contains two devices: HyperConnect and HyperLite
         configHyperConnectDevice(config, profileEquip)
         configHyperLiteDevice(config, profileEquip)
 
@@ -148,8 +152,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         }
     }
 
-    // Configure HyperConnect Device
-    // HyperStatSplit equip contains (2) devices: HyperConnect and HyperLite
+    /*
+        Configure HyperConnect Device
+        HyperConnect Device contains physical points for:
+            - All wired IO (Universal Ins, Relays, and Analog Outs)
+            - RSSI (it's the device with the 900MHz antenna)
+        No sensor bus physical points.
+     */
     private fun configHyperConnectDevice(config: HyperStatSplitCpuEconConfiguration, profileEquip: HyperStatSplitEquip) {
 
         val hyperConnectDevice = HyperConnectDevice(
@@ -200,8 +209,11 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     }
 
-    // Configure HyperLite Device
-    // HyperStatSplit equip contains (2) devices: HyperConnect and HyperLite
+    /*
+        Configure HyperLite Device
+        HyperLite Device contains physical points for:
+            - Onboard sensors used with HyperStat
+     */
     private fun configHyperLiteDevice(config: HyperStatSplitCpuEconConfiguration, profileEquip: HyperStatSplitEquip) {
 
         val hyperLiteDevice = HyperLiteDevice(
@@ -222,7 +234,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     }
 
 
-        //function which creates Profile configuration Points
+    /*
+        Function which creates Profile configuration Points
+
+        Points that are added from CPU include:
+            - Config points for new hardware
+            - OAO Tuners (now zone-level instead of system-level)
+     */
     private fun createProfileConfigurationPoints(hyperStatSplitConfig: HyperStatSplitCpuEconConfiguration) {
 
         hyperStatSplitPointsUtil.addProfilePoints()
@@ -350,6 +368,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         // Device Class will create all the sensor points dynamically based on the input message
         // which is received by the Hyper state device
+        // TODO: circle back on this once firmware is ready
         val sensorPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatSplitPointsUtil.createLogicalSensorPoints()
 
         masterPoints.putAll(hyperStatSplitPointsUtil.addPointsToHaystack(listOfAllPoints = sensorPointsList))
@@ -362,7 +381,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Done with Logical points creation")
 
     }
-
 
     // Function to update the existing profile
     override fun updateConfiguration(configuration: BaseProfileConfiguration) {
@@ -377,7 +395,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         updateUniversalInConfig(newConfiguration = updatedHyperStatSplitConfig, existingConfiguration = presetConfiguration)
         updateSensorBusConfig(newConfiguration = updatedHyperStatSplitConfig, existingConfiguration = presetConfiguration)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updatedHyperStatSplitConfig: " + updatedHyperStatSplitConfig.toString())
         LogicalPointsUtil.cleanCpuEconLogicalPoints(updatedHyperStatSplitConfig,equipRef!!)
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Profile update has been completed  ")
         haystack.syncEntityTree()
@@ -651,6 +668,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     private fun getSensorBusConfigurations(config: HyperStatSplitCpuEconConfiguration) {
 
+        // TODO: these tags could potentially change. Re-test if they do.
         val addr0 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address0 and input").toInt()
         val addr1 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address1 and input").toInt()
         val addr2 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address2 and input").toInt()
@@ -923,20 +941,15 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         changeIn: AnalogOutChanges,
         newConfiguration: HyperStatSplitCpuEconConfiguration?
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateAnalogOutDetails: " + physicalPort)
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "old AnalogOutState: " + existingAnalogOutState)
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "new AnalogOutState: " + analogOutState)
         // Read enable/disable Point ID
         val analogOutId = hsSplitHaystackUtil.readPointID(
             "config and $analogOutTag and output and enabled"
         ) as String
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "analogOutEnabledId: " + analogOutId)
 
         // associated  Point ID
         val analogOutAssociatedId = hsSplitHaystackUtil.readPointID(
             "config and $analogOutTag and output and association"
         ) as String
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "analogOutAssociatedId: " + analogOutAssociatedId)
 
         // Read Analog Out min max fan config Point Id's
         val minPointId = hsSplitHaystackUtil.readPointID("$analogOutTag and output and min")
@@ -969,7 +982,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
             }
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateAnalogOutDetails complete for " + physicalPort)
             return
         }
 

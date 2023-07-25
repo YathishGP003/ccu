@@ -4,9 +4,13 @@ import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.List;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Zone;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
@@ -19,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -288,4 +293,36 @@ public class DeviceUtil {
                 return DeviceFieldConstants.NO_INFO;
         }
     }
+
+    public static void updateDesiredTempFromDevice(Point coolPoint, Point heatPoint, Point avgPoint, double coolVal,
+                                                   double heatVal, double avgVal, CCUHsApi hayStack) {
+        List<HashMap<Object, Object>> equipsInZone =
+                CCUHsApi.getInstance().readAllEntities("equip and zone and roomRef ==\"" + coolPoint.getRoomRef() + "\"");
+
+        if (equipsInZone.size() == 1) {
+            CcuLog.i(L.TAG_CCU_DEVICE,"updateDesiredTempFromDevice : "+coolVal+" "+heatVal);
+            SystemScheduleUtil.handleManualDesiredTempUpdate(coolPoint, heatPoint, avgPoint, coolVal, heatVal, avgVal);
+            return;
+        }
+
+        equipsInZone.forEach( equip -> {
+            HashMap<Object,Object> coolDT = hayStack.readEntity("point and temp and desired and cooling and equipRef == \""
+                    + equip.get("id").toString() + "\"");
+            HashMap<Object,Object> heatDT = hayStack.readEntity("point and temp and desired and heating and equipRef == \""
+                    + equip.get("id").toString() + "\"");
+            HashMap<Object,Object> avgDT = hayStack.readEntity("point and temp and desired and average and equipRef == \""
+                    + equip.get("id").toString() + "\"");
+
+            Point coolDtPoint = new Point.Builder().setHashMap(coolDT).build();
+            Point heatDtPoint = new Point.Builder().setHashMap(heatDT).build();
+            Point avgDtPoint = new Point.Builder().setHashMap(avgDT).build();
+            CcuLog.i(L.TAG_CCU_DEVICE,"updateDesiredTempFromDevice for : "+equip+", "+coolVal+" "+heatVal);
+            SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal, avgVal);
+        });
+
+    }
+
+
+
+
 }

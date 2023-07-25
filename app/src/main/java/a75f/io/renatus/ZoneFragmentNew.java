@@ -2278,6 +2278,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
                             for(EquipmentDevice equipmentDevice : modbusDevices){
+                                if(equipmentDevice.getDeviceEquipRef() == null){
+                                    equipmentDevice.setDeviceEquipRef(equipmentDevice.getEquipRef());
+                                }
                                 if(null != equipmentDevice.getEquips()) {
                                     modbusDevices.addAll(equipmentDevice.getEquips());
                                 }
@@ -2316,11 +2319,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     equipString.append(StringUtils.capitalize(equipType.trim()));
                                     equipString.append(" ");
                                 }
-                                //tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i)
-                                // .getSlaveId()+")");
-                                //Uncomment above line after confirmation from product and comment the below line for
-                                // US 18757
-                                tvEquipmentType.setText(StringUtils.capitalize(equipTypes[0].trim())+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 if((Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
                                 null == modbusDevices.get(i).getEquipRef()) ||
                                         (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId())) {

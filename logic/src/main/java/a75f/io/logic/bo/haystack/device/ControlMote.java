@@ -437,7 +437,7 @@ public class ControlMote
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        Log.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -475,5 +475,25 @@ public class ControlMote
             hsApi.updatePoint(point.build(),point.build().getId());
         }
 
+    }
+
+    public static void setCMPointEnabled(String port, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and cm");
+        if (device == null)
+        {
+            return ;
+        }
+
+        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+                "point and th1 and physical and deviceRef == \"" + device.get("id").toString() + "\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+        }
     }
 }

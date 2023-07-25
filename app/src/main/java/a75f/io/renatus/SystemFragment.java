@@ -1040,6 +1040,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			for (int i = 0; i <modbusDevices.size() ; i++) {
 				if(modbusDevices.get(i).getEquipType().equals("EMR")){
 					emDevice = modbusDevices.get(i);
+					emDevice.setDeviceEquipRef(emDevice.getEquipRef());
 				}
 			}
 
@@ -1093,6 +1094,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			for (int i = 0; i <modbusDevices.size() ; i++) {
 				if(modbusDevices.get(i).getEquipType().equals("BTU")){
 					btuDevice = modbusDevices.get(i);
+					btuDevice.setDeviceEquipRef(btuDevice.getEquipRef());
 				}
 			}
 

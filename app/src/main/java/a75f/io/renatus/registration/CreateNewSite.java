@@ -1,5 +1,14 @@
 package a75f.io.renatus.registration;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
+import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
+
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
+import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -38,6 +47,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
@@ -49,8 +60,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -116,7 +125,7 @@ public class CreateNewSite extends Fragment {
 
     private ImageView imgEditSite;
     private ImageView imgUnregisterSite;
-
+    View toastLayout;
     Context mContext;
     LinearLayout btnSetting;
     Prefs prefs;
@@ -131,9 +140,13 @@ public class CreateNewSite extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
-
+        LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+        }
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
@@ -392,6 +405,7 @@ public class CreateNewSite extends Fragment {
                     enableViews(false);
                     btnEditSite.setText(getResources().getString(R.string.title_edit));
                     ControlMote.updateOnSiteNameChange();
+                    updateBacnetConfig(siteName, ccuName);
                 } else {
                     Toast.makeText(getActivity(), "Please fill proper details", Toast.LENGTH_LONG).show();
                 }
@@ -951,11 +965,30 @@ public class CreateNewSite extends Fragment {
 
     private void goTonext() {
         prefs.setBoolean("CCU_SETUP", false);
-        ((FreshRegistration) getActivity()).selectItem(4);
+        ((FreshRegistration) getActivity()).selectItem(21);
     }
 
     private Spanned getHTMLCodeForHints( int resource){
         return Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory)
                 + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(resource) + "</font></big>");
+    }
+
+    private void updateBacnetConfig(String siteName, String ccuName) {
+
+        try {
+            String confString = prefs.getString(BACNET_CONFIGURATION);
+            JSONObject config = new JSONObject(confString);
+            JSONObject deviceObject = config.getJSONObject("device");
+            if(!deviceObject.get(IP_DEVICE_OBJECT_NAME).toString().equals(siteName+"_"+ccuName))
+            {
+                Log.d(L.TAG_CCU_BACNET, "siteName or ccuName changed "+siteName+"_"+ccuName);
+                deviceObject.put(IP_DEVICE_OBJECT_NAME,siteName+"_"+ccuName);
+                prefs.setString(BACNET_CONFIGURATION, config.toString());
+                sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                performConfigFileBackup();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

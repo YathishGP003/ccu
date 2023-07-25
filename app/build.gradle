@@ -144,6 +144,7 @@ android {
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
         exclude 'thirdpartynotice.txt'
         exclude 'simplelogger.properties'
+        pickFirst 'META-INF/*'
     }
 
     dexOptions {
@@ -227,7 +228,7 @@ dependencies {
     implementation "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
     implementation 'com.github.vihtarb:tooltip:0.1.9'
     implementation 'org.apache.commons:commons-collections4:4.4'
-
+    implementation project(':restserver')
     implementation project(':messaging')
     implementation project(':data')
 

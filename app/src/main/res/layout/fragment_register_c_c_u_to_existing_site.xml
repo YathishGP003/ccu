@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout
+        android:id="@+id/rlFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="78dp"
+        android:layout_marginStart="10dp"
+        android:scrollbars="vertical">>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputCCUName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:errorTextAppearance="?error_appearance">
+
+            <EditText
+                android:id="@+id/editCCUName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lato_regular"
+                android:gravity="left|center_vertical"
+                android:maxLength="25"
+                android:singleLine="true"
+                android:textColor="@color/input_textcolor"
+                android:textSize="19.5dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textInputCCUName">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <Spinner
+                    android:background="@drawable/style_spinner_to_down"
+                    android:id="@+id/addressBandSpinner"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:textSize="19.5sp"
+                    android:textColor="#212121"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="center_vertical"
+                    />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height=".5dp"
+                    android:background="#999999" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="Address Band"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="#666666"
+                    android:paddingBottom="20dp">
+                </TextView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="774dp"
+                android:layout_height="40dp"
+                android:background="#EBECED"
+                android:paddingStart="9dp">
+                <EditText
+                    android:id="@+id/facility_manager_email_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="textEmailAddress"
+                    android:hint="facilitymanager@75f.io"
+                    android:textColor="#212121"
+                    android:paddingTop="12dp"
+                    android:paddingStart="10.5dp"
+                    android:paddingBottom="5dp"
+                    android:background="@android:color/transparent">
+                </EditText>
+            </LinearLayout>>
+            <TextView
+                android:paddingTop="4dp"
+                android:paddingStart="9dp"
+                android:paddingBottom="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="18sp"
+                android:fontFamily="@font/lato_regular"
+                android:text="Facility Manager’s Email ID"
+                android:textColor="#666666">
+            </TextView>
+            <LinearLayout
+                android:layout_width="774dp"
+                android:layout_height="wrap_content"
+                android:background="#EBECED"
+                android:paddingStart="9dp"
+                >
+                <EditText
+                    android:id="@+id/installer_email_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="5dp"
+                    android:paddingStart="10.5dp"
+                    android:inputType="textEmailAddress"
+                    android:hint="installer@75f.io"
+                    android:textColor="#212121"
+                    android:background="@android:color/transparent">
+                </EditText>
+            </LinearLayout>>
+            <TextView
+                android:paddingStart="9dp"
+                android:paddingTop="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Installer’s Email ID"
+                android:textSize="18sp"
+                android:fontFamily="@font/lato_regular"
+                android:textColor="#666666">
+            </TextView>
+
+            <TextView
+                app:layout_constraintTop_toBottomOf="@id/installer_email_et"
+                android:id="@+id/add_ccu"
+                android:layout_marginLeft="690dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="ADD CCU"
+                android:paddingTop="44dp"
+                android:textSize="19.5dp"
+                android:textColor="#E24301">
+            </TextView>
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

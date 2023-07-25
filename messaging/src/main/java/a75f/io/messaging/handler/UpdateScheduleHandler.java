@@ -285,8 +285,8 @@ public class UpdateScheduleHandler implements MessageHandler
 
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
-        if (jsonObject.get("command").equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
-            CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
+        if (jsonObject.get("command").getAsString().equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
+            CCUHsApi.getInstance().removeEntity(jsonObject.get("id").getAsString());
             return;
         }
         long timeToken = jsonObject.get("timeToken").getAsLong();

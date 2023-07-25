@@ -1181,8 +1181,6 @@ public class FloorPlanFragment extends Fragment {
                 if (!siteRoomList.contains(addRoomEdit.getText().toString().trim())) {
                     siteRoomList.add(addRoomEdit.getText().toString().trim());
                 }
-                BacnetUtilKt.addBacnetTags(requireContext(), hsZone.getFloorRef(), hsZone.getId());
-
                 return true;
             }
 

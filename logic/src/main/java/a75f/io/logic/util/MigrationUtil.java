@@ -120,10 +120,7 @@ public class MigrationUtil {
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
         }
 
-        if (!PreferenceUtil.isCCUHeartbeatMigrationDone()) {
-            addCCUHeartbeatDiagPoint();
-            PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
-        }
+        addCCUHeartbeatDiagPoint();
 
         if(!PreferenceUtil.isPressureUnitMigrationDone()){
             pressureUnitMigration(CCUHsApi.getInstance());
@@ -393,6 +390,7 @@ public class MigrationUtil {
             removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
+        CCUHsApi.getInstance().removeAllNamedSchedule();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());

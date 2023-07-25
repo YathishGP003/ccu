@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -49,7 +49,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.modbus.ModbusEquipTypes;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -362,12 +361,25 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             paramHeader1.setVisibility(View.VISIBLE);
             paramHeader2.setVisibility(View.GONE);
         }
-        SelectAllParameters selectAllParameters = enable -> {
-            if(!enable) {
-                toggleSelectAllParams.setOnCheckedChangeListener(null);
-                toggleSelectAllParams.setChecked(false);
-                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+
+        List<EquipmentDevice> subEquipList = new ArrayList<>();
+        if(null != equipmentDevice.getEquips()) {
+            for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
+                subEquipList.add(subEquipmentDevice);
             }
+        }
+
+        SelectAllParameters selectAllParameters = enable -> {
+            AtomicBoolean isAllParametersSelected = new AtomicBoolean(true);
+            parameterList.forEach(parameter -> {
+                if(!parameter.isDisplayInUI()){
+                    isAllParametersSelected.set(false);
+                }
+            });
+            isAllParametersSelected.set(enableSelectAllParameters(subEquipList));
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(isAllParametersSelected.get());
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         };
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig,
                 selectAllParameters);
@@ -375,8 +387,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         recyclerParams.setAdapter(recyclerModbusParamAdapter);
         recyclerParams.invalidate();
 
-        List<EquipmentDevice> subEquipList = new ArrayList<>();
-        if(null != equipmentDevice.getEquips()) {
+        if(subEquipList.size() > 0) {
             for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
                 subEquipList.add(subEquipmentDevice);
             }

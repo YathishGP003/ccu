@@ -1,9 +1,11 @@
 package a75f.io.renatus.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -28,7 +30,7 @@ fun ToggleButton(
     onEnabled: (Boolean) -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.wrapContentSize(),
         contentAlignment = Alignment.Center
     ) {
         Switch(

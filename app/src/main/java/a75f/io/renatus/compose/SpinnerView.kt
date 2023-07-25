@@ -41,7 +41,7 @@ import com.renovo.bacnet4j.type.enumerated.LifeSafetyMode.enabled
 
 @Composable
 fun SpinnerView(
-    selected: Int, items: MutableState<List<String>>, itemSelected: (Int, String) -> Unit
+    selected: Int, items: MutableState<List<String>>, disable: Boolean, itemSelected: (Int, String) -> Unit
 ) {
     var selectedText by remember {
         if (items.value.isEmpty()) mutableStateOf("Select Device") else mutableStateOf(
@@ -84,35 +84,37 @@ fun SpinnerView(
                 tint = Color.Black,
                 modifier = Modifier.size(24.dp)
             )
-            DropdownMenu(
-                expanded = expand, onDismissRequest = {
-                    expand = false
-                    stroke = if (expand) 2 else 1
-                }, properties = PopupProperties(
-                    focusable = false,
-                    dismissOnBackPress = true,
-                    dismissOnClickOutside = true,
-                ), modifier = Modifier
-                    .background(White)
-                    .padding(2.dp)
-                    .width(400.dp)
-            ) {
-                items.value.forEachIndexed { index, item ->
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = item,
-                            color = Color.Black,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }, onClick = {
-                        selectedIndex = index
+            if (!disable) {
+                DropdownMenu(
+                    expanded = expand, onDismissRequest = {
                         expand = false
                         stroke = if (expand) 2 else 1
-                        itemSelected(index, item)
-                        selectedText = item
-                    })
+                    }, properties = PopupProperties(
+                        focusable = false,
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true,
+                    ), modifier = Modifier
+                        .background(White)
+                        .padding(2.dp)
+                        .width(400.dp)
+                ) {
+                    items.value.forEachIndexed { index, item ->
+                        DropdownMenuItem(text = {
+                            Text(
+                                text = item,
+                                color = Color.Black,
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }, onClick = {
+                            selectedIndex = index
+                            expand = false
+                            stroke = if (expand) 2 else 1
+                            itemSelected(index, item)
+                            selectedText = item
+                        })
+                    }
                 }
             }
         }

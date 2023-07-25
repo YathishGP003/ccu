@@ -25,7 +25,7 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
                     parameterTemp.registerType = registerTemp.getRegisterType()
 
                     val register = RegisterItem()
-                    register.displayInUi.value = false
+                    register.displayInUi.value = parameterTemp.isDisplayInUI
                     register.param = mutableStateOf(parameterTemp)
                     parameterList.add(register)
                 }

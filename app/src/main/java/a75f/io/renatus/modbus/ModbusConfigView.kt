@@ -3,17 +3,18 @@ package a75f.io.renatus.modbus
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.compose.SpinnerView
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.ParameterLabel
 import a75f.io.renatus.compose.SaveTextView
+import a75f.io.renatus.compose.SpinnerView
 import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.util.EQUIP_TYPE
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS
+import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SELECT_ALL
 import a75f.io.renatus.modbus.util.SLAVE_ID
@@ -34,17 +35,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 
 /**
@@ -73,7 +82,6 @@ class ModbusConfigView : BaseDialogFragment() {
     ): View {
         val rootView = ComposeView(requireContext())
         viewModel = ViewModelProvider(this)[ModbusConfigViewModel::class.java]
-
         viewModel.holdBundleValues(requireArguments())
         rootView.apply {
             setContent { RootView() }
@@ -98,7 +106,6 @@ class ModbusConfigView : BaseDialogFragment() {
                 .fillMaxSize()
                 .padding(10.dp),
         ) {
-            ProgressDialogUtils.showProgressDialog(context, LOADING)
             viewModel.configModelDefinition(requireContext())
             item {
                 Box(
@@ -108,40 +115,27 @@ class ModbusConfigView : BaseDialogFragment() {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Column {
                         HeaderTextView(EQUIP_TYPE)
-                        SpinnerView(selected = 0,
-                            items = viewModel.deviceList,
-                            itemSelected = { _, selected ->
-                                ProgressDialogUtils.showProgressDialog(
-                                    context, "Fetching $selected details"
-                                )
-                                viewModel.fetchModelDetails(selected)
-                            })
-                    }
-                }
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        HeaderTextView(if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else viewModel.equipModel.value.equipDevice.value.name )
-                    }
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            HeaderTextView(SLAVE_ID)
+                        if (viewModel.equipModel.value.isDevicePaired) {
+                            Text(
+                                text = getName(viewModel.equipModel.value.equipDevice.value.name),
+                                color = Color.Black,
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .padding(horizontal = 5.dp, vertical = 5.dp)
+                                    .width(200.dp)
+                                    .wrapContentHeight(),
+                            )
+                        } else {
                             SpinnerView(selected = 0,
-                                items = viewModel.slaveIdList,
-                                itemSelected = { index, _ ->
-                                    viewModel.equipModel.value.slaveId.value =
-                                        viewModel.slaveIdList.value[index].toInt()
+                                items = viewModel.deviceList,
+                                disable = viewModel.equipModel.value.isDevicePaired,
+                                itemSelected = { _, selected ->
+                                    ProgressDialogUtils.showProgressDialog(
+                                        context, "Fetching $selected details"
+                                    )
+                                    viewModel.fetchModelDetails(selected)
                                 })
                         }
                     }
@@ -153,12 +147,43 @@ class ModbusConfigView : BaseDialogFragment() {
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        HeaderTextView(if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else getName(viewModel.equipModel.value.equipDevice.value.name) )
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Column {
+                                HeaderTextView(SLAVE_ID)
+                                SpinnerView(selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(true).indexOf(viewModel.equipModel.value.slaveId.value.toString()) else 0,
+                                    items = viewModel.slaveIdList,
+                                    disable = viewModel.equipModel.value.isDevicePaired,
+                                    itemSelected = { index, _ ->
+                                        viewModel.equipModel.value.slaveId.value =
+                                            viewModel.slaveIdList.value[index].toInt()
+                                    })
+                            }
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(PaddingValues(bottom = 5.dp)),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+
+                ) {
                     HeaderTextView(SELECT_ALL)
                     ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters.value) {
                         viewModel.equipModel.value.selectAllParameters.value = it
                         viewModel.onSelectAll(it)
                     }
                 }
+
                 ParameterLabel()
             }
             item { FlowRow { ParametersListView(data = viewModel.equipModel, gridColumns = 2) } }
@@ -214,7 +239,7 @@ class ModbusConfigView : BaseDialogFragment() {
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.CenterStart
                         ) {
-                            HeaderTextView(text = subEquip.value.equipDevice.value.name)
+                            HeaderTextView(text = getName(subEquip.value.equipDevice.value.name))
                         }
                         Box(
                             modifier = Modifier.weight(1f),
@@ -228,7 +253,11 @@ class ModbusConfigView : BaseDialogFragment() {
                                     .padding(8.dp)
                             ) {
                                 HeaderTextView(SLAVE_ID)
-                                SpinnerView(0, viewModel.childSlaveIdList) { index, _ ->
+
+                                SpinnerView(
+                                    selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(false).indexOf(subEquip.value.slaveId.value.toString()) else 0,
+                                    items = viewModel.childSlaveIdList,
+                                    disable = viewModel.equipModel.value.isDevicePaired) { index, _ ->
                                     if (index == 0) {
                                         subEquip.value.slaveId.value =
                                             viewModel.equipModel.value.slaveId.value
@@ -245,6 +274,20 @@ class ModbusConfigView : BaseDialogFragment() {
                 }
             }
         }
+    }
+
+    private fun getDeviceTypeVal(): String {
+        if (viewModel.equipModel.value.isDevicePaired)
+            return getName(viewModel.equipModel.value.equipDevice.value.name)
+        return "Select Device"
+    }
+
+    fun getName(name: String): String {
+        if (name.contains("-")) {
+            val titles = name.split("-")
+            return "${titles[1]} ${titles[2]}"
+        }
+        return name
     }
 
     override fun getIdString(): String {

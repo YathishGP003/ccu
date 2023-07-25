@@ -14,4 +14,6 @@ class EquipModel {
     var equipDevice = mutableStateOf(EquipmentDevice())
     var parameters = mutableListOf<RegisterItem>()
     var subEquips = mutableListOf<MutableState<EquipModel>>()
+    var jsonContent = String()
+    var isDevicePaired = false
 }

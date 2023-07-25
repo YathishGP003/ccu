@@ -73,6 +73,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
+import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -1520,8 +1521,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
-                    showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
+                    /*showDialogFragment(FragmentModbusConfiguration
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);*/
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;
 
             }

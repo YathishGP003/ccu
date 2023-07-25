@@ -247,7 +247,8 @@ public class ModbusEquip {
                         if(enumVariables.length() == 0)
                             enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
                         else {
-                            enumVariables.append(",");enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
+                            enumVariables.append(",");
+                            enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
                         }
                     }
                 }

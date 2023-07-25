@@ -135,15 +135,16 @@
                 android:layout_height="20dp"
                 android:background="#686868"
                 />
+
         <TextView
             android:id="@+id/btnPause"
             android:layout_width="150dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textStyle="bold"
+            android:text=" PAUSE SYNCING"
             android:textColor="@color/renatus_75f_primary"
             android:textSize="15dp"
-            android:text=" PAUSE SYNCING"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

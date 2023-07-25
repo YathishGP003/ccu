@@ -218,7 +218,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputCCU"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/CustomErrorTextAppearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editFacilityEmail"

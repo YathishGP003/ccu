@@ -53,7 +53,7 @@
                 android:layout_width="502dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#1AE24301"
+                android:background="?orange_75f_secondary"
                 android:padding="15dp"
                 android:paddingStart="11dp">
                 <TextView

@@ -670,6 +670,7 @@
     <!--Congrats Screen-->
     <string name="title_congrats">CONGRATULATIONS!</string>
     <string name="title_success">You have successfully Installed a 75F System!</string>
+    <string name="title_success_carrier">You have successfully Installed a Carrier ClimaVision System!</string>
     <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="label_ccuname">CCU Name : </string>
     <string name="label_serialno">Serial No. : </string>

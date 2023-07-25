@@ -131,6 +131,10 @@ public class CCUUiUtil {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
 
+    public static boolean is75FEnvironment(Context context){
+        return !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment)) && !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment));
+    }
+
     public static boolean isInvalidName(String enteredName){
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");

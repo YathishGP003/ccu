@@ -390,7 +390,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
             } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())){
-                pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
+                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn_carrier);
             } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn);
             }
@@ -402,6 +402,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
+            } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                {
+                    pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn_carrier);
+                }
             } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn);
             }

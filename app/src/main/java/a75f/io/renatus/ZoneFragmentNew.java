@@ -3721,7 +3721,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setScheduleType(String id, ScheduleType schedule, ArrayList<HashMap> zoneMap) {
-        Thread thread = new Thread(() -> {
             CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
             CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
             Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
@@ -3735,8 +3734,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             } else
                 CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
-        });
-        thread.start();
     }
 
 

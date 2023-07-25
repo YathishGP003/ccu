@@ -23,8 +23,6 @@ import java.util.List;
 
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.renatus.BuildConfig;
@@ -59,14 +57,21 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
         if (StringUtils.isEmpty(ccuCurrVersion) || StringUtils.isEmpty(ccuVersion) || lastUpdatedDateTime.equalsIgnoreCase("n/a")) {
             return false;
         }
-        return ((ccuCurrVersion.contains(ccuVersion)) && (!ccuList.get(position).isOnline()));
+        return (!ccuList.get(position).isOnline());
     }
+
+    private boolean isCCUVersionMatchingWithReplacingCCU(int position) {
+        String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
+        String ccuVersion = ccuList.get(position).getVersion();
+        return  (ccuCurrVersion.contains(ccuVersion));
+    }
+
     @Override
     public void onBindViewHolder(@NonNull CCUView holder, int position) {
         holder.name.setText(ccuList.get(position).getName());
         holder.lastUpdated.setText("Last Updated On "+ ccuList.get(position).getLastUpdated());
         holder.version.setText("CCU Version "+ ccuList.get(position).getVersion());
-       //holder.itemView.setEnabled(false);
+        holder.itemView.setEnabled(false);
 
         holder.status.setText("ONLINE");
         if (!ccuList.get(position).isOnline()) {
@@ -83,7 +88,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
        }
 
         holder.itemView.setOnClickListener(view ->{
-            if (!isCCUReplaceable(position)) {
+            if (!isCCUVersionMatchingWithReplacingCCU(position)) {
                 checkIsCCUHasRecommendedVersion(ccuList.get(position));
             } else {
                 callBack.onCCUSelect(ccuList.get(position));

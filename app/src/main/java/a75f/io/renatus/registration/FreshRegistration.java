@@ -1182,7 +1182,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
-            verticalTabAdapter.setCurrentSelected(1);
+            verticalTabAdapter.setCurrentSelected(2);
             textView_title.setText(getText(R.string.add_new_ccu));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.GONE);

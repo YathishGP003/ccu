@@ -38,6 +38,8 @@ android {
         }
         carrier_prod {
             minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
         staging {
             minifyEnabled false

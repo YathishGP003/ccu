@@ -120,10 +120,7 @@ public class MigrationUtil {
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
         }
 
-        if (!PreferenceUtil.isCCUHeartbeatMigrationDone()) {
-            addCCUHeartbeatDiagPoint();
-            PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
-        }
+        addCCUHeartbeatDiagPoint();
 
         if(!PreferenceUtil.isPressureUnitMigrationDone()){
             pressureUnitMigration(CCUHsApi.getInstance());

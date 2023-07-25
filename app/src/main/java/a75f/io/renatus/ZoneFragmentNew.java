@@ -2278,6 +2278,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
                             for(EquipmentDevice equipmentDevice : modbusDevices){
+                                if(equipmentDevice.getDeviceEquipRef() == null){
+                                    equipmentDevice.setDeviceEquipRef(equipmentDevice.getEquipRef());
+                                }
                                 if(null != equipmentDevice.getEquips()) {
                                     modbusDevices.addAll(equipmentDevice.getEquips());
                                 }

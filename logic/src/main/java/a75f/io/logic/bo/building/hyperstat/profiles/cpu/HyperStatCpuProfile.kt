@@ -462,7 +462,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) -> {
                 doAnalogStagedFanAction(
-                    port, basicSettings.fanMode, basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
+                    port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
+                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
+                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
                 )
             }
         }
@@ -470,6 +472,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private fun doAnalogStagedFanAction(
         port: Port,
+        fanLowPercent: Int,
+        fanMediumPercent: Int,
+        fanHighPercent: Int,
         fanMode: StandaloneFanStage,
         conditioningMode: StandaloneConditioningMode,
         fanLoopOutput: Int,
@@ -477,21 +482,47 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     ) {
         if (fanMode != StandaloneFanStage.OFF) {
             var fanLoopForAnalog = 0
-            if (conditioningMode == StandaloneConditioningMode.OFF) {
-                updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
-                return
-            }
-            fanLoopForAnalog = fanLoopOutput
-            if (conditioningMode == StandaloneConditioningMode.AUTO) {
-                if (getOperatingMode() == 1.0) {
-                    fanLoopForAnalog = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
-                } else if (getOperatingMode() == 2.0) {
-                    fanLoopForAnalog = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+            if (fanMode == StandaloneFanStage.AUTO) {
+                if (conditioningMode == StandaloneConditioningMode.OFF) {
+                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    return
                 }
-            } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                fanLoopForAnalog = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
-            } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                fanLoopForAnalog = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                fanLoopForAnalog = fanLoopOutput
+                if (conditioningMode == StandaloneConditioningMode.AUTO) {
+                    if (getOperatingMode() == 1.0) {
+                        fanLoopForAnalog =
+                            getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                    } else if (getOperatingMode() == 2.0) {
+                        fanLoopForAnalog =
+                            getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                    }
+                } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                    fanLoopForAnalog =
+                        getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                    fanLoopForAnalog =
+                        getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                }
+            } else {
+                when {
+                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
+                            || fanMode == StandaloneFanStage.LOW_OCC
+                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
+                        fanLoopForAnalog = fanLowPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
+                        fanLoopForAnalog = fanMediumPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
+                            || fanMode == StandaloneFanStage.HIGH_OCC
+                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
+                        fanLoopForAnalog = fanHighPercent
+                    }
+                }
             }
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog

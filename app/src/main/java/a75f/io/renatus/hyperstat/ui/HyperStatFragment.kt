@@ -602,7 +602,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
                         vAtMaxDamperLabel.visibility = View.GONE
                         vAtMaxDamperSelector.visibility = View.GONE
-                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
                         isStagedFanEnabled = true
                     } else {
                         vAtMinDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE

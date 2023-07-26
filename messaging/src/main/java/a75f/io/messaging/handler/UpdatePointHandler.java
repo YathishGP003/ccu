@@ -26,6 +26,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -170,11 +171,16 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (localPoint.getMarkers().contains("modbus")){
-            if (modbusDataInterface != null) {
-                modbusDataInterface.refreshScreen(localPoint.getId(),msgObject.get("val").getAsInt());
-            }
-            if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
-                modbusWritableDataInterface.writeRegister(localPoint.getId(),msgObject.get("val").getAsInt());
+            if(msgObject.get("val").getAsString().equals("") ){
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
+            }else {
+                if (modbusDataInterface != null) {
+                    modbusDataInterface.refreshScreen(localPoint.getId(), msgObject.get("val").getAsInt());
+                }
+                if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                    modbusWritableDataInterface.writeRegister(localPoint.getId(), msgObject.get("val").getAsInt());
+                }
             }
         }
         

@@ -903,6 +903,9 @@ public class HClient extends HProj
     String bearerToken = CCUHsApi.getInstance().getJwt();
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
+      if(uriStr.endsWith("hisRead")){
+        uriStr = uriStr.replace("v1", "v2");
+      }
       Log.d("CCU_HCLIENT", "Request to " + uriStr);
       Log.d("CCU_HCLIENT", "Request body: " + req);
       Log.i("CCU_HCLIENT","Client Token: " + bearerToken);

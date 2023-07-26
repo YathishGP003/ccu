@@ -169,20 +169,6 @@ public class UpdatePointHandler implements MessageHandler
                 BackFillUtil.updateBackfillDuration(backFillVal.getAsDouble());
             }
         }
-
-        if (localPoint.getMarkers().contains("modbus")){
-            if(msgObject.get("val").getAsString().equals("") ){
-                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-                hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
-            }else {
-                if (modbusDataInterface != null) {
-                    modbusDataInterface.refreshScreen(localPoint.getId(), msgObject.get("val").getAsInt());
-                }
-                if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
-                    modbusWritableDataInterface.writeRegister(localPoint.getId(), msgObject.get("val").getAsInt());
-                }
-            }
-        }
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
@@ -256,6 +242,8 @@ public class UpdatePointHandler implements MessageHandler
                     //If duration shows it has already expired, then just write 1ms to force-expire it locally.
                     duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                            CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -301,6 +289,15 @@ public class UpdatePointHandler implements MessageHandler
         if (p.getMarkers().contains("his")) {
             CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
             updateZoneUi = true;
+        }
+
+        if (p.getMarkers().contains("modbus")){
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(luid);
+            }
+            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(p.getId());
+            }
         }
 
         if (updateZoneUi && zoneDataInterface != null) {

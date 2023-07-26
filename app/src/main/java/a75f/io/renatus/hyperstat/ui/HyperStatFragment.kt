@@ -602,7 +602,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
                         vAtMaxDamperLabel.visibility = View.GONE
                         vAtMaxDamperSelector.visibility = View.GONE
-                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
                         isStagedFanEnabled = true
                     } else {
                         vAtMinDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
@@ -625,7 +625,8 @@ class HyperStatFragment : BaseDialogFragment() {
                 }
 
                 analogOutFanConfig.visibility =
-                    if (analogOutState.enabled && analogOutState.association == 1) View.VISIBLE else View.GONE
+                    if (analogOutState.enabled && (analogOutState.association == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
+                                analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))

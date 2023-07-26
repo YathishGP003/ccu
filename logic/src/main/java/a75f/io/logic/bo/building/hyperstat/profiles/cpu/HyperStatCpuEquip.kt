@@ -647,16 +647,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao1fanHigh = 100.0
 
         if (ao1 == 1) {
-            ao1MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog1 and output and min"
-            )
-            ao1MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog1 and output and max"
-            )
+            if (ao1AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao1MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog1 and output and min"
+                )
+                ao1MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog1 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao1AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao1AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao1fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog1 and output and low"
@@ -678,16 +683,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao2fanHigh = 100.0
 
         if (ao2 == 1) {
-            ao2MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog2 and output and min"
-            )
-            ao2MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog2 and output and max"
-            )
+            if (ao2AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao2MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog2 and output and min"
+                )
+                ao2MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog2 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao2AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao2AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao2fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog2 and output and low"
@@ -709,16 +719,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao3fanHigh = 100.0
 
         if (ao3 == 1) {
-            ao3MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog3 and output and min"
-            )
-            ao3MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog3 and output and max"
-            )
+            if (ao3AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao3MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog3 and output and min"
+                )
+                ao3MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog3 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao3AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao3fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog3 and output and low"
@@ -1008,7 +1023,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             // check if the new state of analog is mapped to Fan Speed
             // then will create new Points for fan configurations
 
-            if (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) {
+            if (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState) || HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) {
 
                 // Create Fan configuration Points
                 val fanConfigPoints: Triple<Point, Point, Point> = hyperStatPointsUtil.createFanLowMediumHighPoint(

@@ -273,7 +273,7 @@ class HyperStatAssociationUtil {
                 (analogOut1.association != analogOut2.association) -> return false
                 (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
                 (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
-                (isAnalogOutAssociatedToFanSpeed(analogOut1)) -> {
+                (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                     when {
                         (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
                         (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return false
@@ -291,7 +291,7 @@ class HyperStatAssociationUtil {
                     (analogOut1.association != analogOut2.association) -> return AnalogOutChanges.MAPPING
                     (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return AnalogOutChanges.MIN
                     (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return AnalogOutChanges.MAX
-                    (isAnalogOutAssociatedToFanSpeed(analogOut1)) -> {
+                    (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                         when {
                             (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return AnalogOutChanges.LOW
                             (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return AnalogOutChanges.MED

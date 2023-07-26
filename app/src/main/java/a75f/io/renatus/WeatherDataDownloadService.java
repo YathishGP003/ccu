@@ -9,10 +9,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
@@ -64,8 +66,13 @@ public class WeatherDataDownloadService {
 
         HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
         if (!site.containsKey("weatherRef")) {
-            CcuLog.w(L.TAG_CCU_WEATHER, "Failed to get weather conditions - Site does not have a weatherRef");
-            return;
+            if(updateWeatherRef()) {
+                site.clear();
+                site = CCUHsApi.getInstance().readEntity("site");
+            }else{
+                CcuLog.w(L.TAG_CCU_WEATHER, "Failed to get weather conditions - Site does not have a weatherRef");
+                return;
+            }
         }
         String weatherRef = site.get("weatherRef").toString();
 
@@ -124,6 +131,7 @@ public class WeatherDataDownloadService {
             protected JSONObject doInBackground(Void... params) {
                 JSONObject jsonResponse = null;
                 String requestUrl = String.format("%s/current/%s", weatherUrl, weatherRef);
+                CcuLog.i(L.TAG_CCU_WEATHER, "weatherURL: "+requestUrl+", weatherRef: "+weatherRef+", token: "+bearerToken);
                 String response = HttpUtil.executeJson(
                         requestUrl,
                         null,
@@ -173,5 +181,19 @@ public class WeatherDataDownloadService {
     
     public static double getPrecipitation() {
         return mPrecipIntensity;
+    }
+
+    private static boolean updateWeatherRef() {
+        CCUHsApi haystack = CCUHsApi.getInstance();
+        Site remoteSite = haystack
+                .getRemoteSiteEntity(Objects.requireNonNull(haystack.getSite()).getId().replace("@", ""));
+        Site localSite = haystack.getSite();
+        if(remoteSite != null && remoteSite.getWeatherRef() != null){
+            localSite.weatherRef = remoteSite.getWeatherRef();
+            haystack.updateSiteLocal(localSite, localSite.getId());
+            CcuLog.d(L.TAG_CCU_WEATHER, "updated weatherRef: "+localSite.weatherRef);
+            return true;
+        }
+        return false;
     }
 }

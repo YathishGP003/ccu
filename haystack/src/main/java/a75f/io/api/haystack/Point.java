@@ -142,15 +142,6 @@ public class Point extends Entity
     public void setCcuRef(String ccuRef) {
         this.ccuRef = ccuRef;
     }
-
-    public String getCell() {
-        return cell;
-    }
-
-    public void setCell(String cell) {
-        this.cell = cell;
-    }
-
     public String getDomainName() {
         return domainName;
     }
@@ -160,6 +151,12 @@ public class Point extends Entity
 
     public Map<String, HVal> getTags() {
         return tags;
+    }
+    public String getCell() {
+        return cell;
+    }
+    public void setCell(String cell) {
+        this.cell = cell;
     }
     private Point(){
     }

@@ -491,7 +491,9 @@ public class CCUTagsDb extends HServer {
         if(q.getLastModifiedBy() != null){
             equip.add("lastModifiedBy", q.getLastModifiedBy());
         }
-
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
+        }
         if(q.getEquipRef() != null){
             equip.add("equipRef",q.getEquipRef());
         }
@@ -505,10 +507,6 @@ public class CCUTagsDb extends HServer {
         }
         if (q.getCapacity() != null) {
             equip.add("capacity", q.getCapacity());
-        }
-
-        if (q.getDomainName() != null) {
-            equip.add("domainName", q.getDomainName());
         }
 
         for (String m : q.getMarkers()) {
@@ -562,6 +560,9 @@ public class CCUTagsDb extends HServer {
         if(q.getModel() != null){
             equip.add("model",q.getModel());
         }
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
+        }
         if(q.getEquipRef() != null){
             equip.add("equipRef", q.getEquipRef());
         }
@@ -576,9 +577,6 @@ public class CCUTagsDb extends HServer {
         }
         if (q.getCapacity() != null) {
             equip.add("capacity", q.getCapacity());
-        }
-        if (q.getDomainName() != null) {
-            equip.add("domainName", q.getDomainName());
         }
         for (String m : q.getMarkers()) {
             equip.add(m);

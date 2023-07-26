@@ -1,7 +1,7 @@
 package a75f.io.domain.api
 
+import a75f.io.api.haystack.CCUHsApi
 import kotlin.reflect.KClass
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * An entity definition that binds its domainName to database UUID.
@@ -13,7 +13,7 @@ open class EntityConfig(val domainName: String)
 
 class Site(domainName : String, id : String) : Entity(domainName, id) {
     val floors = mutableMapOf<String, Floor>()
-    val ccus = mutableMapOf<String, CcuDevice>()
+    val ccus = mutableMapOf<String, Device>()
     fun addFloor(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
@@ -22,7 +22,7 @@ class Site(domainName : String, id : String) : Entity(domainName, id) {
     fun addCcu(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        ccus[id] = CcuDevice(domainName, id)
+        ccus[id] = Device(domainName, id)
     }
 }
 class Floor(domainName : String, id : String) : Entity(domainName, id) {
@@ -62,31 +62,44 @@ class Equip(domainName : String, id : String) : Entity(domainName, id) {
     }
 }
 class Device(domainName : String, id : String) : Entity(domainName, id) {
-    val points = mutableMapOf<String, RawPoint>()
+    val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        points[domainName] = RawPoint(domainName, id)
+        points[domainName] = Point(domainName, id)
     }
-    fun getPoint(domainName: String) : RawPoint? {
+    fun getPoint(domainName: String) : Point? {
         return points[domainName]
     }
 }
+class Point(domainName : String, id : String) : Entity(domainName, id) {
+    fun readHisVal() : Double {
+        return CCUHsApi.getInstance().readHisValById(id)
+    }
+    fun writeHisVal(hisVal : Double) {
+        CCUHsApi.getInstance().writeHisValById(id, hisVal)
+    }
+    fun readPriorityVal() : Double {
+        return CCUHsApi.getInstance().readPointPriorityVal(id)
+    }
+    fun writeDefaultVal(defaultVal : Any) {
+        if (defaultVal is String) {
+            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+        } else if (defaultVal is Double) {
+            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+        }
+    }
+    fun readDefaultVal() : Double {
+        return CCUHsApi.getInstance().readDefaultValById(id)
+    }
+    fun readDefaultStrVal() : String {
+        return CCUHsApi.getInstance().readDefaultStrVal(id)
+    }
+    fun writeVal(id: String?, level: Int, who: String?, writableVal: Double?, duration: Int) {
+        CCUHsApi.getInstance().writePoint(id, level, who, writableVal, duration )
+    }
 
-class CcuDevice(domainName : String, id : String) : Entity(domainName, id) {
-    val points = mutableMapOf<String, SettingPoint>()
-    fun addPoint(entityMap : HashMap<Any, Any>) {
-        val domainName = entityMap["domainName"].toString()
-        val id = entityMap["id"].toString()
-        points[domainName] = SettingPoint(domainName, id)
-    }
-    fun getPoint(domainName: String) : SettingPoint? {
-        return points[domainName]
-    }
 }
-class Point(domainName : String, id : String) : Entity(domainName, id)
-class RawPoint(domainName : String, id : String) : Entity(domainName, id)
-class SettingPoint(domainName : String, id : String) : Entity(domainName, id)
 private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
     val domainName = entityMap["domainName"].toString()
     val id = entityMap["id"].toString()
@@ -100,8 +113,6 @@ private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass
         Equip::class -> Equip(domainName, id)
         Device::class -> Device(domainName, id)
         Point::class -> Point(domainName, id)
-        RawPoint::class -> RawPoint(domainName, id)
-        SettingPoint::class -> SettingPoint(domainName, id)
         else -> null
     }
 }

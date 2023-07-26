@@ -3,10 +3,8 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.Entity
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
-import a75f.io.domain.api.RawPoint
 import a75f.io.domain.api.Site
 
 
@@ -116,7 +114,7 @@ object DomainManager {
         }
         Domain.site?.floors?.get(hayStackPoint.floorRef)?.
         rooms?.get(hayStackPoint.roomRef)?.devices?.get(hayStackPoint.deviceRef)?.
-        points?.put(hayStackPoint.domainName, RawPoint(hayStackPoint.domainName, hayStackPoint.id))
+        points?.put(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.id))
     }
 }
 

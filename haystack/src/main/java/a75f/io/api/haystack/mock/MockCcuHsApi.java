@@ -25,7 +25,14 @@ public class MockCcuHsApi extends CCUHsApi {
     public MockCcuHsApi() {
         super();
     }
-    
+
+    public void closeDb() {
+        tagsDb.getBoxStore().close();
+    }
+
+    public void clearDb() {
+        tagsDb.tagsMap.clear();
+    }
     @Override
     public String addSite(Site s) {
         return tagsDb.addSite(s);

@@ -32,7 +32,7 @@ object TunerUtil {
     ): Boolean {
         val levelMap = srcArray[level - 1]
         if (levelMap != null && levelMap["val"] != null) {
-//            CcuLog.i(Constants.TAG_DM_CCU, " copyTunerLevel : $levelMap")
+            CcuLog.i(Constants.TAG_DM_CCU, " copyTunerLevel : $levelMap")
             hayStack.pointWrite(
                 HRef.copy(dstPointId),
                 level,
@@ -50,7 +50,7 @@ object TunerUtil {
         domainName:String,
         hayStack: CCUHsApi
     ): Boolean {
-        //CcuLog.e(Constants.TAG_DM_CCU, " copyFromBuildingTuner : ")
+        CcuLog.e(Constants.TAG_DM_CCU, " copyFromBuildingTuner : ")
 
         //building tuners like forcedOccupiedTime,adrCoolingDeadband,adrHeatingDeadband don't have zone marker,so try one more time without zone marker
         val buildingTunerPoint = hayStack.readEntity(
@@ -58,7 +58,7 @@ object TunerUtil {
         )
 
         if (buildingTunerPoint.isEmpty()) {
-            //CcuLog.e(Constants.TAG_DM_CCU, " copyFromBuildingTuner Failed: $domainName")
+            CcuLog.e(Constants.TAG_DM_CCU, " copyFromBuildingTuner Failed: $domainName")
             return false
         }
         val buildingTunerPointArray = hayStack.readPoint(buildingTunerPoint["id"].toString())
@@ -80,7 +80,7 @@ object TunerUtil {
             }
             .findFirst()
         if (!systemTunerPoint.isPresent) return false
-        //CcuLog.e(Constants.TAG_DM_CCU, " copyFromSystemTuner : $systemTunerPoint")
+        CcuLog.e(Constants.TAG_DM_CCU, " copyFromSystemTuner : $systemTunerPoint")
         val systemTunerPointArray = hayStack.readPoint(systemTunerPoint.get()["id"].toString())
 
         return (copyTunerLevel(dstPointId, systemTunerPointArray, 14, hayStack)
@@ -101,7 +101,7 @@ object TunerUtil {
             }
             .findFirst()
         if (!zoneTunerPoint.isPresent) return false
-        //CcuLog.e(Constants.TAG_DM_CCU, " copyFromZoneTuner : $zoneTunerPoint")
+        CcuLog.e(Constants.TAG_DM_CCU, " copyFromZoneTuner : $zoneTunerPoint")
         val zoneTunerPointArray = hayStack.readPoint(zoneTunerPoint.get()["id"].toString())
         return (copyTunerLevel(dstPointId, zoneTunerPointArray, 10, hayStack)
                 && copyTunerLevel(dstPointId, zoneTunerPointArray, 14, hayStack)

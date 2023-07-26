@@ -165,16 +165,6 @@ public class Equip extends Entity
         this.ccuRef = ccuRef;
     }
 
-
-    public String getEquipRef() {
-        return equipRef;
-    }
-
-    public void setEquipRef(String equipRef) {
-        this.equipRef = equipRef;
-    }
-
-
     public String getDomainName() {
         return domainName;
     }
@@ -184,6 +174,13 @@ public class Equip extends Entity
 
     public Map<String, HVal> getTags() {
         return tags;
+    }
+    public String getEquipRef() {
+        return equipRef;
+    }
+
+    public void setEquipRef(String equipRef) {
+        this.equipRef = equipRef;
     }
     public static class Builder{
         private String            displayName;
@@ -197,14 +194,12 @@ public class Equip extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+        private String domainName;
         private String equipRef;
         private String equipType;
         private String pipeRef;
         private String cell;
         private String capacity;
-
-        private String domainName;
-
         public Builder setAhuRef(String ahuRef)
         {
             this.ahuRef = ahuRef;
@@ -315,6 +310,15 @@ public class Equip extends Entity
             this.createdByApplication = createdByApplication;
             return this;
         }
+
+        public Builder setDomainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
+        public Builder addTag(String tag, HVal val) {
+            this.tags.put(tag, val);
+            return this;
+        }
         public Builder setCell(String cell) {
             this.cell = cell;
             return this;
@@ -339,15 +343,6 @@ public class Equip extends Entity
             return this;
         }
 
-
-        public Builder setDomainName(String domainName) {
-            this.domainName = domainName;
-            return this;
-        }
-        public Builder addTag(String tag, HVal val) {
-            this.tags.put(tag, val);
-            return this;
-        }
         public Equip build() {
             
             Equip q = new Equip();
@@ -370,13 +365,13 @@ public class Equip extends Entity
             q.setCreatedDateTime(createdDateTime);
             q.setLastModifiedDateTime(lastModifiedDateTime);
             q.setLastModifiedBy(lastModifiedBy);
+            q.setDomainName(domainName);
+            q.tags = this.tags;
             q.equipRef = this.equipRef;
             q.equipType = this.equipType;
             q.pipeRef = this.pipeRef;
             q.cell= this.cell;
             q.capacity = this.capacity;
-            q.setDomainName(domainName);
-            q.tags = this.tags;
             return q;
         }
         

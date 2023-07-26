@@ -409,7 +409,7 @@ public class OTNEquip {
         otnConfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
         otnConfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
-                "forced and away and  equipRef == \"" + mEquipRef + "\"") > 0);
+                "away and equipRef == \"" + mEquipRef + "\"") > 0);
         Log.d(LOG_TAG,
                 "config: " + otnConfig.gettempOffset() + " - " + otnConfig.getautoAway() + " - " +
                         "--" + otnConfig.getautoforceOccupied() + " - " + otnConfig.getzonePriority());
@@ -419,13 +419,12 @@ public class OTNEquip {
     public void update(ProfileType type, int node, OTNConfiguration config, String floorRef,
                        String roomRef) {
 
-        HashMap tempOffset = CCUHsApi.getInstance().read("point and temperature and offset and " +
+        HashMap tempOffset = CCUHsApi.getInstance().readEntity("point and temperature and offset and " +
                 "equipRef == \"" + mEquipRef + "\"");
-        HashMap zonepriority = CCUHsApi.getInstance().read("point and priority and config and " +
+        HashMap zonepriority = CCUHsApi.getInstance().readEntity("point and priority and config and " +
                 "equipRef == \"" + mEquipRef + "\"");
-        HashMap autoaway = CCUHsApi.getInstance().read("point and config and auto and" +
-                " forced and away and equipRef == \"" + mEquipRef + "\"");
-        HashMap autooccupied = CCUHsApi.getInstance().read("point and " +
+        HashMap autoaway = CCUHsApi.getInstance().readEntity("point and auto and away and equipRef == \"" + mEquipRef + "\"");
+        HashMap autooccupied = CCUHsApi.getInstance().readEntity("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mEquipRef + "\"");
 
         OTNConfiguration currentConfig = getOTNconfiguration();
@@ -579,7 +578,7 @@ public class OTNEquip {
 
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + mNodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + mNodeAddr + "\"", status);
         }
 
         String message;
@@ -604,7 +603,7 @@ public class OTNEquip {
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == " +
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == " +
                 "\"" + mNodeAddr + "\"");
     }
 

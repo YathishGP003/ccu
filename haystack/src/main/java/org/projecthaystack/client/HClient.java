@@ -21,10 +21,10 @@ import org.projecthaystack.HHisItem;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HProj;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
-import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.auth.AuthClientContext;
 import org.projecthaystack.io.HZincReader;
@@ -40,7 +40,13 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
@@ -49,7 +55,6 @@ import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.sync.SiloApiService;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
-import info.guardianproject.netcipher.NetCipher;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -109,6 +114,12 @@ public class HClient extends HProj
 //////////////////////////////////////////////////////////////////////////
 // State
 //////////////////////////////////////////////////////////////////////////
+
+  private final HashMap watches = new HashMap();
+
+  /* contains point id and point data*/
+  private final HashMap sharedEntities = new HashMap();
+  private final HashMap sharedPointArrays = new HashMap();
 
   /** Base URI for connection such as "http://host/api/demo/".
       This string always ends with slash. */
@@ -281,46 +292,47 @@ public class HClient extends HProj
 
     // grid meta
     HGridBuilder b = new HGridBuilder();
-    if (w.id != null) b.meta().add("watchId", w.id);
+    if (w.id != null) {
+      b.meta().add("watchId", w.id);
+    } else {
+      // generating watch id
+      String watchId = UUID.randomUUID().toString();
+      b.meta().add("watchId", watchId);
+      w.id = watchId;
+    }
     if (w.desiredLease != null) b.meta().add("lease", w.desiredLease);
     b.meta().add("watchDis", w.dis);
 
     // grid rows
     b.addCol("id");
-    for (int i=0; i<ids.length; ++i)
-      b.addRow(new HVal[] { ids[i] });
-
-    // make request
-    HGrid res;
-    try
-    {
-      HGrid req = b.toGrid();
-      res = call("watchSub", req);
-    }
-    catch (CallErrException e)
-    {
-      // any server side error is considered close
-      watchClose(w, false);
-      throw e;
+    for (int i=0; i<ids.length; ++i) {
+      b.addRow(new HVal[]{ids[i]});
     }
 
-    // make sure watch is stored with its watch id
-    if (w.id == null)
-    {
-      w.id = res.meta().getStr("watchId");
-      w.lease = (HNum)res.meta().get("lease");
-      watches.put(w.id, w);
+    w.lease = w.desiredLease;
+    watches.put(w.id, w);
+
+    List<HRef> newIds = Arrays.asList(ids);
+    w.subscribedIds.addAll(Arrays.asList(ids));
+
+    HRef[] hIds = new HRef[newIds.size()];
+    for(int i = 0;i < newIds.size();i++){
+      hIds[i] = newIds.get(i);
     }
 
-    // if checked, then check it
-    if (checked)
-    {
-      if (res.numRows() != ids.length && ids.length > 0)
-        throw new UnknownRecException(ids[0]);
-      for (int i=0; i<res.numRows(); ++i)
-        if (res.row(i).missing("id")) throw new UnknownRecException(ids[i]);
+    HGrid grid = CCUHsApi.getInstance().readHDictByIds(hIds);
+
+    Iterator it = grid.iterator();
+    while (it.hasNext()) {
+      HRow r = (HRow) it.next();
+      HVal rowId = r.get("id");
+      sharedEntities.put(rowId, r);
+      sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+
+      //sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
     }
-    return res;
+
+    return b.toGrid();
   }
 
   void watchUnsub(HClientWatch w, HRef[] ids)
@@ -328,19 +340,14 @@ public class HClient extends HProj
     if (ids.length == 0) throw new IllegalArgumentException("ids are empty");
     if (w.id == null) throw new IllegalStateException("nothing subscribed yet");
     if (w.closed) throw new IllegalStateException("watch is closed");
-
-    // grid meta
-    HGridBuilder b = new HGridBuilder();
-    b.meta().add("watchId", w.id);
-
-    // grid rows
-    b.addCol("id");
-    for (int i=0; i<ids.length; ++i)
-      b.addRow(new HVal[] { ids[i] });
-
-    // make request
-    HGrid req = b.toGrid();
-    call("watchUnsub", req);
+    CcuLog.i("CCU_HS","--watchUnsub---"+Arrays.toString(ids));
+    for (int i = 0; i < ids.length; ++i) {
+      sharedEntities.remove(ids[i]);
+      sharedPointArrays.remove(ids[i]);
+      w.subscribedIds.remove(ids[i]);
+    }
+    //w.subscribedIds.clear();
+    CcuLog.i("CCU_HS","--unsub--sharedEntities-"+sharedEntities.size() + "-sharedPointArrays-" + sharedPointArrays.size() + "-subscribedIds-" + w.subscribedIds.size());
   }
 
   HGrid watchPoll(HClientWatch w, boolean refresh)
@@ -354,18 +361,92 @@ public class HClient extends HProj
     if (refresh) b.meta().add("refresh");
     b.addCol("empty");
 
-    // make request
-    HGrid req = b.toGrid();
-    try
-    {
-      return call("watchPoll", req);
+    return pollChanges(w, refresh);
+
+  }
+
+  private HGrid pollChanges(HClientWatch w, boolean refresh) {
+    List<HRef> allSubscribedIdsList = (List<HRef>) w.subscribedIds;
+    HRef[] ids = allSubscribedIdsList.toArray(new HRef[0]);
+    HGrid requestedGridData = CCUHsApi.getInstance().readHDictByIds(ids);
+
+    if (refresh) {
+      // send all
+      return requestedGridData;
+    } else {
+      // send only change points
+      ArrayList<HDict> pIds = new ArrayList<>();
+      Iterator it = requestedGridData.iterator();
+
+      // iterate through entities subscribed as part of watch with latest data
+      String idStr = "id";
+      String lastModifiedDateTimeStr = "lastModifiedDateTime";
+      while (it.hasNext()) {
+        HRow r = (HRow) it.next();
+        HVal lastModifiedDateTime = r.get(lastModifiedDateTimeStr);
+        HVal rowId = r.get(idStr);
+        HRow previousRow = (HRow) sharedEntities.get(rowId);
+        HVal previousLastModifiedDateTime = previousRow.get(lastModifiedDateTimeStr);
+
+        if(previousLastModifiedDateTime != null && lastModifiedDateTime != null){
+          if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
+            pIds.add(getDictFromHRow(r));
+            sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+          }else{
+            checkItemsWithInPointArray(pIds, idStr, r, rowId);
+          }
+        }else{
+          checkItemsWithInPointArray(pIds, idStr, r, rowId);
+        }
+      }
+      return HGridBuilder.dictsToGrid(pIds.toArray(new HDict[0]));
     }
-    catch (CallErrException e)
-    {
-      // any server side error is considered close
-      watchClose(w, false);
-      throw e;
+  }
+
+  private void checkItemsWithInPointArray(ArrayList<HDict> pIds, String idStr, HRow r, HVal rowId) {
+    Double currentHighPriorityVal = CCUHsApi.getInstance().readPointPriorityVal(r.get(idStr).toString());
+    Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
+    Log.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
+    if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
+      pIds.add(getDictFromHRow(r));
+      sharedPointArrays.put(rowId, currentHighPriorityVal);
+    } else {
+      Log.d("CCU_HS", "no change in data");
     }
+  }
+
+  private HDict getDictFromHRow(HRow r) {
+    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+    HDictBuilder pid = new HDictBuilder();
+    while (ri.hasNext()) {
+      HDict.MapEntry e = (HDict.MapEntry) ri.next();
+      pid.add((String) e.getKey(), e.getValue().toString());
+    }
+    return pid.toDict();
+  }
+
+  private boolean isValuePresent(String inputLevel, String inputTime, String inputValue, HGrid inputGrid) {
+    Iterator itPr = inputGrid.iterator();
+    while (itPr.hasNext()) {
+      HRow row = (HRow) itPr.next();
+      String level = row.get("level").toString();
+      String val = row.get("val").toString();
+      String lastModifiedDateTimeForVal = row.get("lastModifiedDateTime").toString();
+      if(inputLevel.equalsIgnoreCase(level)){
+        if (inputValue.equalsIgnoreCase(val)) {
+          if (lastModifiedDateTimeForVal.equalsIgnoreCase(inputTime)) {
+            return true;
+          } else {
+            return false;
+          }
+        }else{
+          return false;
+        }
+      }
+      Log.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
+    }
+    // shared value is removed
+    return false;
   }
 
   void watchClose(HClientWatch w, boolean send)
@@ -375,7 +456,18 @@ public class HClient extends HProj
     w.closed = true;
 
     // remove it from my lookup table
-    if (w.id != null) watches.remove(w.id);
+    if (w.id != null) {
+      Iterator it = w.subscribedIds.iterator();
+      while (it.hasNext()) {
+        HRef r = (HRef) it.next();
+        sharedEntities.remove(r.val);
+        sharedPointArrays.remove(r.val);
+      }
+      //watchesWithIds.remove(w.id);
+      w.subscribedIds.clear();
+      watches.remove(w.id);
+
+    }
 
     // optionally send close message to server
     if (send)
@@ -391,14 +483,42 @@ public class HClient extends HProj
     }
   }
 
+  /**
+   * This method will be called when point is deleted from zone,
+   * This method will clear point id and point data from watches
+   * @param id
+   */
+  public void clearPointFromWatch(HRef id) {
+    for (Object entry : watches.entrySet()) {
+      Map.Entry<String,Object> obj = (Map.Entry<String, Object>) entry;
+      HClientWatch watch = (HClientWatch) obj.getValue();
+      Iterator<HRef> it = watch.subscribedIds.iterator();
+      while (it.hasNext()) {
+        HRef r = (HRef) it.next();
+        if(r.equals(id)){
+          sharedEntities.remove(r.val);
+          it.remove();
+          break;
+        }
+      }
+    }
+  }
+
   static class HClientWatch extends HWatch
   {
-    HClientWatch(HClient c, String d, HNum l) { client = c; dis = d; desiredLease = l; }
+    HClientWatch(HClient c, String d, HNum l) {
+      client = c;
+      dis = d;
+      desiredLease = l;
+      subscribedIds = new ArrayList<>();
+    }
     public String id() { return id; }
     public HNum lease() { return lease; }
     public String dis() { return dis; }
     public HGrid sub(HRef[] ids, boolean checked) { return client.watchSub(this, ids, checked); }
-    public void unsub(HRef[] ids) { client.watchUnsub(this, ids); }
+
+    public void unsub(HRef[] ids) throws IllegalArgumentException {
+      client.watchUnsub(this, ids); }
     public HGrid pollChanges() { return client.watchPoll(this, false); }
     public HGrid pollRefresh() { return client.watchPoll(this, true); }
     public void close() { client.watchClose(this, true); }
@@ -410,6 +530,7 @@ public class HClient extends HProj
     String id;
     HNum lease;
     boolean closed;
+    List<HRef> subscribedIds;
   }
 
 //////////////////////////////////////////////////////////////////////////
@@ -584,8 +705,6 @@ public class HClient extends HProj
     String resStr = postString(uri + op, reqStr);
     return (resStr == null ? null : new HZincReader(resStr).readGrid());
   }
-
-  private final HashMap watches = new HashMap();
 
   private String postString(String uriStr, String req) {
     return postString(uriStr, req, null);

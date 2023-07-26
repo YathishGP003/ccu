@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -49,7 +49,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.modbus.ModbusEquipTypes;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -191,26 +190,18 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 parameter.setDisplayInUI(isChecked);
             }
             if(modbusConfigurationAdapter != null){
-
-                ModbusConfigurationAdapter modbusConfigurationAdapter = (ModbusConfigurationAdapter)recyclerSubEquips.getAdapter();
-                List<EquipmentDevice> equipmentDeviceList = modbusConfigurationAdapter.getSubEquips();
-
-                for(EquipmentDevice equipmentDevice :equipmentDeviceList){
+                for(EquipmentDevice equipmentDevice :modbusConfigurationAdapter.getSubEquips()){
                     if (Objects.nonNull(equipmentDevice.getRegisters())) {
                         for (Register registerTemp : equipmentDevice.getRegisters()) {
                             if (registerTemp.getParameters() != null) {
                                 for (Parameter parameterTemp : registerTemp.getParameters()) {
-                                    parameterTemp.setRegisterNumber(registerTemp.getRegisterNumber());
-                                    parameterTemp.setRegisterAddress(registerTemp.getRegisterAddress());
-                                    parameterTemp.setRegisterType(registerTemp.getRegisterType());
                                     parameterTemp.setDisplayInUI(isChecked);
                                 }
                             }
                         }
                     }
                 }
-                recyclerSubEquips.setAdapter(null);
-                recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
+                modbusConfigurationAdapter.updateView();
             }
             recyclerModbusParamAdapter.notifyDataSetChanged();
         };
@@ -370,12 +361,25 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             paramHeader1.setVisibility(View.VISIBLE);
             paramHeader2.setVisibility(View.GONE);
         }
-        SelectAllParameters selectAllParameters = enable -> {
-            if(!enable) {
-                toggleSelectAllParams.setOnCheckedChangeListener(null);
-                toggleSelectAllParams.setChecked(false);
-                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+
+        List<EquipmentDevice> subEquipList = new ArrayList<>();
+        if(null != equipmentDevice.getEquips()) {
+            for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
+                subEquipList.add(subEquipmentDevice);
             }
+        }
+
+        SelectAllParameters selectAllParameters = enable -> {
+            AtomicBoolean isAllParametersSelected = new AtomicBoolean(true);
+            parameterList.forEach(parameter -> {
+                if(!parameter.isDisplayInUI()){
+                    isAllParametersSelected.set(false);
+                }
+            });
+            isAllParametersSelected.set(enableSelectAllParameters(subEquipList));
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(isAllParametersSelected.get());
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         };
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig,
                 selectAllParameters);
@@ -383,15 +387,14 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         recyclerParams.setAdapter(recyclerModbusParamAdapter);
         recyclerParams.invalidate();
 
-        List<EquipmentDevice> subEquipList = new ArrayList<>();
-        if(null != equipmentDevice.getEquips()) {
+        if(subEquipList.size() > 0) {
             for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
                 subEquipList.add(subEquipmentDevice);
             }
             modbusConfigurationAdapter = new ModbusConfigurationAdapter(getActivity(), subEquipList, isNewConfig,
                     selectAllParameters);
-            recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
             recyclerSubEquips.setLayoutManager(new LinearLayoutManager(this.getContext()));
+            recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
             recyclerSubEquips.invalidate();
         }
         if (subEquipList.size() > 0) {
@@ -399,7 +402,30 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         } else {
             recyclerSubEquips.setVisibility(View.GONE);
         }
+        if(enableSelectAllParameters(subEquipList)){
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(true);
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+        }
     }
+    private boolean enableSelectAllParameters(List<EquipmentDevice> subEquipList){
+        List<EquipmentDevice> equipmentDeviceList = new ArrayList<>();
+        equipmentDeviceList.add(equipmentDevice);
+        equipmentDeviceList.addAll(subEquipList);
+        boolean enable = true;
+        for(EquipmentDevice device : equipmentDeviceList){
+            if (Objects.nonNull(device.getRegisters())) {
+                for (Register registerTemp : device.getRegisters()) {
+                    if (registerTemp.getParameters() != null) {
+                        for (Parameter parameterTemp : registerTemp.getParameters()) {
+                            enable &= parameterTemp.isDisplayInUI();
+                        }
+                    }
+                }
+            }
+        }
+        return enable;
+        }
 
     private void saveConfig(EquipmentDevice equipmentDev, short selectedSlaveId, List<Parameter> modbusParam) {
 

@@ -1,6 +1,10 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.*
+import a75f.io.logic.ANALOG_VALUE
+import a75f.io.logic.BINARY_VALUE
+import a75f.io.logic.MULTI_STATE_VALUE
+import a75f.io.logic.addBacnetTags
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -11,7 +15,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.hyperstat.profiles.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
-import android.util.Log
 import java.util.*
 
 /**
@@ -93,7 +96,7 @@ class HyperStatPointsUtil(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
-
+            .setCurStatus("0")   //added just for bacnet testing
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
@@ -240,10 +243,14 @@ class HyperStatPointsUtil(
             .setTz(tz)
             .setGroup(nodeAddress)
             .setUnit(unit)
-
+            .setCurStatus("0")   //added just for bacnet testing
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
-        if(!hisInterpolate.isNullOrEmpty())
+        val tempDis =  displayName.split("-").last()
+            if (tempDis == "heatingLoopOutput" || tempDis == "coolingLoopOutput" || tempDis == "fanLoopOutput") {
+                point.setMinVal("0")
+                point.setMaxVal("100")
+            }if(!hisInterpolate.isNullOrEmpty())
             point.setHisInterpolate(hisInterpolate)
 
         // add specific markers
@@ -356,6 +363,9 @@ class HyperStatPointsUtil(
             "%"
         )
 
+        addBacnetTags(coolingLoopOutputPoint, 8, ANALOG_VALUE, nodeAddress.toInt())
+        addBacnetTags(heatingLoopOutputPoint, 31, ANALOG_VALUE, nodeAddress.toInt())
+        addBacnetTags(fanLoopOutputPoint, 22, ANALOG_VALUE, nodeAddress.toInt())
 
         loopOutputPointsList.add(Pair(coolingLoopOutputPoint, 0.0))
         loopOutputPointsList.add(Pair(heatingLoopOutputPoint, 0.0))
@@ -372,6 +382,7 @@ class HyperStatPointsUtil(
                 "cov",
                 "%"
             )
+            addBacnetTags(compressorLoopOutputPoint, 52, ANALOG_VALUE, nodeAddress.toInt())
             loopOutputPointsList.add(Pair(compressorLoopOutputPoint, 0.0))
         }
         return loopOutputPointsList
@@ -875,12 +886,14 @@ class HyperStatPointsUtil(
             zoneCO2ThresholdPointMarkers,
             "cov","ppm"
         )
+        addBacnetTags(zoneCO2ThresholdPointPoint, 49, ANALOG_VALUE, nodeAddress.toInt())
 
         val zoneCO2TargetPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Target",
             zoneCO2TargetPointMarkers,
             "cov","ppm"
         )
+        addBacnetTags(zoneCO2TargetPointPoint, 48, ANALOG_VALUE, nodeAddress.toInt())
 
         co2ConfigPointsList.add(
             Pair(co2DamperOpeningRatePoint, zoneCO2DamperOpeningRate)
@@ -981,12 +994,14 @@ class HyperStatPointsUtil(
             fanOperationsModePointMarkers,
             fanOperationsModePointEnums
         )
+        addBacnetTags(fanOperationsModePoint, 21, MULTI_STATE_VALUE, nodeAddress.toInt())
 
         val conditioningModePointPoint = createHaystackPointWithEnums(
             displayName = "$equipDis-ConditioningMode",
             conditioningModePointMarkers,
             conditioningModePointEnums
         )
+        addBacnetTags(conditioningModePointPoint, 46, MULTI_STATE_VALUE, nodeAddress.toInt())
 
         val targetDehumidifierPointPoint = createHaystackPointWithUnit(
             displayName = "$equipDis-targetDehumidifier",
@@ -994,12 +1009,15 @@ class HyperStatPointsUtil(
             "cov",
             "%"
         )
+        addBacnetTags(targetDehumidifierPointPoint, 50, ANALOG_VALUE, nodeAddress.toInt())
+
         val targetHumidifierPointPoint = createHaystackPointWithUnit(
             displayName = "$equipDis-targetHumidifier",
             humidifierPointMarkers,
             "cov",
             "%"
         )
+        addBacnetTags(targetHumidifierPointPoint, 51, ANALOG_VALUE, nodeAddress.toInt())
 
         userIntentPointList.add(Pair(fanOperationsModePoint, defaultFanMode.ordinal.toDouble()))
         userIntentPointList.add(Pair(conditioningModePointPoint, defaultConditioningMode.ordinal.toDouble()))
@@ -1059,11 +1077,11 @@ class HyperStatPointsUtil(
             HyperStatAssociationUtil.isRelayAssociatedToFanEnabled(relayState = relayState) ->
                 LogicalPointsUtil.createPointForFanEnable(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             HyperStatAssociationUtil.isRelayAssociatedToOccupiedEnabled(relayState = relayState) ->
-                LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayAssociatedToHumidifier(relayState = relayState) ->
-                LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayAssociatedToDeHumidifier(relayState = relayState) ->
-                LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toShort())
             else -> Point.Builder().build()
         }
 
@@ -1075,13 +1093,13 @@ class HyperStatPointsUtil(
     private fun createCoolingStagesPoint(relayState: RelayState): Point {
         when (relayState.association) {
             CpuRelayAssociation.COOLING_STAGE_1 -> {
-                return LogicalPointsUtil.createCoolingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             CpuRelayAssociation.COOLING_STAGE_2 -> {
-                return LogicalPointsUtil.createCoolingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             CpuRelayAssociation.COOLING_STAGE_3 -> {
-                return LogicalPointsUtil.createCoolingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             else -> {}
         }
@@ -1091,13 +1109,13 @@ class HyperStatPointsUtil(
     private fun createHeatingStagesPoint(relayState: RelayState): Point {
         when (relayState.association) {
             CpuRelayAssociation.HEATING_STAGE_1 -> {
-                return  LogicalPointsUtil.createHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return  LogicalPointsUtil.createHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             CpuRelayAssociation.HEATING_STAGE_2 -> {
-                return LogicalPointsUtil.createHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             CpuRelayAssociation.HEATING_STAGE_3 -> {
-                return LogicalPointsUtil.createHeatingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createHeatingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             }
             else -> {}
         }
@@ -1106,9 +1124,9 @@ class HyperStatPointsUtil(
 
     private fun createFanStagesPoint(fanStage: Int): Point {
         when (fanStage) {
-            1-> return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // Low
-            2-> return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // Medium
-            3-> return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // High
+            1-> return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()) // Low
+            2-> return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()) // Medium
+            3-> return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()) // High
         }
         throw NullPointerException("Fan stage can not be null")
     }
@@ -1315,7 +1333,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForCooling(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForCooling(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_COOLING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_COOLING),
                 )
@@ -1329,7 +1347,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -1344,7 +1362,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForHeating(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForHeating(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_HEATING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_HEATING),
                 )
@@ -1358,7 +1376,7 @@ class HyperStatPointsUtil(
                     markers = arrayOf("dcv","damper")
                 )
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_DCV_DAMPER),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_DCV_DAMPER),
                 )
@@ -1486,7 +1504,7 @@ class HyperStatPointsUtil(
 
 
     fun createAirflowTempSensor(): Point{
-       return LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+       return LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
     }
 
     fun createPointForDoorWindowSensor(windowSensorType: LogicalPointsUtil.WindowSensorType): Point{
@@ -1501,7 +1519,7 @@ class HyperStatPointsUtil(
 
         val configLogicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()
         if (isEnableAirFlowTempSensorEnabled) {
-            val pointData: Point = LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+            val pointData: Point = LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             configLogicalPointsList.add(Triple(pointData, Port.TH1_IN, 0.0))
         }
         if(isTh2ConfigEnabled) {
@@ -1580,18 +1598,22 @@ class HyperStatPointsUtil(
             "cov",
             "%"
         )
+        addBacnetTags(humidityPoint, 38, ANALOG_VALUE, nodeAddress.toInt())
+
         val illuminancePoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_ILLUMINANCE.portSensor,
             illuminanceSensorPointMarkers,
             "cov",
             "lux"
         )
+        addBacnetTags(illuminancePoint, 39, ANALOG_VALUE, nodeAddress.toInt())
+
         val occupancyPoint = createHaystackPointWithEnums(
             "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor+"sensor",
             occupancySensorPointMarkers,
             "off,on"
         )
-
+        addBacnetTags(occupancyPoint, 40, BINARY_VALUE, nodeAddress.toInt())
 
         logicalPointsList.add(Triple(occupancyPoint, Port.SENSOR_OCCUPANCY, 0.0))
         logicalPointsList.add(Triple(humidityPoint, Port.SENSOR_RH, 0.0))
@@ -1612,6 +1634,7 @@ class HyperStatPointsUtil(
             displayName = "$equipDis-temperatureOffset",
             markers = temperatureOffsetMarkers
         )
+        addBacnetTags(temperatureOffsetPoint, 17, ANALOG_VALUE, nodeAddress.toInt())
         val temperatureOffsetPointId = addPointToHaystack(point = temperatureOffsetPoint)
 
         addDefaultValueForPoint(
@@ -1693,6 +1716,7 @@ class HyperStatPointsUtil(
             "cov",
             "\u00B0F"
         )
+        addBacnetTags(desiredTempPoint, 18, ANALOG_VALUE, nodeAddress.toInt())
 
 
         val desiredTempCoolingPoint = createHaystackPointWithUnit(
@@ -1701,12 +1725,14 @@ class HyperStatPointsUtil(
             "cov",
             "\u00B0F"
         )
+        addBacnetTags(desiredTempCoolingPoint, 20, ANALOG_VALUE, nodeAddress.toInt())
         val desiredTempHeatingPoint = createHaystackPointWithUnit(
             "$equipDis-desiredTempHeating",
             desiredTempHeatingPointMarkers,
             "cov",
             "\u00B0F"
         )
+        addBacnetTags(desiredTempHeatingPoint, 19, ANALOG_VALUE, nodeAddress.toInt())
 
         val currentTempPoint = createHaystackPointWithUnit(
             "$equipDis-currentTemp",
@@ -1714,7 +1740,7 @@ class HyperStatPointsUtil(
             "cov",
             "\u00B0F"
         )
-
+        addBacnetTags(currentTempPoint, 14, ANALOG_VALUE, nodeAddress.toInt())
 
         val equipStatusPoint = createHaystackPointWithEnums(
             "$equipDis-equipStatus",
@@ -1783,8 +1809,8 @@ class HyperStatPointsUtil(
             markers = operatingModeMarkers,
             enums = operatingModePointEnums
         )
-
-         addPointToHaystack(point = occupancyModePoint)
+        addBacnetTags(operatingModeModePoint, 47, MULTI_STATE_VALUE, nodeAddress.toInt())
+        addPointToHaystack(point = occupancyModePoint)
         val occupancyDetectionPointId = addPointToHaystack(point = occupancyDetection)
         val operatingModeModePointId = addPointToHaystack(point = operatingModeModePoint)
 
@@ -1912,25 +1938,25 @@ class HyperStatPointsUtil(
 
         return when {
             HyperStatAssociationUtil.isRelayFanLowSpeed(relayState = relayState) ->
-                return  LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return  LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayFanMediumSpeed(relayState = relayState) ->
-                return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayFanHighSpeed(relayState = relayState) ->
-                return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayAuxHeatingStage1(relayState = relayState) ->
-                return LogicalPointsUtil.createAuxHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createAuxHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayAuxHeatingStage2(relayState = relayState) ->
-                return LogicalPointsUtil.createAuxHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createAuxHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayWaterValveStage(relayState = relayState) ->
-                return LogicalPointsUtil.createWaterValvePoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createWaterValvePoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayFanEnabledStage(relayState = relayState) ->
                 return LogicalPointsUtil.createPointForFanEnable(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             HyperStatAssociationUtil.isRelayOccupiedEnabledStage(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayHumidifierEnabledStage(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             HyperStatAssociationUtil.isRelayDeHumidifierEnabledStage(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toShort())
             else -> Point.Builder().build()
         }
 
@@ -2072,7 +2098,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForWaterValve(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForWaterValve(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_COOLING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_COOLING),
                 )
@@ -2086,15 +2112,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(
-                        equipDis,
-                        siteRef,
-                        equipRef,
-                        roomRef,
-                        floorRef,
-                        tz,
-                        nodeAddress
-                    ),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -2109,7 +2127,7 @@ class HyperStatPointsUtil(
                     markers = arrayOf("dcv","damper")
                 )
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_DCV_DAMPER),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_DCV_DAMPER),
                 )
@@ -2214,46 +2232,46 @@ class HyperStatPointsUtil(
 
         return when {
             HyperStatAssociationUtil.isHpuRelayCompressorStage1(relayState = relayState) ->
-                return  LogicalPointsUtil.createCompressorStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return  LogicalPointsUtil.createCompressorStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayCompressorStage2(relayState = relayState) ->
-                return LogicalPointsUtil.createCompressorStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCompressorStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayCompressorStage3(relayState = relayState) ->
-                return LogicalPointsUtil.createCompressorStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCompressorStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayAuxHeatingStage1(relayState = relayState) ->
-                return LogicalPointsUtil.createAuxHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createAuxHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayAuxHeatingStage2(relayState = relayState) ->
-                return LogicalPointsUtil.createAuxHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createAuxHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayFanLowSpeed(relayState = relayState) ->
-                return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayFanMediumSpeed(relayState = relayState) ->
-                return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayFanHighSpeed(relayState = relayState) ->
-                return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayFanEnabled(relayState = relayState) ->
                 return LogicalPointsUtil.createPointForFanEnable(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
 
             HyperStatAssociationUtil.isHpuRelayOccupiedEnabled(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayHumidifierEnabled(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayDeHumidifierEnabled(relayState = relayState) ->
-                return LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toShort())
 
             HyperStatAssociationUtil.isHpuRelayChangeOverCooling(relayState = relayState) ->
-                return LogicalPointsUtil.createChangeOverCoolingPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createChangeOverCoolingPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
 
             HyperStatAssociationUtil.isHpuRelayChangeOverHeating(relayState = relayState) ->
-                return LogicalPointsUtil.createChangeOverHeatingPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createChangeOverHeatingPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
             else -> Point.Builder().build()
         }
 
@@ -2365,7 +2383,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutCompressorSpeedValve(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutCompressorSpeedValve(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_COOLING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_COOLING),
                 )
@@ -2379,15 +2397,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(
-                        equipDis,
-                        siteRef,
-                        equipRef,
-                        roomRef,
-                        floorRef,
-                        tz,
-                        nodeAddress
-                    ),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -2402,7 +2412,7 @@ class HyperStatPointsUtil(
                     markers = arrayOf("dcv","damper")
                 )
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForDCVDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_DCV_DAMPER),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_DCV_DAMPER),
                 )

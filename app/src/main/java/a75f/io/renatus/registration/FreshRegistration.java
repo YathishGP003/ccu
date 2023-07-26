@@ -35,8 +35,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.RestoreCCU;
@@ -56,6 +58,7 @@ import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -79,9 +82,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             R.drawable.ic_goarrow_svg,
             R.drawable.ic_wifi_svg,
             R.drawable.ic_settings_svg,
-            R.drawable.ic_options_svg,
-            R.drawable.ic_security_svg,
-            R.drawable.ic_ticket_alt_solid,
     };
 
     FrameLayout container;
@@ -156,6 +156,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof ReplaceCCU) {
                     selectItem(1);
+                }
+                if (currentFragment instanceof RegisterCCUToExistingSite) {
+                    selectItem(6);
                 }
                 if (currentFragment instanceof DefaultSystemProfile) {
                     selectItem(5);
@@ -1160,7 +1163,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
-            paramsPager.topMargin = 92;
+            paramsPager.topMargin = 102;
             paramsPager.leftMargin = 116;
             paramsPager.bottomMargin = 24;
             paramsPager.rightMargin = 101;
@@ -1170,6 +1173,34 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             Intent intent = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
             startActivity(intent);
+        }
+        if (position == 23) {
+
+            fragment = new RegisterCCUToExistingSite();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(2);
+            textView_title.setText(getText(R.string.add_new_ccu));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0, 0, 92, 0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 130;
+            paramsPager.leftMargin = 400;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
         }
     }
 
@@ -1210,6 +1241,14 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (!Globals.getInstance().siteAlreadyCreated()) {
+                    DefaultSchedules.generateDefaultSchedule(false, null);
+                }
+                InstallerOptions installerOptions = new InstallerOptions();
+                HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
+                installerOptions.createInstallerPoints(ccu, true);
+                prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
+                prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
                 ProgressDialogUtils.hideProgressDialog();
                 if (pingCloudServer()){
 

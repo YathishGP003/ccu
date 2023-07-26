@@ -79,10 +79,12 @@ public class OTNProfile extends ZoneProfile {
                         " and" +
                         " group == \"" + mOTNEquip.mNodeAddr + "\"", "Zone Temp Dead");
             }
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" +
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
                     mOTNEquip.mNodeAddr + "\"", (double) TEMPDEAD.ordinal());
             return;
         }
+
+
 
         boolean isAutoforceoccupiedenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mOTNEquip.mEquipRef + "\"") > 0;

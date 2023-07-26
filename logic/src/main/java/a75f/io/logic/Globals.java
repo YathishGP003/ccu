@@ -4,10 +4,15 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HNum;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,6 +33,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.ccu.CazProfile;
@@ -80,6 +86,7 @@ import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.RxjavaUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -127,6 +134,9 @@ public class Globals {
     private long ccuUpdateTriggerTimeToken;
 
     private boolean recoveryMode = false;
+    private boolean isInitCompleted = false;
+
+    private List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
     private Globals() {
     }
 
@@ -209,21 +219,15 @@ public class Globals {
 
 
     public void initilize() {
-
+        CcuLog.i(L.TAG_CCU_INIT,"Globals Initialize");
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-
-        Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
-
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
-
-
         RenatusServicesEnvironment servicesEnv = RenatusServicesEnvironment.createWithSharedPrefs(
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         RenatusServicesUrls urls = servicesEnv.getUrls();
-
+        CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
@@ -236,17 +240,16 @@ public class Globals {
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-        if(!isSafeMode()){
-            importTunersAndScheduleJobs();
-            handleAutoCommissioning();
-        }
+
+        importTunersAndScheduleJobs();
+        handleAutoCommissioning();
 
         updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
-
+        CcuLog.i(L.TAG_CCU_INIT,"Initialize completed");
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -318,7 +321,29 @@ public class Globals {
             @Override
             public void run()
             {
-                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                try {
+                    CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+                    HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                    if(!isSafeMode()) {
+                        MigrationUtil.doMigrationTasksIfRequired();
+                        performBuildingTunerUprades(site);
+                        migrateHeartbeatPointForEquips(site);
+                        migrateHeartbeatDiagPointForEquips(site);
+                        migrateHeartbeatwithNewtags(site);
+                        OAODamperOpenReasonMigration(site);
+                        firmwareVersionPointMigration(site);
+                        migrateIduPoints(site);
+                        migrateSNPoints(site);
+                        CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
+                        loadEquipProfiles();
+                        isInitCompleted = true;
+                        Site siteObject = new Site.Builder().setHashMap(site).build();
+                        CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                                HayStackConstants.USER, HayStackConstants.PASS), siteObject);
+                    }
+                    CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
+                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                 MigrationUtil.doMigrationTasksIfRequired();
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
@@ -329,6 +354,7 @@ public class Globals {
                 migrateIduPoints(site);
                 migrateSNPoints(site);
                 loadEquipProfiles();
+                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
                 Site siteObject = new Site.Builder().setHashMap(site).build();
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);
@@ -336,17 +362,27 @@ public class Globals {
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                         TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
-                mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                        TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
 
-                BearerTokenManager.getInstance().scheduleJob();
+                    BearerTokenManager.getInstance().scheduleJob();
 
-                mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
-
-                Watchdog.getInstance().addMonitor(mProcessJob);
-                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
-                Watchdog.getInstance().start();
+                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
+                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+                    CcuLog.i(L.TAG_CCU_INIT,"Init Watchdog");
+                    Watchdog.getInstance().addMonitor(mProcessJob);
+                    Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+                    Watchdog.getInstance().start();
+                }  catch ( Exception e) {
+                    //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
+                    //Init would retried during next app restart.
+                    CcuLog.i(L.TAG_CCU_INIT,"Init failed");
+                    e.printStackTrace();
+                } finally {
+                    CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
+                    isInitCompleted = true;
+                    initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                }
             }
         }.start();
 
@@ -677,5 +713,26 @@ public class Globals {
             long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
             AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);
         }
+
+        if(AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.ABORTED ||
+                AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.COMPLETED){
+            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                    HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.NOT_STARTED.ordinal()), HNum.make(0));
+            CCUHsApi.getInstance().writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.NOT_STARTED.ordinal());
+        }
+    }
+    public interface OnCcuInitCompletedListener {
+        void onInitCompleted();
+    }
+
+    public void registerOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
+        initCompletedListeners.add(listener);
+        if (isInitCompleted) {
+            CcuLog.i("UI_PROFILING","CCU Already registered");
+            listener.onInitCompleted();
+        }
+    }
+    public void unRegisterOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
+        initCompletedListeners.remove(listener);
     }
 }

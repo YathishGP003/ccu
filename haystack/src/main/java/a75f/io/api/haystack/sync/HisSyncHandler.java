@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
@@ -228,7 +226,7 @@ public class HisSyncHandler
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsBatch(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {

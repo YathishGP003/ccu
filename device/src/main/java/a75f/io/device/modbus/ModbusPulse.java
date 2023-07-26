@@ -190,7 +190,8 @@ public class ModbusPulse {
                     }
                 }
             }else if(register.getParameterDefinitionType().equals("unsigned long") ||
-                    register.getParameterDefinitionType().equals("long")){
+                    register.getParameterDefinitionType().equals("long") ||
+                    register.getParameterDefinitionType().equals("int32")){
                 if (register.getParameters().size() > 0) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianInt32Val(response);
@@ -270,8 +271,7 @@ public class ModbusPulse {
 
 
     public static long parseLittleEndianInt32Val(RtuMessageResponse response) {
-        long responseVal = ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) <<
-                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+        long responseVal = ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
                 ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);

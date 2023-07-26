@@ -1,6 +1,7 @@
 package a75f.io.renatus.registration;
 
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
+import static a75f.io.logic.util.backupfiles.FileConstants.CCU_REPLACE_BACNET_CONFIG;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -52,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.bacnet.BacnetConfigConstants;
 import a75f.io.logic.Globals;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.EquipResponseCallback;
@@ -112,6 +114,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private TextView connectivityIssue;
     private ImageView pauseAlert;
     private ImageView connectivityAlert;
+    private SharedPreferences bacnet_pref;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -146,6 +149,8 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         connectivityIssue = progressBarView.findViewById(R.id.connectivityIssue);
         pauseAlert = progressBarView.findViewById(R.id.pauseAlert);
         connectivityAlert = progressBarView.findViewById(R.id.connectivityAlert);
+        bacnet_pref = Globals.getInstance().getApplicationContext().getSharedPreferences(CCU_REPLACE_BACNET_CONFIG,
+                Context.MODE_PRIVATE);
 
         cancel.setOnClickListener(view -> {
             Toast.makeText(getActivity() , "Cancelling Replace CCU...", Toast.LENGTH_LONG).show();
@@ -258,7 +263,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         RecyclerView ccuListRecyclerView = dialogView.findViewById(R.id.ccus);
         TextView ccuVersionTextView = dialogView.findViewById(R.id.curr_ccu_version);
         ImageView close = dialogView.findViewById(R.id.close_button);
-        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this);
+        CCUListAdapter adapter = new CCUListAdapter(ccuList,getContext(), this, getParentFragmentManager());
         ccuListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ccuListRecyclerView.setHasFixedSize(true);
         ccuListRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -338,7 +343,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private AlertDialog replaceCCUDailog;
     @Override
     public void onCCUSelect(CCU ccu) {
-        replaceCCUDailog = new AlertDialog.Builder(getContext()).create();
+        replaceCCUDailog = new AlertDialog.Builder(requireContext()).create();
         replaceCCUDailog.setTitle("Do you want to replace "+ ccu.getName()+"?");
         replaceCCUDailog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", (dialogInterface, i) -> {
             alertDialog.dismiss();
@@ -407,7 +412,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             equipResponseCallback, ReplaceCCUTracker replaceCCUTracker){
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.CONFIG_FILES, ReplaceStatus.RUNNING.toString());
         Map<String, Integer> modbusConfigs = new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@"
-                , ""), ccu.getCcuId().replaceFirst("@", ""));
+                , ""), ccu.getCcuId().replaceFirst("@", ""), bacnet_pref);
         new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
                 ccu.getCcuId().replaceFirst("@", ""));
         updateModbusConfigValues(modbusConfigs);
@@ -573,5 +578,8 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setBoolean("CCU_SETUP", true);
         prefs.setBoolean("PROFILE_SETUP", true);
         prefs.setBoolean("isCcuRegistered", true);
+        prefs.setString(BacnetConfigConstants.BACNET_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_CONFIGURATION,null));
+        prefs.setBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED,false));
+        prefs.setBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED,false));
     }
 }

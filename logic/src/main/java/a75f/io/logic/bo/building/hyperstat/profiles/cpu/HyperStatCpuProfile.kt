@@ -551,7 +551,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             equip.hsHaystackUtil.writeDefaultVal("status and message and writable", "Zone Temp Dead")
         }
         equip.haystack.writeHisValByQuery(
-            "point and status and his and group == \"${equip.node}\"",
+            "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }

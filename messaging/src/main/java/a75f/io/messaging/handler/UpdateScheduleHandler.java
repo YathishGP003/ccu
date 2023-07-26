@@ -252,7 +252,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 }
                 Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
                 if (zoneSchedule.getRoomRef()!= null)
-                    CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+                    CCUHsApi.getInstance().updateScheduleNoSync(zoneSchedule, zoneSchedule.getRoomRef());
             }
         }
     }
@@ -285,8 +285,8 @@ public class UpdateScheduleHandler implements MessageHandler
 
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
-        if (jsonObject.get("command").equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
-            CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
+        if (jsonObject.get("command").getAsString().equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
+            CCUHsApi.getInstance().removeEntity(jsonObject.get("id").getAsString());
             return;
         }
         long timeToken = jsonObject.get("timeToken").getAsLong();

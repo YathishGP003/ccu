@@ -5,6 +5,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import android.util.Log
 import com.google.gson.JsonObject
 
@@ -52,7 +53,15 @@ class HyperstatReconfigurationHandler {
                         }
                     }
                 }
-
+                for (i in 1.. 6 ) {
+                    if (configPoint.markers.contains("relay$i")) {
+                        DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
+                    }
+                }
+                if((configPoint.markers.contains("analog1") || configPoint.markers.contains("analog2")
+                            || configPoint.markers.contains("analog3")) && configPoint.markers.contains("output")) {
+                    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance());
+                }
                 if (configPoint.markers.contains(Tags.USERINTENT)
                     && configPoint.markers.contains(Tags.FAN)
                     && configPoint.markers.contains(Tags.MODE)

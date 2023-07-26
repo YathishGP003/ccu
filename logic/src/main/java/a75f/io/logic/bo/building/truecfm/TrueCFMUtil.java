@@ -70,6 +70,8 @@ public class TrueCFMUtil {
                                                     .intValue();
         
         return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)
-                                    || occupancyMode != Occupancy.OCCUPIED.ordinal();
+                                    || (occupancyMode != Occupancy.OCCUPIED.ordinal()
+                                        && occupancyMode != Occupancy.FORCEDOCCUPIED.ordinal()
+                                        && occupancyMode != Occupancy.AUTOFORCEOCCUPIED.ordinal());
     }
 }

@@ -111,9 +111,8 @@ public class InstallTypeFragment extends Fragment {
         layoutWithoutCloud.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                // TODO Auto-generated method stub
                 prefs.setString("INSTALL_TYPE","OFFLINE");
-                ((FreshRegistration)getActivity()).selectItem(4);
+                ((FreshRegistration)getActivity()).selectItem(21);
             }
         });
 

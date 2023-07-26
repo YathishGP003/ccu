@@ -1,20 +1,16 @@
 package a75f.io.renatus;
 
-import static a75f.io.logic.L.app;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -45,16 +41,13 @@ import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -66,15 +59,14 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
+import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
-import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
@@ -570,7 +562,6 @@ public class FloorPlanFragment extends Fragment {
         } else {
             moduleListView.setAdapter(null);
         }
-        BackFillUtil.setBackFillDuration();
     }
 
     private ArrayList<String> createAddressList(List<Equip> equips) {
@@ -1229,6 +1220,7 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
+                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();

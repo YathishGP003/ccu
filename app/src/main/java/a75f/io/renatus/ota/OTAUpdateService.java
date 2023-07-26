@@ -1027,14 +1027,13 @@ public class OTAUpdateService extends IntentService {
     }
 
     boolean checkDuplicateRequest(Intent intentDetails){
-        AtomicBoolean isFound = new AtomicBoolean(false);
-        otaRequestsQueue.forEach( intent -> {
+        for (Intent intent : otaRequestsQueue) {
             String currentOtaRequest = intent.getStringExtra(MESSAGE_ID);
             if (currentOtaRequest.equalsIgnoreCase(intentDetails.getStringExtra(MESSAGE_ID))){
-                isFound.set(true);
+                return true;
             }
-        });
-        return isFound.get();
+        }
+        return false;
     }
     private void deleteFilesByDeviceType(File dir){
         try {

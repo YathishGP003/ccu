@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.logic.L;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.renatus.AboutFragment;
@@ -84,7 +86,7 @@ public class AppInstaller
             e.printStackTrace();
         }
         if (applicationInfo == null) {
-            Log.e("upgrade", "The app wasn't installed, installing now");
+            CcuLog.e("upgrade", "The app wasn't installed, installing now");
             final String libs = "";
             try {
                 String sFilePath = moveAssetToExternalStorage("mover.apk");
@@ -188,7 +190,7 @@ public class AppInstaller
         }
         request.setDestinationInExternalFilesDir(RenatusApp.getAppContext(), null, apkFile);
         long dowloadId = manager.enqueue(request);
-        Log.d("CCU_DOWNLOAD", "downloading file: "+dowloadId+","+url);
+        CcuLog.d("L.TAG_CCU_DOWNLOAD", "downloading file: "+dowloadId+","+url);
         if(currentFragment != null) {
             checkDownload(dowloadId, manager, currentFragment);
         }
@@ -205,7 +207,11 @@ public class AppInstaller
                 Cursor cursor = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
                 if (cursor.moveToFirst()) {
                     int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                    Log.i("ccu_download ","columnIndex"+cursor.getInt(columnIndex));
+                    CcuLog.i(L.TAG_CCU_DOWNLOAD,"columnIndex columnIndex "+columnIndex);
+                    CcuLog.i(L.TAG_CCU_DOWNLOAD,"columnIndex"+cursor.getInt(columnIndex)+" m "+DownloadManager.STATUS_FAILED);
+                    if (cursor.getInt(columnIndex) == DownloadManager.STATUS_FAILED) {
+                        CcuLog.i("ccu_download ","failed"+cursor.getInt(columnIndex));
+                    }
                     if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
                         if (currentFragment instanceof UpdateCCUFragment) {
                             UpdateCCUFragment updateCCUFragment = (UpdateCCUFragment) currentFragment;
@@ -228,10 +234,21 @@ public class AppInstaller
                             AboutFragment aboutFragment = (AboutFragment) currentFragment;
                             aboutFragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
                         }
-                        Log.i("CCU_DOWNLOAD", "Downloaded: " + progress + "%");
+                        CcuLog.i(L.TAG_CCU_DOWNLOAD, "Downloaded: " + progress + "%");
+                    }
+                } else {
+                    CcuLog.i(L.TAG_CCU_DOWNLOAD, "Download cancelled");
+                    cursor.close();
+                    timer.cancel();
+                    if (currentFragment instanceof UpdateCCUFragment) {
+                        UpdateCCUFragment updateCCUFragment = (UpdateCCUFragment) currentFragment;
+                        updateCCUFragment.downloadCanceled();
+                    }
+                    if (currentFragment instanceof AboutFragment) {
+                        AboutFragment aboutFragment = (AboutFragment) currentFragment;
+                        aboutFragment.cancelUpdateCCU();
                     }
                 }
-                cursor.close();
             }
         };
         timer.scheduleAtFixedRate(task, 0, 1000);
@@ -254,7 +271,7 @@ public class AppInstaller
             invokeInstallerIntent(activity, mHomeAppDownloadId, HOMEAPP_INSTALL_CODE, bSilent);
         }
         else if (bInstallCCUApp) {
-            Log.d("CCU_DOWNLOAD", "Install AppInstall===>>>");
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall===>>>");
             invokeInstallerIntent(activity, mCCUAppDownloadId, CCUAPP_INSTALL_CODE, bSilent);
         }
     }
@@ -273,7 +290,7 @@ public class AppInstaller
                     File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
-                    Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     RenatusApp.executeAsRoot(commands);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
@@ -283,7 +300,7 @@ public class AppInstaller
                 Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
                 Uri uri = Uri.fromFile(new File(RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ));
                 installIntent.setData(uri);
-                Log.d("CCU_DOWNLOAD", "Install AppInstall invokeInstallerIntent not silently===>>>"+manager.getUriForDownloadedFile(downloadId).getPath()+","+uri.getPath());
+                CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall invokeInstallerIntent not silently===>>>"+manager.getUriForDownloadedFile(downloadId).getPath()+","+uri.getPath());
                 //installIntent.setData(manager.getUriForDownloadedFile(downloadId));
                 installIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
                 installIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
@@ -291,10 +308,10 @@ public class AppInstaller
             }
         }
         catch (ActivityNotFoundException e) {
-            Log.d("CCU_DOWNLOAD", "ActivityNotFoundException ".concat(e.getMessage()));
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "ActivityNotFoundException ".concat(e.getMessage()));
 
         }catch (Exception e){
-            Log.d("CCU_DOWNLOAD", "Exception ".concat(e.getMessage()));
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "Exception ".concat(e.getMessage()));
         }
     }
     
@@ -314,23 +331,23 @@ public class AppInstaller
             PackageManager pm = RenatusApp.getAppContext().getPackageManager();
             PackageInfo packageInfo = getPackageInfo(pm, sFilePath);
             if (packageInfo != null) {
-                Log.d("CCU_DOWNLOAD", "New Version: "+sFilePath+" "+packageInfo.versionName+"."+
+                CcuLog.d(L.TAG_CCU_DOWNLOAD, "New Version: "+sFilePath+" "+packageInfo.versionName+"."+
                         packageInfo.versionCode);
                 PackageInfo pi = pm.getPackageInfo(packageInfo.packageName, 0);{
-                    Log.d("CCU_DOWNLOAD", "Installed Version: "+pi.versionName+"."+ pi.versionCode);
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "Installed Version: "+pi.versionName+"."+ pi.versionCode);
                 }
                 if (packageInfo.versionCode > pi.versionCode) {
-                    Log.d("CCU_DOWNLOAD", "*****New version available to install");
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "*****New version available to install");
                     return true;
                 }
             }
         }
         catch (NameNotFoundException e) {
-            Log.d("CCU_DOWNLOAD", "***exception Called*** ".concat(e.toString()));
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
             return true;
         }
         catch (NullPointerException e) {
-            Log.d("CCU_DOWNLOAD", "***exception Called*** ".concat(e.toString()));
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
         }
         return false;
     }
@@ -363,7 +380,7 @@ public class AppInstaller
         for (ApplicationInfo ai : l) {
             if (ai.packageName.contains(name)){
                 PackageInfo pinew = pm.getPackageArchiveInfo(ai.sourceDir,0);
-                Log.d("CCU_HOME","home app info = "+ai.sourceDir+","+ai.packageName+","+pinew.versionCode+","+pinew.versionName);
+                CcuLog.d("CCU_HOME","home app info = "+ai.sourceDir+","+ai.packageName+","+pinew.versionCode+","+pinew.versionName);
                 if (pinew != null) {
                     PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", pinew.versionCode).commit();
                     return pinew.versionCode;
@@ -385,7 +402,7 @@ public class AppInstaller
             }
         }
         catch (NullPointerException e) {
-            Log.d("CCU_DOWNLOAD", "***exception Called*** ");
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
         }
         return 1;
     }

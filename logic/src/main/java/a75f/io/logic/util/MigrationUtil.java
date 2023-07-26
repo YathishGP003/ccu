@@ -120,10 +120,7 @@ public class MigrationUtil {
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
         }
 
-        if (!PreferenceUtil.isCCUHeartbeatMigrationDone()) {
-            addCCUHeartbeatDiagPoint();
-            PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
-        }
+        addCCUHeartbeatDiagPoint();
 
         if(!PreferenceUtil.isPressureUnitMigrationDone()){
             pressureUnitMigration(CCUHsApi.getInstance());
@@ -393,6 +390,7 @@ public class MigrationUtil {
             removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
+        CCUHsApi.getInstance().removeAllNamedSchedule();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
@@ -2030,7 +2028,7 @@ public class MigrationUtil {
 
     private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
 
-        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone and not smartstat");
         for (HashMap<Object, Object> equip : Equips) {
             ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
             if (!enableOccupancyControlPoints.isEmpty()) {

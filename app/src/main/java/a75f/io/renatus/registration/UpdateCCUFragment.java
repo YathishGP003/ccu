@@ -139,13 +139,17 @@ public class UpdateCCUFragment extends DialogFragment {
         }
         dismiss();
         if (!isReplace) {
-            ((FreshRegistration) requireActivity()).selectItem(2);
+            if(requireActivity() instanceof FreshRegistration){
+                ((FreshRegistration) requireActivity()).selectItem(2);
+            }
         }
     };
 
     View.OnClickListener cancelInServerDownLayout = view -> {
+        if(requireActivity() instanceof FreshRegistration){
+            ((FreshRegistration) requireActivity()).selectItem(2);
+        }
         dismiss();
-        ((FreshRegistration) requireActivity()).selectItem(2);
     };
 
     View.OnClickListener updateOnClickListener = view -> {
@@ -157,6 +161,18 @@ public class UpdateCCUFragment extends DialogFragment {
             RemoteCommandHandlerUtil.updateCCU(versionLabelString, UpdateCCUFragment.this);
         }
     };
+
+    public void downloadCanceled() {
+        isNotFirstInvocation = false;
+        if (getActivity() != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                updateApp.setEnabled(true);
+                progressLayout.setVisibility(View.GONE);
+                updateApp.setTextColor(Color.parseColor("#E24301"));
+            });
+        }
+        Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+    }
 
     private void updateUI() {
         currentVersionOfCCU.setText(currentVersionOfCCUString);

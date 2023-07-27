@@ -494,7 +494,349 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_2)
         }
-        
+
+        private fun isUniversalInDuplicated(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+            association: UniversalInAssociation
+        ): Boolean{
+            var nMappings = 0
+
+            if (ui1.enabled && ui1.association==association) nMappings++
+            if (ui2.enabled && ui2.association==association) nMappings++
+            if (ui3.enabled && ui3.association==association) nMappings++
+            if (ui4.enabled && ui4.association==association) nMappings++
+            if (ui5.enabled && ui5.association==association) nMappings++
+            if (ui6.enabled && ui6.association==association) nMappings++
+            if (ui7.enabled && ui7.association==association) nMappings++
+            if (ui8.enabled && ui8.association==association) nMappings++
+
+            return nMappings > 1
+        }
+        private fun isSensorBusTempDuplicated(
+            addr0: SensorBusTempState,
+            addr1: SensorBusTempState,
+            addr2: SensorBusTempState,
+            association: CpuEconSensorBusTempAssociation
+        ): Boolean{
+            var nMappings = 0
+
+            if (addr0.enabled && addr0.association==association) nMappings++
+            if (addr1.enabled && addr1.association==association) nMappings++
+            if (addr2.enabled && addr2.association==association) nMappings++
+
+            return nMappings > 1
+        }
+
+        fun isOutsideAirTemperatureDuplicated(
+            addr0State: SensorBusTempState,
+            addr1State: SensorBusTempState,
+            addr2State: SensorBusTempState,
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isSensorBusTempDuplicated(
+                    addr0State, addr1State, addr2State,
+                    CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)) return true
+
+            if (isAnySensorBusAddressMappedToOutsideAir(addr0State,addr1State,addr2State)
+                        && isAnyUniversalInMappedToOutsideAirTemperature(
+                            uniIn1State, uniIn2State,
+                            uniIn3State, uniIn4State,
+                            uniIn5State, uniIn6State,
+                            uniIn7State, uniIn8State)) return true
+
+            return false
+        }
+        fun isSupplyAirTemperatureDuplicated(
+            addr0State: SensorBusTempState,
+            addr1State: SensorBusTempState,
+            addr2State: SensorBusTempState,
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isSensorBusTempDuplicated(
+                    addr0State, addr1State, addr2State,
+                    CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.SUPPLY_AIR_TEMPERATURE)) return true
+
+            if (isAnySensorBusAddressMappedToSupplyAir(addr0State,addr1State,addr2State)
+                && isAnyUniversalInMappedToSupplyAirTemperature(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) return true
+
+            return false
+        }
+        fun isMixedAirTemperatureDuplicated(
+            addr0State: SensorBusTempState,
+            addr1State: SensorBusTempState,
+            addr2State: SensorBusTempState,
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isSensorBusTempDuplicated(
+                    addr0State, addr1State, addr2State,
+                    CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.MIXED_AIR_TEMPERATURE)) return true
+
+            if (isAnySensorBusAddressMappedToMixedAir(addr0State,addr1State,addr2State)
+                && isAnyUniversalInMappedToMixedAirTemperature(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) return true
+
+            return false
+        }
+        fun isDuctPressureDuplicated(
+            addr3State: SensorBusPressState,
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.DUCT_PRESSURE_0_1)
+                || isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.DUCT_PRESSURE_0_2)
+                || (isUniversalInMapped(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.DUCT_PRESSURE_0_1) &&
+                        isUniversalInMapped(
+                            uniIn1State, uniIn2State,
+                            uniIn3State, uniIn4State,
+                            uniIn5State, uniIn6State,
+                            uniIn7State, uniIn8State,
+                            UniversalInAssociation.DUCT_PRESSURE_0_2))) return true
+
+            if(isSensorBusAddressAssociatedToDuctPressure(addr3State) &&
+                        (isUniversalInMapped(
+                            uniIn1State, uniIn2State,
+                            uniIn3State, uniIn4State,
+                            uniIn5State, uniIn6State,
+                            uniIn7State, uniIn8State,
+                            UniversalInAssociation.DUCT_PRESSURE_0_1) ||
+                        isUniversalInMapped(
+                            uniIn1State, uniIn2State,
+                            uniIn3State, uniIn4State,
+                            uniIn5State, uniIn6State,
+                            uniIn7State, uniIn8State,
+                            UniversalInAssociation.DUCT_PRESSURE_0_2))) return true
+
+            return false
+        }
+
+        fun isFilterStatusDuplicated(
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.FILTER_NC)) return true
+
+            if (isUniversalInDuplicated(
+                uniIn1State, uniIn2State,
+                uniIn3State, uniIn4State,
+                uniIn5State, uniIn6State,
+                uniIn7State, uniIn8State,
+                UniversalInAssociation.FILTER_NO)) return true
+
+            if (isAnyUniversalInMappedToFilterNO(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)
+                && isAnyUniversalInMappedToFilterNC(
+                uniIn1State, uniIn2State,
+                uniIn3State, uniIn4State,
+                uniIn5State, uniIn6State,
+                uniIn7State, uniIn8State)) return true
+
+            return false
+        }
+
+        fun isCondensateOverflowStatusDuplicated(
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CONDENSATE_NC)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CONDENSATE_NO)) return true
+
+            if (isAnyUniversalInMappedToCondensateNO(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)
+                && isAnyUniversalInMappedToCondensateNC(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) return true
+
+            return false
+        }
+        fun isCurrentTXDuplicated(
+            uniIn1State: UniversalInState,
+            uniIn2State: UniversalInState,
+            uniIn3State: UniversalInState,
+            uniIn4State: UniversalInState,
+            uniIn5State: UniversalInState,
+            uniIn6State: UniversalInState,
+            uniIn7State: UniversalInState,
+            uniIn8State: UniversalInState
+        ): Boolean {
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CURRENT_TX_0_10)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CURRENT_TX_0_20)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CURRENT_TX_0_50)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CURRENT_TX_0_100)) return true
+
+            if (isUniversalInDuplicated(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State,
+                    UniversalInAssociation.CURRENT_TX_0_150)) return true
+
+            var nMappings = 0
+
+            if (isAnyUniversalInMappedToCT10(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) nMappings++
+
+            if (isAnyUniversalInMappedToCT20(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) nMappings++
+
+            if (isAnyUniversalInMappedToCT50(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) nMappings++
+
+            if (isAnyUniversalInMappedToCT100(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) nMappings++
+
+            if (isAnyUniversalInMappedToCT150(
+                    uniIn1State, uniIn2State,
+                    uniIn3State, uniIn4State,
+                    uniIn5State, uniIn6State,
+                    uniIn7State, uniIn8State)) nMappings++
+
+            return nMappings > 1
+        }
+
         fun isAnySensorBusAddressMappedToMixedAir(
             addr0: SensorBusTempState, 
             addr1: SensorBusTempState,
@@ -826,8 +1168,7 @@ class HyperStatSplitAssociationUtil {
         private fun verifyCoolingState(state: RelayState, highestValue: Int): Int {
             if (state.enabled && isRelayAssociatedToCoolingStage(state)
                 && state.association.ordinal > highestValue
-            )
-                return state.association.ordinal
+            ) return state.association.ordinal
             return highestValue
         }
 

@@ -63,13 +63,13 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         port: Port,
         coolingLoopOutput: Int,
         relayActivationHysteresis: Int,
-        divider: Int,
+        threshold: Int,
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
-        if (coolingLoopOutput > (2*divider + (relayActivationHysteresis / 2)))
+        if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (coolingLoopOutput <= (2*divider - (relayActivationHysteresis / 2)))
+        if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
@@ -84,13 +84,13 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         port: Port,
         coolingLoopOutput: Int,
         relayActivationHysteresis: Int,
-        divider: Int,
+        threshold: Int,
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
-        if (coolingLoopOutput > (3*divider + (relayActivationHysteresis / 2)))
+        if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (coolingLoopOutput <= (3*divider - (relayActivationHysteresis / 2)))
+        if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
@@ -333,39 +333,17 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         }
     }
 
-    /*
-        Unlike HyperStat, there is no door/window sensor option on HyperStat Split at this time.
-        isDoorOpen argument is left in place for inheritance purposes, but this method will always
-        be called with isDoorOpen = false for now.
-     */
     override fun doAnalogOAOAction(
         port: Port,
+        conditioningMode: StandaloneConditioningMode,
         analogOutStages: HashMap<String, Int>,
-        zoneCO2Threshold: Double,
-        zoneCO2DamperOpeningRate: Double,
-        isDoorOpen: Boolean
+        outsideAirFinalLoopOutput: Int
     ) {
-        val currentOperatingMode = hsSplitHaystackUtil.getOccupancyModePointValue().toInt()
-        val co2Value = hsSplitHaystackUtil.readCo2Value()
-
-        if (co2Value > 0 && co2Value > zoneCO2Threshold
-            && !isDoorOpen && (currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
-                    currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
-                    currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
-                    currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal)
+        if (conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
         ) {
-            var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
-            if (damperOperationPercent > 100) damperOperationPercent = 100.0
-            updateLogicalPointIdValue(logicalPointsList[port]!!, damperOperationPercent)
-            if (damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] =
-                damperOperationPercent.toInt()
-            logIt("$port = OutOAODamper  analogSignal  $damperOperationPercent")
-
-        } else if (co2Value < zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
-            currentOperatingMode == Occupancy.VACATION.ordinal ||
-            currentOperatingMode == Occupancy.UNOCCUPIED.ordinal
-        ) {
-            updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+            updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
+            if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
         }
     }
 

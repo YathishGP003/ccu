@@ -101,22 +101,188 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
         return hyperStatSplitConfiguration != null
     }
 
-    /*
+    private var validationMessage: String = ""
 
+    /*
+          There's a lot of validation that *could* be imposed here.
+
+          I'm choosing to draw the line as follows. We can modify:
+            * Each temperature (OAT, SAT, MAT) can only appear once
+            * Only one Duct Pressure sensor of any type
+            * Only one filter switch of any type
+            * Only one condensate switch of any type
+            * Only one CT of any type
      */
     override fun validateProfileConfig() : Boolean {
 
         val cpuConfig = currentState.toConfig() as HyperStatSplitCpuEconConfiguration
 
+        // Need an Outside Air Temperature sensor
+        if (!(
+                HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToOutsideAir(
+                        cpuConfig.address0State,
+                        cpuConfig.address1State,
+                        cpuConfig.address2State) ||
+                HyperStatSplitAssociationUtil.isAnyUniversalInMappedToOutsideAirTemperature(
+                        cpuConfig.universalIn1State,
+                        cpuConfig.universalIn2State,
+                        cpuConfig.universalIn3State,
+                        cpuConfig.universalIn4State,
+                        cpuConfig.universalIn5State,
+                        cpuConfig.universalIn6State,
+                        cpuConfig.universalIn7State,
+                        cpuConfig.universalIn8State)
+                    )) {
+
+                validationMessage = "An Outside Air Temperature sensor (on Sensor Bus or a Universal Input) is required for profile. Please enable one."
+                return false
+
+            }
+
+        // Need a Mixed Air Temperature sensor
+        if (!(
+                    HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToMixedAir(
+                        cpuConfig.address0State,
+                        cpuConfig.address1State,
+                        cpuConfig.address2State) ||
+                            HyperStatSplitAssociationUtil.isAnyUniversalInMappedToMixedAirTemperature(
+                                cpuConfig.universalIn1State,
+                                cpuConfig.universalIn2State,
+                                cpuConfig.universalIn3State,
+                                cpuConfig.universalIn4State,
+                                cpuConfig.universalIn5State,
+                                cpuConfig.universalIn6State,
+                                cpuConfig.universalIn7State,
+                                cpuConfig.universalIn8State)
+                    )) {
+
+            validationMessage = "A Mixed Air Temperature Sensor (on Sensor Bus or a Universal Input) is required for profile. Please enable one."
+            return false
+
+        }
+
+        // Check if OAT sensor is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isOutsideAirTemperatureDuplicated(
+                cpuConfig.address0State,
+                cpuConfig.address1State,
+                cpuConfig.address2State,
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+                validationMessage = "Profile can only have one Outside Air Temperature sensor. Check Universal Inputs and Sensor Bus addresses for duplicates."
+                return false
+        }
+
+        // Check if MAT sensor is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isMixedAirTemperatureDuplicated(
+                cpuConfig.address0State,
+                cpuConfig.address1State,
+                cpuConfig.address2State,
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Mixed Air Temperature sensor. Check Universal Inputs and Sensor Bus addresses for duplicates."
+            return false
+        }
+
+        // Check if SAT sensor is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isSupplyAirTemperatureDuplicated(
+                cpuConfig.address0State,
+                cpuConfig.address1State,
+                cpuConfig.address2State,
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Supply Air Temperature sensor. Check Universal Inputs and Sensor Bus addresses for duplicates."
+            return false
+        }
+
+        // Check if Duct Pressure is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isDuctPressureDuplicated(
+                cpuConfig.address3State,
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Duct Pressure sensor. Check Universal Inputs and Sensor Bus addresses for duplicates."
+            return false
+        }
+
+        // Check if Filter Status is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isFilterStatusDuplicated(
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Filter sensor. Check Universal Inputs for duplicates."
+            return false
+        }
+
+        // Check if Condensate Overflow Status is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isCondensateOverflowStatusDuplicated(
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Condensate sensor. Check Universal Inputs for duplicates."
+            return false
+        }
+
+        // Check if CT is mapped in multiple places
+        if (HyperStatSplitAssociationUtil.isCurrentTXDuplicated(
+                cpuConfig.universalIn1State,
+                cpuConfig.universalIn2State,
+                cpuConfig.universalIn3State,
+                cpuConfig.universalIn4State,
+                cpuConfig.universalIn5State,
+                cpuConfig.universalIn6State,
+                cpuConfig.universalIn7State,
+                cpuConfig.universalIn8State
+            )) {
+            validationMessage = "Profile can only have one Current TX. Check Universal Inputs for duplicates."
+            return false
+        }
+
+        validationMessage = ""
         return true
 
     }
 
     override fun getValidationMessage() : String {
-        return "If OAO Damper is configured, OAT and MAT sensors are required.\n\n" +
-                "Enable:\n" +
-                "\t- Mixed Air Temperature on the sensor bus\n" +
-                "\t- Outside Air Temperature on the sensor bus or a universal input"
+        return validationMessage
     }
 
 

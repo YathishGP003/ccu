@@ -827,13 +827,13 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "duct and pressure and logical and sensor and $pressureTag and equipRef == \"$equipRef\"")
         }
-        private fun readFilterSwitch(equipRef: String): HashMap<Any, Any> {
+        private fun readFilterStatus(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "filter and switch and logical and sensor and equipRef == \"$equipRef\"")
+                "filter and status and sensor and equipRef == \"$equipRef\"")
         }
-        private fun readCondensateSwitch(equipRef: String): HashMap<Any, Any> {
+        private fun readCondensateOverflowStatus(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "condensate and switch and logical and sensor and equipRef == \"$equipRef\"")
+                "condensate and overflow and status and sensor and equipRef == \"$equipRef\"")
         }
 
 
@@ -1019,7 +1019,7 @@ class LogicalPointsUtil {
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State
                 )) {
-                removePoint(readCondensateSwitch(equipRef))
+                removePoint(readCondensateOverflowStatus(equipRef))
             }
             if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToFilterNO(
                     universalIn1State,universalIn2State,
@@ -1032,7 +1032,7 @@ class LogicalPointsUtil {
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State
                 )) {
-                removePoint(readFilterSwitch(equipRef))
+                removePoint(readFilterStatus(equipRef))
             }
         }
 

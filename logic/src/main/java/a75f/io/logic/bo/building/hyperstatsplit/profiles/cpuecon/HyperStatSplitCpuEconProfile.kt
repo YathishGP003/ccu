@@ -150,6 +150,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         equip.hsSplitHaystackUtil.updateOccupancyDetection()
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
         equip.hsSplitHaystackUtil.updateOaoLoopOutput(economizingLoopOutput, dcvLoopOutput, outsideAirLoopOutput, outsideAirFinalLoopOutput)
+
         val currentOperatingMode = equip.hsSplitHaystackUtil.getOccupancyModePointValue().toInt()
 
         logIt(
@@ -184,7 +185,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         logIt("Equip Running : $curState")
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
-            equip.equipRef!!, relayStages, analogOutStages, temperatureState
+            equip.equipRef!!, relayStages, analogOutStages, temperatureState, economizingLoopOutput,
+            equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
         )
     }
 
@@ -232,61 +234,75 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip) {
 
-        val outsideDamperMinOpen = equip.getHisVal("outside and damper and min and open").toInt()
-        doEconomizing(equip)
-        doDcv(equip, outsideDamperMinOpen)
+        // If there's not an OAO damper mapped,
+        if (!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(equip.getConfiguration())) {
 
-        outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
+            economizingAvailable = false
+            economizingLoopOutput = 0
+            dcvAvailable = false
+            dcvLoopOutput = 0
+            outsideAirLoopOutput = 0
+            matThrottle = false
+            outsideAirFinalLoopOutput = 0
 
-        val exhaustFanStage1Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage1 and threshold", equip.equipRef)
-        val exhaustFanStage2Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage2 and threshold", equip.equipRef)
-        val exhaustFanHysteresis = TunerUtil.readTunerValByQuery("exhaust and fan and hysteresis", equip.equipRef)
-        val oaoDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",equip.equipRef)
-        val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
+        } else {
 
-        val matTemp  = equip.getHisVal("mixed and air and temp and sensor")
+            val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "outsideDamperMinOpen: " + outsideDamperMinOpen)
+            doEconomizing(equip)
+            doDcv(equip, outsideDamperMinOpen)
 
-        Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" oaoDamperMatTarget "+oaoDamperMatTarget+" oaoDamperMatMin "+oaoDamperMatMin
-                +" matTemp "+matTemp)
+            outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
 
-        matThrottle = false
+            val exhaustFanStage1Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage1 and threshold", equip.equipRef)
+            val exhaustFanStage2Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage2 and threshold", equip.equipRef)
+            val exhaustFanHysteresis = TunerUtil.readTunerValByQuery("exhaust and fan and hysteresis", equip.equipRef)
+            val oaoDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",equip.equipRef)
+            val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
 
-        if (outsideAirLoopOutput > outsideDamperMinOpen) {
-            if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
-                if (matTemp > oaoDamperMatMin) {
+            val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
+
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"outsideAirLoopOutput "+outsideAirLoopOutput+" oaoDamperMatTarget "+oaoDamperMatTarget+" oaoDamperMatMin "+oaoDamperMatMin
+                    +" matTemp "+matTemp)
+
+            matThrottle = false
+
+            if (outsideAirLoopOutput > outsideDamperMinOpen) {
+                if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                     outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                 } else {
-                    outsideAirFinalLoopOutput = outsideAirLoopOutput
+                    outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else outsideAirLoopOutput
                 }
+                if (matTemp < oaoDamperMatTarget) matThrottle = true
+            } else {
+                outsideAirFinalLoopOutput = outsideDamperMinOpen
             }
-            if (matTemp < oaoDamperMatTarget) matThrottle = true
-        } else {
-            outsideAirFinalLoopOutput = outsideDamperMinOpen
+
+            outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
+            outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
+
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON," economizingLoopOutput "+economizingLoopOutput+" dcvLoopOutput "+dcvLoopOutput
+                    +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+
+            equip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput.toDouble())
+            equip.setHisVal("oao and zone and logical and damper and actuator and cmd", outsideAirFinalLoopOutput.toDouble())
+
+            if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
+                equip.setHisVal("cmd and exhaust and fan and stage1", 1.0)
+            } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)) {
+                equip.setHisVal("cmd and exhaust and fan and stage1",0.0);
+            }
+
+            if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
+                equip.setHisVal("cmd and exhaust and fan and stage2",1.0)
+            } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
+                equip.setHisVal("cmd and exhaust and fan and stage2",0.0)
+            }
+
+            val matThrottleNumber = if (matThrottle) 1.0 else 0.0
+            equip.setHisVal("mat and available", matThrottleNumber)
+
         }
-
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
-        outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
-
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON," economizingLoopOutput "+economizingLoopOutput+" dcvLoopOutput "+dcvLoopOutput
-                +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
-
-        equip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput.toDouble())
-        equip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput.toDouble())
-
-        if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
-            equip.setHisVal("cmd and exhaust and fan and stage1", 1.0)
-        } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)) {
-            equip.setHisVal("cmd and exhaust and fan and stage1",0.0);
-        }
-
-        if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
-            equip.setHisVal("cmd and exhaust and fan and stage2",1.0)
-        } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
-            equip.setHisVal("cmd and exhaust and fan and stage2",0.0)
-        }
-
-        val matThrottleNumber = if (matThrottle) 1.0 else 0.0
-        equip.setHisVal("mat and available", matThrottleNumber)
 
     }
 
@@ -486,10 +502,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private fun doDcv(equip: HyperStatSplitCpuEconEquip, standaloneOutsideAirDamperMinOpen: Int) {
 
         dcvAvailable = false
-        var zoneSensorCO2 = equip.getHisVal("air and co2 and sensor")
-        var zoneCO2Threshold = equip.getHisVal("co2 and threshold")
-        var co2DamperOpeningRate = TunerUtil.readTunerValByQuery("oao and co2 and damper and opening and rate",equip.equipRef)
-
+        var zoneSensorCO2 = hsSplitHaystackUtil.getZoneCO2()
+        var zoneCO2Threshold = hsSplitHaystackUtil.getZoneCO2Threshold()
+        var co2DamperOpeningRate = hsSplitHaystackUtil.getZoneCO2DamperOpeningRate()
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
         if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
             if (zoneSensorCO2 > zoneCO2Threshold) {
                 dcvAvailable = true
@@ -695,19 +711,36 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         relayStages: HashMap<String, Int>
     ) {
         val highestStage = HyperStatSplitAssociationUtil.getHighestCoolingStage(config).ordinal
-        var divider = 100
+        var s1threshold = 0
+        var s2threshold = 0
+        var s3threshold = 0
+        
         if (economizingAvailable) {
             when (highestStage) {
-                1 -> { divider = 50 }
-                2 -> { divider = 33 }
-                3 -> { divider = 25 }
+                0 -> { 
+                    s1threshold = 50 
+                }
+                1 -> { 
+                    s1threshold = 33 
+                    s2threshold = 67
+                }
+                2 -> { 
+                    s1threshold = 25
+                    s2threshold = 50
+                    s3threshold = 75
+                }
                 else -> { }
             }
         } else {
             when (highestStage) {
-                1 -> { divider = 100 }
-                2 -> { divider = 50 }
-                3 -> { divider = 33 }
+                0 -> {}
+                1 -> { 
+                    s2threshold = 50 
+                }
+                2 -> { 
+                    s2threshold = 33 
+                    s3threshold = 67
+                }
                 else -> {}
             }
         }
@@ -716,19 +749,17 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         when (relayAssociation.association) {
             CpuEconRelayAssociation.COOLING_STAGE_1 -> {
                 doCoolingStage1(
-                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, divider, relayStages
+                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, s1threshold, relayStages
                 )
             }
             CpuEconRelayAssociation.COOLING_STAGE_2 -> {
-                val highestStage = HyperStatSplitAssociationUtil.getHighestCoolingStage(config).ordinal
-                val divider = if (highestStage == 1) 50 else 33
                doCoolingStage2(
-                   whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, divider,relayStages
+                   whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, s2threshold,relayStages
                )
             }
             CpuEconRelayAssociation.COOLING_STAGE_3 -> {
                 doCoolingStage3(
-                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, divider, relayStages
+                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, s3threshold, relayStages
                 )
             }
             else -> {}
@@ -823,7 +854,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             }
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToOaoDamper(analogOutState)) -> {
                 doAnalogOAOAction(
-                    port,analogOutStages,config.zoneCO2Threshold,config.zoneCO2DamperOpeningRate,false
+                    port,basicSettings.effectiveConditioningMode, analogOutStages, outsideAirFinalLoopOutput
                 )
             }
         }
@@ -893,7 +924,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             equipId = equip.equipRef!!,
             portStages = HashMap(),
             analogOutStages = HashMap(),
-            temperatureState = ZoneTempState.TEMP_DEAD
+            temperatureState = ZoneTempState.TEMP_DEAD,
+            economizingLoopOutput,
+            hsSplitHaystackUtil.getCondensateOverflowStatus(),
+            hsSplitHaystackUtil.getFilterStatus()
         )
     }
 

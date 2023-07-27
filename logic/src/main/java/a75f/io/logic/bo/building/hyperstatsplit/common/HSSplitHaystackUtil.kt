@@ -8,6 +8,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyUniversalInMappedToFilterNC
 
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip
 import a75f.io.logic.tuners.TunerUtil
@@ -203,6 +204,36 @@ class HSSplitHaystackUtil(
         )
     }
 
+    fun getMixedAirTemp(): Double {
+        return haystack.readHisValByQuery(
+            "point and air and mixed and cur and temp and sensor and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getZoneCO2(): Double {
+        return haystack.readHisValByQuery(
+            "point and zone and co2 and sensor and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getZoneCO2Threshold(): Double {
+        return haystack.readHisValByQuery(
+            "point and zone and co2 and threshold and concentration and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getZoneCO2DamperOpeningRate(): Double {
+        return haystack.readHisValByQuery(
+            "point and zone and co2 and damper and opening and rate and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideDamperMinOpen(): Double {
+        return haystack.readPointPriorityValByQuery(
+            "point and oao and outside and damper and min and open and equipRef == \"$equipRef\""
+        )
+    }
+
     private fun readPointIdWithAll(markers: String): String {
         val points: ArrayList<*> = haystack.readAll(
             "point and $markers and sp and equipRef == \"$equipRef\""
@@ -304,9 +335,18 @@ class HSSplitHaystackUtil(
             "analog and fan and speed and multiplier and equipRef == \"$equipRef\"")
     }
 
+    /**
+     * For HyperStat Split, this needs a "zone" tag because there are numerous humidity
+     * sensors used in profile. Not needed in current implementation of HyperStat.
+     *
+     * This query will probably need to be modified in HyperStat if more sensor options
+     * are added down the road.
+     *
+     * Nick P, 07-25-2023
+     */
     fun getHumidity(): Double {
         return haystack.readHisValByQuery(
-            "point and air and humidity and sensor and equipRef == \"$equipRef\""
+            "point and zone and air and humidity and sensor and equipRef == \"$equipRef\""
         )
 
     }
@@ -356,6 +396,11 @@ class HSSplitHaystackUtil(
         )
     }
 
+    /**
+     * Condensate overflow sensor may or may not actually be mapped.
+     * If it's not, query will return 0 (normal).
+     * This is the behavior we want.
+      */
     fun getCondensateOverflowStatus(): Double {
         return haystack.readHisValByQuery(
             "point and condensate " +
@@ -363,6 +408,16 @@ class HSSplitHaystackUtil(
         )
     }
 
+    /**
+     * Filter sensor may or may not actually be mapped.
+     * If it's not, query will return 0 (normal).
+     * This is the behavior we want.
+     */
+    fun getFilterStatus(): Double {
+        return haystack.readHisValByQuery(
+            "point and filter and status and his and equipRef == \"$equipRef\""
+        )
+    }
     fun updateOccupancyDetection() {
         val detectionPointId = readPointID("occupancy and detection and his")
         if (getOccupancySensorPointValue() > 0)

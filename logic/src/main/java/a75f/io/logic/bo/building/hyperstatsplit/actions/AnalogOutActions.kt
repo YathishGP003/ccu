@@ -21,10 +21,9 @@ interface AnalogOutActions {
                          heatingLoopOutput : Int)
 
     fun doAnalogOAOAction( port: Port,
+                           conditioningMode: StandaloneConditioningMode,
                            analogOutStages: HashMap<String, Int>,
-                           zoneCO2Threshold: Double,
-                           zoneCO2DamperOpeningRate: Double,
-                           isDoorOpen: Boolean)
+                           outsideAirFinalLoopOutput : Int)
 
     fun doAnalogFanAction( port: Port,
                            fanLowPercent: Int,

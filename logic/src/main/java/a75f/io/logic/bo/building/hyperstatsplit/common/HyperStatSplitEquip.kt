@@ -91,10 +91,28 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusTempState,
         sensorBusTag: String
     ) {
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails() " + sensorBusTag)
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
+
+        if (sensorBusState.enabled) {
+            val tempPointData: Point = hyperStatSplitPointsUtil.sensorBusTempConfiguration(
+                sensorBusState = sensorBusState
+            )
+            val tempPointId = hyperStatSplitPointsUtil.addPointToHaystack(tempPointData)
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(tempPointId, 0.0)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(tempPointId, 0.0)
+
+            val humidityPointData: Point = hyperStatSplitPointsUtil.sensorBusHumidityConfiguration(
+                sensorBusState = sensorBusState
+            )
+            val humidityPointId = hyperStatSplitPointsUtil.addPointToHaystack(humidityPointData)
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(humidityPointId, 0.0)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(humidityPointId, 0.0)
+        }
+
     }
 
     // Function which updates the Sensor Bus Temp new configurations
@@ -102,10 +120,20 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusPressState,
         sensorBusTag: String
     ) {
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails() " + sensorBusTag)
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
+
+        if (sensorBusState.enabled) {
+            val pointData: Point = hyperStatSplitPointsUtil.sensorBusPressureConfiguration(
+                sensorBusState = sensorBusState
+            )
+            val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData)
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+        }
     }
 
     // Function which updates the Universal In new configurations
@@ -172,7 +200,7 @@ open class HyperStatSplitEquip {
         oldCO2Threshold: Double, newCO2Threshold: Double,
         oldCO2Target: Double, newCO2Target: Double){
         if (oldCO2DamperOpeningRate != newCO2DamperOpeningRate) {
-            val pointId = hsSplitHaystackUtil.readPointID("co2 and opening and rate") as String
+            val pointId = hsSplitHaystackUtil.readPointID("zone and co2 and damper and opening and rate") as String
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newCO2DamperOpeningRate)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newCO2DamperOpeningRate)
         }

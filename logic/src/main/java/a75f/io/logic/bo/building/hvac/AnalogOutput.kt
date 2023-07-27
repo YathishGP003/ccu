@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hvac
 
 /**
  * Created by Manjunath K on 07-03-2022.
+ * Modified to add OAO Damper by Nick P on 07-24-2023.
  */
 enum class AnalogOutput {
 
@@ -9,5 +10,6 @@ enum class AnalogOutput {
     FAN_SPEED,
     HEATING,
     DCV_DAMPER,
-    WATER_VALVE
+    WATER_VALVE,
+    OAO_DAMPER
 }

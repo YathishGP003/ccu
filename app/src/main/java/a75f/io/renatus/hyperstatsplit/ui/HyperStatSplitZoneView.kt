@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.building.hyperstatsplit.common.*
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
@@ -18,6 +19,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Compa
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayAssociatedToDeHumidifier
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip.Companion.getHyperStatSplitEquipRef
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints
@@ -52,16 +54,23 @@ fun loadHyperStatSplitCpuEconProfile(
     )
     setUpConditionFanConfig(viewPointRow1, cpuEconEquipPoints, equipId!!, nodeAddress, context, ProfileType.HYPERSTATSPLIT_CPU_ECON)
     setUpHumidifierDeHumidifier(viewPointRow2, cpuEconEquipPoints, equipId, context, nodeAddress)
-    val textAirflowValue = viewSat.findViewById<TextView>(R.id.text_airflowValue)
-    val textMatValue = viewMat.findViewById<TextView>(R.id.text_airflowValue)
-    if (UnitUtils.isCelsiusTunerAvailableStatus()) {
-        textAirflowValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
-            cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
-                .replace("[^0-9\\.]".toRegex(), "").toFloat().toString().toDouble()
-        ).toString() + " \u00B0C"
+
+    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) {
+        val textAirflowValue = viewSat.findViewById<TextView>(R.id.text_airflowValue)
+        if (UnitUtils.isCelsiusTunerAvailableStatus()) {
+            textAirflowValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
+                cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+                    .replace("[^0-9\\.]".toRegex(), "").toFloat().toString().toDouble()
+            ).toString() + " \u00B0C"
+        } else {
+            textAirflowValue.text = cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+        }
+        textAirflowValue.visibility = View.VISIBLE
     } else {
-        textAirflowValue.text = cpuEconEquipPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name].toString()
+        viewSat.findViewById<TextView>(R.id.text_airflowValue).visibility = View.GONE
     }
+
+    val textMatValue = viewMat.findViewById<TextView>(R.id.text_airflowValue)
     if (UnitUtils.isCelsiusTunerAvailableStatus()) {
         textMatValue.text = UnitUtils.fahrenheitToCelsiusTwoDecimal(
             cpuEconEquipPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name].toString()
@@ -73,7 +82,7 @@ fun loadHyperStatSplitCpuEconProfile(
     linearLayoutZonePoints.addView(viewTitle)
     linearLayoutZonePoints.addView(viewStatus)
     linearLayoutZonePoints.addView(viewMat)
-    linearLayoutZonePoints.addView(viewSat)
+    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) linearLayoutZonePoints.addView(viewSat)
     linearLayoutZonePoints.addView(viewPointRow2)
     linearLayoutZonePoints.addView(viewPointRow1)
 
@@ -91,83 +100,6 @@ private fun setTitleStatusConfig(
     textViewStatus.text = status
     val textViewUpdatedTime = viewStatus.findViewById<TextView>(R.id.last_updated_status)
     textViewUpdatedTime.text = HeartBeatUtil.getLastUpdatedTime(nodeAddress)
-}
-
-private fun setUpTemps(
-    viewPointRow1: View,
-    cpuEconEquipPoints: HashMap<*, *>,
-    equipId: String,
-    nodeAddress: String,
-    context: Activity,
-    profileType: ProfileType
-) {
-    val textViewLabel1 = viewPointRow1.findViewById<TextView>(R.id.text_point1label)
-    val textViewLabel2 = viewPointRow1.findViewById<TextView>(R.id.text_point2label)
-
-    textViewLabel1.text = "Mixed Air Temp : "
-    textViewLabel2.text = "Supply Air Temp : "
-
-    val conditioningModeSpinner = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue1)
-    val fanModeSpinner = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue2)
-
-    CCUUiUtil.setSpinnerDropDownColor(conditioningModeSpinner, context)
-    CCUUiUtil.setSpinnerDropDownColor(fanModeSpinner, context)
-
-    var conditionMode = 0
-    var fanMode = 0
-    try {
-        conditionMode = cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_MODE.name] as Int
-        fanMode = cpuEconEquipPoints[HSSplitZoneStatus.FAN_MODE.name] as Int
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    var conModeAdapter =  createAdapter(context, R.array.smartstat_conditionmode)
-
-    if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.CONDITIONING_ENABLED.name)) {
-        if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Cool Only")) {
-
-            conModeAdapter = createAdapter(context, R.array.smartstat_conditionmode_coolonly)
-            if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal)
-                conditionMode = conModeAdapter.count - 1
-
-        } else if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Heat Only")) {
-
-            conModeAdapter = createAdapter(context, R.array.smartstat_conditionmode_heatonly)
-            if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal) {
-                conditionMode = conModeAdapter.count - 1
-            }
-        }
-        if (cpuEconEquipPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Off")) {
-            conModeAdapter = createAdapter( context, R.array.smartstat_conditionmode_off)
-            conditionMode = 0
-        }
-    }
-    try {
-        conditioningModeSpinner.adapter = conModeAdapter
-        conditioningModeSpinner.setSelection(conditionMode, false)
-    } catch (e: Exception) {
-        Log.i(L.TAG_CCU_ZONE, "Exception : ${e.message}")
-    }
-    val fanSpinnerSelectionValues =
-        RelayUtil.getFanOptionByLevel((cpuEconEquipPoints[HSSplitZoneStatus.FAN_LEVEL.name] as Int?)!!)
-    val fanModeAdapter = createAdapter(context, fanSpinnerSelectionValues)
-
-    try {
-        fanModeSpinner.adapter = fanModeAdapter
-        fanModeSpinner.setSelection(fanMode, false)
-    } catch (e: Exception) {
-        Log.i(
-            L.TAG_CCU_ZONE,
-            "Exception while setting fan mode: " + e.message + " fan Mode " + fanMode
-        )
-        e.printStackTrace()
-    }
-    setSpinnerListenerForHyperstatSplit(
-        conditioningModeSpinner, HSSplitZoneStatus.CONDITIONING_MODE, equipId, nodeAddress,profileType
-    )
-    setSpinnerListenerForHyperstatSplit(
-        fanModeSpinner, HSSplitZoneStatus.FAN_MODE, equipId, nodeAddress,profileType
-    )
 }
 
 private fun setUpConditionFanConfig(
@@ -235,7 +167,7 @@ private fun setUpConditionFanConfig(
     } catch (e: Exception) {
         Log.i(
             L.TAG_CCU_ZONE,
-            "Exception while setting fan ode: " + e.message + " fan Mode " + fanMode
+            "Exception while setting fan mode: " + e.message + " fan Mode " + fanMode
         )
         e.printStackTrace()
     }
@@ -403,6 +335,19 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
     val selectedConditioningMode = getSelectedConditioningMode(equipDetails.group, conditionModePoint.toInt())
     Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted conditionModePoint mode $selectedConditioningMode")
     cpuEconPoints[HSSplitZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
+
+    if (isAnyInputMappedToSupplyAirTemperature(config)) {
+        val dischargePoint = hsSplitHaystackUtil.readHisVal(
+            "sensor and supply and air and temp"
+        )
+        cpuEconPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name] = "$dischargePoint \u2109"
+    }
+
+    val mixedAirPoint = hsSplitHaystackUtil.readHisVal(
+        "sensor and mixed and air and temp"
+    )
+    cpuEconPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name] = "$mixedAirPoint \u2109"
+
     if (isAnyRelayAssociatedToHumidifier(config)) {
         val targetHumidity = hsSplitHaystackUtil.readPointPriorityVal("target and humidifier")
         cpuEconPoints[HSSplitZoneStatus.TARGET_HUMIDITY.name] = targetHumidity
@@ -428,6 +373,21 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Config $s : $o")
     }
     return cpuEconPoints
+}
+
+private fun isAnyInputMappedToSupplyAirTemperature(config: HyperStatSplitCpuEconConfiguration): Boolean {
+    return (
+        HyperStatSplitAssociationUtil.isAnyUniversalInMappedToSupplyAirTemperature(
+            config.universalIn1State, config.universalIn2State,
+            config.universalIn3State, config.universalIn4State,
+            config.universalIn5State, config.universalIn6State,
+            config.universalIn7State, config.universalIn8State
+        ) || HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToSupplyAir(
+            config.address0State,
+            config.address1State,
+            config.address2State
+        )
+    )
 }
 
 

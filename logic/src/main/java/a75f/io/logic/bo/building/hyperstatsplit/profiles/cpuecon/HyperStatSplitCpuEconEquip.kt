@@ -226,6 +226,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         hyperLiteDevice.addSensor(Port.SENSOR_RH, masterPoints[Port.SENSOR_RH])
         hyperLiteDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE])
         hyperLiteDevice.addSensor(Port.SENSOR_OCCUPANCY, masterPoints[Port.SENSOR_OCCUPANCY])
+        hyperLiteDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2])
         hyperLiteDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
         hyperLiteDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
 
@@ -453,7 +454,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.temperatureOffset = hsSplitHaystackUtil.getTempOffValue()
         config.isEnableAutoForceOccupied = hsSplitHaystackUtil.isAutoForceOccupyEnabled()
         config.isEnableAutoAway =  hsSplitHaystackUtil.isAutoAwayEnabled()
-        config.zoneCO2DamperOpeningRate = hsSplitHaystackUtil.getCo2DamperOpeningConfigValue()
+        config.zoneCO2DamperOpeningRate = hsSplitHaystackUtil.getZoneCO2DamperOpeningRate()
         config.zoneCO2Threshold = hsSplitHaystackUtil.getCo2DamperThresholdConfigValue()
         config.zoneCO2Target = hsSplitHaystackUtil.getCo2TargetConfigValue()
         config.zoneVOCThreshold = hsSplitHaystackUtil.getVocThresholdConfigValue()
@@ -830,6 +831,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration,
         existingConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusConfig()")
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address0State, existingConfiguration.address0State)
         ) {

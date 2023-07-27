@@ -17,7 +17,8 @@ import kotlin.collections.set
 
 
 /**
- * Created by Manjunath K on 11-08-2021.
+ * Created for HyperStat by Manjunath K on 11-08-2021.
+ * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 class HyperStatSplitUserIntentHandler {
 
@@ -35,7 +36,10 @@ class HyperStatSplitUserIntentHandler {
             equipId: String,
             portStages: HashMap<String, Int>,
             analogOutStages: HashMap<String, Int>,
-            temperatureState: ZoneTempState
+            temperatureState: ZoneTempState,
+            economizingLoopOutput: Int,
+            condensateOverflow: Double,
+            filterDirty: Double,
         ) {
             var status: String
             status = when (temperatureState) {
@@ -169,13 +173,57 @@ class HyperStatSplitUserIntentHandler {
                     status += "Fan Analog ON"
                 }
 
-                if(analogOutStages.containsKey(AnalogOutput.DCV_DAMPER.name)) {
+                if(analogOutStages.containsKey(AnalogOutput.OAO_DAMPER.name)) {
                     if(status.isNotBlank()
                         && (status[status.length-2]!=',')
                         && (status[status.length-2]!='|'))
-                        status += " | "
-                    status += "DCV Analog ON"
+                        status += ", "
+
+                    /**
+                     * If there is a non-zero economizingLoopOutput, status message will say
+                     * "Free Cooling ON", even if the dcvLoopOutput is larger.
+                     *
+                     * This is by design. First priority is to let user know that economizing
+                     * is enabled, even if it's DCV that's actively driving the OAO damper at the
+                     * current moment.
+                     *
+                     * User only needs to know about DCV as an explanation for why their OAO Damper
+                     * is open during non-economizer conditions.
+                      */
+                    if(economizingLoopOutput > 0) {
+                        status += "Free Cooling ON"
+                    } else {
+                        status += "DCV ON"
+                    }
                 }
+            }
+
+            /**
+             *  Condensate Overflow and Filter Status should both still display even if status is OFF.
+             *      - Conditioning Mode is forced to OFF when a Condensate Alarm occurs.
+             *      So, the cause should be displayed when it occurs.
+             *      - For a Dirty Filter condition, some pressure switches require a manual reset
+             *      by the operator after they are tripped. So, it is possible that a filter switch
+             *      could accurately be in an alarm condition even with the unit off, and we should
+             *      allow for this on the zone screen.
+             */
+            if (condensateOverflow > 0.0) {
+                if(status.isBlank()) status = "OFF"
+                if(status.isNotBlank()
+                    && (status[status.length-2]!=',')
+                    && (status[status.length-2]!='|'))
+                    status += ", "
+
+                status += "Condensate Overflow"
+            }
+            if (filterDirty > 0.0) {
+                if(status.isBlank()) status = "OFF"
+                if(status.isNotBlank()
+                    && (status[status.length-2]!=',')
+                    && (status[status.length-2]!='|'))
+                    status += ", "
+
+                status += "Replace Filter"
             }
 
             if (getHyperStatSplitStatusString(equipId) != status) {
@@ -183,7 +231,7 @@ class HyperStatSplitUserIntentHandler {
                     equipId
                 )
                 hyperStatSplitStatus[equipId] = status
-                if (status.isEmpty()) status = " OFF "
+                if (status.isEmpty()) status = " OFF"
 
                 CCUHsApi.getInstance().writeDefaultVal(
                     "point and status and message and writable and equipRef == \"$equipId\"", status

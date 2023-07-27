@@ -2073,6 +2073,8 @@ class HyperStatSplitPointsUtil(
 
         val logicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()
 
+        val co2PointMarkers =
+            arrayOf("zone", "air", "co2", "sensor", "his", "cur", "logical")
         val humidityPointMarkers =
             arrayOf("zone", "air", "humidity", "sensor", "his", "cur", "logical")
         val illuminanceSensorPointMarkers =
@@ -2080,6 +2082,12 @@ class HyperStatSplitPointsUtil(
         val occupancySensorPointMarkers =
             arrayOf("zone", "occupancy", "sensor", "his", "cur", "logical")
 
+        val co2Point = createHaystackPointWithUnit(
+            "$equipDis-zone" + Port.SENSOR_CO2.portSensor,
+            co2PointMarkers,
+            "cov",
+            "ppm"
+        )
         val humidityPoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_RH.portSensor,
             humidityPointMarkers,
@@ -2098,6 +2106,7 @@ class HyperStatSplitPointsUtil(
             "off,on"
         )
 
+        logicalPointsList.add(Triple(co2Point, Port.SENSOR_CO2, 0.0))
         logicalPointsList.add(Triple(occupancyPoint, Port.SENSOR_OCCUPANCY, 0.0))
         logicalPointsList.add(Triple(humidityPoint, Port.SENSOR_RH, 0.0))
         logicalPointsList.add(Triple(illuminancePoint, Port.SENSOR_ILLUMINANCE, 0.0))

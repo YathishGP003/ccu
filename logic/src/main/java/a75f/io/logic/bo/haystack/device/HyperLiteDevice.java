@@ -105,8 +105,7 @@ public class HyperLiteDevice {
                           .setUnit("\u00B0F")
                           .setTz(tz)
                           .build();
-        
-        
+
         desiredTemp = new RawPoint.Builder()
                           .setDisplayName("desiredTemp-"+hyperStatNodeAddress)
                           .setDeviceRef(deviceRef)

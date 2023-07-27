@@ -61,7 +61,6 @@ class ModbusModelBuilder {
             equipDevice.deviceEquipRef = null
             equipDevice.isPaired = (equipDevice.deviceEquipRef == null)
             equipDevice.slaveId = equip.group.toInt()
-
             val deviceId = CCUHsApi.getInstance()
                 .readEntity("device and modbus and equipRef == \"${equip.id}\"")[Tags.ID]
 
@@ -112,9 +111,6 @@ class ModbusModelBuilder {
                 }
                register.parameters = mutableListOf(param)
                equipDevice.registers.add(register)
-            }
-            equipDevice.registers.forEach {
-                Log.i(TAG, "getModel: ${it.parameters[0].isDisplayInUI}")
             }
             return equipDevice
         }

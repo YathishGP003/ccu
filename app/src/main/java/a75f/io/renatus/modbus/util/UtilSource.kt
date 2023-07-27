@@ -47,6 +47,26 @@ fun getParametersList(equipment: EquipModel): List<Parameter> {
     return parameterList
 }
 
+
+fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
+    var isAllSelected = true
+    if (equipDevice.registers.isNotEmpty()) {
+        equipDevice.registers[0].parameters.forEach {
+            if (!it.isDisplayInUI)
+                isAllSelected = false
+        }
+    }
+    if (equipDevice.equips.isNotEmpty()) {
+        equipDevice.equips.forEach { subEquip ->
+            subEquip.registers[0].parameters.forEach {
+                if (!it.isDisplayInUI)
+                    isAllSelected = false
+            }
+        }
+    }
+    return isAllSelected
+}
+
  fun showToast(text: String, context: Context){
     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
 }

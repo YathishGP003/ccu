@@ -70,7 +70,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
                     val currentPoint = equip.points.filter { it.value.domainName == diffDomain.domainName }
                     val existingId = currentPoint[diffDomain.domainName]?.id
                     hayStackPoint.id = existingId
-                    haystack.updatePoint(hayStackPoint,existingId );
+                    haystack.updatePoint(hayStackPoint,existingId )
                     DomainManager.addPoint(hayStackPoint)
                 }
             }

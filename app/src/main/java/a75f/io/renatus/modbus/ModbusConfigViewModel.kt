@@ -1,7 +1,6 @@
 package a75f.io.renatus.modbus
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.domain.service.DomainService
@@ -17,9 +16,7 @@ import a75f.io.renatus.R
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
-import a75f.io.renatus.modbus.models.ModbusModelBuilder
 import a75f.io.renatus.modbus.models.ModbusModelBuilder.Companion.getModel
-import a75f.io.renatus.modbus.models.ModbusModelBuilder.Companion.readFile
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.NO_MODEL_DATA_FOUND
@@ -30,13 +27,17 @@ import a75f.io.renatus.modbus.util.SAVING
 import a75f.io.renatus.modbus.util.WARNING
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
+import a75f.io.renatus.modbus.util.isAllParamsSelected
+import a75f.io.renatus.modbus.util.log
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -57,12 +58,14 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     var slaveIdList = mutableStateOf(emptyList<String>())
     var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
+    var selectedModbusType = mutableStateOf(0)
 
-    lateinit var modbusProfile: ModbusProfile
+    private lateinit var modbusProfile: ModbusProfile
     lateinit var zoneRef: String
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
     lateinit var deviceModelList: List<ModelMetaData>
+    @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
 
     private var selectedSlaveId by Delegates.notNull<Short>()
@@ -75,8 +78,6 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     fun configModelDefinition(context: Context) {
         this.context = context
         if (L.getProfile(selectedSlaveId) != null) {
-
-            if (L.getProfile(selectedSlaveId) != null) {
                 modbusProfile = L.getProfile(selectedSlaveId) as ModbusProfile
                 if (modbusProfile != null) {
                     selectedSlaveId = modbusProfile.slaveId
@@ -85,6 +86,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                     if (equipmentDevice != null) {
                         val model = EquipModel()
                         model.equipDevice.value = equipmentDevice
+                        model.selectAllParameters.value = isAllParamsSelected(equipmentDevice)
                         model.parameters = getParameters(equipmentDevice)
                         val subDeviceList = mutableListOf<MutableState<EquipModel>>()
                         equipModel.value = model
@@ -99,21 +101,19 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                                 subDeviceList.add(mutableStateOf(subEquip))
                             }
                         }
-                        if (subDeviceList.isNotEmpty()) {
+                        if (subDeviceList.isNotEmpty())
                             equipModel.value.subEquips = subDeviceList
-                        } else {
+                         else
                             equipModel.value.subEquips = mutableListOf()
-                        }
                     } else {
                         showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
                     }
 
                 }
+            } else {
+                ProgressDialogUtils.showProgressDialog(context, LOADING)
+                readDeviceModels()
             }
-        } else {
-            ProgressDialogUtils.showProgressDialog(context, LOADING)
-            readDeviceModels()
-        }
         childSlaveIdList.value = getSlaveIds(false)
         slaveIdList.value = getSlaveIds(true)
     }
@@ -214,12 +214,39 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun isValidConfiguration(): Boolean {
-        // TODO add all validations here
+
+        if (equipModel.value.parameters.isEmpty()) {
+            showToast("Please select modbus device",context)
+            return false
+        }
+
+        if (equipModel.value.isDevicePaired)
+            return true // If it is paired then will not allow the use to to edit slave id
+
+        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
+            showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
+                    "another slave id to proceed",context)
+            return false
+        }
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach {
+                if  (it.value.slaveId.value != 0) {
+                    if (L.isModbusSlaveIdExists(it.value.slaveId.value.toShort())
+                        || it.value.slaveId.value == equipModel.value.slaveId.value ) {
+                        showToast("Make sure all sub equips have unique slave Id, if it is not same as Parent",context)
+                        return false
+                    }
+                }
+            }
+        }
         return true
     }
 
+
+
     fun saveConfiguration() {
         if (isValidConfiguration()) {
+            populateSlaveId()
             saveConfiguration(
                 equipModel.value.equipDevice.value,
                 equipModel.value.slaveId.value.toShort(),
@@ -227,6 +254,17 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             )
         }
     }
+
+    private fun populateSlaveId(){
+        equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
+        equipModel.value.subEquips.forEach {
+            it.value.equipDevice.value.slaveId = it.value.slaveId.value
+            it.value.parameters.forEach { registerItem ->
+                registerItem.param.value.isDisplayInUI = registerItem.displayInUi.value
+            }
+        }
+    }
+
 
     private fun saveConfiguration(
         equipmentDev: EquipmentDevice,
@@ -260,8 +298,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 subEquipmentDevices.add(it.value.equipDevice.value)
             }
         }
-        val equipId = setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam, subEquipmentDevices)
-        ModbusModelBuilder.saveToFile("$equipId.json",equipModel.value.jsonContent)
+        setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam, subEquipmentDevices)
+        //ModbusModelBuilder.saveToFile("$equipId.json",equipModel.value.jsonContent)
     }
 
     private fun setUpsModbusProfile(
@@ -333,7 +371,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
         }
-        if (!equipModel.value.subEquips.isEmpty() && equipModel.value.subEquips.isNotEmpty()) {
+        if (equipModel.value.subEquips.isNotEmpty()) {
             equipModel.value.subEquips.forEach { subEquip ->
                 subEquip.value.parameters.forEach {
                     if (!it.displayInUi.value) {

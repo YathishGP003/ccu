@@ -12,14 +12,14 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.util.EQUIP_TYPE
-import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS
-import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SELECT_ALL
 import a75f.io.renatus.modbus.util.SLAVE_ID
+import a75f.io.renatus.modbus.util.log
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -128,10 +127,11 @@ class ModbusConfigView : BaseDialogFragment() {
                                     .wrapContentHeight(),
                             )
                         } else {
-                            SpinnerView(selected = 0,
+                            SpinnerView(selected = viewModel.selectedModbusType.value,
                                 items = viewModel.deviceList,
                                 disable = viewModel.equipModel.value.isDevicePaired,
-                                itemSelected = { _, selected ->
+                                itemSelected = { index, selected ->
+                                    viewModel.selectedModbusType.value = index
                                     ProgressDialogUtils.showProgressDialog(
                                         context, "Fetching $selected details"
                                     )
@@ -160,19 +160,21 @@ class ModbusConfigView : BaseDialogFragment() {
                         ) {
                             Column {
                                 HeaderTextView(SLAVE_ID)
-                                SpinnerView(selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(true).indexOf(viewModel.equipModel.value.slaveId.value.toString()) else 0,
+                                SpinnerView(
+                                    selected = getSlaveId(viewModel.equipModel.value.slaveId.value.toString(),viewModel.slaveIdList.value), // if (viewModel.equipModel.value.isDevicePaired ) getSlaveId(viewModel.equipModel.value.slaveId.value.toString(),viewModel.slaveIdList.value) else viewModel.equipModel.value.slaveId.value,
                                     items = viewModel.slaveIdList,
                                     disable = viewModel.equipModel.value.isDevicePaired,
-                                    itemSelected = { index, _ ->
-                                        viewModel.equipModel.value.slaveId.value =
-                                            viewModel.slaveIdList.value[index].toInt()
+                                    itemSelected = { index, value ->
+                                        viewModel.equipModel.value.slaveId.value = value.toInt()
                                     })
                             }
                         }
                     }
                 }
                 Row(
-                    modifier = Modifier.fillMaxSize().padding(PaddingValues(bottom = 5.dp)),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(PaddingValues(bottom = 5.dp)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
 
@@ -255,16 +257,10 @@ class ModbusConfigView : BaseDialogFragment() {
                                 HeaderTextView(SLAVE_ID)
 
                                 SpinnerView(
-                                    selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(false).indexOf(subEquip.value.slaveId.value.toString()) else 0,
+                                    selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(false).indexOf(subEquip.value.slaveId.value.toString()) else subEquip.value.slaveId.value,
                                     items = viewModel.childSlaveIdList,
-                                    disable = viewModel.equipModel.value.isDevicePaired) { index, _ ->
-                                    if (index == 0) {
-                                        subEquip.value.slaveId.value =
-                                            viewModel.equipModel.value.slaveId.value
-                                    } else {
-                                        subEquip.value.slaveId.value =
-                                            viewModel.childSlaveIdList.value[index].toInt()
-                                    }
+                                    disable = viewModel.equipModel.value.isDevicePaired) { index, value ->
+                                    subEquip.value.slaveId.value = value.toInt()
                                 }
                             }
                         }
@@ -276,10 +272,13 @@ class ModbusConfigView : BaseDialogFragment() {
         }
     }
 
-    private fun getDeviceTypeVal(): String {
-        if (viewModel.equipModel.value.isDevicePaired)
-            return getName(viewModel.equipModel.value.equipDevice.value.name)
-        return "Select Device"
+    private fun getSlaveId(slaveId: String,list: List<String> ): Int {
+        log("getSlaveId: $slaveId")
+        log("getSlaveId: $list")
+        if (list.contains(slaveId))
+            return list.indexOf(slaveId)
+        return 0
+
     }
 
     fun getName(name: String): String {

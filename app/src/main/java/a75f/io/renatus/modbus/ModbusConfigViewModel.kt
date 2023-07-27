@@ -2,7 +2,6 @@ package a75f.io.renatus.modbus
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice
-import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.logic.L
@@ -107,6 +106,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             }
         childSlaveIdList.value = getSlaveIds(false)
         slaveIdList.value = getSlaveIds(true)
+        equipModel.value.slaveId.value = 1
     }
 
     fun holdBundleValues(bundle: Bundle) {
@@ -235,40 +235,26 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     fun saveConfiguration() {
         if (isValidConfiguration()) {
             populateSlaveId()
-            saveConfiguration(
-                equipModel.value.equipDevice.value,
-                equipModel.value.slaveId.value.toShort(),
-                getParametersList(equipModel.value)
-            )
+            RxjavaUtil.executeBackgroundTask({
+                ProgressDialogUtils.showProgressDialog(context, SAVING)
+            }, {
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpsModbusProfile()
+                L.saveCCUState()
+                CCUHsApi.getInstance().setCcuReady()
+            }, {
+                ProgressDialogUtils.hideProgressDialog()
+                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                showToast(SAVED, context)
+                _isDialogOpen.value = false
+            })
         }
     }
 
-    private fun saveConfiguration(
-        equipmentDev: EquipmentDevice,
-        selectedSlaveId: Short,
-        modbusParam: List<Parameter>
-    ) {
-        RxjavaUtil.executeBackgroundTask({
-            ProgressDialogUtils.showProgressDialog(context, SAVING)
-        }, {
-            CCUHsApi.getInstance().resetCcuReady()
-            setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam)
-            L.saveCCUState()
-            CCUHsApi.getInstance().setCcuReady()
-        }, {
-            ProgressDialogUtils.hideProgressDialog()
-            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-            showToast(SAVED, context)
-            _isDialogOpen.value = false
-        })
-    }
-
-    private fun setUpsModbusProfile(
-        equipmentDev: EquipmentDevice, selectedSlaveId: Short, modbusParam: List<Parameter>
-    ): String {
-        val equipRef: String
-        equipmentDev.slaveId = selectedSlaveId.toInt()
-        val parentMap = getModbusEquipMap(selectedSlaveId)
+    private fun setUpsModbusProfile() {
+        equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
+        equipModel.value.slaveId.value
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
         if (parentMap.isNullOrEmpty()) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
             if (equipModel.value.subEquips.isNotEmpty()) {
@@ -277,17 +263,18 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
             modbusProfile = ModbusProfile()
-            modbusProfile.addMbEquip(selectedSlaveId, floorRef, zoneRef, equipmentDev, modbusParam, ProfileType.MODBUS_DEFAULT, subEquipmentDevices)
+            modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
+                equipModel.value.equipDevice.value, getParametersList(equipModel.value),
+                ProfileType.MODBUS_DEFAULT, subEquipmentDevices)
+
             L.ccu().zoneProfiles.add(modbusProfile)
-            equipRef = modbusProfile.equip.id
             L.saveCCUState()
         } else {
-            equipRef = updateModbusProfile()
+            updateModbusProfile()
         }
-        return equipRef
     }
 
-    private fun updateModbusProfile(): String {
+    private fun updateModbusProfile() {
         modbusProfile.updateModbusEquip(
             equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),
@@ -304,7 +291,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             )
         }
         L.ccu().zoneProfiles.add(modbusProfile)
-        return modbusProfile.equip.id
+        L.saveCCUState()
     }
 
     private fun populateSlaveId() {

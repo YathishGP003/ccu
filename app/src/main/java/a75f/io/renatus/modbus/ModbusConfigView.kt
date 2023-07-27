@@ -161,7 +161,7 @@ class ModbusConfigView : BaseDialogFragment() {
                             Column {
                                 HeaderTextView(SLAVE_ID)
                                 SpinnerView(
-                                    selected = getSlaveId(viewModel.equipModel.value.slaveId.value.toString(),viewModel.slaveIdList.value), // if (viewModel.equipModel.value.isDevicePaired ) getSlaveId(viewModel.equipModel.value.slaveId.value.toString(),viewModel.slaveIdList.value) else viewModel.equipModel.value.slaveId.value,
+                                    selected = getSlaveId(viewModel.equipModel.value.slaveId.value.toString(),viewModel.slaveIdList.value),
                                     items = viewModel.slaveIdList,
                                     disable = viewModel.equipModel.value.isDevicePaired,
                                     itemSelected = { index, value ->
@@ -276,7 +276,6 @@ class ModbusConfigView : BaseDialogFragment() {
         if (list.contains(slaveId))
             return list.indexOf(slaveId)
         return 0
-
     }
 
     fun getName(name: String): String {

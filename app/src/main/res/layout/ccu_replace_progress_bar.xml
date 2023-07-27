@@ -128,7 +128,7 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textSize="15dp"
-            android:textColor="@color/renatus_75f_primary"
+            android:textColor="?orange_75f"
             android:text="CANCEL"/>
             <View
                 android:layout_width="2dp"
@@ -142,7 +142,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text=" PAUSE SYNCING"
-            android:textColor="@color/renatus_75f_primary"
+            android:textColor="?orange_75f"
             android:textSize="15dp"
             android:textStyle="bold" />
     </LinearLayout>

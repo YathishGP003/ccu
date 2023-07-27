@@ -43,8 +43,6 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
-import a75f.io.renatus.modbus.RecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -441,7 +439,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
         saveToBox(zoneRef,equipRef,equipmentDevice,curSelectedSlaveId, isNewDevice,floorRef);
     }
     public String updateModbusProfile(int slave_id){
-        modbusProfile.updateMbEquip((short)slave_id,floorRef,zoneRef, equipmentDevice,recyclerModbusParamAdapter.modbusParam);
+        modbusProfile.updateMbEquip((short)slave_id, equipmentDevice,recyclerModbusParamAdapter.modbusParam);
         L.ccu().zoneProfiles.add(modbusProfile);
         return modbusProfile.getEquip().getId();
     }

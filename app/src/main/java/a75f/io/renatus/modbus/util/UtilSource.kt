@@ -23,7 +23,8 @@ fun getParameters(equipment: EquipmentDevice): MutableList<RegisterItem> {
                     parameterTemp.registerNumber = registerTemp.getRegisterNumber()
                     parameterTemp.registerAddress = registerTemp.getRegisterAddress()
                     parameterTemp.registerType = registerTemp.getRegisterType()
-
+                    parameterTemp.parameterDefinitionType = registerTemp.getParameterDefinitionType()
+                    parameterTemp.multiplier = registerTemp.multiplier
                     val register = RegisterItem()
                     register.displayInUi.value = parameterTemp.isDisplayInUI
                     register.param = mutableStateOf(parameterTemp)

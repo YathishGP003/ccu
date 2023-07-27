@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -49,7 +48,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.modbus.ModbusEquipTypes;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -562,7 +560,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
 
     public String updateModbusProfile(int slave_id, EquipmentDevice equipmentDev, List<Parameter> modbusParam) {
-        modbusProfile.updateMbEquip((short) slave_id, floorRef, zoneRef, equipmentDev, modbusParam);
+        modbusProfile.updateMbEquip((short) slave_id, equipmentDev, modbusParam);
         L.ccu().zoneProfiles.add(modbusProfile);
         return modbusProfile.getEquip().getId();
     }

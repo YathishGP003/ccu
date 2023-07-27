@@ -176,6 +176,15 @@ public class ModbusEquip {
                     .setParameterId(configParam.getParameterId())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
                     .setTz(tz);
+                    /*.addTag("parameterDefinitionType", HStr.make(configParam.getParameterDefinitionType()))
+                    .addTag("multiplier", HStr.make(configParam.getMultiplier()))
+                    .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
+                    .addTag("bitParam", HNum.make( (configParam.getBitParam() != null) ? configParam.getBitParam() : 0));*/
+
+            Log.i("DMModbus","getParameterDefinitionType "+configParam.getParameterDefinitionType());
+            Log.i("DMModbus","getMultiplier "+configParam.getMultiplier());
+            Log.i("DMModbus","getBitParamRange "+configParam.getBitParamRange());
+            Log.i("DMModbus","getBitParam "+configParam.getBitParam());
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
             }
@@ -321,7 +330,7 @@ public class ModbusEquip {
         return equipmentRef;
     }
 
-    public void updateHaystackPoints(String equipRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
+    public void updateHaystackPoints(String equipRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {
             //Read all points for this markers
             StringBuilder tags = new StringBuilder();

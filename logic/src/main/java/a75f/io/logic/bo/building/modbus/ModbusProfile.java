@@ -41,6 +41,8 @@ public class ModbusProfile extends ZoneProfile {
                             parameterTemp.setRegisterNumber(registerTemp.getRegisterNumber());
                             parameterTemp.setRegisterAddress(registerTemp.getRegisterAddress());
                             parameterTemp.setRegisterType(registerTemp.getRegisterType());
+                            parameterTemp.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+                            parameterTemp.setMultiplier(registerTemp.getMultiplier());
                             parameterList.add(parameterTemp);
                         }
                     }
@@ -63,10 +65,17 @@ public class ModbusProfile extends ZoneProfile {
         modBusEquip.init(slaveId);
     }
 
-    public void updateMbEquip(short slaveId,String floorRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
-        modBusEquip.updateHaystackPoints(getModbusEquip(slaveId).getId(),zoneRef,equipmentDevice,configParams);
+    public void updateMbEquip(short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
+        modBusEquip.updateHaystackPoints(getModbusEquip(slaveId).getId(), equipmentDevice,configParams);
         modBusEquip.init(slaveId);
     }
+
+    public void updateModbusEquip(String equipRef, short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams){
+        modBusEquip.updateHaystackPoints(equipRef,equipmentDevice,configParams);
+        modBusEquip.init(slaveId);
+    }
+
+
     @Override
     public void updateZonePoints() {
 

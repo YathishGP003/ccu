@@ -273,8 +273,6 @@ class ModbusConfigView : BaseDialogFragment() {
     }
 
     private fun getSlaveId(slaveId: String,list: List<String> ): Int {
-        log("getSlaveId: $slaveId")
-        log("getSlaveId: $list")
         if (list.contains(slaveId))
             return list.indexOf(slaveId)
         return 0

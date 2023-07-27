@@ -12,15 +12,6 @@ import a75f.io.api.haystack.modbus.LogicalPointTags
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.api.haystack.modbus.Register
 import a75f.io.api.haystack.modbus.UserIntentPointTags
-import a75f.io.modbusbox.ModbusParser
-import android.os.Environment
-import android.util.Log
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.FileReader
-import java.io.IOException
-import java.util.HashMap
 
 /**
  * Created by Manjunath K on 24-07-2023.
@@ -28,19 +19,18 @@ import java.util.HashMap
 
 class ModbusModelBuilder {
     companion object {
-        const val TAG = "DEV_DEBUG"
-        fun getModel(slaveId: Int): EquipmentDevice {
+        fun buildModbusModel(slaveId: Int): EquipmentDevice {
             val parentMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
-            val equipDevice =  getEquipModel(parentMap)
+            val equipDevice =  buildEquipModel(parentMap)
             val childEquipMaps = CCUHsApi.getInstance().readAllEntities("equip and modbus and equipRef== \"${parentMap["id"].toString()}\"")
             childEquipMaps.forEach {
-                equipDevice.equips.add(getEquipModel(it))
+                equipDevice.equips.add(buildEquipModel(it))
             }
             return equipDevice
         }
 
 
-        private fun getEquipModel(parentMap: HashMap<Any, Any>) : EquipmentDevice {
+        private fun buildEquipModel(parentMap: HashMap<Any, Any>) : EquipmentDevice {
             val equipDevice = EquipmentDevice()
             val equip = Equip.Builder().setHashMap(parentMap).build()
             equipDevice.id = 0L
@@ -61,6 +51,7 @@ class ModbusModelBuilder {
             equipDevice.deviceEquipRef = null
             equipDevice.isPaired = (equipDevice.deviceEquipRef == null)
             equipDevice.slaveId = equip.group.toInt()
+            equipDevice.deviceEquipRef = equip.id
             val deviceId = CCUHsApi.getInstance()
                 .readEntity("device and modbus and equipRef == \"${equip.id}\"")[Tags.ID]
 
@@ -113,75 +104,6 @@ class ModbusModelBuilder {
                equipDevice.registers.add(register)
             }
             return equipDevice
-        }
-
-
-
-
-
-        fun saveToFile(fileName: String, content: String): Boolean {
-            // Check if the external storage is available and writable
-            val state = Environment.getExternalStorageState()
-            if (state != Environment.MEDIA_MOUNTED) {
-                return false
-            }
-
-            val folder = File("/sdcard/ccu/modbus")
-
-            // Create the folder if it doesn't exist
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
-                    return false
-                }
-            }
-
-            val file = File(folder, fileName)
-            var outputStream: FileOutputStream? = null
-
-            return try {
-                outputStream = FileOutputStream(file)
-                outputStream.write(content.toByteArray())
-                true
-            } catch (e: IOException) {
-                e.printStackTrace()
-                false
-            } finally {
-                try {
-                    outputStream?.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-        fun readFile(fileName: String): EquipmentDevice? {
-            // Check if the external storage is available
-            val state = Environment.getExternalStorageState()
-            if (state != Environment.MEDIA_MOUNTED) {
-                return null
-            }
-
-            val folder = File("/sdcard/ccu/modbus")
-            val file = File(folder, "$fileName.json")
-
-            if (!file.exists() || !file.isFile) {
-                return null
-            }
-
-            val stringBuilder = StringBuilder()
-
-            try {
-                val reader = BufferedReader(FileReader(file))
-                var line: String? = reader.readLine()
-                while (line != null) {
-                    stringBuilder.append(line).append('\n')
-                    line = reader.readLine()
-                }
-                reader.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                return null
-            }
-            return ModbusParser().parseModbusDataFromString(stringBuilder.toString())
         }
 
     }

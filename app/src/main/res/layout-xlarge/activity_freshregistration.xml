@@ -112,7 +112,7 @@
         android:layout_height="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_logo_svg"
+        app:srcCompat="@drawable/carrier_logo_dark_blue"
         android:layout_marginLeft="38dp"
         android:layout_marginBottom="36dp"/>
 

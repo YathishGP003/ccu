@@ -159,6 +159,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         mViewPager.setAdapter(mSettingPagerAdapter);
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         startCountDownTimer(INTERVAL);
+                        setMarginStart(mTabLayout);
                         menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.GONE);
 
@@ -174,6 +175,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         floorMenu.setVisibility(View.VISIBLE);
                     }
                     btnTabs.setEnabled(true);
+                }
+
+                private void setMarginStart(TabLayout mTabLayout) {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT
+                    );
+                    int marginStartInPixels = 40;
+                    layoutParams.setMarginStart(marginStartInPixels);
+                    mTabLayout.setLayoutParams(layoutParams);
                 }
 
                 @Override

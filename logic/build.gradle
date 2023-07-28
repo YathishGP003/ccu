@@ -109,7 +109,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-carrier-service.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-carrier-service.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-carrier-service.azurewebsites.net/\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-carrier-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-carrier-service.azurewebsites.net/version/all\"'
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-carrier-service.azurewebsites.net/version/getDetails\"'
 

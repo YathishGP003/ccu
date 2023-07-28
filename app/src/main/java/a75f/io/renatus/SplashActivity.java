@@ -67,7 +67,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         } else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP)) {
             Log.i(TAG,"CCU Setup is not completed");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-            i.putExtra("viewpager_position", 4);
+            i.putExtra("viewpager_position", 21);
             startActivity(i);
             finish();
         } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)

@@ -250,12 +250,24 @@ public class AboutFragment extends Fragment {
         RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this);
     };
 
+    public void cancelUpdateCCU(){
+        new Handler(Looper.getMainLooper()).post(() -> {
+            connectivityIssues.setVisibility(View.GONE);
+            updateCCU.setEnabled(true);
+            updateAppText.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            cancel.setEnabled(false);
+            cancel.setVisibility(View.GONE);
+        });
+        Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+        isNotFirstInvocation = false;
+    }
     View.OnClickListener cancelOnClickListener = view -> {
         connectivityIssues.setVisibility(View.GONE);
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
         if(downloadTd != null) {
-            Log.i("amardebug","downloadTd "+downloadTd);
             manager.remove(downloadTd);
             updateCCU.setEnabled(true);
             updateAppText.setVisibility(View.VISIBLE);

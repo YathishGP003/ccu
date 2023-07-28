@@ -1,6 +1,5 @@
 package a75f.io.messaging.handler;
 
-import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.resetAO2ToSecondaryDamper;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
 
 import com.google.gson.JsonObject;
@@ -19,6 +18,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 
 public class DamperReheatTypeHandler {
     
@@ -114,5 +114,8 @@ public class DamperReheatTypeHandler {
         int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
         int level = msgObject.get("level").getAsInt();
         hayStack.writePointLocal(configPoint.getId(), level, who, (double) typeVal, duration);
+        if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.TYPE)){
+            DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), CCUHsApi.getInstance());
+        }
     }
 }

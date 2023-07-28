@@ -17,11 +17,13 @@ import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 
 public class SafeModeActivity extends AppCompatActivity implements SafeModeInterface {
 
     Button exitSafeMode;
+    static CloudConnetionStatusThread mCloudConnectionStatus = null;
 
     public static SafeModeActivity getInstance(){
         return new SafeModeActivity();
@@ -50,6 +52,7 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
     @Override
     protected void onResume() {
         super.onResume();
+        CloudConnectionAlive();
         RemoteCommandUpdateHandler.setSafeInterface(this);
     }
 
@@ -75,5 +78,12 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
+    }
+
+    public static synchronized void CloudConnectionAlive() {
+        if (mCloudConnectionStatus == null) {
+            mCloudConnectionStatus = new CloudConnetionStatusThread();
+            mCloudConnectionStatus.start();
+        }
     }
 }

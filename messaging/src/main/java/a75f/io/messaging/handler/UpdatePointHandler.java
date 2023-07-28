@@ -205,6 +205,7 @@ public class UpdatePointHandler implements MessageHandler
         double val = 0;
         double duration = 0;
         HDateTime lastModifiedDateTime;
+        CCUHsApi.getInstance().deletePointArray(pointUid);
         if (isDataSync) {
             level = Double.parseDouble(msgObject.get("level").getAsString());
             val = Double.parseDouble(msgObject.get("val").getAsString());
@@ -212,6 +213,8 @@ public class UpdatePointHandler implements MessageHandler
             duration = Double.parseDouble(msgObject.get("duration").getAsString());
             CcuLog.i(L.TAG_CCU_READ_CHANGES,"Read changes point "+"Level: "+level+"value: "+val+
                     "lastModifiedDateTime: "+lastModifiedDateTime+"duration: "+duration);
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
         } else {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
             if (pointGrid == null) {
@@ -242,12 +245,12 @@ public class UpdatePointHandler implements MessageHandler
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                        CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
             }
 
         }
-        CCUHsApi.getInstance().deletePointArray(pointUid);
-        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
-                CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+
     }
 
     private static void logPointArray(Point localPoint) {

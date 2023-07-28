@@ -25,6 +25,7 @@ import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
+import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.Pulse;
@@ -398,10 +399,10 @@ public class HyperStatMsgReceiver {
             }
             CcuLog.e(L.TAG_CCU_DEVICE, "coolingDesiredTemp " + coolingDesiredTemp + " heatingDesiredTemp " + heatingDesiredTemp + "  averageDesiredTemp " + averageDesiredTemp);
 
-            SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+            DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
                     new Point.Builder().setHashMap(heatingDtPoint).build(),
                     new Point.Builder().setHashMap(dtPoint).build(),
-                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
+                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack);
         }
     }
 

@@ -43,6 +43,8 @@ import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.renovo.bacnet4j.type.enumerated.Segmentation;
 import com.renovo.bacnet4j.type.primitive.ObjectIdentifier;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 
@@ -77,11 +79,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
+import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.ccu;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.util.BackFillViewModel.*;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
@@ -336,6 +342,19 @@ public class InstallerOptions extends Fragment {
                         SettingPoint snBand = sp.build();
 
                         CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
+
+                        try {
+                            String confString = prefs.getString(BACNET_CONFIGURATION);
+                            JSONObject config = new JSONObject(confString);
+                            JSONObject deviceObject = config.getJSONObject("device");
+                            deviceObject.put(IP_DEVICE_INSTANCE_NUMBER,Integer.parseInt(addressBandSelected) + 99);
+                            prefs.setString(BACNET_CONFIGURATION, config.toString());
+                            sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                            performConfigFileBackup();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }
 

@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
@@ -43,8 +44,6 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
-import a75f.io.renatus.modbus.RecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -253,11 +252,15 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
         }
 
         SelectAllParameters selectAllParameters = enable -> {
-            if(!enable) {
-                toggleSelectAllParams.setOnCheckedChangeListener(null);
-                toggleSelectAllParams.setChecked(false);
-                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
-            }
+            AtomicBoolean isAllParametersSelected = new AtomicBoolean(true);
+            parameterList.forEach(parameter -> {
+                if(!parameter.isDisplayInUI()){
+                    isAllParametersSelected.set(false);
+                }
+            });
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(isAllParametersSelected.get());
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         };
 
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig, selectAllParameters);

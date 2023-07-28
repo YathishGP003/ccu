@@ -267,6 +267,16 @@ public class DataSyncHandler {
         }
         return true;
     }
+    public static boolean isCloudScheduleHasLatestValue(HashMap<Object, Object> localEntity, HDateTime lastModifiedDateTimeInMessage) {
+        if (localEntity.containsKey(Tags.LAST_MODIFIED_TIME) && (lastModifiedDateTimeInMessage != null)) {
+            String lastModifiedTimeInCCU = localEntity.get(Tags.LAST_MODIFIED_TIME).toString();
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"lastModifiedTimeInCCU "+ lastModifiedTimeInCCU+
+                    "||  lastModifiedDateTimeInMessage: "+lastModifiedDateTimeInMessage);
+            HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
+            return lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis();
+        }
+        return true;
+    }
 
     private void syncRoom(List<HashMap<Object, Object>> roomEntities, CCUHsApi ccuHsApi) {
         for (HashMap<Object, Object> roomEntity : roomEntities) {

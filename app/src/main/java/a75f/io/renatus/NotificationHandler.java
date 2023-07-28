@@ -71,6 +71,7 @@ public class NotificationHandler {
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
         if (bIsConnected) {
+            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
             CcuLog.i(L.TAG_CCU_READ_CHANGES, "CCU IS CONNECTED TO WIFI " + new Date(System.currentTimeMillis()));
             long lastCCUUpdateTime = PreferenceUtil.getLastCCUUpdatedTime();
             CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is message expired "+isMessageTimeExpired(lastCCUUpdateTime) +
@@ -86,7 +87,6 @@ public class NotificationHandler {
                 CcuLog.i(L.TAG_CCU_READ_CHANGES,"Set last updated date time "+new Date(System.currentTimeMillis()));
                 PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
             }
-            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
             prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP, "");
         } else {
             rebootDeviceByCCUNetworkWatchdogTimeoutTuner();

@@ -43,6 +43,7 @@ public class ModbusProfile extends ZoneProfile {
                             parameterTemp.setRegisterType(registerTemp.getRegisterType());
                             parameterTemp.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
                             parameterTemp.setMultiplier(registerTemp.getMultiplier());
+                            parameterTemp.setWordOrder(registerTemp.getWordOrder());
                             parameterList.add(parameterTemp);
                         }
                     }

@@ -19,6 +19,19 @@ import a75f.io.api.haystack.modbus.UserIntentPointTags
 
 class ModbusModelBuilder {
     companion object {
+
+
+
+        fun buildModbusModel(zoneRef: String): EquipmentDevice {
+            val parentMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and roomRef == \"$zoneRef\"")
+            val equipDevice =  buildEquipModel(parentMap)
+            val childEquipMaps = CCUHsApi.getInstance().readAllEntities("equip and modbus and equipRef== \"${parentMap["id"].toString()}\"")
+            childEquipMaps.forEach {
+                equipDevice.equips.add(buildEquipModel(it))
+            }
+            return equipDevice
+        }
+
         fun buildModbusModel(slaveId: Int): EquipmentDevice {
             val parentMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
             val equipDevice =  buildEquipModel(parentMap)
@@ -28,7 +41,6 @@ class ModbusModelBuilder {
             }
             return equipDevice
         }
-
 
         private fun buildEquipModel(parentMap: HashMap<Any, Any>) : EquipmentDevice {
             val equipDevice = EquipmentDevice()
@@ -59,25 +71,25 @@ class ModbusModelBuilder {
                 "physical and point and deviceRef == \"${deviceId}\""
             )
 
-            registersMap.forEach {
-                val rawMap = RawPoint.Builder().setHashMap(it).build()
-                val logicalPointMap = CCUHsApi.getInstance().readMapById(rawMap.pointRef)
+            registersMap.forEach { rawMap ->
+                val rawPhysicalPoint = RawPoint.Builder().setHashMap(rawMap).build()
+                val logicalPointMap = CCUHsApi.getInstance().readMapById(rawPhysicalPoint.pointRef)
 
                 val logicalPoint = Point.Builder().setHashMap(logicalPointMap).build()
                 val register = Register()
-                register.registerNumber = rawMap.registerNumber
-                register.registerAddress = rawMap.registerAddress.toInt()
-                register.registerType = rawMap.registerType
-                register.parameterDefinitionType = null
-                register.wordOrder = null
-                register.multiplier = null
+                register.registerNumber = rawPhysicalPoint.registerNumber
+                register.registerAddress = rawPhysicalPoint.registerAddress.toInt()
+                register.registerType = rawPhysicalPoint.registerType
+                register.parameterDefinitionType = if (rawMap.containsKey("parameterDefinitionType")) rawMap["parameterDefinitionType"].toString() else null
+                register.wordOrder = if (rawMap.containsKey("wordOrder")) rawMap["wordOrder"].toString() else null
+                register.multiplier = if (rawMap.containsKey("multiplier")) rawMap["multiplier"].toString() else null
                 val param = Parameter()
-                param.parameterId = rawMap.parameterId
-                param.name = rawMap.shortDis
-                param.startBit = rawMap.startBit.toInt()
-                param.endBit = rawMap.endBit.toInt()
-                param.bitParamRange = null
-                param.bitParam = null
+                param.parameterId = rawPhysicalPoint.parameterId
+                param.name = rawPhysicalPoint.shortDis
+                param.startBit = rawPhysicalPoint.startBit.toInt()
+                param.endBit = rawPhysicalPoint.endBit.toInt()
+                param.bitParamRange = if (rawMap.containsKey("bitParamRange")) rawMap["bitParamRange"].toString() else null
+                param.bitParam =  if (rawMap.containsKey("bitParam")) strToDouble(rawMap["bitParam"].toString()) else 0
                 param.logicalPointTags = mutableListOf<LogicalPointTags>()
                 param.commands = mutableListOf<Command>()
                 param.userIntentPointTags = mutableListOf<UserIntentPointTags>()
@@ -106,6 +118,14 @@ class ModbusModelBuilder {
             return equipDevice
         }
 
+        private fun strToDouble(str: String?): Int {
+            if (str != null) {
+                if (str.contains(".")){
+                    return str.toDouble().toInt()
+                }
+                return str.toInt()
+            } else
+                return 0
+        }
     }
-
 }

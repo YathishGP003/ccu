@@ -264,7 +264,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             }
             modbusProfile = ModbusProfile()
             modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
-                equipModel.value.equipDevice.value, getParametersList(equipModel.value),
+                equipModel.value.equipDevice.value, getParametersList(equipModel.value.equipDevice.value),
                 ProfileType.MODBUS_DEFAULT, subEquipmentDevices)
 
             L.ccu().zoneProfiles.add(modbusProfile)

@@ -2,6 +2,9 @@ package a75f.io.logic.bo.building.modbus;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HStr;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -175,16 +178,20 @@ public class ModbusEquip {
                     .setRegisterType(configParam.getRegisterType())
                     .setParameterId(configParam.getParameterId())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
-                    .setTz(tz);
-                    /*.addTag("parameterDefinitionType", HStr.make(configParam.getParameterDefinitionType()))
+                    .setTz(tz)
+                    .addTag("parameterDefinitionType", HStr.make(configParam.getParameterDefinitionType()))
                     .addTag("multiplier", HStr.make(configParam.getMultiplier()))
+                    .addTag("wordOrder", HStr.make(configParam.getWordOrder()))
                     .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
-                    .addTag("bitParam", HNum.make( (configParam.getBitParam() != null) ? configParam.getBitParam() : 0));*/
+                    .addTag("bitParam", HNum.make( (configParam.getBitParam() != null) ? configParam.getBitParam() : 0));
 
             Log.i("DMModbus","getParameterDefinitionType "+configParam.getParameterDefinitionType());
             Log.i("DMModbus","getMultiplier "+configParam.getMultiplier());
             Log.i("DMModbus","getBitParamRange "+configParam.getBitParamRange());
+            Log.i("DMModbus","wordOrder "+configParam.getWordOrder());
             Log.i("DMModbus","getBitParam "+configParam.getBitParam());
+
+            Log.i("DMModbus","getTags "+physicalParamPoint.build().getTags());
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
             }

@@ -48,6 +48,20 @@ fun getParametersList(equipment: EquipModel): List<Parameter> {
     return parameterList
 }
 
+fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
+    val parameterList = mutableListOf<Parameter>()
+    equipment.registers.forEach {
+        val param = it.parameters[0]
+        param.registerNumber = it.getRegisterNumber()
+        param.registerAddress = it.getRegisterAddress()
+        param.registerType = it.getRegisterType()
+        param.parameterDefinitionType = it.getParameterDefinitionType()
+        param.multiplier = it.getMultiplier()
+        param.wordOrder = it.getWordOrder()
+        parameterList.add(param)
+    }
+    return parameterList
+}
 
 fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     var isAllSelected = true

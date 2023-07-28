@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
-import static a75f.io.logic.bo.util.DesiredTempDisplayMode.getDesiredTempDisplayMode;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
@@ -61,11 +60,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.javolution.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
 
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -110,10 +107,11 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.modbus.models.ModbusModelBuilder;
+import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -2273,32 +2271,50 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
 
-                            List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
-                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +
+                         //   List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
+
+                            EquipmentDevice device = ModbusModelBuilder.Companion.buildModbusModel(nonTempEquip.getRoomRef());
+                            List<EquipmentDevice> modbusDevices = new ArrayList<>();
+                            modbusDevices.add(device);
+                            modbusDevices.addAll(device.getEquips());
+
+
+                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
-                            for(EquipmentDevice equipmentDevice : modbusDevices){
+                      /*      for(EquipmentDevice equipmentDevice : modbusDevices){
                                 if(null != equipmentDevice.getEquips()) {
                                     modbusDevices.addAll(equipmentDevice.getEquips());
                                 }
                             }
-
+*/
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
                                 List<Parameter> parameterList = new ArrayList<>();
-                                if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
-                                    for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
-                                        if (registerTemp.getParameters() != null) {
-                                            for (Parameter p : registerTemp.getParameters()) {
-                                                if (p.isDisplayInUI()) {
-                                                    p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-                                                    parameterList.add(p);
+
+                                List<Parameter> allParamList = UtilSourceKt.getParametersList(modbusDevices.get(i));
+                                allParamList.forEach(parameter -> {
+                                    if (parameter.isDisplayInUI())
+                                        parameterList.add(parameter);
+                                });
+                                /*
+                                   List<Parameter> parameterList = new ArrayList<>();
+                                    if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
+                                        ModbusModelBuilder.Companion
+                                        for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
+                                            if (registerTemp.getParameters() != null) {
+                                                for (Parameter p : registerTemp.getParameters()) {
+                                                    if (p.isDisplayInUI()) {
+                                                        p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+                                                        parameterList.add(p);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
+                                    }*/
+
+
                                 View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);

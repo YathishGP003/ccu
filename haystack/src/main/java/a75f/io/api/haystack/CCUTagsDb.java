@@ -742,9 +742,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();

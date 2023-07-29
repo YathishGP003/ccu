@@ -50,7 +50,8 @@ class ConfigPointUpdateHandler {
             systemProfile.handleMultiZoneEnable(val);
         } else {
             String userIntent = getUserIntentType(configPoint);
-            if (userIntent != null) {
+            if (userIntent != null &&
+                    configPoint.getMarkers().contains(Tags.ENABLED)) {
                 systemProfile.setConfigEnabled(userIntent, val);
             }
         }

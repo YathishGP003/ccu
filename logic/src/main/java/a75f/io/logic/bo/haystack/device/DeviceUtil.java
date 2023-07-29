@@ -23,7 +23,7 @@ public class DeviceUtil {
         }
 
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (!point.get("analogType").equals(type))
+        if (!point.get("analogType" ).equals(type))
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setType(type);
@@ -49,6 +49,7 @@ public class DeviceUtil {
     }
 
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
+        Log.d("CCU"," Update Physical point "+port);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device == null)
@@ -57,10 +58,8 @@ public class DeviceUtil {
         }
 
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"point: "+point.toString());
         RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"calling updatePoint()");
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
     }

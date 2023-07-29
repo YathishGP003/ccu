@@ -120,10 +120,7 @@ public class MigrationUtil {
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
         }
 
-        if (!PreferenceUtil.isCCUHeartbeatMigrationDone()) {
-            addCCUHeartbeatDiagPoint();
-            PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
-        }
+        addCCUHeartbeatDiagPoint();
 
         if(!PreferenceUtil.isPressureUnitMigrationDone()){
             pressureUnitMigration(CCUHsApi.getInstance());
@@ -307,10 +304,8 @@ public class MigrationUtil {
             PreferenceUtil.setAirflowSampleWaitTimeMigration();
         }
 
-        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
-            staticPressureSpTrimMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setStaticPressureSpTrimMigration();
-        }
+        staticPressureSpTrimMigration(CCUHsApi.getInstance());
+
 
         if (!PreferenceUtil.getOccupancyModePointMigration()) {
             Log.i("CCU_MIGRATION","start migration for occupancy mode");
@@ -395,6 +390,7 @@ public class MigrationUtil {
             removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
+        CCUHsApi.getInstance().removeAllNamedSchedule();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
@@ -1754,15 +1750,16 @@ public class MigrationUtil {
 
     private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
 
-        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
-        String updatedMaxVal = "-0.5";
-        String updatedMinVal = "-0.01";
-        String updatedIncrementalVal = "-0.01";
+        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim");
+        String updatedMaxVal = "-0.01";
+        String updatedMinVal = "-0.5";
+        String updatedIncrementalVal = "0.01";
         for (HashMap<Object,Object> staticPressureSPTrim : staticPressureSPTrimPoint) {
-            Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
-            CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+            if (staticPressureSPTrim.get("maxVal").toString().equals("-0.5") || staticPressureSPTrim.get("minVal").toString().equals("-0.01")) {
+                Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
+                CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+            }
         }
-
     }
 
     private static void airflowSampleWaitTimeMigration(CCUHsApi ccuHsApi) {
@@ -2031,7 +2028,7 @@ public class MigrationUtil {
 
     private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
 
-        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone and not smartstat");
         for (HashMap<Object, Object> equip : Equips) {
             ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
             if (!enableOccupancyControlPoints.isEmpty()) {

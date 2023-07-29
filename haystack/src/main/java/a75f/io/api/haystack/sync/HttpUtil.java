@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
@@ -39,23 +38,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-
-
-import android.app.Application;
 import android.content.Context;
-import android.net.SSLCertificateSocketFactory;
-import android.net.SSLSessionCache;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 public class HttpUtil {
 
@@ -65,7 +49,7 @@ public class HttpUtil {
 
     private static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
 
-    private static OkHttpClient okHttpClient;
+    private static OkHttpClient okHttpClient = null;
 
     public static String executePost(String targetURL, String urlParameters) {
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
@@ -85,7 +69,7 @@ public class HttpUtil {
                 .addHeader("Authorization", " Bearer " + token)
                 .post(body)
                 .build();
-        Call call = client.newCall(request);
+        Call call = getSharedOkHttpClient().newCall(request);
         call.enqueue(callback);
 
         CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:post: [POST] " + url + " - Token: " + token);
@@ -384,80 +368,6 @@ public class HttpUtil {
         return null;
     }
 
-    public String getMapLocationData(String stringUrl, String httpMethod, Context context) throws IOException {
-        URL url;
-        HttpsURLConnection connection = null;
-
-        try {
-            //Create connection
-            url = new URL(stringUrl);
-
-            if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
-                connection = (HttpsURLConnection) url.openConnection();
-            } else {
-                connection = NetCipher.getHttpsURLConnection(url);
-            }
-
-            javax.net.ssl.SSLSocketFactory sf = ClientSSLSocketFactory.getSocketFactory(context);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
-
-            CcuLog.i("CCU_WEATHER", Objects.toString(url.toString(), ""));
-
-            connection.setSSLSocketFactory(sf);
-            connection.setRequestProperty("Content-Language", "en-US");
-
-
-            connection.setUseCaches(false);
-            connection.setRequestMethod(httpMethod);
-
-            connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
-            connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
-
-            if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
-                connection.setDoOutput(false);
-            } else {
-                connection.setDoOutput(true);
-
-                //Send request
-                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-
-                wr.flush();
-            }
-
-            int responseCode = connection.getResponseCode();
-            CcuLog.i("CCU_WEATHER", "HttpResponse: responseCode " + responseCode);
-
-            if (responseCode >= 400) {
-
-                BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-                String linee;
-                StringBuffer responsee = new StringBuffer();
-                while ((linee = rde.readLine()) != null) {
-                    responsee.append(linee);
-                    responsee.append('\n');
-                }
-                CcuLog.i("CCU_WEATHER", "Response error stream: " + responsee.toString());
-            }
-
-            //Get Response
-            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\n');
-            }
-
-            return responseCode == 200 ? response.toString() : null;
-
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    }
-
     private static synchronized OkHttpClient getSharedOkHttpClient() {
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient.Builder()
@@ -469,10 +379,10 @@ public class HttpUtil {
     }
 
     @NotNull
-    private static Retrofit getRetrofitForHaystackBaseUrl(URL url) {
+    private static Retrofit getRetrofitForHaystackBaseUrl(URL url, OkHttpClient httpClient) {
         return new Retrofit.Builder()
                 .baseUrl(url)
-                .client(getSharedOkHttpClient())
+                .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
@@ -484,7 +394,8 @@ public class HttpUtil {
         } else {
             requestBody = RequestBody.create(MediaType.parse("text/zinc"), "");
         }
-        SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url).create(SiloApiService.class);
+        OkHttpClient httpClient = getSharedOkHttpClient();
+        SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url, httpClient).create(SiloApiService.class);
         retrofit2.Call<ResponseBody> call = null;
 
         try {
@@ -507,14 +418,7 @@ public class HttpUtil {
                     );
                     break;
             }
-
-            OkHttpClient okHttpClient = new OkHttpClient();
-            Request request = call.request();
-            okhttp3.Call okHttpCall = okHttpClient.newCall(request);
-            Response okHttpResponse;
-
-            okHttpResponse = okHttpCall.execute();
-            return (HttpURLConnection) okHttpResponse.request().url().url().openConnection();
+            return (HttpURLConnection) call.request().url().url().openConnection();
         } catch (IOException e) {
             e.printStackTrace();
             return null;

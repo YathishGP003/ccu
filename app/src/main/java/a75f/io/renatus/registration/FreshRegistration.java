@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
@@ -89,6 +90,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         CCUUiUtil.setThemeDetails(this);
         setContentView(R.layout.activity_freshregistration);
         container = findViewById(R.id.container);
@@ -1182,7 +1184,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
-            verticalTabAdapter.setCurrentSelected(1);
+            verticalTabAdapter.setCurrentSelected(2);
             textView_title.setText(getText(R.string.add_new_ccu));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.GONE);

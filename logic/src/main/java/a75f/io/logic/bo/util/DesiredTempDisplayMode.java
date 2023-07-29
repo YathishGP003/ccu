@@ -305,7 +305,6 @@ public class DesiredTempDisplayMode {
         });
     }
     public static String setPointStatusMessage(String status, TemperatureMode modeType) {
-        CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Status "+ status+" Mode type "+modeType);
         boolean statusContainsChar = false;
         if(modeType == TemperatureMode.DUAL){
             return status;
@@ -357,10 +356,8 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getZoneTemperatureMode(List<TemperatureMode> temperatureModes) {
           boolean heating = false;
           boolean cooling = false;
-        CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Temperature modes "+temperatureModes);
         for (TemperatureMode temperatureMode : temperatureModes){
             if(temperatureMode == TemperatureMode.DUAL){
-                CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Return Dual Mode");
                 return TemperatureMode.DUAL;
             }else if(temperatureMode == TemperatureMode.HEATING){
                 heating = true;
@@ -370,13 +367,10 @@ public class DesiredTempDisplayMode {
         }
 
         if(heating && cooling){
-            CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Dual Mode");
             return TemperatureMode.DUAL;
         }else if(heating){
-            CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Heating Mode");
             return TemperatureMode.HEATING;
         }
-        CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"Cooling Mode");
         return TemperatureMode.COOLING;
     }
 }

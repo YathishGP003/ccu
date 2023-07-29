@@ -187,8 +187,8 @@ public class SettingsFragment extends Fragment {
                     }
     
                     case 5: {
-                        if (isTransactionSafe && !(fragment instanceof ModbusConfigFragment)) {
-                            fragmentClass = ModbusConfigFragment.class;
+                        if (isTransactionSafe && !(fragment instanceof Communication)) {
+                            fragmentClass = Communication.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
                             } catch (Exception e) {

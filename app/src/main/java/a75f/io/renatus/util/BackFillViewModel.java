@@ -1,11 +1,19 @@
 package a75f.io.renatus.util;
 
+import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
+
 import android.content.Context;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+
+import androidx.annotation.NonNull;
+
+import org.javolution.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +23,6 @@ import java.util.Map;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BackfillPref;
-import a75f.io.logic.bo.building.BackfillUtil;
 import a75f.io.renatus.R;
 
 public class BackFillViewModel {
@@ -26,9 +33,40 @@ public class BackFillViewModel {
     private static final int BACKFIELD_DEFAULT_DURATION = 24;
 
     public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
+        int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
         String[] strings = BackFillDuration.getDisplayNames();
         ArrayList<String> backFillTimeArray = new ArrayList<>(Arrays.asList(strings));
-        return new ArrayAdapter<>(context, R.layout.spinner_dropdown_item, backFillTimeArray);
+        return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, equipCount);
+    }
+
+    private static ArrayAdapter<String> getDynamicBackFillTimeArrayAdapter(Context context, ArrayList<String> backFillTimeArray, int totalZones) {
+
+        return new ArrayAdapter<String>(context, R.layout.spinner_dropdown_item, backFillTimeArray) {
+            @Override
+            public boolean isEnabled(int position) {
+                return position < getMaxNormalRows();
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                Context mContext = getContext();
+                LayoutInflater vi = LayoutInflater.from(mContext);
+                View v = vi.inflate(R.layout.spinner_dropdown_item, parent, false);
+                View row = super.getDropDownView(position, v, parent);
+                if (position >= getMaxNormalRows()) {
+                    row.setAlpha(0.5F);
+                }
+                return row;
+            }
+
+            private int getMaxNormalRows() {
+                if (totalZones > 20) {
+                    return 7;
+                }
+                return 9;
+            }
+        };
+
     }
 
     public static int backfieldTimeSelectedValue() {
@@ -66,7 +104,7 @@ public class BackFillViewModel {
         }
 
         if (backFillTimeChange) {
-            BackfillUtil.updateBackfillDuration(currentBackFillTime);
+            updateBackfillDuration(currentBackFillTime);
         }
     }
 

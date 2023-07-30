@@ -388,9 +388,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         recyclerParams.invalidate();
 
         if(subEquipList.size() > 0) {
-            for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
-                subEquipList.add(subEquipmentDevice);
-            }
             modbusConfigurationAdapter = new ModbusConfigurationAdapter(getActivity(), subEquipList, isNewConfig,
                     selectAllParameters);
             recyclerSubEquips.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -461,7 +458,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private void addModbusProfile(EquipmentDevice equipmentDev, short selectedSlaveId, List<Parameter> modbusParam){
         boolean isNewDevice = L.getProfile(selectedSlaveId) == null;
         List<EquipmentDevice> subEquipmentDevices = new ArrayList<>();
-        if(null != equipmentDevice.getEquips()) {
+        if(null != equipmentDevice.getEquips() && (equipmentDevice.getEquips().size() > 0)) {
             for (EquipmentDevice subEquipmentDevice : modbusConfigurationAdapter.getSubEquips()) {
                 subEquipmentDevices.add(subEquipmentDevice);
             }

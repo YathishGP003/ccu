@@ -230,22 +230,21 @@ public class UpdatePointHandler implements MessageHandler
 
                 try {
                     level = Double.parseDouble(r.get("level").toString());
-                    if(level == Double.parseDouble(msgObject.get("level").getAsString()) ) {
-                        val = Double.parseDouble(r.get("val").toString());
-                        HVal durHVal = r.get("duration", false);
-                        Object lastModifiedTimeTag = r.get("lastModifiedDateTime", false);
-                        if (lastModifiedTimeTag != null) {
-                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
-                        } else {
-                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
-                        }
-                        double durationRemote = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
-                        //If duration shows it has already expired, then just write 1ms to force-expire it locally.
-                        duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
-                        CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
-                        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
-                                CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+                    val = Double.parseDouble(r.get("val").toString());
+                    HVal durHVal = r.get("duration", false);
+                    Object lastModifiedTimeTag = r.get("lastModifiedDateTime", false);
+                    if (lastModifiedTimeTag != null) {
+                        lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                    } else {
+                        lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
                     }
+                    double durationRemote = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
+                    //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                    duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                            CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }

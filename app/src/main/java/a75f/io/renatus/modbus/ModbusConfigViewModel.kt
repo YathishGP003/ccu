@@ -1,6 +1,7 @@
 package a75f.io.renatus.modbus
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
@@ -34,6 +35,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -106,7 +108,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             }
         childSlaveIdList.value = getSlaveIds(false)
         slaveIdList.value = getSlaveIds(true)
-        equipModel.value.slaveId.value = 1
+        if (!equipModel.value.isDevicePaired)
+            equipModel.value.slaveId.value = 1
     }
 
     fun holdBundleValues(bundle: Bundle) {
@@ -115,7 +118,6 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
-
 
     }
 
@@ -204,6 +206,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun isValidConfiguration(): Boolean {
+        if (HSUtil.getEquips(zoneRef).isNotEmpty()) {
+
+            showToast("Zone should have no equips to pair modbus with sub equips", context)
+            return false
+        }
 
         if (equipModel.value.parameters.isEmpty()) {
             showToast("Please select modbus device", context)
@@ -253,8 +260,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun setUpsModbusProfile() {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
-        equipModel.value.slaveId.value
         val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
+
         if (parentMap.isNullOrEmpty()) {
             val subEquipmentDevices = mutableListOf<EquipmentDevice>()
             if (equipModel.value.subEquips.isNotEmpty()) {
@@ -296,6 +303,9 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun populateSlaveId() {
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
+        equipModel.value.parameters.forEach {
+            it.param.value.isDisplayInUI = it.displayInUi.value
+        }
         equipModel.value.subEquips.forEach {
             it.value.equipDevice.value.slaveId = it.value.slaveId.value
             it.value.parameters.forEach { register ->

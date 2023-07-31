@@ -2273,21 +2273,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                          //   List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
 
-                            EquipmentDevice device = ModbusModelBuilder.Companion.buildModbusModel(nonTempEquip.getRoomRef());
+                            List<EquipmentDevice> list = ModbusModelBuilder.Companion.buildModbusModel(nonTempEquip.getRoomRef());
                             List<EquipmentDevice> modbusDevices = new ArrayList<>();
-                            modbusDevices.add(device);
-                            modbusDevices.addAll(device.getEquips());
-
-
-                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
-                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
-
-                      /*      for(EquipmentDevice equipmentDevice : modbusDevices){
+                            for(EquipmentDevice equipmentDevice : list) {
+                                modbusDevices.add(equipmentDevice);
                                 if(null != equipmentDevice.getEquips()) {
                                     modbusDevices.addAll(equipmentDevice.getEquips());
                                 }
                             }
-*/
+
+                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
+                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
+
+
+
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
@@ -2298,6 +2297,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     if (parameter.isDisplayInUI())
                                         parameterList.add(parameter);
                                 });
+
                                 /*
                                    List<Parameter> parameterList = new ArrayList<>();
                                     if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
@@ -2316,7 +2316,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
                                 View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
-
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
 
@@ -2325,7 +2324,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         zoneDetails.findViewById(R.id.last_updated);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
 
-                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
                                 StringBuffer equipString = new StringBuffer();
                                 for(String equipType : equipTypes){
@@ -2344,11 +2342,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
                                             Integer.toString(modbusDevices.get(i).getSlaveId())));
                                 }
-                                else{
+                                else {
                                     textViewModule.setVisibility(View.GONE);
                                     textViewUpdatedTimeHeading.setVisibility(View.GONE);
                                     textViewUpdatedTime.setVisibility(View.GONE);
                                 }
+
+
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =

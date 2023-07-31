@@ -259,7 +259,7 @@ class ModbusConfigView : BaseDialogFragment() {
                                 SpinnerView(
                                     selected = if (viewModel.equipModel.value.isDevicePaired ) viewModel.getSlaveIds(false).indexOf(subEquip.value.slaveId.value.toString()) else subEquip.value.slaveId.value,
                                     items = viewModel.childSlaveIdList,
-                                    disable = viewModel.equipModel.value.isDevicePaired) { index, value ->
+                                    disable = viewModel.equipModel.value.isDevicePaired) { _, value ->
                                     subEquip.value.slaveId.value = value.toInt()
                                 }
                             }

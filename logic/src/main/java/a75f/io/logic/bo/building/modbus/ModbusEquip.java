@@ -245,10 +245,10 @@ public class ModbusEquip {
                         if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
-                        /*if (marker.getTagName().contains("kind")) { //TODO Recheck this if needed, what side effect it causes?
+                        /*if (marker.getTagName().contains("kind")) {
                             logicalParamPoint.setKind(marker.getTagValue());
                         }*/
-                    }else {
+                    } else {
                         logicalParamPoint.addMarker(marker.getTagName());
                         physicalParamPoint.addMarker(marker.getTagName());
                     }
@@ -257,7 +257,6 @@ public class ModbusEquip {
             }
             StringBuffer enumVariables = new StringBuffer();
             if(Objects.nonNull(configParam.getConditions())) {
-                //String[] enumVariables = new String[configParam.getConditions().size()];
                 for(Condition readCondition :configParam.getConditions()) {
                     if(Objects.nonNull(readCondition.getBitValues())) {
                         if(enumVariables.length() == 0)
@@ -279,7 +278,8 @@ public class ModbusEquip {
                         if(enumVariables.length() == 0)
                             enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
                         else {
-                            enumVariables.append(",");enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
+                            enumVariables.append(",");
+                            enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
                         }
                     }
                 }

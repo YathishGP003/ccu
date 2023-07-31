@@ -1,14 +1,6 @@
 package a75f.io.renatus.modbus;
 
 import android.content.Context;
-
-import a75f.io.api.haystack.Equip;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import androidx.annotation.NonNull;
-import androidx.core.text.HtmlCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -40,6 +33,7 @@ import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
+import a75f.io.renatus.modbus.models.ModbusModelBuilder;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -358,11 +352,20 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
         }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = ModbusModelBuilder.Companion.buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
+
+        }
+        /*if (equip.getEquipRef() != null) {
             modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
         } else {
             modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
-        }
+        }*/
+
+
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
                 for (Parameter pam : register.getParameters()) {

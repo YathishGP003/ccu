@@ -672,7 +672,7 @@ class LogicalPointsUtil {
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-modulatingFanSpeed")
-                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress)
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress.toString())
                     .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }

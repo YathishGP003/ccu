@@ -1,32 +1,11 @@
 package a75f.io.renatus.util;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.location.Address;
-import android.os.AsyncTask;
-import android.os.StrictMode;
-import android.preference.PreferenceManager;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
-import android.view.View;
 
-import com.google.android.material.color.MaterialColors;
 import com.google.common.base.Strings;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -41,13 +20,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.Globals;
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
-import a75f.io.renatus.RenatusApp;
-import a75f.io.renatus.WeatherDataDownloadService;
-import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
+
 
 public class CCUUtils {
 	private static List<Address> locAddress= new ArrayList<Address>();

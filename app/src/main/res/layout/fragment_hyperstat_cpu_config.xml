@@ -901,6 +901,8 @@
                 <Spinner
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
                     style="@style/Damper_HyperStat"
+                    android:layout_width="wrap_content"
+                    android:dropDownWidth="wrap_content"
                     android:visibility="gone"/>
 
                 <TextView
@@ -910,6 +912,8 @@
 
                 <Spinner
                     android:id="@+id/zoneCO2ThresholdSpinner"
+                    android:layout_width="75dp"
+                    android:dropDownWidth="wrap_content"
                     style="@style/Damper_HyperStat" />
 
                 <TextView
@@ -919,6 +923,8 @@
 
                 <Spinner
                     android:id="@+id/zoneCO2TargetSpinner"
+                    android:layout_width="wrap_content"
+                    android:dropDownWidth="wrap_content"
                     style="@style/Damper_HyperStat" />
 
 

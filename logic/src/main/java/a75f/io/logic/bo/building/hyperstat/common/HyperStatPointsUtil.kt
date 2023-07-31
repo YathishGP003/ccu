@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.hyperstat.profiles.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
+import android.util.Log
 import java.util.*
 
 /**
@@ -250,7 +251,8 @@ class HyperStatPointsUtil(
             if (tempDis == "heatingLoopOutput" || tempDis == "coolingLoopOutput" || tempDis == "fanLoopOutput") {
                 point.setMinVal("0")
                 point.setMaxVal("100")
-            }if(!hisInterpolate.isNullOrEmpty())
+            }
+        if(!hisInterpolate.isNullOrEmpty())
             point.setHisInterpolate(hisInterpolate)
 
         // add specific markers
@@ -1245,11 +1247,11 @@ class HyperStatPointsUtil(
                     )
                 )
                 createFanConfigForAnalogOut(
-                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State),
-                    hyperStatConfig.analogOut1State.perAtFanLow,
-                    hyperStatConfig.analogOut1State.perAtFanMedium,
-                    hyperStatConfig.analogOut1State.perAtFanHigh,
-                    "analog1", configLogicalPointsList
+                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2State),
+                    hyperStatConfig.analogOut2State.perAtFanLow,
+                    hyperStatConfig.analogOut2State.perAtFanMedium,
+                    hyperStatConfig.analogOut2State.perAtFanHigh,
+                    "analog2", configLogicalPointsList
                 )
             }
         }
@@ -1301,11 +1303,11 @@ class HyperStatPointsUtil(
                     )
                 )
                 createFanConfigForAnalogOut(
-                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State),
-                    hyperStatConfig.analogOut1State.perAtFanLow,
-                    hyperStatConfig.analogOut1State.perAtFanMedium,
-                    hyperStatConfig.analogOut1State.perAtFanHigh,
-                    "analog1", configLogicalPointsList
+                    HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3State),
+                    hyperStatConfig.analogOut3State.perAtFanLow,
+                    hyperStatConfig.analogOut3State.perAtFanMedium,
+                    hyperStatConfig.analogOut3State.perAtFanHigh,
+                    "analog3", configLogicalPointsList
                 )
             }
         }

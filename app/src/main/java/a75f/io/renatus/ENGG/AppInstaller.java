@@ -19,7 +19,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
-import android.util.Log;
+import androidx.fragment.app.FragmentActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -164,7 +164,7 @@ public class AppInstaller
 
     public void downloadInstalls() {
         reset();
-        setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+CCU_DOWNLOAD_FILE, CCU_APK_FILE_NAME, null));
+        setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+CCU_DOWNLOAD_FILE, CCU_APK_FILE_NAME, null, null));
         //setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+HOME_DOWNLOAD_FILE, HOME_APK_FILE_NAME));
     }
 
@@ -175,7 +175,7 @@ public class AppInstaller
     }
 
 
-    private synchronized long downloadFile(String url, String apkFile, Fragment currentFragment) {
+    private synchronized long downloadFile(String url, String apkFile, Fragment currentFragment, FragmentActivity activity) {
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -192,12 +192,12 @@ public class AppInstaller
         long dowloadId = manager.enqueue(request);
         CcuLog.d("L.TAG_CCU_DOWNLOAD", "downloading file: "+dowloadId+","+url);
         if(currentFragment != null) {
-            checkDownload(dowloadId, manager, currentFragment);
+            checkDownload(dowloadId, manager, currentFragment, activity);
         }
         return dowloadId;
     }
 
-    private void checkDownload(long downloadId, DownloadManager downloadManager, Fragment currentFragment) {
+    private void checkDownload(long downloadId, DownloadManager downloadManager, Fragment currentFragment, FragmentActivity activity) {
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
             @Override
@@ -218,8 +218,10 @@ public class AppInstaller
                             updateCCUFragment.setProgress(100, downloadId, cursor.getInt(columnIndex));
                         }
                         if (currentFragment instanceof AboutFragment) {
-                            AboutFragment aboutFragment = (AboutFragment) currentFragment;
-                            aboutFragment.setProgress(100, downloadId, cursor.getInt(columnIndex));
+                            AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
+                            if (fragment != null) {
+                                fragment.setProgress(100, downloadId, cursor.getInt(columnIndex));
+                            }
                         }
                         timer.cancel();
                     } else {
@@ -231,8 +233,11 @@ public class AppInstaller
                             updateCCUFragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
                         }
                         if (currentFragment instanceof AboutFragment) {
-                            AboutFragment aboutFragment = (AboutFragment) currentFragment;
-                            aboutFragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
+                            AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
+                            if (fragment != null) {
+                                fragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
+                            }
+
                         }
                         CcuLog.i(L.TAG_CCU_DOWNLOAD, "Downloaded: " + progress + "%");
                     }
@@ -245,8 +250,10 @@ public class AppInstaller
                         updateCCUFragment.downloadCanceled();
                     }
                     if (currentFragment instanceof AboutFragment) {
-                        AboutFragment aboutFragment = (AboutFragment) currentFragment;
-                        aboutFragment.cancelUpdateCCU();
+                        AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
+                        if (fragment != null) {
+                            fragment.cancelUpdateCCU();
+                        }
                     }
                 }
             }
@@ -256,10 +263,10 @@ public class AppInstaller
 
 
     public void downloadHomeInstall(String sFileName){
-        setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName,HOME_APK_FILE_NAME, null));
+        setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName,HOME_APK_FILE_NAME, null, null));
     }
-    public void downloadCCUInstall(String sFileName, Fragment currentFragment) {
-        setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment));
+    public void downloadCCUInstall(String sFileName, Fragment currentFragment, FragmentActivity activity) {
+        setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment, activity));
     }
     
     

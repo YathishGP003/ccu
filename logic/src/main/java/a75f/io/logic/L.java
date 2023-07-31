@@ -59,6 +59,7 @@ public class L
     public static final String TAG_CCU_UPDATE = "CCU_UPDATE";
     public static final String TAG_DESIRED_TEMP_MODE = "DESIRED_TEMP_MODE";
     public static final String TAG_CCU_BACNET = "CCU_BACNET";
+    public static final String TAG_CCU_DOWNLOAD = "CCU_DOWNLOAD";
 
     public static Context app()
     {

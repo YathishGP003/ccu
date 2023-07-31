@@ -409,7 +409,7 @@ public class OTNEquip {
         otnConfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
         otnConfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
-                "away and equipRef == \"" + mEquipRef + "\"") > 0);
+                "away and enabled and equipRef == \"" + mEquipRef + "\"") > 0);
         Log.d(LOG_TAG,
                 "config: " + otnConfig.gettempOffset() + " - " + otnConfig.getautoAway() + " - " +
                         "--" + otnConfig.getautoforceOccupied() + " - " + otnConfig.getzonePriority());

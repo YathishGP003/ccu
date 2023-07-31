@@ -37,7 +37,7 @@
             android:layout_marginStart="25dp"
             android:scaleType="center"
             android:layout_gravity="center_vertical"
-            app:srcCompat="@drawable/ccu_carrier_logo" />
+            app:srcCompat="@drawable/ic_75f_logo" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"

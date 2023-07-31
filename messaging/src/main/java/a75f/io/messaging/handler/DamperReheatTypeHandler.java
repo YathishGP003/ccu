@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
@@ -115,7 +116,17 @@ public class DamperReheatTypeHandler {
         int level = msgObject.get("level").getAsInt();
         hayStack.writePointLocal(configPoint.getId(), level, who, (double) typeVal, duration);
         if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.TYPE)){
-            DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), CCUHsApi.getInstance());
+            if(configPoint.getMarkers().contains(Tags.VAV)) {
+                String fanMarker = "";
+                if (configPoint.getMarkers().contains(Tags.SERIES)) {
+                    fanMarker = Tags.SERIES;
+                } else if (configPoint.getMarkers().contains(Tags.PARALLEL)) {
+                    fanMarker = Tags.PARALLEL;
+                }
+                VavEquip.updateReheatTypeVav(typeVal, configPoint.getEquipRef(), hayStack, fanMarker,
+                        Integer.parseInt(configPoint.getGroup()));
+            }
+            DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), hayStack);
         }
     }
 }

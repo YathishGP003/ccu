@@ -150,9 +150,15 @@ public class RestoreCCUHsApi {
     public HGrid getAllEquips(String ahuRef, String gatewayRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef" +
-                        " == "+
-                        StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+                "equip and not equipRef and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef,
+                        "@") +" or ahuRef" + " == "+ StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public HGrid getModBusSubEquips(String parentEquipRef, RetryCountCallback retryCountCallback){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "equip and modbus and equipRef  == " + StringUtils.prependIfMissing(parentEquipRef, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 

@@ -127,6 +127,7 @@ public class HClient extends HProj
 
   /** Timeout in milliseconds for opening the HTTP socket */
   public int connectTimeout = 60 * 1000;
+  private static OkHttpClient okHttpClient = null;
 
   /** Set the connect timeout and return this */
   public HClient setConnectTimeout(final int timeout)
@@ -971,24 +972,33 @@ public class HClient extends HProj
     }
     return null;
   }
-
+  /**
+   * This is a copy of httpClient present in HttpUtil class.
+   * We are creating another client here to make use of a separate thread pool to support more
+   * async operation at the cost of more resources.
+   * @return
+   */
   private static OkHttpClient getOkHttpClient(){
-    return new OkHttpClient.Builder()
-            .build();
+    if (okHttpClient == null) {
+      okHttpClient = new OkHttpClient.Builder()
+              .build();
+    }
+    return okHttpClient;
   }
 
   @NotNull
-  private static Retrofit getRetrofitForHaystackBaseUrl(URL url) {
+  private static Retrofit getRetrofitForHaystackBaseUrl(URL url, OkHttpClient okHttpClient) {
     return new Retrofit.Builder()
             .baseUrl(url)
-            .client(getOkHttpClient())
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build();
   }
 
   private static HttpURLConnection openConnection(String urlParameters, URL url, String targetURL, String httpMethod) {
     RequestBody requestBody = RequestBody.create(MediaType.parse("text/zinc"), urlParameters);
-    SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url).create(SiloApiService.class);
+    OkHttpClient httpClient = getOkHttpClient();
+    SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url, httpClient).create(SiloApiService.class);
     retrofit2.Call<ResponseBody> call = null;
 
     try {
@@ -1012,13 +1022,7 @@ public class HClient extends HProj
           break;
       }
 
-      OkHttpClient okHttpClient = new OkHttpClient();
-      Request request = call.request();
-      okhttp3.Call okHttpCall = okHttpClient.newCall(request);
-      Response okHttpResponse;
-
-      okHttpResponse = okHttpCall.execute();
-      return (HttpURLConnection) okHttpResponse.request().url().url().openConnection();
+      return (HttpURLConnection) call.request().url().url().openConnection();
     } catch (IOException e) {
       e.printStackTrace();
       return null;

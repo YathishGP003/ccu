@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -119,6 +121,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.resetAppBtn) Button resetAppBtn;
 
+    public @BindView(R.id.serialCommTimeOut) EditText etSerialCommTimeOut;
+
+    public @BindView(R.id.saveSerialCommTimeOut) Button btnSerialCommTimeOut;
+
+    public @BindView(R.id.registerRequestCount) EditText etRegisterRequestCount;
+
+    public @BindView(R.id.saveRegisterRequestCount) Button btnregisterRequestCount;
+
+    SharedPreferences spDefaultPrefs = null;
+
     private final CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
@@ -126,6 +138,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                   Bundle savedInstanceState) {
          View rootView = inflater.inflate(R.layout.fragment_dev_settings, container, false);
          ButterKnife.bind(this , rootView);
+         spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
          return rootView;
     }
     
@@ -373,10 +386,51 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             Globals.getInstance().loadEquipProfiles();
         });
 
+
+        etRegisterRequestCount.setText(String.valueOf(spDefaultPrefs.getInt("registerRequestCount", 3)));
+        etSerialCommTimeOut.setText(String.valueOf(spDefaultPrefs.getInt("serialCommTimeOut", 300)));
+
+        etRegisterRequestCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                etRegisterRequestCount.setCursorVisible(true);
+                etRegisterRequestCount.requestFocus();
+            }
+        });
+
+        etSerialCommTimeOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                etSerialCommTimeOut.setCursorVisible(true);
+                etSerialCommTimeOut.requestFocus();
+            }
+        });
+
+        btnregisterRequestCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                spDefaultPrefs.edit().putInt("registerRequestCount",
+                        Integer.parseInt(etRegisterRequestCount.getText().toString())).apply();
+                etRegisterRequestCount.setCursorVisible(false);
+                hideKeyboard(view);
+                Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnSerialCommTimeOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                spDefaultPrefs.edit().putInt("serialCommTimeOut",
+                        Integer.parseInt(etSerialCommTimeOut.getText().toString())).apply();
+                etSerialCommTimeOut.setCursorVisible(false);
+                hideKeyboard(view);
+                Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
-    
+
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
@@ -465,4 +519,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         disposable.dispose();
     }
 
+    private void hideKeyboard(View view){
+        try {
+            InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            mgr.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }

@@ -311,7 +311,7 @@ public class RestoreCCUHsApi {
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "point and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
+                "point and not createdByApplication and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
                         , "@")).toDict();
         HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(pointsGrid == null){

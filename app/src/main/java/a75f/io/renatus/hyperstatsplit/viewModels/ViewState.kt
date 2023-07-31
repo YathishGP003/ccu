@@ -45,7 +45,8 @@ import android.util.Log
     var isDisplayHumidityEnabled: Boolean,
     var isDisplayVOCEnabled: Boolean,
     var isDisplayPp2p5Enabled: Boolean,
-    var isDisplayCo2Enabled: Boolean
+    var isDisplayCo2Enabled: Boolean,
+    var stagedFanUis: List<Int>
 ) {
 
     companion object {
@@ -170,7 +171,11 @@ import android.util.Log
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5
+            isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = listOf(
+                config.coolingStage1FanState, config.coolingStage2FanState, config.coolingStage3FanState,
+                config.heatingStage1FanState, config.heatingStage2FanState, config.heatingStage3FanState
+            )
         )
 
     }
@@ -295,6 +300,13 @@ import android.util.Log
                 UniversalInAssociation.values()[universalIns[7].association]
             )
 
+            coolingStage1FanState = stagedFanUis[0]
+            coolingStage2FanState = stagedFanUis[1]
+            coolingStage3FanState = stagedFanUis[2]
+            heatingStage1FanState = stagedFanUis[3]
+            heatingStage2FanState = stagedFanUis[4]
+            heatingStage3FanState = stagedFanUis[5]
+
             zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
             zoneCO2Threshold = openingDamperValueFromIndex(zoneCO2ThresholdPos)
             zoneCO2Target = openingDamperValueFromIndex(zoneCO2TargetPos)
@@ -339,9 +351,10 @@ val CpuEconAnalogOutAssociation.displayName: Int
     get() {
         return when (this) {
             CpuEconAnalogOutAssociation.COOLING -> R.string.cooling
-            CpuEconAnalogOutAssociation.FAN_SPEED -> R.string.fan_speed
+            CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED -> R.string.linear_fan_speed
             CpuEconAnalogOutAssociation.HEATING -> R.string.heating
             CpuEconAnalogOutAssociation.OAO_DAMPER -> R.string.oao_damper
+            CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED -> R.string.staged_fan_speed
         }
     }
 
@@ -375,9 +388,10 @@ fun getAnalogOutDisplayName(profileType: ProfileType, enumValue: Int): Int {
         ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
             when (enumValue) {
                 CpuEconAnalogOutAssociation.COOLING.ordinal -> return R.string.cooling
-                CpuEconAnalogOutAssociation.FAN_SPEED.ordinal -> return R.string.fan_speed
+                CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal -> return R.string.linear_fan_speed
                 CpuEconAnalogOutAssociation.HEATING.ordinal -> return R.string.heating
                 CpuEconAnalogOutAssociation.OAO_DAMPER.ordinal -> return R.string.oao_damper
+                CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal -> return R.string.staged_fan_speed
             }
         }
 

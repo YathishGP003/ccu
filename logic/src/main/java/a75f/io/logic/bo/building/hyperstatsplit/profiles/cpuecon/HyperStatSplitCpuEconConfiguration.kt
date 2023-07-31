@@ -39,7 +39,7 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var relay8State = RelayState(false, CpuEconRelayAssociation.EXHAUST_FAN_STAGE_2)
 
    var analogOut1State = AnalogOutState(false, CpuEconAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuEconAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut2State = AnalogOutState(false, CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
    var analogOut3State = AnalogOutState(false, CpuEconAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
    var analogOut4State = AnalogOutState(false, CpuEconAnalogOutAssociation.OAO_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
@@ -51,6 +51,13 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var universalIn6State = UniversalInState(false, UniversalInAssociation.FILTER_NC)
    var universalIn7State = UniversalInState(false, UniversalInAssociation.DUCT_PRESSURE_0_2)
    var universalIn8State = UniversalInState(false, UniversalInAssociation.CURRENT_TX_0_50)
+
+   var coolingStage1FanState = 7
+   var coolingStage2FanState = 10
+   var coolingStage3FanState = 10
+   var heatingStage1FanState = 7
+   var heatingStage2FanState = 10
+   var heatingStage3FanState = 10
 
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0
@@ -140,7 +147,8 @@ enum class CpuEconRelayAssociation {
 // Order is important -- FAN_HIGH_SPEED
 enum class CpuEconAnalogOutAssociation {
    COOLING,
-   FAN_SPEED,
+   MODULATING_FAN_SPEED,
+   PREDEFINED_FAN_SPEED,
    HEATING,
    OAO_DAMPER
 }

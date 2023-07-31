@@ -9,6 +9,7 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstatsplit.common.*
@@ -20,7 +21,7 @@ import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
-
+import kotlin.math.roundToInt
 
 /**
  * @author tcase@75f.io (HyperStat CPU)
@@ -51,6 +52,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private val defaultFanLoopOutput = 0.0
     private var economizingLoopOutput = 0
     private var dcvLoopOutput = 0
     private var outsideAirCalculatedMinDamper = 0
@@ -99,7 +101,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     // Run the profile logic and algorithm for an equip.
     fun processHyperStatSplitCPUEconProfile(equip: HyperStatSplitCpuEconEquip) {
-
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile()")
         if (Globals.getInstance().isTestMode) {
             logIt("Test mode is on: ${equip.nodeAddress}")
             return
@@ -108,8 +110,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         if (mInterface != null) mInterface.refreshView()
         val relayStages = HashMap<String, Int>()
         val analogOutStages = HashMap<String, Int>()
-
         logicalPointsList = equip.getLogicalPointList()
+
         hsSplitHaystackUtil = HSSplitHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
 
         if (isZoneDead) {
@@ -188,6 +190,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             equip.equipRef!!, relayStages, analogOutStages, temperatureState, economizingLoopOutput,
             equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
         )
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile() complete")
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents){
@@ -857,7 +860,82 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     port,basicSettings.effectiveConditioningMode, analogOutStages, outsideAirFinalLoopOutput
                 )
             }
+            (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) -> {
+                doAnalogStagedFanAction(
+                    port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
+                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
+                    basicSettings.effectiveConditioningMode, fanLoopOutput, analogOutStages,
+                )
+            }
         }
+    }
+
+    private fun doAnalogStagedFanAction(
+        port: Port,
+        fanLowPercent: Int,
+        fanMediumPercent: Int,
+        fanHighPercent: Int,
+        fanMode: StandaloneFanStage,
+        conditioningMode: StandaloneConditioningMode,
+        fanLoopOutput: Int,
+        analogOutStages: HashMap<String, Int>,
+    ) {
+        if (fanMode != StandaloneFanStage.OFF) {
+            var fanLoopForAnalog = 0
+            if (fanMode == StandaloneFanStage.AUTO) {
+                if (conditioningMode == StandaloneConditioningMode.OFF) {
+                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    return
+                }
+                fanLoopForAnalog = fanLoopOutput
+                if (conditioningMode == StandaloneConditioningMode.AUTO) {
+                    if (getOperatingMode() == 1.0) {
+                        fanLoopForAnalog =
+                            getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                    } else if (getOperatingMode() == 2.0) {
+                        fanLoopForAnalog =
+                            getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                    }
+                } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                    fanLoopForAnalog =
+                        getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                    fanLoopForAnalog =
+                        getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                }
+            } else {
+                when {
+                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
+                            || fanMode == StandaloneFanStage.LOW_OCC
+                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
+                        fanLoopForAnalog = fanLowPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
+                        fanLoopForAnalog = fanMediumPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
+                            || fanMode == StandaloneFanStage.HIGH_OCC
+                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
+                        fanLoopForAnalog = fanHighPercent
+                    }
+                }
+            }
+            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
+                fanLoopForAnalog
+            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Staged Fan Speed  analogSignal  $fanLoopForAnalog")
+        }
+
+    }
+
+    private fun getOperatingMode(): Double {
+
+        return hsSplitHaystackUtil.readHisVal("point and operating and mode")
+
     }
 
     private fun handleDeadZone(equip: HyperStatSplitCpuEconEquip) {
@@ -966,4 +1044,40 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private fun logIt(msg: String){
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON,msg)
     }
+
+    private fun getCoolingStateActivated (): Double {
+        return if (stageActive("cooling and runtime and stage3")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage3")
+        } else if (stageActive("cooling and runtime and stage2")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage2")
+        } else if (stageActive("cooling and runtime and stage1")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+
+    private fun getHeatingStateActivated (): Double {
+        return if (stageActive("heating and runtime and stage3")) {
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage3")
+        } else if (stageActive("heating and runtime and stage2")) {
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage2")
+        } else if (stageActive("heating and runtime and stage1")){
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage1")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    private fun stageActive(fanStage: String): Boolean {
+        return hsSplitHaystackUtil.readHisVal(fanStage) == 1.0
+    }
+
+    private fun getPercentageFromVoltageSelected(voltageSelected: Int): Int {
+        val minVoltage = 0
+        val maxVoltage = 10
+        return (((voltageSelected - minVoltage).toDouble() / (maxVoltage - minVoltage)) * 100).roundToInt()
+    }
+
 }

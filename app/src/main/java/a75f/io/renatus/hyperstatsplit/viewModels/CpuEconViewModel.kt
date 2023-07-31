@@ -66,6 +66,7 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
             cpuConfig
         )
         hyperStatSplitProfile?.profileConfiguration?.put(address, cpuConfig)
+
         if (hyperStatSplitConfiguration == null) {
             // creating all the Equip and point details for new profile
             hyperStatSplitProfile?.addNewEquip(address, roomName, floorName, cpuConfig)

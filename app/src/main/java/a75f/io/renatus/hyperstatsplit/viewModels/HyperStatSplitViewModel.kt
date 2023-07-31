@@ -341,6 +341,17 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    override fun voltageAtStagedFanSelected(index: Int, position: Int) {
+
+        val stagedFans = currentState.stagedFanUis.toMutableList()
+        stagedFans[index] = position
+        viewState.onNext(
+            currentState.copy(
+                stagedFanUis = stagedFans
+            )
+        )
+    }
+
     override fun getRelayMappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
         return ArrayAdapter(context , R.layout.spinner_dropdown_item, values)
     }

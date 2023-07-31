@@ -52,4 +52,5 @@ interface HyperStatSplitModel {
     fun getRelayMappingAdapter(context : Context, values: Array<String>): ArrayAdapter<*>
     fun validateProfileConfig() : Boolean
     fun getValidationMessage() : String
+    fun voltageAtStagedFanSelected(index: Int, position: Int)
 }

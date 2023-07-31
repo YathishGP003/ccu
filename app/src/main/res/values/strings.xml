@@ -225,6 +225,8 @@
     <string name="heating"> Heating </string>
     <string name="dcv_damper"> DCV Damper </string>
     <string name="oao_damper"> OAO Damper </string>
+    <string name="linear_fan_speed"> Linear Fan Speed </string>
+    <string name="staged_fan_speed"> Staged Fan Speed </string>
     <string name="water_valve_modulation"> Water Modulating Valve </string>
 
     <string-array name="hyperstat_analog_out_selector">
@@ -236,7 +238,8 @@
 
     <string-array name="hyperstatsplit_analog_out_selector">
         <item>  @string/cooling </item>
-        <item>  @string/fan_speed </item>
+        <item>  @string/linear_fan_speed </item>
+        <item>  @string/staged_fan_speed </item>
         <item>  @string/heating </item>
         <item>  @string/oao_damper </item>
     </string-array>
@@ -627,6 +630,13 @@
     <string name="analogin_2">Analog-in2</string>
 
     <string name="hyperstat_analog_out">Analog-out</string>
+
+    <string name="hyperstat_fan_out_cooling_stage_1">Fan-out During Cooling Stage 1</string>
+    <string name="hyperstat_fan_out_cooling_stage_2">Fan-out During Cooling Stage 2</string>
+    <string name="hyperstat_fan_out_cooling_stage_3">Fan-out During Cooling Stage 3</string>
+    <string name="hyperstat_fan_out_heating_stage_1">Fan-out During Heating Stage 1</string>
+    <string name="hyperstat_fan_out_heating_stage_2">Fan-out During Heating Stage 2</string>
+    <string name="hyperstat_fan_out_heating_stage_3">Fan-out During Heating Stage 3</string>
 
     <string name="hyperstat_analog_out_1_at_min_damper">Analog-out1 at\nMin</string>
     <string name="hyperstat_analog_out_1_at_max_damper">Analog-out1 at\nMax</string>

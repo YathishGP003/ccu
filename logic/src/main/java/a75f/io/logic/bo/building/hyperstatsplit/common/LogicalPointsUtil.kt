@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Kind
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -463,11 +464,11 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output",
+                    "cmd","zone","logical","analog", "output", "modulating",
                     "fan", "speed","run","his"
                 )
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-fanSpeed")
+                    .setDisplayName("$equipDis-modulatingFanSpeed")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -499,6 +500,27 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readAnalogOutOaoLogicalPoint(equipRef)).build()
         }
 
+        fun createAnalogOutPointForPredefinedFanSpeed(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String,
+        ): Point {
+            val existingPoint = readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd","zone","logical","cur","analog","standalone","output",
+                    "fan", "speed","his","predefined","cpuecon"
+                )
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-predefinedFanSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress)
+                    .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
+                    .setTz(tz).setHisInterpolate("cov").setUnit("%")
+                markers.forEach { point.addMarker(it) }
+                addPointToHaystack(point.build())
+            }
+            return Point.Builder().setHashMap(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
+        }
+
         // Read analog logical points
         fun readAnalogCoolingLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
@@ -510,11 +532,15 @@ class LogicalPointsUtil {
         }
         fun readAnalogOutFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "analog and logical and output and fan and speed and equipRef == \"$equipRef\"")
+                "analog and logical and output and modulating and fan and speed and equipRef == \"$equipRef\"")
         }
         fun readAnalogOutOaoLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
                 "analog and logical and output and oao and damper and equipRef == \"$equipRef\"")
+        }
+        fun readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "analog and logical and output and predefined and fan and speed and equipRef == \"$equipRef\"")
         }
 
         /***   Universal In logical points***/
@@ -886,6 +912,8 @@ class LogicalPointsUtil {
                 removePoint(readAnalogOutFanSpeedLogicalPoint(equipRef))
             if(!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(config))
                 removePoint(readAnalogOutOaoLogicalPoint(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToStaged(config))
+                removePoint(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef))
         }
 
         /*

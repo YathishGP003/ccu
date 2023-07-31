@@ -68,9 +68,11 @@ class HyperStatSplitAssociationUtil {
             return when (state) {
                 // Order is important here
                 0 -> CpuEconAnalogOutAssociation.COOLING
-                1 -> CpuEconAnalogOutAssociation.FAN_SPEED
-                2 -> CpuEconAnalogOutAssociation.HEATING
-                3 -> CpuEconAnalogOutAssociation.OAO_DAMPER
+                1 -> CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED
+                2 -> CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED
+                3 -> CpuEconAnalogOutAssociation.HEATING
+                4 -> CpuEconAnalogOutAssociation.OAO_DAMPER
+
                 // assuming it never going to call
                 else -> CpuEconAnalogOutAssociation.COOLING
             }
@@ -180,7 +182,7 @@ class HyperStatSplitAssociationUtil {
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
         fun isAnalogOutAssociatedToFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.FAN_SPEED)
+            return (analogOut.association == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED)
         }
 
         //Function which checks the Analog out is Associated  to HEATING
@@ -191,6 +193,11 @@ class HyperStatSplitAssociationUtil {
         //Function which checks the Analog out is Associated  to OAO Damper
         fun isAnalogOutAssociatedToOaoDamper(analogOut: AnalogOutState): Boolean {
             return (analogOut.association == CpuEconAnalogOutAssociation.OAO_DAMPER)
+        }
+
+        //Function which checks the Analog out is Associated  to STAGED_FAN_SPEED
+        fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AnalogOutState): Boolean {
+            return (analogOut.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
         }
 
         //Function which checks the Universal in is Associated  to SUPPLY_AIR_TEMPERATURE
@@ -345,10 +352,13 @@ class HyperStatSplitAssociationUtil {
             return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.HEATING)
         }
         fun isAnyAnalogAssociatedToFan(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.FAN_SPEED)
+            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED)
         }
         fun isAnyAnalogAssociatedToOAO(config: HyperStatSplitCpuEconConfiguration): Boolean {
             return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.OAO_DAMPER)
+        }
+        fun isAnyAnalogAssociatedToStaged(config: HyperStatSplitCpuEconConfiguration): Boolean {
+            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
         }
         private fun isAnalogOutMapped(config: HyperStatSplitCpuEconConfiguration, association: CpuEconAnalogOutAssociation): Boolean{
             return when {
@@ -886,7 +896,7 @@ class HyperStatSplitAssociationUtil {
                 (analogOut1.association != analogOut2.association) -> return false
                 (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
                 (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
-                (isAnalogOutAssociatedToFanSpeed(analogOut1)) -> {
+                (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                     when {
                         (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
                         (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return false
@@ -952,7 +962,7 @@ class HyperStatSplitAssociationUtil {
                 third = false   //  Fan High
             )
 
-            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration)) return 21 // All options are enabled due to
+            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration) || isAnyAnalogOutMappedToStagedFan(configuration)) return 21 // All options are enabled due to
             // analog fan speed
 
             if (isRelayEnabledAssociatedToFan(configuration.relay1State))
@@ -1407,6 +1417,34 @@ class HyperStatSplitAssociationUtil {
                 else -> { return Port.SENSOR_PRESSURE }
             }
 
+        }
+
+        fun isStagedFanEnabled(
+            hyperStatConfig: HyperStatSplitCpuEconConfiguration,
+            fanStage: CpuEconRelayAssociation
+        ): Boolean {
+            return  hyperStatConfig.relay1State.enabled && hyperStatConfig.relay1State.association == fanStage ||
+                    hyperStatConfig.relay2State.enabled && hyperStatConfig.relay2State.association == fanStage ||
+                    hyperStatConfig.relay3State.enabled && hyperStatConfig.relay3State.association == fanStage ||
+                    hyperStatConfig.relay4State.enabled && hyperStatConfig.relay4State.association == fanStage ||
+                    hyperStatConfig.relay5State.enabled && hyperStatConfig.relay5State.association == fanStage ||
+                    hyperStatConfig.relay6State.enabled && hyperStatConfig.relay6State.association == fanStage ||
+                    hyperStatConfig.relay7State.enabled && hyperStatConfig.relay7State.association == fanStage ||
+                    hyperStatConfig.relay8State.enabled && hyperStatConfig.relay8State.association == fanStage
+        }
+
+        fun isAnyAnalogOutMappedToStagedFan(
+            hyperStatConfig: HyperStatSplitCpuEconConfiguration,
+        ): Boolean {
+            return when {
+                (hyperStatConfig.analogOut1State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State)) -> true
+                (hyperStatConfig.analogOut2State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2State)) -> true
+                (hyperStatConfig.analogOut3State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3State)) -> true
+                else -> false
+            }
         }
 
     }

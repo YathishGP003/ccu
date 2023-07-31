@@ -647,7 +647,7 @@ public class VavEquip
         Equip vavEquip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build();
         String rhID = null;
         if (config.reheatType != -1) {
-            rhID = createReheatPosPointVav(vavEquip, hayStack);
+            rhID = createReheatPosPointVav(vavEquip, hayStack, getFanMarker(), nodeAddr);
             hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
         }
 
@@ -732,14 +732,15 @@ public class VavEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
     }
 
-    private String createReheatPosPointVav(Equip vavEquip, CCUHsApi hayStack) {
+    private static String createReheatPosPointVav(Equip vavEquip, CCUHsApi hayStack, String fanMarker,
+                                                  int nodeAddr) {
         Point reheatPos = new Point.Builder()
                 .setDisplayName(vavEquip.getDisplayName()+"-VAV-"+nodeAddr+"-reheatPos")
                 .setEquipRef(vavEquip.getId())
                 .setSiteRef(vavEquip.getSiteRef())
                 .setRoomRef(vavEquip.getRoomRef())
                 .setFloorRef(vavEquip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("reheat").addMarker("vav").addMarker(getFanMarker())
+                .addMarker("reheat").addMarker("vav").addMarker(fanMarker)
                 .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("%")
@@ -1139,7 +1140,7 @@ public class VavEquip
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
 
-        updateReheatTypeVav(config.reheatType, equipRef, hayStack);
+        updateReheatTypeVav(config.reheatType, equipRef, hayStack, getFanMarker(), nodeAddr);
 
         if (config.enableCFMControl) {
             setConfigNumVal("min and trueCfm and cooling", config.numMinCFMCooling);
@@ -1164,13 +1165,14 @@ public class VavEquip
         setHisVal("trueCfm and enable ", config.enableCFMControl ? 1.0 : 0);
     }
 
-    private void updateReheatTypeVav(int reheatType, String equipRef, CCUHsApi hayStack) {
+    public static void updateReheatTypeVav(int reheatType, String equipRef, CCUHsApi hayStack, String fanMarker,
+                                     int nodeAddress) {
         HashMap<Object, Object> reheatPos = hayStack.readEntity("reheat and valve and equipRef == \""+equipRef+"\"");
         Equip.Builder equipBuilder = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef));
         if (reheatType != -1 && reheatPos.isEmpty()) {
-            String rhID = createReheatPosPointVav(equipBuilder.build(), hayStack);
+            String rhID = createReheatPosPointVav(equipBuilder.build(), hayStack, fanMarker, nodeAddress);
             hayStack.writeHisValueByIdWithoutCOV(rhID, 0.0);
-            SmartNode.updatePhysicalPointRef(nodeAddr, ANALOG_OUT_TWO.toString(), rhID);
+            SmartNode.updatePhysicalPointRef(nodeAddress, ANALOG_OUT_TWO.toString(), rhID);
         } else if (reheatType == -1 && !reheatPos.isEmpty()) {
             hayStack.deleteEntity(reheatPos.get("id").toString());
         }

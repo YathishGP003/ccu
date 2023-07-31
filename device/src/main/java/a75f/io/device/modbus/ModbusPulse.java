@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.Register;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
 public class ModbusPulse {
@@ -82,6 +83,7 @@ public class ModbusPulse {
         List<HashMap<Object, Object>> deviceList = hayStack.readAllEntities("device and addr == \""+slaveid+"\"");
         for(HashMap<Object, Object> device : deviceList) {
             if (device.size() > 0) {
+                LModbus.IS_MODBUS_DATA_RECEIVED = true;
                 updateModbusRespone(device.get("id").toString(), response, registerType);
                 updateHeartBeatPoint(slaveid, hayStack);
             }

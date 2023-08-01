@@ -1169,6 +1169,8 @@ public class FloorPlanFragment extends Fragment {
                         .build();
 
                 hsZone.setId(roomToRename.getId());
+                hsZone.setBacnetId(roomToRename.getBacnetId());
+                hsZone.setBacnetType(roomToRename.getBacnetType());
                 CCUHsApi.getInstance().updateZone(hsZone, roomToRename.getId());
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();

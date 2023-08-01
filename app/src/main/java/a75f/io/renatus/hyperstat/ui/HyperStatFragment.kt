@@ -1,6 +1,7 @@
 package a75f.io.renatus.hyperstat.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.HyperStat
+import a75f.io.device.bacnet.addBacnetTags
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
@@ -533,6 +534,7 @@ class HyperStatFragment : BaseDialogFragment() {
                             this.meshAddress, roomName, floorName, false
                         )
                     }, {
+                        addBacnetTags(requireContext(), floorName, roomName)
                         ProgressDialogUtils.hideProgressDialog()
                         closeAllBaseDialogFragments()
                         activity?.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))

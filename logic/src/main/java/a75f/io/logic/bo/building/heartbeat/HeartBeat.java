@@ -5,6 +5,7 @@ import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -51,7 +52,7 @@ public class HeartBeat {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
+        addBacnetTags(heartBeat, BacnetIdKt.HEARTBEATID, BINARY_VALUE, nodeAddr);
     }
 
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,

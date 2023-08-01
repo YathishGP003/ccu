@@ -6,6 +6,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -61,5 +62,8 @@ object ResourceHelper {
         val objectMapper = ObjectMapperConfig().objectMapper()
         val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFDeviceDirective
+    }
+    fun getModelVersion(fileName: String): JSONObject? {
+        return loadString(fileName)?.let { JSONObject(it) }
     }
 }

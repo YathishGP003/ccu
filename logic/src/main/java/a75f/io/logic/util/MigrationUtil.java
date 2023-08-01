@@ -6,7 +6,6 @@ import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -14,7 +13,6 @@ import android.util.Log;
 
 import org.projecthaystack.HDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +26,6 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
@@ -64,9 +61,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -394,6 +389,7 @@ public class MigrationUtil {
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
+        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
         L.saveCCUState();
     }
@@ -415,6 +411,17 @@ public class MigrationUtil {
         }
     }
 
+    private static void migrateHyperStatFanStagedEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> hsCpuEquips = ccuHsApi.readAllEntities("equip and hyperstat and cpu");
+        if (!hsCpuEquips.isEmpty()) {
+            for (HashMap<Object, Object> equipMap : hsCpuEquips) {
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                fanSpeedLogicalPointMigration(equip, ccuHsApi);
+                analogOutConfigPointsMigration(equip, ccuHsApi);
+            }
+        }
+    }
 
     private static void updateKind(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");
@@ -2110,4 +2117,36 @@ public class MigrationUtil {
             }
         });
     }
+
+
+    private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> analogOutPoints = ccuHsApi.readAllEntities("point and " +
+                "(analog1 or analog2 or analog3) and cpu and output and association and equipRef == \"" + equip.getId() + "\"");
+        for (HashMap<Object, Object> analogOutPoint : analogOutPoints) {
+            if (analogOutPoint.get("enum").toString().contains("fanspeed")) {
+                Point enumUpdatedAnalogOutPoint = new Point.Builder().setHashMap(analogOutPoint)
+                        .setEnums("cooling,modulatingFanSpeed,heating,dcvdamper,predefinedFanSpeed").build();
+                CCUHsApi.getInstance().updatePoint(enumUpdatedAnalogOutPoint, enumUpdatedAnalogOutPoint.getId());
+            }
+        }
+    }
+
+    private static void fanSpeedLogicalPointMigration(Equip equip, CCUHsApi ccuHsApi) {
+
+        HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteDis = siteMap.get("dis").toString();
+        String equipDis = siteDis + "-hyperstatcpu-" + equip.getGroup();
+
+        HashMap<Object, Object> fanSpeedPointMap = ccuHsApi.readEntity("point and " +
+                "fan and run and speed and equipRef == \"" + equip.getId() + "\"");
+        if (fanSpeedPointMap != null && !fanSpeedPointMap.isEmpty()) {
+            Point fanSpeedPoint = new Point.Builder().setHashMap(fanSpeedPointMap).removeMarker("run")
+                    .removeMarker("analog").removeMarker("output").addMarker("modulating").setGroup(equip.getGroup())
+                    .addMarker("cpu").addMarker("cur").addMarker("standalone").setDisplayName(equipDis + "-modulatingFanSpeed")
+                    .build();
+            CCUHsApi.getInstance().updatePoint(fanSpeedPoint, fanSpeedPoint.getId());
+        }
+    }
+
 }

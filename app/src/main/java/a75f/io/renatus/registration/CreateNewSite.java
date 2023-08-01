@@ -143,10 +143,10 @@ public class CreateNewSite extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
-            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
-            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
-        }
+//        if(!CCUHsApi.getInstance().isCCURegistered()) {
+//            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+//            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+//        }
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 

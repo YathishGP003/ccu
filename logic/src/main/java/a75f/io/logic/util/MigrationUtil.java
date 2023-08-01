@@ -85,6 +85,7 @@ public class MigrationUtil {
      * THis will be fixed by using longVersionCode after migrating to API30. (dev going in another branch)
      */
     public static void doMigrationTasksIfRequired() {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         /*if (checkVersionUpgraded()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
@@ -389,6 +390,7 @@ public class MigrationUtil {
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
+        migrateSenseToMonitoring(ccuHsApi);
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
         L.saveCCUState();
@@ -2149,4 +2151,30 @@ public class MigrationUtil {
         }
     }
 
+    private static void migrateSenseToMonitoring(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> listOfSenseEquips = ccuHsApi.readAllEntities("sense and equip and not device");
+        ArrayList<HashMap<Object, Object>> listOfSenseDevices = ccuHsApi.readAllEntities("sense and not equip and device");
+        ArrayList<HashMap<Object, Object>> listOfSensePoints = ccuHsApi.readAllEntities("sense and not equip and not device");
+        for (HashMap<Object, Object> sensePoint: listOfSensePoints) {
+            String displayNameOfSensePoint = sensePoint.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSensePoint = displayNameOfSensePoint.replace("SENSE", Tags.MONITORING);
+            Point newSensePoint = new Point.Builder().setHashMap(sensePoint).addMarker(Tags.MONITORING)
+                    .removeMarker(Tags.SENSE).setDisplayName(modifiedDisplayNameOfSensePoint).build();
+            ccuHsApi.updatePoint(newSensePoint, newSensePoint.getId());
+        }
+        for(HashMap<Object, Object> senseEquipMap : listOfSenseEquips){
+            String displayNameOfSenseEquip = senseEquipMap.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSenseEquip = displayNameOfSenseEquip.replace("SENSE", Tags.MONITORING);
+            Equip senseEquip = new Equip.Builder().setHashMap(senseEquipMap).setDisplayName(modifiedDisplayNameOfSenseEquip)
+                    .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).setProfile("HYPERSTAT_MONITORING").build();
+            ccuHsApi.updateEquip(senseEquip, senseEquip.getId());
+        }
+        for(HashMap<Object, Object> senseDeviceMap : listOfSenseDevices){
+            String displayNameOfSenseDevice = senseDeviceMap.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSenseDevice = displayNameOfSenseDevice.replace("SENSE", Tags.MONITORING);
+            Device senseEquip = new Device.Builder().setHashMap(senseDeviceMap).setDisplayName(modifiedDisplayNameOfSenseDevice)
+                    .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).build();
+            ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
+        }
+    }
 }

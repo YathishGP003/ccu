@@ -759,7 +759,7 @@
     <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
     <string name="title_vrv">VRV</string>
     <string name="desc_vrv">Connect to the Daikin VRV Indoor Unit using P1 P2 Protocol</string>
-    <string name="title_hypersense">Sense</string>
+    <string name="title_hyperstatMonitoring">Monitoring</string>
     <string name="desc_hypersense">Equipment Connector for Monitoring Data</string>
 
     <!--WTM Module Screen-->

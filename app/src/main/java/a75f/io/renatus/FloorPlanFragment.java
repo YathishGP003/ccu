@@ -1352,7 +1352,7 @@ public class FloorPlanFragment extends Fragment {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
             }
             if (isSensePaired) {
-                Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
             }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();

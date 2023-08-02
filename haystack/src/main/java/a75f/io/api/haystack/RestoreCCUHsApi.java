@@ -306,12 +306,13 @@ public class RestoreCCUHsApi {
     public void importEquip(HRow equipRow, RetryCountCallback retryCountCallback){
         Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
+        String siteManager = "SITE_MANAGER";
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
         equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "point and not createdByApplication and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
+                "point and createdByApplication != \"" + siteManager + "\" and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
                         , "@")).toDict();
         HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(pointsGrid == null){

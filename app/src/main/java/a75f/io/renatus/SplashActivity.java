@@ -116,14 +116,18 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 23);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+        }else if(prefs.getString("INSTALL_TYPE").equals("ADDCCU") && !prefs.getBoolean("ADD_CCU")){
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
+            startActivity(i);
             finish();
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
-    
+
         PermissionHandler permissionHandler = new PermissionHandler();
         if (permissionHandler.hasAppPermissions(this)) {
             Globals.getInstance().registerOnCcuInitCompletedListener(this);

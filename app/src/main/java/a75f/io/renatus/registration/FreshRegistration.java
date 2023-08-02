@@ -1183,7 +1183,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .commit();
+                    .commitAllowingStateLoss();
 
             verticalTabAdapter.setCurrentSelected(2);
             textView_title.setText(getText(R.string.add_new_ccu));

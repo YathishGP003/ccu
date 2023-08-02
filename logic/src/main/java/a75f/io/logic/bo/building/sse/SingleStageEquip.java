@@ -17,6 +17,8 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.NodeType;
@@ -102,6 +104,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ctID, 0.0);
 
@@ -117,6 +120,7 @@ public class SingleStageEquip {
                 .setUnit("%")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(humidity, BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(humidityId, 0.0);
 
@@ -132,6 +136,7 @@ public class SingleStageEquip {
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(co2, BacnetIdKt.CO2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(co2Id, 0.0);
 
@@ -147,6 +152,7 @@ public class SingleStageEquip {
                 .setUnit("ppb")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(voc, BacnetIdKt.VOCID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String vocId = CCUHsApi.getInstance().addPoint(voc);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(vocId, 0.0);
 
@@ -162,6 +168,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
 
         Point desiredTempCooling = new Point.Builder()
@@ -176,6 +183,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
 
         Point desiredTempHeating = new Point.Builder()
@@ -190,6 +198,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()
@@ -258,6 +267,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(dischargeAirTemp1, BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(dat1Id, 0.0);
 
@@ -273,6 +283,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(eatPoint, BacnetIdKt.EXTERNAL10KTEMPSENSORTH2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
         //CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
         Point occupancy = new Point.Builder()
@@ -422,6 +433,7 @@ public class SingleStageEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
 

@@ -8,9 +8,6 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -33,6 +30,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
@@ -176,7 +175,9 @@ public class DabEquip
                                   .setUnit("%")
                                   .setTz(tz)
                                   .build();
+        BacnetUtilKt.addBacnetTags(damper1Pos,BacnetIdKt.DAMPER1POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dpID = CCUHsApi.getInstance().addPoint(damper1Pos);
+
         hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
     
         Point damper2Pos = new Point.Builder()
@@ -191,7 +192,10 @@ public class DabEquip
                                   .setUnit("%")
                                   .setTz(tz)
                                   .build();
+        BacnetUtilKt.addBacnetTags(damper2Pos,BacnetIdKt.DAMPER2POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dp2ID = CCUHsApi.getInstance().addPoint(damper2Pos);
+
+
         hisItems.add(new HisItem(dp2ID, new Date(System.currentTimeMillis()), 0.0));
     
         Point normalizedDamper1Pos = new Point.Builder()
@@ -235,7 +239,10 @@ public class DabEquip
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(currentTemp,BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
+
+
         hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
     
         Point humidity = new Point.Builder()
@@ -251,7 +258,9 @@ public class DabEquip
                                  .setUnit("%")
                                  .setTz(tz)
                                  .build();
+        BacnetUtilKt.addBacnetTags(humidity,BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+
         hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
     
         Point co2 = new Point.Builder()
@@ -267,7 +276,9 @@ public class DabEquip
                             .setUnit("ppm")
                             .setTz(tz)
                             .build();
+        BacnetUtilKt.addBacnetTags(co2,BacnetIdKt.CO2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
+
         hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point voc = new Point.Builder()
@@ -283,7 +294,9 @@ public class DabEquip
                             .setUnit("ppb")
                             .setTz(tz)
                             .build();
+        BacnetUtilKt.addBacnetTags(voc,BacnetIdKt.VOCID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String vocId = CCUHsApi.getInstance().addPoint(voc);
+
         hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
     
         Point desiredTemp = new Point.Builder()
@@ -299,6 +312,7 @@ public class DabEquip
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp,BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
     
         Point desiredTempCooling = new Point.Builder()
@@ -314,8 +328,9 @@ public class DabEquip
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling,BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
-    
+
         Point desiredTempHeating = new Point.Builder()
                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-desiredTempHeating")
                                            .setEquipRef(equipRef)
@@ -329,8 +344,9 @@ public class DabEquip
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating,BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
-    
+
         Point equipStatus = new Point.Builder()
                                     .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatus")
                                     .setEquipRef(equipRef)
@@ -397,7 +413,9 @@ public class DabEquip
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(supplyAirTemp1,BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String sat1Id = CCUHsApi.getInstance().addPoint(supplyAirTemp1);
+
         hisItems.add(new HisItem(sat1Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point supplyAirTemp2 = new Point.Builder()
@@ -412,7 +430,9 @@ public class DabEquip
                                        .setUnit("\u00B0F")
                                        .setTz(tz)
                                        .build();
+        BacnetUtilKt.addBacnetTags(supplyAirTemp2,BacnetIdKt.SUPPLYAIRTEMP2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String sat2Id = CCUHsApi.getInstance().addPoint(supplyAirTemp2);
+
         hisItems.add(new HisItem(sat2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point occupancy = new Point.Builder()
@@ -453,7 +473,9 @@ public class DabEquip
                              .setGroup(String.valueOf(nodeAddr))
                              .setTz(tz)
                              .build();
+        BacnetUtilKt.addBacnetTags(pressure,BacnetIdKt.PRESSUREID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String pressureId = CCUHsApi.getInstance().addPoint(pressure);
+
 
         ConfigUtil.Companion.addConfigPoints("dab",siteRef,roomRef,floorRef,
                 equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAwayControl ? 1:0,
@@ -518,7 +540,7 @@ public class DabEquip
         createEquipReheatTuners(hayStack, dabEquip);
         if (config.reheatType > 0) {
             createReheatMinDamper(dabEquip, config.minReheatDamperPos, hayStack);
-            String reheatPosId = createReheatPosPoint(dabEquip, 0, hayStack);
+            String reheatPosId = createReheatPosPoint(dabEquip, 0, hayStack,BacnetIdKt.REHEATCMDID, BacnetUtilKt.ANALOG_VALUE);
 
             if (config.reheatType <= ReheatType.OneStage.ordinal()) {
                 device.analog2Out.setPointRef(reheatPosId);
@@ -692,7 +714,9 @@ public class DabEquip
                                           .setUnit("\u00B0F")
                                           .setTz(tz)
                                           .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset,BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
+
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, config.temperaturOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
         
@@ -910,7 +934,7 @@ public class DabEquip
         setConfigNumVal("trueCfm and kfactor and dab",config.kFactor);
         setHisVal("trueCfm and kfactor and dab",config.kFactor);
 
-        updateReheatType(config.reheatType, config.minReheatDamperPos, equipRef, hayStack);
+        updateReheatType(config.reheatType, config.minReheatDamperPos, equipRef, hayStack,BacnetIdKt.REHEATCMDID,BacnetUtilKt.ANALOG_VALUE);
         setConfigNumVal("reheat and type",config.reheatType);
         if (config.reheatType > 0) {
             setConfigNumVal("reheat and min and damper", config.minReheatDamperPos);
@@ -1159,7 +1183,7 @@ public class DabEquip
                 .setUnit("%")
                 .setTz(tz)
                 .build();
-
+        BacnetUtilKt.addBacnetTags(damperFeedback,BacnetIdKt.DAMPERFEEDBACKID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         return ccuHsApi.addPoint(damperFeedback);
     }
 

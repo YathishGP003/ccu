@@ -7,6 +7,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -442,14 +444,14 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String tz = siteMap.get("tz").toString();
         Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "coolingSignal")
                                                  .setSiteRef(siteRef)
-                                                 .setEquipRef(equipref).setHisInterpolate("cov")
+                                                 .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.COOLINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his")
                                                  .setUnit("%").setTz(tz).build();
         String coolingSignalId = CCUHsApi.getInstance().addPoint(coolingSignal);
         CCUHsApi.getInstance().writeHisValById(coolingSignalId, 0.0);
         
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
-                                                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
+                                                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.HEATINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his")
                                                  .setUnit("%").setTz(tz).build();
         String heatingSignalId = CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -457,7 +459,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         
         Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
                                              .setSiteRef(siteRef)
-                                             .setEquipRef(equipref).setHisInterpolate("cov")
+                                             .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.FANSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                              .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his")
                                              .setUnit("%").setTz(tz).build();
         String fanSignalId = CCUHsApi.getInstance().addPoint(fanSignal);
@@ -466,7 +468,8 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his")
-                                                   .setUnit("%").setTz(tz).build();
+                .setBacnetId(BacnetIdKt.COMPOSITESIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
+                .setUnit("%").setTz(tz).build();
         String compositeSignalId = CCUHsApi.getInstance().addPoint(compositeSignal);
         CCUHsApi.getInstance().writeHisValById(compositeSignalId, 0.0);
     }

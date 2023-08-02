@@ -62,9 +62,11 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
+import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
@@ -452,6 +454,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        abortCCUDownloadProcess();
         try {
             if (mConnectionChangeReceiver != null) {
                 this.unregisterReceiver(mConnectionChangeReceiver);
@@ -463,6 +466,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             // already unregistered
         }
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
+    }
+
+    private void abortCCUDownloadProcess() {
+        UpdateCCUFragment.stopAllDownloads();
+        PreferenceUtil.stopUpdateCCU();
+        PreferenceUtil.installationCompleted();
     }
 
     private void appRestarted() {

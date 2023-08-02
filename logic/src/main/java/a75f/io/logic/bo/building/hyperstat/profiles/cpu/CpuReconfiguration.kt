@@ -84,6 +84,12 @@ class CpuReconfiguration {
                 zoneVOCTarget = original.zoneVOCTarget
                 zonePm2p5Threshold = original.zonePm2p5Threshold
                 zonePm2p5Target = original.zonePm2p5Target
+                coolingStage1FanState = original.coolingStage1FanState
+                coolingStage2FanState = original.coolingStage2FanState
+                coolingStage3FanState = original.coolingStage3FanState
+                heatingStage1FanState = original.heatingStage1FanState
+                heatingStage2FanState = original.heatingStage2FanState
+                heatingStage3FanState = original.heatingStage3FanState
             }
         }
 

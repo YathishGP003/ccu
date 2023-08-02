@@ -101,6 +101,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.MessageHandlerSubscriber;
@@ -242,6 +243,7 @@ public abstract class UtilityApplication extends Application {
 
         Globals.getInstance().setApplicationContext(this);
         isDataSyncRestartRequired();
+        PreferenceUtil.installationCompleted();
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 

@@ -46,6 +46,37 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var displayPp2p5 = false
    var displayCo2 = true
 
+   override fun toString(): String {
+
+      val returnStr: String = "\nHyperStatSplitCpuEconConfiguration: {\n" +
+              "temperatureOffset: $temperatureOffset\n" +
+              "isEnableAutoForcedOccupied: $isEnableAutoForceOccupied\n" +
+              "isEnableAutoAway: $isEnableAutoAway\n\n" +
+              "relay1State: ${relay1State.enabled}, ${relay1State.association.name} \n" +
+              "relay2State: ${relay2State.enabled}, ${relay2State.association.name} \n" +
+              "relay3State: ${relay3State.enabled}, ${relay3State.association.name} \n" +
+              "relay4State: ${relay4State.enabled}, ${relay4State.association.name} \n" +
+              "relay5State: ${relay5State.enabled}, ${relay5State.association.name} \n" +
+              "relay6State: ${relay6State.enabled}, ${relay6State.association.name} \n\n" +
+              "analogOut1State: ${analogOut1State.enabled}, ${analogOut1State.association.name} \n" +
+              "analogOut2State: ${analogOut2State.enabled}, ${analogOut2State.association.name} \n" +
+              "analogOut3State: ${analogOut3State.enabled}, ${analogOut3State.association.name} \n\n" +
+              "zoneCO2DamperOpeningRate: $zoneCO2DamperOpeningRate\n" +
+              "zoneCO2Threshold: $zoneCO2Threshold\n" +
+              "zoneCO2Target: $zoneCO2Target\n\n" +
+              "zoneVOCThreshold: $zoneVOCThreshold\n" +
+              "zoneVOCTarget: $zoneVOCTarget\n" +
+              "zonePm2p5Threshold: $zonePm2p5Threshold\n" +
+              "zonePm2p5Target: $zonePm2p5Target\n\n" +
+              "displayHumidity: $displayHumidity\n" +
+              "displayVOC: $displayVOC\n" +
+              "displayPp2p5: $displayPp2p5\n" +
+              "displayCo2: $displayCo2\n" +
+              "}\n"
+
+      return returnStr
+   }
+
    companion object {
       fun default(): HyperStatCpuConfiguration = HyperStatCpuConfiguration()
    }

@@ -69,9 +69,9 @@ class HyperStatSplitAssociationUtil {
                 // Order is important here
                 0 -> CpuEconAnalogOutAssociation.COOLING
                 1 -> CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED
-                2 -> CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED
-                3 -> CpuEconAnalogOutAssociation.HEATING
-                4 -> CpuEconAnalogOutAssociation.OAO_DAMPER
+                2 -> CpuEconAnalogOutAssociation.HEATING
+                3 -> CpuEconAnalogOutAssociation.OAO_DAMPER
+                4 -> CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED
 
                 // assuming it never going to call
                 else -> CpuEconAnalogOutAssociation.COOLING
@@ -82,20 +82,22 @@ class HyperStatSplitAssociationUtil {
         fun getUniversalInStage(state: Int): UniversalInAssociation {
             return when (state) {
                 // Order is important here
-                0 -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
-                1 -> UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE
-                2 -> UniversalInAssociation.MIXED_AIR_TEMPERATURE
-                3 -> UniversalInAssociation.CONDENSATE_NC
-                4 -> UniversalInAssociation.CONDENSATE_NO
-                5 -> UniversalInAssociation.CURRENT_TX_0_10
-                6 -> UniversalInAssociation.CURRENT_TX_0_20
-                7 -> UniversalInAssociation.CURRENT_TX_0_50
-                8 -> UniversalInAssociation.CURRENT_TX_0_100
-                9 -> UniversalInAssociation.CURRENT_TX_0_150
-                10 -> UniversalInAssociation.DUCT_PRESSURE_0_1
-                11 -> UniversalInAssociation.DUCT_PRESSURE_0_2
-                12 -> UniversalInAssociation.FILTER_NC
-                13 -> UniversalInAssociation.FILTER_NO
+                0 -> UniversalInAssociation.CURRENT_TX_0_10
+                1 -> UniversalInAssociation.CURRENT_TX_0_20
+                2 -> UniversalInAssociation.CURRENT_TX_0_50
+                3 -> UniversalInAssociation.CURRENT_TX_0_100
+                4 -> UniversalInAssociation.CURRENT_TX_0_150
+                5 -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
+                6 -> UniversalInAssociation.MIXED_AIR_TEMPERATURE
+                7 -> UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE
+                8 -> UniversalInAssociation.FILTER_NC
+                9 -> UniversalInAssociation.FILTER_NO
+                10 -> UniversalInAssociation.CONDENSATE_NC
+                11 -> UniversalInAssociation.CONDENSATE_NO
+                12 -> UniversalInAssociation.DUCT_PRESSURE_0_1
+                13 -> UniversalInAssociation.DUCT_PRESSURE_0_2
+                14 -> UniversalInAssociation.GENERIC_VOLTAGE
+                15 -> UniversalInAssociation.GENERIC_RESISTANCE
 
                 // assuming it never going to call
                 else -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
@@ -251,14 +253,20 @@ class HyperStatSplitAssociationUtil {
             return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_2)
         }
         //Function which checks the Universal in is Associated  to FILTER_NO
-        // TODO: verify this point is included
         fun isUniversalInAssociatedToFilterNO(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.FILTER_NO)
         }
         //Function which checks the Universal in is Associated  to FILTER_NC
-        // TODO: verify this point is included
         fun isUniversalInAssociatedToFilterNC(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.FILTER_NC)
+        }
+        //Function which checks the Universal in is Associated  to GENERIC_VOLTAGE
+        fun isUniversalInAssociatedToGenericVoltage(universalIn: UniversalInState): Boolean {
+            return (universalIn.association == UniversalInAssociation.GENERIC_VOLTAGE)
+        }
+        //Function which checks the Universal in is Associated  to GENERIC_RESISTANCE
+        fun isUniversalInAssociatedToGenericResistance(universalIn: UniversalInState): Boolean {
+            return (universalIn.association == UniversalInAssociation.GENERIC_RESISTANCE)
         }
 
         fun isAnyRelayAssociatedToCoolingStage1(config: HyperStatSplitCpuEconConfiguration): Boolean {
@@ -430,7 +438,6 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.FILTER_NO)
         }
-        // TODO: verify this point is included
         fun isAnyUniversalInMappedToCondensateNC(
             ui1: UniversalInState, ui2: UniversalInState,
             ui3: UniversalInState, ui4: UniversalInState,
@@ -439,7 +446,6 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NC)
         }
-        // TODO: verify this point is included
         fun isAnyUniversalInMappedToCondensateNO(
             ui1: UniversalInState, ui2: UniversalInState,
             ui3: UniversalInState, ui4: UniversalInState,
@@ -447,6 +453,22 @@ class HyperStatSplitAssociationUtil {
             ui7: UniversalInState, ui8: UniversalInState,
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NO)
+        }
+        fun isAnyUniversalInMappedToGenericVoltage(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+        ): Boolean {
+            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_VOLTAGE)
+        }
+        fun isAnyUniversalInMappedToGenericResistance(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+        ): Boolean {
+            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_RESISTANCE)
         }
         fun isAnyUniversalInMappedToCT10(
             ui1: UniversalInState, ui2: UniversalInState,
@@ -1355,6 +1377,7 @@ class HyperStatSplitAssociationUtil {
                 UniversalInAssociation.CURRENT_TX_0_150 -> "13"
                 UniversalInAssociation.DUCT_PRESSURE_0_1 -> "14"
                 UniversalInAssociation.DUCT_PRESSURE_0_2 -> "1"
+                UniversalInAssociation.GENERIC_VOLTAGE -> "0"
                 else -> "8"
             }
         }

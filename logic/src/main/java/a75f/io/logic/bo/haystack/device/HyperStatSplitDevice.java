@@ -15,12 +15,9 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -28,9 +25,9 @@ import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
- * Models a HyperConnect device Haystack entity.
+ * Models a HyperStat Split device Haystack entity.
  */
-public class HyperConnectDevice {
+public class HyperStatSplitDevice {
 
     int hyperStatNodeAddress;
 
@@ -54,8 +51,19 @@ public class HyperConnectDevice {
     public RawPoint analog2Out;
     public RawPoint analog3Out;
     public RawPoint analog4Out;
+
+    public RawPoint supplyAirTempSensor;
+    public RawPoint supplyAirHumiditySensor;
+    public RawPoint mixedAirTempSensor;
+    public RawPoint mixedAirHumiditySensor;
+    public RawPoint outsideAirTempSensor;
+    public RawPoint outsideAirHumiditySensor;
+    public RawPoint ductStaticPressureSensor;
+
     public RawPoint rssi;
     private RawPoint firmWareVersion;
+    public RawPoint currentTemp;
+    public RawPoint desiredTemp;
 
     public String deviceRef;
     public String siteRef;
@@ -77,18 +85,18 @@ public class HyperConnectDevice {
      * @param equipRef
      * @param profile
      */
-    public HyperConnectDevice(int address, String site, String floor, String room, String equipRef, String profile) {
+    public HyperStatSplitDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
-                       .setDisplayName("HC-"+address)
-                       .addMarker("network").addMarker("node").addMarker(profile)
-                       .addMarker("hyperconnect")
-                       .setEquipRef(equipRef)
-                       .setAddr(address)
-                       .setSiteRef(site)
-                       .setFloorRef(floor)
-                       .setRoomRef(room)
-                       .setProfileType(profile)
-                       .build();
+                .setDisplayName("HSS-" + address)
+                .addMarker("network").addMarker("node").addMarker(profile)
+                .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
+                .setEquipRef(equipRef)
+                .setAddr(address)
+                .setSiteRef(site)
+                .setFloorRef(floor)
+                .setRoomRef(room)
+                .setProfileType(profile)
+                .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         hyperStatNodeAddress = address;
         siteRef = site;
@@ -102,13 +110,13 @@ public class HyperConnectDevice {
     }
 
     /**
-     * Reconstruct a HyperConnectDevice from haystack database using the address.
+     * Reconstruct a HyperStatSplitDevice from haystack database using the address.
      * @param address
      */
-    public HyperConnectDevice(int address) {
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\" and hyperconnect");
+    public HyperStatSplitDevice(int address) {
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
         Device d = new Device.Builder().setHashMap(device).build();
-        
+
         deviceRef = d.getId();
         hyperStatNodeAddress = Integer.parseInt(d.getAddr());
         siteRef = d.getSiteRef();
@@ -124,23 +132,27 @@ public class HyperConnectDevice {
      *  - "type" will be changed to "0"
      *  - "unit" will be changed to "Kilo Ohm"
      */
+    // TODO: make these updates
     private void createPoints() {
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"HSS deviceRef: " + deviceRef);
         universal1In = new RawPoint.Builder()
-                        .setDisplayName("Universal1In-"+hyperStatNodeAddress)
-                        .setDeviceRef(deviceRef)
-                        .setSiteRef(siteRef)
-                        .setPort(Port.UNIVERSAL_IN_ONE.toString())
-                        .setRoomRef(roomRef)
-                        .setFloorRef(floorRef)
-                        .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL1)
-                        .setTz(tz)
-                        .build();
+                .setDisplayName("universal1In-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setPort(Port.UNIVERSAL_IN_ONE.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL1)
+                .setTz(tz)
+                .build();
 
         universal2In = new RawPoint.Builder()
-                .setDisplayName("Universal2In-"+hyperStatNodeAddress)
+                .setDisplayName("universal2In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_TWO.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL2)
@@ -148,10 +160,11 @@ public class HyperConnectDevice {
                 .build();
 
         universal3In = new RawPoint.Builder()
-                .setDisplayName("Universal3In-"+hyperStatNodeAddress)
+                .setDisplayName("universal3In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_THREE.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL3)
@@ -159,10 +172,11 @@ public class HyperConnectDevice {
                 .build();
 
         universal4In = new RawPoint.Builder()
-                .setDisplayName("Universal4In-"+hyperStatNodeAddress)
+                .setDisplayName("universal4In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_FOUR.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL4)
@@ -170,10 +184,11 @@ public class HyperConnectDevice {
                 .build();
 
         universal5In = new RawPoint.Builder()
-                .setDisplayName("Universal5In-"+hyperStatNodeAddress)
+                .setDisplayName("universal5In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_FIVE.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL5)
@@ -181,10 +196,11 @@ public class HyperConnectDevice {
                 .build();
 
         universal6In = new RawPoint.Builder()
-                .setDisplayName("Universal6In-"+hyperStatNodeAddress)
+                .setDisplayName("universal6In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_SIX.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL6)
@@ -192,10 +208,11 @@ public class HyperConnectDevice {
                 .build();
 
         universal7In = new RawPoint.Builder()
-                .setDisplayName("Universal7In-"+hyperStatNodeAddress)
+                .setDisplayName("universal7In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_SEVEN.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL7)
@@ -203,16 +220,17 @@ public class HyperConnectDevice {
                 .build();
 
         universal8In = new RawPoint.Builder()
-                .setDisplayName("Universal8In-"+hyperStatNodeAddress)
+                .setDisplayName("universal8In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setPort(Port.UNIVERSAL_IN_EIGHT.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL8)
                 .setTz(tz)
                 .build();
-        
+
         relay1 = createRelayPoint(Port.RELAY_ONE, Tags.RELAY1);
         relay2 = createRelayPoint(Port.RELAY_TWO, Tags.RELAY2);
         relay3 = createRelayPoint(Port.RELAY_THREE, Tags.RELAY3);
@@ -227,62 +245,174 @@ public class HyperConnectDevice {
         analog3Out = createAnalogOutPoint(Port.ANALOG_OUT_THREE, "analog3Out");
         analog4Out = createAnalogOutPoint(Port.ANALOG_OUT_FOUR, "analog4Out");
 
+        supplyAirTempSensor = new RawPoint.Builder()
+                .setDisplayName("supplyAirTempSensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_SAT.toString())
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+
+        supplyAirHumiditySensor = new RawPoint.Builder()
+                .setDisplayName("supplyAirHumiditySensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_SAH.toString())
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+
+        mixedAirTempSensor = new RawPoint.Builder()
+                .setDisplayName("mixedAirTempSensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_MAT.toString())
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+
+        mixedAirHumiditySensor = new RawPoint.Builder()
+                .setDisplayName("mixedAirHumiditySensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_MAH.toString())
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+
+        outsideAirTempSensor = new RawPoint.Builder()
+                .setDisplayName("outsideAirTempSensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_OAT.toString())
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+
+        outsideAirHumiditySensor = new RawPoint.Builder()
+                .setDisplayName("outsideAirHumiditySensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_OAH.toString())
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+
+        ductStaticPressureSensor = new RawPoint.Builder()
+                .setDisplayName("ductStaticPressureSensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_PRESSURE.toString())
+                .setUnit("inH₂O")
+                .setTz(tz)
+                .build();
+
+        currentTemp = new RawPoint.Builder()
+                .setDisplayName("currentTemp-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_RT.toString())
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+
+        desiredTemp = new RawPoint.Builder()
+                .setDisplayName("desiredTemp-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.DESIRED_TEMP.toString())
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+
+
         rssi = HeartBeat.getHeartBeatRawPoint(hyperStatNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
         firmWareVersion = FirmwareVersion.getFirmwareVersion(hyperStatNodeAddress, deviceRef, siteRef, floorRef, roomRef,
                 tz);
+
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Finished adding device points");
+
     }
-    
+
     private RawPoint createRelayPoint(Port relayPort, String name) {
         return new RawPoint.Builder()
-                            .setDisplayName(name+"-"+hyperStatNodeAddress)
-                            .setDeviceRef(deviceRef)
-                            .setSiteRef(siteRef)
-                            .setRoomRef(roomRef)
-                            .setFloorRef(floorRef)
-                            .setPort(relayPort.toString())
-                            .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                            .addMarker("cmd").addMarker("his")
-                            .setTz(tz)
-                            .build();
+                .setDisplayName(name+"-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPort(relayPort.toString())
+                .setType(OutputRelayActuatorType.NormallyOpen.displayName)
+                .addMarker("cmd").addMarker("his")
+                .setTz(tz)
+                .build();
     }
-    
+
     private RawPoint createAnalogOutPoint(Port analogPort, String name) {
         return new RawPoint.Builder()
-                   .setDisplayName(name+"-"+hyperStatNodeAddress)
-                   .setDeviceRef(deviceRef)
-                   .setSiteRef(siteRef)
-                   .setRoomRef(roomRef)
-                   .setFloorRef(floorRef)
-                   .setPort(analogPort.toString())
-                   .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
-                   .addMarker("cmd").addMarker("his")
-                   .setUnit("dV")
-                   .setTz(tz)
-                   .build();
+                .setDisplayName(name+"-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPort(analogPort.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                .addMarker("cmd").addMarker("his")
+                .setUnit("dV")
+                .setTz(tz)
+                .build();
     }
-    
+
     public void createPhysicalSensorPoint(Port p, String pointRef) {
         RawPoint sensor = new RawPoint.Builder()
-                              .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
-                              .setDeviceRef(deviceRef)
-                              .setSiteRef(siteRef)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef)
-                              .setPointRef(pointRef)
-                              .setEnabled(true)
-                              .addMarker("sensor").addMarker("his")
-                              .setPort(p.toString())
-                              .setTz(tz)
-                              .build();
+                .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(true)
+                .addMarker("sensor").addMarker("his")
+                .setPort(p.toString())
+                .setTz(tz)
+                .build();
         CCUHsApi.getInstance().addPoint(sensor);
     }
 
     public RawPoint getRawPoint(Port p) {
         HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
-                                                          +" and port == \""+p.toString()+"\"");
+                +" and port == \""+p.toString()+"\"");
         return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
     }
-    
+
     public void addPointsToDb() {
         CCUHsApi.getInstance().addPoint(universal1In);
         CCUHsApi.getInstance().addPoint(universal2In);
@@ -304,13 +434,15 @@ public class HyperConnectDevice {
         CCUHsApi.getInstance().addPoint(analog2Out);
         CCUHsApi.getInstance().addPoint(analog3Out);
         CCUHsApi.getInstance().addPoint(analog4Out);
+        CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().addPoint(desiredTemp);
         CCUHsApi.getInstance().addPoint(rssi);
         CCUHsApi.getInstance().addPoint(firmWareVersion);
     }
 
     public void addSensor(Port p, String pointRef) {
         RawPoint sensor = new RawPoint.Builder()
-                .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
+                .setDisplayName(p.getPortSensor()+"-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -318,10 +450,10 @@ public class HyperConnectDevice {
                 .setPointRef(pointRef)
                 .setEnabled(true)
                 .addMarker("sensor").addMarker("his")
-                .setPort(p.toString())
+                .setPort(p.getPortSensor())
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(sensor);
     }
-    
+
 }

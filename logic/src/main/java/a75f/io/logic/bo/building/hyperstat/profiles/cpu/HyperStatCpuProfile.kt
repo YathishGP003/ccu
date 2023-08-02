@@ -54,6 +54,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     fun addEquip(node: Short): HyperStatEquip {
         val equip = HyperStatCpuEquip(node)
+        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
         equip.initEquipReference(node)
         cpuDeviceMap[node] = equip
         return equip
@@ -63,6 +64,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val equip = addEquip(node)
         val configuration = equip.initializePoints(baseConfig as HyperStatCpuConfiguration, room, floor, node)
         hsHaystackUtil = equip.hsHaystackUtil
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for Cpu: " + configuration.toString())
         return configuration
     }
 

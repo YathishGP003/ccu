@@ -18,27 +18,27 @@ public enum Port
 		switch (this)
 		{
 			case SENSOR_RH:
-				return "humidity";
+				return "humiditySensor";
 			case SENSOR_CO2:
-				return "co2";
+				return "co2Sensor";
 			case SENSOR_VOC:
-				return "voc";
+				return "vocSensor";
 			case SENSOR_CO:
 				return "co";
 			case SENSOR_NO:
 				return "no";
 			case SENSOR_PRESSURE:
-				return "pressure";
+				return "ductStaticPressureSensor";
 			case SENSOR_OCCUPANCY:
-				return "occupancy";
+				return "occupancySensor";
 			case SENSOR_ENERGY_METER:
 				return "emr";
 			case SENSOR_SOUND:
-				return "sound";
+				return "soundSensor";
 			case SENSOR_CO2_EQUIVALENT:
-				return "co2Equivalent";
+				return "co2EquivalentSensor";
 			case SENSOR_ILLUMINANCE:
-				return "illuminance";
+				return "illuminanceSensor";
 			case SENSOR_UVI:
 				return "uvi";
 			case SENSOR_NO2:
@@ -48,21 +48,21 @@ public enum Port
 			case SENSOR_PM10:
 				return "pm10";
 			case SENSOR_RT:
-				return "temperature";
+				return "currentTemp";
 			case RSSI:
 				return "rssi";
 			case SENSOR_MAT:
-				return "mat";
+				return "mixedAirTempSensor";
 			case SENSOR_MAH:
-				return "mah";
+				return "mixedAirHumiditySensor";
 			case SENSOR_OAT:
-				return "oat";
+				return "outsideAirTempSensor";
 			case SENSOR_OAH:
-				return "oah";
+				return "outsideAirHumiditySensor";
 			case SENSOR_SAT:
-				return "sat";
+				return "supplyAirTempSensor";
 			case SENSOR_SAH:
-				return "sah";
+				return "supplyAirHumiditySensor";
 			default:
 				return name();
 		}

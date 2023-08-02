@@ -239,9 +239,9 @@
     <string-array name="hyperstatsplit_analog_out_selector">
         <item>  @string/cooling </item>
         <item>  @string/linear_fan_speed </item>
-        <item>  @string/staged_fan_speed </item>
         <item>  @string/heating </item>
         <item>  @string/oao_damper </item>
+        <item>  @string/staged_fan_speed </item>
     </string-array>
 
     <string-array name="hyperstat_pipe2_analog_out_selector">
@@ -275,10 +275,8 @@
     <string name="duct_pressure"> Duct Static Pressure</string>
     <string name="duct_pressure_0_1"> Duct Static Pressure (0-1\")</string>
     <string name="duct_pressure_0_2"> Duct Static Pressure (0-2\")</string>
-    <string name="duct_pressure_0_5"> Duct Static Pressure (0-5\")</string>
-    <string name="filter_pressure_0_1"> Filter Pressure (0-1\")</string>
-    <string name="filter_pressure_0_2"> Filter Pressure (0-2\")</string>
-    <string name="filter_pressure_0_5"> Filter Pressure (0-5\")</string>
+    <string name="generic_voltage"> Generic 0-10V</string>
+    <string name="generic_resistance"> Generic 1-100kOhm</string>
 
     <string name="sensorbusaddress0"> Address 0</string>
     <string name="sensorbusaddress1"> Address 1</string>
@@ -286,20 +284,22 @@
     <string name="sensorbusaddress3"> Address 3</string>
 
     <string-array name="hyperstatsplit_universal_in_selector">
-        <item>  @string/supply_air_temperature </item>
-        <item>  @string/outside_air_temperature </item>
-        <item>  @string/mixed_air_temperature </item>
-        <item>  @string/condensate_nc </item>
-        <item>  @string/condensate_no </item>
         <item>  @string/current_tx_0_10 </item>
         <item>  @string/current_tx_0_20 </item>
         <item>  @string/current_tx_0_50 </item>
         <item>  @string/current_tx_0_100 </item>
         <item>  @string/current_tx_0_150 </item>
-        <item>  @string/duct_pressure_0_1 </item>
-        <item>  @string/duct_pressure_0_2 </item>
+        <item>  @string/supply_air_temperature </item>
+        <item>  @string/mixed_air_temperature </item>
+        <item>  @string/outside_air_temperature </item>
         <item>  @string/filter_nc </item>
         <item>  @string/filter_no </item>
+        <item>  @string/condensate_nc </item>
+        <item>  @string/condensate_no </item>
+        <item>  @string/duct_pressure_0_1 </item>
+        <item>  @string/duct_pressure_0_2 </item>
+        <item>  @string/generic_voltage </item>
+        <item>  @string/generic_resistance </item>
     </string-array>
 
     <string-array name="hyperstatsplit_sensor_temp_selector">

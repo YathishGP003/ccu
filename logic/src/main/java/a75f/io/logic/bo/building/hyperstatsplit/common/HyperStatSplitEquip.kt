@@ -11,7 +11,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusPressS
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempState
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
-import a75f.io.logic.bo.haystack.device.HyperConnectDevice
+import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice
 import android.util.Log
 
 /**
@@ -91,9 +91,8 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusTempState,
         sensorBusTag: String
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails() " + sensorBusTag)
-        val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
-        val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
+        val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and enabled") as String
+        val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
 
@@ -120,9 +119,8 @@ open class HyperStatSplitEquip {
         sensorBusState: SensorBusPressState,
         sensorBusTag: String
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusDetails() " + sensorBusTag)
-        val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and enabled") as String
-        val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorbus and $sensorBusTag and input and association") as String
+        val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and enabled") as String
+        val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
 
@@ -142,24 +140,33 @@ open class HyperStatSplitEquip {
         universalInTag: String,
         physicalPort: Port
     ) {
-        val universalInId = hsSplitHaystackUtil.readPointID("config and $universalInTag and input and enabled") as String
-        val universalInAssociatedId = hsSplitHaystackUtil.readPointID("config and $universalInTag and input and association") as String
+        val universalInId = hsSplitHaystackUtil.readPointID("config and $universalInTag and enabled") as String
+        val universalInAssociatedId = hsSplitHaystackUtil.readPointID("config and $universalInTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(universalInId, if (universalInState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(universalInAssociatedId, universalInState.association.ordinal.toDouble())
 
-        DeviceUtil.setHyperConnectPointEnabled(nodeAddress, physicalPort.name, universalInState.enabled)
+        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, universalInState.enabled)
+
         if (universalInState.enabled) {
+
             val pointData: Point = hyperStatSplitPointsUtil.universalInConfiguration(
                 universalInState = universalInState,
                 universalTag = universalInTag
             )
+
             val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData)
+
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
-            DeviceUtil.updateHyperConnectPhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+
             val pointType = HyperStatSplitAssociationUtil.getSensorNameByType(universalInState.association)
-            DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
+
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
         }
     }
 
@@ -243,8 +250,6 @@ open class HyperStatSplitEquip {
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, if(isDisplayCo2EnabledNew) 1.0 else 0.0)
         }
     }
-
-    
     
     fun updateTempOffset(oldValue: Double, newValue: Double){
         if (oldValue != newValue) {
@@ -280,7 +285,7 @@ open class HyperStatSplitEquip {
         isRelay1Enabled: Boolean, isRelay2Enabled: Boolean, isRelay3Enabled: Boolean,
         isRelay4Enabled: Boolean, isRelay5Enabled: Boolean, isRelay6Enabled: Boolean,
         isRelay7Enabled: Boolean, isRelay8Enabled: Boolean,
-        masterPoints: HashMap<Any, String>, device: HyperConnectDevice
+        masterPoints: HashMap<Any, String>, device: HyperStatSplitDevice
     ) {
 
         if (isRelay1Enabled) {
@@ -324,7 +329,7 @@ open class HyperStatSplitEquip {
         isAnalogOut2Enabled: Boolean, analogOut2MinVoltage: Int, analogOut2MaxVoltage: Int,
         isAnalogOut3Enabled: Boolean, analogOut3MinVoltage: Int, analogOut3MaxVoltage: Int,
         isAnalogOut4Enabled: Boolean, analogOut4MinVoltage: Int, analogOut4MaxVoltage: Int,
-        masterPoints: HashMap<Any,String>, device: HyperConnectDevice) {
+        masterPoints: HashMap<Any,String>, device: HyperStatSplitDevice) {
 
 
         if (isAnalogOut1Enabled) {
@@ -359,7 +364,7 @@ open class HyperStatSplitEquip {
         isUniversalIn6Enabled: Boolean, isUniversalIn6Association: String,
         isUniversalIn7Enabled: Boolean, isUniversalIn7Association: String,
         isUniversalIn8Enabled: Boolean, isUniversalIn8Association: String,
-        masterPoints: HashMap<Any, String>, device: HyperConnectDevice) {
+        masterPoints: HashMap<Any, String>, device: HyperStatSplitDevice) {
         if (isUniversalIn1Enabled) {
             device.universal1In.pointRef = masterPoints[Port.UNIVERSAL_IN_ONE]
             device.universal1In.enabled = true
@@ -403,7 +408,102 @@ open class HyperStatSplitEquip {
 
     }
 
+    // setup Device Sensor Bus
+    fun setupDeviceSensorBus(
+        isAddress0Enabled: Boolean, isAddress0Association: Int,
+        isAddress1Enabled: Boolean, isAddress1Association: Int,
+        isAddress2Enabled: Boolean, isAddress2Association: Int,
+        isAddress3Enabled: Boolean, isAddress3Association: Int,
+        masterPoints: HashMap<Any, String>, device: HyperStatSplitDevice
+    ) {
+        if (isAddress0Enabled) {
+            if (isAddress0Association == 0) {
+                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
+                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
+                device.mixedAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
+                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
+                device.mixedAirHumiditySensor.enabled = true
+            }
+            else if (isAddress0Association == 1) {
+                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
+                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
+                device.supplyAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
+                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
+                device.supplyAirHumiditySensor.enabled = true
+            }
+            else if (isAddress0Association == 2) {
+                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
+                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
+                device.outsideAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
+                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
+                device.outsideAirHumiditySensor.enabled = true
+            }
+        }
 
+        if (isAddress1Enabled) {
+            if (isAddress1Association == 0) {
+                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
+                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
+                device.mixedAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
+                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
+                device.mixedAirHumiditySensor.enabled = true
+            }
+            else if (isAddress1Association == 1) {
+                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
+                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
+                device.supplyAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
+                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
+                device.supplyAirHumiditySensor.enabled = true
+            }
+            else if (isAddress1Association == 2) {
+                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
+                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
+                device.outsideAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
+                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
+                device.outsideAirHumiditySensor.enabled = true
+            }
+        }
+
+        if (isAddress2Enabled) {
+            if (isAddress2Association == 0) {
+                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
+                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
+                device.mixedAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
+                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
+                device.mixedAirHumiditySensor.enabled = true
+            }
+            else if (isAddress2Association == 1) {
+                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
+                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
+                device.supplyAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
+                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
+                device.supplyAirHumiditySensor.enabled = true
+            }
+            else if (isAddress2Association == 2) {
+                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
+                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
+                device.outsideAirTempSensor.enabled = true
+                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
+                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
+                device.outsideAirHumiditySensor.enabled = true
+            }
+        }
+
+        if (isAddress3Enabled) {
+            if (isAddress3Association == 0) {
+                device.ductStaticPressureSensor.pointRef = masterPoints[Port.SENSOR_PRESSURE]
+                device.ductStaticPressureSensor.enabled = true
+            }
+        }
+    }
 
     /**
      * Function  which collects all the logical associated points

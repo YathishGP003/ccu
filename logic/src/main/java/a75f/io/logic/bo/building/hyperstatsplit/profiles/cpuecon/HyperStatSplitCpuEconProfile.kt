@@ -83,15 +83,19 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     fun addEquip(node: Short): HyperStatSplitEquip {
         val equip = HyperStatSplitCpuEconEquip(node)
+        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
         equip.initEquipReference(node)
         cpuEconDeviceMap[node] = equip
         return equip
     }
 
     override fun addNewEquip(node: Short, room: String, floor: String, baseConfig: BaseProfileConfiguration) {
+
         val equip = addEquip(node)
+
         val configuration = equip.initializePoints(baseConfig as HyperStatSplitCpuEconConfiguration, room, floor, node)
         hsSplitHaystackUtil = equip.hsSplitHaystackUtil
+        //Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for CpuEcon: " + configuration.toString())
         return configuration
     }
 
@@ -101,7 +105,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     // Run the profile logic and algorithm for an equip.
     fun processHyperStatSplitCPUEconProfile(equip: HyperStatSplitCpuEconEquip) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile()")
+
         if (Globals.getInstance().isTestMode) {
             logIt("Test mode is on: ${equip.nodeAddress}")
             return

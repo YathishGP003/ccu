@@ -31,16 +31,17 @@ public class DeviceUtil {
         }
     }
 
-    public static void updateHyperConnectPhysicalPointType(int addr, String port, String type) {
+    public static void updateUniversalInPhysicalPointType(int addr, String port, String type) {
+        Log.d("CCU"," Update Physical point "+port+" "+type);
 
-        HashMap device = CCUHsApi.getInstance().read("device and hyperconnect and addr == \""+addr+"\"");
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device == null)
         {
             return ;
         }
-        String query = "point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"";
-        HashMap point = CCUHsApi.getInstance().read(query);
-        if (!point.containsKey("analogType") || !point.get("analogType").equals(type))
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (!point.get("analogType" ).equals(type))
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setType(type);
@@ -64,25 +65,6 @@ public class DeviceUtil {
 
     }
 
-    public static void updateHyperConnectPhysicalPointRef(int addr, String port, String pointRef) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON," Updating Physical pointRef | "+pointRef+" | "+port+" | "+addr);
-
-        HashMap device = CCUHsApi.getInstance().read("device and hyperconnect and addr == \""+addr+"\"");
-        if (device == null)
-        {
-            return ;
-        }
-        String query = "point and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"";
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "query: " + query);
-        HashMap point = CCUHsApi.getInstance().read(query);Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"point: "+point.toString());
-        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
-        p.setPointRef(pointRef);
-        if (p.getId().equals(null)) { return; }
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"p.id = " + p.getId());
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"calling updatePoint()");
-        CCUHsApi.getInstance().updatePoint(p,p.getId());
-    }
-
     public static void setPointEnabled(int addr, String port, boolean enabled) {
         Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
 
@@ -93,25 +75,6 @@ public class DeviceUtil {
         }
 
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (point != null && point.size() > 0)
-        {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
-            p.setEnabled(enabled);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
-            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
-        }
-    }
-
-    public static void setHyperConnectPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
-
-        HashMap device = CCUHsApi.getInstance().read("device and hyperconnect and addr == \""+addr+"\"");
-        if (device == null)
-        {
-            return ;
-        }
-
-        HashMap point = CCUHsApi.getInstance().read("point and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (point != null && point.size() > 0)
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();

@@ -40,8 +40,6 @@ class HyperStatSplitPointsUtil(
     // Static References
     companion object {
 
-        const val HYPERSTATSPLIT = Tags.HYPERSTATSPLIT
-
         // function to create equip Point
         fun createHyperStatSplitEquipPoint(
             profileName: String, siteRef: String, roomRef: String, floorRef: String, priority: String,
@@ -54,7 +52,8 @@ class HyperStatSplitPointsUtil(
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name)
                 .setPriority(priority)
-                .addMarker(HYPERSTATSPLIT).addMarker(Tags.EQUIP).addMarker(Tags.STANDALONE)
+                .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
+                .addMarker(Tags.EQUIP).addMarker(Tags.STANDALONE)
                 .addMarker(Tags.ZONE).addMarker(profileName)
                 .setGatewayRef(gatewayRef)
                 .setTz(tz)
@@ -74,7 +73,8 @@ class HyperStatSplitPointsUtil(
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name)
                 .setPriority(priority)
-                .addMarker(HYPERSTATSPLIT).addMarker(Tags.EQUIP)
+                .addMarker(Tags.HYPERSTAT)
+                .addMarker(Tags.SPLIT).addMarker(Tags.EQUIP)
                 .addMarker(Tags.ZONE).addMarker(profileName).addMarker(Tags.STANDALONE)
                 .setGatewayRef(gatewayRef)
                 .setTz(tz)
@@ -563,13 +563,13 @@ class HyperStatSplitPointsUtil(
 
         val sensorBusMarkers: MutableList<String> = LinkedList()
         sensorBusMarkers.addAll(
-            arrayOf("config", "writable", "zone", "input", "sensorbus")
+            arrayOf("addr", "config", "writable", "zone", "input", "sp", "sensorBus")
         )
 
-        sensorBusMarkers.add("address0")
+        sensorBusMarkers.add("addr0")
         sensorBusMarkers.add("enabled")
         val sensorBusAddress0Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-sensorBusAddress0Enabled",
+            "$equipDis-sensorBusAddress0Enable",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
             sensorBusEnum
         )
@@ -578,15 +578,15 @@ class HyperStatSplitPointsUtil(
         val sensorBusAddress0AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-sensorBusAddress0Association",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
-            sensorBusEnum
+            getSensorBusTempConfigEnum(profileType)
         )
         sensorBusMarkers.remove("association")
-        sensorBusMarkers.remove("address0")
+        sensorBusMarkers.remove("addr0")
 
-        sensorBusMarkers.add("address1")
+        sensorBusMarkers.add("addr1")
         sensorBusMarkers.add("enabled")
         val sensorBusAddress1Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-sensorBusAddress1Enabled",
+            "$equipDis-sensorBusAddress1Enable",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
             sensorBusEnum
         )
@@ -595,16 +595,16 @@ class HyperStatSplitPointsUtil(
         val sensorBusAddress1AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-sensorBusAddress1Association",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
-            sensorBusEnum
+            getSensorBusTempConfigEnum(profileType)
         )
         sensorBusMarkers.remove("association")
-        sensorBusMarkers.remove("address1")
+        sensorBusMarkers.remove("addr1")
 
 
-        sensorBusMarkers.add("address2")
+        sensorBusMarkers.add("addr2")
         sensorBusMarkers.add("enabled")
         val sensorBusAddress2Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-sensorBusAddress2Enabled",
+            "$equipDis-sensorBusAddress2Enable",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
             sensorBusEnum
         )
@@ -613,15 +613,15 @@ class HyperStatSplitPointsUtil(
         val sensorBusAddress2AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-sensorBusAddress2Association",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
-            sensorBusEnum
+            getSensorBusTempConfigEnum(profileType)
         )
         sensorBusMarkers.remove("association")
-        sensorBusMarkers.remove("address2")
+        sensorBusMarkers.remove("addr2")
 
-        sensorBusMarkers.add("address3")
+        sensorBusMarkers.add("addr3")
         sensorBusMarkers.add("enabled")
         val sensorBusAddress3Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-sensorBusAddress3Enabled",
+            "$equipDis-sensorBusAddress3Enable",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
             sensorBusEnum
         )
@@ -630,10 +630,10 @@ class HyperStatSplitPointsUtil(
         val sensorBusAddress3AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-sensorBusAddress3Association",
             sensorBusMarkers.stream().toArray { arrayOfNulls(it) },
-            sensorBusEnum
+            getSensorBusPressureConfigEnum(profileType)
         )
         sensorBusMarkers.remove("association")
-        sensorBusMarkers.remove("address3")
+        sensorBusMarkers.remove("addr3")
 
         // Enable disable point
         configSensorBusPointsList.add(Pair(sensorBusAddress0Point, if (address0.enabled) 1.0 else 0.0))
@@ -665,22 +665,20 @@ class HyperStatSplitPointsUtil(
         // Common Relay Markers
         val relayMarkers: MutableList<String> = LinkedList()
         relayMarkers.addAll(
-            arrayOf("config", "writable", "zone")
+            arrayOf("config", "relay", "writable", "zone", "output", "sp")
         )
 
         /**  Relay 1 config and association point */
         relayMarkers.add("relay1")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay1Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay1OutputEnabled",
+            "$equipDis-relay1OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
 
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay1AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay1OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -694,16 +692,14 @@ class HyperStatSplitPointsUtil(
         /**  Relay 2 config and association point */
         relayMarkers.add("relay2")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay2Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay2OutputEnabled",
+            "$equipDis-relay2OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
 
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay2AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay2OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -715,15 +711,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 3 config and association point */
         relayMarkers.add("relay3")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay3Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay3OutputEnabled",
+            "$equipDis-relay3OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay3AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay3OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -735,15 +729,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 4config and association point */
         relayMarkers.add("relay4")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay4Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay4OutputEnabled",
+            "$equipDis-relay4OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay4AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay4OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -755,15 +747,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 5 config and association point */
         relayMarkers.add("relay5")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay5Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay5OutputEnabled",
+            "$equipDis-relay5OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay5AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay5OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -775,15 +765,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 6 config and association point */
         relayMarkers.add("relay6")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay6Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay6OutputEnabled",
+            "$equipDis-relay6OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay6AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay6OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -795,15 +783,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 7 config and association point */
         relayMarkers.add("relay7")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay7Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay7OutputEnabled",
+            "$equipDis-relay7OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay7AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay7OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -815,15 +801,13 @@ class HyperStatSplitPointsUtil(
         /**  Relay 8 config and association point */
         relayMarkers.add("relay8")
         relayMarkers.add("enabled")
-        relayMarkers.add("cmd")
         val relay8Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-relay8OutputEnabled",
+            "$equipDis-relay8OutputEnable",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         relayMarkers.add("association")
         relayMarkers.remove("enabled")
-        relayMarkers.remove("cmd")
         val relay8AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-relay8OutputAssociation",
             relayMarkers.stream().toArray { arrayOfNulls(it) },
@@ -866,21 +850,19 @@ class HyperStatSplitPointsUtil(
 
         val analogMarkers: MutableList<String> = LinkedList()
         analogMarkers.addAll(
-            arrayOf("config", "writable", "zone", "output")
+            arrayOf("config", "analog", "writable", "sp", "zone", "output")
         )
 
         /**  analog 1 config and association point */
         analogMarkers.add("analog1")
         analogMarkers.add("enabled")
-        analogMarkers.add("cmd")
         val analogOut1Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-analogOut1Enabled",
+            "$equipDis-analogOut1Enable",
             analogMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         analogMarkers.add("association")
         analogMarkers.remove("enabled")
-        analogMarkers.remove("cmd")
         val analogOut1AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-analogOut1Association",
             analogMarkers.stream().toArray { arrayOfNulls(it) },
@@ -893,15 +875,13 @@ class HyperStatSplitPointsUtil(
         /**  analog 2 config and association point */
         analogMarkers.add("analog2")
         analogMarkers.add("enabled")
-        analogMarkers.add("cmd")
         val analogOut2Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-analogOut2Enabled",
+            "$equipDis-analogOut2Enable",
             analogMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         analogMarkers.add("association")
         analogMarkers.remove("enabled")
-        analogMarkers.remove("cmd")
 
         val analogOut2AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-analogOut2Association",
@@ -915,15 +895,13 @@ class HyperStatSplitPointsUtil(
         /**  analog 3 config and association point */
         analogMarkers.add("analog3")
         analogMarkers.add("enabled")
-        analogMarkers.add("cmd")
         val analogOut3Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-analogOut3Enabled",
+            "$equipDis-analogOut3Enable",
             analogMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         analogMarkers.add("association")
         analogMarkers.remove("enabled")
-        analogMarkers.remove("cmd")
 
         val analogOut3AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-analogOut3Association",
@@ -937,15 +915,13 @@ class HyperStatSplitPointsUtil(
         /**  analog 4 config and association point */
         analogMarkers.add("analog4")
         analogMarkers.add("enabled")
-        analogMarkers.add("cmd")
         val analogOut4Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-analogOut4Enabled",
+            "$equipDis-analogOut4Enable",
             analogMarkers.stream().toArray { arrayOfNulls(it) },
-            "off,on"
+            "false,true"
         )
         analogMarkers.add("association")
         analogMarkers.remove("enabled")
-        analogMarkers.remove("cmd")
 
         val analogOut4AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-analogOut4Association",
@@ -986,13 +962,13 @@ class HyperStatSplitPointsUtil(
 
         val universalMarkers: MutableList<String> = LinkedList()
         universalMarkers.addAll(
-            arrayOf("config", "writable", "zone", "input")
+            arrayOf("config", "writable", "universal", "zone", "sp", "input")
         )
 
         universalMarkers.add("universal1")
         universalMarkers.add("enabled")
         val universalIn1Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn1Enabled",
+            "$equipDis-universalIn1Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1001,7 +977,7 @@ class HyperStatSplitPointsUtil(
         val universalIn1AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn1Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal1")
@@ -1010,7 +986,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal2")
         universalMarkers.add("enabled")
         val universalIn2Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn2Enabled",
+            "$equipDis-universalIn2Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1019,7 +995,7 @@ class HyperStatSplitPointsUtil(
         val universalIn2AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn2Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal2")
@@ -1028,7 +1004,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal3")
         universalMarkers.add("enabled")
         val universalIn3Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn3Enabled",
+            "$equipDis-universalIn3Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1037,7 +1013,7 @@ class HyperStatSplitPointsUtil(
         val universalIn3AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn3Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal3")
@@ -1046,7 +1022,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal4")
         universalMarkers.add("enabled")
         val universalIn4Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn4Enabled",
+            "$equipDis-universalIn4Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1055,7 +1031,7 @@ class HyperStatSplitPointsUtil(
         val universalIn4AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn4Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal4")
@@ -1064,7 +1040,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal5")
         universalMarkers.add("enabled")
         val universalIn5Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn5Enabled",
+            "$equipDis-universalIn5Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1073,7 +1049,7 @@ class HyperStatSplitPointsUtil(
         val universalIn5AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn5Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal5")
@@ -1082,7 +1058,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal6")
         universalMarkers.add("enabled")
         val universalIn6Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn6Enabled",
+            "$equipDis-universalIn6Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1091,7 +1067,7 @@ class HyperStatSplitPointsUtil(
         val universalIn6AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn6Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal6")
@@ -1100,7 +1076,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal7")
         universalMarkers.add("enabled")
         val universalIn7Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn7Enabled",
+            "$equipDis-universalIn7Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1109,7 +1085,7 @@ class HyperStatSplitPointsUtil(
         val universalIn7AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn7Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal7")
@@ -1118,7 +1094,7 @@ class HyperStatSplitPointsUtil(
         universalMarkers.add("universal8")
         universalMarkers.add("enabled")
         val universalIn8Point = createHaystackPointWithOnlyEnum(
-            "$equipDis-universalIn8Enabled",
+            "$equipDis-universalIn8Enable",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
             universalInEnum
         )
@@ -1127,7 +1103,7 @@ class HyperStatSplitPointsUtil(
         val universalIn8AssociationPoint = createHaystackPointWithOnlyEnum(
             "$equipDis-universalIn8Association",
             universalMarkers.stream().toArray { arrayOfNulls(it) },
-            universalInEnum
+            getUniversalInConfigEnum(profileType)
         )
         universalMarkers.remove("association")
         universalMarkers.remove("universal8")
@@ -1847,9 +1823,6 @@ class HyperStatSplitPointsUtil(
             }
             // Need to check how how handle this
             else -> {
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Watch it, just created a blank analog out...")
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "analogOutState = " + analogOutState)
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "analogTag = " + analogTag)
                 Triple(Point.Builder().build(), Point.Builder().build(), Point.Builder().build())
             }
         }
@@ -2053,13 +2026,13 @@ class HyperStatSplitPointsUtil(
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCondensateNC(universalInState)) -> {
 
-                LogicalPointsUtil.createPointForCondensateOverflowStatus(
+                LogicalPointsUtil.createPointForCondensateNC(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCondensateNO(universalInState)) -> {
 
-                LogicalPointsUtil.createPointForCondensateOverflowStatus(
+                LogicalPointsUtil.createPointForCondensateNO(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz
                 )
             }
@@ -2108,13 +2081,25 @@ class HyperStatSplitPointsUtil(
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToFilterNC(universalInState)) -> {
 
-                LogicalPointsUtil.createPointForFilterStatus(
+                LogicalPointsUtil.createPointForFilterNC(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToFilterNO(universalInState)) -> {
 
-                LogicalPointsUtil.createPointForFilterStatus(
+                LogicalPointsUtil.createPointForFilterNO(
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                )
+            }
+            (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericVoltage(universalInState)) -> {
+
+                LogicalPointsUtil.createPointForGenericVoltage(
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                )
+            }
+            (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericResistance(universalInState)) -> {
+
+                LogicalPointsUtil.createPointForGenericResistance(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz
                 )
             }
@@ -2468,8 +2453,8 @@ class HyperStatSplitPointsUtil(
         when(profileType){
             ProfileType.HYPERSTATSPLIT_CPU_ECON-> {
                 return "$COOLING_STAGE1,$COOLING_STAGE2,$COOLING_STAGE3,$HEATING_STAGE1," +
-                        "$HEATING_STAGE2,$HEATING_STAGE3,$FAN_ENABLED,$OCCUPIED_ENABLED," +
-                        "$FAN_HIGH,$FAN_LOW,$FAN_MEDIUM,$HUMIDIFIER,$DEHUMIDIFIER," +
+                        "$HEATING_STAGE2,$HEATING_STAGE3,$FAN_LOW,$FAN_MEDIUM,$FAN_HIGH," +
+                        "$FAN_ENABLED,$OCCUPIED_ENABLED,$HUMIDIFIER,$DEHUMIDIFIER," +
                         "$EXHAUST_FAN_STAGE1,$EXHAUST_FAN_STAGE2"
             }
 
@@ -2494,6 +2479,36 @@ class HyperStatSplitPointsUtil(
             Tags.ANALOG4-> return 4
         }
         return 0
+    }
+    private fun getUniversalInConfigEnum(profileType: ProfileType): String {
+        when(profileType) {
+            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+                return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150" +
+                        "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NO" +
+                        "$FILTER_NC,$CONDENSATE_NO,$CONDENSATE_NC,$PRESSURE_1,$PRESSURE_2"+
+                        "$GENERIC_VOLTAGE,$GENERIC_RESISTANCE"
+            }
+            else -> {}
+        }
+        return ""
+    }
+    private fun getSensorBusTempConfigEnum(profileType: ProfileType): String {
+        when(profileType) {
+            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+                return "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP"
+            }
+            else -> {}
+        }
+        return ""
+    }
+    private fun getSensorBusPressureConfigEnum(profileType: ProfileType): String {
+        when(profileType) {
+            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+                return "$PRESSURE"
+            }
+            else -> {}
+        }
+        return ""
     }
 
 

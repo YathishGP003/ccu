@@ -47,6 +47,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     companion object {
         fun getHyperStatEquipRef(nodeAddress: Short): HyperStatCpuEquip {
             val hyperStatCpuEquip = HyperStatCpuEquip(nodeAddress)
+            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "From CpuEquip Companion, calling initEquipReference()...")
             hyperStatCpuEquip.initEquipReference(nodeAddress)
             return hyperStatCpuEquip
         }

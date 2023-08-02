@@ -4,6 +4,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Tags.CPUECON
+import a75f.io.api.haystack.Tags.HYPERSTAT
+import a75f.io.api.haystack.Tags.SPLIT
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -24,8 +26,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.LogicalKeyID
 import a75f.io.logic.bo.building.hyperstatsplit.common.LogicalPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleConditioningMode
 import a75f.io.logic.bo.haystack.device.DeviceUtil
-import a75f.io.logic.bo.haystack.device.HyperConnectDevice
-import a75f.io.logic.bo.haystack.device.HyperLiteDevice
+import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperstatSplitCpuEconTuners
 import a75f.io.logic.tuners.OAOTuners
@@ -78,6 +79,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         node: Short
     ) {
         val config = baseConfig as HyperStatSplitCpuEconConfiguration
+
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  Initialising Points: ")
         nodeAddress = node.toInt()
         floorRef = floor
@@ -112,28 +114,30 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile Profile configuration points are created ")
         // Create Logical Points
-       createProfileLogicalPoints(hyperStatSplitConfig = config)
+        createProfileLogicalPoints(hyperStatSplitConfig = config)
 
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  logical points are created")
 
-        // HyperStat Split Equip contains two devices: HyperConnect and HyperLite
-        configHyperConnectDevice(config, profileEquip)
-        configHyperLiteDevice(config, profileEquip)
+        configHyperStatSplitDevice(config, profileEquip)
+
+        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "HSS device is created")
 
         addOTAStatusPoint("${Tags.HS}-$nodeAddress", equipRef!!, basicInfo.siteRef, roomRef!!, floorRef!!, nodeAddress, basicInfo.timeZone, haystack)
 
         updateConditioningMode()
         // Syncing the Points
         haystack.syncEntityTree()
-
+        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "All done initializing points")
         return
     }
 
     fun initEquipReference(node: Short) {
-        val equip = haystack.read("equip and hyperstatsplit and cpuecon and group == \"$node\"")
+        val equip = haystack.read("equip and $HYPERSTAT and $SPLIT and group == \"$node\"")
         if (equip.isEmpty()) {
             Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " Unable to find the equip details for node $node ")
             return
+        } else {
+            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " Found equip for node $node ")
         }
         equipRef = equip["id"].toString()
         roomRef = equip["roomRef"].toString()
@@ -158,16 +162,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         }
     }
 
-    /*
-        Configure HyperConnect Device
-        HyperConnect Device contains physical points for:
-            - All wired IO (Universal Ins, Relays, and Analog Outs)
-            - RSSI (it's the device with the 900MHz antenna)
-        No sensor bus physical points.
-     */
-    private fun configHyperConnectDevice(config: HyperStatSplitCpuEconConfiguration, profileEquip: HyperStatSplitEquip) {
+    private fun configHyperStatSplitDevice(config: HyperStatSplitCpuEconConfiguration, profileEquip: HyperStatSplitEquip) {
 
-        val hyperConnectDevice = HyperConnectDevice(
+        val hyperStatSplitDevice = HyperStatSplitDevice(
             nodeAddress, basicInfo.siteRef, floorRef, roomRef, equipRef, HyperstatSplitProfileNames.HSSPLIT_CPUECON
         )
 
@@ -184,7 +181,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             config.relay1State.enabled, config.relay2State.enabled, config.relay3State.enabled,
             config.relay4State.enabled, config.relay5State.enabled, config.relay6State.enabled,
             config.relay7State.enabled, config.relay8State.enabled,
-            masterPoints, hyperConnectDevice
+            masterPoints, hyperStatSplitDevice
 
         )
 
@@ -193,7 +190,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             config.analogOut2State.enabled, getCpuEconAnalogOutVoltageAtMin(config.analogOut2State),getCpuEconAnalogOutVoltageAtMax(config.analogOut2State),
             config.analogOut3State.enabled, getCpuEconAnalogOutVoltageAtMin(config.analogOut3State),getCpuEconAnalogOutVoltageAtMax(config.analogOut3State),
             config.analogOut4State.enabled, getCpuEconAnalogOutVoltageAtMin(config.analogOut4State),getCpuEconAnalogOutVoltageAtMax(config.analogOut4State),
-            masterPoints, hyperConnectDevice
+            masterPoints, hyperStatSplitDevice
         )
 
         profileEquip.setupDeviceUniversalIns(
@@ -205,13 +202,33 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             config.universalIn6State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn6State.association),
             config.universalIn7State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn7State.association),
             config.universalIn8State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn8State.association),
-            masterPoints, hyperConnectDevice
+            masterPoints, hyperStatSplitDevice
         )
 
-        hyperConnectDevice.rssi.pointRef = heartBeatId
-        hyperConnectDevice.rssi.enabled = true
+        hyperStatSplitDevice.currentTemp.pointRef = masterPoints[LogicalKeyID.CURRENT_TEMP]
+        hyperStatSplitDevice.currentTemp.enabled = true
 
-        hyperConnectDevice.addPointsToDb()
+        hyperStatSplitDevice.addSensor(Port.SENSOR_RH, masterPoints[Port.SENSOR_RH])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_OCCUPANCY, masterPoints[Port.SENSOR_OCCUPANCY])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_VOC, masterPoints[Port.SENSOR_VOC])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
+
+        profileEquip.setupDeviceSensorBus(
+            config.address0State.enabled, config.address0State.association.ordinal,
+            config.address1State.enabled, config.address1State.association.ordinal,
+            config.address2State.enabled, config.address2State.association.ordinal,
+            config.address3State.enabled, config.address3State.association.ordinal,
+            masterPoints, hyperStatSplitDevice
+        )
+
+        hyperStatSplitDevice.rssi.pointRef = heartBeatId
+        hyperStatSplitDevice.rssi.enabled = true
+
+        hyperStatSplitDevice.addPointsToDb()
+
 
     }
 
@@ -230,32 +247,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             analogOutState.voltageAtMax.toInt()
         }
     }
-
-    /*
-        Configure HyperLite Device
-        HyperLite Device contains physical points for:
-            - Onboard sensors used with HyperStat
-     */
-    private fun configHyperLiteDevice(config: HyperStatSplitCpuEconConfiguration, profileEquip: HyperStatSplitEquip) {
-
-        val hyperLiteDevice = HyperLiteDevice(
-            nodeAddress, basicInfo.siteRef, floorRef, roomRef, equipRef, HyperstatSplitProfileNames.HSSPLIT_CPUECON
-        )
-
-        hyperLiteDevice.currentTemp.pointRef = masterPoints[LogicalKeyID.CURRENT_TEMP]
-        hyperLiteDevice.currentTemp.enabled = true
-
-        hyperLiteDevice.addSensor(Port.SENSOR_RH, masterPoints[Port.SENSOR_RH])
-        hyperLiteDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE])
-        hyperLiteDevice.addSensor(Port.SENSOR_OCCUPANCY, masterPoints[Port.SENSOR_OCCUPANCY])
-        hyperLiteDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2])
-        hyperLiteDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
-        hyperLiteDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
-
-        hyperLiteDevice.addPointsToDb()
-
-    }
-
 
     /*
         Function which creates Profile configuration Points
@@ -444,8 +435,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration,
         existingConfiguration: HyperStatSplitCpuEconConfiguration){
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Starting updateGeneralConfiguration()")
-
         updateTempOffset(existingConfiguration.temperatureOffset ,newConfiguration.temperatureOffset)
 
         updateAutoAwayAutoForceOccupy(
@@ -468,6 +457,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             existingConfiguration.zonePm2p5Threshold, newConfiguration.zonePm2p5Threshold,
             existingConfiguration.zonePm2p5Target, newConfiguration.zonePm2p5Target
         )
+
         updateDeviceDisplayConfiguration(
             existingConfiguration.displayHumidity,newConfiguration.displayHumidity,
             existingConfiguration.displayVOC,newConfiguration.displayVOC,
@@ -488,6 +478,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         updateStagedFanConfigPoints(
             existingConfiguration, newConfiguration,
         )
+
 
     }
 
@@ -886,15 +877,15 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     private fun getSensorBusConfigurations(config: HyperStatSplitCpuEconConfiguration) {
 
         // TODO: these tags could potentially change. Re-test if they do.
-        val addr0 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address0 and input").toInt()
-        val addr1 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address1 and input").toInt()
-        val addr2 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address2 and input").toInt()
-        val addr3 = hsSplitHaystackUtil.readConfigStatus("sensorbus and address3 and input").toInt()
+        val addr0 = hsSplitHaystackUtil.readConfigStatus("sensorBus and addr0 and input").toInt()
+        val addr1 = hsSplitHaystackUtil.readConfigStatus("sensorBus and addr1 and input").toInt()
+        val addr2 = hsSplitHaystackUtil.readConfigStatus("sensorBus and addr2 and input").toInt()
+        val addr3 = hsSplitHaystackUtil.readConfigStatus("sensorBus and addr3 and input").toInt()
 
-        val addr0AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorbus and address0 and input").toInt()
-        val addr1AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorbus and address1 and input").toInt()
-        val addr2AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorbus and address2 and input").toInt()
-        val addr3AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorbus and address3 and input").toInt()
+        val addr0AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorBus and addr0 and input").toInt()
+        val addr1AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorBus and addr1 and input").toInt()
+        val addr2AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorBus and addr2 and input").toInt()
+        val addr3AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorBus and addr3 and input").toInt()
 
         config.address0State = SensorBusTempState(
             addr0 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr0AssociatedTo.toInt())
@@ -1051,22 +1042,22 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address0State, existingConfiguration.address0State)
         ) {
-            updateSensorBusDetails(newConfiguration.address0State, "address0")
+            updateSensorBusDetails(newConfiguration.address0State, "addr0")
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address1State, existingConfiguration.address1State)
         ) {
-            updateSensorBusDetails(newConfiguration.address1State, "address1")
+            updateSensorBusDetails(newConfiguration.address1State, "addr1")
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address2State, existingConfiguration.address2State)
         ) {
-            updateSensorBusDetails(newConfiguration.address2State, "address2")
+            updateSensorBusDetails(newConfiguration.address2State, "addr2")
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address3State, existingConfiguration.address3State)
         ) {
-            updateSensorBusDetails(newConfiguration.address3State, "address3")
+            updateSensorBusDetails(newConfiguration.address3State, "addr3")
         }
     }
 
@@ -1074,45 +1065,54 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration,
         existingConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"updateUniversalInConfig()")
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn1State, existingConfiguration.universalIn1State)
         ) {
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui1")
             updateUniversalInDetails(newConfiguration.universalIn1State, "universal1", Port.UNIVERSAL_IN_ONE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn2State, existingConfiguration.universalIn2State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn2State, "universal2", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui2")
+            updateUniversalInDetails(newConfiguration.universalIn2State, "universal2", Port.UNIVERSAL_IN_TWO)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn3State, existingConfiguration.universalIn3State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn3State, "universal3", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui3")
+            updateUniversalInDetails(newConfiguration.universalIn3State, "universal3", Port.UNIVERSAL_IN_THREE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn4State, existingConfiguration.universalIn4State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn4State, "universal4", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui4")
+            updateUniversalInDetails(newConfiguration.universalIn4State, "universal4", Port.UNIVERSAL_IN_FOUR)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn5State, existingConfiguration.universalIn5State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn5State, "universal5", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui5")
+            updateUniversalInDetails(newConfiguration.universalIn5State, "universal5", Port.UNIVERSAL_IN_FIVE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn6State, existingConfiguration.universalIn6State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn6State, "universal6", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui6")
+            updateUniversalInDetails(newConfiguration.universalIn6State, "universal6", Port.UNIVERSAL_IN_SIX)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn7State, existingConfiguration.universalIn7State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn7State, "universal7", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui7")
+            updateUniversalInDetails(newConfiguration.universalIn7State, "universal7", Port.UNIVERSAL_IN_SEVEN)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn8State, existingConfiguration.universalIn8State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn8State, "universal8", Port.UNIVERSAL_IN_ONE)
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui8")
+            updateUniversalInDetails(newConfiguration.universalIn8State, "universal8", Port.UNIVERSAL_IN_EIGHT)
         }
     }
 
@@ -1130,7 +1130,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         ) as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(relayId, if (relayState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(relayAssociatedId, relayState.association.ordinal.toDouble())
-        DeviceUtil.setHyperConnectPointEnabled(nodeAddress, physicalPort.name, relayState.enabled)
+        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, relayState.enabled)
         if (relayState.enabled) {
             val pointData: Point = hyperStatSplitPointsUtil.relayConfiguration(
                 relayState = relayState
@@ -1140,7 +1140,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
             }
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-            DeviceUtil.updateHyperConnectPhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
         }
         if(isRelayFanModeUpdateRequired(existingRelay,relayState,newConfiguration)){
             updateFanMode(newConfiguration!!)
@@ -1193,12 +1193,12 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             if (minPointId != null) {
                 updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
-                DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
             }
             if (maxPointId != null) {
                 updatePointValueChangeRequired(maxPointId, analogOutState.voltageAtMax)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
-                DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
             }
             return
         }
@@ -1219,7 +1219,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (fanHighPointId != null) hsSplitHaystackUtil.removePoint(fanHighPointId)
 
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
-        DeviceUtil.setHyperConnectPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
+        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
 
         if (analogOutState.enabled) {
             if (analogOutState.association != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
@@ -1242,15 +1242,15 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 hyperStatSplitPointsUtil.addDefaultValueForPoint(newMaxPointId, analogOutState.voltageAtMax)
 
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
-                DeviceUtil.updateHyperConnectPhysicalPointRef(nodeAddress, physicalPort.name, pointId)
-                DeviceUtil.updateHyperConnectPhysicalPointType(nodeAddress, physicalPort.name, pointType)
+                DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
 
             } else {
                 val pointData: Triple<Point, Any?, Any?> = hyperStatSplitPointsUtil.analogOutConfiguration()
                 val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData.first)
                 if ((pointData.first).markers.contains("his")) {
                     hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                    DeviceUtil.updateHyperConnectPhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                    DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
                 }
             }
 
@@ -1320,7 +1320,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         val curCondMode = haystack.readDefaultValById(conditioningModeId)
         var conditioningMode = curCondMode
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateConditioningMode: curCondMode $curCondMode")
 
          when(HSSplitHaystackUtil.getPossibleConditioningModeSettings(nodeAddress)) {
              PossibleConditioningMode.BOTH -> {

@@ -190,6 +190,7 @@ import android.util.Log
 
     private fun toCpuEconConfig(): HyperStatSplitCpuEconConfiguration {
         return HyperStatSplitCpuEconConfiguration().apply {
+
             temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
@@ -262,6 +263,7 @@ import android.util.Log
                 analogOutUis[3].perAtFanMedium,
                 analogOutUis[3].perAtFanHigh
             )
+
             address0State = SensorBusTempState(sensorBusTemps[0].enabled, CpuEconSensorBusTempAssociation.values()[sensorBusTemps[0].association])
             address1State = SensorBusTempState(sensorBusTemps[1].enabled, CpuEconSensorBusTempAssociation.values()[sensorBusTemps[1].association])
             address2State = SensorBusTempState(sensorBusTemps[2].enabled, CpuEconSensorBusTempAssociation.values()[sensorBusTemps[2].association])
@@ -318,7 +320,6 @@ import android.util.Log
             displayCo2 = isDisplayCo2Enabled
             displayVOC = isDisplayVOCEnabled
             displayPp2p5 = isDisplayPp2p5Enabled
-
         }
 
     }
@@ -375,6 +376,8 @@ val UniversalInAssociation.displayName: Int
             UniversalInAssociation.CURRENT_TX_0_150 -> R.string.current_tx_0_150
             UniversalInAssociation.DUCT_PRESSURE_0_1 -> R.string.duct_pressure_0_1
             UniversalInAssociation.DUCT_PRESSURE_0_2 -> R.string.duct_pressure_0_2
+            UniversalInAssociation.GENERIC_VOLTAGE -> R.string.generic_voltage
+            UniversalInAssociation.GENERIC_RESISTANCE -> R.string.generic_resistance
         }
     }
 

@@ -37,12 +37,14 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
     }
 
     private fun initialViewState(address: Short): ViewState {
+
         hyperStatSplitProfile =  L.getProfile(address) as HyperStatSplitProfile?
+
         return if (hyperStatSplitProfile != null) {
             hyperStatSplitConfiguration = hyperStatSplitProfile!!.getProfileConfiguration(address)
-            val state = ViewState.fromConfigTo(( if (hyperStatSplitProfile !=null ) hyperStatSplitConfiguration!! else HyperStatSplitCpuEconConfiguration()), profileType)
-            state
+            ViewState.fromConfigTo(( if (hyperStatSplitProfile !=null ) hyperStatSplitConfiguration!! else HyperStatSplitCpuEconConfiguration()), profileType)
         } else {
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "HSS Profile is null")
             hyperStatSplitProfile = HyperStatSplitCpuEconProfile()
             ViewState.fromConfigTo(HyperStatSplitCpuEconConfiguration(),profileType)
         }
@@ -52,11 +54,14 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
 // Save the configuration
 
     override fun setConfigSelected() {
+
         // get the state fragment state
         val cpuConfig = currentState.toConfig() as HyperStatSplitCpuEconConfiguration
+
         cpuConfig.nodeType = nodeType
         cpuConfig.nodeAddress = address
         cpuConfig.priority = ZonePriority.NONE
+
         addOutputRelayConfigurations(
             cpuConfig.relay1State.enabled, cpuConfig.relay2State.enabled, cpuConfig.relay3State.enabled,
             cpuConfig.relay4State.enabled, cpuConfig.relay5State.enabled, cpuConfig.relay6State.enabled,
@@ -65,11 +70,16 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
             cpuConfig.analogOut3State.enabled, cpuConfig.analogOut4State.enabled,
             cpuConfig
         )
+
         hyperStatSplitProfile?.profileConfiguration?.put(address, cpuConfig)
+
+        val intConfig: HyperStatSplitCpuEconConfiguration? = (hyperStatSplitProfile as HyperStatSplitCpuEconProfile)?.getProfileConfiguration(address)
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "intConfig: " + intConfig.toString())
 
         if (hyperStatSplitConfiguration == null) {
             // creating all the Equip and point details for new profile
             hyperStatSplitProfile?.addNewEquip(address, roomName, floorName, cpuConfig)
+
         } else {
             // update with latest configuration points
             hyperStatSplitProfile?.getHyperStatSplitEquip(address)?.updateConfiguration(cpuConfig)
@@ -79,6 +89,8 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
         L.saveCCUState()
         DesiredTempDisplayMode.setModeType(roomName, CCUHsApi.getInstance())
 
+        val finalConfig: HyperStatSplitCpuEconConfiguration? = (hyperStatSplitProfile as HyperStatSplitCpuEconProfile)?.getProfileConfiguration(address)
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "finalConfig: " + finalConfig.toString())
     }
 
 

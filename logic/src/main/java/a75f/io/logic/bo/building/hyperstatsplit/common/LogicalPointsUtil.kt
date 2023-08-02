@@ -411,6 +411,10 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "cmd and logical and exhaust and fan and stage2 and equipRef == \"$equipRef\"")
         }
+        fun readDCVDamperRelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "cmd and logical and dcv and damper and equipRef == \"$equipRef\"")
+        }
 
         /**====== Analog Logical points=======**/
 
@@ -478,7 +482,6 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
         }
 
-        // TODO: to be verified. This uses all existing OAO damper tags, but replaces "system" with "zone".
          fun createAnalogOutPointForOaoDamper(
              equipDis: String, siteRef: String, equipRef: String,
              roomRef: String, floorRef: String, tz: String,
@@ -486,8 +489,8 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutOaoLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "air", "cmd", "zone","logical","analog", "output",
-                    "outside", "damper", "oao","actuator","his"
+                    "air", "cmd", "zone","logical",
+                    "damper", "economizer","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-oaoDamper")
@@ -552,10 +555,10 @@ class LogicalPointsUtil {
 
             val existingPoint = readSupplyAirTempSensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val supplyAirTempMarkers = arrayOf("supply", "air", "temp", "sensor", "cur", "his", "logical")
+                val supplyAirTempMarkers = arrayOf("discharge", "air", "temp", "sensor", "cur", "his", "logical")
 
                 val supplyAirTempPoint = Point.Builder()
-                    .setDisplayName("$equipDis-supplyAirTemperature")
+                    .setDisplayName("$equipDis-supplyAirTempSensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -575,7 +578,7 @@ class LogicalPointsUtil {
                 val supplyAirHumidityMarkers = arrayOf("supply", "air", "humidity", "sensor", "cur", "his", "logical")
 
                 val supplyAirHumidityPoint = Point.Builder()
-                    .setDisplayName("$equipDis-supplyAirHumidity")
+                    .setDisplayName("$equipDis-supplyAirHumiditySensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -596,7 +599,7 @@ class LogicalPointsUtil {
                 val mixedAirTempMarkers = arrayOf("mixed", "air", "temp", "sensor", "cur", "his", "logical")
 
                 val mixedAirTempPoint = Point.Builder()
-                    .setDisplayName("$equipDis-mixedAirTemperature")
+                    .setDisplayName("$equipDis-mixedAirTempSensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -616,7 +619,7 @@ class LogicalPointsUtil {
                 val mixedAirHumidityMarkers = arrayOf("mixed", "air", "humidity", "sensor", "cur", "his", "logical")
 
                 val mixedAirHumidityPoint = Point.Builder()
-                    .setDisplayName("$equipDis-mixedAirHumidity")
+                    .setDisplayName("$equipDis-mixedAirHumiditySensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -637,7 +640,7 @@ class LogicalPointsUtil {
                 val supplyAirTempMarkers = arrayOf("outside", "air", "temp", "sensor", "cur", "his", "logical")
 
                 val supplyAirTempPoint = Point.Builder()
-                    .setDisplayName("$equipDis-outsideAirTemperature")
+                    .setDisplayName("$equipDis-outsideAirTempSensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -657,7 +660,7 @@ class LogicalPointsUtil {
                 val outsideAirHumidityMarkers = arrayOf("outside", "air", "humidity", "sensor", "cur", "his", "logical")
 
                 val outsideAirHumidityPoint = Point.Builder()
-                    .setDisplayName("$equipDis-outsideAirHumidity")
+                    .setDisplayName("$equipDis-outsideAirHumiditySensor")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -668,21 +671,40 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readOutsideAirHumiditySensor(equipRef)).build()
         }
 
-        // TODO: verify if polarity will be reversible on this point or not.
-        fun createPointForCondensateOverflowStatus(
+        fun createPointForCondensateNC(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
         ): Point {
 
             val markers = arrayOf(
-                "condensate","overflow","status","sensor","his"
+                "condensate","sensor","his","logical","zone","normallyClosed"
             )
 
             val point = Point.Builder()
-                .setDisplayName("$equipDis-condensateOverflowStatus")
+                .setDisplayName("$equipDis-condensateNC")
                 .setSiteRef(siteRef).setEquipRef(equipRef)
                 .setRoomRef(roomRef).setFloorRef(floorRef)
                 .setTz(tz).setHisInterpolate("cov")
+                .setEnums("normal,fault")
+            markers.forEach { point.addMarker(it) }
+
+            return point.build()
+        }
+        fun createPointForCondensateNO(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String
+        ): Point {
+
+            val markers = arrayOf(
+                "condensate","sensor","his","logical","zone","normallyOpen"
+            )
+
+            val point = Point.Builder()
+                .setDisplayName("$equipDis-condensateNO")
+                .setSiteRef(siteRef).setEquipRef(equipRef)
+                .setRoomRef(roomRef).setFloorRef(floorRef)
+                .setTz(tz).setHisInterpolate("cov")
+                .setEnums("normal,fault")
             markers.forEach { point.addMarker(it) }
 
             return point.build()
@@ -695,28 +717,28 @@ class LogicalPointsUtil {
         ): Point {
 
             var transformerTag = "transformer"
-            var name = "currentDrawn_10"
+            var name = "currentTx10"
             if(tranferType == TransformerSensorType.TRANSFORMER_20) {
                 transformerTag = "transformer20"
-                name = "currentDrawn_20"
+                name = "currentTx20"
             }
             if(tranferType == TransformerSensorType.TRANSFORMER_50) {
                 transformerTag = "transformer50"
-                name = "currentDrawn_50"
+                name = "currentTx50"
             }
             if(tranferType == TransformerSensorType.TRANSFORMER_100) {
                 transformerTag = "transformer100"
-                name = "currentDrawn_100"
+                name = "currentTx100"
             }
             if(tranferType == TransformerSensorType.TRANSFORMER_150) {
                 transformerTag = "transformer150"
-                name = "currentDrawn_150"
+                name = "currentTx150"
             }
             val existingPoint = readCurrentTransferSensor(equipRef,transformerTag)
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "sensor", "zone", "his", "logical", "cur", transformerTag
+                    "current", "run", "sensor", "zone", "his", "logical", "cur", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
@@ -737,13 +759,12 @@ class LogicalPointsUtil {
             roomRef: String, floorRef: String, tz: String
         ): Point {
 
-            var pressureTag = "ductPressure"
-            var name = "ductPressure"
-            val existingPoint = readDuctPressureSensor(equipRef,pressureTag)
+            var name = "ductStaticPressureSensor"
+            val existingPoint = readDuctPressureSensor(equipRef,"static")
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "duct", "pressure", "sensor", "zone", "his", "logical", "cur", pressureTag
+                    "static", "pressure", "sensor", "zone", "his", "logical", "cur"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
@@ -751,11 +772,11 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                     // TODO: min, max, inc (verify with firmware once we get there)
-                    .setUnit("Pa")
+                    .setUnit("inH₂O")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,pressureTag)).build()
+            return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,"static")).build()
         }
 
         // Duct Pressure point configured from a 0-10V sensor on a Universal Input
@@ -765,21 +786,17 @@ class LogicalPointsUtil {
             min: String, max: String, inc: String, unit: String, sensorType: DuctPressureSensorType
         ): Point {
 
-            var pressureTag = "ductPressure1in"
-            var name = "ductPressure_1in"
+            var pressureTag = "pressure1in"
+            var name = "pressure1"
             if(sensorType == DuctPressureSensorType.DUCT_PRESSURE_0_2) {
-                pressureTag = "ductPressure2in"
-                name = "ductPressure_2in"
-            }
-            if(sensorType == DuctPressureSensorType.DUCT_PRESSURE_0_5) {
-                pressureTag = "ductPressure5in"
-                name = "ductPressure_5in"
+                pressureTag = "pressure2in"
+                name = "pressure2"
             }
             val existingPoint = readDuctPressureSensor(equipRef,pressureTag)
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "duct", "pressure", "sensor", "zone", "his", "logical", "cur", pressureTag
+                    "air", "pressure", "sensor", "zone", "his", "logical", "cur", pressureTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
@@ -794,22 +811,79 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,pressureTag)).build()
         }
 
-        // TODO: verify if polarity will be reversible on this point or not.
-        fun createPointForFilterStatus(
+        fun createPointForFilterNC(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
         ): Point {
 
-            // TODO: add enum (once polarity is determined)
             val markers = arrayOf(
-                "filter","pressure","status","sensor","his"
+                "filter","sensor","his","logical","zone","normallyClosed"
             )
 
             val point = Point.Builder()
-                .setDisplayName("$equipDis-filterStatus")
+                .setDisplayName("$equipDis-filterNC")
                 .setSiteRef(siteRef).setEquipRef(equipRef)
                 .setRoomRef(roomRef).setFloorRef(floorRef)
                 .setTz(tz).setHisInterpolate("cov")
+                .setEnums("normal,fault")
+            markers.forEach { point.addMarker(it) }
+
+            return point.build()
+        }
+        fun createPointForFilterNO(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String
+        ): Point {
+
+            val markers = arrayOf(
+                "filter","sensor","his","logical","zone","normallyOpen"
+            )
+
+            val point = Point.Builder()
+                .setDisplayName("$equipDis-filterNO")
+                .setSiteRef(siteRef).setEquipRef(equipRef)
+                .setRoomRef(roomRef).setFloorRef(floorRef)
+                .setTz(tz).setHisInterpolate("cov")
+                .setEnums("normal,fault")
+            markers.forEach { point.addMarker(it) }
+
+            return point.build()
+        }
+
+        fun createPointForGenericVoltage(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String
+        ): Point {
+
+            val markers = arrayOf(
+                "generic","voltage","sensor","his","logical","zone"
+            )
+
+            val point = Point.Builder()
+                .setDisplayName("$equipDis-genericVoltage")
+                .setSiteRef(siteRef).setEquipRef(equipRef)
+                .setRoomRef(roomRef).setFloorRef(floorRef)
+                .setTz(tz).setHisInterpolate("cov")
+                .setUnit("V")
+            markers.forEach { point.addMarker(it) }
+
+            return point.build()
+        }
+        fun createPointForGenericResistance(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String
+        ): Point {
+
+            val markers = arrayOf(
+                "generic","resistance","sensor","his","logical","zone"
+            )
+
+            val point = Point.Builder()
+                .setDisplayName("$equipDis-genericResistance")
+                .setSiteRef(siteRef).setEquipRef(equipRef)
+                .setRoomRef(roomRef).setFloorRef(floorRef)
+                .setTz(tz).setHisInterpolate("cov")
+                .setUnit("kOhm")
             markers.forEach { point.addMarker(it) }
 
             return point.build()
@@ -853,13 +927,29 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "duct and pressure and logical and sensor and $pressureTag and equipRef == \"$equipRef\"")
         }
-        private fun readFilterStatus(equipRef: String): HashMap<Any, Any> {
+        private fun readFilterNC(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "filter and status and sensor and equipRef == \"$equipRef\"")
+                "filter and sensor and normallyClosed and equipRef == \"$equipRef\"")
         }
-        private fun readCondensateOverflowStatus(equipRef: String): HashMap<Any, Any> {
+        private fun readFilterNO(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "condensate and overflow and status and sensor and equipRef == \"$equipRef\"")
+                "filter and sensor and normallyOpen and equipRef == \"$equipRef\"")
+        }
+        private fun readCondensateNC(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "condensate and sensor and normallyClosed and equipRef == \"$equipRef\"")
+        }
+        private fun readCondensateNO(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "condensate and sensor and normallyOpen and equipRef == \"$equipRef\"")
+        }
+        private fun readGenericVoltage(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and voltage and sensor and equipRef == \"$equipRef\"")
+        }
+        private fun readGenericResistance(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and resistance and sensor and equipRef == \"$equipRef\"")
         }
 
 
@@ -1040,28 +1130,43 @@ class LogicalPointsUtil {
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
-                    universalIn7State,universalIn8State
-            ) && !HyperStatSplitAssociationUtil.isAnyUniversalInMappedToCondensateNC(
+                    universalIn7State,universalIn8State))
+                removePoint(readCondensateNO(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToCondensateNC(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State
-                )) {
-                removePoint(readCondensateOverflowStatus(equipRef))
-            }
+                ))
+                removePoint(readCondensateNC(equipRef))
             if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToFilterNO(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State
-                ) && !HyperStatSplitAssociationUtil.isAnyUniversalInMappedToFilterNC(
+                ))
+                removePoint(readFilterNO(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToFilterNC(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State
-                )) {
-                removePoint(readFilterStatus(equipRef))
-            }
+                ))
+                removePoint(readFilterNC(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericVoltage(
+                    universalIn1State,universalIn2State,
+                    universalIn3State,universalIn4State,
+                    universalIn5State,universalIn6State,
+                    universalIn7State,universalIn8State
+                ))
+                removePoint(readGenericVoltage(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericResistance(
+                    universalIn1State,universalIn2State,
+                    universalIn3State,universalIn4State,
+                    universalIn5State,universalIn6State,
+                    universalIn7State,universalIn8State
+                ))
+                removePoint(readGenericResistance(equipRef))
         }
 
         /*
@@ -1155,16 +1260,7 @@ class LogicalPointsUtil {
     enum class TransformerSensorType {
         TRANSFORMER,TRANSFORMER_20,TRANSFORMER_50, TRANSFORMER_100, TRANSFORMER_150
     }
-    enum class FilterSwitchType {
-        NORMALLY_OPEN, NORMALLY_CLOSED
-    }
-    enum class FilterPressureSensorType {
-        FILTER_PRESSURE_0_1, FILTER_PRESSURE_0_2, FILTER_PRESSURE_0_5
-    }
-    enum class CondensateSwitchType {
-        NORMALLY_OPEN, NORMALLY_CLOSED
-    }
     enum class DuctPressureSensorType {
-        DUCT_PRESSURE_0_1, DUCT_PRESSURE_0_2, DUCT_PRESSURE_0_5
+        DUCT_PRESSURE_0_1, DUCT_PRESSURE_0_2
     }
 }

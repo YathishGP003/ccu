@@ -18,6 +18,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 
 public class FragmentModbusType  extends BaseDialogFragment {
 
@@ -65,11 +66,12 @@ public class FragmentModbusType  extends BaseDialogFragment {
             /*FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS30);
             showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);*/
 
-            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT), FragmentModbusConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), FragmentModbusConfiguration.ID);
         });
         modbusem.setOnClickListener(v -> {
-            FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR_ZONE);
-            showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);
+            /*FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR_ZONE);
+            showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);*/
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,"emr"), FragmentModbusConfiguration.ID);
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         return view;

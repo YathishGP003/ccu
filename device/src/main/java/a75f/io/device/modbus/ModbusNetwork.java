@@ -1,6 +1,8 @@
 
 package a75f.io.device.modbus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +32,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
     @Override
     public void sendMessage() {
-        
+        pullRegisters();
+        /*
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
@@ -57,7 +60,36 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
             }
+        }*/
+    }
+
+    private void pullRegisters(){
+        if (!LSerial.getInstance().isModbusConnected()) {
+            CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
+            return;
         }
+
+        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
+                "equipRef and modbus");
+        modbusEquips.forEach(equipMap -> {
+            try {
+                EquipmentDevice equipDevice = buildModbusModelByEquipRef(equipMap.get("id").toString());
+                List<EquipmentDevice> modbusDeviceList = new ArrayList<>();
+                modbusDeviceList.add(equipDevice);
+                if (!equipDevice.getEquips().isEmpty())
+                    modbusDeviceList.addAll(equipDevice.getEquips());
+
+                for(EquipmentDevice modbusDevice : modbusDeviceList){
+                    for (Register register : modbusDevice.getRegisters()) {
+                        LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : ");
+            }
+        });
+
     }
 
     private int getRegisterCount(Register register) {
@@ -91,12 +123,21 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
         short groupId = Short.parseShort(writablePoint.get("group").toString());
 
-        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        /*List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (null != equip.getEquipRef()) {
             modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
         } else {
             modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(groupId));
+        }*/
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
+
         }
+
         HashMap<Object, Object> physicalPoint = CCUHsApi.getInstance()
                 .readEntity("point and pointRef == \""+writablePoint.get("id").toString()+"\"");
         

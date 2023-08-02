@@ -13,13 +13,12 @@ import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.util.EQUIP_TYPE
 import a75f.io.renatus.modbus.util.MODBUS
+import a75f.io.renatus.modbus.util.ModbusLevel
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SELECT_ALL
 import a75f.io.renatus.modbus.util.SLAVE_ID
-import a75f.io.renatus.modbus.util.log
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,7 +62,8 @@ class ModbusConfigView : BaseDialogFragment() {
     private lateinit var viewModel: ModbusConfigViewModel
     companion object {
         fun newInstance(
-            meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType
+            meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType,
+            level: ModbusLevel, filer: String
         ): ModbusConfigView {
             val fragment = ModbusConfigView()
             val bundle = Bundle()
@@ -71,6 +71,8 @@ class ModbusConfigView : BaseDialogFragment() {
             bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
+            bundle.putInt(FragmentCommonBundleArgs.MODBUS_LEVEL, level.ordinal)
+            bundle.putString(FragmentCommonBundleArgs.MODBUS_FILTER, filer)
             fragment.arguments = bundle
             return fragment
         }
@@ -293,8 +295,9 @@ class ModbusConfigView : BaseDialogFragment() {
         super.onStart()
         val dialog = dialog
         if (dialog != null) {
-            val width = 1200
-            val height = 700
+            val width = ViewGroup.LayoutParams.MATCH_PARENT
+            val height = ViewGroup.LayoutParams.MATCH_PARENT
+            dialog.window!!.setLayout(width, height)
             dialog.window!!.setLayout(width, height)
         }
     }

@@ -301,7 +301,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
 
             @Override
             protected Void doInBackground( final String ... params ) {
-                setUpsModbusProfile();
+               // setUpsModbusProfile();
                 L.saveCCUState();
                 return null;
             }
@@ -313,7 +313,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
+    }/*
     private void setUpsModbusProfile() {
         Log.i("ModbusUI", "Data:" + recyclerModbusParamAdapter.modbusParam);
         String equipType = equipmentDevice.getEquipType();
@@ -437,7 +437,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
                 break;
         }
         saveToBox(zoneRef,equipRef,equipmentDevice,curSelectedSlaveId, isNewDevice,floorRef);
-    }
+    }*/
     public String updateModbusProfile(int slave_id){
         modbusProfile.updateMbEquip((short)slave_id, equipmentDevice,recyclerModbusParamAdapter.modbusParam);
         L.ccu().zoneProfiles.add(modbusProfile);

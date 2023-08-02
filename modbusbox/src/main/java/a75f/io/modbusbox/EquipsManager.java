@@ -104,6 +104,7 @@ public class EquipsManager
     public List<String> getAllModbusNamesByEquipType(String equipType){
         return processor.getEquipNamesByProfile(equipType);
     }
+/*
 
     public List<EquipmentDevice> getModbusSubEquip(Equip equip, Point point) {
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
@@ -117,6 +118,7 @@ public class EquipsManager
         }
         return modbusSubEquipList;
     }
+*/
 
     public void readExternalJSONFiles(){
         processor.readExternalJsonData();

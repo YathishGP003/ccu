@@ -74,6 +74,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -702,7 +703,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -727,7 +727,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -1267,16 +1266,21 @@ public class FloorPlanFragment extends Fragment {
                     Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
                     return;
                 } else {
+                /*
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                */
+
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr"), FragmentModbusConfiguration.ID);
+
                 }
             }
             if (previousSelectedDevice == 3) {
                 /**
                  * Modbus BTU meter selection
                  */
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+               /*  showDialogFragment(FragmentModbusConfiguration.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID); */
+                showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), FragmentModbusConfiguration.ID);
             }
             return;
         }
@@ -1413,12 +1417,20 @@ public class FloorPlanFragment extends Fragment {
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
+                /*
                 showDialogFragment(FragmentModbusConfiguration
                         .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                */
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), FragmentModbusConfiguration.ID);
+
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), FragmentModbusConfiguration.ID);
+
+                /*
                 showDialogFragment(FragmentModbusConfiguration
                         .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                */
             }
             return;
         }
@@ -1456,7 +1468,7 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                     showDialogFragment(FragmentCPUConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
                     break;
                 case SMARTSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(FragmentHeatPumpConfiguration
@@ -1523,7 +1535,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_DEFAULT:
                     /*showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);*/
-                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), FragmentModbusConfiguration.ID);
                     break;
 
             }

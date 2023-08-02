@@ -453,14 +453,14 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 subEquipmentDevices.add(subEquipmentDevice);
             }
         }
-        String equipRef = setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam, subEquipmentDevices);
-        saveToBox(zoneRef, equipRef, equipmentDev, selectedSlaveId, isNewDevice, floorRef);
+        // String equipRef = setUpsModbusProfile(equipmentDev, selectedSlaveId, modbusParam, subEquipmentDevices);
+        // saveToBox(zoneRef, equipRef, equipmentDev, selectedSlaveId, isNewDevice, floorRef);
     }
 
     private HashMap<Object, Object> getModbusEquipMap(Short slaveId){
         return CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and group == \"" + slaveId + "\"");
     }
-
+/*
     private String setUpsModbusProfile(EquipmentDevice equipmentDev, short selectedSlaveId, List<Parameter> modbusParam,
                                        List<EquipmentDevice> subEquipmentDevices) {
         String equipType = equipmentDev.getEquipType();
@@ -557,7 +557,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         }
         CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + equipRef + "," + selectedSlaveId);
         return equipRef;
-    }
+    }*/
 
     public String updateModbusProfile(int slave_id, EquipmentDevice equipmentDev, List<Parameter> modbusParam) {
         modbusProfile.updateMbEquip((short) slave_id, equipmentDev, modbusParam);

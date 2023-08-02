@@ -64,8 +64,6 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	{
 		switch (position)
 		{
-			/*case 0:
-				return "Dashboard";*/
 			case 0:
 				return "Zones";
 			case 1:

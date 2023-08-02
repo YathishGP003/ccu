@@ -1,5 +1,7 @@
 package a75f.io.renatus.modbus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,9 +33,7 @@ import a75f.io.device.modbus.LModbus;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
-import a75f.io.renatus.modbus.models.ModbusModelBuilder;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -242,8 +242,10 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
             }
         }
-        for (int pos = (int) (100 * minValue); pos <= (100 * maxValue); pos += (100 * incValue)) {
-            doubleArrayList.add(pos / 100.0);
+        if (maxValue > 0) {
+            for (int pos = (int) (100 * minValue); pos <= (100 * maxValue); pos += (100 * incValue)) {
+                doubleArrayList.add(pos / 100.0);
+            }
         }
         userIntentsMap.put(unit, doubleArrayList);
 
@@ -263,12 +265,21 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         double value = readVal(id);
         //write to modbus
-        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        /*List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (null != equip.getEquipRef()) {
             modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
         } else {
             modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
+        }*/
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
+
         }
+
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
                 for (Parameter pam : register.getParameters()) {
@@ -353,7 +364,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (equip.getEquipRef() != null) {
-            EquipmentDevice parentEquip = ModbusModelBuilder.Companion.buildModbusModelByEquipRef(equip.getEquipRef());
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
             if (!parentEquip.getEquips().isEmpty()) {
                 modbusSubEquipList.addAll(parentEquip.getEquips());
             }

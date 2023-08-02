@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
@@ -82,7 +83,6 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
-import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
@@ -110,7 +110,6 @@ import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
-import a75f.io.renatus.modbus.models.ModbusModelBuilder;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.schedules.NamedSchedule;
@@ -2273,7 +2272,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                          //   List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
 
-                            List<EquipmentDevice> list = ModbusModelBuilder.Companion.buildModbusModel(nonTempEquip.getRoomRef());
+                            List<EquipmentDevice> list = buildModbusModel(nonTempEquip.getRoomRef());
                             List<EquipmentDevice> modbusDevices = new ArrayList<>();
                             for(EquipmentDevice equipmentDevice : list) {
                                 modbusDevices.add(equipmentDevice);

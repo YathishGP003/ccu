@@ -50,13 +50,13 @@ public class ModbusEquip {
         }
     }
 
-    public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
+ /*   public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
                                  List<Parameter> configParams) {
-     return createEntities(floorRef, roomRef, equipmentInfo, configParams, null, false);
+     return createEntities(floorRef, roomRef, equipmentInfo, configParams, null, false,null);
     }
-
+*/
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent) {
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -98,9 +98,13 @@ public class ModbusEquip {
                 mbEquip.addMarker(equip.trim());
             }
         }
+
+        /*
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             mbEquip.addMarker("zone");
-        }
+        }*/
+
+        mbEquip.addMarker(modbusLevel);
 
         if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
             mbEquip.setVendor(equipmentInfo.getVendor());

@@ -7,6 +7,7 @@ import org.projecthaystack.UnknownRecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -27,7 +28,7 @@ public abstract class SystemController
     public State systemState = OFF;
     public static final int MIN_DAMPER_FOR_CUMULATIVE_CALCULATION = 1;
     public boolean emergencyMode = false;
-    
+    public Set<String> deadZones = new HashSet<>();
     public abstract int getCoolingSignal() ;
     public abstract int getHeatingSignal();
     public abstract double getAverageSystemHumidity();

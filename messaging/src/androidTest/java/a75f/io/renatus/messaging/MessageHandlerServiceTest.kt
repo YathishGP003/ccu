@@ -2,10 +2,13 @@ package a75f.io.renatus.messaging
 
 import a75f.io.messaging.service.MessageHandlerService
 import androidx.test.platform.app.InstrumentationRegistry
+import dagger.hilt.android.testing.HiltAndroidRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.spyk
 import kotlinx.coroutines.flow.flow
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
 

@@ -244,6 +244,7 @@ public class UpdatePointHandler implements MessageHandler
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
                     CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
                             CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }

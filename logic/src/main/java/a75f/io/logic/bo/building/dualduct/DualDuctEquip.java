@@ -13,6 +13,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
@@ -175,8 +177,10 @@ public class DualDuctEquip {
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(currentTemp,BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-    
+
+
         Point humidity = new Point.Builder()
                                  .setDisplayName(equipDis+"-humidity")
                                  .setEquipRef(equipRef)
@@ -191,8 +195,10 @@ public class DualDuctEquip {
                                  .setUnit("%")
                                  .setTz(tz)
                                  .build();
+        BacnetUtilKt.addBacnetTags(humidity,BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
-    
+
+
         Point co2 = new Point.Builder()
                             .setDisplayName(equipDis+"-co2")
                             .setEquipRef(equipRef)
@@ -207,8 +213,10 @@ public class DualDuctEquip {
                             .setUnit("ppm")
                             .setTz(tz)
                             .build();
+        BacnetUtilKt.addBacnetTags(co2,BacnetIdKt.CO2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
-    
+
+
         Point voc = new Point.Builder()
                             .setDisplayName(equipDis+"-voc")
                             .setEquipRef(equipRef)
@@ -223,6 +231,7 @@ public class DualDuctEquip {
                             .setUnit("ppb")
                             .setTz(tz)
                             .build();
+        BacnetUtilKt.addBacnetTags(voc,BacnetIdKt.VOCID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String vocId = CCUHsApi.getInstance().addPoint(voc);
     
         Point dischargeAirTemp = new Point.Builder()
@@ -238,7 +247,9 @@ public class DualDuctEquip {
                                           .setUnit("\u00B0F")
                                           .setTz(tz)
                                           .build();
+        BacnetUtilKt.addBacnetTags(dischargeAirTemp,BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String datId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
+
         CCUHsApi.getInstance().writeHisValById(datId, 0.0);
     
         Point desiredTemp = new Point.Builder()
@@ -254,7 +265,9 @@ public class DualDuctEquip {
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
                                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp,BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
+
 
         String supplyAirTempId = createSupplyAirTempPoint(siteRef, equipDis, roomRef, floorRef, tz, config);
 
@@ -367,8 +380,10 @@ public class DualDuctEquip {
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling,BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
-    
+
+
         Point desiredTempHeating = new Point.Builder()
                                            .setDisplayName(equipDis+"-desiredTempHeating")
                                            .setEquipRef(equipRef)
@@ -382,6 +397,7 @@ public class DualDuctEquip {
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating,BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
     
         Point scheduleType = new Point.Builder()
@@ -599,7 +615,9 @@ public class DualDuctEquip {
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset,BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
+
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.getTemperatureOffset());
         CCUHsApi.getInstance().writeHisValById(temperatureOffsetId, config.getTemperatureOffset());
     
@@ -922,8 +940,16 @@ public class DualDuctEquip {
                                      .setUnit("%")
                                      .setTz(tz)
                                      .build();
+        if(Objects.equals(type, "composite"))
+            BacnetUtilKt.addBacnetTags(damperPos, BacnetIdKt.COMPOSITEDAMPERID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
+        if(Objects.equals(type, "cooling"))
+            BacnetUtilKt.addBacnetTags(damperPos, BacnetIdKt.DAMPER1POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
+        if(Objects.equals(type, "heating"))
+            BacnetUtilKt.addBacnetTags(damperPos, BacnetIdKt.DAMPER2POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
+
         String damperPosId = CCUHsApi.getInstance().addPoint(damperPos);
         CCUHsApi.getInstance().writeHisValById(damperPosId, 0.0);
+
         return damperPosId;
     }
     
@@ -1161,6 +1187,7 @@ public class DualDuctEquip {
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+            BacnetUtilKt.addBacnetTags(coolingAirflowTemp,BacnetIdKt.SUPPLYAIRTEMP2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
             String coolingAirflowTempId = CCUHsApi.getInstance().addPoint(coolingAirflowTemp);
             CCUHsApi.getInstance().writeHisValById(coolingAirflowTempId, 0.0);
             return coolingAirflowTempId;
@@ -1214,6 +1241,8 @@ public class DualDuctEquip {
                 .setUnit("%")
                 .setTz(tz)
                 .build();
+        if(analogTag.equals("analog1") )
+            BacnetUtilKt.addBacnetTags(damperFeedback,BacnetIdKt.DAMPERFEEDBACKID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         return ccuHsApi.addPoint(damperFeedback);
     }
 

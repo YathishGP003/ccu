@@ -1,8 +1,11 @@
 package a75f.io.renatus.registration;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
+import android.app.DownloadManager;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -26,7 +29,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
@@ -104,6 +110,32 @@ public class UpdateCCUFragment extends DialogFragment {
         this.isNotFirstInvocation = false;
     }
 
+    public static void stopAllDownloads(){
+        List<Long> downloadIds = getAllDownloadIds();
+        DownloadManager downloadManager = (DownloadManager) Globals.getInstance().getApplicationContext()
+                .getSystemService(DOWNLOAD_SERVICE);
+        for (long downloadId : downloadIds) {
+            downloadManager.remove(downloadId);
+        }
+    }
+
+    private static List<Long> getAllDownloadIds() {
+        List<Long> downloadIds = new ArrayList<>();
+        DownloadManager downloadManager = (DownloadManager) Globals.getInstance().getApplicationContext()
+                .getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Query query = new DownloadManager.Query();
+        query.setFilterByStatus(DownloadManager.STATUS_RUNNING | DownloadManager.STATUS_PENDING);
+        Cursor cursor = downloadManager.query(query);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                long downloadId = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                downloadIds.add(downloadId);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return downloadIds;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -132,7 +164,7 @@ public class UpdateCCUFragment extends DialogFragment {
     View.OnClickListener cancelOnClickListener = view -> {
         connectivityIssues.setVisibility(View.GONE);
         DownloadManager manager =
-                (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                (DownloadManager) RenatusApp.getAppContext().getSystemService(DOWNLOAD_SERVICE);
         if (downloadTd != null) {
             manager.remove(downloadTd);
             Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
@@ -158,7 +190,7 @@ public class UpdateCCUFragment extends DialogFragment {
         progressLayout.setVisibility(View.VISIBLE);
         updateApp.setTextColor(Color.parseColor("#CCCCCC"));
         if (versionLabelString != null) {
-            RemoteCommandHandlerUtil.updateCCU(versionLabelString, UpdateCCUFragment.this);
+            RemoteCommandHandlerUtil.updateCCU(versionLabelString, UpdateCCUFragment.this, getActivity());
         }
     };
 

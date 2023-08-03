@@ -214,7 +214,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             @Override
             protected void onPreExecute() {
                 mSetbtn.setEnabled(false);
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving HyperStat Sense Configuration");
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving HyperStat Monitoring Configuration");
                 super.onPreExecute();
             }
 

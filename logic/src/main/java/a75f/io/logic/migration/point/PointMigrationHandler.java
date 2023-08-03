@@ -29,7 +29,7 @@ public class PointMigrationHandler {
             for(HashMap<Object, Object> senseEquip : senseEquips){
 
                 String equipId = senseEquip.get(Tags.ID).toString();
-                String equipDis = siteDis + "-SENSE-" + senseEquip.get(Tags.GROUP).toString() + "-";
+                String equipDis = siteDis + "-MONITORING-" + senseEquip.get(Tags.GROUP).toString() + "-";
 
                 HashMap<Object, Object> senseAnalog1InputPoint = CCUHsApi.getInstance().readEntity("sense and " +
                         analog+" and unit and equipRef == \""+ equipId +"\"");

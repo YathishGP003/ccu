@@ -67,6 +67,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import a75f.io.logic.L;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -183,6 +185,8 @@ public class Communication extends Fragment {
     JSONObject deviceObject;
     JSONObject objectConf;
 
+    private ExecutorService executorService;
+
     boolean isZoneToVirtualDeviceErrorShowing = false;
 
     public Communication() {
@@ -199,7 +203,7 @@ public class Communication extends Fragment {
                                                                                                   Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_modbusconfig, container, false);
         ButterKnife.bind(this, rootView);
-        
+        executorService = Executors.newFixedThreadPool(1);
         return rootView;
     }
     
@@ -409,42 +413,7 @@ public class Communication extends Fragment {
         initializeBACnet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isPortAvailable(5001)){
-                    Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Log.d(TAG_CCU_BACNET,"5001 port is free-->");
-
-                if(validateEntries()) {
-                    toggleZoneToVirtualDeviceMapping.setEnabled(false);
-                    initializeBACnet.setVisibility(View.GONE);
-                    disableBACnet.setVisibility(View.VISIBLE);
-                    hideView(description, tvDescription);
-                    hideView(location, tvLocation);
-                    if(password.getText().toString().trim().equals("")){
-                        textInputLayout.setVisibility(View.GONE);
-                    }else{
-                        textInputLayout.setVisibility(View.GONE);
-                        tvPassword.setVisibility(View.VISIBLE);
-                        tvPassword.setText("******");
-                    }
-                    hideView(ipAddress, tvIPAddress);
-                    hideView(localNetworkNumber, tvLocalNetworkNumber);
-                    hideView(virtualNetworkNumber, tvVirtualNetworkAddress);
-                    hideView(port, tvPort);
-                    hideView(ipDeviceInstanceNumber, tvIPDeviceInstanceNumber);
-                    hideView(apduTimeout, tvAPDUTimeout);
-                    hideView(numberOfAPDURetries, tvNumberofAPDURetries);
-                    hideView(apduSegmentTimeout, tvApduSegmentTimeout);
-                    hideView(etNotificationClassObjects, tvNotificationClassObjects);
-                    hideView(etTrendLogObjects, tvTrendLogObjects);
-                    hideView(etScheduleObjects, tvScheduleObjects);
-                    hideView(etOffsetValues, tvOffsetValue);
-                    startRestServer();
-                    sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
-                    sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App");
-                    performConfigFileBackup();
-                }
+                executeTask();
             }
         });
 
@@ -523,6 +492,44 @@ public class Communication extends Fragment {
 
             }
         });
+    }
+
+    private void handleClick(boolean isPortAvailable){
+        if(!isPortAvailable){
+            Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.d(TAG_CCU_BACNET,"5001 port is free-->");
+        if(validateEntries()) {
+            toggleZoneToVirtualDeviceMapping.setEnabled(false);
+            initializeBACnet.setVisibility(View.GONE);
+            disableBACnet.setVisibility(View.VISIBLE);
+            hideView(description, tvDescription);
+            hideView(location, tvLocation);
+            if(password.getText().toString().trim().equals("")){
+                textInputLayout.setVisibility(View.GONE);
+            }else{
+                textInputLayout.setVisibility(View.GONE);
+                tvPassword.setVisibility(View.VISIBLE);
+                tvPassword.setText("******");
+            }
+            hideView(ipAddress, tvIPAddress);
+            hideView(localNetworkNumber, tvLocalNetworkNumber);
+            hideView(virtualNetworkNumber, tvVirtualNetworkAddress);
+            hideView(port, tvPort);
+            hideView(ipDeviceInstanceNumber, tvIPDeviceInstanceNumber);
+            hideView(apduTimeout, tvAPDUTimeout);
+            hideView(numberOfAPDURetries, tvNumberofAPDURetries);
+            hideView(apduSegmentTimeout, tvApduSegmentTimeout);
+            hideView(etNotificationClassObjects, tvNotificationClassObjects);
+            hideView(etTrendLogObjects, tvTrendLogObjects);
+            hideView(etScheduleObjects, tvScheduleObjects);
+            hideView(etOffsetValues, tvOffsetValue);
+            startRestServer();
+            sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
+            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App");
+            performConfigFileBackup();
+        }
     }
 
     public static boolean isPortAvailable(int port) {
@@ -793,6 +800,24 @@ public class Communication extends Fragment {
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private void executeTask() {
+        executorService.submit(() -> {
+            boolean isPortAvailable = isPortAvailable(5001);
+            // Update the UI on the main thread
+            requireActivity().runOnUiThread(() -> {
+                handleClick(isPortAvailable);
+            });
+        });
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Shutdown the ExecutorService when the Fragment is destroyed
+        if (executorService != null) {
+            executorService.shutdown();
         }
     }
 }

@@ -1,8 +1,6 @@
 package a75f.io.renatus.compose
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -51,7 +49,9 @@ fun ToggleButton(
                 uncheckedIconColor = greyColor,
                 uncheckedTrackColor = greyColor,
                 checkedIconColor = primaryColor,
-                checkedTrackColor = primaryColor
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
             )
         )
     }

@@ -21,6 +21,7 @@ import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.ModbusLevel
 import a75f.io.renatus.modbus.util.NO_MODEL_DATA_FOUND
 import a75f.io.renatus.modbus.util.OK
+import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.SAVING
@@ -57,6 +58,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
+    var modelName = mutableStateOf("Select Model")
 
     private lateinit var modbusProfile: ModbusProfile
     private lateinit var filer: String
@@ -75,6 +77,15 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     private val _isDialogOpen = MutableLiveData<Boolean>()
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
+
+    val onItemSelect = object : OnItemSelect {
+        override fun onItemSelected(index: Int, item: String) {
+            selectedModbusType.value = index
+            modelName.value = item
+            ProgressDialogUtils.showProgressDialog( context, "Fetching $item details")
+            fetchModelDetails(item)
+        }
+    }
 
     fun configModelDefinition(context: Context) {
         this.context = context
@@ -383,5 +394,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         return (CCUHsApi.getInstance().readAllEntities(
             "equip and modbus and roomRef == \"SYSTEM\"")).isNotEmpty()
     }
+
+
 
 }

@@ -234,7 +234,7 @@ public class SettingsFragment extends Fragment {
                             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
+                            transaction.replace(R.id.flContent, fragment, "ABOUT_FRAGMENT_TAG");
                             transaction.commit();
                         } else {
                             isTransactionPending = true;

@@ -27,7 +27,8 @@ public class LModbus {
     public static final String MODBUS_REGISTER_READ_COIL = "readCoil";
     public static final String MODBUS_REGISTER_WRITE_COIL = "writeCoil";
     public static final String MODBUS_REGISTER_COIL = "coil";
-    private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
+    public static int SERIAL_COMM_TIMEOUT_MS = 1000;
+    public static boolean IS_MODBUS_DATA_RECEIVED = false;
     private static SerialCommLock modbusCommLock = new SerialCommLock();
     public static SerialCommLock getModbusCommLock() {
         return modbusCommLock;
@@ -67,7 +68,7 @@ public class LModbus {
      * */
     
     public static synchronized void readRegister(Short slaveId, Register register, int offset) {
-        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString());
+        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString()+" SERIAL_COMM_TIMEOUT_MS "+SERIAL_COMM_TIMEOUT_MS);
         byte[] requestData = LModbus.getModbusData(slaveId,
                                                    register.registerType,
                                                    register.registerAddress,

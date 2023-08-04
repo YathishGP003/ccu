@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
 import android.app.Dialog;
@@ -458,6 +459,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                             LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
                             DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         },()->{
+                            addBacnetTags(requireContext(), floorRef, zoneRef);
                             ProgressDialogUtils.hideProgressDialog();
                             FragmentDABConfiguration.this.closeAllBaseDialogFragments();
                             getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

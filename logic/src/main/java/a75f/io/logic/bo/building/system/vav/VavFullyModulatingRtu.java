@@ -15,6 +15,8 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -669,7 +671,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier")
+                            .setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -681,7 +684,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && cmd.size() > 0) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier")
+                            .setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -726,7 +730,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.COOLINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
@@ -744,7 +748,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.FANSIGNALID)
                                 .build();
                         String cmdFanSignalPtId = CCUHsApi.getInstance().addPoint(fanSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdFanSignalPtId,0.0);
@@ -762,7 +766,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.HEATINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdHeatingPtId = CCUHsApi.getInstance().addPoint(heatSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdHeatingPtId,0.0);
@@ -780,7 +784,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.CO2SIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdCo2PtId = CCUHsApi.getInstance().addPoint(co2Signal);
                         CCUHsApi.getInstance().writeHisValById(cmdCo2PtId,0.0);
@@ -821,7 +825,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
                                     .setEnums("off,on")
-                                    .setTz(tz)
+                                    .setTz(tz).setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
                                     .build();
                             String cmdHumidPtId = CCUHsApi.getInstance().addPoint(humidPt);
                             CCUHsApi.getInstance().writeHisValById(cmdHumidPtId,0.0);
@@ -839,7 +843,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("runtime")
-                                    .setTz(tz)
+                                    .setTz(tz).setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
                                     .build();
                             String cmdDehumidPtId = CCUHsApi.getInstance().addPoint(dehumidPt);
                             CCUHsApi.getInstance().writeHisValById(cmdDehumidPtId,0.0);

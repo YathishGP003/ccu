@@ -3,6 +3,8 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.projecthaystack.HDateTime;
@@ -20,13 +22,7 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HStdOps;
-import org.projecthaystack.server.HStdOps;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -154,9 +150,15 @@ public class RestoreCCUHsApi {
     public HGrid getAllEquips(String ahuRef, String gatewayRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef" +
-                        " == "+
-                        StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+                "equip and not equipRef and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef,
+                        "@") +" or ahuRef" + " == "+ StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public HGrid getModBusSubEquips(String parentEquipRef, RetryCountCallback retryCountCallback){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "equip and modbus and equipRef  == " + StringUtils.prependIfMissing(parentEquipRef, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
@@ -199,7 +201,76 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteZone(zone, zone.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
+        importZonePoints(zoneRefSet, retryCountCallback);
         Log.i(TAG, " Importing Zone completed");
+    }
+
+    public void importZonePoints(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
+        Log.i(TAG, " Importing Zone points started");
+        StringBuffer zonePointsQuery = constructQueryStringToRetrieveZonePoints(zoneRefSet);
+
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict zonePointDict = new HDictBuilder().add("filter", zonePointsQuery.toString()).toDict();
+        HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zonePointDict), retryCountCallback);
+
+        if(pointsGrid == null){
+            throw new NullHGridException("Null occurred while fetching zone points");
+        }
+
+        List<HashMap> pointMaps = ccuHsApi.HGridToList(pointsGrid);
+        List<Point> points = new ArrayList<>();
+        pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        for (Point point : points) {
+            String pointId = StringUtils.prependIfMissing(point.getId(), "@");
+            HashMap<Object, Object> p = ccuHsApi.readMapById(pointId);
+            if (p.isEmpty()) {
+                String pointLuid = hsApi.addRemotePoint(point, point.getId().replace("@", ""));
+                hsApi.setSynced(pointLuid);
+            } else {
+                CcuLog.i(TAG, "Point already imported " + point.getId());
+            }
+        }
+        for (Point point : points) {
+            HGridBuilder gridBuilder = new HGridBuilder();
+            gridBuilder.addCol("id");
+            gridBuilder.addCol("range");
+            gridBuilder.addRow(new HVal[] { HRef.make(point.getId().replaceFirst("@", "")), HStr.make("last") });
+            HGrid zonePointGrid = invokeWithRetry("hisRead", hClient, gridBuilder.toGrid(), retryCountCallback);
+            if (zonePointGrid == null) {
+                CcuLog.e(TAG, "Failed to fetch his value for point id >>"+ point.getId());
+                throw new NullHGridException("Failed to fetch his value for point id >>"+ point.getId());
+            }
+            if (zonePointGrid.numRows() > 0) {
+                zonePointGrid.dump();
+                HRow r = zonePointGrid.row(zonePointGrid.numRows() - 1);
+                ccuHsApi.writeHisValById(point.getId(), Double.parseDouble(r.get("val").toString().replaceAll(
+                        "[^-?\\d.]", "")));
+            }
+        }
+        Log.i(TAG, " Importing Zone points completed");
+    }
+
+    @NonNull
+    private StringBuffer constructQueryStringToRetrieveZonePoints(Set<String> zoneRefSet) {
+        StringBuffer zonePointsQuery = new StringBuffer();
+        String[] zoneRefArray = zoneRefSet.toArray(new String[zoneRefSet.size()]);
+
+        zonePointsQuery.append("point and not equipRef and not deviceRef and not writable and his and ");
+        zonePointsQuery.append("(");
+        for(int index = 0;  index < zoneRefArray.length-1; index++){
+            zonePointsQuery.append("roomRef");
+            zonePointsQuery.append("==");
+            zonePointsQuery.append(StringUtils.prependIfMissing(zoneRefArray[index], "@"));
+            zonePointsQuery.append(" ");
+            zonePointsQuery.append("or");
+            zonePointsQuery.append(" ");
+        }
+        zonePointsQuery.append("roomRef");
+        zonePointsQuery.append("==");
+        zonePointsQuery.append(StringUtils.prependIfMissing(zoneRefArray[zoneRefArray.length-1], "@"));
+        zonePointsQuery.append(")");
+        return zonePointsQuery;
     }
 
     public Map<String, String> getCCUVersion(List<String> equipRefs){

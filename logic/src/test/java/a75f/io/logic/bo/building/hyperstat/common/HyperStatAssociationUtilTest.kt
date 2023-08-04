@@ -56,9 +56,10 @@ class HyperStatAssociationUtilTest{
     @Test
     fun getAnalogOutAssociatedStageTest(){
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(0), CpuAnalogOutAssociation.COOLING)
-        Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(1), CpuAnalogOutAssociation.FAN_SPEED)
+        Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(1), CpuAnalogOutAssociation.MODULATING_FAN_SPEED)
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(2), CpuAnalogOutAssociation.HEATING)
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(3), CpuAnalogOutAssociation.DCV_DAMPER)
+        Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(4), CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
     }
     @Test
     fun getAnalogInStageTest(){
@@ -107,7 +108,7 @@ class HyperStatAssociationUtilTest{
 
     @Test
     fun isAnalogOutAssociatedToFanSpeedTest(){
-        Assert.assertEquals(true,HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,0.0,0.0,0.0,0.0)))
+        Assert.assertEquals(true,HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,0.0,0.0,0.0,0.0)))
         Assert.assertEquals(false,HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(AnalogOutState(true,CpuAnalogOutAssociation.COOLING,0.0,0.0,0.0,0.0,0.0)))
     }
 
@@ -192,18 +193,18 @@ class HyperStatAssociationUtilTest{
         ))
 
         Assert.assertEquals(false,HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,11.0,50.0,100.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,10.0,50.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,11.0,50.0,100.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,10.0,50.0,100.0)
         ))
 
         Assert.assertEquals(false,HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,11.0,51.0,100.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,11.0,50.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,11.0,51.0,100.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,11.0,50.0,100.0)
         ))
 
         Assert.assertEquals(false,HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,11.0,51.0,99.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,11.0,11.0,51.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,11.0,51.0,99.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,11.0,11.0,51.0,100.0)
         ))
     }
 
@@ -233,17 +234,17 @@ class HyperStatAssociationUtilTest{
         ))
 
         Assert.assertEquals(AnalogOutChanges.LOW,HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,11.0,50.0,100.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,11.0,50.0,100.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
         ))
 
         Assert.assertEquals(AnalogOutChanges.MED,HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,10.0,51.0,100.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,10.0,51.0,100.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
         ))
         Assert.assertEquals(AnalogOutChanges.HIGH,HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,10.0,50.0,99.0),
-            AnalogOutState(true,CpuAnalogOutAssociation.FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,10.0,50.0,99.0),
+            AnalogOutState(true,CpuAnalogOutAssociation.MODULATING_FAN_SPEED,0.0,10.0,10.0,50.0,100.0)
         ))
     }
 

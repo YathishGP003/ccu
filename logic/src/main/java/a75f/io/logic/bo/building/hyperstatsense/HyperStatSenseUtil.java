@@ -187,7 +187,7 @@ public class HyperStatSenseUtil {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-SENSE-" + nodeaddr + "-";
+        String equipDis = siteDis + "-MONITORING-" + nodeaddr + "-";
         Bundle bundle = new Bundle();
         if (tag.equals("analog1")) {
             bundle = getAnalogBundle(val);
@@ -214,7 +214,7 @@ public class HyperStatSenseUtil {
                 .setShortDis(shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("zone").addMarker("his").addMarker(tag)
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(nodeaddr))
                 .setMinVal(minVal)
                 .setMaxVal(maxVal)

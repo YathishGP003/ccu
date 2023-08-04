@@ -12,7 +12,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
@@ -402,9 +401,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog1 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao1AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao1fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog1 and output and low"
@@ -433,9 +432,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog2 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao2AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao2fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog2 and output and low"
@@ -464,9 +463,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog3 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao3fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog3 and output and low"

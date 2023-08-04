@@ -34,6 +34,7 @@ import a75f.io.renatus.R
     var isDisplayVOCEnabled: Boolean,
     var isDisplayPp2p5Enabled: Boolean,
     var isDisplayCo2Enabled: Boolean,
+    var stagedFanUis: List<Int>
 ) {
 
     companion object {
@@ -121,6 +122,10 @@ import a75f.io.renatus.R
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
             isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = listOf(
+                config.coolingStage1FanState, config.coolingStage2FanState, config.coolingStage3FanState,
+                config.heatingStage1FanState, config.heatingStage2FanState, config.heatingStage3FanState
+            )
         )
 
         private fun fromConfigPipe2(config: HyperStatPipe2Configuration) = ViewState(
@@ -183,7 +188,8 @@ import a75f.io.renatus.R
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5
+            isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = emptyList()
         )
 
         private fun fromConfigHpu(config: HyperStatHpuConfiguration) = ViewState(
@@ -245,7 +251,8 @@ import a75f.io.renatus.R
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5
+            isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = emptyList()
         )
 
     }
@@ -295,6 +302,13 @@ import a75f.io.renatus.R
             )
             analogIn1State = AnalogInState(analogIns[0].enabled,AnalogInAssociation.values()[analogIns[0].association])
             analogIn2State = AnalogInState(analogIns[1].enabled,AnalogInAssociation.values()[analogIns[1].association])
+
+            coolingStage1FanState = stagedFanUis[0]
+            coolingStage2FanState = stagedFanUis[1]
+            coolingStage3FanState = stagedFanUis[2]
+            heatingStage1FanState = stagedFanUis[3]
+            heatingStage2FanState = stagedFanUis[4]
+            heatingStage3FanState = stagedFanUis[5]
 
             zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
             zoneCO2Threshold = openingDamperValueFromIndex(zoneCO2ThresholdPos)
@@ -441,9 +455,10 @@ val CpuAnalogOutAssociation.displayName: Int
     get() {
         return when (this) {
             CpuAnalogOutAssociation.COOLING -> R.string.cooling
-            CpuAnalogOutAssociation.FAN_SPEED -> R.string.fan_speed
+            CpuAnalogOutAssociation.MODULATING_FAN_SPEED -> R.string.modulating_fan_speed
             CpuAnalogOutAssociation.HEATING -> R.string.heating
             CpuAnalogOutAssociation.DCV_DAMPER -> R.string.dcv_damper
+            CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED -> R.string.predefined_fan_speed
         }
     }
 
@@ -467,9 +482,10 @@ fun getAnalogOutDisplayName(profileType: ProfileType, enumValue: Int): Int{
         ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT ->{
             when (enumValue) {
                 CpuAnalogOutAssociation.COOLING.ordinal-> return R.string.cooling
-                CpuAnalogOutAssociation.FAN_SPEED.ordinal -> return R.string.fan_speed
+                CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal -> return R.string.modulating_fan_speed
                 CpuAnalogOutAssociation.HEATING.ordinal -> return R.string.heating
                 CpuAnalogOutAssociation.DCV_DAMPER.ordinal -> return R.string.dcv_damper
+                CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal -> return R.string.predefined_fan_speed
             }
         }
         ProfileType.HYPERSTAT_TWO_PIPE_FCU ->{

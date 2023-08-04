@@ -1,6 +1,6 @@
 package a75f.io.messaging.handler;
 
-import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
+import static a75f.io.messaging.handler.DataSyncHandler.isCloudScheduleHasLatestValue;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -50,10 +51,6 @@ public class UpdateScheduleHandler implements MessageHandler
     public static void handleMessage(JsonObject msgObject, Long timeToken) {
         String uid = msgObject.get("id").getAsString();
         HashMap<Object,Object> scheduleEntity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
-        if(!isCloudEntityHasLatestValue(scheduleEntity, timeToken)){
-            Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
-            return;
-        }
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
@@ -71,8 +68,18 @@ public class UpdateScheduleHandler implements MessageHandler
         Iterator it = sGrid.iterator();
         while (it.hasNext())
         {
-
             HRow r = (HRow) it.next();
+            HDateTime lastModifiedDateTime;
+            Object lastModifiedTimeTag = r.get("lastModifiedDateTime", false);
+            if (lastModifiedTimeTag != null) {
+                lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+            } else {
+                lastModifiedDateTime = null;
+            }
+            if(!isCloudScheduleHasLatestValue(scheduleEntity, lastModifiedDateTime)){
+                Log.i(L.TAG_CCU_READ_CHANGES,"CCU HAS LATEST VALUE ");
+                return;
+            }
             if (CCUHsApi.getInstance().isEntityExisting("@" + uid))
             {
                 HDict scheduleDict = new HDictBuilder().add(r).toDict();

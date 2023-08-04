@@ -439,6 +439,67 @@
                 android:text="Crash App"
                 android:visibility="gone" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text="Set serial comm timeout:" />
+                <EditText
+                    android:id="@+id/serialCommTimeOut"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="300"
+                    android:padding="10dp"
+                    android:inputType="number"
+                    />
+
+                <Button
+                    android:id="@+id/saveSerialCommTimeOut"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:text="Save" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_margin="10dp"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text="Register request count:" />
+                <EditText
+                    android:id="@+id/registerRequestCount"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="3"
+                    android:inputType="number"
+                    android:padding="10dp"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/saveRegisterRequestCount"
+                    android:textSize="20sp"
+                    android:padding="10dp"
+                    android:text="Save" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

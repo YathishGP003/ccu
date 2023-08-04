@@ -32,3 +32,8 @@ class AnalogInWidgets(
     val switch: ToggleButton,
     val selector: Spinner
 )
+
+class StagedFanWidgets(
+    val stagedFanLabel : TextView,
+    val selector : Spinner
+)

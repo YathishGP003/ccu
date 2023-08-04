@@ -84,7 +84,7 @@ configurations {
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:20230621.10-dev') {
+    customImplementation('io.seventyfivef:domain-modeler-lib:20230803.1-prod') {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -128,7 +128,7 @@ task getExternalLibraryPaths {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20230621.10-dev.jar')) {
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20230803.1-prod.jar')) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

@@ -56,8 +56,8 @@ class HyperStatSettingsUtil {
                     settings2.thermistor2Enable = getTh2SupplyWaterTempEnabled(hsApi, equipRef)
                 }
 
-                ProfileType.HYPERSTAT_SENSE.name -> {
-                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_SENSE
+                ProfileType.HYPERSTAT_MONITORING.name -> {
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_MONITORING
                 }
                 ProfileType.HYPERSTAT_VRV.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_VRV
@@ -88,7 +88,7 @@ class HyperStatSettingsUtil {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                     settings3.fcuTuners = getFcuTunerDetails(equipRef)
                 }
-                ProfileType.HYPERSTAT_SENSE.name -> {
+                ProfileType.HYPERSTAT_MONITORING.name -> {
                     /** Do nothing */
                 }
                 ProfileType.HYPERSTAT_VRV.name -> {

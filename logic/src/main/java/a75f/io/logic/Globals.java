@@ -2,7 +2,6 @@ package a75f.io.logic;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -13,7 +12,6 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +23,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
@@ -44,7 +40,7 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
@@ -547,10 +543,10 @@ public class Globals {
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
 
-                        case HYPERSTAT_SENSE:
-                            HyperStatSenseProfile hssense = new HyperStatSenseProfile();
-                            hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
-                            L.ccu().zoneProfiles.add(hssense);
+                        case HYPERSTAT_MONITORING:
+                            HyperStatMonitoringProfile hyperStatMonitoringProfile = new HyperStatMonitoringProfile();
+                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
                             break;
                         case OTN:
                             OTNProfile otnProfile = new OTNProfile();

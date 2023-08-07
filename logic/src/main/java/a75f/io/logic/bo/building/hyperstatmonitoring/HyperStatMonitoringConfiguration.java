@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.hyperstatsense;
+package a75f.io.logic.bo.building.hyperstatmonitoring;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
@@ -7,7 +7,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
  * This class if a configuration class for Hyperstat sense
  */
 
-public class HyperStatSenseConfiguration extends BaseProfileConfiguration {
+public class HyperStatMonitoringConfiguration extends BaseProfileConfiguration {
 
     public double temperatureOffset;
     public int analog1Sensor;

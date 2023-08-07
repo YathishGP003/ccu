@@ -27,16 +27,16 @@ import butterknife.Optional;
  * Created by spoorthidev On 23/06/2021
  */
 
-public class HyperStatSensePairScreen  extends BaseDialogFragment {
+public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
 
 
-    public static final String ID = HyperStatSensePairScreen.class.getSimpleName();
+    public static final String ID = HyperStatMonitoringPairScreen.class.getSimpleName();
     short        mNodeAddress;
     String       mRoomName;
     String       mFloorName;
     ProfileType   mProfileName;
 
-    @BindView(R.id.hyperSensePairing)
+    @BindView(R.id.hyperStatMonitoringPairing)
     ImageView pairImage;
 
 
@@ -60,18 +60,18 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
     }
 
     private void OnPair() {
-        if (mProfileName == ProfileType.HYPERSTAT_SENSE) {
+        if (mProfileName == ProfileType.HYPERSTAT_MONITORING) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        HyperStatSenseFragment.newInstance( mNodeAddress,
+                        HyperStatMonitoringFragment.newInstance( mNodeAddress,
                                 mRoomName,
                                 mFloorName,
-                                ProfileType.HYPERSTAT_SENSE),
-                        HyperStatSenseFragment.ID
+                                ProfileType.HYPERSTAT_MONITORING),
+                        HyperStatMonitoringFragment.ID
                 );
             } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                        .getInstance(mNodeAddress, mRoomName, mFloorName, NodeType.HYPER_STAT, ProfileType.HYPERSTAT_SENSE);
+                        .getInstance(mNodeAddress, mRoomName, mFloorName, NodeType.HYPER_STAT, ProfileType.HYPERSTAT_MONITORING);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
@@ -83,8 +83,8 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
         return ID;
     }
 
-    public static HyperStatSensePairScreen newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType){
-        HyperStatSensePairScreen f = new HyperStatSensePairScreen();
+    public static HyperStatMonitoringPairScreen newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType){
+        HyperStatMonitoringPairScreen f = new HyperStatMonitoringPairScreen();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
@@ -97,13 +97,13 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.hyperstatsensepairinginstscr, container, false);
+        View view = inflater.inflate(R.layout.hyperstatmonitoringpairinginstscr, container, false);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mProfileName = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         ButterKnife.bind(this, view);
-        pairImage = view.findViewById(R.id.hyperSensePairing);
+        pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
         if(CCUUiUtil.isDaikinEnvironment(getContext())){
             pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
         }

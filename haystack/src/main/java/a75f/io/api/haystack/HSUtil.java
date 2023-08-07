@@ -303,9 +303,9 @@ public class HSUtil
                 || (pointEntity.containsKey(Tags.MAXIMIZED) && pointEntity.containsKey(Tags.EXIT));
     }
 
-    public static boolean isSenseConfig(String id, CCUHsApi hayStack) {
+    public static boolean isMonitoringConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.SENSE)
+        return pointEntity.containsKey(Tags.MONITORING)
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 

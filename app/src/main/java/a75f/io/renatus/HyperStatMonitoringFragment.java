@@ -27,8 +27,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -44,13 +44,12 @@ import butterknife.OnCheckedChanged;
  */
 
 
-public class HyperStatSenseFragment extends BaseDialogFragment {
+public class HyperStatMonitoringFragment extends BaseDialogFragment {
 
-    public static final String ID = HyperStatSenseFragment.class.getSimpleName();
-    public static final String LOG_TAG = HyperStatSenseFragment.class.getSimpleName();
-    private HyperStatSenseVM mHyperStatSenseVM;
-    private HyperStatSenseProfile mHSSenseProfile;
-    HyperStatSenseConfiguration mHSSenseConfig;
+    public static final String ID = HyperStatMonitoringFragment.class.getSimpleName();
+    public static final String LOG_TAG = HyperStatMonitoringFragment.class.getSimpleName();
+    private HyperStatMonitoringProfile hyperStatMonitoringProfile;
+    HyperStatMonitoringConfiguration hyperStatMonitoringConfiguration;
     static int TEMPERATURE_OFFSET = 100;
 
     short mNodeAddress;
@@ -96,8 +95,8 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     }
 
 
-    public static HyperStatSenseFragment newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
-        HyperStatSenseFragment f = new HyperStatSenseFragment();
+    public static HyperStatMonitoringFragment newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
+        HyperStatMonitoringFragment f = new HyperStatMonitoringFragment();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
@@ -115,7 +114,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_hssense_config, container, false);
+        View view = inflater.inflate(R.layout.fragment_hs_monitoring_config, container, false);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -129,7 +128,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(mNodeAddress);
+        hyperStatMonitoringProfile = (HyperStatMonitoringProfile) L.getProfile(mNodeAddress);
         setSpinnerListItem();
 
         /** Setting temperature offset limit */
@@ -141,30 +140,30 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mTemperatureOffset.setMaxValue(nums.length -1);
         mTemperatureOffset.setWrapSelectorWheel(false);
         mTemperatureOffset.setValue(TEMPERATURE_OFFSET);
-        if (mHSSenseProfile != null) {
-            CcuLog.d(L.TAG_CCU_UI, "Get HyperStat SenseConfig: ");
-            mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);
-            mTemperatureOffset.setValue((offsetIndexFromValue(-10,0.1,mHSSenseConfig.temperatureOffset)));
+        if (hyperStatMonitoringProfile != null) {
+            CcuLog.d(L.TAG_CCU_UI, "Get HyperStat monitoringConfig: ");
+            hyperStatMonitoringConfiguration = (HyperStatMonitoringConfiguration) hyperStatMonitoringProfile.getProfileConfiguration(mNodeAddress);
+            mTemperatureOffset.setValue((offsetIndexFromValue(-10,0.1, hyperStatMonitoringConfiguration.temperatureOffset)));
 
 
-            mThermostat1Sp.setSelection(mHSSenseConfig.th1Sensor);
-            mThermostat2Sp.setSelection(mHSSenseConfig.th2Sensor);
-            mAnalog1Sp.setSelection(mHSSenseConfig.analog1Sensor);
-            mAnalog2Sp.setSelection(mHSSenseConfig.analog2Sensor);
+            mThermostat1Sp.setSelection(hyperStatMonitoringConfiguration.th1Sensor);
+            mThermostat2Sp.setSelection(hyperStatMonitoringConfiguration.th2Sensor);
+            mAnalog1Sp.setSelection(hyperStatMonitoringConfiguration.analog1Sensor);
+            mAnalog2Sp.setSelection(hyperStatMonitoringConfiguration.analog2Sensor);
 
-            mThermostat1Sp.setEnabled(mHSSenseConfig.isTh1Enable);
-            mThermostat2Sp.setEnabled(mHSSenseConfig.isTh2Enable);
-            mAnalog1Sp.setEnabled(mHSSenseConfig.isAnalog1Enable);
-            mAnalog2Sp.setEnabled(mHSSenseConfig.isAnalog2Enable);
+            mThermostat1Sp.setEnabled(hyperStatMonitoringConfiguration.isTh1Enable);
+            mThermostat2Sp.setEnabled(hyperStatMonitoringConfiguration.isTh2Enable);
+            mAnalog1Sp.setEnabled(hyperStatMonitoringConfiguration.isAnalog1Enable);
+            mAnalog2Sp.setEnabled(hyperStatMonitoringConfiguration.isAnalog2Enable);
 
-            mTherm1toggle.setChecked(mHSSenseConfig.isTh1Enable);
-            mTherm2toggle.setChecked(mHSSenseConfig.isTh2Enable);
-            mAnalog1toggle.setChecked(mHSSenseConfig.isAnalog1Enable);
-            mAnalog2toggle.setChecked(mHSSenseConfig.isAnalog2Enable);
+            mTherm1toggle.setChecked(hyperStatMonitoringConfiguration.isTh1Enable);
+            mTherm2toggle.setChecked(hyperStatMonitoringConfiguration.isTh2Enable);
+            mAnalog1toggle.setChecked(hyperStatMonitoringConfiguration.isAnalog1Enable);
+            mAnalog2toggle.setChecked(hyperStatMonitoringConfiguration.isAnalog2Enable);
 
         } else {
-            CcuLog.d(L.TAG_CCU_UI, "Create Hyperstatsense Profile: ");
-            mHSSenseProfile = new HyperStatSenseProfile();
+            CcuLog.d(L.TAG_CCU_UI, "Create Hyperstatmonitoring Profile: ");
+            hyperStatMonitoringProfile = new HyperStatMonitoringProfile();
             /** Spinner id disabled by default */
             mThermostat1Sp.setEnabled(false);
             mThermostat2Sp.setEnabled(false);
@@ -221,7 +220,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             @Override
             protected Void doInBackground(final String... params) {
                 CCUHsApi.getInstance().resetCcuReady();
-                setupSenseProfile();
+                setUpMonitoringProfile();
                 L.saveCCUState();
                 CCUHsApi.getInstance().setCcuReady();
                 return null;
@@ -230,36 +229,36 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             @Override
             protected void onPostExecute(final Void result) {
                 ProgressDialogUtils.hideProgressDialog();
-                HyperStatSenseFragment.this.closeAllBaseDialogFragments();
+                HyperStatMonitoringFragment.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendHyperStatSeedMessage(mNodeAddress, mRoomName, mFloorName, false);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-    private void setupSenseProfile() {
+    private void setUpMonitoringProfile() {
 
-        HyperStatSenseConfiguration hssense = new HyperStatSenseConfiguration();
-        hssense.temperatureOffset = offsetFromIndex(-10,0.1,mTemperatureOffset.getValue()) * 10;
-        hssense.isTh1Enable = mTherm1toggle.isChecked();
-        hssense.isTh2Enable = mTherm2toggle.isChecked();
-        hssense.isAnalog1Enable = mAnalog1toggle.isChecked();
-        hssense.isAnalog2Enable = mAnalog2toggle.isChecked();
-        hssense.th1Sensor = mThermostat1Sp.getSelectedItemPosition();
-        hssense.th2Sensor = mThermostat2Sp.getSelectedItemPosition();
-        hssense.analog1Sensor = mAnalog1Sp.getSelectedItemPosition();
-        hssense.analog2Sensor = mAnalog2Sp.getSelectedItemPosition();
+        HyperStatMonitoringConfiguration monitoringConfiguration = new HyperStatMonitoringConfiguration();
+        monitoringConfiguration.temperatureOffset = offsetFromIndex(-10,0.1,mTemperatureOffset.getValue()) * 10;
+        monitoringConfiguration.isTh1Enable = mTherm1toggle.isChecked();
+        monitoringConfiguration.isTh2Enable = mTherm2toggle.isChecked();
+        monitoringConfiguration.isAnalog1Enable = mAnalog1toggle.isChecked();
+        monitoringConfiguration.isAnalog2Enable = mAnalog2toggle.isChecked();
+        monitoringConfiguration.th1Sensor = mThermostat1Sp.getSelectedItemPosition();
+        monitoringConfiguration.th2Sensor = mThermostat2Sp.getSelectedItemPosition();
+        monitoringConfiguration.analog1Sensor = mAnalog1Sp.getSelectedItemPosition();
+        monitoringConfiguration.analog2Sensor = mAnalog2Sp.getSelectedItemPosition();
 
-        mHSSenseProfile.getProfileConfiguration().put(mNodeAddress, hssense);
-        if (mHSSenseConfig == null) {
+        hyperStatMonitoringProfile.getProfileConfiguration().put(mNodeAddress, monitoringConfiguration);
+        if (hyperStatMonitoringConfiguration == null) {
             Log.d(LOG_TAG, "Creating new config");
-            mHSSenseProfile.addHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE, mNodeAddress, hssense, mFloorName, mRoomName);
+            hyperStatMonitoringProfile.addHyperStatMonitoringEquip(ProfileType.HYPERSTAT_MONITORING, mNodeAddress, monitoringConfiguration, mFloorName, mRoomName);
         } else {
             Log.d(LOG_TAG, " Update config");
-            mHSSenseProfile.updateHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE, mNodeAddress, hssense, mFloorName, mRoomName);
+            hyperStatMonitoringProfile.updateHyperStatMonitoringEquip(ProfileType.HYPERSTAT_MONITORING, mNodeAddress, monitoringConfiguration, mFloorName, mRoomName);
         }
-        L.ccu().zoneProfiles.add(mHSSenseProfile);
-        CcuLog.d(L.TAG_CCU_UI, "Set Hyperstat sense Config: Profiles - " + L.ccu().zoneProfiles.size());
+        L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
+        CcuLog.d(L.TAG_CCU_UI, "Set Hyperstat monitoring Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
 

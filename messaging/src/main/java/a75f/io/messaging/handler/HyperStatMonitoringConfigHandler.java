@@ -10,25 +10,25 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseUtil;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringUtil;
 
 
 /*
  * created by spoorthidev on 20-July-2021
  */
 
-class HyperStatSenseConfigHandler {
+class HyperStatMonitoringConfigHandler {
 
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        CcuLog.i(L.TAG_CCU_PUBNUB, "updateHyperStatSenseConfigPoint " + configPoint + " " + msgObject.toString()
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateHyperStatMonitoringConfigPoint " + configPoint + " " + msgObject.toString()
                 + " Markers =" + configPoint.getMarkers());
 
         if (configPoint.getMarkers().contains(Tags.ENABLED)) {
-            HyperStatSenseUtil.updateConfigEnabled(msgObject, configPoint, hayStack);
+            HyperStatMonitoringUtil.updateConfigEnabled(msgObject, configPoint, hayStack);
         } else if (configPoint.getMarkers().contains("offset")) {
-            HyperStatSenseUtil.updatetempOffset(msgObject, configPoint, hayStack);
+            HyperStatMonitoringUtil.updatetempOffset(msgObject, configPoint, hayStack);
         } else {
-            HyperStatSenseUtil.updateConfig(msgObject, configPoint, hayStack);
+            HyperStatMonitoringUtil.updateConfig(msgObject, configPoint, hayStack);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
 

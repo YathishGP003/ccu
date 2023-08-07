@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.hyperstatsense;
+package a75f.io.logic.bo.building.hyperstatmonitoring;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -6,7 +6,6 @@ import android.util.Log;
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
-import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -19,15 +18,14 @@ import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
-import a75f.io.logic.bo.haystack.device.SmartStat;
 
 /*
  * created by spoorthidev on 20-July-2021
  */
 
-public class HyperStatSenseUtil {
+public class HyperStatMonitoringUtil {
 
-    private static String LOG_TAG = "HyperStatSenseUtil";
+    private static String LOG_TAG = "HyperStatMonitoringUtil";
 
     public static void updateConfigEnabled(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         Log.d(LOG_TAG, "updateConfigEnabled ++");
@@ -214,7 +212,7 @@ public class HyperStatSenseUtil {
                 .setShortDis(shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("zone").addMarker("his").addMarker(tag)
-                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
+                .addMarker("hyperstat").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(nodeaddr))
                 .setMinVal(minVal)
                 .setMaxVal(maxVal)

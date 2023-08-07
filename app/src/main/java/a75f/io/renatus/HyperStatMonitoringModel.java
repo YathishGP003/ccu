@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-public class HyperStatSenseModel {
+public class HyperStatMonitoringModel {
 
     String tempOffset;
     boolean th1toggle;
@@ -12,7 +12,7 @@ public class HyperStatSenseModel {
     int anlg1Sp;
     int anlg2Sp;
 
-    public HyperStatSenseModel() {
+    public HyperStatMonitoringModel() {
         tempOffset = "0";
         th1toggle = false;
         th2toggle = false;

@@ -106,8 +106,8 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
-        if (HSUtil.isSenseConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperStatSenseConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+        if (HSUtil.isMonitoringConfig(pointUid, CCUHsApi.getInstance())) {
+            HyperStatMonitoringConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }

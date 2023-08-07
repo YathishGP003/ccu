@@ -412,7 +412,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mNodeType == NodeType.HYPER_STAT) {
             title.setText(R.string.title_pairhss);
-            pairinginstruct.setImageResource(R.drawable.sensepairscreen);
+            pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }
     }
     

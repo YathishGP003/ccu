@@ -187,15 +187,8 @@ public class ModbusEquip {
                     .addTag("multiplier", HStr.make(configParam.getMultiplier()))
                     .addTag("wordOrder", HStr.make(configParam.getWordOrder()))
                     .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
-                    .addTag("bitParam", HNum.make( (configParam.getBitParam() != null) ? configParam.getBitParam() : 0));
+                    .addTag("bitParam", HStr.make( (configParam.getBitParam() != null) ? configParam.getBitParam().toString() : "0"));
 
-            Log.i("DMModbus","getParameterDefinitionType "+configParam.getParameterDefinitionType());
-            Log.i("DMModbus","getMultiplier "+configParam.getMultiplier());
-            Log.i("DMModbus","getBitParamRange "+configParam.getBitParamRange());
-            Log.i("DMModbus","wordOrder "+configParam.getWordOrder());
-            Log.i("DMModbus","getBitParam "+configParam.getBitParam());
-
-            Log.i("DMModbus","getTags "+physicalParamPoint.build().getTags());
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
             }

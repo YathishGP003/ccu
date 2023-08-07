@@ -3,7 +3,11 @@ package a75f.io.renatus.modbus;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +19,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.tooltip.Tooltip;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +69,18 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
+        if (modbusParam.get(position).getName().length() > 30)
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,30));
+        else
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
+
+        viewHolder.tvParamLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showToolTip(modbusParam.get(position).getName(), view);
+            }
+        });
+
         if (modbusParam.get(position).getParameterDefinitionType() != null) {
             switch (modbusParam.get(position).getParameterDefinitionType()) {
                 case "range":
@@ -264,13 +281,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         double value = readVal(id);
-        //write to modbus
-        /*List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
-        } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
-        }*/
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
@@ -392,4 +402,17 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             }
         }
     }
+
+    public void showToolTip(String text, View v) {
+        Tooltip intrinsicScheduleToolTip = new Tooltip.Builder(v)
+                .setBackgroundColor(Color.BLACK)
+                .setTextColor(Color.WHITE)
+                .setCancelable(true)
+                .setDismissOnClick(true)
+                .setGravity(Gravity.TOP)
+                .setText(text)
+                .show();
+        new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
+    }
 }
+

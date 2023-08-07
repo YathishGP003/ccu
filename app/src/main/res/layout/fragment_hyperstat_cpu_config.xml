@@ -1133,7 +1133,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/renatus_75f_primary"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp"
                 tools:ignore="SpUsage" />
         </LinearLayout>

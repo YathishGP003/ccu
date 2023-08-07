@@ -195,6 +195,7 @@
     </declare-styleable>
 
     <attr name="orange_75f" format="reference|color" />
+    <attr name="orange_75f_secondary" format="reference|color" />
 
     <attr name="AppTheme.AppBarOverlay" format="reference" />
     <attr name="AppTheme.PopupOverlay" format="reference" />

@@ -456,7 +456,7 @@
                         android:digits="255"
                         app:passwordToggleEnabled="true"
                         app:passwordToggleDrawable="@drawable/show_password_selector"
-                        app:passwordToggleTint="@color/renatus_75f_primary"
+                        app:passwordToggleTint="?orange_75f"
                         android:textColorHint="@color/buttonTextColor"
                         android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey">

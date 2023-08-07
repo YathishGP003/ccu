@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 
@@ -86,6 +87,15 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
 
     @BindView(R.id.daikin_ccu)
     ImageView daikinCcu;
+
+    @BindView(R.id.hyperstatImageId)
+    ImageView hyperStatImage;
+
+    @BindView(R.id.smartNodeId)
+    ImageView smartNodeImage;
+
+    @BindView(R.id.helioNodeId)
+    ImageView helioNodeImage;
 
 
     @Override
@@ -306,10 +316,18 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
 
     private void configCCULogo(){
 
-        if(CCUUiUtil.isDaikinEnvironment(getContext()))
+        if(CCUUiUtil.isDaikinEnvironment(requireContext()))
             daikinCcu.setVisibility(View.VISIBLE);
-        else
+        else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+            daikinCcu.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_ccu, null));
+            daikinCcu.setVisibility(View.VISIBLE);
+            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_image, null));
+            smartNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.smartnode_device_image, null));
+            helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
+        } else {
+            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_75f, null));
             ccu75Image.setVisibility(View.VISIBLE);
+        }
 
     }
 }

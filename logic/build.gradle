@@ -99,6 +99,20 @@ android {
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/getDetails\"'
             minifyEnabled false
         }
+
+        carrier_prod {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.carrier.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.carrier.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.carrier.service.75f.io/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.carrier.service.75f.io/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.carrier.service.75f.io/\"'
+            buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.carrier.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.carrier.service.75f.io//version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.carrier.service.75f.io//version/getDetails\"'
+
+            minifyEnabled false
+        }
         staging {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.staging.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.staging.service.75f.io/api/v1/\"'

@@ -58,7 +58,6 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -181,13 +180,6 @@ public class FloorPlanFragment extends Fragment {
                         } else {
                             updateModules(getSelectedZone());
                             setScheduleType(getSelectedZone().getId());
-                            //Update BACnet Database Revision by adding new module to zone
-                            ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
-                            if (zoneEquips.size() == 1) {
-                                if (!zoneEquips.get(0).getMarkers().contains("pid") && !zoneEquips.get(0).getMarkers().contains("emr")) {
-                                    BACnetUtils.updateDatabaseRevision();
-                                }
-                            }
                         }
                         //Crash here because of activity null while moving to other fragment and return back here after edit config
                         if ((getActivity() != null) && (mPairingReceiver != null))

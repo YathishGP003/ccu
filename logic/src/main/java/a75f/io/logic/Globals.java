@@ -2,6 +2,7 @@ package a75f.io.logic;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;

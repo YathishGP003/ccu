@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -57,17 +58,20 @@ class ModelSelectionFragment : DialogFragment() {
 
     var itemsList = mutableStateOf(emptyList<String>())
     lateinit var onItemSelect: OnItemSelect
+    lateinit var placeholder: String
 
     companion object {
         val ID: String = HyperStatSenseFragment::class.java.simpleName
 
         fun newInstance(
             items: MutableState<List<String>>,
-            onItemSelect: OnItemSelect
+            onItemSelect: OnItemSelect,
+            placeholder: String
         ): ModelSelectionFragment {
             val fragment = ModelSelectionFragment()
             fragment.itemsList = items
             fragment.onItemSelect = onItemSelect
+            fragment.placeholder = placeholder
             return fragment
         }
     }
@@ -101,7 +105,7 @@ class ModelSelectionFragment : DialogFragment() {
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = { Text("Search for Parameter") },
+                    placeholder = { Text(placeholder) },
                     singleLine = true,
                     colors = TextFieldDefaults.textFieldColors(
                         focusedIndicatorColor = Color.Red,

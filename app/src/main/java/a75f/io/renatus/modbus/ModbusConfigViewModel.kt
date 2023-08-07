@@ -19,6 +19,7 @@ import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.ModbusLevel
+import a75f.io.renatus.modbus.util.NO_INTERNET
 import a75f.io.renatus.modbus.util.NO_MODEL_DATA_FOUND
 import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.modbus.util.OnItemSelect
@@ -152,13 +153,13 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND, true)
                     }
                 } catch (e: Exception) {
-                    showErrorDialog(context, e.localizedMessage!!, true)
+                    showErrorDialog(context, NO_INTERNET, true)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, response!!, true)
+                showErrorDialog(context, NO_INTERNET, true)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -195,22 +196,22 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                             showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
                         }
                     } catch (e: JsonParseException) {
-                        showErrorDialog(context, e.message!!, false)
+                        showErrorDialog(context, NO_INTERNET, true)
                     }
                 } else {
-                    showErrorDialog(context, response!!, false)
+                    showErrorDialog(context, NO_INTERNET, true)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, response!!, false)
+                showErrorDialog(context, NO_INTERNET, true)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
     }
 
-    fun getSlaveIds(isParent: Boolean): List<String> {
+    private fun getSlaveIds(isParent: Boolean): List<String> {
         val slaveAddress: ArrayList<String> = ArrayList()
         if (!isParent) slaveAddress.add(SAME_AS_PARENT)
         for (i in 1..247) slaveAddress.add(i.toString())

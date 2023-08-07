@@ -20,6 +20,8 @@ import a75f.io.renatus.modbus.util.MODBUS
 import a75f.io.renatus.modbus.util.ModbusLevel
 import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.SAME_AS_PARENT
+import a75f.io.renatus.modbus.util.SEARCH_MODEL
+import a75f.io.renatus.modbus.util.SEARCH_SLAVE_ID
 import a75f.io.renatus.modbus.util.SELECT_ALL
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.modbus.util.SLAVE_ID
@@ -124,11 +126,11 @@ class ModbusConfigView : BaseDialogFragment() {
                         TextViewWithClick(
                             text = viewModel.modelName,
                             onClick = {
-                                ProgressDialogUtils.showProgressDialog(context, "Loading..")
+                                ProgressDialogUtils.showProgressDialog(context, LOADING)
                                 showDialogFragment(
                                     ModelSelectionFragment.newInstance(
                                         viewModel.deviceList,
-                                        viewModel.onItemSelect
+                                        viewModel.onItemSelect,SEARCH_MODEL
                                     ), ModelSelectionFragment.ID
                                 )
                             },
@@ -161,11 +163,11 @@ class ModbusConfigView : BaseDialogFragment() {
                         TextViewWithClickOption(
                             text = viewModel.equipModel.value.slaveId,
                             onClick = {
-                                ProgressDialogUtils.showProgressDialog(context, "Loading..")
+                                ProgressDialogUtils.showProgressDialog(context, LOADING)
                                 showDialogFragment(
                                     ModelSelectionFragment.newInstance(
                                         viewModel.slaveIdList,
-                                        onItemSelect
+                                        onItemSelect, SEARCH_SLAVE_ID
                                     ), ModelSelectionFragment.ID
                                 )
                             },
@@ -280,7 +282,7 @@ class ModbusConfigView : BaseDialogFragment() {
                                     showDialogFragment(
                                         ModelSelectionFragment.newInstance(
                                             viewModel.childSlaveIdList,
-                                            onItemSelect
+                                            onItemSelect, SEARCH_SLAVE_ID
                                         ), ModelSelectionFragment.ID
                                     )
                                 },

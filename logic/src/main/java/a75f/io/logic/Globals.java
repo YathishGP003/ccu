@@ -696,7 +696,7 @@ public class Globals {
         HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
         HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
 
-        if(systemProfile.isEmpty()){
+        if(systemProfile.isEmpty() || ccuDevice.isEmpty()){
             return;
         }
 

@@ -39,6 +39,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
+import androidx.core.view.size
 import java.util.*
 
 
@@ -140,6 +141,9 @@ private fun setUpConditionFanConfig(
             conditionMode = 0
         }
     }
+    if (conditionMode >= conModeAdapter.count) {
+        conditionMode = 0
+    }
     try {
         conditioningModeSpinner.adapter = conModeAdapter
         conditioningModeSpinner.setSelection(conditionMode, false)
@@ -150,6 +154,9 @@ private fun setUpConditionFanConfig(
         RelayUtil.getFanOptionByLevel((cpuEquipPoints[HSZoneStatus.FAN_LEVEL.name] as Int?)!!)
     val fanModeAdapter = createAdapter(context, fanSpinnerSelectionValues)
 
+    if (fanMode >= fanModeAdapter.count) {
+        fanMode = 0
+    }
     try {
         fanModeSpinner.adapter = fanModeAdapter
         fanModeSpinner.setSelection(fanMode, false)

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -103,6 +104,11 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mProfileName = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         ButterKnife.bind(this, view);
+        pairImage = view.findViewById(R.id.hyperSensePairing);
+        if(CCUUiUtil.isDaikinEnvironment(requireContext())){
+            pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.daikenhsspairscreen, null));
+        } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+            pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrierhspairingscreen, null));
         pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
         if(CCUUiUtil.isDaikinEnvironment(getContext())){
             pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));

@@ -56,6 +56,11 @@ android {
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-f0c1e96b-0869-47d5-9190-4191ab7d7bf1\"'
             buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-4a8955cd-6d2b-413c-aab6-c1f4f1992280\"'
         }
+        carrier_prod {
+            minifyEnabled false
+            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-c229e29b-b568-4ee6-9298-c384631f501b\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-fc6c85e6-952a-459d-a1af-d442f29ca271\"'
+        }
         staging {
             minifyEnabled false
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-746e8311-38fe-4381-b557-e88278aa8516\"'

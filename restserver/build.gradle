@@ -40,6 +40,11 @@ android {
         qa {
             minifyEnabled false
         }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
         dev_qa {
             minifyEnabled false
         }

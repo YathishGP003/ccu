@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_75f">Renatus</string>
     <string name="app_daikin">Daikin</string>
+    <string name="app_carrier">Carrier</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -679,6 +680,7 @@
     <!--Congrats Screen-->
     <string name="title_congrats">CONGRATULATIONS!</string>
     <string name="title_success">You have successfully Installed a 75F System!</string>
+    <string name="title_success_carrier">You have successfully Installed a Carrier ClimaVision System!</string>
     <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="label_ccuname">CCU Name : </string>
     <string name="label_serialno">Serial No. : </string>
@@ -1307,6 +1309,7 @@
     <!-- Building passcode -->
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
     <string name="Daikin_Environment">daikin_prod</string>
+    <string name="Carrier_Environment">carrier_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>
@@ -1415,5 +1418,7 @@
     <string name="txt_add_property">Add Property</string>
     <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
     <string name="txt_submit">Submit</string>
+    <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
+    <string name="menutoggle">menutoggle</string>
     <string name="display_toast_message">display toast message</string>
 </resources>

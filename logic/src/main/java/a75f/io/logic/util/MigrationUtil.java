@@ -413,6 +413,7 @@ public class MigrationUtil {
         migrateSenseToMonitoring(ccuHsApi);
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
+        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         L.saveCCUState();
     }
 
@@ -2196,5 +2197,23 @@ public class MigrationUtil {
                     .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).build();
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
+    }
+
+    private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
+        Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
+        Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");
+        if (!tunerEquip.isEmpty()) {
+            String equipRef = Objects.requireNonNull(tunerEquip.get("id")).toString();
+            addDefaultMarker(haystack.readAllEntities("aux and heating and tuner and equipRef== \"" + equipRef + "\""));
+            addDefaultMarker(haystack.readAllEntities("water and valve and tuner and equipRef== \"" + equipRef + "\""));
+            Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration completed");
+        }
+    }
+
+    private static void addDefaultMarker(List<HashMap<Object, Object>> points) {
+        points.forEach(point -> {
+            Point up = new Point.Builder().setHashMap(point).addMarker("default").build();
+            CCUHsApi.getInstance().updatePoint(up, up.getId());
+        });
     }
 }

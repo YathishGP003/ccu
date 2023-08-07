@@ -1,6 +1,7 @@
 package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain.getEquipDetailsByDomain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.HyperStat2pfcuConfiguration
@@ -15,13 +16,12 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 class MigrationHandler(var haystack: CCUHsApi) {
 
     fun migrateModel(entityData: EntityConfiguration,newModel: SeventyFiveFProfileDirective) {
-        val equipBuilder = EquipBuilder (haystack)
-        val equipDetails = equipBuilder.getEquipDetailsByDomain(newModel.domainName)
-        addDomains(entityData.tobeAdded,newModel,equipDetails)
-        removeDomains(entityData.tobeDeleted,newModel,equipDetails)
-        updateDomains(entityData.tobeUpdated,newModel,equipDetails)
+        val equipDetails = getEquipDetailsByDomain(newModel.domainName)
+        addEntityData(entityData.tobeAdded,newModel,equipDetails)
+        removeEntityData(entityData.tobeDeleted,newModel,equipDetails)
+        updateEntityData(entityData.tobeUpdated,newModel,equipDetails)
     }
-    private fun addDomains(tobeAdded: MutableList<EntityConfig>,newModel: SeventyFiveFProfileDirective,equips: List<a75f.io.domain.api.Equip>) {
+    private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
         val equipBuilder = EquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeAdded.forEach { diffDomain ->
@@ -47,11 +47,11 @@ class MigrationHandler(var haystack: CCUHsApi) {
             }
         }
     }
-    private fun removeDomains(tobeRemove: MutableList<EntityConfig>,newModel: SeventyFiveFProfileDirective,equips: List<a75f.io.domain.api.Equip>) {
+    private fun removeEntityData(tobeRemove: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
     // TODO remove change set
         println(tobeRemove)
     }
-    private fun updateDomains(tobeUpdate: MutableList<EntityConfig>,newModel: SeventyFiveFProfileDirective,equips: List<a75f.io.domain.api.Equip>) {
+    private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
         val equipBuilder = EquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeUpdate.forEach { diffDomain ->
@@ -70,7 +70,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
                     val currentPoint = equip.points.filter { it.value.domainName == diffDomain.domainName }
                     val existingId = currentPoint[diffDomain.domainName]?.id
                     hayStackPoint.id = existingId
-                    haystack.updatePoint(hayStackPoint,existingId )
+                    haystack.updatePoint(hayStackPoint,existingId );
                     DomainManager.addPoint(hayStackPoint)
                 }
             }

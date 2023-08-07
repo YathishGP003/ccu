@@ -179,23 +179,4 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         }
     }
 
-    fun getEquipDetailsByDomain(domainName: String): List<a75f.io.domain.api.Equip>{
-        DomainManager.buildDomain(hayStack)
-        val equips = mutableListOf<a75f.io.domain.api.Equip>()
-        assert(Domain.site?.floors?.size  == 1)
-        Domain.site?.floors?.entries?.forEach{
-            val floor = it.value
-            assert(floor.rooms.size == 1)
-            floor.rooms.entries.forEach { r ->
-                val room =  r.value
-                room.equips.forEach { (equipDomainName, equip) ->
-                    if (equip.domainName == domainName){
-                        equips.add(equip)
-                    }
-                }
-            }
-        }
-        return equips
-    }
-
 }

@@ -1,6 +1,7 @@
 package a75f.io.domain.migration
 
 import a75f.io.domain.util.ResourceHelper
+import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -20,7 +21,7 @@ class ModelValidator {
          */
         fun validateAllDomainModels(metaDetails: List<ModelMeta>): List<String> {
             val inValidModels = mutableListOf<String>()
-         /*   val newVersionFiles = diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
+             /*   val newVersionFiles = diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
             // TODO I think no need to validate the current models.
             // val versionFiles = diffManger.getModelFileVersionDetails(DiffManger.VERSION)*/
             metaDetails.forEach {
@@ -60,7 +61,7 @@ class ModelValidator {
         }
 
         private fun logIt(modelType: String, id: String){
-            Log.i(TAG, " $modelType Valid Model found. Model Id : $id")
+            CcuLog.i (TAG, " $modelType Valid Model found. Model Id : $id")
         }
     }
 }

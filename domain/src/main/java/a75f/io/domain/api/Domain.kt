@@ -1,5 +1,8 @@
 package a75f.io.domain.api
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.logic.DomainManager
+
 object Domain {
     var site: Site? = null
 
@@ -44,4 +47,25 @@ object Domain {
         }
         return null
     }
+
+
+    fun getEquipDetailsByDomain(domainName: String): List<Equip> {
+        DomainManager.buildDomain(CCUHsApi.getInstance())
+        val equips = mutableListOf<Equip>()
+        assert(Domain.site?.floors?.size  == 1)
+        Domain.site?.floors?.entries?.forEach{
+            val floor = it.value
+            assert(floor.rooms.size == 1)
+            floor.rooms.entries.forEach { r ->
+                val room =  r.value
+                room.equips.forEach { (equipDomainName, equip) ->
+                    if (equip.domainName == domainName){
+                        equips.add(equip)
+                    }
+                }
+            }
+        }
+        return equips
+    }
+
 }

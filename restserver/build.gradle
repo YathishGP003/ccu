@@ -165,6 +165,7 @@ dependencies {
     implementation 'io.ktor:ktor-gson:1.6.4'
     implementation 'io.ktor:ktor-server-netty:1.6.2'
     implementation 'io.ktor:ktor-websockets:1.6.2'
+    annotationProcessor 'org.apache.logging.log4j:log4j-core:2.14.0'
 
 }
 repositories {

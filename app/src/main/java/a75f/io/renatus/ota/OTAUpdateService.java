@@ -113,6 +113,9 @@ public class OTAUpdateService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        if(intent == null){
+            return;
+        }
         String action = intent.getAction();
         if(action == null) {
             return;

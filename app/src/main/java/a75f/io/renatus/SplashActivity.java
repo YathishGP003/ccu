@@ -31,9 +31,9 @@ import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
-    
+
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
-    
+
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
     private Thread registrationThread;
@@ -43,7 +43,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         CcuLog.i("UI_PROFILING", "SplashActivity.onCreate");
-    
+
         setContentView(R.layout.splash);
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
@@ -118,6 +118,12 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
+        }else if(prefs.getString("INSTALL_TYPE").equals("CREATENEW") && !prefs.getBoolean("CCU_SETUP")
+                && !prefs.getBoolean("REGISTRATION")){
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 21);
+            startActivity(i);
+            finish();
         }
     }
 
@@ -130,7 +136,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             Globals.getInstance().registerOnCcuInitCompletedListener(this);
         }
     }
-    
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

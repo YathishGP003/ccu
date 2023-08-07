@@ -17,6 +17,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
+import a75f.io.constants.WhoFiledConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -349,7 +350,8 @@ public class OTNProfile extends ZoneProfile {
                     new Point.Builder().setHashMap(avgDtPoint).build(),
                     coolingDesiredTemp,
                     heatingDesiredTemp,
-                    avgDesiredTemp);
+                    avgDesiredTemp,
+                    WhoFiledConstants.OTN_WHO);
         }
 
 

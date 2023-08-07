@@ -84,9 +84,6 @@ public class HyperStatDevice {
                        .setFloorRef(floor)
                        .setRoomRef(room)
                        .setProfileType(profile);
-        if (profile.equals(Tags.SENSE)) {
-            d.addMarker(Tags.MONITORING);
-        }
         Device device = d.build();
         deviceRef = CCUHsApi.getInstance().addDevice(device);
         hyperStatNodeAddress = address;
@@ -322,8 +319,8 @@ public class HyperStatDevice {
                     .setUnit(sensorUnit)
                     .setTz(tz);
         }
-        if (equip.getMarkers().contains(Tags.SENSE)) {
-            equipSensor.addMarker(Tags.SENSE);
+        if (equip.getMarkers().contains(Tags.MONITORING)) {
+            equipSensor.addMarker(Tags.MONITORING);
         }
 
         if (hasAirMarker) {

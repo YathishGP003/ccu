@@ -87,7 +87,6 @@ dependencies {
     implementation project(':haystack')
     implementation project(':logic')
     implementation project(':alerts')
-    implementation project(':BACnet4J')
     implementation project(':modbus4j')
     implementation project(':messaging')
     implementation project(path: ':modbusbox')

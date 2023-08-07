@@ -8,11 +8,23 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
 
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.projecthaystack.HDateTime;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.reflect.TypeToken;
+
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincReader;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,11 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.CCUTagsDb;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -35,6 +50,11 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.WriteArray;
+import a75f.io.data.entities.HayStackEntity;
+import a75f.io.data.entities.EntityDBUtilKt;
+import a75f.io.data.writablearray.WritableArray;
+import a75f.io.data.writablearray.WritableArrayDBUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -393,6 +413,7 @@ public class MigrationUtil {
         migrateSenseToMonitoring(ccuHsApi);
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
+        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         L.saveCCUState();
     }
 
@@ -2176,5 +2197,23 @@ public class MigrationUtil {
                     .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).build();
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
+    }
+
+    private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
+        Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
+        Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");
+        if (!tunerEquip.isEmpty()) {
+            String equipRef = Objects.requireNonNull(tunerEquip.get("id")).toString();
+            addDefaultMarker(haystack.readAllEntities("aux and heating and tuner and equipRef== \"" + equipRef + "\""));
+            addDefaultMarker(haystack.readAllEntities("water and valve and tuner and equipRef== \"" + equipRef + "\""));
+            Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration completed");
+        }
+    }
+
+    private static void addDefaultMarker(List<HashMap<Object, Object>> points) {
+        points.forEach(point -> {
+            Point up = new Point.Builder().setHashMap(point).addMarker("default").build();
+            CCUHsApi.getInstance().updatePoint(up, up.getId());
+        });
     }
 }

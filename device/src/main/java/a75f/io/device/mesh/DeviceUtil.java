@@ -295,13 +295,14 @@ public class DeviceUtil {
     }
 
     public static void updateDesiredTempFromDevice(Point coolPoint, Point heatPoint, Point avgPoint, double coolVal,
-                                                   double heatVal, double avgVal, CCUHsApi hayStack) {
+                                                   double heatVal, double avgVal, CCUHsApi hayStack, String who) {
         List<HashMap<Object, Object>> equipsInZone =
                 CCUHsApi.getInstance().readAllEntities("equip and zone and roomRef ==\"" + coolPoint.getRoomRef() + "\"");
 
         if (equipsInZone.size() == 1) {
             CcuLog.i(L.TAG_CCU_DEVICE,"updateDesiredTempFromDevice : "+coolVal+" "+heatVal);
-            SystemScheduleUtil.handleManualDesiredTempUpdate(coolPoint, heatPoint, avgPoint, coolVal, heatVal, avgVal);
+            SystemScheduleUtil.handleManualDesiredTempUpdate(coolPoint, heatPoint, avgPoint, coolVal, heatVal, avgVal
+                    , who);
             return;
         }
 
@@ -317,7 +318,8 @@ public class DeviceUtil {
             Point heatDtPoint = new Point.Builder().setHashMap(heatDT).build();
             Point avgDtPoint = new Point.Builder().setHashMap(avgDT).build();
             CcuLog.i(L.TAG_CCU_DEVICE,"updateDesiredTempFromDevice for : "+equip+", "+coolVal+" "+heatVal);
-            SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal, avgVal);
+            SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal,
+                    avgVal, who);
         });
 
     }

@@ -58,7 +58,6 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -1292,7 +1291,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
-        boolean isSensePaired = false;
+        boolean isMonitoringPaired = false;
         boolean isOTNPaired = false;
 
         if (zoneEquips.size() > 0) {
@@ -1307,8 +1306,8 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
                     isCCUPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("SENSE")) {
-                    isSensePaired = true;
+                if (zoneEquips.get(i).getProfile().contains("MONITORING")) {
+                    isMonitoringPaired = true;
                 }
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
@@ -1321,7 +1320,7 @@ public class FloorPlanFragment extends Fragment {
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isOTNPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1355,7 +1354,7 @@ public class FloorPlanFragment extends Fragment {
             if (isCCUPaired) {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
             }
-            if (isSensePaired) {
+            if (isMonitoringPaired) {
                 Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
             }
             if (isOTNPaired) {
@@ -1487,9 +1486,9 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
-                case HYPERSTAT_SENSE:
-                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddress)
-                            , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
+                case HYPERSTAT_MONITORING:
+                    showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
+                            , zone.getId(), floor.getId(), profile.getProfileType()), HyperStatMonitoringFragment.ID);
                     break;
                 case OTN:
                     showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
@@ -1497,7 +1496,7 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
-                        , zone.getId(), floor.getId()), HyperStatSenseFragment.ID);
+                        , zone.getId(), floor.getId()), HyperStatMonitoringFragment.ID);
                     break;
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:

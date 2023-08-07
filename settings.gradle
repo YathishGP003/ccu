@@ -1,6 +1,6 @@
 include ':modbusbox'
 include ':modbus4j'
 include ':messaging'
-include ':app', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haystack', ':BACnet4J'
+include ':app', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haystack'
 include ':restserver'
 include ':data'

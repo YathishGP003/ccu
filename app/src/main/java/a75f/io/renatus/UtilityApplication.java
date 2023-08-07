@@ -288,7 +288,7 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("prod") ||
                 BuildConfig.BUILD_TYPE.equals("daikin_prod") ||
                 BuildConfig.BUILD_TYPE.equals("qa") ||
-                BuildConfig.BUILD_TYPE.equals("carrier_prod")) {
+                BuildConfig.BUILD_TYPE.equals("carrier_prod") ||
                 BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 handleSafeMode(paramThrowable);

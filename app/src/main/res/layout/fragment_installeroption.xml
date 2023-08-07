@@ -263,7 +263,7 @@
                 android:id="@+id/textBackfillDurationTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/relativeLayoutBACnet"
+                android:layout_below="@id/textUseCelsius"
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="42dp"
                 android:alpha="0.87"

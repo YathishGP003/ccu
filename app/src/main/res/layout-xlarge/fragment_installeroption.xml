@@ -258,11 +258,47 @@
                 android:textColor="@color/black"
                 android:textSize="19.5sp" />
 
+            <a75f.io.renatus.views.TempLimit.TempLimitView
+                android:id="@+id/imageTemp"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_below="@+id/textTempLimitDesc"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp" />
+
+            <TextView
+                android:id="@+id/textUseCelsius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageTemp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
+                android:text="@string/usecelsius"
+                android:textColor="@color/black"
+                android:textSize="25sp"
+                android:visibility="gone" />
+
+            <ToggleButton
+                android:id="@+id/toggleCelsius"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_below="@+id/imageTemp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:enabled="true"
+                android:textOff=""
+                android:textOn=""
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/textBackfillDurationTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/relativeLayoutBACnet"
+                android:layout_below="@id/textUseCelsius"
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="42dp"
                 android:alpha="0.87"
@@ -334,42 +370,6 @@
                     android:textColor="?orange_75f"
                     android:textSize="19.5sp" />
             </LinearLayout>
-
-            <a75f.io.renatus.views.TempLimit.TempLimitView
-                android:id="@+id/imageTemp"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_below="@+id/textTempLimitDesc"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp" />
-
-            <TextView
-                android:id="@+id/textUseCelsius"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/imageTemp"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usecelsius"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
-
-            <ToggleButton
-                android:id="@+id/toggleCelsius"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/imageTemp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:enabled="true"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textUseMT"

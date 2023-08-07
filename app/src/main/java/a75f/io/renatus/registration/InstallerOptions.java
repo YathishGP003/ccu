@@ -228,8 +228,6 @@ public class InstallerOptions extends Fragment {
         toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
         textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
-        relativeLayoutBACnet.setVisibility(View.GONE);
-        buttonSendIAM.setVisibility(View.GONE);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         Button buttonApply = rootView.findViewById(R.id.buttonApply);
         Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
@@ -385,7 +383,6 @@ public class InstallerOptions extends Fragment {
         });
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
-        getBACnetConfig();
 
         setBackFillTimeSpinner(rootView);
 
@@ -460,18 +457,6 @@ public class InstallerOptions extends Fragment {
                 .setDisplayName(ccuName + "-bacnetIp")
                 .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
         CCUHsApi.getInstance().addPoint(bacnetIp);
-        SettingPoint bacnetSubnet = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-bacnetSubnet")
-                .addMarker("bacnet").addMarker("ipsubnet").addMarker("sp").setVal(initialise?"":getEditSubnet(editSubnet)).build();
-        CCUHsApi.getInstance().addPoint(bacnetSubnet);
-        SettingPoint bacnetGateway = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-bacnetGateway")
-                .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(initialise ? "":getEditGateWay(editGateway)).build();
-        CCUHsApi.getInstance().addPoint(bacnetGateway);
 
         BackfillUtilKt.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
     }
@@ -782,5 +767,32 @@ public class InstallerOptions extends Fragment {
                 textNetworkError.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    private void setBackFillTimeSpinner(View rootView) {
+
+        this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
+        this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
+        this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue());
+
+        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if (backfieldTimeSelectedValue() == i) {
+                    linearLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    if (!isFreshRegister) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    }
+                }
+                adapterView.setSelection(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 }

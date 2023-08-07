@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.Preference;
 
 import android.preference.PreferenceManager;
 import android.util.Log;

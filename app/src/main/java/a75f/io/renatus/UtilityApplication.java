@@ -91,6 +91,8 @@ import javax.inject.Inject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.util.DatabaseAction;
+import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.bacnet.BACnetScheduler;
@@ -125,6 +127,7 @@ import a75f.io.usbserial.UsbServiceActions;
  */
 
 public abstract class UtilityApplication extends Application {
+    private static final String TAG = "UtilityApplication";
     public static LocalDevice localDevice = null;
     public static IpNetwork network;
     public static DhcpInfo dhcpInfo;
@@ -135,6 +138,8 @@ public abstract class UtilityApplication extends Application {
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
     private static final int MESSAGING_ACK_INTERVAL = 30;
+
+    private boolean isRoomDbReady = false;
     @Inject
     MessageHandlerSubscriber messageHandlerSubscriber;
 
@@ -233,17 +238,34 @@ public abstract class UtilityApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        setCcuDbReady(false);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate");
     
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Started");
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        context = getApplicationContext();
+        prefs = new Prefs(context);
+
         // initialize crash reports as early as possible
         initializeCrashReporting();
-
+        EventBus.getDefault().register(this);
         Globals.getInstance().setApplicationContext(this);
+
+
+    }
+
+    public void setCcuDbReady(boolean isCcuDbReady) {
+        isRoomDbReady = isCcuDbReady;
+    }
+
+    private void postProcessingInit(){
+        Log.i("CCU_DB", "postProcessingInit - start");
+
+        Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
         PreferenceUtil.installationCompleted();
+
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
@@ -258,28 +280,34 @@ public abstract class UtilityApplication extends Application {
         startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
         // started before)
         // and Bind it
-        
-        EventBus.getDefault().register(this);
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         deviceUpdateJob = new DeviceUpdateJob();
         deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
                 15, TimeUnit.SECONDS);
         Watchdog.getInstance().addMonitor(deviceUpdateJob);
-        context = getApplicationContext();
-        prefs = new Prefs(context);
+
 
         mNetworkReceiver = new NetworkChangeReceiver();
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
         EveryDaySchedulerService.scheduleJobForDay(context);
-
         initMessaging();
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
+        Log.i("CCU_DB", "postProcessingInit - end");
+    }
 
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onDatabaseLoad(DatabaseEvent event) {
+        Log.i("CCU_DB", "Event Type:@ " + event.getSerialAction().name());
+        if (event.getSerialAction() == DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS_INIT_UI) {
+            postProcessingInit();
+            Log.i("CCU_DB", "post processing done- launch ui now");
+            setCcuDbReady(true);
+        }
     }
 
     private void isDataSyncRestartRequired() {
@@ -474,9 +502,13 @@ public abstract class UtilityApplication extends Application {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event) {
         if (CCUHsApi.getInstance().isCcuReady() && !Globals.getInstance().isRecoveryMode() ||
-                !Globals.getInstance().isSafeMode()) {
+                !Globals.getInstance().isSafeMode() && isRoomDbReady()) {
             LSerial.handleSerialEvent(this, event);
         }
+    }
+
+    private boolean isRoomDbReady() {
+        return this.isRoomDbReady;
     }
 
     static class Listener extends DeviceEventAdapter {

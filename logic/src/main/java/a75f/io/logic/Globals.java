@@ -213,7 +213,7 @@ public class Globals {
         }
     }
 
-
+    private RenatusServicesUrls renatusServicesUrls;
     public void initilize() {
         CcuLog.i(L.TAG_CCU_INIT,"Globals Initialize");
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
@@ -224,12 +224,16 @@ public class Globals {
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
-        CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+		renatusServicesUrls = urls;
+        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+    }
+
+    public void startTimerTask(){
+        Log.d(L.TAG_CCU_JOB, " running after db is done");
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
-        ccuHsApi.testHarnessEnabled = testHarness;
-
-        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl())
+        CCUHsApi.getInstance().testHarnessEnabled = testHarness;
+        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl())
                 .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band

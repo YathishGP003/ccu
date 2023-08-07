@@ -7,7 +7,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.FragmentBLEInstructionScreen
-import a75f.io.renatus.HyperStatSensePairScreen
+import a75f.io.renatus.HyperStatMonitoringPairScreen
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
@@ -78,7 +78,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val twoPipeCell = view.findViewById<View>(R.id.twoPipeCell)
       val fourPipeCell = view.findViewById<View>(R.id.fourPipeCell)
       val vrvCell = view.findViewById<View>(R.id.vrvCell)
-      val senseCell = view.findViewById<View>(R.id.hypersenseCell)
+      val monitoringCell = view.findViewById<View>(R.id.hypersenseCell)
 
       vrvCell.isVisible = BuildConfig.BUILD_TYPE == "daikin_prod" || CCUUiUtil.isDaikinThemeEnabled(context)
 
@@ -86,7 +86,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       cpuCell.setOnClickListener { showCPUConfigFragment() }
       hpuCell.setOnClickListener { showHPUConfigFragment() }
       twoPipeCell.setOnClickListener { showPipe2ConfigFragment() }
-      senseCell.setOnClickListener{ showSenseconfigFragment() }
+      monitoringCell.setOnClickListener{ showMonitoringConfigFragment() }
       vrvCell.setOnClickListener{ showVrvConfigFragment() }
    }
 
@@ -124,15 +124,15 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       )
    }
 
-   private fun showSenseconfigFragment() {
+   private fun showMonitoringConfigFragment(){
       val zoneEquips   = HSUtil.getEquips(mRoomName).size;
       if (zoneEquips == 0) {
          showDialogFragment(
-                 HyperStatSensePairScreen.newInstance(mNodeAddress,
+                 HyperStatMonitoringPairScreen.newInstance(mNodeAddress,
                          mRoomName,
                          mFloorName,
-                         ProfileType.HYPERSTAT_SENSE),
-                 HyperStatSensePairScreen.ID
+                         ProfileType.HYPERSTAT_MONITORING),
+                 HyperStatMonitoringPairScreen.ID
          )
       }else{
          Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();

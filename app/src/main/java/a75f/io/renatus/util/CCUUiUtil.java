@@ -47,6 +47,8 @@ public class CCUUiUtil {
     public static void setThemeDetails(Activity activity){
         if(CCUUiUtil.isDaikinEnvironment(activity)){
             activity.setTheme(R.style.RenatusAppDaikinTheme);
+        } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppCarrierTheme);
         }
     }
     public static String getColorCode(Context context) {
@@ -129,6 +131,10 @@ public class CCUUiUtil {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
 
+    public static boolean is75FEnvironment(Context context){
+        return !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment)) && !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment));
+    }
+
     public static boolean isInvalidName(String enteredName){
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");
@@ -140,6 +146,35 @@ public class CCUUiUtil {
         if(orgName.startsWith("_") || orgName.startsWith("-") || orgName.startsWith(" ") )
             return false;
         return !matcher.find();
+    }
+
+    public static boolean isValidIPAddress(String ip) {
+        String zeroTo255 = "(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])";
+        String regex = zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255;
+        Pattern p = Pattern.compile(regex);
+        if (ip == null) {
+            return false;
+        }
+        //pattern class contains matcher() method to find matching between given IP address and regular expression.
+        Matcher m = p.matcher(ip);
+        // Return if the IP address matched the ReGex
+        return m.matches();
+    }
+
+    public static boolean isValidNumber(int val, int min, int max, int multiple) {
+        return (val >= min && val <= max && val % multiple == 0);
+    }
+
+    public static boolean isAlphaNumeric(String str) {
+        if (str == null || str.length() == 0) {
+            return true;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isLetterOrDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
@@ -156,5 +191,10 @@ public class CCUUiUtil {
             }
         }
         return false;
+    }
+
+    public static boolean isCarrierThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
     }
 }

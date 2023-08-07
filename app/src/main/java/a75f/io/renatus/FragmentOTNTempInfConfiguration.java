@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -153,6 +155,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
                     DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                     },
                 ()->{
+                    addBacnetTags(requireContext(), floorRef, zoneRef);
                     ProgressDialogUtils.hideProgressDialog();
                     FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();
                     getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

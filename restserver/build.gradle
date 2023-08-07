@@ -1,0 +1,178 @@
+
+plugins {
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+}
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        //testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'a75f.io.renatus.messaging.CustomTestRunner'
+        /*javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }*/
+    }
+
+    buildTypes {
+        local {
+            minifyEnabled false
+        }
+        dev {
+            minifyEnabled false
+        }
+        prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+        qa {
+            minifyEnabled false
+        }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+        dev_qa {
+            minifyEnabled false
+        }
+        staging {
+            minifyEnabled false
+        }
+        daikin_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+            unitTests.returnDefaultValues = true
+        }
+        packagingOptions {
+            jniLibs {
+                useLegacyPackaging = true
+            }
+        }
+    }
+    testBuildType = "qa"
+
+    configurations {
+        all*.exclude group: 'com.google.guava', module: 'listenablefuture'
+    }
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+}
+
+dependencies {
+    //Local
+    implementation project(':haystack')
+    implementation project(':alerts')
+    implementation project(':usbserial')
+    implementation project(':algos')
+    implementation project(':logic')
+    implementation project(':data')
+    implementation project(':alerts')
+    implementation project(':device')
+
+    //RxJava
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
+    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+
+    //Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation 'com.github.heremaps:oksse:0.9.0'
+
+    //Work manager
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
+
+    //Utils
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.6'
+
+    //Room
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation 'androidx.lifecycle:lifecycle-process:2.6.0'
+    annotationProcessor("androidx.room:room-compiler:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
+    kapt "androidx.room:room-compiler:2.5.0"
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    //Hilt
+    implementation 'com.google.dagger:hilt-android:2.44.2'
+    kapt 'com.google.dagger:hilt-android-compiler:2.44.2'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0'
+
+    //Unit test
+    testImplementation 'junit:junit:4.13.1'
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testImplementation "io.mockk:mockk:1.13.4"
+    testImplementation 'androidx.arch.core:core-testing:2.1.0'
+    testImplementation 'androidx.room:room-testing:2.5.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
+    testImplementation("com.google.dagger:hilt-android-testing:2.44.2")
+    kaptTest("com.google.dagger:hilt-android-compiler:2.44.2")
+    testAnnotationProcessor("com.google.dagger:hilt-android-compiler:2.44.2")
+    testImplementation "com.google.truth:truth:1.1"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+
+    //Instrumentation test
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation "io.mockk:mockk-android:1.12.3"
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44.2")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.44.2")
+    androidTestAnnotationProcessor("com.google.dagger:hilt-android-compiler:2.44.2")
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+
+    implementation 'io.ktor:ktor-server-core:1.6.4'
+    implementation 'io.ktor:ktor-gson:1.6.4'
+    implementation 'io.ktor:ktor-server-netty:1.6.2'
+    implementation 'io.ktor:ktor-websockets:1.6.2'
+    annotationProcessor 'org.apache.logging.log4j:log4j-core:2.14.0'
+
+}
+repositories {
+    mavenCentral()
+}

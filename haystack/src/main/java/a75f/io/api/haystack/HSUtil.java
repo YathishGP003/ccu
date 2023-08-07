@@ -2,16 +2,23 @@ package a75f.io.api.haystack;
 
 import android.util.Log;
 
+import com.google.gson.internal.LinkedTreeMap;
+
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
+import org.projecthaystack.MapImpl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import a75f.io.logger.CcuLog;
 
@@ -157,9 +164,26 @@ public class HSUtil
             {
                 b.add(entry.getKey(), (HVal) entry.getValue());
             }
+            else if (entry.getValue() instanceof HRef)
+            {
+                b.add(entry.getKey(), (HRef) entry.getValue());
+            }
             else
             {
-                b.add(entry.getKey(), (String) entry.getValue());
+                if(entry.getValue().getClass() == com.google.gson.internal.LinkedTreeMap.class) {
+
+                    LinkedTreeMap<String,Object> linkedTreeMap = (LinkedTreeMap<String,Object>) entry.getValue();
+                    HDictBuilder dictForMap = new HDictBuilder();
+                    Set<String> keySet = linkedTreeMap.keySet();
+                    for (String key: keySet) {
+                        dictForMap.add(key,linkedTreeMap.get(key).toString());
+                    }
+
+                    b.add(entry.getKey(), (HVal) dictForMap.toDict());
+                } else{
+                    b.add(entry.getKey(),(String) entry.getValue());
+                }
+
             }
         }
         return b.toDict();
@@ -303,9 +327,9 @@ public class HSUtil
                 || (pointEntity.containsKey(Tags.MAXIMIZED) && pointEntity.containsKey(Tags.EXIT));
     }
 
-    public static boolean isSenseConfig(String id, CCUHsApi hayStack) {
+    public static boolean isMonitoringConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.SENSE)
+        return pointEntity.containsKey(Tags.MONITORING)
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 
@@ -431,9 +455,8 @@ public class HSUtil
         HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
         return ((pointEntity.containsKey("ti")
                 && pointEntity.containsKey("config"))
-                && (pointEntity.containsKey("th1")
-                || pointEntity.containsKey("th2")
-                || pointEntity.containsKey("main")));
+                && (pointEntity.containsKey("space")
+                || pointEntity.containsKey("supply")));
     }
 
     /**
@@ -516,5 +539,18 @@ public class HSUtil
     public static boolean isPointBackfillConfigPoint(String id, CCUHsApi ccuHsApi) {
         HashMap<Object,Object> pointEntity = ccuHsApi.readMapById(id);
         return ((pointEntity.containsKey(Tags.BACKFILL))&&(pointEntity.containsKey(Tags.DURATION)));
+    }
+
+
+
+    public static HDict mapToHDict(HashMap<String, String> m)
+    {
+        HDictBuilder b = new HDictBuilder();
+        for (HashMap.Entry<String, String> entry : m.entrySet())
+        {
+            b.add(entry.getKey(),  entry.getValue());
+
+        }
+        return b.toDict();
     }
 }

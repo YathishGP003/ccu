@@ -1,6 +1,8 @@
 package a75f.io.renatus.ENGG;
 
 import com.google.android.material.tabs.TabLayout;
+
+import androidx.core.content.res.ResourcesCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -58,9 +60,11 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 	private void configLogo(){
 		ImageView logo = findViewById(R.id.logo);
 		if(CCUUiUtil.isDaikinEnvironment(this))
-			logo.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.d3, null));
+		else if (CCUUiUtil.isCarrierThemeEnabled(this))
+			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
 		else
-			logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));
 
 	}
 }

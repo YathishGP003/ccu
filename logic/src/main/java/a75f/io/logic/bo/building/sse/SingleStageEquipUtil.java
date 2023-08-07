@@ -8,6 +8,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.SSEStage;
@@ -167,6 +169,7 @@ public class SingleStageEquipUtil {
                                  .setGroup(equip.getGroup())
                                  .setTz(CCUHsApi.getInstance().getTimeZone())
                                  .build();
+        BacnetUtilKt.addBacnetTags(coolingStage, BacnetIdKt.COOLINGSTAGE1ID,BacnetUtilKt.BINARY_VALUE,Integer.parseInt(equip.getGroup()));
         String coolingStageId = CCUHsApi.getInstance().addPoint(coolingStage);
         CCUHsApi.getInstance().writeHisValById(coolingStageId, 0.0);
         return coolingStageId;
@@ -186,6 +189,7 @@ public class SingleStageEquipUtil {
                                  .setGroup(String.valueOf(equip.getGroup()))
                                  .setTz(CCUHsApi.getInstance().getTimeZone())
                                  .build();
+        BacnetUtilKt.addBacnetTags(heatingStage, BacnetIdKt.HEATINGSTAGE1ID,BacnetUtilKt.BINARY_VALUE,Integer.parseInt(equip.getGroup()));
         String heatingStageId = CCUHsApi.getInstance().addPoint(heatingStage);
         CCUHsApi.getInstance().writeHisValById(heatingStageId, 0.0);
         return heatingStageId;
@@ -205,6 +209,7 @@ public class SingleStageEquipUtil {
                               .setGroup(String.valueOf(equip.getGroup()))
                               .setTz(CCUHsApi.getInstance().getTimeZone())
                               .build();
+        BacnetUtilKt.addBacnetTags(fanStage1, BacnetIdKt.FANSTAGE1ID,BacnetUtilKt.BINARY_VALUE,Integer.parseInt(equip.getGroup()));
         String fanStage1Id = CCUHsApi.getInstance().addPoint(fanStage1);
         CCUHsApi.getInstance().writeHisValById(fanStage1Id, 0.0);
         return fanStage1Id;

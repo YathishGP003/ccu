@@ -52,13 +52,16 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				//fragment = FieldTestFragment.newInstance();
 				//fragment = SerialMessageFragment.newInstance();
 				break;
+			case 6:
+				fragment = new BacnetServicesFragment();
+				break;
 		}
 		return fragment;
 	}
 	
 	@Override
 	public int getCount() {
-		return 6;
+		return 7;
 	}
 	
 	@Override
@@ -76,6 +79,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				return "OTA Update";
 			case 5:
 				return "Messages";
+			case 6:
+				return "Bacnet Services";
 		}
 		return null;
 	}

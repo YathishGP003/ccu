@@ -63,15 +63,10 @@ public class FragmentModbusType  extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         modbusequip.setOnClickListener(v -> {
-            /*FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS30);
-            showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);*/
-
             showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), FragmentModbusConfiguration.ID);
         });
         modbusem.setOnClickListener(v -> {
-            /*FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR_ZONE);
-            showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);*/
-            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,"emr"), FragmentModbusConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), FragmentModbusConfiguration.ID);
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         return view;

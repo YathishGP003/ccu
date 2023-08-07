@@ -1417,20 +1417,11 @@ public class FloorPlanFragment extends Fragment {
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
-                /*
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
-                */
                 showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), FragmentModbusConfiguration.ID);
 
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
                 showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), FragmentModbusConfiguration.ID);
-
-                /*
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
-                */
             }
             return;
         }

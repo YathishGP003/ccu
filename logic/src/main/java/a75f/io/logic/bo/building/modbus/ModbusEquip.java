@@ -50,11 +50,6 @@ public class ModbusEquip {
         }
     }
 
- /*   public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                                 List<Parameter> configParams) {
-     return createEntities(floorRef, roomRef, equipmentInfo, configParams, null, false,null);
-    }
-*/
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
                                List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel) {
         HashMap siteMap = hayStack.read(Tags.SITE);

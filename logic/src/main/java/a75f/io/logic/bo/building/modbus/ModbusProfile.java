@@ -19,12 +19,6 @@ public class ModbusProfile extends ZoneProfile {
 
     ModbusEquip modBusEquip;
 
-   /* public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentInfo, List<Parameter> configParams, ProfileType profileType) {
-        modBusEquip = new ModbusEquip(profileType, slaveId);
-        modBusEquip.createEntities(floorRef, roomRef, equipmentInfo, configParams);
-        modBusEquip.init(slaveId);
-    }*/
-
     public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentDevice,
                            List<Parameter> configParams, ProfileType profileType,
                            List<EquipmentDevice> subEquipmentDevices, String modbusLevel) {
@@ -93,9 +87,6 @@ public class ModbusProfile extends ZoneProfile {
         return null;
     }
 
-    public List<Parameter> getMbProfileConfiguration(short address){
-        return modBusEquip.getProfileConfiguration(address);
-    }
     @Override
     public Set<Short> getNodeAddresses() {
         return new HashSet<Short>() {{
@@ -119,7 +110,4 @@ public class ModbusProfile extends ZoneProfile {
         return new Equip.Builder().setHashMap(equip).build();
     }
 
-    public List<Parameter> getConfiguredParameters(){
-        return modBusEquip.configuredParams;
-    }
 }

@@ -1637,14 +1637,14 @@ public class CCUTagsDb extends HServer {
         return HGrid.EMPTY;
     }
 
-    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId) {
+    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId, int numberOfHisEntryPerPoint) {
         List<HisItem> validHisItems = new ArrayList<>();
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-        List<HisItem> hisItems = hisQuery.build().find();
+        List<HisItem> hisItems = hisQuery.build().find(0,numberOfHisEntryPerPoint);
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
         for (HisItem hisItem : hisItems) {
             if  (hisItem != null) {
@@ -1738,11 +1738,11 @@ public class CCUTagsDb extends HServer {
     }
     
     //Delete all the hisItem entries older than 24 hrs.
-    public void removeExpiredHisItems(HRef id) {
+    public void removeExpiredHisItems(HRef id, int backFillDurationSelected) {
         HDict entity = readById(id);
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - (long) backFillDurationSelected *60*60*1000)
                 .or()
                 .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);

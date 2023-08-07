@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
+import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -58,7 +59,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
-import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
@@ -393,7 +393,7 @@ public class MigrationUtil {
         migrateEnableOccupancyControl(CCUHsApi.getInstance());
 
         if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
-            BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+            addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
         }
 
 

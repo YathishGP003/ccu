@@ -73,6 +73,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
+import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -180,6 +181,7 @@ public class FloorPlanFragment extends Fragment {
                         } else {
                             updateModules(getSelectedZone());
                             setScheduleType(getSelectedZone().getId());
+                            BackFillViewModel.setBackFillDuration();
                         }
                         //Crash here because of activity null while moving to other fragment and return back here after edit config
                         if ((getActivity() != null) && (mPairingReceiver != null))

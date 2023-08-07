@@ -14,7 +14,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,6 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -54,6 +52,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -77,11 +76,13 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.ccu;
+
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
+import static a75f.io.renatus.util.BackFillViewModel.*;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class InstallerOptions extends Fragment {
@@ -141,7 +142,9 @@ public class InstallerOptions extends Fragment {
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
     private TextView textHeatingLockoutDesc;
-    
+    private Spinner backFillTimeSpinner;
+    private View toastLayout;
+
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -226,7 +229,11 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
+        Button buttonApply = rootView.findViewById(R.id.buttonApply);
+        Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
+        linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_backfill));
 
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
@@ -376,6 +383,25 @@ public class InstallerOptions extends Fragment {
         });
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
+
+        setBackFillTimeSpinner(rootView);
+
+        buttonApply.setOnClickListener(view -> {
+            int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
+            int[] durations = BackFillDuration.toIntArray();
+            int index = selectedSpinnerItem > 0 ? Math.min(selectedSpinnerItem , durations.length - 1) : 0;
+            int backFillDurationSelected = durations[index];
+
+            BackfillUtilKt.updateBackfillDuration(backFillDurationSelected);
+
+            if (!isFreshRegister) {
+                generateToastMessage(toastLayout);
+            }
+            linearLayout.setVisibility(View.INVISIBLE);
+        });
+
+        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(getBackFillDuration()));
+
         return rootView;
     }
 
@@ -431,6 +457,8 @@ public class InstallerOptions extends Fragment {
                 .setDisplayName(ccuName + "-bacnetIp")
                 .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
         CCUHsApi.getInstance().addPoint(bacnetIp);
+
+        BackfillUtilKt.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
     }
 
     private String getEditGateWay(EditText editGateway) {
@@ -739,5 +767,32 @@ public class InstallerOptions extends Fragment {
                 textNetworkError.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    private void setBackFillTimeSpinner(View rootView) {
+
+        this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
+        this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
+        this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue());
+
+        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if (backfieldTimeSelectedValue() == i) {
+                    linearLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    if (!isFreshRegister) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    }
+                }
+                adapterView.setSelection(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 }

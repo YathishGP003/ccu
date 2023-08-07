@@ -24,8 +24,53 @@ class BackfillPref {
         return sharedPreferences.getInt(BACKFILL_TIME_DURATION, BACKFILL_DEFAULT_TIME)
     }
 
-    fun getBackFillTimeSPSelected () : Int {
-        return sharedPreferences.getInt(BACKFILL_TIME_SP_SELECTED, BACKFILL_SP_DEFAULT_SELECTION)
+    enum class BackFillDuration(val displayName: String) {
+        NONE("None"),
+        ONE_HOUR("1 Hr"),
+        TWO_HOURS("2 Hrs"),
+        THREE_HOURS("3 Hrs"),
+        SIX_HOURS("6 Hrs"),
+        TWELVE_HOURS("12 Hrs"),
+        TWENTY_FOUR_HOURS("24 Hrs"),
+        FORTY_EIGHT_HOURS("48 Hrs"),
+        SEVENTY_TWO_HOURS("72 Hrs");
+
+        companion object {
+            val displayNames: Array<String?>
+                get() {
+                    val values: Array<BackFillDuration> =
+                        values()
+                    val displayNames = arrayOfNulls<String>(values.size)
+                    for (i in values.indices) {
+                        displayNames[i] = values[i].displayName
+                    }
+                    return displayNames
+                }
+
+            fun toIntArray(): IntArray {
+                val intValues =
+                    IntArray(values().size)
+                for (i in values().indices) {
+                    val stringValue: String =
+                        values()[i].displayName
+                    if (stringValue == "None") {
+                        intValues[i] = 0
+                    } else {
+                        intValues[i] = stringValue.split(" ").toTypedArray()[0].toInt()
+                    }
+                }
+                return intValues
+            }
+
+            fun getIndex(array: IntArray, selectedValue: Int, defaultVal: Int): Int {
+                for (i in array.indices) {
+                    if (array[i] == selectedValue) {
+                        return i
+                    }
+                }
+                return defaultVal
+            }
+        }
     }
 
     companion object {
@@ -33,6 +78,6 @@ class BackfillPref {
         const val BACKFILL_TIME_DURATION = "backFillTimeDuration"
         const val BACKFILL_TIME_SP_SELECTED = "backFillTimeSpSelected"
         const val BACKFILL_DEFAULT_TIME = 24
-        const val BACKFILL_SP_DEFAULT_SELECTION = 6
     }
+
 }

@@ -1,5 +1,6 @@
 package a75f.io.renatus.compose
 
+import a75f.io.renatus.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +23,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +34,12 @@ import androidx.compose.ui.unit.sp
  * Created by Manjunath K on 18-07-2023.
  */
 
+val myFontFamily = FontFamily(
+    Font(R.font.lato_light, FontWeight.Light),
+    Font(R.font.lato_regular, FontWeight.Normal),
+    Font(R.font.lato_regular, FontWeight.Medium),
+    Font(R.font.lato_bold, FontWeight.Bold)
+)
 
 @Composable
 fun HeaderTextView(text: String) {
@@ -40,7 +48,7 @@ fun HeaderTextView(text: String) {
             .wrapContentSize()
             .padding(5.dp),
         style = TextStyle(
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             color = Color.Black,
@@ -58,7 +66,7 @@ fun HeaderLeftAlignedTextView(text: String) {
             .wrapContentSize()
             .padding(5.dp),
         style = TextStyle(
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             color = Color.Black,
@@ -75,7 +83,7 @@ fun LabelTextView(text: String) {
             .padding(PaddingValues(top = 5.dp, start = 20.dp))
             .width(450.dp),
         style = TextStyle(
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
             color = Color.Black
@@ -92,7 +100,7 @@ fun TitleTextView(text: String) {
             .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 33.5.sp,
             color = Color(android.graphics.Color.parseColor("#E24301")),
@@ -103,16 +111,17 @@ fun TitleTextView(text: String) {
 
 @Composable
 fun SubTitle(text: String) {
+
     Text(
         modifier = Modifier
             .height(50.dp)
             .padding(start = 5.dp),
         style = TextStyle(
             textAlign = TextAlign.Center,
-            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.Normal,
+            fontFamily = myFontFamily,
             fontSize =  18.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.DarkGray
+            color = Color.Gray
         ),
         text = text
     )
@@ -128,7 +137,7 @@ fun SaveTextView(text: String,onClick: () -> Unit) {
         )
     ) {
         Spacer(modifier = Modifier.width(width = 8.dp))
-        Text(text = text, style =  TextStyle(fontSize = 20.sp,  fontWeight = FontWeight.Bold))
+        Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
         Spacer(modifier = Modifier.width(width = 4.dp))
     }
 }
@@ -147,8 +156,8 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
         onValueChange = { text.value = it},
         enabled = false,
         readOnly = !enableClick,
-        modifier = modifier,
-        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.Center),
+        modifier = modifier.height(50.dp),
+        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.Center),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Red,
             unfocusedIndicatorColor = Color.Gray,
@@ -182,7 +191,7 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
                 if (enableClick)
                     onClick()
             }),
-        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
+        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Red,
             unfocusedIndicatorColor = Color.Gray,
@@ -209,7 +218,7 @@ fun TextViewCompose(text: String) {
         enabled = false,
         readOnly = true,
         modifier = Modifier.width(100.dp),
-        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
+        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Red,
             unfocusedIndicatorColor = Color.Gray,

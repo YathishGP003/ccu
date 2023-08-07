@@ -137,6 +137,7 @@ class ModelSelectionFragment : DialogFragment() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
+                    .padding(top = 20.dp)
             ) {
                 LazyVerticalGrid(modifier = Modifier
                     .fillMaxWidth()
@@ -147,7 +148,7 @@ class ModelSelectionFragment : DialogFragment() {
                             Column {
                                 Text(
                                     modifier = Modifier
-                                        .padding(PaddingValues(top = 10.dp, start = 20.dp))
+                                        .padding(PaddingValues(top = 10.dp, bottom = 10.dp, start = 20.dp))
                                         .width(400.dp)
                                         .clickable {
                                             onItemSelect.onItemSelected(items.indexOf(item), item)

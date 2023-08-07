@@ -411,6 +411,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 .setDismissOnClick(true)
                 .setGravity(Gravity.TOP)
                 .setText(text)
+                .setTextSize(20.0f)
+                .setPadding(10f)
                 .show();
         new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
     }

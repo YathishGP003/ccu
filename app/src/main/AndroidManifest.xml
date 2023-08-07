@@ -106,6 +106,9 @@
 
         <meta-data android:name="com.raygun.raygun4android.apikey"
             android:value="7jO0gpjtHlBZhyN4cZuHQ" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <service android:name=".WeatherDataDownloadService"/>
 

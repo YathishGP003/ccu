@@ -14,8 +14,8 @@ import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.Register;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import org.apache.commons.lang3.StringUtils;
 
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
@@ -68,7 +68,7 @@ public class ModbusPulse {
 
             if(!rtuResponse.getModbusResponse().isException()){
                 Log.d(L.TAG_CCU_MODBUS, "Response success==" + rtuResponse.getModbusMessage().toString());
-                updateResponseToHaystack(slaveid, rtuResponse,registerType);
+                updateResponseToHaystack(slaveid, rtuResponse, registerType);
             }else {
                 Log.d(L.TAG_CCU_MODBUS,
                       "handlingResponse, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
@@ -78,15 +78,27 @@ public class ModbusPulse {
         }
     }
 
-    private static void updateResponseToHaystack(int slaveid, RtuMessageResponse response,byte registerType){
+    private static void updateResponseToHaystack(int slaveid, RtuMessageResponse response, byte registerType){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         List<HashMap<Object, Object>> deviceList = hayStack.readAllEntities("device and addr == \""+slaveid+"\"");
-        for(HashMap<Object, Object> device : deviceList) {
-            if (device.size() > 0) {
-                LModbus.IS_MODBUS_DATA_RECEIVED = true;
-                updateModbusRespone(device.get("id").toString(), response, registerType);
-                updateHeartBeatPoint(slaveid, hayStack);
+
+        StringBuilder deviceRefString = new StringBuilder("(");
+        int index = 0;
+        for(HashMap<Object, Object> device : deviceList){
+            deviceRefString.append("deviceRef == ");
+            deviceRefString.append("\""+StringUtils.prependIfMissing(device.get("id").toString(), "@")+"\"");
+            if(index == deviceList.size()-1){
+                deviceRefString.append(" ) ");
             }
+            else{
+                deviceRefString.append(" or ");
+            }
+            index++;
+        }
+        if (deviceList.size() > 0) {
+            LModbus.IS_MODBUS_DATA_RECEIVED = true;
+            updateModbusResponse(deviceRefString.toString(), response, registerType);
+            updateHeartBeatPoint(slaveid, hayStack);
         }
     }
 
@@ -103,7 +115,7 @@ public class ModbusPulse {
         }
     }
 
-    private static void updateModbusRespone(String deviceRef, RtuMessageResponse response,byte registerType){
+    private static void updateModbusResponse(String deviceRefString, RtuMessageResponse response, byte registerType){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Register readRegister = LModbus.getModbusCommLock().getRegister();
 
@@ -111,11 +123,11 @@ public class ModbusPulse {
                                          " and registerType == \""+readRegister.getRegisterType()+"\""+
                                          " and registerAddress == \""+readRegister.getRegisterAddress()+ "\""+
                                          " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
-                                         " and deviceRef == \"" + deviceRef + "\"");
+                                         " and "+ deviceRefString);
 
         if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
             Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
-                                            +readRegister.getRegisterAddress() +" and device "+deviceRef);
+                                            +readRegister.getRegisterAddress() +" and device "+deviceRefString);
             return;
         }
         HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
@@ -147,7 +159,7 @@ public class ModbusPulse {
         }
         Log.d(L.TAG_CCU_MODBUS, "Pulse Register: Type "+registerType+ ", Addr "+readRegister.getRegisterAddress()+
                                         " Val "+formattedVal);
-    
+
         LModbus.getModbusCommLock().unlock();
     }
     

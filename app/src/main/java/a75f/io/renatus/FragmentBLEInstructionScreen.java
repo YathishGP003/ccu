@@ -423,7 +423,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
             else
-            pairinginstruct.setImageResource(R.drawable.sensepairscreen);
+            pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }
     }
     

@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.schedules;
 
 import android.util.Log;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -13,6 +14,8 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
+import a75f.io.constants.WhoFiledConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
@@ -133,9 +136,12 @@ public class EquipScheduleHandler implements Schedulable {
 
         // Donot set temperature if null
         if(coolingDtId != null && heatingDtId != null && averageDtId != null){
-            ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId, HayStackConstants.CCU_USER_WRITE_LEVEL, coolingDt, 0);
-            ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.CCU_USER_WRITE_LEVEL, heatingDt, 0);
-            ScheduleUtil.setDesiredTempAtLevel(hayStack, averageDtId, HayStackConstants.CCU_USER_WRITE_LEVEL, avgTemp, 0);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId, HayStackConstants.CCU_USER_WRITE_LEVEL,
+                    coolingDt, 0, WhoFiledConstants.SCHEDULER_WHO);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.CCU_USER_WRITE_LEVEL,
+                    heatingDt, 0, WhoFiledConstants.SCHEDULER_WHO);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, averageDtId, HayStackConstants.CCU_USER_WRITE_LEVEL, avgTemp
+                    , 0, WhoFiledConstants.SCHEDULER_WHO);
         }
 
     }
@@ -150,12 +156,31 @@ public class EquipScheduleHandler implements Schedulable {
         double heatingDT = hayStack.readPointPriorityValFromOffset(heatingDtId, HayStackConstants.FORCE_OVERRIDE_LEVEL);
     
         ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId, HayStackConstants.AUTO_AWAY_LEVEL ,
-                              coolingDT + autoAwaySetback, 0);
+                              coolingDT + autoAwaySetback, 0, getWhoForPointWrite());
     
         ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.AUTO_AWAY_LEVEL ,
-                              heatingDT - autoAwaySetback, 0);
+                              heatingDT - autoAwaySetback, 0, getWhoForPointWrite());
     }
-    
+    private String getWhoForPointWrite(){
+        HDict equipHDict = hayStack.readHDictById(equipRef);
+        if(equipHDict.has(Tags.HYPERSTAT)){
+           return WhoFiledConstants.HYPERSTAT_OCC_SENSOR_WHO;
+        }
+        else if(equipHDict.has(Tags.HELIO_NODE)){
+            return WhoFiledConstants.HELIONODE_OCC_SENSOR_WHO;
+        }
+        else if(equipHDict.has(Tags.SMART_NODE)){
+            return WhoFiledConstants.SMARTNODE_OCC_SENSOR_WHO;
+        }
+        else if(equipHDict.has(Tags.OTN)){
+            return WhoFiledConstants.OTN_OCC_SENSOR_WHO;
+        }
+        else if(equipHDict.has(Tags.SMART_STAT)){
+            return WhoFiledConstants.SMARTSTAT_OCC_SENSOR_WHO;
+        }
+        return WhoFiledConstants.OCCUPANCY_SENSOR_WHO;
+    }
+
     private void updateDesiredTempAutoForceOccupied(double forcedOccupiedMins) {
 
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
@@ -177,7 +202,7 @@ public class EquipScheduleHandler implements Schedulable {
         String coolingPointId = getCoolingDesiredTempId();
         hayStack.pointWrite(HRef.copy(coolingPointId),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL,
-                            "OccupancySensor",
+                            getWhoForPointWrite(),
                             HNum.make(coolingDesiredTemp) ,
                             HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
         hayStack.writeHisValById(coolingPointId, HSUtil.getPriorityVal(coolingPointId, hayStack));
@@ -185,7 +210,7 @@ public class EquipScheduleHandler implements Schedulable {
         String heatingPointId = getHeatingDesiredTempId();
         hayStack.pointWrite(HRef.copy(heatingPointId),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL,
-                            "OccupancySensor",
+                            getWhoForPointWrite(),
                             HNum.make(heatingDesiredTemp) ,
                             HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
         hayStack.writeHisValById(heatingPointId, HSUtil.getPriorityVal(heatingPointId, hayStack));

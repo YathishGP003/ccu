@@ -96,7 +96,7 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             //All the handlers do not have proper exception handling. We will use an umbrella
             //handler to avoid app crashing due to an invalid message.
             } catch (e : Exception) {
-                CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to handle message $message", e)
+                CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to handle this message $message, and the reason is  ${e.message}")
                 updateMessageFailed(message, e)
             }
         } else {

@@ -27,6 +27,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.constants.WhoFiledConstants;
+import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -475,10 +477,14 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 
+		String who = WhoFiledConstants.SMARTNODE_WHO;
+		if(equipMap.containsKey(Tags.HELIO_NODE)){
+			who = WhoFiledConstants.HELIONODE_WHO;
+		}
 		DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
 				new Point.Builder().setHashMap(heatingDtPoint).build(),
 				new Point.Builder().setHashMap(singleDtPoint).build(),
-				coolingDesiredTemp, heatingDesiredTemp, dt, CCUHsApi.getInstance());
+				coolingDesiredTemp, heatingDesiredTemp, dt, CCUHsApi.getInstance(), who);
 		sendSNControlMessage((short)node,equip.getId());
 		sendSetTemperatureAck((short)node);
 
@@ -554,7 +560,7 @@ public class Pulse
 	    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
 				new Point.Builder().setHashMap(heatinDtPoint).build(),
 				new Point.Builder().setHashMap(singleDtPoint).build(),
-				coolingDesiredTemp,heatingDesiredTemp,dt, CCUHsApi.getInstance());
+				coolingDesiredTemp,heatingDesiredTemp,dt, CCUHsApi.getInstance(), WhoFiledConstants.SMARTSTAT_WHO);
         if(sendAck) {
 			sendSmartStatControlMessage((short) node, equip.getId());
 			sendSetTemperatureAck((short) node);
@@ -1092,7 +1098,8 @@ public class Pulse
 			e.printStackTrace();
 		}
 		if(updatedCoolingDt != 0 || updatedHeatingDt != 0)
-			SystemScheduleUtil.handleManualDesiredTempUpdate(coolingPt,heatingPt,null,updatedCoolingDt,updatedHeatingDt, 0);
+			SystemScheduleUtil.handleManualDesiredTempUpdate(coolingPt,heatingPt,null,updatedCoolingDt,
+					updatedHeatingDt, 0, WhoFiledConstants.BACNET_WHO);
 
 	}
 	public static void updateSetTempFromSmartStat(CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t setTempUpdate){
@@ -1181,7 +1188,7 @@ public class Pulse
 						break;
 				}
 				if(isFanModeChanged) {
-					CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual",
+					CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL, WhoFiledConstants.SMARTSTAT_WHO,
 					                                  (double) fanSpeed_t.ordinal(), 0);
 					CCUHsApi.getInstance().writeHisValById(fanOpModePoint.get("id").toString(),
 					                                       (double)fanSpeed_t.ordinal());

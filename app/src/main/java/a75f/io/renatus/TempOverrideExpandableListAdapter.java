@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,8 +50,8 @@ import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -1534,9 +1533,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         return "Heating Damper\nActuator";
                 }
                 break;
-            case "HYPERSTAT_SENSE":
-                HyperStatSenseProfile mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                HyperStatSenseConfiguration mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+            case "HYPERSTAT_MONITORING":
+                HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+                HyperStatMonitoringConfiguration monitoringConfiguration = (HyperStatMonitoringConfiguration) monitoringProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
                 ArrayList<String> analogArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                     analogArr.add(r.sensorName + " " + r.engineeringUnit);
@@ -1546,23 +1545,23 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     thArr.add(m.sensorName + " " + m.engineeringUnit);
                 }
                 if (pointname.equals("Analog1In")) {
-                    if (mHSSenseConfig.isAnalog1Enable)
-                        return analogArr.get(mHSSenseConfig.analog1Sensor);
+                    if (monitoringConfiguration.isAnalog1Enable)
+                        return analogArr.get(monitoringConfiguration.analog1Sensor);
                     else return "Not Enabled";
                 }
                 else if (pointname.equals("Analog2In")) {
-                    if (mHSSenseConfig.isAnalog2Enable)
-                        return analogArr.get(mHSSenseConfig.analog2Sensor);
+                    if (monitoringConfiguration.isAnalog2Enable)
+                        return analogArr.get(monitoringConfiguration.analog2Sensor);
                     else return "Not Enabled";
                 }
                 else if (pointname.equals("Thermistor1")) {
-                    if (mHSSenseConfig.isTh1Enable)
-                        return thArr.get(mHSSenseConfig.th1Sensor);
+                    if (monitoringConfiguration.isTh1Enable)
+                        return thArr.get(monitoringConfiguration.th1Sensor);
                     else return "Not Enabled";
                 }
                 else if (pointname.equals("Thermistor2")) {
-                    if (mHSSenseConfig.isTh2Enable)
-                        return thArr.get(mHSSenseConfig.th2Sensor);
+                    if (monitoringConfiguration.isTh2Enable)
+                        return thArr.get(monitoringConfiguration.th2Sensor);
                     else return "Not Enabled";
                 }
                 break;

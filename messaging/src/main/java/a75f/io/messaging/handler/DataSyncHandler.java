@@ -43,6 +43,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
 public class DataSyncHandler {
     private static final Object DELETED_BY = "deletedBy";
@@ -478,6 +479,9 @@ public class DataSyncHandler {
             logIt(" NumberFormatException " + e);
             ccuHsApi.writePointStrValLocal(pointRef, level, who, value, 0);
             Log.i("CCU_READ_CHANGES", " Synced Point val with exception " + value);
+        } catch (MessageHandlingFailed e) {
+            Log.i("CCU_READ_CHANGES", "Message not handled:" + e.getMessage() +", value: "+value);
+            e.printStackTrace();
         }
     }
 

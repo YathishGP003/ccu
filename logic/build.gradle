@@ -64,41 +64,39 @@ android {
         }
         dev {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-dev.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.dev.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.dev.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.dev.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-dev.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service-dev.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service-dev.azurewebsites.net/version/getDetails\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.dev.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.dev.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.dev.service.75f.io/version/getDetails\"'
 
         }
         dev_qa {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.qa.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.qa.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-qa.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/getDetails\"'
-
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.qa.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/getDetails\"'
             minifyEnabled false
         }
         qa {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.qa.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.qa.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-qa.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service-qa.azurewebsites.net/version/getDetails\"'
-
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.qa.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/getDetails\"'
             minifyEnabled false
         }
 
@@ -116,44 +114,44 @@ android {
             minifyEnabled false
         }
         staging {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-staging.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.staging.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.staging.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.staging.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-staging.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.staging.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-staging\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-staging.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service-staging.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service-staging.azurewebsites.net/version/getDetails\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.staging.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.staging.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.staging.service.75f.io/version/getDetails\"'
 
             minifyEnabled false
         }
         prod {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.prod.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.prod.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.prod.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.prod.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-75f-service.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-75f-service.azurewebsites.net/version/getDetails\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.prod.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.prod.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.prod.service.75f.io/version/getDetails\"'
 
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
         daikin_prod {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-daikin-service.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-daikin-service.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-daikin-service.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.daikin.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.daikin.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.daikin.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-daikin-service.azurewebsites.net/\"'
-            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-daikin-service.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.daikin.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
-            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-daikin-service.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api-daikin-service.azurewebsites.net/version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api-daikin-service.azurewebsites.net/version/getDetails\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.daikin.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.daikin.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.daikin.service.75f.io/version/getDetails\"'
 
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"

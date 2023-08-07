@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -161,6 +160,10 @@ public class FileBackupManager {
                     return;
                 }
                 try {
+                    File dir = new File(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
                     String fileName = FileConstants.MODBUS_SIDE_LOADED_JSON_PATH + ccuId + ".zip";
                     FileOperationsUtil.zipBytes(fileName, response.body().bytes());
                     FileOperationsUtil.unzipFile(fileName, FileConstants.MODBUS_SIDE_LOADED_JSON_PATH);

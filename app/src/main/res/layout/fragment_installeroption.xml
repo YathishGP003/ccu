@@ -380,31 +380,6 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/textBacnetEnable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textTempforAll"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/enable_bacnet"
-                android:textColor="@color/black"
-                android:textSize="25sp" />
-
-            <ToggleButton
-                android:id="@+id/toggleBACnet"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/textTempforAll"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-
-            <TextView
                 android:id="@+id/textNetworkError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -413,151 +388,17 @@
                 android:textSize="26dp"
                 android:layout_marginTop="5sp"
                 android:layout_marginLeft="96sp"
-                android:layout_below="@+id/textBacnetEnable"
+                android:layout_below="@+id/imageTemp"
                 android:visibility="gone"
                 />
 
-            <RelativeLayout
-                android:id="@+id/relativeLayoutBACnet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textBacnetEnable"
-                android:layout_marginStart="96dp"
-                android:layout_marginTop="20dp">
 
-                <RadioGroup
-                    android:id="@+id/radioGroupConfig"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbAuto"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/rb_auto" />
-
-                    <RadioButton
-                        android:id="@+id/rbManual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:text="@string/rb_manual" />
-                </RadioGroup>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInputIP"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroupConfig"
-                    app:errorTextAppearance="?error_appearance">
-
-                    <EditText
-                        android:id="@+id/editIPaddr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:digits="0123456789."
-                        android:fontFamily="@font/lato_regular"
-                        android:gravity="start|center_vertical"
-                        android:hint="@string/hint_deviceIP"
-                        android:inputType="numberDecimal|textWebEditText"
-                        android:maxLength="16"
-                        android:minWidth="200dp"
-                        android:singleLine="true"
-                        android:textColor="@color/input_textcolor"
-                        android:textSize="19.5sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInputSubnet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroupConfig"
-                    android:layout_marginStart="56dp"
-                    android:layout_toEndOf="@+id/textInputIP"
-                    app:errorTextAppearance="?error_appearance">
-		    <EditText
-                        android:id="@+id/editSubnet"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/lato_regular"
-                        android:gravity="start|center_vertical"
-                        android:hint="@string/hint_deviceSubnet"
-                        android:inputType="numberDecimal"
-                        android:maxLength="16"
-                        android:minWidth="200dp"
-                        android:singleLine="true"
-                        android:textColor="@color/input_textcolor"
-                        android:textSize="19.5sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInputGateway"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textInputIP"
-                    android:layout_marginTop="20dp"
-                    app:errorTextAppearance="?error_appearance">
-
-                    <EditText
-                        android:id="@+id/editGateway"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:focusable="true"
-                        android:fontFamily="@font/lato_regular"
-                        android:gravity="start|center_vertical"
-                        android:hint="@string/hint_deviceGateWay"
-                        android:inputType="numberDecimal"
-                        android:maxLength="16"
-                        android:minWidth="200dp"
-                        android:singleLine="true"
-                        android:textColor="@color/input_textcolor"
-                        android:textSize="19.5sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Button
-                    android:id="@+id/buttonInitialise"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textInputIP"
-                    android:layout_alignEnd="@+id/textInputSubnet"
-                    android:layout_alignBottom="@+id/textInputGateway"
-                    android:layout_marginTop="20dp"
-                    android:background="@null"
-                    android:focusableInTouchMode="true"
-                    android:fontFamily="@font/lato_bold"
-                    android:padding="5dp"
-                    android:text="@string/button_initialise"
-                    android:textColor="?orange_75f"
-                    android:textSize="26sp" />
-
-                <Button
-                    android:id="@+id/buttonSendIAM"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textInputIP"
-                    android:layout_alignBottom="@+id/textInputGateway"
-                    android:layout_marginStart="36dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_toEndOf="@+id/buttonInitialise"
-                    android:background="@null"
-                    android:focusableInTouchMode="true"
-                    android:fontFamily="@font/lato_bold"
-                    android:padding="5dp"
-                    android:text="@string/button_sendIAM"
-                    android:textColor="?orange_75f"
-                    android:textSize="26sp"
-                    android:visibility="gone" />
-
-            </RelativeLayout>
 
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/relativeLayoutBACnet"
+                android:layout_below="@+id/imageTemp"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="36dp"
                 android:layout_marginBottom="24dp"

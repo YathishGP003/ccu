@@ -104,14 +104,15 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mProfileName = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         ButterKnife.bind(this, view);
-        pairImage = view.findViewById(R.id.hyperSensePairing);
+        pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
         if(CCUUiUtil.isDaikinEnvironment(requireContext())){
             pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.daikenhsspairscreen, null));
         } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
             pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrierhspairingscreen, null));
-        pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
-        if(CCUUiUtil.isDaikinEnvironment(getContext())){
-            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
+            pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
+            if (CCUUiUtil.isDaikinEnvironment(getContext())) {
+                pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
+            }
         }
         return view;
     }

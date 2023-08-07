@@ -52,7 +52,7 @@ import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
 import a75f.io.renatus.FragmentVAVConfiguration;
-import a75f.io.renatus.HyperStatSenseFragment;
+import a75f.io.renatus.HyperStatMonitoringFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
@@ -436,12 +436,12 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case SMARTSTAT_FOUR_PIPE_FCU:
                         showDialogFragment(Fragment4PipeFanCoilUnitConfig.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), Fragment4PipeFanCoilUnitConfig.ID);
                         break;
-                    case HYPERSTAT_SENSE:
-                        showDialogFragment(HyperStatSenseFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_SENSE),
-                                HyperStatSenseFragment.ID);
+                    case HYPERSTAT_MONITORING:
+                        showDialogFragment(HyperStatMonitoringFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_MONITORING),
+                                HyperStatMonitoringFragment.ID);
                         break;
                     case HYPERSTAT_VRV:
-                        showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
+                        showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatMonitoringFragment.ID);
                         break;
                     case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                         showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,

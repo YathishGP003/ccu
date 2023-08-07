@@ -6,29 +6,41 @@ import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.projecthaystack.HDateTime;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.reflect.TypeToken;
+
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincReader;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.CCUTagsDb;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
@@ -37,6 +49,11 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.WriteArray;
+import a75f.io.data.entities.HayStackEntity;
+import a75f.io.data.entities.EntityDBUtilKt;
+import a75f.io.data.writablearray.WritableArray;
+import a75f.io.data.writablearray.WritableArrayDBUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -64,9 +81,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -90,6 +105,7 @@ public class MigrationUtil {
      * THis will be fixed by using longVersionCode after migrating to API30. (dev going in another branch)
      */
     public static void doMigrationTasksIfRequired() {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         /*if (checkVersionUpgraded()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
@@ -394,7 +410,10 @@ public class MigrationUtil {
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
+        migrateSenseToMonitoring(ccuHsApi);
+        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
+        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         L.saveCCUState();
     }
 
@@ -415,6 +434,17 @@ public class MigrationUtil {
         }
     }
 
+    private static void migrateHyperStatFanStagedEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> hsCpuEquips = ccuHsApi.readAllEntities("equip and hyperstat and cpu");
+        if (!hsCpuEquips.isEmpty()) {
+            for (HashMap<Object, Object> equipMap : hsCpuEquips) {
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                fanSpeedLogicalPointMigration(equip, ccuHsApi);
+                analogOutConfigPointsMigration(equip, ccuHsApi);
+            }
+        }
+    }
 
     private static void updateKind(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");
@@ -2108,6 +2138,82 @@ public class MigrationUtil {
                             null);
                 }
             }
+        });
+    }
+
+
+    private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> analogOutPoints = ccuHsApi.readAllEntities("point and " +
+                "(analog1 or analog2 or analog3) and cpu and output and association and equipRef == \"" + equip.getId() + "\"");
+        for (HashMap<Object, Object> analogOutPoint : analogOutPoints) {
+            if (analogOutPoint.get("enum").toString().contains("fanspeed")) {
+                Point enumUpdatedAnalogOutPoint = new Point.Builder().setHashMap(analogOutPoint)
+                        .setEnums("cooling,modulatingFanSpeed,heating,dcvdamper,predefinedFanSpeed").build();
+                CCUHsApi.getInstance().updatePoint(enumUpdatedAnalogOutPoint, enumUpdatedAnalogOutPoint.getId());
+            }
+        }
+    }
+
+    private static void fanSpeedLogicalPointMigration(Equip equip, CCUHsApi ccuHsApi) {
+
+        HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteDis = siteMap.get("dis").toString();
+        String equipDis = siteDis + "-hyperstatcpu-" + equip.getGroup();
+
+        HashMap<Object, Object> fanSpeedPointMap = ccuHsApi.readEntity("point and " +
+                "fan and run and speed and equipRef == \"" + equip.getId() + "\"");
+        if (fanSpeedPointMap != null && !fanSpeedPointMap.isEmpty()) {
+            Point fanSpeedPoint = new Point.Builder().setHashMap(fanSpeedPointMap).removeMarker("run")
+                    .removeMarker("analog").removeMarker("output").addMarker("modulating").setGroup(equip.getGroup())
+                    .addMarker("cpu").addMarker("cur").addMarker("standalone").setDisplayName(equipDis + "-modulatingFanSpeed")
+                    .build();
+            CCUHsApi.getInstance().updatePoint(fanSpeedPoint, fanSpeedPoint.getId());
+        }
+    }
+
+    private static void migrateSenseToMonitoring(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> listOfSenseEquips = ccuHsApi.readAllEntities("sense and equip and not device");
+        ArrayList<HashMap<Object, Object>> listOfSenseDevices = ccuHsApi.readAllEntities("sense and not equip and device");
+        ArrayList<HashMap<Object, Object>> listOfSensePoints = ccuHsApi.readAllEntities("sense and not equip and not device");
+        for (HashMap<Object, Object> sensePoint: listOfSensePoints) {
+            String displayNameOfSensePoint = sensePoint.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSensePoint = displayNameOfSensePoint.replace("SENSE", Tags.MONITORING);
+            Point newSensePoint = new Point.Builder().setHashMap(sensePoint).addMarker(Tags.MONITORING)
+                    .removeMarker(Tags.SENSE).setDisplayName(modifiedDisplayNameOfSensePoint).build();
+            ccuHsApi.updatePoint(newSensePoint, newSensePoint.getId());
+        }
+        for(HashMap<Object, Object> senseEquipMap : listOfSenseEquips){
+            String displayNameOfSenseEquip = senseEquipMap.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSenseEquip = displayNameOfSenseEquip.replace("SENSE", Tags.MONITORING);
+            Equip senseEquip = new Equip.Builder().setHashMap(senseEquipMap).setDisplayName(modifiedDisplayNameOfSenseEquip)
+                    .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).setProfile("HYPERSTAT_MONITORING").build();
+            ccuHsApi.updateEquip(senseEquip, senseEquip.getId());
+        }
+        for(HashMap<Object, Object> senseDeviceMap : listOfSenseDevices){
+            String displayNameOfSenseDevice = senseDeviceMap.get(Tags.DIS).toString();
+            String modifiedDisplayNameOfSenseDevice = displayNameOfSenseDevice.replace("SENSE", Tags.MONITORING);
+            Device senseEquip = new Device.Builder().setHashMap(senseDeviceMap).setDisplayName(modifiedDisplayNameOfSenseDevice)
+                    .addMarker(Tags.MONITORING).removeMarker(Tags.SENSE).build();
+            ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
+        }
+    }
+
+    private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
+        Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
+        Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");
+        if (!tunerEquip.isEmpty()) {
+            String equipRef = Objects.requireNonNull(tunerEquip.get("id")).toString();
+            addDefaultMarker(haystack.readAllEntities("aux and heating and tuner and equipRef== \"" + equipRef + "\""));
+            addDefaultMarker(haystack.readAllEntities("water and valve and tuner and equipRef== \"" + equipRef + "\""));
+            Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration completed");
+        }
+    }
+
+    private static void addDefaultMarker(List<HashMap<Object, Object>> points) {
+        points.forEach(point -> {
+            Point up = new Point.Builder().setHashMap(point).addMarker("default").build();
+            CCUHsApi.getInstance().updatePoint(up, up.getId());
         });
     }
 }

@@ -9,6 +9,8 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
@@ -229,6 +231,7 @@ public class VrvTuners {
                 .setGroup(nodeAddress.toString())
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(occupancySensor, BacnetIdKt.OCCUPANCYID,BacnetUtilKt.BINARY_VALUE,Integer.parseInt(nodeAddress));
         String occupancySensorId = hayStack.addPoint(occupancySensor);
         hayStack.writeHisValById(occupancySensorId, 0.0);
 

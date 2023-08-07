@@ -220,11 +220,40 @@ public class AboutFragment extends Fragment {
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         setOTPOnAboutPage();
 
-        checkIsCCUHasRecommendedVersion(getActivity());
+        if(PreferenceUtil.getUpdateCCUStatus()){
+            getRecommendedCCUDataFromPreference();
+            startDownloadingApk();
+        } else if(PreferenceUtil.isCCUInstalling()){
+            installNewApk();
+        }else {
+            checkIsCCUHasRecommendedVersion(getActivity());
+        }
         updateCCU.setOnClickListener(updateOnClickListener);
         cancel.setOnClickListener(cancelOnClickListener);
 
        return rootView;
+    }
+
+    private void getRecommendedCCUDataFromPreference() {
+        versionLabelString = PreferenceUtil.getStringPreference("versionLabel");
+        fileSize = PreferenceUtil.getStringPreference("fileSize");
+        latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
+        downloadSize.setText(PreferenceUtil.getStringPreference("downloadSize"));
+        totalFileSize.setText(PreferenceUtil.getStringPreference("downloadSize"));
+    }
+
+    private void installNewApk() {
+        latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
+        linearLayout.setVisibility(View.VISIBLE);
+        downloadSizeText.setVisibility(View.GONE);
+        updateAppText.setVisibility(View.GONE);
+        updateCCU.setVisibility(View.GONE);
+        updateCCU.setVisibility(View.GONE);
+        totalDownloadedSize.setVisibility(View.INVISIBLE);
+        totalFileSize.setVisibility(View.INVISIBLE);
+        downloadingText.setText("Installing..");
+        progressBar.setVisibility(View.GONE);
+        cancel.setVisibility(View.GONE);
     }
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
@@ -237,7 +266,7 @@ public class AboutFragment extends Fragment {
                 ProgressDialogUtils::hideProgressDialog);
     }
 
-    View.OnClickListener updateOnClickListener = view -> {
+    private void startDownloadingApk(){
         progressBar.setVisibility(View.VISIBLE);
         cancel.setVisibility(View.VISIBLE);
         updateCCU.setEnabled(false);
@@ -247,19 +276,27 @@ public class AboutFragment extends Fragment {
         connectivityIssues.setVisibility(View.GONE);
         cancel.setEnabled(true);
         cancel.setVisibility(View.VISIBLE);
-        RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this);
+    }
+
+    View.OnClickListener updateOnClickListener = view -> {
+        startDownloadingApk();
+        PreferenceUtil.startUpdateCCU();
+        RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this, getActivity());
     };
 
     public void cancelUpdateCCU(){
-        new Handler(Looper.getMainLooper()).post(() -> {
-            connectivityIssues.setVisibility(View.GONE);
-            updateCCU.setEnabled(true);
-            updateAppText.setVisibility(View.VISIBLE);
-            linearLayout.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
-            cancel.setEnabled(false);
-            cancel.setVisibility(View.GONE);
-        });
+        PreferenceUtil.stopUpdateCCU();
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                connectivityIssues.setVisibility(View.GONE);
+                updateCCU.setEnabled(true);
+                updateAppText.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                cancel.setEnabled(false);
+                cancel.setVisibility(View.GONE);
+            });
+        }
         Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
         isNotFirstInvocation = false;
     }
@@ -295,6 +332,10 @@ public class AboutFragment extends Fragment {
                         isNotFirstInvocation = false;
                         String size = jsonObject.get("size") +" MB";
                         String recommendedVersion = majorVersion+"."+minorVersion+"."+patchVersion;
+                        PreferenceUtil.setStringPreference("recommendedVersion", recommendedVersion);
+                        PreferenceUtil.setStringPreference("downloadSize", size);
+                        PreferenceUtil.setStringPreference("versionLabel", versionLabelString);
+                        PreferenceUtil.setStringPreference("fileSize", fileSize);
                         String currentAppVersion =  CCUUiUtil.getCurrentCCUVersion();
 
                         if (getActivity() != null) {
@@ -763,30 +804,32 @@ public class AboutFragment extends Fragment {
     }
 
     public void setProgress(int value, long downloadId, int columnIndex) {
-        CcuLog.i("CCU_DOWNLOAD", "progress " + value);
+        String downloadSizeProgress = null;
         this.downloadTd = downloadId;
         DecimalFormat df = new DecimalFormat("#.##");
-        double downloadSize = Double.parseDouble(df.format(value * .01 * Double.parseDouble(
-                fileSize)));
-        String downloadedSize = downloadSize + " MB/";
+        if(fileSize != null && !fileSize.isEmpty()) {
+            double downloadSize = Double.parseDouble(df.format(value * .01 * Double.parseDouble(
+                    fileSize)));
+            downloadSizeProgress = downloadSize + " MB/";
+        }
+
         if (getActivity() != null) {
+            String finalDownloadSizeProgress = downloadSizeProgress;
             new Handler(Looper.getMainLooper()).post(() -> {
-                    totalDownloadedSize.setText((downloadedSize));
-                    progressBar.setProgressCompat(value, true);
-                    connectivityIssues.setVisibility(View.GONE);
-                    if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
-                        connectivityIssues.setVisibility(View.VISIBLE);
-                    }
-                    isNotFirstInvocation = true;
-                    if (value == 100) {
-                        totalDownloadedSize.setVisibility(View.INVISIBLE);
-                        totalFileSize.setVisibility(View.INVISIBLE);
-                        downloadingText.setText("Installing..");
-                        progressBar.setVisibility(View.GONE);
-                        cancel.setVisibility(View.GONE);
-                    }
+                totalDownloadedSize.setText((finalDownloadSizeProgress));
+                progressBar.setProgressCompat(value, true);
+                connectivityIssues.setVisibility(View.GONE);
+                if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
+                    connectivityIssues.setVisibility(View.VISIBLE);
+                }
+                isNotFirstInvocation = true;
+                if (value == 100) {
+                    PreferenceUtil.stopUpdateCCU();
+                    PreferenceUtil.installCCU();
+                    installNewApk();
+                }
             });
         }
     }
-    }
+}
 

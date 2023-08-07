@@ -7,6 +7,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -459,14 +461,16 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref).setHisInterpolate("cov")
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his")
-                                                 .setUnit("%").setTz(tz).build();
+                                                 .setUnit("%").setTz(tz)
+                .setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.COOLINGSIGNALID).build();
         String coolingSignalId = CCUHsApi.getInstance().addPoint(coolingSignal);
         CCUHsApi.getInstance().writeHisValById(coolingSignalId, 0.0);
         
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
                                                  .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his")
-                                                 .setUnit("%").setTz(tz).build();
+                                                 .setUnit("%").setTz(tz)
+                .setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.HEATINGSIGNALID).build();
         String heatingSignalId = CCUHsApi.getInstance().addPoint(heatingSignal);
         CCUHsApi.getInstance().writeHisValById(heatingSignalId, 0.0);
         
@@ -474,7 +478,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref).setHisInterpolate("cov")
                                              .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("modulating")
-                                             .setUnit("%")
+                                             .setUnit("%").setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.FANSIGNALID)
                                              .setTz(tz).build();
         String fanSignalId = CCUHsApi.getInstance().addPoint(fanSignal);
         CCUHsApi.getInstance().writeHisValById(fanSignalId, 0.0);
@@ -482,7 +486,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his")
-                                                   .setUnit("%").setTz(tz).build();
+                                                   .setUnit("%").setTz(tz)
+                .setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.COMPOSITESIGNALID).build();
         String compositeSignalId = CCUHsApi.getInstance().addPoint(compositeSignal);
         CCUHsApi.getInstance().writeHisValById(compositeSignalId, 0.0);
     }

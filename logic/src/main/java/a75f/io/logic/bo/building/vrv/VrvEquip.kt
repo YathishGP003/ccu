@@ -1,12 +1,14 @@
 package a75f.io.logic.bo.building.vrv
 
 import a75f.io.api.haystack.*
+import a75f.io.logic.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.tuners.VrvTuners
+
 
 class VrvEquip(hsApi : CCUHsApi,
                addr: Short) {
@@ -89,6 +91,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("\u00B0F")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(desiredTemp, DESIREDTEMPID, ANALOG_VALUE, nodeAddr.toInt())
         val desiredTempId = hayStack.addPoint(desiredTemp)
         hayStack.writeDefaultValById(desiredTempId, 72.0)
         hayStack.writeHisValById(desiredTempId, 72.0)
@@ -107,6 +110,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("\u00B0F")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(desiredTempCooling, CMCOOLINGDESIREDTEMPID, ANALOG_VALUE, nodeAddr.toInt())
         val desiredTempCoolingId = hayStack.addPoint(desiredTempCooling)
         hayStack.writeDefaultValById(desiredTempCoolingId, 74.0)
         hayStack.writeHisValById(desiredTempCoolingId, 74.0)
@@ -125,6 +129,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("\u00B0F")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(desiredTempHeating, CMHEATINGDESIREDTEMPID, ANALOG_VALUE, nodeAddr.toInt())
         val desiredTempHeatingId = hayStack.addPoint(desiredTempHeating)
         hayStack.writeDefaultValById(desiredTempHeatingId, 70.0)
         hayStack.writeHisValById(desiredTempHeatingId, 70.0)
@@ -143,6 +148,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setEnums("Off,Fan,Heating,Cooling,Auto")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(operationMode, OPERATIONMODEID, MULTI_STATE_VALUE, nodeAddr.toInt())
         val operationModeId = hayStack.addPoint(operationMode)
         hayStack.writeDefaultValById(operationModeId, 0.0)
         hayStack.writeHisValById(operationModeId, 0.0)
@@ -160,6 +166,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setEnums("Low,Medium,High,Auto")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(fanSpeed,FANSPEEDID, MULTI_STATE_VALUE, nodeAddr.toInt())
         val fanSpeedId = hayStack.addPoint(fanSpeed)
         hayStack.writeDefaultValById(fanSpeedId, 0.0)
         hayStack.writeHisValById(fanSpeedId, 0.0)
@@ -203,6 +210,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("\u00B0F")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(currentTemp, CURRENTTEMPID, ANALOG_VALUE, nodeAddr.toInt())
         val ctID = hayStack.addPoint(currentTemp)
         hayStack.writeHisValById(ctID, 0.0)
 
@@ -220,6 +228,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("%")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(humidity, HUMIDITYID, ANALOG_VALUE, nodeAddr.toInt())
         val humidityId = hayStack.addPoint(humidity)
         hayStack.writeHisValById(humidityId, 0.0)
 
@@ -336,6 +345,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setUnit("\u00B0F")
             .setTz(equip.tz)
             .build()
+        addBacnetTags(temperatureOffset, TEMPERATUREOFFSETID, ANALOG_VALUE,nodeAddr.toInt())
         val temperatureOffsetId = hayStack.addPoint(temperatureOffset)
         hayStack.writeDefaultValById(temperatureOffsetId, config.temperatureOffset)
 

@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -361,6 +363,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 
                     @Override
                     protected void onPostExecute(final Void result) {
+                        addBacnetTags(requireContext(), floorRef, roomRef);
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentHeatPumpConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

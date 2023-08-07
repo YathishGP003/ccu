@@ -10,7 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseUtil;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringUtil;
 import a75f.io.logic.bo.building.plc.PlcRelayConfigHandler;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -29,7 +29,7 @@ public class PointMigrationHandler {
             for(HashMap<Object, Object> senseEquip : senseEquips){
 
                 String equipId = senseEquip.get(Tags.ID).toString();
-                String equipDis = siteDis + "-SENSE-" + senseEquip.get(Tags.GROUP).toString() + "-";
+                String equipDis = siteDis + "-MONITORING-" + senseEquip.get(Tags.GROUP).toString() + "-";
 
                 HashMap<Object, Object> senseAnalog1InputPoint = CCUHsApi.getInstance().readEntity("sense and " +
                         analog+" and unit and equipRef == \""+ equipId +"\"");
@@ -37,7 +37,7 @@ public class PointMigrationHandler {
                     int configVal = CCUHsApi.getInstance().readDefaultVal("sense and "+analog+" and point and " +
                             "input and sensor and config" +
                             " and equipRef == \"" + equipId + "\"").intValue();
-                    Bundle bundle = HyperStatSenseUtil.getAnalogBundle(configVal);
+                    Bundle bundle = HyperStatMonitoringUtil.getAnalogBundle(configVal);
                     String shortDis = bundle.getString(Tags.SHORTDIS);
                     Point updatePoint = new Point.Builder().setHashMap(senseAnalog1InputPoint)
                             .setDisplayName(equipDis + shortDis)

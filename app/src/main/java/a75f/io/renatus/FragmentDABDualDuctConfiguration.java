@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -487,6 +489,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                     
                     @Override
                     protected void onPostExecute( final Void result ) {
+                        addBacnetTags(requireContext(), floorRef, zoneRef);
                         ProgressDialogUtils.hideProgressDialog();
                         //FragmentDABDualDuctConfiguration.this.dismissProgressDialog();
                         setRetainInstance(true);

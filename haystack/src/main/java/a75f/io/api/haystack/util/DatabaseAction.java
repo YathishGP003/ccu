@@ -1,0 +1,7 @@
+package a75f.io.api.haystack.util;
+
+public enum DatabaseAction {
+    MESSAGE_DATABASE_LOADED_SUCCESS,
+    MESSAGE_DATABASE_LOADED_FAILED,
+    MESSAGE_DATABASE_LOADED_SUCCESS_INIT_UI
+}

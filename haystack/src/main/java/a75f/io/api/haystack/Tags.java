@@ -186,6 +186,7 @@ public class Tags
     public static final String MODBUS = "modbus";
 
     public static final String PIPEREF = "pipeRef";
+    public static final String MONITORING = "monitoring";
     public static final String CUR_STATUS = "curStatus";
     public static final String BACNET_ID = "bacnetId";
     public static final String BACNET_TYPE = "bacnetType";

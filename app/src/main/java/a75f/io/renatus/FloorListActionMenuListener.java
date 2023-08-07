@@ -17,7 +17,6 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HSUtilKtKt;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
@@ -142,7 +141,6 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			for (Zone sZone: HSUtil.getZones(floorId))
 			{
 				for (Device d : HSUtil.getDevices(sZone.getId())) {
-					BACnetUtils.removeModule(Short.parseShort(d.getAddr()));
 					L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 				}
                 ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule and roomRef == "+ sZone.getId() );

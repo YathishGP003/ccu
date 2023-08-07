@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
 import android.app.Dialog;
@@ -281,6 +282,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
 
                     @Override
                     protected void onPostExecute( final Void result ) {
+                        addBacnetTags(requireContext(), floorRef, roomRef);
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentSSEConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

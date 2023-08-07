@@ -12,6 +12,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
@@ -32,21 +34,21 @@ public abstract class DabSystemProfile extends SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz, BacnetIdKt.COOLINGLOOPOUTPUTID);
+        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz,BacnetIdKt.HEATINGLOOPOUTPUTID);
+        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz ,BacnetIdKt.FANLOOPOUTPUTID);
+        addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz,BacnetIdKt.CO2LOOPOUTPUTID);
         addRTUSystemPoints(siteRef, equipRef, equipDis, tz);
         addDabSystemPoints(siteRef, equipRef, equipDis, tz);
     }
     
-    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
+    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz,int bacnetId)
     {
             CCUHsApi hayStack = CCUHsApi.getInstance();
-            Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput")
+        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput")
                     .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
                     .addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("sp")
-                    .addMarker("writable").setUnit("%").setTz(tz).build();
+                    .addMarker("writable").setUnit("%").setTz(tz).setBacnetId(bacnetId).setBacnetType(BacnetUtilKt.ANALOG_VALUE).build();
             String loopOPPointId = hayStack.addPoint(relay1Op);
             hayStack.writeDefaultValById(loopOPPointId,0.0);
     }
@@ -311,7 +313,8 @@ public abstract class DabSystemProfile extends SystemProfile
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePointForCcuUser(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
-        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
+        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setBacnetId(BacnetIdKt.CONDITIONINGMODEID).setBacnetType(BacnetUtilKt.MULTI_STATE_VALUE)
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePointForCcuUser(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());

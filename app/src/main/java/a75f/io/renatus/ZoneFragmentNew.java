@@ -2277,18 +2277,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
-                            for(EquipmentDevice equipmentDevice : modbusDevices){
-                                if(equipmentDevice.getDeviceEquipRef() == null){
-                                    equipmentDevice.setDeviceEquipRef(equipmentDevice.getEquipRef());
-                                }
-                                if(null != equipmentDevice.getEquips()) {
-                                    modbusDevices.addAll(equipmentDevice.getEquips());
-                                }
-                            }
-
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
+                                if(modbusDevices.get(i).getDeviceEquipRef() == null){
+                                    modbusDevices.get(i).setDeviceEquipRef(modbusDevices.get(i).getEquipRef());
+                                }
+                                if(null != modbusDevices.get(i).getEquips()) {
+                                    modbusDevices.addAll(modbusDevices.get(i).getEquips());
+                                }
                                 List<Parameter> parameterList = new ArrayList<>();
                                 if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
                                     for (Register registerTemp : modbusDevices.get(i).getRegisters()) {

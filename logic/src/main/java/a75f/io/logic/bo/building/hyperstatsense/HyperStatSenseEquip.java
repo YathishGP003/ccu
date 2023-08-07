@@ -55,7 +55,7 @@ public class HyperStatSenseEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-SENSE-" + mNodeAddr;
+        String equipDis = siteDis + "-MONITORING-" + mNodeAddr;
         HashMap systemEquip = mHayStack.read("equip and system");
         String ahuRef = null;
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -79,7 +79,7 @@ public class HyperStatSenseEquip {
                 .setFloorRef(floorRef)
                 .setProfile(mProfileType.name())
                 .addMarker("equip").addMarker("hyperstat").addMarker("sense").addMarker("zone")
-                .setAhuRef(ahuRef)
+                .addMarker(Tags.MONITORING).setAhuRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(mNodeAddr)).build();
         mEquipRef = mHayStack.addEquip(b);
@@ -91,7 +91,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("zone").addMarker("hyperstat").addMarker("scheduleType")
-                .addMarker("writable").addMarker("his").addMarker("sense")
+                .addMarker("writable").addMarker("his").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("building,zone,named")
                 .setTz(tz)
@@ -108,7 +108,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("analog1").addMarker("sense")
+                .addMarker("enabled").addMarker("analog1").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -123,7 +123,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("analog2").addMarker("sense")
+                .addMarker("enabled").addMarker("analog2").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -138,7 +138,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("th1").addMarker("sense")
+                .addMarker("enabled").addMarker("th1").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -153,7 +153,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("th2").addMarker("sense")
+                .addMarker("enabled").addMarker("th2").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -169,7 +169,7 @@ public class HyperStatSenseEquip {
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("hyperstat").addMarker("sense")
-                .setGroup(String.valueOf(mNodeAddr))
+                .setGroup(String.valueOf(mNodeAddr)).addMarker(Tags.MONITORING)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -177,7 +177,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(tempoffsetId, (double)config.temperatureOffset);
 
         Point currentTemp = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-currentTemp")
+                .setDisplayName(siteDis + "-MONITORING-" + mNodeAddr + "-currentTemp")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -186,7 +186,7 @@ public class HyperStatSenseEquip {
                 .addMarker("zone").addMarker("hyperstat").addMarker("sense")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current")
                 .addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
+                .setGroup(String.valueOf(mNodeAddr)).addMarker(Tags.MONITORING)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -194,7 +194,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeHisValById(ctID, 0.0);
 
         Point humidity = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-humidity")
+                .setDisplayName(siteDis + "-MONITORING-" + mNodeAddr + "-humidity")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -202,7 +202,7 @@ public class HyperStatSenseEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("hyperstat").addMarker("sense")
                 .addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
+                .setGroup(String.valueOf(mNodeAddr)).addMarker(Tags.MONITORING)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -210,7 +210,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeHisValById(humidityId, 0.0);
 
         Point illuminance = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-illuminance")
+                .setDisplayName(siteDis + "-MONITORING-" + mNodeAddr + "-illuminance")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -218,7 +218,7 @@ public class HyperStatSenseEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("hyperstat").addMarker("sense")
                 .addMarker("illuminance").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
+                .setGroup(String.valueOf(mNodeAddr)).addMarker(Tags.MONITORING)
                 .setUnit("lux")
                 .setTz(tz)
                 .build();
@@ -227,7 +227,7 @@ public class HyperStatSenseEquip {
 
 
       Point  occupancy = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-occupancy")
+                .setDisplayName(siteDis + "-MONITORING-" + mNodeAddr + "-occupancy")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -235,7 +235,7 @@ public class HyperStatSenseEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("hyperstat").addMarker("sense")
                 .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
+                .setGroup(String.valueOf(mNodeAddr)).addMarker(Tags.MONITORING)
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
@@ -251,7 +251,7 @@ public class HyperStatSenseEquip {
                 .setShortDis("Analog1 Input Config")
                 .addMarker("config").addMarker("zone").addMarker("writable")
                 .addMarker("analog1").addMarker("input").addMarker("sensor")
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz).build();
         String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
@@ -267,7 +267,7 @@ public class HyperStatSenseEquip {
                 .setShortDis("Analog2 Input Config")
                 .addMarker("config").addMarker("zone").addMarker("writable")
                 .addMarker("analog2").addMarker("input").addMarker("sensor")
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
@@ -283,7 +283,7 @@ public class HyperStatSenseEquip {
                 .setShortDis("Thermister1 Input Config")
                 .addMarker("config").addMarker("zone").addMarker("writable")
                 .addMarker("th1").addMarker("input").addMarker("sensor")
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
@@ -299,7 +299,7 @@ public class HyperStatSenseEquip {
                 .setShortDis("Thermister2 Input Config")
                 .addMarker("config").addMarker("zone").addMarker("writable")
                 .addMarker("th2").addMarker("input").addMarker("sensor")
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
@@ -539,7 +539,7 @@ public class HyperStatSenseEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-SENSE-" + mNodeAddr + "-";
+        String equipDis = siteDis + "-MONITORING-" + mNodeAddr + "-";
         Bundle bundle = new Bundle();
         if (tag.equals("analog1")) {
             bundle = HyperStatSenseUtil.getAnalogBundle(config.analog1Sensor);
@@ -566,7 +566,7 @@ public class HyperStatSenseEquip {
                 .setShortDis(shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("zone").addMarker("his").addMarker(tag)
-                .addMarker("hyperstat").addMarker("sense")
+                .addMarker("hyperstat").addMarker("sense").addMarker(Tags.MONITORING)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setMinVal(minVal)
                 .setMaxVal(maxVal)

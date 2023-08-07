@@ -3,11 +3,11 @@ package a75f.io.logic.bo.building.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
-import a75f.io.logger.CcuLog
+import a75f.io.logic.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ReheatType
 import a75f.io.logic.bo.haystack.device.DeviceUtil
-import a75f.io.logic.bo.haystack.device.SmartNode
+
 
 fun createReheatType(equip : Equip, defaultVal : Double, hayStack : CCUHsApi) {
     val reheatType = Point.Builder()
@@ -45,7 +45,7 @@ fun createReheatMinDamper(equip : Equip, defaultVal : Double, hayStack: CCUHsApi
     hayStack.writeDefaultValById(reheatMinDamperId, defaultVal)
 }
 
-fun createReheatPosPoint(equip : Equip, defaultVal : Double, hayStack: CCUHsApi) : String {
+fun createReheatPosPoint(equip : Equip, defaultVal : Double, hayStack: CCUHsApi , bacnetId : Int , bacnetType : String ) : String {
     val reheatPos = Point.Builder()
         .setDisplayName(equip.displayName + "-reheatCmd")
         .setEquipRef(equip.id)
@@ -59,13 +59,13 @@ fun createReheatPosPoint(equip : Equip, defaultVal : Double, hayStack: CCUHsApi)
         .setGroup(equip.group)
         .setTz(equip.tz)
         .build()
-
+    addBacnetTags(reheatPos, REHEATCMDID, ANALOG_VALUE, equip.group.toInt())
     val reheatPosId = hayStack.addPoint(reheatPos)
     hayStack.writeHisValById(reheatPosId, defaultVal)
     return reheatPosId
 }
 
-fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String, hayStack : CCUHsApi) {
+fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String, hayStack : CCUHsApi,bacnetId: Int,bacnetType: String) {
     val currentReheatType = hayStack.readDefaultVal("reheat and type and equipRef == \"$equipRef\"")
     if (reheatType != currentReheatType) {
         val reheatDamper = hayStack.readEntity("reheat and min and damper and equipRef ==\"$equipRef\"")
@@ -76,7 +76,7 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                 createReheatMinDamper(dabEquip, minDamper, hayStack)
             }
             if (reheatLoop.isEmpty()) {
-                val reheatPosId = createReheatPosPoint(dabEquip, 0.0, hayStack)
+                val reheatPosId = createReheatPosPoint(dabEquip, 0.0, hayStack,bacnetId,bacnetType)
                 when(reheatType.toInt() - 1) {
                     ReheatType.OneStage.ordinal ->
                         DeviceUtil.updatePhysicalPointRef(dabEquip.group.toInt(), Port.RELAY_ONE.name, reheatPosId)

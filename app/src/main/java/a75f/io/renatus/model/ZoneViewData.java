@@ -509,7 +509,7 @@ public class ZoneViewData {
     public static HashMap getHyperStatSenseEquipPoints(String equipID) {
         HashMap sensePoints = new HashMap();
         CCUHsApi haystack = CCUHsApi.getInstance();
-        sensePoints.put("Profile","SENSE");
+        sensePoints.put("Profile","MONITORING");
         double currentTemp = haystack.readHisValByQuery("zone and point and current and temp and group == \""+equipID+"\"");
         double tempOffset = haystack.readDefaultVal("point and offset and temperature and group == \""+equipID+"\"");
         double analog1Sensor = haystack.readDefaultVal("point and config and analog1 and input and sensor and group == \"" + equipID + "\"").intValue();

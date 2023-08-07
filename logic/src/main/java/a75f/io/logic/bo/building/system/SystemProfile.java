@@ -17,6 +17,8 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Schedule;
@@ -728,11 +730,15 @@ public abstract class SystemProfile
     }
 
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
-        Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp")
+                .setBacnetId(BacnetIdKt.CMCOOLINGDESIREDTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);
         CCUHsApi.getInstance().writeDefaultValById(cmCoolDesiredTempId, 0.0);
         CCUHsApi.getInstance().writeHisValById(cmCoolDesiredTempId, 0.0);
-        Point cmHeatDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmHeatingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("heating").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        Point cmHeatDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmHeatingDesiredTemp")
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm")
+                .addMarker("heating").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his")
+                .addMarker("sp").setUnit("\u00B0F").setBacnetId(BacnetIdKt.CMHEATINGDESIREDTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String cmHeatDesiredTempId = CCUHsApi.getInstance().addPoint(cmHeatDesiredTemp);
         CCUHsApi.getInstance().writeDefaultValById(cmHeatDesiredTempId, 0.0);
         CCUHsApi.getInstance().writeHisValById(cmHeatDesiredTempId, 0.0);
@@ -743,7 +749,7 @@ public abstract class SystemProfile
     {
         Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("current")
-                .addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+                .addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setBacnetId(BacnetIdKt.CURRENTTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
         Point systemStatusMessage = new Point.Builder()
@@ -767,11 +773,16 @@ public abstract class SystemProfile
                 .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
 
-        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature")
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
+                .addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F")
+                .setBacnetId(BacnetIdKt.OUTSIDETEMPERATUREID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String outsideTempId = CCUHsApi.getInstance().addPoint(outsideTemperature);
         CCUHsApi.getInstance().writeHisValById(outsideTempId, 0.0);
         
-        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
+        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity")
+                .addMarker("his").addMarker("sp").setUnit("%").setBacnetId(BacnetIdKt.OUTSIDEHUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
@@ -787,16 +798,23 @@ public abstract class SystemProfile
                                    .setEnums(Occupancy.getEnumStringDefinition()).setTz(tz).build();
         String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
         CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
-        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
+        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode")
+                .setBacnetId(BacnetIdKt.OPERATIONMODEID).setBacnetType(BacnetUtilKt.MULTI_STATE_VALUE)
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").
+                addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);
         Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(ciRunning);
-        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
+        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity")
+                .setBacnetId(BacnetIdKt.AVERAGEHUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageHumidity);
-        Point cmHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "cmHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("sp").setTz(tz).setUnit("%").build();
+        Point cmHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "cmHumidity").setSiteRef(siteRef).setEquipRef(equipref).
+                setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("sp").
+                setTz(tz).setUnit("%").setBacnetId(BacnetIdKt.HUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).build();
         String cmHumidityId = CCUHsApi.getInstance().addPoint(cmHumidity);
         CCUHsApi.getInstance().writeHisValById(cmHumidityId, 0.0);
-        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature")
+                .setBacnetId(BacnetIdKt.AVERAGETEMPERATUREID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
         addCMPoints(siteRef, equipref, equipDis, tz);
         addNewSystemUserIntentPoints(equipref);

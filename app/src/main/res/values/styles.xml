@@ -669,7 +669,7 @@
     </style>
     <style name="FanPositionSpinner_HyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
+        <item name="android:layout_weight">0.5</item>
         <item name="android:layout_marginBottom">20dp</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginRight">10dp</item>
@@ -680,7 +680,7 @@
     </style>
     <style name="Damper_HyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1.5</item>
+        <item name="android:layout_weight">0.5</item>
         <item name="android:layout_marginBottom">20dp</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginRight">10dp</item>
@@ -692,7 +692,7 @@
 
     <style name="VocLabel_HyperStat">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
+        <item name="android:layout_weight">0.5</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">20dp</item>
         <item name="android:layout_marginTop">14dp</item>
@@ -701,7 +701,7 @@
     </style>
     <style name="VocHyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1.5</item>
+        <item name="android:layout_weight">0.5</item>
         <item name="android:layout_marginBottom">20dp</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginRight">10dp</item>

@@ -4,13 +4,13 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class EquipBuilderTest {
+class ProfileEquipBuilderTest {
      private lateinit var dmModel: ModelDirective
 
     private var mockHayStack = MockCcuHsApi()
@@ -29,7 +29,7 @@ class EquipBuilderTest {
     fun testCreateEquip() {
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(mockHayStack)
+            val equipBuilder = ProfileEquipBuilder(mockHayStack)
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
         }
 
@@ -45,7 +45,7 @@ class EquipBuilderTest {
     fun testCreatePoints() {
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(mockHayStack)
+            val equipBuilder = ProfileEquipBuilder(mockHayStack)
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
         }
 
@@ -60,7 +60,7 @@ class EquipBuilderTest {
      */
     @Test
     fun testUpdatePoints() {
-        val equipBuilder = EquipBuilder(mockHayStack)
+        val equipBuilder = ProfileEquipBuilder(mockHayStack)
 
         dmModel?.let {
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
@@ -95,7 +95,7 @@ class EquipBuilderTest {
 
     @Test
     fun testUpdatePointsDomain() {
-        val equipBuilder = EquipBuilder(mockHayStack)
+        val equipBuilder = ProfileEquipBuilder(mockHayStack)
 
         dmModel?.let {
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
@@ -131,7 +131,7 @@ class EquipBuilderTest {
     fun testVerifyEquipTagValType() {
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(mockHayStack)
+            val equipBuilder = ProfileEquipBuilder(mockHayStack)
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
         }
 
@@ -148,7 +148,7 @@ class EquipBuilderTest {
     fun testVerifyPointTagValType() {
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(mockHayStack)
+            val equipBuilder = ProfileEquipBuilder(mockHayStack)
             equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
         }
 

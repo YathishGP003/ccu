@@ -2769,4 +2769,8 @@ public class CCUHsApi
             return 0.0;
         }
     }
+
+    public void writeDefaultTunerValById(String id, double val) {
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
+    }
 }

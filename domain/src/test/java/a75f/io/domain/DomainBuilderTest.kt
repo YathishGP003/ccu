@@ -8,7 +8,7 @@ import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import org.junit.After
 import org.junit.Before
@@ -61,7 +61,7 @@ class DomainBuilderTest {
         val zoneRef = hayStack.addZone(z)
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(hayStack)
+            val equipBuilder = ProfileEquipBuilder(hayStack)
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef

@@ -9,7 +9,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import org.junit.After
 import org.junit.Before
@@ -64,7 +64,7 @@ class DeviceBuilderTest {
         dmModel?.let {
             val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
             val entityMapper = EntityMapper(profileModel)
-            val equipBuilder = EquipBuilder(mockHayStack)
+            val equipBuilder = ProfileEquipBuilder(mockHayStack)
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef
@@ -119,7 +119,7 @@ class DeviceBuilderTest {
 
         val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
         val entityMapper = EntityMapper(profileModel)
-        val equipBuilder = EquipBuilder(mockHayStack)
+        val equipBuilder = ProfileEquipBuilder(mockHayStack)
         val profileConfig = getTestProfileConfig()
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef

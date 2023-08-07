@@ -7,7 +7,7 @@ import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.HyperStat2pfcuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
@@ -22,7 +22,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
         updateEntityData(entityData.tobeUpdated,newModel,equipDetails)
     }
     private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
-        val equipBuilder = EquipBuilder (haystack)
+        val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeAdded.forEach { diffDomain ->
             // updated Equip
@@ -52,7 +52,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
         println(tobeRemove)
     }
     private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
-        val equipBuilder = EquipBuilder (haystack)
+        val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeUpdate.forEach { diffDomain ->
             // updated Equip

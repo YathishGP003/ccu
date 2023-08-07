@@ -9,7 +9,7 @@ import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.migration.MAJOR
 import a75f.io.domain.migration.MINOR
@@ -116,7 +116,7 @@ class DiffManagerTest {
        var dmModel = a75f.io.domain.ResourceHelper.loadProfileModelDefinition("models/6483676fad855161596a5040.json")
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(hayStack)
+            val equipBuilder = ProfileEquipBuilder(hayStack)
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef

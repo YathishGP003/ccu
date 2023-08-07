@@ -182,6 +182,7 @@ public class FloorPlanFragment extends Fragment {
                         } else {
                             updateModules(getSelectedZone());
                             setScheduleType(getSelectedZone().getId());
+                            BackFillViewModel.setBackFillDuration();
                             //Update BACnet Database Revision by adding new module to zone
                             ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
                             if (zoneEquips.size() == 1) {
@@ -563,7 +564,6 @@ public class FloorPlanFragment extends Fragment {
         } else {
             moduleListView.setAdapter(null);
         }
-        BackFillViewModel.setBackFillDuration();
     }
 
     private ArrayList<String> createAddressList(List<Equip> equips) {

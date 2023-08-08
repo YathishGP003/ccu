@@ -2,7 +2,6 @@ package a75f.io.renatus.hyperstat.viewModels
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.sensors.SensorType
 import android.content.Context
 import android.widget.ArrayAdapter
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -50,4 +49,5 @@ interface HyperStatModel {
     fun getRelayMappingAdapter(context : Context, values: Array<String>): ArrayAdapter<*>
     fun validateProfileConfig() : Boolean
     fun getValidationMessage() : String
+    fun voltageAtStagedFanSelected(index: Int, position: Int)
 }

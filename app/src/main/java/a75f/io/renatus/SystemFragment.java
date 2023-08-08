@@ -1040,6 +1040,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			for (int i = 0; i <modbusDevices.size() ; i++) {
 				if(modbusDevices.get(i).getEquipType().equals("EMR")){
 					emDevice = modbusDevices.get(i);
+					if(emDevice.getDeviceEquipRef() == null) {
+						emDevice.setDeviceEquipRef(emDevice.getEquipRef());
+					}
 				}
 			}
 
@@ -1093,6 +1096,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			for (int i = 0; i <modbusDevices.size() ; i++) {
 				if(modbusDevices.get(i).getEquipType().equals("BTU")){
 					btuDevice = modbusDevices.get(i);
+					if(btuDevice.getDeviceEquipRef() == null) {
+						btuDevice.setDeviceEquipRef(btuDevice.getEquipRef());
+					}
 				}
 			}
 
@@ -1136,9 +1142,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void configWatermark(){
-		if(!CCUUiUtil.isDaikinEnvironment(getContext()))
-			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
-
+		mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+			mainLayout.setBackground(null);
+		}
 	}
 	private String getOccStatus(){
 		HashMap point = CCUHsApi.getInstance().read("point and " +

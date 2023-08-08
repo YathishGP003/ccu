@@ -103,10 +103,6 @@ class Point(domainName : String, id : String) : Entity(domainName, id) {
 private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
     val domainName = entityMap["domainName"].toString()
     val id = entityMap["id"].toString()
-    if (domainName == null && id == null) {
-        return null
-    }
-
     return when(clazz) {
         Floor::class -> Floor(domainName, id)
         Room::class -> Room(domainName, id)

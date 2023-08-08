@@ -14,6 +14,8 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -727,23 +729,30 @@ public class VavStagedRtu extends VavSystemProfile
         String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        addCmdPoint(COOLING_1.displayName,"cooling","stage1", equipDis, siteRef, equipref, tz);
-        addCmdPoint(COOLING_2.displayName,"cooling","stage2", equipDis, siteRef, equipref, tz);
-        addCmdPoint(FAN_1.displayName,"fan","stage1", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_1.displayName,"heating","stage1", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_2.displayName,"heating","stage2", equipDis, siteRef, equipref, tz);
-        addCmdPoint(FAN_2.displayName,"fan","stage2", equipDis, siteRef, equipref, tz);
+        addCmdPoint(COOLING_1.displayName,"cooling","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.COOLINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(COOLING_2.displayName,"cooling","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.COOLINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(FAN_1.displayName,"fan","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.FANSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(HEATING_1.displayName,"heating","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.HEATINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(HEATING_2.displayName,"heating","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.HEATINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(FAN_2.displayName,"fan","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.FANSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
         addHumidityCmdPoint(HUMIDIFIER.displayName,"humidifier", equipDis, siteRef, equipref, tz);
     }
     
-    private void addCmdPoint(String name, String relayMap, String stage, String equipDis, String siteRef, String equipref, String tz){
+    private void addCmdPoint(String name, String relayMap, String stage, String equipDis, String siteRef, String equipref, String tz,
+                             int bacnetId, String bacnetType){
         //Name to be updated
         Point relay1Op = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+name)
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref).setHisInterpolate("cov")
                                  .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("runtime")
-                                 .setTz(tz)
+                                 .setTz(tz).setBacnetId(bacnetId).setBacnetType(bacnetType)
                                  .build();
         String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
         CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
@@ -756,7 +765,7 @@ public class VavStagedRtu extends VavSystemProfile
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("runtime")
                 .setEnums("off,on")
-                .setTz(tz)
+                .setTz(tz).setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
                 .build();
         String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
         CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
@@ -950,34 +959,38 @@ public class VavStagedRtu extends VavSystemProfile
     
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cooling and cmd and stage"+newStageNum).isEmpty()) {
+                    int bacnetId =  BacnetUtilKt.getBacnetId(val);
                     newCmdPoint =
                         new Point.Builder().setSiteRef(systemEquip.getSiteRef()).setEquipRef(systemEquip.getId()).setDisplayName(
                         equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker(
-                        "his").addMarker("runtime").setTz(timeZone).build();
+                        "his").addMarker("runtime").setTz(timeZone).setBacnetId(bacnetId).setBacnetType(BacnetUtilKt.BINARY_VALUE).build();
                 }
             } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and heating and cmd and stage"+newStageNum).isEmpty()) {
+                    int bacnetId =  BacnetUtilKt.getBacnetId(val);
                     newCmdPoint = new Point.Builder().setSiteRef(systemEquip.getSiteRef()).setEquipRef(systemEquip.getId()).setDisplayName(
                         equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker(
-                        "his").addMarker("runtime").setTz(timeZone).build();
+                        "his").addMarker("runtime").setTz(timeZone).setBacnetId(bacnetId).setBacnetType(BacnetUtilKt.BINARY_VALUE).build();
                 }
             } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and fan and cmd and stage"+newStageNum).isEmpty()) {
+                    int bacnetId =  BacnetUtilKt.getBacnetId(val);
                     newCmdPoint = new Point.Builder().setSiteRef(systemEquip.getSiteRef()).setEquipRef(systemEquip.getId()).setDisplayName(
                         equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker(
-                        "his").addMarker("runtime").setTz(timeZone).build();
+                        "his").addMarker("runtime").setTz(timeZone).setBacnetId(bacnetId).setBacnetType(BacnetUtilKt.BINARY_VALUE).build();
                 }
             } else if (val == HUMIDIFIER.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cmd and humidifier").isEmpty()) {
                     newCmdPoint = new Point.Builder().setSiteRef(systemEquip.getSiteRef()).setEquipRef(systemEquip.getId()).setDisplayName(
                         equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(
-                        timeZone).build();
+                        timeZone).setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
+                            .build();
                 }
             } else if (val == DEHUMIDIFIER.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cmd and dehumidifier").isEmpty()) {
                     newCmdPoint = new Point.Builder().setSiteRef(systemEquip.getSiteRef()).setEquipRef(systemEquip.getId()).setDisplayName(
                         equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(
-                        timeZone).build();
+                        timeZone).setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE).build();
                 }
             }
             if(oldPoint != null && oldPoint.getId() != null) {

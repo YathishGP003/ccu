@@ -199,7 +199,7 @@ public class TunerConstants
     
     
     public static final double OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT = 50;
-    public static final double OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT = 80;
+    public static final double OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT = 65;
     public static final double AIR_FLOW_CFM_PROPORTIONAL_RANGE = 200.0;
     public static final double AIR_FLOW_CFM_INTEGRAL_TIME = 30.0;
     public static final double AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR = 0.5;

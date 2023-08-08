@@ -58,7 +58,7 @@ object Domain {
             assert(floor.rooms.size == 1)
             floor.rooms.entries.forEach { r ->
                 val room =  r.value
-                room.equips.forEach { (equipDomainName, equip) ->
+                room.equips.forEach { (_, equip) ->
                     if (equip.domainName == domainName){
                         equips.add(equip)
                     }

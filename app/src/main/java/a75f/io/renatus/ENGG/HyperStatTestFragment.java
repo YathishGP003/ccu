@@ -55,7 +55,7 @@ public class HyperStatTestFragment extends BaseDialogFragment
 
 	List<String> channels = Arrays.asList("Select Channel", "1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000");
 
-	List<String> profiles = Arrays.asList("Select Profile", "CPU", "HPU", "2PFCU", "4PFCU", "Sense");
+	List<String> profiles = Arrays.asList("Select Profile", "CPU", "HPU", "2PFCU", "4PFCU", "monitoring");
 
 	List<String> fanSpeed = Arrays.asList("Select Fan Speed", "Off", "Auto", "Low", "High");
 

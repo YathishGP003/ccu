@@ -1,21 +1,11 @@
 package a75f.io.renatus.model;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
-import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -506,10 +496,10 @@ public class ZoneViewData {
         return plcPoints;
     }
     
-    public static HashMap getHyperStatSenseEquipPoints(String equipID) {
-        HashMap sensePoints = new HashMap();
+    public static HashMap getHyperStatMonitoringEquipPoints(String equipID) {
+        HashMap monitoringPoints = new HashMap();
         CCUHsApi haystack = CCUHsApi.getInstance();
-        sensePoints.put("Profile","SENSE");
+        monitoringPoints.put("Profile","MONITORING");
         double currentTemp = haystack.readHisValByQuery("zone and point and current and temp and group == \""+equipID+"\"");
         double tempOffset = haystack.readDefaultVal("point and offset and temperature and group == \""+equipID+"\"");
         double analog1Sensor = haystack.readDefaultVal("point and config and analog1 and input and sensor and group == \"" + equipID + "\"").intValue();
@@ -533,66 +523,66 @@ public class ZoneViewData {
         double offset = tempOffset/10;
         double t = currentTemp + offset;
         
-        sensePoints.put("curtempwithoffset",(currentTemp));
+        monitoringPoints.put("curtempwithoffset",(currentTemp));
         
         if (tempOffset  != 0) {
-            sensePoints.put("TemperatureOffset",tempOffset);
+            monitoringPoints.put("TemperatureOffset",tempOffset);
         }else{
-            sensePoints.put("TemperatureOffset",0);
+            monitoringPoints.put("TemperatureOffset",0);
         }
         
         if(isAnalog1Enable){
             size++;
-            sensePoints.put("iAn1Enable","true");
-        } else sensePoints.put("iAn1Enable","false");
+            monitoringPoints.put("iAn1Enable","true");
+        } else monitoringPoints.put("iAn1Enable","false");
         
         if(isAnalog2Enable){
             size++;
-            sensePoints.put("iAn2Enable","true");
+            monitoringPoints.put("iAn2Enable","true");
         }
-        else sensePoints.put("iAn2Enable","false");
+        else monitoringPoints.put("iAn2Enable","false");
         
         if(isTh1Enable){
             size++;
-            sensePoints.put("isTh1Enable","true");
+            monitoringPoints.put("isTh1Enable","true");
         }
-        else sensePoints.put("isTh1Enable","false");
+        else monitoringPoints.put("isTh1Enable","false");
         
         if(isTh2Enable){
             size++;
-            sensePoints.put("isTh2Enable","true");
+            monitoringPoints.put("isTh2Enable","true");
         }
-        else sensePoints.put("isTh2Enable","false");
+        else monitoringPoints.put("isTh2Enable","false");
         
-        sensePoints.put("size",size);
+        monitoringPoints.put("size",size);
         if (analog1Sensor >= 0 ) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog1Sensor );
-            sensePoints.put("Analog1",selectedSensor.sensorName );
-            sensePoints.put("Unit1", selectedSensor.engineeringUnit);
-            sensePoints.put("An1Val",an1Val);
+            monitoringPoints.put("Analog1",selectedSensor.sensorName );
+            monitoringPoints.put("Unit1", selectedSensor.engineeringUnit);
+            monitoringPoints.put("An1Val",an1Val);
         }
         
         if (analog2Sensor >= 0) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog2Sensor );
-            sensePoints.put("Analog2", selectedSensor.sensorName);
-            sensePoints.put("Unit2", selectedSensor.engineeringUnit);
-            sensePoints.put("An2Val",an2Val);
+            monitoringPoints.put("Analog2", selectedSensor.sensorName);
+            monitoringPoints.put("Unit2", selectedSensor.engineeringUnit);
+            monitoringPoints.put("An2Val",an2Val);
         }
         
         if (th1Sensor >= 0) {
             Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th1Sensor );
-            sensePoints.put("Thermistor1", selectedSensor.sensorName);
-            sensePoints.put("Unit3", selectedSensor.engineeringUnit);
-            sensePoints.put("Th1Val",th1Val);
+            monitoringPoints.put("Thermistor1", selectedSensor.sensorName);
+            monitoringPoints.put("Unit3", selectedSensor.engineeringUnit);
+            monitoringPoints.put("Th1Val",th1Val);
         }
         if (th2Sensor >= 0) {
             Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th2Sensor);
-            sensePoints.put("Thermistor2", selectedSensor.sensorName);
-            sensePoints.put("Unit4", selectedSensor.engineeringUnit);
-            sensePoints.put("Th2Val",th2Val);
+            monitoringPoints.put("Thermistor2", selectedSensor.sensorName);
+            monitoringPoints.put("Unit4", selectedSensor.engineeringUnit);
+            monitoringPoints.put("Th2Val",th2Val);
         }
         
-        return sensePoints;
+        return monitoringPoints;
     }
     
     private static String getAnalogShortDis(int analog) {

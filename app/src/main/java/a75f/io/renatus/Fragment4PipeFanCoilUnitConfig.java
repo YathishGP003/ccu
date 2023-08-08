@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -267,6 +269,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
                     },
                     ()->{
+                        addBacnetTags(requireContext(), floorRef, roomRef);
                         ProgressDialogUtils.hideProgressDialog();
                         Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

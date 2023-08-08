@@ -10,7 +10,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil.Companion.updateMarkers
-import android.nfc.Tag
 
 /**
  * Created by Manjunath K on 07-10-2022.
@@ -471,7 +470,7 @@ class CpuPointsMigration {
                             analog,
                             port
                         )
-                        CpuAnalogOutAssociation.FAN_SPEED.ordinal -> {
+                        CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal -> {
                             migrateAnalogOutFanSpeed(equipRef, analog, port)
                             migrateAnalogOutFanOptionPoints(equipRef, analog)
                         }
@@ -583,7 +582,7 @@ class CpuPointsMigration {
                 updateAnalogDuplicatePoints(
                     port,
                     logicalPoint[Tags.ID].toString(),
-                    CpuAnalogOutAssociation.FAN_SPEED,
+                    CpuAnalogOutAssociation.MODULATING_FAN_SPEED,
                     logicalPoint[Tags.GROUP].toString().toInt(),
                     equipRef,
                 )

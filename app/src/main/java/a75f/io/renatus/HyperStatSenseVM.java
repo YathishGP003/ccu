@@ -1,29 +1,24 @@
 package a75f.io.renatus;
 
-import android.widget.Spinner;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import a75f.io.logic.L;
-import io.reactivex.rxjava3.subjects.BehaviorSubject;
-
 public class HyperStatSenseVM extends ViewModel {
     //TODO
-    MutableLiveData<HyperStatSenseModel> mVm;
-    HyperStatSenseModel model;
+    MutableLiveData<HyperStatMonitoringModel> mVm;
+    HyperStatMonitoringModel model;
 
     public void init(){
         if(mVm != null){
             return;
         }
-        mVm = new MutableLiveData<HyperStatSenseModel>();
-        model = new HyperStatSenseModel();
+        mVm = new MutableLiveData<HyperStatMonitoringModel>();
+        model = new HyperStatMonitoringModel();
         mVm.setValue(model);
     }
 
-    public LiveData<HyperStatSenseModel> get(){
+    public LiveData<HyperStatMonitoringModel> get(){
         return mVm;
     }
 

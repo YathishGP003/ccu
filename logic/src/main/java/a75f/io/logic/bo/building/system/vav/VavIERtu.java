@@ -17,6 +17,8 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -356,7 +358,6 @@ public class VavIERtu extends VavSystemProfile
         String equipDis = Objects.requireNonNull(siteMap.get("dis")).toString() + "-SystemEquip";
         String siteRef = Objects.requireNonNull(siteMap.get("id")).toString();
         String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
-
         Point DATClgSetpoint = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"DATClgSetpoint")
                 .setSiteRef(siteRef)
@@ -438,7 +439,7 @@ public class VavIERtu extends VavSystemProfile
                               .addMarker("system").addMarker("dischargeAirTemp").addMarker("ie")
                               .addMarker("sp").addMarker("his").setHisInterpolate("cov")
                               .setUnit("\u00B0F")
-                              .setTz(tz)
+                              .setTz(tz).setBacnetId(BacnetIdKt.SUPPLYAIRTEMP1ID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                               .build();
         String dischargeAirTempId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
         hayStack.writeHisValById(dischargeAirTempId, 0.0);
@@ -673,6 +674,7 @@ public class VavIERtu extends VavSystemProfile
                                                           .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                                           .addMarker("system").addMarker("cmd").addMarker("his")
                                                           .addMarker("staticPressure").addMarker("ie")
+                                    .setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.DUCTSTATICPRESSURE)
                                                           .setUnit(Consts.PRESSURE_UNIT).setTz(tz)
                                                           .build();
                             hayStack.addPoint(staticPressureCmd);
@@ -685,7 +687,7 @@ public class VavIERtu extends VavSystemProfile
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                                         .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
-                                                        .addMarker("ie")
+                                                        .addMarker("ie").setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.FANSIGNALID)
                                                         .setUnit("%").setTz(tz)
                                                         .build();
                                 hayStack.addPoint(fanSpeedCmd);
@@ -749,6 +751,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
                                       .addMarker("system").addMarker("cmd").addMarker("his")
                                       .addMarker("staticPressure").addMarker("ie")
+                        .setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.DUCTSTATICPRESSURE)
                                       .setUnit(Consts.PRESSURE_UNIT).setTz(systemEquip.getTz())
                                       .build();
                 hayStack.addPoint(staticPressure);
@@ -770,7 +773,7 @@ public class VavIERtu extends VavSystemProfile
                                         .setSiteRef(systemEquip.getSiteRef())
                                         .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
                                         .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
-                                        .addMarker("ie")
+                                        .addMarker("ie").setBacnetType(BacnetUtilKt.ANALOG_VALUE).setBacnetId(BacnetIdKt.FANSIGNALID)
                                         .setUnit("%").setTz(systemEquip.getTz())
                                         .build();
                 hayStack.addPoint(fanSpeedCmd);

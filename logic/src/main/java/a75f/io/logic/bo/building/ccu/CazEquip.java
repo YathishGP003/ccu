@@ -13,6 +13,8 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -97,6 +99,7 @@ public class CazEquip
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
 
         Point humidity = new Point.Builder()
@@ -112,6 +115,7 @@ public class CazEquip
                 .setUnit("%")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(humidity, BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
 
 
@@ -128,6 +132,7 @@ public class CazEquip
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
 
         Point desiredTempCooling = new Point.Builder()
@@ -143,6 +148,7 @@ public class CazEquip
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
 
         Point desiredTempHeating = new Point.Builder()
@@ -158,6 +164,7 @@ public class CazEquip
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()
@@ -397,6 +404,7 @@ public class CazEquip
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double) config.temperaturOffset);
 
@@ -415,11 +423,16 @@ public class CazEquip
             ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
             ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
 
+            ControlMote.setCMPointEnabled(Port.TH1_IN.name(), false);
+            ControlMote.setCMPointEnabled( Port.TH2_IN.name(), false);
+
             if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 || roomTempSensor == RoomTempSensor.THERMISTOR_1) {
                 ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
+                ControlMote.setCMPointEnabled(Port.TH1_IN.name(), true);
             }
             if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 || roomTempSensor == RoomTempSensor.THERMISTOR_2) {
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+                ControlMote.setCMPointEnabled(Port.TH2_IN.name(), true);
             }
             if (roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
                 ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);

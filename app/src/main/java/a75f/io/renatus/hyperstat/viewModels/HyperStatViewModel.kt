@@ -143,8 +143,6 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
         )
     }
 
-
-
     override fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int) {
         val analogOuts = currentState.analogOutUis
         val newAnalogOuts =
@@ -294,6 +292,17 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
     override fun onDisplayP2pmSelected(checked: Boolean){
         viewState.onNext(
             currentState.copy( isDisplayPp2p5Enabled = checked )
+        )
+    }
+
+    override fun voltageAtStagedFanSelected(index: Int, position: Int) {
+
+        val stagedFans = currentState.stagedFanUis.toMutableList()
+        stagedFans[index] = position
+        viewState.onNext(
+            currentState.copy(
+                stagedFanUis = stagedFans
+            )
         )
     }
 

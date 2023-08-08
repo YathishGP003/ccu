@@ -130,7 +130,7 @@ public class HyperStatMessageGenerator {
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
 
         // Sense profile does not have control messages
-        if(device.containsKey("sense")) return HyperStat.HyperStatControlsMessage_t.newBuilder();
+        if(device.containsKey("monitoring")) return HyperStat.HyperStatControlsMessage_t.newBuilder();
 
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
         controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef, mode) * 2));

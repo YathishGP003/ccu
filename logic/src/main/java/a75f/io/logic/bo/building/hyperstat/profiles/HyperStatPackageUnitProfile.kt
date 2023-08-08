@@ -152,7 +152,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Fan Speed  analogSignal   $fanLoopForAnalog")
+            Log.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
         }
     }
 

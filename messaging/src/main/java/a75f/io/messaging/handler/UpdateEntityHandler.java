@@ -118,7 +118,9 @@ public class UpdateEntityHandler implements MessageHandler {
                 zone.setCreatedDateTime(getCreatedDateTime(row));
                 zone.setLastModifiedDateTime(getLastModifiedTime(row));
                 zone.setLastModifiedBy(getLastModifiedBy(row, ccuHsApi));
-                ccuHsApi.updateZoneLocally(zone, entity.get("id").toString());
+                zone.setBacnetId(Integer.parseInt(row.get("bacnetId").toString()));
+                zone.setBacnetType(row.get("bacnetType").toString());
+                CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
             }
         }
     }

@@ -2,8 +2,11 @@ package a75f.io.api.haystack;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.projecthaystack.HBin;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HCoord;
@@ -35,7 +39,6 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
 import org.projecthaystack.MapImpl;
 import org.projecthaystack.io.HZincReader;
-import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 import org.projecthaystack.server.HStdOps;
@@ -44,22 +47,37 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 
+import a75f.io.api.haystack.util.DatabaseAction;
+import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.data.RenatusDatabaseBuilder;
+import a75f.io.data.entities.DatabaseHelper;
+import a75f.io.data.entities.EntityDBUtilKt;
+import a75f.io.data.entities.EntityDatabaseHelper;
+import a75f.io.data.entities.HayStackEntity;
+import a75f.io.data.writablearray.WritableArray;
+import a75f.io.data.writablearray.WritableArrayDBUtilKt;
+import a75f.io.data.writablearray.WritableArrayDatabaseHelper;
 import a75f.io.logger.CcuLog;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.query.QueryBuilder;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by samjithsadasivan on 8/31/18.
@@ -75,10 +93,16 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
     private static final String TAG_CCU_HS = "CCU_HS";
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
-    
+    private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
+    private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
+    private static final String TAG_CCU_BACNET = "CCU_BACNET";
+    private static final String PREFS_HAS_MIGRATED_ROOM_DB = "hasMigratedRoomDb";
+
     private static final long MAX_DB_SIZE_IN_KB = 5 * 1024 * 1024;
     private static final long MAX_DB_SIZE_IN_KB_RECOVERY = 6 * 1024 * 1024;
-    
+
+    private static final String TAG_CCU_ROOM_DB = "CCU_DB";
+
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
 
@@ -100,6 +124,10 @@ public class CCUTagsDb extends HServer {
     public ConcurrentHashMap<String, String> updateIdMap;
     public String updateIdMapString;
 
+    public List<HayStackEntity> allEntities;
+
+    public List<WritableArray> allWritable;
+
     private class TimeZoneInstanceCreator implements InstanceCreator<TimeZone> {
         public TimeZone createInstance(Type type) {
             return TimeZone.getDefault();
@@ -107,7 +135,7 @@ public class CCUTagsDb extends HServer {
     }
 
     //public String tagsString = null;
-    RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
+    public RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
             RuntimeTypeAdapterFactory.of(TimeZone.class)
                     .of(HVal.class)
                     .registerSubtype(HBin.class)
@@ -152,8 +180,14 @@ public class CCUTagsDb extends HServer {
 
             CcuLog.d("CCU_HS", "New CCU.  No migration needed");
             markGuidMigrationComplete();
-
+            loadEntitiesFromRoomDb();
         } else {
+                tagsMap = new ConcurrentHashMap<>();
+                writeArrays = new ConcurrentHashMap();
+                idMap = new ConcurrentHashMap();
+                removeIdMap = new ConcurrentHashMap();
+                updateIdMap = new ConcurrentHashMap();
+            //TODO- check if this required
             Gson gson = new GsonBuilder()
                     .registerTypeAdapterFactory(hsTypeAdapter).registerTypeAdapter(TimeZone.class, new TimeZoneInstanceCreator())
                     .setPrettyPrinting()
@@ -163,32 +197,110 @@ public class CCUTagsDb extends HServer {
             // Start migration to GUID if that hasn't happened yet
             DbStrings migrationResult = checkAndStartGuidMigration(gson);
 
-            tagsMap = new ConcurrentHashMap<String, HDict>();
-            loadGrid(tagsString);
-            Type waType = new TypeToken<ConcurrentHashMap<String, WriteArray>>() {
-            }.getType();
-            writeArrays = gson.fromJson(waString, waType);
-            idMap = gson.fromJson(idMapString, ConcurrentHashMap.class);
-            removeIdMap = gson.fromJson(removeIdMapString, ConcurrentHashMap.class);
-            updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
+            if (hasRoomDbMigrationCompleted()) {
+                CcuLog.i(TAG_CCU_ROOM_DB, "loadEntitiesFromRoomDb ");
+                loadEntitiesFromRoomDb();
+            } else {
+                CcuLog.i(TAG_CCU_ROOM_DB, "loadEntitiesFromFile ");
+                loadEntitiesFromPreferenceString();
+                doTagsRoomDbMigration();
+            }
 
             // Finish the migration (if applicable)
             if (migrationResult != null) {
                 finishGuidMigration(migrationResult);
             }
-
-            CcuLog.d("CCU_HS", "checking id map for matching l to g ids");
-            int matchCount = 0;
-            for (String key : idMap.keySet()) {
-                if (key.equals(idMap.get(key))) matchCount++;
-                else {
-                    CcuLog.d("CCU_HS", "Not a match: luid="+key + ", guid="+idMap.get(key));
-                    CcuLog.d("CCU_HS", "entity is: " + tagsMap.get(key));
-                }
-            }
-            CcuLog.d("CCU_HS", "Match check: " + matchCount + " match out of " + idMap.size());
-            
         }
+    }
+
+    private void doTagsRoomDbMigration() {
+        CcuLog.i(TAG_CCU_ROOM_DB, "doTagsRoomDbMigration ");
+        try {
+            TagDbMigration.doTagStringToRoomDBMigration(appContext, hsTypeAdapter);
+            PreferenceManager.getDefaultSharedPreferences(appContext).edit()
+                    .putBoolean(PREFS_HAS_MIGRATED_ROOM_DB, true)
+                    .apply();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
+                    DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
+                    EventBus.getDefault().postSticky(databaseEvent);
+                    CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed @@--------------");
+                }
+            }, 1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //There are many failure points here. Just using generic exception as system can still function,
+            CcuLog.i(TAG_CCU_ROOM_DB, "Tags ROOM DB Migration Failed ", e);
+        }
+    }
+
+    private boolean hasRoomDbMigrationCompleted() {
+        return PreferenceManager.getDefaultSharedPreferences(appContext)
+                .getBoolean(PREFS_HAS_MIGRATED_ROOM_DB, false);
+    }
+
+    private void loadEntitiesFromPreferenceString() {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(hsTypeAdapter).registerTypeAdapter(TimeZone.class, new TimeZoneInstanceCreator())
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+
+        tagsMap = new ConcurrentHashMap<>();
+        loadGrid(tagsString);
+        Type waType = new TypeToken<ConcurrentHashMap<String, WriteArray>>() {
+        }.getType();
+        writeArrays = gson.fromJson(waString, waType);
+        idMap = gson.fromJson(idMapString, ConcurrentHashMap.class);
+        removeIdMap = gson.fromJson(removeIdMapString, ConcurrentHashMap.class);
+        updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
+    }
+
+    private void loadGrid(String tagsString) {
+
+        HZincReader hZincReader = new HZincReader(tagsString);
+        HGrid hGrid = hZincReader.readGrid();
+        hGrid.dump();
+
+        for(int i = 0; i < hGrid.numRows(); i++)
+        {
+            HRow val = hGrid.row(i);
+            //CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
+            if(!val.has("nosync")) {
+                String key = val.get("id").toString().replace("@", "");
+                tagsMap.put(key, val);
+            }
+        }
+    }
+    private void loadEntitiesFromRoomDb() {
+        //To read all the contents of entity table and writable table of roomDB and add it to local variale for further access
+        Observable.fromCallable(() -> {
+                    DatabaseHelper databaseHelper = new EntityDatabaseHelper(RenatusDatabaseBuilder
+                            .getInstance(appContext));
+                    allEntities = databaseHelper.getAllEntities();
+                    Log.d(TAG_CCU_ROOM_DB, "Entities read from DB = " + databaseHelper.getAllEntities().size());
+
+                    a75f.io.data.writablearray.DatabaseHelper dbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
+                    allWritable = dbHelper.getAllwritableArrays();
+                    Log.d(TAG_CCU_ROOM_DB, "Writable points read from DB = " + allWritable.size());
+
+                    loadTagsMap();
+                    loadWritableArray();
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
+                            DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
+                            EventBus.getDefault().postSticky(databaseEvent);
+                            CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed--------------");
+                        }
+                    }, 1000);
+                    return true;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
     
     public void initBoxStore() {
@@ -262,21 +374,63 @@ public class CCUTagsDb extends HServer {
     public ConcurrentHashMap<String, String> getUpdateIdMap() {
         return updateIdMap;
     }
+    /*
+   To read from the writaleArray table of roomdatabase and populate writeArrays
+    */
+    public void loadWritableArray() {
+        if(allWritable != null) {
+            if(writeArrays == null)
+                writeArrays = new ConcurrentHashMap();
+            Log.d(TAG_CCU_ROOM_DB, "writable table size = " + allWritable.size());
+            for (WritableArray eachItem : allWritable) {
+                if (eachItem.component2() != null) {
+                    a75f.io.data.WriteArray component2 = new Gson().fromJson(eachItem.component2(), a75f.io.data.WriteArray.class);//make it readable
+                    //Log.d(TAG_CCU_ROOM_DB, "read write array from room db  " + component2.toString());
+                    WriteArray writeArray = new WriteArray();
+                    if (component2 != null) {
+                        for (int i = 0; i < 17; ++i) {
+                            try {
+                                //writeArray.val[i] = component2.getValue()[i] == null ? null : HNum.make(Double.parseDouble(component2.getValue()[i]));
+                                writeArray.val[i] = component2.getValue()[i] == null ? null : new HZincReader(component2.getValue()[i]).readVal();
+                                writeArray.who[i] = component2.getWho()[i];
+                                writeArray.duration[i] = component2.getDuration()[i];
+                                writeArray.lastModifiedDateTime[i] = component2.getLastModifiedTime()[i] == null ?
+                                        null : HDateTime.make(component2.getLastModifiedTime()[i]);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
 
-    private void loadGrid(String tagsString) {
-
-        HZincReader hZincReader = new HZincReader(tagsString);
-        HGrid hGrid = hZincReader.readGrid();
-        hGrid.dump();
-
-        for(int i = 0; i < hGrid.numRows(); i++)
-        {
-            HRow val = hGrid.row(i);
-            //CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
-            if(!val.has("nosync")) {
-                String key = val.get("id").toString().replace("@", "");
-                tagsMap.put(key, val);
+                        }
+                    }
+                    writeArrays.put(eachItem.component1(), writeArray);
+                }
             }
+        }else{
+            Log.d(TAG_CCU_ROOM_DB, "No writable points to store to in-memory" );
+        }
+    }
+
+    /*
+    To read from the entity table of roomdatabase and populate tagsMap
+     */
+    public void loadTagsMap() {
+        if(allEntities != null) {
+            Log.d(TAG_CCU_ROOM_DB, "size  of the Entities table= " + allEntities.size());
+            for (HayStackEntity entity : allEntities) {
+                entity.component2().entrySet().forEach( item ->  {
+
+                    HZincReader hZincReader = new HZincReader(item.getValue().toString());
+                    HDict itemDict = hZincReader.readDict();
+
+
+                    if(tagsMap == null){
+                        tagsMap = new ConcurrentHashMap<>();
+                    }
+                    tagsMap.put(entity.getId().replace("@", ""), itemDict);
+                });
+            }
+        }else{
+            Log.d(TAG_CCU_ROOM_DB, "No entity to add to in-memory" );
         }
     }
 
@@ -297,12 +451,12 @@ public class CCUTagsDb extends HServer {
                 .disableHtmlEscaping()
                 .create();
         
-        tagsString = HZincWriter.tagsGridToString(getGridTagsMap());
+        /*tagsString = HZincWriter.tagsGridToString(getGridTagsMap());
         sharedPrefsEditor.putString(PREFS_TAGS_MAP, tagsString);
         Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();
         waString = gson.toJson(writeArrays, waType);
-        sharedPrefsEditor.putString(PREFS_TAGS_WA, waString);
+        sharedPrefsEditor.putString(PREFS_TAGS_WA, waString);*/
         
         idMapString = gson.toJson(idMap);
         sharedPrefsEditor.putString(PREFS_ID_MAP, idMapString);
@@ -396,7 +550,11 @@ public class CCUTagsDb extends HServer {
         }
 
         HRef ref = (HRef) site.get("id");
-        tagsMap.put(ref.toVal(), site.toDict());
+        HDict dict = site.toDict();
+        if (!insertEntity(dict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), dict);
         return ref.toVal();         
     }
 
@@ -437,7 +595,13 @@ public class CCUTagsDb extends HServer {
                 site.get("createdDateTime") +" lastModifiedDateTime>>> "+site.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + site.get("lastModifiedBy"));*/
         HRef id = (HRef) site.get("id");
-        tagsMap.put(id.toVal(), site.toDict());
+        HDict hDict = site.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+
+        tagsMap.put(id.toVal(), hDict);
     }
 
     public void log() {
@@ -519,7 +683,12 @@ public class CCUTagsDb extends HServer {
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
         HRef ref = (HRef) equip.get("id");
-        tagsMap.put(ref.toVal(), equip.toDict());
+        HDict dict = equip.toDict();
+
+        if (!insertEntity(dict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), dict);
         return ref.toCode();
     }
 
@@ -586,7 +755,12 @@ public class CCUTagsDb extends HServer {
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
         HRef id = (HRef) equip.get("id");
-        tagsMap.put(id.toVal(), equip.toDict());
+        HDict hDict = equip.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(), hDict);
     }
 
 
@@ -639,13 +813,23 @@ public class CCUTagsDb extends HServer {
             b.add(m);
         }
 
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        if(p.getBacnetType() != null)
+        {
+            b.add(Tags.BACNET_ID, p.getBacnetId());
+            b.add(Tags.BACNET_TYPE, p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET,"addPoint:"+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+            Intent intent = new Intent(BROADCAST_BACNET_POINT_ADDED);
+            intent.putExtra("message", "@"+ref.val);
+            appContext.sendBroadcast(intent);
+        }
+
+        HDict dict = b.toDict();
+
+        if (!insertEntity(dict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), dict);
         return ref.toCode();
     }
 
@@ -687,12 +871,19 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+        if(p.getBacnetType() != null)
+        {
+            b.add(Tags.BACNET_ID, p.getBacnetId());
+            b.add(Tags.BACNET_TYPE, p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+        }
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(), hDict);
     }
 
     public String addPoint(RawPoint p) {
@@ -746,7 +937,11 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        HDict dict = b.toDict();
+        if (!insertEntity(dict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), dict);
         return ref.toCode();
     }
 
@@ -797,7 +992,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(), hDict);
     }
     
     public String addPoint(SettingPoint p) {
@@ -838,7 +1038,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!insertEntity(hDict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), hDict);
         return ref.toCode();
     }
 
@@ -876,7 +1081,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(), hDict);
         return id.toCode();
     }
 
@@ -917,7 +1127,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!insertEntity(hDict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), hDict);
         return ref.toCode();
     }
 
@@ -955,7 +1170,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(),hDict);
     }
 
     public String addFloor(Floor f) {
@@ -987,7 +1207,11 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        HDict dict = b.toDict();
+        if (!insertEntity(dict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), dict);
         return ref.toCode();
     }
 
@@ -1016,7 +1240,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(id.toVal(), hDict);
     }
 
     public String addZone(Zone z) {
@@ -1050,7 +1279,12 @@ public class CCUTagsDb extends HServer {
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
-        tagsMap.put(ref.toVal(), b.toDict());
+        HDict hDict = b.toDict();
+
+        if (!insertEntity(hDict, id)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+        tagsMap.put(ref.toVal(), hDict);
         return ref.toCode();
     }
     
@@ -1079,11 +1313,28 @@ public class CCUTagsDb extends HServer {
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+        HRef id = (HRef) b.get("id");
+        if(z.getBacnetId() != 0)
+        {
+            b.add(Tags.BACNET_ID, z.getBacnetId());
+            b.add(Tags.BACNET_TYPE, Tags.DEVICE);
+            CcuLog.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
+            CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
+            Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
+            intent.putExtra("message", "@"+id.val);
+            appContext.sendBroadcast(intent);
+        }
+		 HDict hDict = b.toDict();
+
+        if (!updateEntity(hDict, i)) {
+            Toast.makeText(appContext,R.string.insert_fail,Toast.LENGTH_LONG).show();
+        }
+		
+        /*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+
+        tagsMap.put(id.toVal(), hDict);
     }
 
 
@@ -1225,17 +1476,58 @@ public class CCUTagsDb extends HServer {
 
     protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts,
                                 HDateTime lastModifiedDateTime) {
-        //CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
+	    boolean isNewPoint = false;
+        CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
+        if(array == null) isNewPoint = true;
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
         array.who[level - 1] = who;
         array.duration[level-1] = dur.val > 0 ? System.currentTimeMillis() + dur.millis() : 0;
         array.lastModifiedDateTime[level-1]= lastModifiedDateTime;
+        CcuLog.d(TAG_CCU_HS,"onPointWrite::id=>"+rec.id().toVal() +"<==val=>"+ Arrays.toString(array.val)+"<--who->"+Arrays.toString(array.who)+"<--dur-->"+Arrays.toString(array.duration)+"<--time-->"+Arrays.toString(array.lastModifiedDateTime)+"<--id-->"+rec.id());
+
+        a75f.io.data.WriteArray writeArray = fillValuesFromArray(array);
+        String data = new Gson().toJson(writeArray);
+        Log.d("SpooTag", "onPointWrite@@3 id->" + rec.id().toString() + "<-data->"+data);
+
+        String key = rec.id().toString().replace("@", "");
+        WritableArray writableArray = new WritableArray(key, data);
+
+        if(isNewPoint){
+            WritableArrayDBUtilKt.insert(writableArray, this.appContext);
+        }else{
+            WritableArrayDBUtilKt.update(writableArray, this.appContext);
+        }
+    }
+
+    private a75f.io.data.WriteArray fillValuesFromArray(WriteArray array) {
+        a75f.io.data.WriteArray writeArray = new a75f.io.data.WriteArray();
+
+        for (int i = 0; i < array.val.length; i++) {
+            HVal val = array.val[i];
+            if (val != null) {
+                writeArray.setValue(val.toZinc(), i);
+            }
+
+            String who = array.who[i];
+            if (who != null) {
+                writeArray.setWho(who, i);
+            }
+
+            writeArray.setDuration(array.duration[i], i);
+
+            HDateTime lastModifiedDateTime = array.lastModifiedDateTime[i];
+            if (lastModifiedDateTime != null) {
+                writeArray.setModifiedTime(lastModifiedDateTime.millis(), i);
+            }
+        }
+        return writeArray;
     }
 
     public void deletePointArray(HRef id) {
         writeArrays.remove(id.toVal());
+        WritableArrayDBUtilKt.deleteEntitywithId(id.toString(), this.appContext);
     }
     
     public void deletePointArrayLevel(HRef id, int level) {
@@ -1247,7 +1539,20 @@ public class CCUTagsDb extends HServer {
         } else {
             CcuLog.d(TAG_CCU_HS," Invalid point array delete command "+id);
         }
-        
+
+        a75f.io.data.WriteArray writeArray = new a75f.io.data.WriteArray();
+        writeArray.setValue(null, level - 1);
+        writeArray.setWho(null, level - 1);
+        writeArray.setDuration(0, level - 1);
+
+        String data = new Gson().toJson(writeArray);
+        Log.d("SpooTag", "onPointWrite@@4 id->" + id + "<-data->"+data);
+
+        String key = id.toString().replace("@", "");
+        WritableArray writableArray = new WritableArray(key, data);
+        WritableArrayDBUtilKt.update(writableArray, this.appContext);
+
+
     }
     
     public HDict getConfig() {
@@ -1265,15 +1570,32 @@ public class CCUTagsDb extends HServer {
         return hDict;
     }
 
-    public void addHDict(String localId, HDict hDict) {
+    public void addHDict(String localId, HDict hDict) {//rename
+
+        HashMap<String , Object > map = new HashMap<>();
+//        try {
+//            Iterator it   = hDict.iterator();
+//            while (it.hasNext()) {
+//                Map.Entry entry = (Map.Entry) it.next();
+//                map.put(entry.getKey().toString(), entry.getValue());
+//            }
+//        } catch (NullPointerException e) {
+//            CcuLog.w("CCU_HS", "NullPointerException: "+ e );
+//        }
+        map.put(localId, hDict.toZinc());
+
+        String key = localId.replace("@", "");
+
+        HayStackEntity entity = new HayStackEntity(key,map);
+        EntityDBUtilKt.insert(entity,this.appContext);
         tagsMap.put(localId, hDict);
     }
 
-    static class WriteArray {
-        final HVal[] val = new HVal[17];
-        final String[] who = new String[17];
-        final long[] duration = new long[17];
-        final HDateTime[] lastModifiedDateTime = new HDateTime[17];
+    public static class WriteArray {
+        public final HVal[] val = new HVal[17];
+        public final String[] who = new String[17];
+        public final long[] duration = new long[17];
+        public final HDateTime[] lastModifiedDateTime = new HDateTime[17];
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1343,14 +1665,14 @@ public class CCUTagsDb extends HServer {
         return HGrid.EMPTY;
     }
 
-    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId) {
+    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId, int numberOfHisEntryPerPoint) {
         List<HisItem> validHisItems = new ArrayList<>();
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-        List<HisItem> hisItems = hisQuery.build().find();
+        List<HisItem> hisItems = hisQuery.build().find(0,numberOfHisEntryPerPoint);
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
         for (HisItem hisItem : hisItems) {
             if  (hisItem != null) {
@@ -1444,11 +1766,11 @@ public class CCUTagsDb extends HServer {
     }
     
     //Delete all the hisItem entries older than 24 hrs.
-    public void removeExpiredHisItems(HRef id) {
+    public void removeExpiredHisItems(HRef id, int backFillDurationSelected) {
         HDict entity = readById(id);
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - (long) backFillDurationSelected *60*60*1000)
                 .or()
                 .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);
@@ -1486,5 +1808,38 @@ public class CCUTagsDb extends HServer {
                 .order(HisItem_.date);
         List<HisItem>  hisItems = hisQuery.build().find();
         hisBox.remove(hisItems);
+    }
+
+    private boolean insertEntity(HDict hDict, String id) {
+        HashMap<String , Object > map = new HashMap<>();
+        map.put(id, hDict.toZinc());
+
+        String key = id.toString().replace("@", "");
+        HayStackEntity entity = new HayStackEntity(key, map);
+        try {
+            EntityDBUtilKt.insert(entity, this.appContext);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+    private boolean updateEntity(HDict hDict, String id) {
+        HashMap<String , Object > map = new HashMap<>();
+        map.put(id, hDict.toZinc());
+
+        String key = id.replace("@", "");
+        HayStackEntity entity = new HayStackEntity(key, map);
+        try {
+            EntityDBUtilKt.update(entity, this.appContext);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private HayStackEntity getEntityFromDict() {
+        return null;
     }
 }

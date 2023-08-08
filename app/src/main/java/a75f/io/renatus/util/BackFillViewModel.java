@@ -60,7 +60,7 @@ public class BackFillViewModel {
             }
 
             private int getMaxNormalRows() {
-                if (totalZones > 20) {
+                if (totalZones > 6) {
                     return 7;
                 }
                 return 9;
@@ -69,13 +69,19 @@ public class BackFillViewModel {
 
     }
 
-    public static int backfieldTimeSelectedValue() {
+    public static int backfieldTimeSelectedValue(ArrayAdapter<String> backFillTimeArrayAdapter) {
 
         String backfillQuery = "backfill and duration";
+        int backfillIndex;
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         if (!ccuHsApi.readEntity(backfillQuery).isEmpty()) {
             Double value = ccuHsApi.readDefaultVal(backfillQuery);
-            return BackFillDuration.getIndex(BackFillDuration.toIntArray(),value.intValue(), BACKFIELD_DEFAULT_DURATION);
+            backfillIndex = BackFillDuration.getIndex(BackFillDuration.toIntArray(),value.intValue(), BACKFIELD_DEFAULT_DURATION);
+            if (backFillTimeArrayAdapter.isEnabled(backfillIndex)) {
+                return backfillIndex;
+            } else {
+                return BACKFIELD_DEFAULT_DURATION_INDEX;
+            }
         } else {
             return BACKFIELD_DEFAULT_DURATION_INDEX;
         }

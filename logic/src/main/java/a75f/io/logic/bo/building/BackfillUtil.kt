@@ -57,7 +57,6 @@ fun verifyBackFillPointAvailability(equipRef: String?): Boolean {
 fun updateBackfillDuration(currentBackFillTime: Double) {
     val ccuHsApi = CCUHsApi.getInstance()
     val backFIllQuery = "backfill and duration"
-
     if (isBackfillPointExisting(ccuHsApi)) {
         ccuHsApi.writeDefaultVal(backFIllQuery, currentBackFillTime)
         backfillPref.saveBackfillConfig(

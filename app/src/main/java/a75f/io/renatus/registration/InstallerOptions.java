@@ -769,11 +769,9 @@ public class InstallerOptions extends Fragment {
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
         this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
         this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())));
-
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
                 if (backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())) == i) {
                     linearLayout.setVisibility(View.INVISIBLE);
                 } else {
@@ -783,10 +781,8 @@ public class InstallerOptions extends Fragment {
                 }
                 adapterView.setSelection(i);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }

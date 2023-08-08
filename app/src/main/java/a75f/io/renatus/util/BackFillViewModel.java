@@ -31,6 +31,7 @@ public class BackFillViewModel {
 
     private static final int BACKFIELD_DEFAULT_DURATION_INDEX = 6;
     private static final int BACKFIELD_DEFAULT_DURATION = 24;
+    private static final int MAX_NUMBER_OF_EQUIP = 6;
 
     public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
         int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
@@ -39,14 +40,13 @@ public class BackFillViewModel {
         return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, equipCount);
     }
 
-    private static ArrayAdapter<String> getDynamicBackFillTimeArrayAdapter(Context context, ArrayList<String> backFillTimeArray, int totalZones) {
+    private static ArrayAdapter<String> getDynamicBackFillTimeArrayAdapter(Context context, ArrayList<String> backFillTimeArray, int totalEquips) {
 
         return new ArrayAdapter<String>(context, R.layout.spinner_dropdown_item, backFillTimeArray) {
             @Override
             public boolean isEnabled(int position) {
                 return position < getMaxNormalRows();
             }
-
             @Override
             public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 Context mContext = getContext();
@@ -58,15 +58,13 @@ public class BackFillViewModel {
                 }
                 return row;
             }
-
             private int getMaxNormalRows() {
-                if (totalZones > 6) {
+                if (totalEquips > MAX_NUMBER_OF_EQUIP) {
                     return 7;
                 }
                 return 9;
             }
         };
-
     }
 
     public static int backfieldTimeSelectedValue(ArrayAdapter<String> backFillTimeArrayAdapter) {

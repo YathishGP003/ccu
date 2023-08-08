@@ -93,7 +93,7 @@ private fun setTitleStatusConfig(
     viewTitle: View, viewStatus: View, nodeAddress: String, status: String, profileName: String
 ) {
     val textViewTitle = viewTitle.findViewById<TextView>(R.id.textProfile)
-    textViewTitle.text = "${HyperstatSplitProfileNames.HYPERSTATSPLIT} - $profileName ( $nodeAddress )"
+    textViewTitle.text = "${HyperstatSplitProfileNames.HSSPLIT_FULL} - ${HyperstatSplitProfileNames.CPUECON_FULL} ( $nodeAddress )"
     val textViewModule = viewTitle.findViewById<TextView>(R.id.module_status)
     HeartBeatUtil.moduleStatus(textViewModule, nodeAddress)
     val textViewStatus = viewStatus.findViewById<TextView>(R.id.text_status)
@@ -347,7 +347,6 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
         "sensor and mixed and air and temp"
     )
     cpuEconPoints[HSSplitZoneStatus.MIXED_AIR_TEMP.name] = "$mixedAirPoint \u2109"
-
     if (isAnyRelayAssociatedToHumidifier(config)) {
         val targetHumidity = hsSplitHaystackUtil.readPointPriorityVal("target and humidifier")
         cpuEconPoints[HSSplitZoneStatus.TARGET_HUMIDITY.name] = targetHumidity

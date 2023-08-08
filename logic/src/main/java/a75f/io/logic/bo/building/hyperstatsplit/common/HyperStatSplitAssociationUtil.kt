@@ -323,6 +323,8 @@ class HyperStatSplitAssociationUtil {
                 (isRelayAssociatedToHumidifier(configuration.relay4State)) -> true
                 (isRelayAssociatedToHumidifier(configuration.relay5State)) -> true
                 (isRelayAssociatedToHumidifier(configuration.relay6State)) -> true
+                (isRelayAssociatedToHumidifier(configuration.relay7State)) -> true
+                (isRelayAssociatedToHumidifier(configuration.relay8State)) -> true
                 else -> false
             }
         }
@@ -336,6 +338,8 @@ class HyperStatSplitAssociationUtil {
                 (isRelayAssociatedToDeHumidifier(configuration.relay4State)) -> true
                 (isRelayAssociatedToDeHumidifier(configuration.relay5State)) -> true
                 (isRelayAssociatedToDeHumidifier(configuration.relay6State)) -> true
+                (isRelayAssociatedToDeHumidifier(configuration.relay7State)) -> true
+                (isRelayAssociatedToDeHumidifier(configuration.relay8State)) -> true
                 else -> false
             }
         }

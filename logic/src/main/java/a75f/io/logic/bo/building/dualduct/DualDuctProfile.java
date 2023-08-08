@@ -88,17 +88,6 @@ public class DualDuctProfile extends ZoneProfile {
     }
     
     @Override
-    public boolean isZoneDead() {
-        
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        return dualDuctEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway) ||
-               dualDuctEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway);
-    }
-    
-    @Override
     public synchronized void updateZonePoints()
     {
         if (isZoneDead()) {

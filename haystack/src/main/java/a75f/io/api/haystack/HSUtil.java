@@ -153,7 +153,6 @@ public class HSUtil
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         return new Equip.Builder().setHashMap(equipHashMap).build();
     }
-    
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();

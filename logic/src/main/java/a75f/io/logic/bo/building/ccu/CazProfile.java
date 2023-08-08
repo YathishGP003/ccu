@@ -64,23 +64,6 @@ public class CazProfile extends ZoneProfile {
     }
 
     @Override
-    public boolean isZoneDead() {
-
-        double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + cazEquip.getCurrentTemp() + " buildingLimitMax:" + buildingLimitMax + " tempDead:" + tempDeadLeeway);
-        CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + cazEquip.getCurrentTemp() + " buildingLimitMin:" + buildingLimitMin + " tempDead:" + tempDeadLeeway);
-        if (cazEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-                || cazEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public void updateZonePoints() {
         if (isZoneDead()) {
             state = TEMPDEAD;

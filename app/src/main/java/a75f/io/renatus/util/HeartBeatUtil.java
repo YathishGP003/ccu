@@ -10,12 +10,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.util.CCUUtils;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 
 public class HeartBeatUtil {
+    private static final int DEFAULT_ZONE_DEAD_TIME_MINUTES = 15;
     public static void zoneStatus(View zoneStatus, boolean isAlive){
         if (isAlive) {
             zoneStatus.setBackgroundResource(R.drawable.module_alive);
@@ -35,16 +40,25 @@ public class HeartBeatUtil {
 
     public static boolean isModuleAlive(String nodeAddress){
         Date updatedTime = null;
+        double zoneDeadTime = 0;
         if(StringUtils.length(nodeAddress)<4){
             updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
         }
         else{
             updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);
+            HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+nodeAddress+"\"");
+            if (!equip.isEmpty()) {
+                zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time", equip.get(Tags.ID).toString());
+            }
         }
         if(updatedTime == null){
             return false;
         }
-        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= 15;
+        if (zoneDeadTime < 1) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ZoneDeadTime tuner not valid, use default "+nodeAddress);
+            zoneDeadTime = DEFAULT_ZONE_DEAD_TIME_MINUTES;
+        }
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= zoneDeadTime;
     }
 
     public static String getLastUpdatedTime(String nodeAddress){
@@ -124,10 +138,10 @@ public class HeartBeatUtil {
     public static boolean isZoneAlive(ArrayList<HashMap> equips){
         for(HashMap equip : equips){
             String address = equip.get("group").toString();
-            if(!isModuleAlive(address)){
-                return false;
+            if(isModuleAlive(address)){
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }

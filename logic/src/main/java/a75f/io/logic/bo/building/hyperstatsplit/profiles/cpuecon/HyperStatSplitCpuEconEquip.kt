@@ -212,9 +212,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         hyperStatSplitDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE])
         hyperStatSplitDevice.addSensor(Port.SENSOR_OCCUPANCY, masterPoints[Port.SENSOR_OCCUPANCY])
         hyperStatSplitDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2])
-        hyperStatSplitDevice.addSensor(Port.SENSOR_VOC, masterPoints[Port.SENSOR_VOC])
-        hyperStatSplitDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
-        hyperStatSplitDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
+        //hyperStatSplitDevice.addSensor(Port.SENSOR_VOC, masterPoints[Port.SENSOR_VOC])
+        //hyperStatSplitDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
+        //hyperStatSplitDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
 
         profileEquip.setupDeviceSensorBus(
             config.address0State.enabled, config.address0State.association.ordinal,
@@ -228,7 +228,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         hyperStatSplitDevice.rssi.enabled = true
 
         hyperStatSplitDevice.addPointsToDb()
-
 
     }
 
@@ -487,7 +486,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuEconRelayAssociation) {
-            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && !HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration)) {
+            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration)) {
                 if (HyperStatSplitAssociationUtil.isStagedFanEnabled(newConfiguration,stage)) {
                     val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createStagedFanPoint(newConfiguration, stage)
                     hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
@@ -1366,14 +1365,30 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val config = getConfiguration()
         val logicalPoints: HashMap<Any, String> = HashMap()
 
-        if (config.relay1State.enabled) logicalPoints[Port.RELAY_ONE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay1State.association).id
-        if (config.relay2State.enabled) logicalPoints[Port.RELAY_TWO] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay2State.association).id
-        if (config.relay3State.enabled) logicalPoints[Port.RELAY_THREE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay3State.association).id
-        if (config.relay4State.enabled) logicalPoints[Port.RELAY_FOUR] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay4State.association).id
-        if (config.relay5State.enabled) logicalPoints[Port.RELAY_FIVE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay5State.association).id
-        if (config.relay6State.enabled) logicalPoints[Port.RELAY_SIX] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay6State.association).id
-        if (config.relay7State.enabled) logicalPoints[Port.RELAY_SEVEN] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay7State.association).id
-        if (config.relay8State.enabled) logicalPoints[Port.RELAY_EIGHT] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay8State.association).id
+        if (config.relay1State.enabled) {
+            logicalPoints[Port.RELAY_ONE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay1State.association).id
+        }
+        if (config.relay2State.enabled) {
+            logicalPoints[Port.RELAY_TWO] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay2State.association).id
+        }
+        if (config.relay3State.enabled) {
+            logicalPoints[Port.RELAY_THREE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay3State.association).id
+        }
+        if (config.relay4State.enabled) {
+            logicalPoints[Port.RELAY_FOUR] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay4State.association).id
+        }
+        if (config.relay5State.enabled) {
+            logicalPoints[Port.RELAY_FIVE] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay5State.association).id
+        }
+        if (config.relay6State.enabled) {
+            logicalPoints[Port.RELAY_SIX] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay6State.association).id
+        }
+        if (config.relay7State.enabled) {
+            logicalPoints[Port.RELAY_SEVEN] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay7State.association).id
+        }
+        if (config.relay8State.enabled) {
+            logicalPoints[Port.RELAY_EIGHT] = hyperStatSplitPointsUtil.getCpuEconRelayLogicalPoint(config.relay8State.association).id
+        }
 
         if (config.analogOut1State.enabled) logicalPoints[Port.ANALOG_OUT_ONE] = hyperStatSplitPointsUtil.getCpuEconAnalogOutLogicalPoint(config.analogOut1State.association).id
         if (config.analogOut2State.enabled) logicalPoints[Port.ANALOG_OUT_TWO] = hyperStatSplitPointsUtil.getCpuEconAnalogOutLogicalPoint(config.analogOut2State.association).id

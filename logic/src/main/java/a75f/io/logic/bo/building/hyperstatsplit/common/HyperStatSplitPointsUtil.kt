@@ -105,7 +105,8 @@ class HyperStatSplitPointsUtil(
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
-        return point.build()
+        val toReturn : Point = point.build()
+        return toReturn
     }
 
     private fun createHaystackPointWithEnums(
@@ -247,7 +248,6 @@ class HyperStatSplitPointsUtil(
             .setTz(tz)
             .setGroup(nodeAddress)
             .setUnit(unit)
-
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
         if(!hisInterpolate.isNullOrEmpty())
@@ -266,7 +266,9 @@ class HyperStatSplitPointsUtil(
             hayStackAPI.updatePoint(point, point.id)
             point.id
         }else {
-            hayStackAPI.addPoint(point)
+            val id:String = hayStackAPI.addPoint(point)
+            //Log.d("CCU_HS_SYNC", id + ", " + point.displayName)
+            id
         }
     }
 
@@ -563,7 +565,7 @@ class HyperStatSplitPointsUtil(
 
         val sensorBusMarkers: MutableList<String> = LinkedList()
         sensorBusMarkers.addAll(
-            arrayOf("addr", "config", "writable", "zone", "input", "sp", "sensorBus")
+            arrayOf("config", "writable", "zone", "input", "sp", "sensorBus")
         )
 
         sensorBusMarkers.add("addr0")
@@ -1455,7 +1457,10 @@ class HyperStatSplitPointsUtil(
                 LogicalPointsUtil.createPointForExhaustFanStage1(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage2(relayState = relayState) ->
                 LogicalPointsUtil.createPointForExhaustFanStage2(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
-            else -> Point.Builder().build()
+            else -> {
+                Log.d("CCU_HS_SYNC", "Got to the default case for a relay point")
+                Point.Builder().build()
+            }
         }
 
     }
@@ -2104,7 +2109,9 @@ class HyperStatSplitPointsUtil(
                 )
             }
 
-            else -> Point.Builder().build()
+            else -> {
+                Point.Builder().build()
+            }
 
         }
     }
@@ -2129,7 +2136,10 @@ class HyperStatSplitPointsUtil(
                 )
             }
 
-            else -> Point.Builder().build()
+            else -> {
+                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
+                Point.Builder().build()
+            }
 
         }
     }
@@ -2154,7 +2164,10 @@ class HyperStatSplitPointsUtil(
                 )
             }
 
-            else -> Point.Builder().build()
+            else -> {
+                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
+                Point.Builder().build()
+            }
 
         }
     }
@@ -2170,7 +2183,10 @@ class HyperStatSplitPointsUtil(
                 )
             }
 
-            else -> Point.Builder().build()
+            else -> {
+                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus pressure point")
+                Point.Builder().build()
+            }
 
         }
     }
@@ -2209,7 +2225,7 @@ class HyperStatSplitPointsUtil(
             "lux"
         )
         val occupancyPoint = createHaystackPointWithEnums(
-            "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor+"sensor",
+            "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor,
             occupancySensorPointMarkers,
             "off,on"
         )
@@ -2483,9 +2499,9 @@ class HyperStatSplitPointsUtil(
     private fun getUniversalInConfigEnum(profileType: ProfileType): String {
         when(profileType) {
             ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
-                return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150" +
-                        "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NO" +
-                        "$FILTER_NC,$CONDENSATE_NO,$CONDENSATE_NC,$PRESSURE_1,$PRESSURE_2"+
+                return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150," +
+                        "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NO," +
+                        "$FILTER_NC,$CONDENSATE_NO,$CONDENSATE_NC,$PRESSURE_1,$PRESSURE_2,"+
                         "$GENERIC_VOLTAGE,$GENERIC_RESISTANCE"
             }
             else -> {}
@@ -2552,7 +2568,6 @@ class HyperStatSplitPointsUtil(
             val coolingStage1FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"
             )
-
             val coolingStage1FanConfigPoint = createHaystackPointWithUnit(
                 "$equipDis-fanOutCoolingStage1",
                 coolingStage1FanConfigPointMarkers,
@@ -2581,7 +2596,6 @@ class HyperStatSplitPointsUtil(
             val coolingStage3FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage3"
             )
-
             val coolingStage3FanConfigPoint = createHaystackPointWithUnit(
                 "$equipDis-fanOutCoolingStage3",
                 coolingStage3FanConfigPointMarkers,
@@ -2596,7 +2610,6 @@ class HyperStatSplitPointsUtil(
             val heatingStage1FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage1"
             )
-
             val heatingStage1FanConfigPoint = createHaystackPointWithUnit(
                 "$equipDis-fanOutHeatingStage1",
                 heatingStage1FanConfigPointMarkers,
@@ -2611,7 +2624,6 @@ class HyperStatSplitPointsUtil(
             val heatingStage2FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage2"
             )
-
             val heatingStage2FanConfigPoint = createHaystackPointWithUnit(
                 "$equipDis-fanOutHeatingStage2",
                 heatingStage2FanConfigPointMarkers,
@@ -2626,7 +2638,6 @@ class HyperStatSplitPointsUtil(
             val heatingStage3FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage3"
             )
-
             val heatingStage3FanConfigPoint = createHaystackPointWithUnit(
                 "$equipDis-fanOutHeatingStage3",
                 heatingStage3FanConfigPointMarkers,
@@ -2644,7 +2655,6 @@ class HyperStatSplitPointsUtil(
                 "createStagedFanConfigPoint: config points created are $point and value $value and id is " + point.id
             )
         }
-
         return stagedFanConfigPointsList
     }
 

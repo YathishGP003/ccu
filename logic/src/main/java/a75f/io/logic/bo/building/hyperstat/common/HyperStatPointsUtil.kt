@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.hyperstat.profiles.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
+import android.util.Log
 import java.util.*
 
 /**
@@ -268,7 +269,9 @@ class HyperStatPointsUtil(
             hayStackAPI.updatePoint(point, point.id)
             point.id
         }else {
-            hayStackAPI.addPoint(point)
+            val id: String = hayStackAPI.addPoint(point)
+            //Log.d("CCU_HS_SYNC", id + ", " + point.displayName.toString())
+            id
         }
     }
 

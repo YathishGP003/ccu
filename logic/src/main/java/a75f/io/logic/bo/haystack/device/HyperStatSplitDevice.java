@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames;
 
 /**
  * Models a HyperStat Split device Haystack entity.
@@ -88,14 +89,14 @@ public class HyperStatSplitDevice {
     public HyperStatSplitDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
                 .setDisplayName("HSS-" + address)
-                .addMarker("network").addMarker("node").addMarker(profile)
+                .addMarker("network").addMarker("node").addMarker(HyperstatProfileNames.HSCPU)
                 .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
                 .setEquipRef(equipRef)
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .setProfileType(profile)
+                .setProfileType(HyperstatProfileNames.HSCPU)
                 .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         hyperStatNodeAddress = address;

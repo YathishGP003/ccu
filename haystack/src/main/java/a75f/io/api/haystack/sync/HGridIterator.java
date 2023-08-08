@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.util.Log;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
@@ -21,11 +23,13 @@ public class HGridIterator {
     
     public HGrid next(int limit)
     {
+        //Log.d("CCU_HS_SYNC", "calling next("+limit+")");
         ArrayList<HDict> dictList = new ArrayList<>();
         int dictIndex = 0;
         
         while (hasNext() && dictIndex < limit) {
             dictList.add(next());
+            //Log.d("CCU_HS_SYNC", "dictList(" + dictIndex + ") = " + dictList.get(dictIndex));
             dictIndex++;
         }
         if (dictIndex > 0) {

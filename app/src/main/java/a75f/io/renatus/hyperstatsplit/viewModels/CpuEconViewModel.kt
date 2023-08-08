@@ -88,9 +88,6 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
         L.ccu().zoneProfiles.add(hyperStatSplitProfile)
         L.saveCCUState()
         DesiredTempDisplayMode.setModeType(roomName, CCUHsApi.getInstance())
-
-        val finalConfig: HyperStatSplitCpuEconConfiguration? = (hyperStatSplitProfile as HyperStatSplitCpuEconProfile)?.getProfileConfiguration(address)
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "finalConfig: " + finalConfig.toString())
     }
 
 

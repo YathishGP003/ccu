@@ -128,22 +128,23 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textSize="15dp"
-            android:textColor="@color/renatus_75f_primary"
+            android:textColor="?orange_75f"
             android:text="CANCEL"/>
             <View
                 android:layout_width="2dp"
                 android:layout_height="20dp"
                 android:background="#686868"
                 />
+
         <TextView
             android:id="@+id/btnPause"
             android:layout_width="150dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textStyle="bold"
-            android:textColor="@color/renatus_75f_primary"
+            android:text=" PAUSE SYNCING"
+            android:textColor="?orange_75f"
             android:textSize="15dp"
-            android:text=" PAUSE SYNCING"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

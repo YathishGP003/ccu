@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
@@ -251,11 +252,15 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
         }
 
         SelectAllParameters selectAllParameters = enable -> {
-            if(!enable) {
-                toggleSelectAllParams.setOnCheckedChangeListener(null);
-                toggleSelectAllParams.setChecked(false);
-                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
-            }
+            AtomicBoolean isAllParametersSelected = new AtomicBoolean(true);
+            parameterList.forEach(parameter -> {
+                if(!parameter.isDisplayInUI()){
+                    isAllParametersSelected.set(false);
+                }
+            });
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(isAllParametersSelected.get());
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         };
 
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig, selectAllParameters);

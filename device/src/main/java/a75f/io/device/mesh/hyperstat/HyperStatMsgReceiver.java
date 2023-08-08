@@ -18,6 +18,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.constants.WhoFiledConstants;
+import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
@@ -25,6 +27,7 @@ import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
+import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.Pulse;
@@ -398,10 +401,10 @@ public class HyperStatMsgReceiver {
             }
             CcuLog.e(L.TAG_CCU_DEVICE, "coolingDesiredTemp " + coolingDesiredTemp + " heatingDesiredTemp " + heatingDesiredTemp + "  averageDesiredTemp " + averageDesiredTemp);
 
-            SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+            DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
                     new Point.Builder().setHashMap(heatingDtPoint).build(),
                     new Point.Builder().setHashMap(dtPoint).build(),
-                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
+                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_WHO);
         }
     }
 
@@ -433,14 +436,14 @@ public class HyperStatMsgReceiver {
             conditioningMode = StandaloneConditioningMode.OFF.ordinal();
         }
         HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints(equipId,
-                "zone and sp and conditioning and mode", conditioningMode);
+                "zone and sp and conditioning and mode", conditioningMode, WhoFiledConstants.HYPERSTAT_WHO);
     }
 
     public static void updateFanMode(String equipId, int mode, PossibleFanMode possibleMode){
         int fanMode = getLogicalFanMode(possibleMode,mode);
         if(fanMode!= -1) {
             HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints(
-                    equipId, "zone and sp and fan and operation and mode", fanMode);
+                    equipId, "zone and sp and fan and operation and mode", fanMode, WhoFiledConstants.HYPERSTAT_WHO);
         }
 
     }

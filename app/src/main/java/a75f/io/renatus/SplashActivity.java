@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -31,22 +32,24 @@ import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
-    
+
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
-    
+
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
     private Thread registrationThread;
     private ImageView splashLogo75f;
     private LinearLayout daikinSplash;
+    private LinearLayout carrierSplash;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         CcuLog.i("UI_PROFILING", "SplashActivity.onCreate");
-    
+
         setContentView(R.layout.splash);
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
+        carrierSplash = findViewById(R.id.carrier_splash);
         prefs = new Prefs(this);
         /*PreferenceManager.getDefaultSharedPreferences(this).edit().
                 putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
@@ -65,7 +68,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         } else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP)) {
             Log.i(TAG,"CCU Setup is not completed");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-            i.putExtra("viewpager_position", 4);
+            i.putExtra("viewpager_position", 21);
             startActivity(i);
             finish();
         } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)
@@ -113,20 +116,30 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 23);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+        }else if(prefs.getString("INSTALL_TYPE").equals("ADDCCU") && !prefs.getBoolean("ADD_CCU")){
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
+            startActivity(i);
+            finish();
+        }else if(prefs.getString("INSTALL_TYPE").equals("CREATENEW") && !prefs.getBoolean("CCU_SETUP")
+                && !prefs.getBoolean("REGISTRATION")){
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 21);
+            startActivity(i);
             finish();
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
-    
+
         PermissionHandler permissionHandler = new PermissionHandler();
         if (permissionHandler.hasAppPermissions(this)) {
             Globals.getInstance().registerOnCcuInitCompletedListener(this);
         }
     }
-    
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -192,6 +205,8 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     private void configSplashLogo(){
         if(CCUUiUtil.isDaikinEnvironment(this))
             daikinSplash.setVisibility(View.VISIBLE);
+        else if(CCUUiUtil.isCarrierThemeEnabled(this))
+            carrierSplash.setVisibility(View.VISIBLE);
         else
             splashLogo75f.setVisibility(View.VISIBLE);
     }

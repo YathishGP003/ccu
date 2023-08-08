@@ -2,7 +2,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="action_bar_height">55dp</dimen>
     <dimen name="action_bar_height_large">69dp</dimen>
-    <dimen name="margin_20">24dp</dimen>
+    <dimen name="margin_20">20dp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_medium">18sp</dimen>
     <dimen name="layout_wi">250dp</dimen>
@@ -20,4 +20,19 @@
     <dimen name="vfd_profile_spinner_width">120dp</dimen>
     <dimen name="vfd_profile_spinner_margin_left">86dp</dimen>
     <dimen name="vfd_profile_config_margin_top">24dp</dimen>
+
+    <dimen name="margin_60">60dp</dimen>
+    <dimen name="margin_5">5dp</dimen>
+    <dimen name="margin_30">30dp</dimen>
+    <dimen name="margin_32">32dp</dimen>
+    <dimen name="margin_85">85dp</dimen>
+    <dimen name="margin_24">24dp</dimen>
+    <dimen name="margin_25">25dp</dimen>
+    <dimen name="margin_40">40dp</dimen>
+    <dimen name="dp_100">100dp</dimen>
+    <dimen name="dp_10">10dp</dimen>
+    <dimen name="dp_30">30dp</dimen>
+    <dimen name="sp_24">24sp</dimen>
+    <dimen name="sp_22">22sp</dimen>
+    <dimen name="sp_20">20sp</dimen>
 </resources>

@@ -1031,8 +1031,28 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 	};
 	private void configEnergyMeterDetails(View view){
+		/*List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();;
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice  emDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("EMR")){
+					emDevice = modbusDevices.get(i);
+					if(emDevice.getDeviceEquipRef() == null) {
+						emDevice.setDeviceEquipRef(emDevice.getEquipRef());
+					}
+				}
+			}
+
+			if(emDevice==null)
+				return;*/
 		EquipmentDevice emDevice = getModbusEquip("emr");;
 		if (emDevice != null) {
+			energyMeterParams.setVisibility(View.VISIBLE);
+			energyMeterModelDetails.setVisibility(View.VISIBLE);
+			moduleStatusEmr.setVisibility(View.VISIBLE);
+			lastUpdatedEmr.setVisibility(View.VISIBLE);
+			List<Parameter> parameterList = new ArrayList<>();
+
 			energyMeterParams.setVisibility(View.VISIBLE);
 			energyMeterModelDetails.setVisibility(View.VISIBLE);
 			moduleStatusEmr.setVisibility(View.VISIBLE);
@@ -1081,6 +1101,20 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return buildModbusModelByEquipRef(Objects.requireNonNull(equipListMap.get("id")).toString());
 	}
 	private void configBTUMeterDetails(View view){
+		/*List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice  btuDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("BTU")){
+					btuDevice = modbusDevices.get(i);
+					if(btuDevice.getDeviceEquipRef() == null) {
+						btuDevice.setDeviceEquipRef(btuDevice.getEquipRef());
+					}
+				}
+			}
+
+			if(btuDevice==null)
+				return;*/
 		EquipmentDevice btuDevice = getModbusEquip("btu");
 		if(btuDevice != null) {
 			btuMeterParams.setVisibility(View.VISIBLE);
@@ -1088,6 +1122,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			moduleStatusBtu.setVisibility(View.VISIBLE);
 			lastUpdatedBtu.setVisibility(View.VISIBLE);
 			List<Parameter> parameterList = new ArrayList<>();
+
 			/*if (Objects.nonNull(btuDevice.getRegisters())) {
 				for (Register registerTemp : btuDevice.getRegisters()) {
 					if (registerTemp.getParameters() != null) {
@@ -1122,9 +1157,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void configWatermark(){
-		if(!CCUUiUtil.isDaikinEnvironment(getContext()))
-			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
-
+		mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+			mainLayout.setBackground(null);
+		}
 	}
 	private String getOccStatus(){
 		HashMap point = CCUHsApi.getInstance().read("point and " +

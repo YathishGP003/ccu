@@ -6,13 +6,13 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -793,7 +793,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.COOLINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
@@ -811,7 +811,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.FANSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdFanPtId = CCUHsApi.getInstance().addPoint(fanSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdFanPtId,0.0);
@@ -829,7 +829,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").setUnit("%")
-                                .setTz(tz)
+                                .setTz(tz).setBacnetId(BacnetIdKt.HEATINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                 .build();
                         String cmdHeatingPtId = CCUHsApi.getInstance().addPoint(heatSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdHeatingPtId,0.0);
@@ -952,7 +952,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                                   .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                                   .addMarker("system").addMarker("cmd").addMarker("valve")
                                                   .addMarker("chilled").addMarker("water").addMarker("his").setUnit("%")
-                                                  .setTz(systemEquip.getTz())
+                                                  .setTz(systemEquip.getTz()).setBacnetId(BacnetIdKt.CHWVALVESIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                                   .build();
                         String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(valveSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);

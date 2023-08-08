@@ -1,6 +1,9 @@
 
 package a75f.io.device.modbus;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
@@ -33,12 +37,14 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     @Override
     public void sendMessage() {
         pullRegisters();
-        /*
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
-    
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);
+        int registerRequestCount = preferences.getInt("registerRequestCount", 3);
+
         ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
                 "equipRef and modbus");
         for (HashMap equip : modbusEquips) {
@@ -52,17 +58,24 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 }
 
                 for(EquipmentDevice modbusDevice : modbusDeviceList){
+                    int count = 0;
+                    LModbus.IS_MODBUS_DATA_RECEIVED = false;
                     for (Register register : modbusDevice.getRegisters()) {
+                        if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
+                            break;
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+                        CcuLog.d(L.TAG_CCU_MODBUS,
+                                "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
+                                ", count: "+count+
+                                ", registerRequestCount: "+registerRequestCount);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
             }
-        }*/
+        }
     }
-
     private void pullRegisters(){
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
@@ -91,7 +104,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         });
 
     }
-
     private int getRegisterCount(Register register) {
         
         if (register.getParameterDefinitionType().equals("int64")) {

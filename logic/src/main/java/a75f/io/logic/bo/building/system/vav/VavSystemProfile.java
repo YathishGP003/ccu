@@ -14,6 +14,8 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
@@ -37,21 +39,26 @@ public abstract class VavSystemProfile extends SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
-        addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz, BacnetIdKt.COOLINGLOOPOUTPUTID, BacnetUtilKt.ANALOG_VALUE);
+        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz
+                , BacnetIdKt.HEATINGLOOPOUTPUTID, BacnetUtilKt.ANALOG_VALUE);
+        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz
+                , BacnetIdKt.FANLOOPOUTPUTID, BacnetUtilKt.ANALOG_VALUE);
+        addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz
+                , BacnetIdKt.CO2LOOPOUTPUTID, BacnetUtilKt.ANALOG_VALUE);
         addRTUSystemPoints(siteRef, equipRef, equipDis, tz);
         addVavSystemPoints(siteRef, equipRef, equipDis, tz);
         addTrTargetPoints(siteRef,equipRef,equipDis,tz);
     }
     
-    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
+    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz,
+                                      int bacnetId,String bacnetType)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput")
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
                 .addMarker(loop).addMarker("loop").addMarker("output").addMarker("his")
+                .setBacnetType(bacnetType).setBacnetId(bacnetId)
                 .addMarker("writable").addMarker("sp").setUnit("%").setTz(tz).build();
         String loopOPPointId = hayStack.addPoint(relay1Op);
         hayStack.writeDefaultValById(loopOPPointId, 0.0);
@@ -162,7 +169,11 @@ public abstract class VavSystemProfile extends SystemProfile
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePointForCcuUser(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
-        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
+        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").
+                setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
+                .addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode")
+                .addMarker("sp").addMarker("his").setEnums("off,auto,coolonly,heatonly").setTz(tz)
+                .setBacnetId(BacnetIdKt.CONDITIONINGMODEID).setBacnetType(BacnetUtilKt.MULTI_STATE_VALUE).build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePointForCcuUser(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());

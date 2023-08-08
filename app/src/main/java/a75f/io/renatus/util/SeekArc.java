@@ -228,10 +228,10 @@ public class SeekArc extends View
     HashMap<ProgressType, Float> mProgresses = new HashMap<>();
     private Paint mInbetweenPaint;
     private float mScaledSliderOffset = 0.0f;
-    private boolean isSense = false;
+    private boolean isMonitoring = false;
     private TemperatureMode ModeType;
-    public void setSense(boolean val){
-        isSense = val;
+    public void setMonitoring(boolean val){
+        isMonitoring = val;
     }
 
 
@@ -415,7 +415,7 @@ public class SeekArc extends View
 
         //outer arc numbers from 50 - 90
         if (isDetailedView()) drawWhiteDelimiters(canvas);
-        if (isSense) {
+        if (isMonitoring) {
             drawCurrentTemp(canvas, getCurrentTemp());
         } else {
 
@@ -430,7 +430,7 @@ public class SeekArc extends View
 
         if (isDetailedView()) {
 
-            if (!isSense) {
+            if (!isMonitoring) {
                 float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
                 if(!(ModeType == TemperatureMode.HEATING)) {
                     if (!inCoolingSelectionMode) {
@@ -459,7 +459,7 @@ public class SeekArc extends View
                 }
             }
         } else {
-                if (!isSense) {
+                if (!isMonitoring) {
                     if(!(ModeType == TemperatureMode.COOLING)) {
                         drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
                                 mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
@@ -487,7 +487,7 @@ public class SeekArc extends View
         }
 
         //Draw icon at current temperature
-        if (isSense) {
+        if (isMonitoring) {
             if((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
                 drawIconByTemp(canvas, mCurrentTempRectangle, mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
             }
@@ -527,7 +527,7 @@ public class SeekArc extends View
     //Refactor to move out mem leaks
     private void drawCurrentTempTextDetailed(Canvas canvas)
     {
-        if (isSense) {
+        if (isMonitoring) {
             String currentTempText;
             String tempString ;
             String curString = "CURRENT";
@@ -1742,7 +1742,7 @@ public class SeekArc extends View
         return bitmap;
     }
 
-    public void setSenseData(boolean detailedView, float curTemp){
+    public void setMonitoringData(boolean detailedView, float curTemp){
         mCurrentTemp = curTemp;
         mDetailedView = detailedView;
         isDataSet = true;

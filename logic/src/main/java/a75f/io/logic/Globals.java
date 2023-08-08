@@ -7,12 +7,12 @@ import android.util.Log;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HNum;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,14 +24,13 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.ccu.CazProfile;
@@ -42,7 +41,7 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
@@ -215,7 +214,7 @@ public class Globals {
         }
     }
 
-
+    private RenatusServicesUrls renatusServicesUrls;
     public void initilize() {
         CcuLog.i(L.TAG_CCU_INIT,"Globals Initialize");
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
@@ -226,22 +225,25 @@ public class Globals {
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
-        CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+		renatusServicesUrls = urls;
+        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+    }
+
+    public void startTimerTask(){
+        Log.d(L.TAG_CCU_JOB, " running after db is done");
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
-        ccuHsApi.testHarnessEnabled = testHarness;
-
-        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl())
+        CCUHsApi.getInstance().testHarnessEnabled = testHarness;
+        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl())
                 .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-        if(!isSafeMode()){
-            importTunersAndScheduleJobs();
-            handleAutoCommissioning();
-        }
+
+        importTunersAndScheduleJobs();
+        handleAutoCommissioning();
 
         updateCCUAhuRef();
         setRecoveryMode();
@@ -323,24 +325,43 @@ public class Globals {
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                    MigrationUtil.doMigrationTasksIfRequired();
-                    performBuildingTunerUprades(site);
-                    migrateHeartbeatPointForEquips(site);
-                    migrateHeartbeatDiagPointForEquips(site);
-                    migrateHeartbeatwithNewtags(site);
-                    OAODamperOpenReasonMigration(site);
-                    firmwareVersionPointMigration(site);
-                    migrateIduPoints(site);
-                    migrateSNPoints(site);
-                    CcuLog.i(L.TAG_CCU_INIT,"Load Profiles");
-                    loadEquipProfiles();
-                    isInitCompleted = true;
-                    Site siteObject = new Site.Builder().setHashMap(site).build();
-                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                            HayStackConstants.USER, HayStackConstants.PASS),siteObject);
+                    if(!isSafeMode()) {
+                        MigrationUtil.doMigrationTasksIfRequired();
+                        performBuildingTunerUprades(site);
+                        migrateHeartbeatPointForEquips(site);
+                        migrateHeartbeatDiagPointForEquips(site);
+                        migrateHeartbeatwithNewtags(site);
+                        OAODamperOpenReasonMigration(site);
+                        firmwareVersionPointMigration(site);
+                        migrateIduPoints(site);
+                        migrateSNPoints(site);
+                        CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
+                        loadEquipProfiles();
+                        isInitCompleted = true;
+                        Site siteObject = new Site.Builder().setHashMap(site).build();
+                        CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                                HayStackConstants.USER, HayStackConstants.PASS), siteObject);
+                    }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+                MigrationUtil.doMigrationTasksIfRequired();
+                performBuildingTunerUprades(site);
+                migrateHeartbeatPointForEquips(site);
+                migrateHeartbeatDiagPointForEquips(site);
+                migrateHeartbeatwithNewtags(site);
+                OAODamperOpenReasonMigration(site);
+                firmwareVersionPointMigration(site);
+                migrateIduPoints(site);
+                migrateSNPoints(site);
+                loadEquipProfiles();
+                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
+                Site siteObject = new Site.Builder().setHashMap(site).build();
+                CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),siteObject);
+
+                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
@@ -527,10 +548,10 @@ public class Globals {
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
 
-                        case HYPERSTAT_SENSE:
-                            HyperStatSenseProfile hssense = new HyperStatSenseProfile();
-                            hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
-                            L.ccu().zoneProfiles.add(hssense);
+                        case HYPERSTAT_MONITORING:
+                            HyperStatMonitoringProfile hyperStatMonitoringProfile = new HyperStatMonitoringProfile();
+                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
                             break;
                         case OTN:
                             OTNProfile otnProfile = new OTNProfile();
@@ -675,7 +696,7 @@ public class Globals {
         HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
         HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
 
-        if(systemProfile.isEmpty()){
+        if(systemProfile.isEmpty() || ccuDevice.isEmpty()){
             return;
         }
 
@@ -692,6 +713,13 @@ public class Globals {
         if (autoCommissioningPointId != null && AutoCommissioningUtil.isAutoCommissioningStarted()) {
             long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
             AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);
+        }
+
+        if(AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.ABORTED ||
+                AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.COMPLETED){
+            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                    HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.NOT_STARTED.ordinal()), HNum.make(0));
+            CCUHsApi.getInstance().writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.NOT_STARTED.ordinal());
         }
     }
     public interface OnCcuInitCompletedListener {

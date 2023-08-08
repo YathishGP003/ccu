@@ -1,14 +1,16 @@
 package a75f.io.renatus.hyperstat.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.HyperStat
+import a75f.io.device.bacnet.addBacnetTags
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -16,6 +18,7 @@ import a75f.io.renatus.R
 import a75f.io.renatus.hyperstat.AnalogInWidgets
 import a75f.io.renatus.hyperstat.AnalogOutWidgets
 import a75f.io.renatus.hyperstat.RelayWidgets
+import a75f.io.renatus.hyperstat.StagedFanWidgets
 import a75f.io.renatus.hyperstat.viewModels.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -37,6 +40,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
  */
 
 class HyperStatFragment : BaseDialogFragment() {
+    private var adapterAnalogOutMapping: AnalogOutAdapter? = null
     private val disposables = CompositeDisposable()
     private val configurationDisposable = CompositeDisposable()
 
@@ -70,6 +74,8 @@ class HyperStatFragment : BaseDialogFragment() {
 
     // 2 rows, 1 for each analog in.
     lateinit var analogInUIs: List<AnalogInWidgets>
+
+    private lateinit var stagedFanUIs: List<StagedFanWidgets>
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
@@ -259,6 +265,16 @@ class HyperStatFragment : BaseDialogFragment() {
                 AnalogInWidgets(findViewById(R.id.toggle_analog_in2), findViewById(R.id.analog2_in_spinner))
             )
 
+            stagedFanUIs = listOf(
+                StagedFanWidgets(findViewById(R.id.fanOutCoolingStage1Label), findViewById(R.id.fanOutCoolingStage1Spinner)),
+                StagedFanWidgets(findViewById(R.id.fanOutCoolingStage2Label), findViewById(R.id.fanOutCoolingStage2Spinner)),
+                StagedFanWidgets(findViewById(R.id.fanOutCoolingStage3Label), findViewById(R.id.fanOutCoolingStage3Spinner)),
+                StagedFanWidgets(findViewById(R.id.fanOutHeatingStage1Label), findViewById(R.id.fanOutHeatingStage1Spinner)),
+                StagedFanWidgets(findViewById(R.id.fanOutHeatingStage2Label), findViewById(R.id.fanOutHeatingStage2Spinner)),
+                StagedFanWidgets(findViewById(R.id.fanOutHeatingStage3Label), findViewById(R.id.fanOutHeatingStage3Spinner)),
+
+            )
+
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
@@ -385,6 +401,18 @@ class HyperStatFragment : BaseDialogFragment() {
             it.analogOutAtFanMedium.adapter = adapter
             it.analogOutAtFanHigh.adapter = adapter
         }
+
+        if (isViewModelCPUViewModel(viewModel)) {
+            stagedFanUIs.forEachIndexed { index, stagedFanState ->
+                stagedFanState.selector.adapter = getAdapterValue(analogVoltageAtSpinnerValues())
+                val spinner = stagedFanState.selector
+                if (index == CpuRelayAssociation.COOLING_STAGE_1.ordinal || index == CpuRelayAssociation.HEATING_STAGE_1.ordinal) {
+                    spinner.setSelection(analogVoltageAtSpinnerValues().indexOf("7V"))
+                } else {
+                    spinner.setSelection(analogVoltageAtSpinnerValues().indexOf("10V"))
+                }
+            }
+        }
     }
 
     private fun setUpViewListeners() {
@@ -409,7 +437,12 @@ class HyperStatFragment : BaseDialogFragment() {
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogOutSwitchChanged(index, isChecked)
             }
-            widgets.selector.setOnItemSelected { position -> viewModel.analogOutMappingSelected(index, position) }
+            widgets.selector.setOnItemSelected { position ->
+                viewModel.analogOutMappingSelected(
+                    index,
+                    position
+                )
+            }
 
             widgets.vAtMinDamperSelector.setOnItemSelected { position ->
                 viewModel.voltageAtDamperSelected(
@@ -457,6 +490,12 @@ class HyperStatFragment : BaseDialogFragment() {
         zonePMThreshold.setOnItemSelected { position ->viewModel.zonePmThresholdSelect(position)  }
         zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
 
+        stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+            stagedFanWidgets.selector.setOnItemSelected {
+                position -> viewModel.voltageAtStagedFanSelected(index, position)
+            }
+        }
+
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
             if(enableDisplay(displayHumidity))
                 viewModel.onDisplayHumiditySelected(isChecked)
@@ -495,6 +534,7 @@ class HyperStatFragment : BaseDialogFragment() {
                             this.meshAddress, roomName, floorName, false
                         )
                     }, {
+                        addBacnetTags(requireContext(), floorName, roomName)
                         ProgressDialogUtils.hideProgressDialog()
                         closeAllBaseDialogFragments()
                         activity?.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
@@ -519,14 +559,34 @@ class HyperStatFragment : BaseDialogFragment() {
         forceOccupiedSwitch.isChecked = viewState.forceOccupiedEnabled
         autoAwaySwitch.isChecked = viewState.autoAwayEnabled
 
+        var isCoolingStage1Enabled = false
+        var isCoolingStage2Enabled = false
+        var isCoolingStage3Enabled = false
+        var isHeatingStage1Enabled = false
+        var isHeatingStage2Enabled = false
+        var isHeatingStage3Enabled = false
+
         viewState.relays.forEachIndexed { index, relayState ->
             with(relayUIs[index]) {
                 switch.isChecked = relayState.enabled
                 selector.isEnabled = relayState.enabled
                 selector.setSelection(relayState.association)
+
+                if (relayState.enabled) {
+                    when (relayState.association) {
+                        CpuRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
+                    }
+                }
+
             }
         }
         var isDampSelected = false
+        var isStagedFanEnabled = false
         viewState.analogOutUis.forEachIndexed { index, analogOutState ->
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
@@ -538,9 +598,6 @@ class HyperStatFragment : BaseDialogFragment() {
                     index + 1,
                     getString(getAnalogOutDisplayName(profileType,analogOutState.association))
                 )
-                vAtMinDamperLabel.isEnabled = analogOutState.enabled
-                vAtMinDamperSelector.isEnabled = analogOutState.enabled
-                vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
 
                 vAtMaxDamperLabel.text = String.format(
                     "%s%d at \nMax %s",
@@ -548,12 +605,40 @@ class HyperStatFragment : BaseDialogFragment() {
                     index + 1,
                     getString(getAnalogOutDisplayName(profileType,analogOutState.association))
                 )
-                vAtMaxDamperLabel.isEnabled = analogOutState.enabled
-                vAtMaxDamperSelector.isEnabled = analogOutState.enabled
-                vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
+
+                if (isViewModelCPUViewModel(viewModel)) {
+                    if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        vAtMinDamperLabel.visibility = View.GONE
+                        vAtMinDamperSelector.visibility = View.GONE
+                        vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+
+                        vAtMaxDamperLabel.visibility = View.GONE
+                        vAtMaxDamperSelector.visibility = View.GONE
+                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
+                        isStagedFanEnabled = true
+                    } else {
+                        vAtMinDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMinDamperSelector.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+
+                        vAtMaxDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMaxDamperSelector.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
+                    }
+                } else {
+
+                    vAtMinDamperLabel.isEnabled = analogOutState.enabled
+                    vAtMinDamperSelector.isEnabled = analogOutState.enabled
+                    vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+
+                    vAtMaxDamperLabel.isEnabled = analogOutState.enabled
+                    vAtMaxDamperSelector.isEnabled = analogOutState.enabled
+                    vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
+                }
 
                 analogOutFanConfig.visibility =
-                    if (analogOutState.enabled && analogOutState.association == 1) View.VISIBLE else View.GONE
+                    if (analogOutState.enabled && (analogOutState.association == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
+                                analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))
@@ -564,6 +649,29 @@ class HyperStatFragment : BaseDialogFragment() {
 
             }
         }
+
+        if (isViewModelCPUViewModel(viewModel)) {
+            makeStagedFanVisible(
+                isCoolingStage1Enabled,
+                isCoolingStage2Enabled,
+                isCoolingStage3Enabled,
+                isHeatingStage1Enabled,
+                isHeatingStage2Enabled,
+                isHeatingStage3Enabled,
+                isStagedFanEnabled
+            )
+        } else {
+            makeStagedFanVisible(
+                isCoolingStage1Enabled = false,
+                isCoolingStage2Enabled = false,
+                isCoolingStage3Enabled = false,
+                isHeatingStage1Enabled = false,
+                isHeatingStage2Enabled = false,
+                isHeatingStage3Enabled = false,
+                false
+            )
+        }
+
 
         airflowSensorSwitch.isChecked = viewState.airflowTempSensorEnabled
         if(viewModel is Pipe2ViewModel) {
@@ -596,7 +704,73 @@ class HyperStatFragment : BaseDialogFragment() {
         displayVOC.isChecked = viewState.isDisplayVOCEnabled
         displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
 
+        if (isViewModelCPUViewModel(viewModel)) {
+            stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+                with(stagedFanWidgets) {
+                    selector.setSelection(viewState.stagedFanUis[index])
+                }
+            }
 
+            if (isNoFanStageEnabled()) {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,false)
+                analogOutUIs.forEach {
+                    if (it.selector.selectedItemPosition == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) it.selector.setSelection(1)
+                }
+            } else {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,true)
+            }
+        }
+    }
+
+    private fun isNoFanStageEnabled(): Boolean {
+        relayUIs.forEach {
+            if (it.switch.isChecked && (it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_1.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_2.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.COOLING_STAGE_3.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_1.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_2.ordinal ||
+                        it.selector.selectedItemPosition == CpuRelayAssociation.HEATING_STAGE_3.ordinal )) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isViewModelCPUViewModel(viewModel: HyperStatModel): Boolean {
+        return viewModel is CpuViewModel
+    }
+
+    private fun makeStagedFanVisible(
+        isCoolingStage1Enabled: Boolean,
+        isCoolingStage2Enabled: Boolean,
+        isCoolingStage3Enabled: Boolean,
+        isHeatingStage1Enabled: Boolean,
+        isHeatingStage2Enabled: Boolean,
+        isHeatingStage3Enabled: Boolean,
+        isStagedFanEnabled: Boolean
+    ) {
+        if (isStagedFanEnabled) {
+            stagedFanUIs.forEachIndexed { index, stagedFanState ->
+                val isVisible: Boolean = when (index) {
+                    0 -> isCoolingStage1Enabled
+                    1 -> isCoolingStage2Enabled
+                    2 -> isCoolingStage3Enabled
+                    3 -> isHeatingStage1Enabled
+                    4 -> isHeatingStage2Enabled
+                    5 -> isHeatingStage3Enabled
+                    else -> false
+                }
+                stagedFanState.stagedFanLabel.visibility =
+                    if (isVisible) View.VISIBLE else View.GONE
+                stagedFanState.selector.visibility =
+                    if (isVisible) View.VISIBLE else View.GONE
+            }
+        } else {
+            stagedFanUIs.forEach { stagedFanState ->
+                stagedFanState.stagedFanLabel.visibility = View.GONE
+                stagedFanState.selector.visibility = View.GONE
+            }
+        }
     }
 
 
@@ -741,7 +915,7 @@ class HyperStatFragment : BaseDialogFragment() {
         th2Label.text = viewModel.getTh2SensorLabel()
 
         val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
-        val adapterAnalogOutMapping = getAdapter(viewModel.getAnalogOutMapping())
+        adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping()) }
         var relayPos = 0
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
@@ -752,9 +926,6 @@ class HyperStatFragment : BaseDialogFragment() {
         }
     }
 
-    private fun getAdapter(values: Array<String>): ArrayAdapter<*> {
-        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
-    }
     private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
         return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
     }

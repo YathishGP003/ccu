@@ -165,7 +165,8 @@ public class SystemScheduleUtil {
      * @param heatval
      * @param avgval
      */
-    public static void handleManualDesiredTempUpdate(Point coolpoint, Point heatpoint, Point avgpoint, double coolval, double heatval, double avgval) {
+    public static void handleManualDesiredTempUpdate(Point coolpoint, Point heatpoint, Point avgpoint, double coolval
+            , double heatval, double avgval, String who) {
         
         CcuLog.d(L.TAG_CCU_SCHEDULER, "handleManualDesiredTempUpdate for " + coolpoint.getDisplayName() + "," + heatpoint.getDisplayName() + "," + coolval + "," + heatval + "," + avgval);
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(coolpoint.getRoomRef());
@@ -204,18 +205,21 @@ public class SystemScheduleUtil {
                                               .withSecondOfMinute(getEndSec(day.getEthh()));
                 
                 if((coolpoint != null) && (coolval != 0)) {
-                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(coolval), HNum.make(overrideExpiry.getMillis()
-                                                                                                                                                                    - System.currentTimeMillis(), "ms"));
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()),
+                            HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(coolval),
+                            HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
                 }
                 if((heatpoint != null) && (heatval != 0)){
-                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(heatval), HNum.make(overrideExpiry.getMillis()
-                                                                                                                                                                    - System.currentTimeMillis(), "ms"));
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()),
+                            HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(heatval),
+                            HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
                 }
                 if(avgpoint != null){
-                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(avgpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(avgval), HNum.make(overrideExpiry.getMillis()
-                                                                                                                                                                  - System.currentTimeMillis(), "ms"));
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()),
+                            HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(avgval),
+                            HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(avgpoint, overrideExpiry.getMillis());
                 }
             }
@@ -229,9 +233,13 @@ public class SystemScheduleUtil {
                 return;
             }
             if((coolpoint != null) && (coolval != 0))
-                CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
+                CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()),
+                        HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(coolval) ,
+                        HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
             if((heatpoint != null) && (heatval != 0))
-                CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(heatval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
+                CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()),
+                        HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(heatval) ,
+                        HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
             
             
         }

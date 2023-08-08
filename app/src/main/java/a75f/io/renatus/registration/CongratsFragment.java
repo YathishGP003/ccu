@@ -109,6 +109,11 @@ public class CongratsFragment extends Fragment {
         ButterKnife.bind(this, rootView);
         mContext = getContext().getApplicationContext();
 
+        if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
+            TextView viewById = rootView.findViewById(R.id.textSuccess);
+            viewById.setText(R.string.title_success_carrier);
+        }
+
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
         p.setMargins(0, 0, 0, 80);
 

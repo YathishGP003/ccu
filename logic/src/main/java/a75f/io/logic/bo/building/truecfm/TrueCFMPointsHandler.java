@@ -9,6 +9,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Units;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
@@ -170,7 +172,9 @@ public class TrueCFMPointsHandler {
                                .setTz(equip.getTz())
                                .setUnit(Units.CFM)
                                .build();
+        BacnetUtilKt.addBacnetTags(airflowCfm,BacnetIdKt.AIRFLOWID,BacnetUtilKt.ANALOG_VALUE,Integer.parseInt(equip.getGroup()));
         String airflowCfmId = hayStack.addPoint(airflowCfm);
+
         hayStack.writeHisValueByIdWithoutCOV(airflowCfmId, 0.0);
         
         Point airVelocity = new Point.Builder()
@@ -185,7 +189,9 @@ public class TrueCFMPointsHandler {
                                  .setTz(equip.getTz())
                                  .setUnit(Units.FT_PER_MIN)
                                  .build();
+        BacnetUtilKt.addBacnetTags(airVelocity,BacnetIdKt.AIRVELOCITYID,BacnetUtilKt.ANALOG_VALUE,Integer.parseInt(equip.getGroup()));
         String airVelocityId = hayStack.addPoint(airVelocity);
+
         hayStack.writeHisValById(airVelocityId, 0.0);
     }
     

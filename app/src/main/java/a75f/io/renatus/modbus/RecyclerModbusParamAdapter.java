@@ -47,11 +47,8 @@ public class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerMod
         viewHolder.textParam.setText(modbusParam.get(position).getName());
         viewHolder.toggleButton.setChecked(modbusParam.get(position).isDisplayInUI());
         viewHolder.toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(!isChecked) {
-                selectAllParameters.enableAllParameters(false);
-            }
             modbusParam.get(position).setDisplayInUI(isChecked);
-
+            selectAllParameters.enableAllParameters(isChecked);
         });
     }
 

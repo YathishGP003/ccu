@@ -1,5 +1,6 @@
 package a75f.io.messaging
 
+import a75f.io.messaging.exceptions.MessageHandlingFailed
 import android.content.Context
 import com.google.gson.JsonObject
 
@@ -13,5 +14,6 @@ import com.google.gson.JsonObject
  */
 interface MessageHandler {
     val command : List<String>
+    @Throws(MessageHandlingFailed::class)
     fun handleMessage(jsonObject: JsonObject, context: Context)
 }

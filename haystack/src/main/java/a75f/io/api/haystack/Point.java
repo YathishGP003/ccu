@@ -38,6 +38,9 @@ public class Point extends Entity
     private String            hisInterpolate;
     private String            shortDis;
     private String ccuRef;
+    private int            bacnetId;
+    private String            bacnetType;
+    private String curStatus;
 
     private String domainName;
 
@@ -148,7 +151,12 @@ public class Point extends Entity
     public void setDomainName(String domainName) {
         this.domainName = domainName;
     }
-
+    public int getBacnetId() { return bacnetId; }
+    public void setBacnetId(int bacnetId) { this.bacnetId = bacnetId; }
+    public String getBacnetType() { return bacnetType; }
+    public void setBacnetType(String bacnetType) { this.bacnetType = bacnetType; }
+    public String getCurStatus() { return curStatus;}
+    public void setCurStatus(String curStatus) { this.curStatus = curStatus;}
     public Map<String, HVal> getTags() {
         return tags;
     }
@@ -184,6 +192,9 @@ public class Point extends Entity
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
         private Map<String, HVal> tags = new HashMap<>();
+        private int            bacnetId;
+        private String            bacnetType;
+        private String curStatus;
 
         public Builder setKind(Kind kind)
         {
@@ -320,6 +331,20 @@ public class Point extends Entity
             this.tags.put(tag, val);
             return this;
         }
+        public Builder setBacnetId(int bacnetId) {
+            this.bacnetId = bacnetId;
+            return this;
+        }
+
+        public Builder setBacnetType(String bacnetType) {
+            this.bacnetType = bacnetType;
+            return this;
+        }
+
+        public Builder setCurStatus(String curStatus) {
+            this.curStatus = curStatus;
+            return this;
+        }
 
         public Point build(){
             Point p = new Point();
@@ -348,6 +373,9 @@ public class Point extends Entity
             p.shortDis = this.shortDis;
             p.domainName = this.domainName;
             p.tags = this.tags;
+            p.bacnetId = this.bacnetId;
+            p.bacnetType = this.bacnetType;
+            p.curStatus = this.curStatus;
             return p;
         }
 
@@ -457,6 +485,18 @@ public class Point extends Entity
                 {
                     this.domainName = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("bacnetId"))
+                {
+                    this.bacnetId = Integer.parseInt(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("bacnetType"))
+                {
+                    this.bacnetType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("curStatus"))
+                {
+                    this.curStatus = pair.getValue().toString();
+                }
                 //it.remove();
             }
             return this;
@@ -464,7 +504,7 @@ public class Point extends Entity
 
         /**
          * Requires entities read using readHDict method that has all values retained as HVal.
-         * Map returned by readEntity()/readAllEntities() are already converted to maps. Both both are retained
+         * Map returned by readEntity()/readAllEntities() are already converted to String. Both are retained
          * for now maintain backward compatibility.
          * @param pointDict
          * @return

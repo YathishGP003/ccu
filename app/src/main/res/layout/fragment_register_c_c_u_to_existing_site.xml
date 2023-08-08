@@ -139,7 +139,7 @@
                 android:text="ADD CCU"
                 android:paddingTop="44dp"
                 android:textSize="19.5dp"
-                android:textColor="#E24301">
+                android:textColor="?orange_75f">
             </TextView>
         </LinearLayout>
     </RelativeLayout>

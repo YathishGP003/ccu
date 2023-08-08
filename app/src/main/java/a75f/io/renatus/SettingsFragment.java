@@ -187,8 +187,8 @@ public class SettingsFragment extends Fragment {
                     }
     
                     case 5: {
-                        if (isTransactionSafe && !(fragment instanceof ModbusConfigFragment)) {
-                            fragmentClass = ModbusConfigFragment.class;
+                        if (isTransactionSafe && !(fragment instanceof Communication)) {
+                            fragmentClass = Communication.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
                             } catch (Exception e) {
@@ -234,7 +234,7 @@ public class SettingsFragment extends Fragment {
                             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
+                            transaction.replace(R.id.flContent, fragment, "ABOUT_FRAGMENT_TAG");
                             transaction.commit();
                         } else {
                             isTransactionPending = true;

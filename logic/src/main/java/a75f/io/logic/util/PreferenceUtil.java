@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.Preference;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -58,7 +59,6 @@ public class PreferenceUtil {
     private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
-    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
 
     private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
@@ -88,6 +88,8 @@ public class PreferenceUtil {
     private static final String REMOTE_DUP_COOLING_LOCKOUT_TUNER = "removeDupCoolingLockoutTuner";
     private static final String SYNC_START_TIME = "syncStartTime";
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
+    private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
+    private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
     public static void setContext(Context c) {
         context= c;
     }
@@ -201,18 +203,6 @@ public class PreferenceUtil {
         editor.apply();
     }
 
-    public static boolean isCCUHeartbeatMigrationDone() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("CCUHeartbeatMigrationWithHisInterpolate", false);
-    }
-
-    public static void setCCUHeartbeatMigrationStatus(boolean isMigrated) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("CCUHeartbeatMigrationWithHisInterpolate", isMigrated);
-        editor.apply();
-    }
-
     public static boolean isSenseAndPILoopAnalogPointDisMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("SenseAndPILoopAnalogPointDisMigrationDone", false);
@@ -241,6 +231,17 @@ public class PreferenceUtil {
     private static void setBooleanPreference(String key, boolean value) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    public static String getStringPreference(String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(key, "");
+    }
+
+    public static void setStringPreference(String key, String value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString(key, value);
         editor.apply();
     }
     
@@ -549,13 +550,6 @@ public class PreferenceUtil {
     public static void setAirflowSampleWaitTimeMigration() {
         setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
     }
-    public static boolean getstaticPressureSpTrimMigration() {
-        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
-    }
-
-    public static void setStaticPressureSpTrimMigration() {
-        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
-    }
 
     public static boolean getOccupancyModePointMigration() {
         return getBooleanPreference(OCCUPANCY_MODE_POINT_MIGRATION);
@@ -716,5 +710,23 @@ public class PreferenceUtil {
     }
     public static boolean getDataSyncProcessing() {
         return getBooleanPreference(DATA_SYNC_PROCESSING);
+    }
+    public static boolean getUpdateCCUStatus() {
+        return getBooleanPreference(UPDATE_CCU_IN_PROGRESS);
+    }
+    public static void  startUpdateCCU() {
+        setBooleanPreference(UPDATE_CCU_IN_PROGRESS, true);
+    }
+    public static void stopUpdateCCU() {
+        setBooleanPreference(UPDATE_CCU_IN_PROGRESS, false);
+    }
+    public static boolean isCCUInstalling() {
+        return getBooleanPreference(INSTALL_CCU_IN_PROGRESS);
+    }
+    public static void installCCU() {
+        setBooleanPreference(INSTALL_CCU_IN_PROGRESS, true);
+    }
+    public static void installationCompleted() {
+        setBooleanPreference(INSTALL_CCU_IN_PROGRESS, false);
     }
 }

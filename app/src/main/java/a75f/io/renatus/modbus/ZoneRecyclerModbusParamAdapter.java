@@ -259,10 +259,13 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
             }
         }
-        if (maxValue > 0) {
-            for (int pos = (int) (100 * minValue); pos <= (100 * maxValue); pos += (100 * incValue)) {
-                doubleArrayList.add(pos / 100.0);
-            }
+        if(minValue == maxValue){
+            doubleArrayList.add(minValue);
+            userIntentsMap.put(unit, doubleArrayList);
+            return userIntentsMap;
+        }
+        for (int pos = (int) (100 * minValue); pos <= (100 * maxValue); pos += (100 * incValue)) {
+            doubleArrayList.add(pos / 100.0);
         }
         userIntentsMap.put(unit, doubleArrayList);
 
@@ -417,4 +420,3 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
     }
 }
-

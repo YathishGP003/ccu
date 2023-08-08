@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_75f">Renatus</string>
     <string name="app_daikin">Daikin</string>
+    <string name="app_carrier">Carrier</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -202,13 +203,16 @@
     <string name="fan_speed"> Fan Speed </string>
     <string name="heating"> Heating </string>
     <string name="dcv_damper"> DCV Damper </string>
+    <string name="modulating_fan_speed"> Linear Fan Speed </string>
+    <string name="predefined_fan_speed"> Staged Fan Speed </string>
     <string name="water_valve_modulation"> Water Modulating Valve </string>
 
     <string-array name="hyperstat_analog_out_selector">
         <item>  @string/cooling </item>
-        <item>  @string/fan_speed </item>
+        <item>  @string/modulating_fan_speed </item>
         <item>  @string/heating </item>
         <item>  @string/dcv_damper </item>
+        <item>  @string/predefined_fan_speed </item>
     </string-array>
 
 
@@ -549,6 +553,13 @@
 
     <string name="hyperstat_analog_out">Analog-out</string>
 
+    <string name="hyperstat_fan_out_cooling_stage_1">Fan-out During Cooling Stage 1</string>
+    <string name="hyperstat_fan_out_cooling_stage_2">Fan-out During Cooling Stage 2</string>
+    <string name="hyperstat_fan_out_cooling_stage_3">Fan-out During Cooling Stage 3</string>
+    <string name="hyperstat_fan_out_heating_stage_1">Fan-out During Heating Stage 1</string>
+    <string name="hyperstat_fan_out_heating_stage_2">Fan-out During Heating Stage 2</string>
+    <string name="hyperstat_fan_out_heating_stage_3">Fan-out During Heating Stage 3</string>
+
     <string name="hyperstat_analog_out_1_at_min_damper">Analog-out1 at\nMin</string>
     <string name="hyperstat_analog_out_1_at_max_damper">Analog-out1 at\nMax</string>
     <string name="hyperstat_analog_out_2_at_min_damper">Analog-out2 at\nMin</string>
@@ -669,6 +680,7 @@
     <!--Congrats Screen-->
     <string name="title_congrats">CONGRATULATIONS!</string>
     <string name="title_success">You have successfully Installed a 75F System!</string>
+    <string name="title_success_carrier">You have successfully Installed a Carrier ClimaVision System!</string>
     <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="label_ccuname">CCU Name : </string>
     <string name="label_serialno">Serial No. : </string>
@@ -749,7 +761,7 @@
     <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
     <string name="title_vrv">VRV</string>
     <string name="desc_vrv">Connect to the Daikin VRV Indoor Unit using P1 P2 Protocol</string>
-    <string name="title_hypersense">Sense</string>
+    <string name="title_hyperstatMonitoring">Monitoring</string>
     <string name="desc_hypersense">Equipment Connector for Monitoring Data</string>
 
     <!--WTM Module Screen-->
@@ -998,7 +1010,7 @@
     <string name="txt_smartstat">SmartStat</string>
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
-    <string name="txt_modbus_config">Modbus Config</string>
+    <string name="txt_configuration">Communication</string>
     <string name="txt_cancel_uppercase">CANCEL</string>
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
@@ -1055,13 +1067,63 @@
 
 
     <string name="title_mb_config">MODBUS CONFIG</string>
-    <string name="txt_mb_baudRate">BaudRate:</string>
-    <string name="txt_mb_parity">Parity:</string>
-    <string name="txt_mb_dataBits">Data Bits:</string>
-    <string name="txt_mb_stopBits">Stop Bits:</string>
+    <string name="txt_mb_baudRate">BaudRate</string>
+    <string name="txt_mb_parity">Parity</string>
+    <string name="txt_mb_dataBits">Data Bits</string>
+    <string name="txt_mb_stopBits">Stop Bits</string>
 
-    <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
-    <string name="txt_restart">Restart Now</string>
+
+    <string name="title_bacnet_config">BACnet CONFIG</string>
+    <string name="title_bacnet_initialize">INITIALIZE BACNET</string>
+    <string name="title_disable_bacnet">DISABLE BACNET</string>
+    <string name="txt_ipDeviceObjectName">IP Device Object Name</string>
+    <string name="txt_zoneToVirtualDeviceMapping">Zone to Virtual Device Mapping</string>
+    <string name="txt_description">Description</string>
+    <string name="txt_location">Location</string>
+    <string name="txt_device_password">Device Password</string>
+    <string name="txt_device_password_hint">Hint: Alpha-Numeric Characters</string>
+    <string name="txt_IPAddress">IP Address <font color="#e5561a">*</font></string>
+    <string name="txt_LocalNetworkAddress">Local Network Number <font color="#e5561a">*</font></string>
+    <string name="txt_localNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_virtualNetworkAddress">Virtual Network Number <font color="#e5561a">*</font></string>
+    <string name="txt_virtualNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_port">Port <font color="#e5561a">*</font></string>
+    <string name="txt_port_hint">Recommended: 47808 to 47823</string>
+    <string name="txt_error_port">Port should be within 4096 to 65535</string>
+    <string name="txt_valid_number">Please input valid number</string>
+    <string name="txt_ip_device_instance_number">IP Device Instance Number  <font color="#e5561a">*</font></string>
+    <string name="txt_ip_device_instance_number_hint">In between 0 to 4194302</string>
+    <string name="txt_apdu_timeout">APDU Timeout  <font color="#e5561a">*</font></string>
+    <string name="txt_apdu_timeout_hint">In between 6000 to 65535</string>
+    <string name="txt_number_of_apdu_retries">Number of APDU Retries <font color="#e5561a">*</font></string>
+    <string name="txt_number_of_apdu_retries_hint">In between 0 to 255</string>
+    <string name="txt_apdu_segment_timeout">APDU Segment Timeout <font color="#e5561a">*</font></string>
+    <string name="txt_apdu_segment_timeout_hint">In between 5000 to 65535</string>
+    <string name="error_apdu_segment_timeout">APDU Segment Timeout should be within 5000 to 65535 in multiples of 1000</string>
+    <string name="error_zoneToVirtualDeviceMapping">every point at CCU level and zone level will be created with IP device created for CCU</string>
+    <string name="error_ip_address">Invalid IP address</string>
+    <string name="error_password">Invalid Password</string>
+    <string name="error_local_network_number">Local Network Number should be within 1 to 65535</string>
+    <string name="error_virtual_network_number">Virtual Network Number should be within 1 to 65535</string>
+    <string name="error_ip_device_instance_number">IP device instance Number should be within 0 to 4194302</string>
+    <string name="error_apdu_timeout">APDU Timeout should be within 6000 to 65535 in multiples of 1000</string>
+    <string name="error_apdu_retries">No. of APDU Retries should be within 0 to 255</string>
+    <string name="txt_notification_class_objects">Notification Class Objects <font color="#e5561a">*</font></string>
+    <string name="txt_notification_class_objects_hint">In between 0 to 10</string>
+    <string name="txt_trend_log_objects">Trend Log Objects <font color="#e5561a">*</font></string>
+    <string name="txt_trend_log_objects_hint">In between 0 to 10</string>
+    <string name="txt_schedule_objects">Schedule Objects <font color="#e5561a">*</font></string>
+    <string name="txt_offset_values">Offset Value(%) <font color="#e5561a">*</font></string>
+    <string name="txt_schedule_objects_hint">In between 0 to 10</string>
+    <string name="txt_offset_values_hint">In between 1 to 100</string>
+    <string name="error_notification_class_objects">Notification Class Objects should be within 0 to 10</string>
+    <string name="error_trend_log_objects">Trend Log Objects should be within 0 to 10</string>
+    <string name="error_schedule_objects">Schedule Objects should be within 0 to 10</string>
+    <string name="error_offset_values">Offset values be within 1 to 100</string>
+    <string name="error_vnn_and_lnn_not_same">Virtual Network Number and Local Network Number should not be Same</string>
+
+    <string name="txt_mb_restart_prompt">Disclaimer: Change in config requires app restart.</string>
+    <string name="txt_restart">RESTART CCU APP</string>
     <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
     <string name="alert_definitions">Alert Definitions:</string>
@@ -1247,6 +1309,7 @@
     <!-- Building passcode -->
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
     <string name="Daikin_Environment">daikin_prod</string>
+    <string name="Carrier_Environment">carrier_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>
@@ -1267,6 +1330,8 @@
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
     <string name="desired_temperature">Desired Temperature</string>
+    <string name="backFill_duration">Backfill Time</string>
+    <string name="backFill_duration_description">Please choose backfill time according to site for appropriate offline storage.</string>
 
 
     <!-- Named Schedule-->
@@ -1324,4 +1389,36 @@
     <string name="latest_version">Latest Version: </string>
     <string name="download_size">  | Download Size: </string>
     <string name="bacnet_admin">admin@75f</string>
+    <string name="label_configure_as">Configure as</string>
+    <string name="label_bbmd">BBMD</string>
+    <string name="label_foreign_device">Foreign Device</string>
+    <string name="label_neither">Neither</string>
+    <string name="label_configure_service">Configure Service</string>
+    <string name="label_destination_ip_address">Destination IP Address <font color="#e5561a">*</font></string>
+    <string name="label_port">Port <font color="#e5561a">*</font></string>
+    <string name="label_object_type">Object Type <font color="#e5561a">*</font></string>
+    <string name="label_object_id">Object ID <font color="#e5561a">*</font></string>
+    <string name="label_array_index">Array Index</string>
+    <string name="label_property">Property <font color="#e5561a">*</font></string>
+    <string name="label_priority">Priority <font color="#e5561a">*</font></string>
+    <string name="txt_read_property">READ PROPERTY</string>
+    <string name="txt_write_property">WRITE PROPERTY</string>
+    <string name="txt_error_object_id">Object Id can not be empty</string>
+    <string name="label_data_type">Data Type <font color="#e5561a">*</font></string>
+    <string name="label_value">Value <font color="#e5561a">*</font></string>
+    <string name="label_delivery_method">Delivery Method <font color="#e5561a">*</font></string>
+    <string name="hint_enter_ip_address">Enter IP Address</string>
+    <string name="hint_enter_port_number">Enter Port Number</string>
+    <string name="hint_enter_low_limit">Enter Low Limit</string>
+    <string name="label_low_limit">Low Limit</string>
+    <string name="label_high_limit">High Limit</string>
+    <string name="hint_enter_high_limit">Enter High Limit</string>
+    <string name="txt_who_is">Who Is</string>
+    <string name="txt_add_object">ADD OBJECT</string>
+    <string name="txt_add_property">Add Property</string>
+    <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
+    <string name="txt_submit">Submit</string>
+    <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
+    <string name="menutoggle">menutoggle</string>
+    <string name="display_toast_message">display toast message</string>
 </resources>

@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
@@ -360,12 +361,25 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             paramHeader1.setVisibility(View.VISIBLE);
             paramHeader2.setVisibility(View.GONE);
         }
-        SelectAllParameters selectAllParameters = enable -> {
-            if(!enable) {
-                toggleSelectAllParams.setOnCheckedChangeListener(null);
-                toggleSelectAllParams.setChecked(false);
-                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+
+        List<EquipmentDevice> subEquipList = new ArrayList<>();
+        if(null != equipmentDevice.getEquips()) {
+            for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
+                subEquipList.add(subEquipmentDevice);
             }
+        }
+
+        SelectAllParameters selectAllParameters = enable -> {
+            AtomicBoolean isAllParametersSelected = new AtomicBoolean(true);
+            parameterList.forEach(parameter -> {
+                if(!parameter.isDisplayInUI()){
+                    isAllParametersSelected.set(false);
+                }
+            });
+            isAllParametersSelected.set(enableSelectAllParameters(subEquipList));
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(isAllParametersSelected.get());
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         };
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig,
                 selectAllParameters);
@@ -373,11 +387,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         recyclerParams.setAdapter(recyclerModbusParamAdapter);
         recyclerParams.invalidate();
 
-        List<EquipmentDevice> subEquipList = new ArrayList<>();
-        if(null != equipmentDevice.getEquips()) {
-            for (EquipmentDevice subEquipmentDevice : equipmentDevice.getEquips()) {
-                subEquipList.add(subEquipmentDevice);
-            }
+        if(subEquipList.size() > 0) {
             modbusConfigurationAdapter = new ModbusConfigurationAdapter(getActivity(), subEquipList, isNewConfig,
                     selectAllParameters);
             recyclerSubEquips.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -448,7 +458,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private void addModbusProfile(EquipmentDevice equipmentDev, short selectedSlaveId, List<Parameter> modbusParam){
         boolean isNewDevice = L.getProfile(selectedSlaveId) == null;
         List<EquipmentDevice> subEquipmentDevices = new ArrayList<>();
-        if(null != equipmentDevice.getEquips()) {
+        if(null != equipmentDevice.getEquips() && (equipmentDevice.getEquips().size() > 0)) {
             for (EquipmentDevice subEquipmentDevice : modbusConfigurationAdapter.getSubEquips()) {
                 subEquipmentDevices.add(subEquipmentDevice);
             }

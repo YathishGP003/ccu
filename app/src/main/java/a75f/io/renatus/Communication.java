@@ -624,7 +624,7 @@ public class Communication extends Fragment {
                                 if(validateEntries()){
                                     initializeBACnet.setEnabled(true);
                                     initializeBACnet.setClickable(true);
-                                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                    initializeBACnet.setTextColor(R.attr.orange_75f);
                                 }else{
                                     initializeBACnet.setEnabled(false);
                                     initializeBACnet.setClickable(false);
@@ -638,7 +638,7 @@ public class Communication extends Fragment {
                             if(validateEntries()){
                                 initializeBACnet.setEnabled(true);
                                 initializeBACnet.setClickable(true);
-                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                initializeBACnet.setTextColor(R.attr.orange_75f);
                             }else{
                                 initializeBACnet.setEnabled(false);
                                 initializeBACnet.setClickable(false);
@@ -711,7 +711,7 @@ public class Communication extends Fragment {
                         if(validateEntries()){
                             initializeBACnet.setEnabled(true);
                             initializeBACnet.setClickable(true);
-                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                            initializeBACnet.setTextColor(R.attr.orange_75f);
                         }else{
                             initializeBACnet.setEnabled(false);
                             initializeBACnet.setClickable(false);
@@ -725,7 +725,7 @@ public class Communication extends Fragment {
                     if(validateEntries()){
                         initializeBACnet.setEnabled(true);
                         initializeBACnet.setClickable(true);
-                        initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                        initializeBACnet.setTextColor(R.attr.orange_75f);
                     }else{
                         initializeBACnet.setEnabled(false);
                         initializeBACnet.setClickable(false);

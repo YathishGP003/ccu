@@ -68,4 +68,7 @@ object Domain {
         return equips
     }
 
+    fun readPoint(domainName: String) : Map<Any,Any> {
+        return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")
+    }
 }

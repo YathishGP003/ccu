@@ -68,7 +68,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
                 DomainManager.addPoint(hayStackPoint)
             }
-
         }
     }
 

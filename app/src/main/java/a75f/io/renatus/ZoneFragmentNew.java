@@ -2402,6 +2402,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
         }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+            textViewValue2.setVisibility(View.VISIBLE);
+            textViewLabel2.setVisibility(View.VISIBLE);
+        } else {
+            textViewValue2.setVisibility(View.GONE);
+            textViewLabel2.setVisibility(View.GONE);
+        }
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);

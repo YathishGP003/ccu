@@ -1,10 +1,10 @@
 
 package a75f.io.device.modbus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
-import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataInterface
 {
@@ -37,7 +36,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     @Override
     public void sendMessage() {
         pullRegisters();
-        if (!LSerial.getInstance().isModbusConnected()) {
+        /*if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
@@ -74,13 +73,16 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
             }
-        }
+        }*/
     }
     private void pullRegisters(){
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);
+        int registerRequestCount = preferences.getInt("registerRequestCount", 3);
 
         ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
                 "equipRef and modbus");
@@ -93,8 +95,16 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                     modbusDeviceList.addAll(equipDevice.getEquips());
 
                 for(EquipmentDevice modbusDevice : modbusDeviceList){
+                    int count = 0;
+                    LModbus.IS_MODBUS_DATA_RECEIVED = false;
                     for (Register register : modbusDevice.getRegisters()) {
+                        if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
+                            break;
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+                        CcuLog.d(L.TAG_CCU_MODBUS,
+                                "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
+                                        ", count: "+count+
+                                        ", registerRequestCount: "+registerRequestCount);
                     }
                 }
             } catch (Exception e) {

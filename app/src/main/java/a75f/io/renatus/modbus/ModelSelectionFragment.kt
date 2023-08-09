@@ -1,6 +1,5 @@
 package a75f.io.renatus.modbus
 
-import a75f.io.renatus.HyperStatSenseFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -43,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +59,7 @@ class ModelSelectionFragment : DialogFragment() {
     lateinit var placeholder: String
 
     companion object {
-        val ID: String = HyperStatSenseFragment::class.java.simpleName
+        val ID: String = ModelSelectionFragment::class.java.simpleName
 
         fun newInstance(
             items: MutableState<List<String>>,

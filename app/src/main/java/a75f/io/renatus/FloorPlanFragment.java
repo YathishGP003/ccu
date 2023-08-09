@@ -71,7 +71,6 @@ import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.modbus.ModbusConfigView;
@@ -1250,30 +1249,19 @@ public class FloorPlanFragment extends Fragment {
              **/
             if (previousSelectedDevice == 2) {
 
-
-                boolean isPaired = isModbusPairedSystem("emr");
-                /*if (L.ccu().zoneProfiles.size() > 0) {
-                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
-                        ZoneProfile p = it.next();
-                        if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            isPaired = true;
-                            break;
-                        }
-                    }
-                }*/
+                boolean isPaired = isModbusPairedSystem();
                 if (isPaired) {
                     Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr"), FragmentModbusConfiguration.ID);
-
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
                 }
             }
             if (previousSelectedDevice == 3) {
                 /**
                  * Modbus BTU meter selection
                  */
-                showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1409,11 +1397,11 @@ public class FloorPlanFragment extends Fragment {
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
-                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
 
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
-                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1516,9 +1504,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
-                    /*showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);*/
-                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), FragmentModbusConfiguration.ID);
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
                     break;
 
             }
@@ -1571,7 +1557,7 @@ public class FloorPlanFragment extends Fragment {
                 .hideSoftInputFromWindow(requireView().getWindowToken(), 0);
     }
 
-    private boolean isModbusPairedSystem(String filer){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and "+filer+" and roomRef ==\"SYSTEM\"").size() > 0;
+    private boolean isModbusPairedSystem(){
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and roomRef ==\"SYSTEM\"").size() > 0;
     }
 }

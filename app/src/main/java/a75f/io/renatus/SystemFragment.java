@@ -713,19 +713,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}, 100);
 			}
 		});
-		//TODO Commented this out for Automation test, we will revoke for actual prod test
-		/*systemModePicker.setOnScrollListener((view1, scrollState) -> {
-			if (scrollState == SystemNumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
-				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
-				new Handler().postDelayed(() -> {
-					if (systemModePicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
-					{
-						setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(systemModePicker.getValue())).ordinal());
-					}
-				}, 100);
-			}
-		});*/
-		
+
 		occupancyStatus = view.findViewById(R.id.occupancyStatus);
 		equipmentStatus = view.findViewById(R.id.equipmentStatus);
 		IEGatewayOccupancyStatus = view.findViewById(R.id.IE_Gateway_Occupancy_Status);
@@ -1031,20 +1019,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 	};
 	private void configEnergyMeterDetails(View view){
-		/*List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();;
-		if(modbusDevices!=null&&modbusDevices.size()>0){
-			EquipmentDevice  emDevice=null;
-			for (int i = 0; i <modbusDevices.size() ; i++) {
-				if(modbusDevices.get(i).getEquipType().equals("EMR")){
-					emDevice = modbusDevices.get(i);
-					if(emDevice.getDeviceEquipRef() == null) {
-						emDevice.setDeviceEquipRef(emDevice.getEquipRef());
-					}
-				}
-			}
-
-			if(emDevice==null)
-				return;*/
 		EquipmentDevice emDevice = getModbusEquip("emr");;
 		if (emDevice != null) {
 			energyMeterParams.setVisibility(View.VISIBLE);
@@ -1057,19 +1031,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			energyMeterModelDetails.setVisibility(View.VISIBLE);
 			moduleStatusEmr.setVisibility(View.VISIBLE);
 			lastUpdatedEmr.setVisibility(View.VISIBLE);
-			List<Parameter> parameterList = new ArrayList<>();
-			/*if (Objects.nonNull(emDevice.getRegisters())) {
-				for (Register registerTemp : emDevice.getRegisters()) {
-					if (registerTemp.getParameters() != null) {
-						for (Parameter p : registerTemp.getParameters()) {
-							if (p.isDisplayInUI()) {
-								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-								parameterList.add(p);
-							}
-						}
-					}
-				}
-			}*/
 			List<Parameter> allParamList = UtilSourceKt.getParametersList(emDevice);
 			allParamList.forEach(parameter -> {
 				if (parameter.isDisplayInUI())
@@ -1089,10 +1050,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 
 	}
-/*
-	private List<EquipmentDevice> getSystemLevelModBusDevices(){
-		return 	EquipsManager.getInstance().getAllMbEquips("SYSTEM");
-	}*/
 
 	private EquipmentDevice getModbusEquip(String filter){
 		HashMap<Object, Object> equipListMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and "+filter+" and roomRef == \"SYSTEM\"");
@@ -1101,20 +1058,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return buildModbusModelByEquipRef(Objects.requireNonNull(equipListMap.get("id")).toString());
 	}
 	private void configBTUMeterDetails(View view){
-		/*List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();
-		if(modbusDevices!=null&&modbusDevices.size()>0){
-			EquipmentDevice  btuDevice=null;
-			for (int i = 0; i <modbusDevices.size() ; i++) {
-				if(modbusDevices.get(i).getEquipType().equals("BTU")){
-					btuDevice = modbusDevices.get(i);
-					if(btuDevice.getDeviceEquipRef() == null) {
-						btuDevice.setDeviceEquipRef(btuDevice.getEquipRef());
-					}
-				}
-			}
 
-			if(btuDevice==null)
-				return;*/
 		EquipmentDevice btuDevice = getModbusEquip("btu");
 		if(btuDevice != null) {
 			btuMeterParams.setVisibility(View.VISIBLE);
@@ -1123,18 +1067,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			lastUpdatedBtu.setVisibility(View.VISIBLE);
 			List<Parameter> parameterList = new ArrayList<>();
 
-			/*if (Objects.nonNull(btuDevice.getRegisters())) {
-				for (Register registerTemp : btuDevice.getRegisters()) {
-					if (registerTemp.getParameters() != null) {
-						for (Parameter p : registerTemp.getParameters()) {
-							if (p.isDisplayInUI()) {
-								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-								parameterList.add(p);
-							}
-						}
-					}
-				}
-			}*/
 			List<Parameter> allParamList = UtilSourceKt.getParametersList(btuDevice);
 			allParamList.forEach(parameter -> {
 				if (parameter.isDisplayInUI())

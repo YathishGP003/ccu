@@ -933,7 +933,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
+        p.getTags().forEach(b::add);
         HRef ref = (HRef) b.get("id");
         HDict dict = b.toDict();
         if (!insertEntity(dict, id)) {
@@ -986,9 +986,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+        p.getTags().forEach(b::add);
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1032,9 +1030,6 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1075,9 +1070,6 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1121,9 +1113,6 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1164,9 +1153,6 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1201,9 +1187,6 @@ public class CCUTagsDb extends HServer {
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict dict = b.toDict();
         if (!insertEntity(dict, id)) {
@@ -1234,9 +1217,6 @@ public class CCUTagsDb extends HServer {
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1273,9 +1253,6 @@ public class CCUTagsDb extends HServer {
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 

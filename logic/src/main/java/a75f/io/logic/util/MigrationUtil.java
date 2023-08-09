@@ -7,6 +7,7 @@ import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
+import static a75f.io.logic.util.MigrateModbusModelKt.migrateModbusProfiles;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -412,8 +413,8 @@ public class MigrationUtil {
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
-
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
+        migrateModbusProfiles();
         L.saveCCUState();
     }
 

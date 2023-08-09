@@ -228,15 +228,15 @@ public abstract class UtilityApplication extends Application {
     private void postProcessingInit(){
         Log.i("CCU_DB", "postProcessingInit - start");
 
+        //Remove this Equip Manager once all modbus models are migrated from Domain modeler
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
         PreferenceUtil.installationCompleted();
 
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
-
-        //Modbus EquipmendManager
-        EquipsManager.getInstance(this).setApplicationContext(this);
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service

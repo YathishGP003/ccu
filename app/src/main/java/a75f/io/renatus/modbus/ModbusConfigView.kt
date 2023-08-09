@@ -57,6 +57,8 @@ class ModbusConfigView : BaseDialogFragment() {
     private lateinit var viewModel: ModbusConfigViewModel
 
     companion object {
+        val ID: String = ModelSelectionFragment::class.java.simpleName
+
         fun newInstance(
             meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType,
             level: ModbusLevel, filer: String

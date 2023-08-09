@@ -1295,20 +1295,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
     }
 
-    override fun isZoneDead(): Boolean {
-        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
-        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
-        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
-        for (node in pipe2DeviceMap.keys) {
-            if (pipe2DeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
-                || pipe2DeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
-            ) {
-                return true
-            }
-        }
-        return false
-    }
-
     private fun milliToMin(milliseconds: Long): Long {
         return (milliseconds / (1000 * 60) % 60)
     }

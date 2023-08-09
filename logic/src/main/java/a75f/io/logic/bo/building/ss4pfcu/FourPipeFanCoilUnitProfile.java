@@ -51,29 +51,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         return ProfileType.SMARTSTAT_FOUR_PIPE_FCU;
     }
 
-
-
-    @Override
-    public boolean isZoneDead() {
-
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
-        for (short node : fourPfcuDeviceMap.keySet())
-        {
-            double curTemp = fourPfcuDeviceMap.get(node).getCurrentTemp();
-            Log.d("SmartStat","isZoneDead="+buildingLimitMax+","+buildingLimitMin+","+tempDeadLeeway+","+curTemp);
-            if (curTemp > (buildingLimitMax + tempDeadLeeway)
-                    || curTemp < (buildingLimitMin - tempDeadLeeway))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public void updateZonePoints() {
         if (Globals.getInstance().isTestMode()){

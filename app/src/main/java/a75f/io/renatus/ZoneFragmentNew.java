@@ -764,7 +764,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
                 if (!tempModule && nontempModule && !profileType.contains(profileHyperStatMonitoring)) {
                     viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
-                    //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
+
                 }
                 gridPosition++;
             }

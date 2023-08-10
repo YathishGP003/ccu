@@ -17,10 +17,6 @@ public class EquipsManager
     private static EquipsManager mInstance;
     EquipProcessor processor;
 
-    public EquipProcessor getProcessor() {
-        return processor;
-    }
-
     public EquipsManager(Context c) {
         if (processor == null){
             processor = new EquipProcessor(c);
@@ -53,47 +49,11 @@ public class EquipsManager
         mContext = c;
     }
 
-    public List<EquipmentDevice> getAllEquipments(){
-        return processor.getAllEquips();
-    }
 
-    public void saveProfile(EquipmentDevice equipmentDevice){
-        processor.saveConfig(equipmentDevice);
-    }
-    /*public EquipmentDevice fetchProfile(String equipRef){
-        return processor.getConfig(equipRef);
-    }*/
-    public List<EquipmentDevice> getAllMbEquips(String zoneRef){
-        return processor.getEquipByZoneRef(zoneRef);
-    }
     public EquipmentDevice fetchProfileBySlaveId(int slaveId){
         return processor.getEquipBySlave(slaveId);
     }
 
-    public void deleteModules(ArrayList<Short> slaveIds){
-        processor.removeDevice(slaveIds);
-    }
-
-    public void deleteEquipsByFloor(String floorRef){
-        processor.removeDeviceByFloor(floorRef);
-    }
-
-    public void deleteEquipByZone(String zoneRef){
-        processor.removeDeviceByZone(zoneRef);
-    }
-
-
-    public List<EquipmentDevice> getEnergyMeterEquipments() {
-        return processor.getAllEMEquips();
-    }
-
-    public List<EquipmentDevice> getEnergyMeterSysEquipments(){
-        return processor.getAllEMSysEquips();
-    }
-
-    public List<EquipmentDevice> getAllBtuMeters(){
-        return processor.getAllBTUMeterDevicesEquips();
-    }
 
     public EquipmentDevice fetchProfileByEquipTypeAndName(String equipType, String name){
         return processor.getEquipByEquipTypeAndName(equipType, name);
@@ -104,24 +64,6 @@ public class EquipsManager
     public List<String> getAllModbusNamesByEquipType(String equipType){
         return processor.getEquipNamesByProfile(equipType);
     }
-/*
 
-    public List<EquipmentDevice> getModbusSubEquip(Equip equip, Point point) {
-        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        HashMap<Object, Object> parentEquipHashMap = CCUHsApi.getInstance().readMapById(equip.getEquipRef());
-        Equip parentEquip = new Equip.Builder().setHashMap(parentEquipHashMap).build();
-        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(parentEquip.getGroup()));
-        for (EquipmentDevice modbusSubEquip : modbusDevice.getEquips()) {
-            if (Integer.parseInt(point.getGroup()) == modbusSubEquip.getSlaveId()) {
-                modbusSubEquipList.add(modbusSubEquip);
-            }
-        }
-        return modbusSubEquipList;
-    }
-*/
-
-    public void readExternalJSONFiles(){
-        processor.readExternalJsonData();
-    }
 }
 

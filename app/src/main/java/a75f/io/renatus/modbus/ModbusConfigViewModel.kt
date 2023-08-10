@@ -9,7 +9,6 @@ import a75f.io.domain.service.ResponseCallback
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
-import a75f.io.modbusbox.ModbusParser
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
@@ -30,6 +29,7 @@ import a75f.io.renatus.modbus.util.WARNING
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.isAllParamsSelected
+import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -171,7 +171,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             override fun onSuccessResponse(response: String?) {
                 if (!response.isNullOrEmpty()) {
                     try {
-                        val equipmentDevice = ModbusParser().parseModbusDataFromString(response)
+                        val equipmentDevice = parseModbusDataFromString(response)
                         if (equipmentDevice != null) {
                             val model = EquipModel()
                             model.jsonContent = response

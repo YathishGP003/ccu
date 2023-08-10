@@ -71,7 +71,6 @@ import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -923,11 +922,7 @@ public class FloorPlanFragment extends Fragment {
                                 }
 
                             }
-                            EquipsManager.getInstance().getAllMbEquips(zone.getId())
-                                    .forEach( equip -> {
-                                        equip.setFloorRef(floor.getId());
-                                        EquipsManager.getInstance().saveProfile(equip);
-                                    });
+
                         }
 
                         refreshScreen();
@@ -1461,10 +1456,6 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
-                case MODBUS_EMR_ZONE:
-                    showDialogFragment(FragmentModbusEnergyMeterConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
-                    break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(), profile.getProfileType()), HyperStatMonitoringFragment.ID);
@@ -1504,9 +1495,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
+                case MODBUS_EMR_ZONE:
                     showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
                     break;
-
             }
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();

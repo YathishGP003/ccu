@@ -433,9 +433,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
     }
 
-
-
-    }
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)

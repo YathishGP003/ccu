@@ -2,12 +2,14 @@ package a75f.io.renatus.modbus.util
 
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import com.google.gson.Gson
 import java.util.Objects
 
 /**
@@ -86,7 +88,18 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
 }
 fun log(msg: String) {
-    Log.i("DMModbus",msg)
+    CcuLog.i("DMModbus",msg)
+}
+
+fun parseModbusDataFromString(json: String?): EquipmentDevice? {
+    var equipmentDevice: EquipmentDevice? = null
+    try {
+        val gson = Gson()
+        equipmentDevice = gson.fromJson(json, EquipmentDevice::class.java)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return equipmentDevice
 }
 
 

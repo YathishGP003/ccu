@@ -156,7 +156,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			} else {
 				CCUHsApi.getInstance().deleteEntityTree(floorId);
 			}
-			EquipsManager.getInstance().deleteEquipsByFloor(floor.getId());
+
 		}
 		CCUHsApi.getInstance().syncEntityTree();
 		L.saveCCUState();

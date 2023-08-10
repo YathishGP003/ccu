@@ -11,12 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
-import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 
@@ -63,10 +61,10 @@ public class FragmentModbusType  extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         modbusequip.setOnClickListener(v -> {
-            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), FragmentModbusConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
         });
         modbusem.setOnClickListener(v -> {
-            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), FragmentModbusConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), ModbusConfigView.Companion.getID());
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         return view;

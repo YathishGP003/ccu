@@ -3,13 +3,13 @@ package a75f.io.logic.ccu.restore;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +30,6 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
@@ -351,7 +350,7 @@ public class RestoreCCU {
                             getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
                         }
                     }
-                    saveToBox(equipRow, subEquipRowList);
+                   // saveToBox(equipRow, subEquipRowList);
                 }
                 getDevicesFromEquips(equipId, equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
                         replaceCCUTracker, retryCountCallback);
@@ -464,8 +463,6 @@ public class RestoreCCU {
         modbusDevice.setEquips(null);
         modbusDevice.setEquips(subEquipmentDevices);
 
-
-        EquipsManager.getInstance().saveProfile(modbusDevice);
     }
 
     private HGrid getEquipGrid(String equipId, RetryCountCallback retryCountCallback){

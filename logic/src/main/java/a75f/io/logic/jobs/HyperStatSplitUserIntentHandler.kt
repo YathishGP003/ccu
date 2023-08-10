@@ -240,7 +240,7 @@ class HyperStatSplitUserIntentHandler {
             }
         }
 
-        fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double) {
+        fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {
 
             val haystack: CCUHsApi = CCUHsApi.getInstance()
             RxjavaUtil.executeBackgroundTask(
@@ -256,9 +256,10 @@ class HyperStatSplitUserIntentHandler {
 
                         if(pointDetails.markers.contains("writable")){
                             Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " updated point write $id")
-                            haystack.pointWriteForCcuUser(
+                            haystack.pointWrite(
                                 HRef.copy(id),
                                 TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                who,
                                 HNum.make(value),
                                 HNum.make(0)
                             )

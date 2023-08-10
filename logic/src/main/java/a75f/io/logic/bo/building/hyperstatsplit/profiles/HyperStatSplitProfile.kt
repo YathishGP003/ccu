@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import android.util.Log
 
@@ -399,10 +400,11 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
             logIt("Resetting the Fan status back to  AUTO: ")
-            HyperStatUserIntentHandler.updateHyperStatUIPoints(
+            HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
                 equipRef = equipRef,
                 command = "zone and sp and fan and operation and mode",
-                value = StandaloneFanStage.AUTO.ordinal.toDouble()
+                value = StandaloneFanStage.AUTO.ordinal.toDouble(),
+                CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.AUTO
         }
@@ -410,10 +412,11 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         if ((occupancyStatus == Occupancy.OCCUPIED|| Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING )
             && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
-            HyperStatUserIntentHandler.updateHyperStatUIPoints(
+            HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
                 equipRef = equipRef,
                 command = "zone and sp and fan and operation and mode",
-                value = actualFanMode.toDouble()
+                value = actualFanMode.toDouble(),
+                CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.values()[actualFanMode]
         }

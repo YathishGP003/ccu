@@ -270,7 +270,7 @@ private fun handleConditionMode(
         actualConditioningMode  = getActualConditioningMode(nodeAddress, selectedPosition)
     }
     if(actualConditioningMode != -1)
-        updateHyperStatSplitUIPoints(equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble())
+        updateHyperStatSplitUIPoints(equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
 }
 
 
@@ -284,7 +284,7 @@ private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: S
         else -> { -1 }
     }
     if(actualFanMode != -1) {
-        updateHyperStatSplitUIPoints(equipId, "zone and sp and fan and operation and mode", actualFanMode.toDouble())
+        updateHyperStatSplitUIPoints(equipId, "zone and sp and fan and operation and mode", actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
         if (selectedPosition != 0 && selectedPosition % 3 == 0)
             cacheStorage.saveFanModeInCache(equipId, selectedPosition)
         else
@@ -294,13 +294,13 @@ private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: S
 
 private fun handleHumidityMode(selectedPosition: Int, equipId: String) {
     updateHyperStatSplitUIPoints(
-        equipId, "target and humidifier", (selectedPosition + 1).toDouble()
+        equipId, "target and humidifier", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )
 }
 
 private fun handleDeHumidityMode(selectedPosition: Int, equipId: String) {
     updateHyperStatSplitUIPoints(
-        equipId, "target and dehumidifier", (selectedPosition + 1).toDouble()
+        equipId, "target and dehumidifier", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
     )
 }
 

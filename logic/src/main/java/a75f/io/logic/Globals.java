@@ -42,7 +42,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;

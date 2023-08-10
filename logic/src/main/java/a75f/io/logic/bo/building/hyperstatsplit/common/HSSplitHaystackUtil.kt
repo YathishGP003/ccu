@@ -404,7 +404,7 @@ class HSSplitHaystackUtil(
     fun getCondensateOverflowStatus(): Double {
         return haystack.readHisValByQuery(
             "point and condensate " +
-                    "and overflow and status and his and equipRef == \"$equipRef\""
+                    "and sensor and his and equipRef == \"$equipRef\""
         )
     }
 
@@ -415,7 +415,7 @@ class HSSplitHaystackUtil(
      */
     fun getFilterStatus(): Double {
         return haystack.readHisValByQuery(
-            "point and filter and status and his and equipRef == \"$equipRef\""
+            "point and filter and sensor and his and equipRef == \"$equipRef\""
         )
     }
     fun updateOccupancyDetection() {

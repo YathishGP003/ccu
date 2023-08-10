@@ -1201,7 +1201,7 @@
                     android:id="@+id/ao4MinDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
                     android:layout_below="@id/ao3MinDamperLabel"
-                    android:layout_toEndOf="@+id/ao3MinDamperLabel"
+                    android:layout_toEndOf="@+id/ao4MinDamperLabel"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
                 <TextView

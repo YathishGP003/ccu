@@ -83,7 +83,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     fun addEquip(node: Short): HyperStatSplitEquip {
         val equip = HyperStatSplitCpuEconEquip(node)
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
         equip.initEquipReference(node)
         cpuEconDeviceMap[node] = equip
         return equip
@@ -95,7 +94,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         val configuration = equip.initializePoints(baseConfig as HyperStatSplitCpuEconConfiguration, room, floor, node)
         hsSplitHaystackUtil = equip.hsSplitHaystackUtil
-        //Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for CpuEcon: " + configuration.toString())
+
         return configuration
     }
 

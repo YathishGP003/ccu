@@ -18,7 +18,10 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.AnalogOutChanges
 import a75f.io.logic.bo.building.hyperstatsplit.common.ConfigState
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getHumidityPort
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getPressPort
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getTempPort
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames
@@ -208,13 +211,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         hyperStatSplitDevice.currentTemp.pointRef = masterPoints[LogicalKeyID.CURRENT_TEMP]
         hyperStatSplitDevice.currentTemp.enabled = true
 
-        hyperStatSplitDevice.addSensor(Port.SENSOR_RH, masterPoints[Port.SENSOR_RH])
-        hyperStatSplitDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_RH, masterPoints[Port.SENSOR_RH], "%RH")
+        hyperStatSplitDevice.addSensor(Port.SENSOR_ILLUMINANCE, masterPoints[Port.SENSOR_ILLUMINANCE], "lx")
         hyperStatSplitDevice.addSensor(Port.SENSOR_OCCUPANCY, masterPoints[Port.SENSOR_OCCUPANCY])
-        hyperStatSplitDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2])
-        //hyperStatSplitDevice.addSensor(Port.SENSOR_VOC, masterPoints[Port.SENSOR_VOC])
-        //hyperStatSplitDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT])
-        //hyperStatSplitDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND])
+        hyperStatSplitDevice.addSensor(Port.SENSOR_CO2, masterPoints[Port.SENSOR_CO2], "ppm")
+        hyperStatSplitDevice.addSensor(Port.SENSOR_VOC, masterPoints[Port.SENSOR_VOC], "ppb")
+        //hyperStatSplitDevice.addSensor(Port.SENSOR_CO2_EQUIVALENT, masterPoints[Port.SENSOR_CO2_EQUIVALENT], "ppm")
+        hyperStatSplitDevice.addSensor(Port.SENSOR_SOUND, masterPoints[Port.SENSOR_SOUND], "db")
 
         profileEquip.setupDeviceSensorBus(
             config.address0State.enabled, config.address0State.association.ordinal,
@@ -423,6 +426,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         updateSensorBusConfig(newConfiguration = updatedHyperStatSplitConfig, existingConfiguration = presetConfiguration)
 
         LogicalPointsUtil.cleanCpuEconLogicalPoints(updatedHyperStatSplitConfig,equipRef!!)
+
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
@@ -1041,22 +1045,22 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address0State, existingConfiguration.address0State)
         ) {
-            updateSensorBusDetails(newConfiguration.address0State, "addr0")
+            updateSensorBusDetails(newConfiguration.address0State, "addr0", getTempPort(newConfiguration.address0State), getHumidityPort(newConfiguration.address0State))
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address1State, existingConfiguration.address1State)
         ) {
-            updateSensorBusDetails(newConfiguration.address1State, "addr1")
+            updateSensorBusDetails(newConfiguration.address1State, "addr1", getTempPort(newConfiguration.address1State), getHumidityPort(newConfiguration.address1State))
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address2State, existingConfiguration.address2State)
         ) {
-            updateSensorBusDetails(newConfiguration.address2State, "addr2")
+            updateSensorBusDetails(newConfiguration.address2State, "addr2", getTempPort(newConfiguration.address2State), getHumidityPort(newConfiguration.address2State))
         }
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address3State, existingConfiguration.address3State)
         ) {
-            updateSensorBusDetails(newConfiguration.address3State, "addr3")
+            updateSensorBusDetails(newConfiguration.address3State, "addr3", getPressPort(newConfiguration.address3State))
         }
     }
 

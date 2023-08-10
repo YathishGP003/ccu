@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -89,12 +88,17 @@ open class HyperStatSplitEquip {
     // Function which updates the Sensor Bus Temp new configurations
     fun updateSensorBusDetails(
         sensorBusState: SensorBusTempState,
-        sensorBusTag: String
+        sensorBusTag: String,
+        tempPort: Port,
+        humidityPort: Port,
     ) {
+        Log.d("CCU_DEVICE_TEST", " updateSensorBusDetails $sensorBusState $sensorBusTag $tempPort $humidityPort")
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
+        DeviceUtil.setPointEnabled(nodeAddress, tempPort.toString(), sensorBusState.enabled)
+        DeviceUtil.setPointEnabled(nodeAddress, humidityPort.toString(), sensorBusState.enabled)
 
         if (sensorBusState.enabled) {
             val tempPointData: Point = hyperStatSplitPointsUtil.sensorBusTempConfiguration(
@@ -117,18 +121,22 @@ open class HyperStatSplitEquip {
     // Function which updates the Sensor Bus Temp new configurations
     fun updateSensorBusDetails(
         sensorBusState: SensorBusPressState,
-        sensorBusTag: String
+        sensorBusTag: String,
+        pressPort: Port
     ) {
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusAssociatedId, sensorBusState.association.ordinal.toDouble())
+        DeviceUtil.setPointEnabled(nodeAddress, pressPort.name, sensorBusState.enabled)
 
         if (sensorBusState.enabled) {
             val pointData: Point = hyperStatSplitPointsUtil.sensorBusPressureConfiguration(
                 sensorBusState = sensorBusState
             )
             val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData)
+
+
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
         }
@@ -260,7 +268,8 @@ open class HyperStatSplitEquip {
 
     fun updateAutoAwayAutoForceOccupy(
         oldAutoAwayEnabled: Boolean, newAutoAwayEnabled: Boolean,
-        oldAutoForceOccupyEnabled: Boolean, newAutoForceOccupyEnabled: Boolean, ){
+        oldAutoForceOccupyEnabled: Boolean, newAutoForceOccupyEnabled: Boolean,
+    ){
         if (oldAutoAwayEnabled != newAutoAwayEnabled) {
             val autoAwayEnabledId = hsSplitHaystackUtil.readPointID("config and auto and away") as String
             hyperStatSplitPointsUtil.addDefaultValueForPoint(autoAwayEnabledId, if (newAutoAwayEnabled) 1.0 else 0.0 )
@@ -416,93 +425,67 @@ open class HyperStatSplitEquip {
         isAddress3Enabled: Boolean, isAddress3Association: Int,
         masterPoints: HashMap<Any, String>, device: HyperStatSplitDevice
     ) {
-        if (isAddress0Enabled) {
-            if (isAddress0Association == 0) {
-                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
-                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
-                device.mixedAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
-                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
-                device.mixedAirHumiditySensor.enabled = true
-            }
-            else if (isAddress0Association == 1) {
-                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
-                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
-                device.supplyAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
-                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
-                device.supplyAirHumiditySensor.enabled = true
-            }
-            else if (isAddress0Association == 2) {
-                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
-                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
-                device.outsideAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
-                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
-                device.outsideAirHumiditySensor.enabled = true
-            }
+        
+        // Mixed Air Temp/Humidity is enabled
+        if ((isAddress0Enabled && isAddress0Association == 0) ||
+            (isAddress1Enabled && isAddress1Association == 0) ||
+            (isAddress2Enabled && isAddress2Association == 0)) {
+            device.mixedAirTempSensor.enabled = true
+            device.mixedAirHumiditySensor.enabled = true
+        } else {
+            device.mixedAirTempSensor.enabled = false
+            device.mixedAirHumiditySensor.enabled = false
         }
 
-        if (isAddress1Enabled) {
-            if (isAddress1Association == 0) {
-                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
-                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
-                device.mixedAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
-                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
-                device.mixedAirHumiditySensor.enabled = true
-            }
-            else if (isAddress1Association == 1) {
-                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
-                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
-                device.supplyAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
-                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
-                device.supplyAirHumiditySensor.enabled = true
-            }
-            else if (isAddress1Association == 2) {
-                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
-                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
-                device.outsideAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
-                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
-                device.outsideAirHumiditySensor.enabled = true
-            }
+        // Supply Air Temp/Humidity is enabled
+        if ((isAddress0Enabled && isAddress0Association == 1) ||
+            (isAddress1Enabled && isAddress1Association == 1) ||
+            (isAddress2Enabled && isAddress2Association == 1)) {
+            device.supplyAirTempSensor.enabled = true
+            device.supplyAirHumiditySensor.enabled = true
+        } else {
+            device.supplyAirTempSensor.enabled = false
+            device.supplyAirHumiditySensor.enabled = false
         }
 
-        if (isAddress2Enabled) {
-            if (isAddress2Association == 0) {
-                device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT])
-                device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
-                device.mixedAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH])
-                device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
-                device.mixedAirHumiditySensor.enabled = true
-            }
-            else if (isAddress2Association == 1) {
-                device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT])
-                device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
-                device.supplyAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH])
-                device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
-                device.supplyAirHumiditySensor.enabled = true
-            }
-            else if (isAddress2Association == 2) {
-                device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT])
-                device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
-                device.outsideAirTempSensor.enabled = true
-                device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH])
-                device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
-                device.outsideAirHumiditySensor.enabled = true
-            }
+        // Outside Air Temp/Humidity is enabled
+        if ((isAddress0Enabled && isAddress0Association == 2) ||
+            (isAddress1Enabled && isAddress1Association == 2) ||
+            (isAddress2Enabled && isAddress2Association == 2)) {
+            device.outsideAirTempSensor.enabled = true
+            device.outsideAirHumiditySensor.enabled = true
+        } else {
+            device.outsideAirTempSensor.enabled = false
+            device.outsideAirHumiditySensor.enabled = false
         }
 
-        if (isAddress3Enabled) {
-            if (isAddress3Association == 0) {
-                device.ductStaticPressureSensor.pointRef = masterPoints[Port.SENSOR_PRESSURE]
-                device.ductStaticPressureSensor.enabled = true
-            }
+        if (isAddress3Enabled && isAddress3Association == 0) {
+            device.ductStaticPressureSensor.enabled = true
+        } else {
+            device.ductStaticPressureSensor.enabled = false
         }
+
+        device.addSensor(Port.SENSOR_MAT, masterPoints[Port.SENSOR_MAT], "\u00B0F", device.mixedAirTempSensor.enabled)
+        device.mixedAirTempSensor.pointRef = masterPoints[Port.SENSOR_MAT]
+
+        device.addSensor(Port.SENSOR_MAH, masterPoints[Port.SENSOR_MAH], "%RH", device.mixedAirHumiditySensor.enabled)
+        device.mixedAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_MAH]
+
+        device.addSensor(Port.SENSOR_SAT, masterPoints[Port.SENSOR_SAT], "\u00B0F", device.supplyAirTempSensor.enabled)
+        device.supplyAirTempSensor.pointRef = masterPoints[Port.SENSOR_SAT]
+
+        device.addSensor(Port.SENSOR_SAH, masterPoints[Port.SENSOR_SAH], "%RH", device.supplyAirHumiditySensor.enabled)
+        device.supplyAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_SAH]
+
+        device.addSensor(Port.SENSOR_OAT, masterPoints[Port.SENSOR_OAT], "\u00B0F", device.outsideAirTempSensor.enabled)
+        device.outsideAirTempSensor.pointRef = masterPoints[Port.SENSOR_OAT]
+
+        device.addSensor(Port.SENSOR_OAH, masterPoints[Port.SENSOR_OAH], "%RH", device.outsideAirHumiditySensor.enabled)
+        device.outsideAirHumiditySensor.pointRef = masterPoints[Port.SENSOR_OAH]
+
+        device.addSensor(Port.SENSOR_PRESSURE, masterPoints[Port.SENSOR_PRESSURE], "inH2O", device.ductStaticPressureSensor.enabled)
+        device.ductStaticPressureSensor.pointRef = masterPoints[Port.SENSOR_PRESSURE]
+
     }
 
     /**

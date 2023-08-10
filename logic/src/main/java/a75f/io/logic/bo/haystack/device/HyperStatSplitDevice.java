@@ -24,6 +24,9 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames;
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil;
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration;
 
 /**
  * Models a HyperStat Split device Haystack entity.
@@ -89,14 +92,14 @@ public class HyperStatSplitDevice {
     public HyperStatSplitDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
                 .setDisplayName("HSS-" + address)
-                .addMarker("network").addMarker("node").addMarker(HyperstatProfileNames.HSCPU)
+                .addMarker("network").addMarker("node")
                 .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
                 .setEquipRef(equipRef)
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .setProfileType(HyperstatProfileNames.HSCPU)
+                .setProfileType(HyperstatSplitProfileNames.HSSPLIT_CPUECON)
                 .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         hyperStatNodeAddress = address;
@@ -135,7 +138,6 @@ public class HyperStatSplitDevice {
      */
     // TODO: make these updates
     private void createPoints() {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"HSS deviceRef: " + deviceRef);
         universal1In = new RawPoint.Builder()
                 .setDisplayName("universal1In-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
@@ -144,7 +146,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL1)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL1)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -156,7 +161,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL2)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL2)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -168,7 +176,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL3)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL3)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -180,7 +191,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL4)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL4)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -192,7 +206,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL5)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL5)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -204,7 +221,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL6)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL6)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -216,7 +236,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL7)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL7)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -228,7 +251,10 @@ public class HyperStatSplitDevice {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker(UNIVERSAL8)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .addMarker(UNIVERSAL8)
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 
@@ -253,7 +279,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_SAT.toString())
+                .setPort(Port.SENSOR_SAT.name())
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -265,7 +291,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_SAH.toString())
+                .setPort(Port.SENSOR_SAH.name())
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -277,7 +303,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_MAT.toString())
+                .setPort(Port.SENSOR_MAT.name())
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -289,7 +315,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_MAH.toString())
+                .setPort(Port.SENSOR_MAH.name())
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -301,7 +327,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_OAT.toString())
+                .setPort(Port.SENSOR_OAT.name())
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -313,7 +339,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_OAH.toString())
+                .setPort(Port.SENSOR_OAH.name())
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -325,7 +351,7 @@ public class HyperStatSplitDevice {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_PRESSURE.toString())
+                .setPort(Port.SENSOR_PRESSURE.name())
                 .setUnit("inH₂O")
                 .setTz(tz)
                 .build();
@@ -336,8 +362,8 @@ public class HyperStatSplitDevice {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his")
-                .setPort(Port.SENSOR_RT.toString())
+                .addMarker("sensor").addMarker("his").addMarker("zone")
+                .setPort(Port.SENSOR_RT.name())
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -348,8 +374,8 @@ public class HyperStatSplitDevice {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his")
-                .setPort(Port.DESIRED_TEMP.toString())
+                .addMarker("sensor").addMarker("his").addMarker("zone")
+                .setPort(Port.DESIRED_TEMP.name())
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -373,6 +399,7 @@ public class HyperStatSplitDevice {
                 .setPort(relayPort.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
                 .addMarker("cmd").addMarker("his")
+                .addMarker("cur").addMarker("zone")
                 .setTz(tz)
                 .build();
     }
@@ -387,6 +414,7 @@ public class HyperStatSplitDevice {
                 .setPort(analogPort.toString())
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .addMarker("cmd").addMarker("his")
+                .addMarker("cur").addMarker("zone")
                 .setUnit("dV")
                 .setTz(tz)
                 .build();
@@ -443,7 +471,7 @@ public class HyperStatSplitDevice {
 
     public void addSensor(Port p, String pointRef) {
         RawPoint sensor = new RawPoint.Builder()
-                .setDisplayName(p.getPortSensor()+"-"+hyperStatNodeAddress)
+                .setDisplayName(p.getPortSensor()+"Sensor-"+hyperStatNodeAddress)
                 .setDeviceRef(deviceRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -451,7 +479,44 @@ public class HyperStatSplitDevice {
                 .setPointRef(pointRef)
                 .setEnabled(true)
                 .addMarker("sensor").addMarker("his")
-                .setPort(p.getPortSensor())
+                .addMarker("cur").addMarker("zone")
+                .setPort(p.toString())
+                .setTz(tz)
+                .build();
+        CCUHsApi.getInstance().addPoint(sensor);
+    }
+
+    public void addSensor(Port p, String pointRef, String unit) {
+        RawPoint sensor = new RawPoint.Builder()
+                .setDisplayName(p.getPortSensor()+"Sensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(true)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .setPort(p.toString())
+                .setUnit(unit)
+                .setTz(tz)
+                .build();
+        CCUHsApi.getInstance().addPoint(sensor);
+    }
+
+    public void addSensor(Port p, String pointRef, String unit, boolean enabled) {
+        RawPoint sensor = new RawPoint.Builder()
+                .setDisplayName(p.getPortSensor()+"Sensor-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(enabled)
+                .addMarker("sensor").addMarker("his")
+                .addMarker("cur").addMarker("zone")
+                .setPort(p.toString())
+                .setUnit(unit)
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(sensor);

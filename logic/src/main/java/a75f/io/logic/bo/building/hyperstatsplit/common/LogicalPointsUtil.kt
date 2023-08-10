@@ -45,12 +45,13 @@ class LogicalPointsUtil {
             val existingPoint = readFanLowRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","zone","his","fan", "low", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "low", "speed", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanLowSpeed")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -65,12 +66,13 @@ class LogicalPointsUtil {
             val existingPoint = readFanMediumRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","zone","his","fan", "medium", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "medium", "speed", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanMediumSpeed")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -85,12 +87,13 @@ class LogicalPointsUtil {
             val existingPoint = readFanHighRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","zone","his","fan", "high", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "high", "speed", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanHighSpeed")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -106,12 +109,13 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "cmd", "logical","runtime", "his", "zone", "fan", "enabled"
+                    "cmd", "logical","runtime", "his", "zone", "fan", "enabled", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanEnabled")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -126,12 +130,13 @@ class LogicalPointsUtil {
             val existingPoint = readOccupiedEnabledRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "zone", "occupied", "enabled"
+                    "cmd", "logical", "runtime", "his", "zone", "occupied", "enabled", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-occupiedEnabled")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -146,12 +151,13 @@ class LogicalPointsUtil {
             val existingPoint = readHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "zone", "humidifier"
+                    "cmd", "logical", "runtime", "his", "zone", "humidifier", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-humidifierEnableCmd")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -166,12 +172,13 @@ class LogicalPointsUtil {
             val existingPoint = readDeHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "zone", "dehumidifier"
+                    "cmd", "logical", "runtime", "his", "zone", "dehumidifier", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-dehumidifierEnableCmd")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -188,12 +195,13 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage1RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage1", "dxCooling", "zone", "logical", "runtime","his"
+                    "cmd", "cooling", "stage1", "dxCooling", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage1")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -208,12 +216,13 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage2RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage2", "dxCooling", "zone", "logical", "runtime","his"
+                    "cmd", "cooling", "stage2", "dxCooling", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage2")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -228,12 +237,13 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage3", "dxCooling", "zone", "logical", "runtime","his"
+                    "cmd", "cooling", "stage3", "dxCooling", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage3")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
 
@@ -250,12 +260,13 @@ class LogicalPointsUtil {
 
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage1", "electHeating", "zone", "logical", "runtime","his"
+                    "cmd", "heating", "stage1", "electHeating", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage1")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
 
@@ -272,12 +283,13 @@ class LogicalPointsUtil {
 
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage2", "electHeating", "zone", "logical", "runtime","his"
+                    "cmd", "heating", "stage2", "electHeating", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage2")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -292,12 +304,13 @@ class LogicalPointsUtil {
             val existingPoint = readHeatingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage3", "electHeating", "zone", "logical", "runtime","his"
+                    "cmd", "heating", "stage3", "electHeating", "zone", "logical", "runtime","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage3")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -312,12 +325,13 @@ class LogicalPointsUtil {
             val existingPoint = readExhaustFanStage1RelayLogicalPoint(equipRef)
             if (existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "exhaust", "fan", "stage1", "zone", "logical", "runtime", "his"
+                    "cmd", "exhaust", "fan", "stage1", "zone", "logical", "runtime", "his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-exhaustFanStage1")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -332,12 +346,13 @@ class LogicalPointsUtil {
             val existingPoint = readExhaustFanStage2RelayLogicalPoint(equipRef)
             if (existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "exhaust", "fan", "stage2", "zone", "logical", "runtime", "his"
+                    "cmd", "exhaust", "fan", "stage2", "zone", "logical", "runtime", "his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-exhaustFanStage2")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -420,17 +435,18 @@ class LogicalPointsUtil {
 
          fun createAnalogOutPointForHeating(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
          ): Point {
             val existingPoint = readAnalogHeatingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
                     "cmd","zone","logical","analog", "output",
-                    "modulating", "elecHeating","heating","his"
+                    "modulating", "elecHeating","heating","his", "cur", "standalone"
                 )
 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-modulatingHeating")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -441,16 +457,17 @@ class LogicalPointsUtil {
         }
          fun createAnalogOutPointForCooling(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
          ): Point {
             val existingPoint = readAnalogCoolingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
                     "cmd","zone","logical","analog", "output",
-                    "modulating", "dxCooling","cooling","his"
+                    "modulating", "dxCooling","cooling","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-modulatingCooling")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -463,16 +480,17 @@ class LogicalPointsUtil {
 
          fun createAnalogOutPointForFanSpeed(
              equipDis: String, siteRef: String, equipRef: String,
-             roomRef: String, floorRef: String, tz: String,
+             roomRef: String, floorRef: String, tz: String, nodeAddress: String
          ): Point {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
                     "cmd","zone","logical","analog", "output", "modulating",
-                    "fan", "speed","run","his"
+                    "fan", "speed","run","his", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-modulatingFanSpeed")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -484,16 +502,17 @@ class LogicalPointsUtil {
 
          fun createAnalogOutPointForOaoDamper(
              equipDis: String, siteRef: String, equipRef: String,
-             roomRef: String, floorRef: String, tz: String,
+             roomRef: String, floorRef: String, tz: String, nodeAddress: String
          ): Point {
             val existingPoint = readAnalogOutOaoLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "analog", "air", "cmd", "zone","logical",
-                    "damper", "economizer","his", "output"
+                    "analog", "cmd", "zone","logical",
+                    "damper", "economizer","his", "output", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-oaoDamper")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -505,16 +524,17 @@ class LogicalPointsUtil {
 
         fun createAnalogOutPointForPredefinedFanSpeed(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String, nodeAddress: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
             val existingPoint = readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
                     "cmd","zone","logical","cur","analog","standalone","output",
-                    "fan", "speed","his","predefined","cpuecon"
+                    "fan", "speed","his","predefined","cpuecon", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-predefinedFanSpeed")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress)
                     .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
@@ -550,15 +570,16 @@ class LogicalPointsUtil {
 
         fun createPointForSupplyAirTemperature(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readSupplyAirTempSensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val supplyAirTempMarkers = arrayOf("discharge", "air", "temp", "sensor", "cur", "his", "logical")
+                val supplyAirTempMarkers = arrayOf("discharge", "air", "temp", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val supplyAirTempPoint = Point.Builder()
                     .setDisplayName("$equipDis-supplyAirTempSensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -570,15 +591,16 @@ class LogicalPointsUtil {
         }
         fun createPointForSupplyAirHumidity(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readSupplyAirHumiditySensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val supplyAirHumidityMarkers = arrayOf("discharge", "air", "humidity", "sensor", "cur", "his", "logical")
+                val supplyAirHumidityMarkers = arrayOf("discharge", "air", "humidity", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val supplyAirHumidityPoint = Point.Builder()
                     .setDisplayName("$equipDis-supplyAirHumiditySensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -591,15 +613,16 @@ class LogicalPointsUtil {
 
         fun createPointForMixedAirTemperature(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readMixedAirTempSensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val mixedAirTempMarkers = arrayOf("mixed", "air", "temp", "sensor", "cur", "his", "logical")
+                val mixedAirTempMarkers = arrayOf("mixed", "air", "temp", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val mixedAirTempPoint = Point.Builder()
                     .setDisplayName("$equipDis-mixedAirTempSensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -611,15 +634,16 @@ class LogicalPointsUtil {
         }
         fun createPointForMixedAirHumidity(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readMixedAirHumiditySensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val mixedAirHumidityMarkers = arrayOf("mixed", "air", "humidity", "sensor", "cur", "his", "logical")
+                val mixedAirHumidityMarkers = arrayOf("mixed", "air", "humidity", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val mixedAirHumidityPoint = Point.Builder()
                     .setDisplayName("$equipDis-mixedAirHumiditySensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -632,15 +656,16 @@ class LogicalPointsUtil {
 
         fun createPointForOutsideAirTemperature(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readOutsideAirTempSensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val supplyAirTempMarkers = arrayOf("outside", "air", "temp", "sensor", "cur", "his", "logical")
+                val supplyAirTempMarkers = arrayOf("outside", "air", "temp", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val supplyAirTempPoint = Point.Builder()
                     .setDisplayName("$equipDis-outsideAirTempSensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -652,15 +677,16 @@ class LogicalPointsUtil {
         }
         fun createPointForOutsideAirHumidity(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readOutsideAirHumiditySensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val outsideAirHumidityMarkers = arrayOf("outside", "air", "humidity", "sensor", "cur", "his", "logical")
+                val outsideAirHumidityMarkers = arrayOf("outside", "air", "humidity", "sensor", "cur", "his", "logical", "standalone", "zone")
 
                 val outsideAirHumidityPoint = Point.Builder()
                     .setDisplayName("$equipDis-outsideAirHumiditySensor")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -675,17 +701,18 @@ class LogicalPointsUtil {
 
         fun createPointForCondensateNC(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readCondensateNC(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "condensate", "sensor", "his", "logical", "zone", "normallyClosed"
+                    "condensate", "sensor", "his", "logical", "zone", "normallyClosed", "standalone"
                 )
 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-condensateNC")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -697,17 +724,18 @@ class LogicalPointsUtil {
         }
         fun createPointForCondensateNO(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readCondensateNO(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "condensate", "sensor", "his", "logical", "zone", "normallyOpen"
+                    "condensate", "sensor", "his", "logical", "zone", "normallyOpen", "standalone", "zone"
                 )
 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-condensateNO")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -721,7 +749,7 @@ class LogicalPointsUtil {
          fun createPointForCurrentTx(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
-            min: String, max: String, inc: String, unit: String, tranferType: TransformerSensorType
+            min: String, max: String, inc: String, unit: String, tranferType: TransformerSensorType, nodeAddress: String
         ): Point {
 
             var transformerTag = "transformer"
@@ -746,10 +774,11 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "run", "sensor", "zone", "his", "logical", "cur", transformerTag
+                    "current", "run", "sensor", "zone", "his", "logical", "cur", "standalone", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -764,7 +793,7 @@ class LogicalPointsUtil {
         // Sensor bus point configured from a native 75F Pressure Sensor (DPS)
         fun createPointForDuctPressure(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             var name = "ductStaticPressureSensor"
@@ -772,10 +801,11 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "static", "pressure", "sensor", "zone", "his", "logical", "cur"
+                    "air", "static", "pressure", "sensor", "zone", "his", "logical", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -791,7 +821,7 @@ class LogicalPointsUtil {
         fun createPointForDuctPressure(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
-            min: String, max: String, inc: String, unit: String, sensorType: DuctPressureSensorType
+            min: String, max: String, inc: String, unit: String, sensorType: DuctPressureSensorType, nodeAddress: String
         ): Point {
 
             var pressureTag = "pressure1in"
@@ -804,10 +834,11 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "air", "pressure", "sensor", "zone", "his", "logical", "cur", pressureTag
+                    "air", "pressure", "sensor", "zone", "his", "logical", "cur", "standalone", pressureTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -821,18 +852,19 @@ class LogicalPointsUtil {
 
         fun createPointForFilterNC(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readFilterNC(equipRef)
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "filter", "sensor", "his", "logical", "zone", "normallyClosed"
+                    "filter", "sensor", "his", "logical", "zone", "standalone", "normallyClosed"
                 )
 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-filterNC")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -844,18 +876,19 @@ class LogicalPointsUtil {
         }
         fun createPointForFilterNO(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
         ): Point {
 
             val existingPoint = readFilterNO(equipRef)
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "filter", "sensor", "his", "logical", "zone", "normallyOpen"
+                    "filter", "sensor", "his", "logical", "zone", "standalone", "normallyOpen"
                 )
 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-filterNO")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -868,17 +901,28 @@ class LogicalPointsUtil {
 
         fun createPointForGenericVoltage(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, universalTag: String, nodeAddress: String
         ): Point {
 
-            val existingPoint = readGenericVoltage(equipRef)
+            val existingPoint = readGenericVoltage(equipRef, universalTag)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "generic", "voltage", "sensor", "his", "logical", "zone"
+                    "generic", "voltage", "sensor", "his", "logical", "cur", "zone", "standalone", universalTag
                 )
 
+                var genericVoltageName = "genericVoltage"
+                if (universalTag.equals("universal1")) genericVoltageName += "1"
+                else if (universalTag.equals("universal2")) genericVoltageName += "2"
+                else if (universalTag.equals("universal3")) genericVoltageName += "3"
+                else if (universalTag.equals("universal4")) genericVoltageName += "4"
+                else if (universalTag.equals("universal5")) genericVoltageName += "5"
+                else if (universalTag.equals("universal6")) genericVoltageName += "6"
+                else if (universalTag.equals("universal7")) genericVoltageName += "7"
+                else if (universalTag.equals("universal8")) genericVoltageName += "8"
+                
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-genericVoltage")
+                    .setDisplayName("$equipDis-$genericVoltageName")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -886,21 +930,32 @@ class LogicalPointsUtil {
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readGenericVoltage(equipRef)).build()
+            return Point.Builder().setHashMap(readGenericVoltage(equipRef, universalTag)).build()
         }
         fun createPointForGenericResistance(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String
+            roomRef: String, floorRef: String, tz: String, universalTag: String, nodeAddress: String
         ): Point {
 
-            val existingPoint = readGenericResistance(equipRef)
+            val existingPoint = readGenericResistance(equipRef, universalTag)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "generic", "resistance", "sensor", "his", "logical", "zone"
+                    "generic", "resistance", "sensor", "his", "logical", "cur", "zone", "standalone", universalTag
                 )
-
+                
+                var genericResistanceName = "genericResistance"
+                if (universalTag.equals("universal1")) genericResistanceName += "1"
+                else if (universalTag.equals("universal2")) genericResistanceName += "2"
+                else if (universalTag.equals("universal3")) genericResistanceName += "3"
+                else if (universalTag.equals("universal4")) genericResistanceName += "4"
+                else if (universalTag.equals("universal5")) genericResistanceName += "5"
+                else if (universalTag.equals("universal6")) genericResistanceName += "6"
+                else if (universalTag.equals("universal7")) genericResistanceName += "7"
+                else if (universalTag.equals("universal8")) genericResistanceName += "8"
+                
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-genericResistance")
+                    .setDisplayName("$equipDis-$genericResistanceName")
+                    .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -908,7 +963,7 @@ class LogicalPointsUtil {
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readGenericResistance(equipRef)).build()
+            return Point.Builder().setHashMap(readGenericResistance(equipRef, universalTag)).build()
         }
 
         /** Read sensor points**/
@@ -965,13 +1020,13 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "condensate and sensor and normallyOpen and equipRef == \"$equipRef\"")
         }
-        private fun readGenericVoltage(equipRef: String): HashMap<Any, Any> {
+        private fun readGenericVoltage(equipRef: String, universalTag: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and voltage and sensor and equipRef == \"$equipRef\"")
+                "generic and voltage and sensor and $universalTag and equipRef == \"$equipRef\"")
         }
-        private fun readGenericResistance(equipRef: String): HashMap<Any, Any> {
+        private fun readGenericResistance(equipRef: String, universalTag: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and resistance and sensor and equipRef == \"$equipRef\"")
+                "generic and resistance and sensor and $universalTag and equipRef == \"$equipRef\"")
         }
 
 
@@ -1175,20 +1230,43 @@ class LogicalPointsUtil {
                     universalIn7State,universalIn8State
                 ))
                 removePoint(readFilterNC(equipRef))
-            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericVoltage(
-                    universalIn1State,universalIn2State,
-                    universalIn3State,universalIn4State,
-                    universalIn5State,universalIn6State,
-                    universalIn7State,universalIn8State
-                ))
-                removePoint(readGenericVoltage(equipRef))
-            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericResistance(
-                    universalIn1State,universalIn2State,
-                    universalIn3State,universalIn4State,
-                    universalIn5State,universalIn6State,
-                    universalIn7State,universalIn8State
-                ))
-                removePoint(readGenericResistance(equipRef))
+            
+            // This is now a pain because multiple Generic Voltage/Resistance points can be mapped to one equip.
+            // If a specific Generic Voltage/Resistance point is deleted, remove only that instance of the point.
+            if((!(universalIn1State.enabled && universalIn1State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal1"))
+            if((!(universalIn2State.enabled && universalIn2State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal2"))
+            if((!(universalIn3State.enabled && universalIn3State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal3"))
+            if((!(universalIn4State.enabled && universalIn4State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal4"))
+            if((!(universalIn5State.enabled && universalIn5State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal5"))
+            if((!(universalIn6State.enabled && universalIn6State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal6"))
+            if((!(universalIn7State.enabled && universalIn7State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal7"))
+            if((!(universalIn8State.enabled && universalIn8State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
+                removePoint(readGenericVoltage(equipRef, "universal8"))
+
+            if((!(universalIn1State.enabled && universalIn1State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal1"))
+            if((!(universalIn2State.enabled && universalIn2State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal2"))
+            if((!(universalIn3State.enabled && universalIn3State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal3"))
+            if((!(universalIn4State.enabled && universalIn4State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal4"))
+            if((!(universalIn5State.enabled && universalIn5State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal5"))
+            if((!(universalIn6State.enabled && universalIn6State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal6"))
+            if((!(universalIn7State.enabled && universalIn7State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal7"))
+            if((!(universalIn8State.enabled && universalIn8State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
+                removePoint(readGenericResistance(equipRef, "universal8"))
+
         }
 
         /*

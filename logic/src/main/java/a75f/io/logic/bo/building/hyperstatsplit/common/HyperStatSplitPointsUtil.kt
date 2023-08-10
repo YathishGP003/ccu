@@ -144,9 +144,7 @@ class HyperStatSplitPointsUtil(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
-            .setEnums(enums)
-
-            .addMarker(profileName).addMarker(Tags.STANDALONE)
+            .setEnums(enums).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -396,7 +394,7 @@ class HyperStatSplitPointsUtil(
         val zoneOAOPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val insideEnthalpyPointMarker = arrayOf(
-            "oao", "inside", "enthalpy", "his", "sp"
+            "oao", "inside", "enthalpy", "his", "sp", "cpuecon"
         )
         val insideEnthalpyPoint = createHaystackPointWithUnit(
             "$equipDis-insideEnthalpy",
@@ -407,7 +405,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(insideEnthalpyPoint, 0.0))
 
         val outsideEnthalpyPointMarker = arrayOf(
-            "oao", "outside", "enthalpy", "his", "sp"
+            "oao", "outside", "enthalpy", "his", "sp", "cpuecon"
         )
         val outsideEnthalpyPoint = createHaystackPointWithUnit(
             "$equipDis-outsideEnthalpy",
@@ -418,7 +416,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideEnthalpyPoint, 0.0))
 
         val economizingAvailablePointMarker = arrayOf(
-            "oao", "economizing", "available", "his", "sp"
+            "oao", "economizing", "available", "his", "sp", "cpuecon"
         )
         val economizingAvailablePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-economizingAvailable",
@@ -428,7 +426,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(economizingAvailablePoint, 0.0))
 
         val dcvAvailablePointMarker = arrayOf(
-            "oao", "dcv", "available", "his", "sp"
+            "oao", "dcv", "available", "his", "sp", "cpuecon"
         )
         val dcvAvailablePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-dcvAvailable",
@@ -438,7 +436,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(dcvAvailablePoint, 0.0))
 
         val matThrottlePointMarker = arrayOf(
-            "oao", "mat", "available", "his", "sp"
+            "oao", "mat", "available", "his", "sp", "cpuecon"
         )
         val matThrottlePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-matThrottle",
@@ -448,7 +446,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(matThrottlePoint, 0.0))
 
         val economizingLoopOutputPointMarker = arrayOf(
-            "oao", "economizing", "loop", "output", "his", "sp"
+            "oao", "economizing", "loop", "output", "his", "sp", "cpuecon"
         )
         val economizingLoopOutputPoint = createHaystackPointWithUnit(
             "$equipDis-economizingLoopOutput",
@@ -459,7 +457,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(economizingLoopOutputPoint, 0.0))
 
         val outsideAirCalculatedMinDamperPointMarker = arrayOf(
-            "oao", "outside", "air", "calculated", "min", "damper", "his", "sp"
+            "oao", "outside", "air", "calculated", "min", "damper", "his", "sp", "cpuecon"
         )
         val outsideAirCalculatedMinDamperPoint = createHaystackPointWithUnit(
             "$equipDis-outsideAirCalculatedMinDamper",
@@ -470,7 +468,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideAirCalculatedMinDamperPoint, 0.0))
 
         val outsideAirFinalLoopOutputPointMarker = arrayOf(
-            "oao", "outside", "air", "final", "loop", "output", "his", "sp"
+            "oao", "outside", "air", "final", "loop", "output", "his", "sp", "cpuecon"
         )
         val outsideAirFinalLoopOutputPoint = createHaystackPointWithUnit(
             "$equipDis-outsideAirFinalLoopOutput",
@@ -481,7 +479,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideAirFinalLoopOutputPoint, 0.0))
 
         val weatherOutsideTempPointMarker = arrayOf(
-            "oao", "outsideWeather", "air", "temp", "sensor", "his"
+            "oao", "outsideWeather", "air", "temp", "sensor", "his", "cpuecon"
         )
         val weatherOutsideTempPoint = createHaystackPointWithUnit(
             "$equipDis-weatherOutsideTemp",
@@ -492,7 +490,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(weatherOutsideTempPoint, 0.0))
 
         val weatherOutsideHumidityPointMarker = arrayOf(
-            "oao", "outsideWeather", "air", "humidity", "sensor", "his"
+            "oao", "outsideWeather", "air", "humidity", "sensor", "his", "cpuecon"
         )
         val weatherOutsideHumidityPoint = createHaystackPointWithUnit(
             "$equipDis-weatherOutsideHumidity",
@@ -503,7 +501,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(weatherOutsideHumidityPoint, 0.0))
 
         val outsideDamperMinOpenPointMarker = arrayOf(
-            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp"
+            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpuecon"
         )
         val outsideDamperMinOpenPoint = createHaystackPointWithUnit(
             "$equipDis-outsideDamperMinOpen",
@@ -514,7 +512,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideDamperMinOpenPoint, 0.0))
 
         val exhaustFanStage1ThresholdPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp"
+            "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp", "cpuecon"
         )
         val exhaustFanStage1ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanStage1Threshold",
@@ -525,7 +523,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(exhaustFanStage1ThresholdPoint, 50.0))
 
         val exhaustFanStage2ThresholdPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "stage2", "threshold" , "sp"
+            "config", "oao", "writable", "exhaust", "fan", "stage2", "threshold" , "sp", "cpuecon"
         )
         val exhaustFanStage2ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanStage2Threshold",
@@ -536,7 +534,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(exhaustFanStage2ThresholdPoint, 90.0))
 
         val exhaustFanHysteresisPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "hysteresis" , "sp"
+            "config", "oao", "writable", "exhaust", "fan", "hysteresis" , "sp", "cpuecon"
         )
         val exhaustFanHysteresisPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanHysteresis",
@@ -1772,7 +1770,7 @@ class HyperStatSplitPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForCooling(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForCooling(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_COOLING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_COOLING),
                 )
@@ -1786,7 +1784,7 @@ class HyperStatSplitPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -1801,7 +1799,7 @@ class HyperStatSplitPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForHeating(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForHeating(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_HEATING),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_HEATING),
                 )
@@ -1821,7 +1819,7 @@ class HyperStatSplitPointsUtil(
                     markers = arrayOf("oao","damper")
                 )
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForOaoDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForOaoDamper(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_OAO_DAMPER),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_OAO_DAMPER),
                 )
@@ -2014,98 +2012,98 @@ class HyperStatSplitPointsUtil(
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToSupplyAirTemperature(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForSupplyAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToOutsideAirTemperature(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForOutsideAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToMixedAirTemperature(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForMixedAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCondensateNC(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForCondensateNC(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCondensateNO(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForCondensateNO(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCurrentTX10(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "10", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER
+                    min = "0", max = "10", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCurrentTX20(universalInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "20", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_20
+                    min = "0", max = "20", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_20,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCurrentTX50(universalInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "50", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_50
+                    min = "0", max = "50", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_50,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCurrentTX100(universalInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "100", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_100
+                    min = "0", max = "100", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_100,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToCurrentTX150(universalInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "150", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_150
+                    min = "0", max = "150", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_150,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToDuctPressure1In(universalInState)) -> {
                 LogicalPointsUtil.createPointForDuctPressure(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "1", inc = "0.01", unit = "inH₂O",LogicalPointsUtil.DuctPressureSensorType.DUCT_PRESSURE_0_1
+                    min = "0", max = "1", inc = "0.01", unit = "inH₂O",LogicalPointsUtil.DuctPressureSensorType.DUCT_PRESSURE_0_1,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToDuctPressure2In(universalInState)) -> {
                 LogicalPointsUtil.createPointForDuctPressure(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "2", inc = "0.01", unit = "inH₂O",LogicalPointsUtil.DuctPressureSensorType.DUCT_PRESSURE_0_2
+                    min = "0", max = "2", inc = "0.01", unit = "inH₂O",LogicalPointsUtil.DuctPressureSensorType.DUCT_PRESSURE_0_2,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToFilterNC(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForFilterNC(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToFilterNO(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForFilterNO(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericVoltage(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForGenericVoltage(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalTag,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericResistance(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForGenericResistance(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalTag,nodeAddress
                 )
             }
 
@@ -2122,17 +2120,17 @@ class HyperStatSplitPointsUtil(
 
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToSupplyAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForSupplyAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToMixedAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForMixedAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToOutsideAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForOutsideAirTemperature(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
 
@@ -2150,17 +2148,17 @@ class HyperStatSplitPointsUtil(
 
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToSupplyAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForSupplyAirHumidity(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToMixedAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForMixedAirHumidity(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToOutsideAir(sensorBusState)) -> {
                 LogicalPointsUtil.createPointForOutsideAirHumidity(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
 
@@ -2179,7 +2177,7 @@ class HyperStatSplitPointsUtil(
             (HyperStatSplitAssociationUtil.isSensorBusAddressAssociatedToDuctPressure(sensorBusState)) -> {
 
                 LogicalPointsUtil.createPointForDuctPressure(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
                 )
             }
 
@@ -2500,8 +2498,8 @@ class HyperStatSplitPointsUtil(
         when(profileType) {
             ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
                 return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150," +
-                        "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NO," +
-                        "$FILTER_NC,$CONDENSATE_NO,$CONDENSATE_NC,$PRESSURE_1,$PRESSURE_2,"+
+                        "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NC," +
+                        "$FILTER_NO,$CONDENSATE_NC,$CONDENSATE_NO,$PRESSURE_1,$PRESSURE_2,"+
                         "$GENERIC_VOLTAGE,$GENERIC_RESISTANCE"
             }
             else -> {}
@@ -2511,7 +2509,7 @@ class HyperStatSplitPointsUtil(
     private fun getSensorBusTempConfigEnum(profileType: ProfileType): String {
         when(profileType) {
             ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
-                return "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP"
+                return "$SUPPLY_AIR,$MIXED_AIR,$OUTSIDE_AIR"
             }
             else -> {}
         }

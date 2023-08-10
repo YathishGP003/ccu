@@ -11,27 +11,10 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Port;
 
 public class DeviceUtil {
     public static void updatePhysicalPointType(int addr, String port, String type) {
-        Log.d("CCU"," Update Physical point "+port+" "+type);
-
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
-        {
-            return ;
-        }
-
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (!point.get("analogType" ).equals(type))
-        {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
-            p.setType(type);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
-        }
-    }
-
-    public static void updateUniversalInPhysicalPointType(int addr, String port, String type) {
         Log.d("CCU"," Update Physical point "+port+" "+type);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
@@ -66,7 +49,6 @@ public class DeviceUtil {
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device == null)

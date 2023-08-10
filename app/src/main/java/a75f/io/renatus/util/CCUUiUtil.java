@@ -47,6 +47,8 @@ public class CCUUiUtil {
     public static void setThemeDetails(Activity activity){
         if(CCUUiUtil.isDaikinEnvironment(activity)){
             activity.setTheme(R.style.RenatusAppDaikinTheme);
+        } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppCarrierTheme);
         }
     }
     public static String getColorCode(Context context) {
@@ -129,6 +131,10 @@ public class CCUUiUtil {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
 
+    public static boolean is75FEnvironment(Context context){
+        return !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment)) && !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment));
+    }
+
     public static boolean isInvalidName(String enteredName){
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");
@@ -185,5 +191,10 @@ public class CCUUiUtil {
             }
         }
         return false;
+    }
+
+    public static boolean isCarrierThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
     }
 }

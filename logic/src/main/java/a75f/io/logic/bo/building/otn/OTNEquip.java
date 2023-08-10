@@ -14,6 +14,8 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -102,6 +104,7 @@ public class OTNEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
        // CCUHsApi.getInstance().writeDefaultValById(ctID, 0.0);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
@@ -120,6 +123,7 @@ public class OTNEquip {
                 .setUnit("%")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(humidity, BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
       //  CCUHsApi.getInstance().writeDefaultValById(humidityId, 0.0);
         CCUHsApi.getInstance().writeHisValById(humidityId, 0.0);
@@ -154,6 +158,7 @@ public class OTNEquip {
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(occupancySensor, BacnetIdKt.OCCUPANCYID,BacnetUtilKt.BINARY_VALUE,mNodeAddr);
         String occupancySensorid = CCUHsApi.getInstance().addPoint(occupancySensor);
         CCUHsApi.getInstance().writeHisValById(occupancySensorid, 0.0);
 
@@ -202,6 +207,7 @@ public class OTNEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId,
                 (double) config.gettempOffset());
@@ -277,6 +283,7 @@ public class OTNEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
 
         Point desiredTempCooling = new Point.Builder()
@@ -291,6 +298,7 @@ public class OTNEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
 
         Point desiredTempHeating = new Point.Builder()
@@ -305,6 +313,7 @@ public class OTNEquip {
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()

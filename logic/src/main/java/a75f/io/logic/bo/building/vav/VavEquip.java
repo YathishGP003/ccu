@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
@@ -30,6 +31,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
@@ -267,7 +270,7 @@ public class VavEquip
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
                                 .build();
-        
+        BacnetUtilKt.addBacnetTags(datPoint, BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
         hisItems.add(new HisItem(datID, new Date(System.currentTimeMillis()), 0.0));
         
@@ -283,6 +286,7 @@ public class VavEquip
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
                                 .build();
+        BacnetUtilKt.addBacnetTags(eatPoint, BacnetIdKt.ENTERINGAIRTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
         hisItems.add(new HisItem(eatID, new Date(System.currentTimeMillis()), 0.0));
         
@@ -298,6 +302,7 @@ public class VavEquip
                                 .setUnit("%")
                                 .setTz(tz)
                                 .build();
+        BacnetUtilKt.addBacnetTags(damperPos, BacnetIdKt.DAMPER1POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
         hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
         
@@ -327,6 +332,7 @@ public class VavEquip
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
+        BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
         hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
         
@@ -342,7 +348,9 @@ public class VavEquip
                                     .setUnit("%")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(humidity, BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+
         hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
     
         Point co2 = new Point.Builder()
@@ -357,6 +365,7 @@ public class VavEquip
                                  .setUnit("ppm")
                                  .setTz(tz)
                                  .build();
+        BacnetUtilKt.addBacnetTags(co2, BacnetIdKt.CO2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
         hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
         
@@ -372,6 +381,7 @@ public class VavEquip
                                  .setUnit("ppb")
                                  .setTz(tz)
                                  .build();
+        BacnetUtilKt.addBacnetTags(voc, BacnetIdKt.VOCID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String vocId = CCUHsApi.getInstance().addPoint(voc);
         hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
         
@@ -387,6 +397,7 @@ public class VavEquip
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
         
         Point desiredTempCooling = new Point.Builder()
@@ -401,6 +412,7 @@ public class VavEquip
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtCoolingId = CCUHsApi.getInstance().addPoint(desiredTempCooling);
         
         Point desiredTempHeating = new Point.Builder()
@@ -415,6 +427,7 @@ public class VavEquip
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
+        BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String dtHeatingId = CCUHsApi.getInstance().addPoint(desiredTempHeating);
         
         Point heatingLoopOp = new Point.Builder()
@@ -429,6 +442,7 @@ public class VavEquip
                                     .setUnit("%")
                                     .setTz(tz)
                                     .build();
+        BacnetUtilKt.addBacnetTags(heatingLoopOp, BacnetIdKt.HEATINGLOOPOUTPUTID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(heatingLoopOp);
     
         Point coolingLoopOp = new Point.Builder()
@@ -443,6 +457,7 @@ public class VavEquip
                                       .setUnit("%")
                                       .setTz(tz)
                                       .build();
+        BacnetUtilKt.addBacnetTags(coolingLoopOp, BacnetIdKt.COOLINGLOOPOUTPUTID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(coolingLoopOp);
     
         Point dischargeSp = new Point.Builder()
@@ -457,6 +472,7 @@ public class VavEquip
                                       .setUnit("\u00B0F")
                                       .setTz(tz)
                                       .build();
+        BacnetUtilKt.addBacnetTags(dischargeSp, BacnetIdKt.DISCHARGESPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         CCUHsApi.getInstance().addPoint(dischargeSp);
     
         Point satRequestPercentage = new Point.Builder()
@@ -635,6 +651,7 @@ public class VavEquip
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
+        BacnetUtilKt.addBacnetTags(pressure, BacnetIdKt.PRESSUREID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String pressureId = CCUHsApi.getInstance().addPoint(pressure);
         
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
@@ -746,6 +763,7 @@ public class VavEquip
                 .setUnit("%")
                 .setTz(vavEquip.getTz())
                 .build();
+        BacnetUtilKt.addBacnetTags(reheatPos, BacnetIdKt.REHEATCMDID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         return hayStack.addPoint(reheatPos);
     }
 
@@ -757,6 +775,7 @@ public class VavEquip
                                    String tz,
                                    String fanType
     ) {
+        int bacnetID = Objects.equals(fanType, "series") ? BacnetIdKt.SERIESFANID : BacnetIdKt.PARALLELFANID;
         Point fan = new Point.Builder()
                               .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-"+fanType+"Fan")
                               .setEquipRef(equipRef)
@@ -769,6 +788,7 @@ public class VavEquip
                               .setEnums("Off, On")
                               .setTz(tz)
                               .build();
+        BacnetUtilKt.addBacnetTags(fan,bacnetID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String fanId = CCUHsApi.getInstance().addPoint(fan);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanId, 0.0);
         return fanId;
@@ -947,6 +967,7 @@ public class VavEquip
                                      .setUnit("\u00B0F")
                                      .setTz(tz)
                                      .build();
+        BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, config.temperaturOffset);
@@ -1652,7 +1673,7 @@ public class VavEquip
                  .setUnit("%")
                  .setTz(tz)
                  .build();
-
+         BacnetUtilKt.addBacnetTags(damperFeedback, BacnetIdKt.DAMPERFEEDBACKID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
          return ccuHsApi.addPoint(damperFeedback);
     }
 }

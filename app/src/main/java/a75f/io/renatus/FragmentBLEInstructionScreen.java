@@ -397,9 +397,11 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         if (mNodeType == NodeType.SMART_NODE)
         {
             title.setText(getText(R.string.title_pairsn));
-            if(CCUUiUtil.isDaikinEnvironment(getContext())) {
+            if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
+            } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())){
+                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn_carrier);
             } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn);
             }
@@ -408,9 +410,13 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         else if (mNodeType == NodeType.HELIO_NODE)
         {
             title.setText(getText(R.string.title_pairhn));
-            if(CCUUiUtil.isDaikinEnvironment(getContext())) {
+            if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
+            } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                {
+                    pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn_carrier);
+                }
             } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn);
             }
@@ -423,7 +429,12 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mNodeType == NodeType.HYPER_STAT) {
             title.setText(R.string.title_pairhss);
-            pairinginstruct.setImageResource(R.drawable.sensepairscreen);
+            if (CCUUiUtil.isDaikinEnvironment(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
+            else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
+            else
+            pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }
         else if (mNodeType == NodeType.HYPERSTATSPLIT) {
             title.setText(R.string.title_pairhssplit);

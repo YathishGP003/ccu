@@ -10,6 +10,7 @@ import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_ID
 import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
+import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_ZONE_ADDED
 import a75f.io.device.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
 import a75f.io.device.bacnet.BacnetConfigConstants.DESCRIPTION
 import a75f.io.device.bacnet.BacnetConfigConstants.FIRMWARE_REVISION
@@ -47,12 +48,12 @@ import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.preference.PreferenceManager
+import android.text.format.Formatter
 import android.util.Log
 import org.json.JSONObject
-import java.util.*
-import android.text.format.Formatter
 import java.net.InetAddress
 import java.net.NetworkInterface
+import java.util.*
 
 
 fun sendBroadCast(context: Context, intentAction: String, message: String) {
@@ -261,6 +262,13 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         try {
             val bacnetId = generateBacnetIdForRoom(roomRef)
             val zone = HSUtil.getZone(roomRef, floorRef)
+            if(zone.bacnetId == 0){
+                sendBroadCast(
+                    context,
+                    BROADCAST_BACNET_ZONE_ADDED,
+                    zone.id
+                )
+            }
             zone.bacnetId = bacnetId;
             zone.bacnetType = Tags.DEVICE;
             CCUHsApi.getInstance().updateZone(zone, zone.id);

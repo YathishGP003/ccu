@@ -1,5 +1,6 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 
 import android.content.Context;
@@ -30,13 +31,13 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.messaging.MessageHandler;
+import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
 public class UpdatePointHandler implements MessageHandler
 {
@@ -45,7 +46,7 @@ public class UpdatePointHandler implements MessageHandler
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
-    public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) {
+    public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) throws MessageHandlingFailed {
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -105,8 +106,8 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
-        if (HSUtil.isSenseConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperStatSenseConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+        if (HSUtil.isMonitoringConfig(pointUid, CCUHsApi.getInstance())) {
+            HyperStatMonitoringConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
@@ -165,7 +166,7 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
             JsonElement backFillVal = msgObject.get("val");
             if (!backFillVal.isJsonNull()){
-                BackFillUtil.updateBackfillDuration(backFillVal.getAsDouble());
+                updateBackfillDuration(backFillVal.getAsDouble());
             }
         }
         
@@ -199,7 +200,7 @@ public class UpdatePointHandler implements MessageHandler
     /**
      * Replace local point array with point array values from server
      */
-    private static void fetchRemotePoint(String pointUid, Boolean isDataSync, JsonObject msgObject) {
+    private static void fetchRemotePoint(String pointUid, Boolean isDataSync, JsonObject msgObject) throws MessageHandlingFailed {
         double level = 0;
         double val = 0;
         double duration = 0;
@@ -218,7 +219,7 @@ public class UpdatePointHandler implements MessageHandler
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
             if (pointGrid == null) {
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point : " + pointUid);
-                return;
+                throw new MessageHandlingFailed("Failed to read remote point");
             }
             //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
             Iterator it = pointGrid.iterator();
@@ -357,7 +358,7 @@ public class UpdatePointHandler implements MessageHandler
     }
 
     @Override
-    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) throws MessageHandlingFailed {
         long timeToken = jsonObject.get("timeToken").getAsLong();
         handlePointUpdateMessage(jsonObject, timeToken, false);
     }

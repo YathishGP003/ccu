@@ -47,7 +47,7 @@ public class HeartbeatMigration {
         addHeartbeatToEquip(hayStack, OAO, siteDis+"-OAO-", false);
         addHeartbeatToEquip(hayStack, "pid", siteDis+"-PID-", false);
         addHeartbeatToEquip(hayStack, "vav", siteDis+"-VAV-", false);
-        addHeartbeatToEquip(hayStack, "sense", siteDis+"-SENSE-", false);
+        addHeartbeatToEquip(hayStack, "monitoring", siteDis+"-MONITORING-", false);
 
         //modbus
        addHeartbeatToModbus(hayStack);

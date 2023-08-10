@@ -150,9 +150,15 @@ public class RestoreCCUHsApi {
     public HGrid getAllEquips(String ahuRef, String gatewayRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef" +
-                        " == "+
-                        StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+                "equip and not equipRef and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef,
+                        "@") +" or ahuRef" + " == "+ StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public HGrid getModBusSubEquips(String parentEquipRef, RetryCountCallback retryCountCallback){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("filter",
+                "equip and modbus and equipRef  == " + StringUtils.prependIfMissing(parentEquipRef, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
@@ -371,12 +377,13 @@ public class RestoreCCUHsApi {
     public void importEquip(HRow equipRow, RetryCountCallback retryCountCallback){
         Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
+        String siteManager = "SITE_MANAGER";
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
         equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "point and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
+                "point and createdByApplication != \"" + siteManager + "\" and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
                         , "@")).toDict();
         HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(pointsGrid == null){

@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -61,9 +62,11 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
+import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
@@ -90,6 +93,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
+    private ImageView powerByLogoForCarrier;
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -157,6 +161,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         mViewPager.setAdapter(mSettingPagerAdapter);
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         startCountDownTimer(INTERVAL);
+                        setMarginStart(mTabLayout);
                         menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.GONE);
 
@@ -172,6 +177,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         floorMenu.setVisibility(View.VISIBLE);
                     }
                     btnTabs.setEnabled(true);
+                }
+
+                private void setMarginStart(TabLayout mTabLayout) {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT
+                    );
+                    int marginStartInPixels = 40;
+                    layoutParams.setMarginStart(marginStartInPixels);
+                    mTabLayout.setLayoutParams(layoutParams);
                 }
 
                 @Override
@@ -439,6 +454,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        abortCCUDownloadProcess();
         try {
             if (mConnectionChangeReceiver != null) {
                 this.unregisterReceiver(mConnectionChangeReceiver);
@@ -450,6 +466,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             // already unregistered
         }
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
+    }
+
+    private void abortCCUDownloadProcess() {
+        UpdateCCUFragment.stopAllDownloads();
+        PreferenceUtil.stopUpdateCCU();
+        PreferenceUtil.installationCompleted();
     }
 
     private void appRestarted() {
@@ -601,10 +623,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private void configLogo(){
 
         if(CCUUiUtil.isDaikinEnvironment(this)){
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.d3, null));
             powerbylogo.setVisibility(View.VISIBLE);
-        }else{
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+        }else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));
             powerbylogo.setVisibility(View.GONE);
         }
 

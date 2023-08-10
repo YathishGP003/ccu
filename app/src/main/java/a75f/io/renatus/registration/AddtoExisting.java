@@ -561,10 +561,14 @@ public class AddtoExisting extends Fragment {
                 ProgressDialogUtils.hideProgressDialog();
 
                 if (success) {
-                    Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                    if(getActivity() != null) {
+                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                    }
                     navigateToCCUScreen();
                 } else {
-                    Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                    if(getActivity() != null) {
+                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         };

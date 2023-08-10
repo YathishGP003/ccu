@@ -74,7 +74,7 @@ public class HyperStatDevice {
      * @param profile
      */
     public HyperStatDevice(int address, String site, String floor, String room, String equipRef, String profile) {
-        Device d = new Device.Builder()
+        Device.Builder  d = new Device.Builder()
                        .setDisplayName("HS-"+address)
                        .addMarker("network").addMarker("node").addMarker(profile)
                        .addMarker("hyperstat")
@@ -83,15 +83,15 @@ public class HyperStatDevice {
                        .setSiteRef(site)
                        .setFloorRef(floor)
                        .setRoomRef(room)
-                       .setProfileType(profile)
-                       .build();
-        deviceRef = CCUHsApi.getInstance().addDevice(d);
+                       .setProfileType(profile);
+        Device device = d.build();
+        deviceRef = CCUHsApi.getInstance().addDevice(device);
         hyperStatNodeAddress = address;
         siteRef = site;
         floorRef = floor;
         roomRef = room;
         
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         tz = siteMap.get("tz").toString();
         
         createPoints();
@@ -319,8 +319,8 @@ public class HyperStatDevice {
                     .setUnit(sensorUnit)
                     .setTz(tz);
         }
-        if (equip.getMarkers().contains(Tags.SENSE)) {
-            equipSensor.addMarker(Tags.SENSE);
+        if (equip.getMarkers().contains(Tags.MONITORING)) {
+            equipSensor.addMarker(Tags.MONITORING);
         }
 
         if (hasAirMarker) {

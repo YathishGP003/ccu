@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
@@ -82,7 +83,7 @@ public class RemoteCommandHandlerUtil {
                 break;
             case UPDATE_CCU:
                 OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
-                updateCCU(id, null);
+                updateCCU(id, null, null);
                 break;
             case RESTART_MODULE:
 
@@ -135,7 +136,7 @@ public class RemoteCommandHandlerUtil {
         }
     }
 
-    public static void updateCCU(String id, Fragment currentFragment) {
+    public static void updateCCU(String id, Fragment currentFragment, FragmentActivity activity) {
         Log.d("CCU_DOWNLOAD", "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
         RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
             @Override
@@ -169,7 +170,7 @@ public class RemoteCommandHandlerUtil {
         else if (id.startsWith("RENATUS_CCU") || id.startsWith("DAIKIN_CCU")) {
             if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
                 Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
-                AppInstaller.getHandle().downloadCCUInstall(id, currentFragment);
+                AppInstaller.getHandle().downloadCCUInstall(id, currentFragment, activity);
             } else {
                 CcuLog.d("CCU_DOWNLOAD", "Update command ignored , previous update in progress "
                         + Globals.getInstance().getCcuUpdateTriggerTimeToken());

@@ -1,24 +1,234 @@
+ - Merged PR 8238: CCU: Backfill Strategy
+ - code refractor
+ - code refractor
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/21365/Backfill_strategy
+ - Merged PR 8620: Merge conflict
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/21365/Backfill_strategy
+ - Merged PR 8331: Refactored theme details, colors, and branding elements to support the new  "...
+ - Merged PR 8409: Changed the URL to support the carrier_prod environment
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21317_api_service_support_carrier
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/21365/Backfill_strategy
+ - Merged PR 8614: checking port is used or not and added missing dependecy as per logs shared i...
+ - Merged PR 8446: Added 'default' tag to missing building tuners points of HyperStat
+ - Merged PR 8531: Added subdomain names
+ - Merged PR 8613: Fix for renatus goes unresponsive
+ - Merged PR 8504: SM Add Point: CCU Won't Consume Points Created by Site Manager within CCU Equips
+ - Merged PR 8313: removed old bacnt changes
+ - Merged PR 8572: These changes will introduce database and all points and writable arrays will be stored in db
+ - Merged PR 8590: Resolve conflicts in Sense to monitoring feature
+ - Merged PR 7616: US- 18301,18302, 8911,18227 - Audit trail- More specific Who fields
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/21365/Backfill_strategy
+ - setbackfill called only during adding equip
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18415_SM_points_CCU
+ - Merged PR 8587: Throwing the MessageHandlingFailed when we failed to fetch the remote point.
+ - Merged PR 8580: Revert 'Added check of port 5001 is in use, while user hit initialize bacnet button,...'
+ - Merged PR 8570: weatherRef is no more required for site comparison
+ - Revert "Merged PR 8540: Added check of port 5001 is in use, while user hit initialize bacnet button,...
+ - Merged PR 8540: Added check of port 5001 is in use, while user hit initialize bacnet button,...
+ - Merged PR 8539: replace ccu fix for a factory new ccu to master
+ - Merged PR 8565: Fix for Values feeded from Modbus Slave get overlapped for Parent equips and...
+ - Merged PR 8575: Fix for crash issue if minval and max value is same in user intent point
+ - added a thread executor, checking port number in separate thread
+ - Merged PR 8569: bacnet Id correction - integration build
+ - Merged PR 8567: uncommented the code for update CCU
+ - uncommented the code for update CCU
+ - New URLs updated for carrier
+ - Added check of port 5001 is in use, while user hit initialize bacnet button, If its already in use will show toast to the user.
+ - uncommented the upgrade CCU related line of code
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21317_api_service_support_carrier
+ - changed the query to include createdByApplication specifically to SITE_MANAGER
+ - Merged PR 8506: Check entity existence before Sync.
+ - Merged PR 8136: Added the bacnetId and bacnetType to the room entity
+ - Merged PR 8517: Hyperstat Sense to monitoring
+ - Merged PR 8516: Bacnet instances tag added
+ - Merged PR 8497: INtegrated branch for staged fan
+ -  SM Add Point: CCU Won't Consume Points Created by Site Manager within CCU Equips
+ - Merged PR 8450: Show update CCU progress even if user moves to other screen
+ - Staged fan integrated branch
+ - update to latest master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21316_carrier_rebranding
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21317_api_service_support_carrier
+ - upgrade progress bar updated to theme color
+ - Merged PR 8464: fix for 21733, 21747 to master branch
+ - Made the 48 and 72 hours not available for more than 20 equips
+ - Merged PR 8484: Given register request count and serial communication timeout edit option in dev settings.
+ - Merged PR 8467: Fix reconfiguration issue in VAV reheat type
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/21365/Backfill_strategy
+ - Addressed the design review items
+ - Merged PR 8382: Fix memory leak in Okhttp client create
+ - Merged PR 8397: Fix for auto away toggle issue
+ - Merged PR 8309: Fix for UI and logos are dynamic and gets compressed when tablet keypad is raised
+ - Merged PR 8350: Fetch lastmodifiedTime from response
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21317_api_service_support_carrier
+ - added CCU theme in add CCU changed messaging to gloabal
+ - added CCU theme in add CCU changed messaging to gloabal
+ - added CCU theme in add CCU changed messaging to gloabal
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/staged_fan_main_branch
+ - Merged PR 8385: Showing weather data in zone page
+ - Merged PR 8391: Fix for restoring zone his and non writable points
+ - added support in ci.config file
+ - Merged PR 8424: OTA duplicate meta request
+ - Merged PR 8425: Updated Duplicate check
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/staged_fan_main_branch
+ - Merged PR 8347: Provided user intent support for staged fan similar to linear fan
+ - Merged PR 8153: 18901: CCU : [Migration] Hyperstat Fan Control Based on Cooling/Heating Stage...
+ - Refactored the code to perform fan loop to be overiden by the user intent selection
+ - Changed the URL to support the carrier_prod environment
+ - Merged PR 8299: Removed creation of thread to update scheduleType
+ - Merged PR 8366: All CCU Wizard observations
+ - Merged PR 8395: secondary PR to 641.1
+ - secondary PR to 641.1
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21316_carrier_rebranding
+ - Handled observations
+ - Merged PR 8348: bug-21466 and 21599 - Recent object box changes to support subequips had impa...
+ - Merged PR 8318: Creating the ccuHeartbeat point if its not already created
+ - Merged PR 8353: renaming room changes are reflecting in zone + floor screens
+ - Merged PR 8327: CCU - 19574 - Delete named scheule not working
+ - changed app icon
+ - removed default json
+ - code review comments addressed
+ - Provided user intent support for staged fan similar to linear fan
+ - Merged PR 8266: Handle reconfiguration for single-Dual in HS-CPU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/21316_carrier_rebranding
+ - Refactored theme details, colors, and branding elements to support the new  "Carrier." Created a new build variant specifically for "Carrier." APIs for the new build variant will be handled in a separate story.
+ - Merged PR 8296: VERSION_CODE_MINOR changed to 641
+ - Merged PR 8294: version changed in VERSION file.
+ - Merged PR 8293: Merge conflict error in Globals class
+ - Merge conflict error in Globals class
+ - Merged PR 7474: Autoaway setback tuner migration failed for non primary CCUs
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18520_autoaway_migration_non_primary
+ - Merged PR 8105: DaikinIE reconf - Enabled point is updated for every point update with min max values.
+ - Merged PR 8290: removed curStatus code changes from database layer
+ - Merged PR 8286: 21368 - second PR for master
+ - Merged PR 8277: Revert release version
+ - Merged PR 8273: merging bacnet changes to master
+ - resolving comments
+ - Merged PR 7394: Lower the Default 'outsideTempLockoutHeating'
+ - Merged PR 7253: staticPressureSPTrim(INH2O) tuner discrepancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18138_static_pressure_sp_trim_disc
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18307_lower_the_default_outsidetemplockout
+ - Revert release version
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bacnet_integration_phase2_pi8_new
+ - Merged PR 7536: Update desired temp for other equips in the same zone
+ - Fix merge issue for objectbox schema
+ - Merge master
+ - Merged PR 8262: auto-cx aborted state handled now-mstr
+ - Merged PR 7783: Bug 19447: CCU: Update to 637.2 reverted TI sensor option
+ - Merged PR 8154: Added changes for read, write, multi read, who is UI
+ - Refactored the code to declare the functions as a high level function in the BackfillUtil.kt instead of declaring a companion object.
+ - Make staged fan to be enabled only when any of the stage fan is enabled
+ - CCU: Backfill Strategy
+ - Merged PR 8212: Update zone schedule but don't sync back to cloud
+ - Merged PR 8172: Reverting the change in masterControl
+ - Merged PR 7802: when application restarts, getting building tuners from the backend.
+ - Merged PR 8177: Bug 21051: CCU: Tuners changed made from portals for zone and module level ar...
+ - merge conflicts resolved
+ - Merge branch 'bacnet_integration_phase2_pi8_new' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bacnet_integration_phase2_pi8_new
+ - log replaced
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bacnet_integration_phase2_pi8_new
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/19447_ti_revert_ti_sensor_option
+ - correction in te code
+ - Merged PR 7808: Update thermistor look up table
+ - Bug 19447: CCU: Update to 637.2 reverted TI sensor option
+ - Bug 19447: CCU: Update to 637.2 reverted TI sensor option
+ - Merged PR 8028: Bug 20205: VAV AHU Fan During Unoccupied
+ - Merged PR 8137: Set vrv controls pending upon reconfiguration
+ - merged master code
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bacnet_integration_phase2_pi8_new
+ - Merged PR 7981: Re-design UI of ADD CCU to existing site
+ - Merged PR 8167: Backfill reg commit
+ - Backfill reg commit
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/19447_ti_revert_ti_sensor_option
+ - Merged PR 8162: Revert backfill feature PR against master_641
+ - Set vrv controls pending upon reconfiguration
+ - Added validation for multi read, added input when fd is selected, bacnet
+ - Revert backfill feature PR against master_641
+ - Merged PR 7967: Cell KV tag for modbus points and equipType KV tag for modbus Equip
+ - Merged PR 8150: Make CCU init and UI loading asynchronous (Secondary PR to master)
+ - Merged PR 8048: added the minVal, maxVal and curStatus
+ - Merged PR 8115: fix for Bug 20853: Modbus displays the incorrect value for long integer data...
+ - Added changes for read, write, multi read, who is UI
+ - 18901: CCU : [Migration] Hyperstat Fan Control Based on Cooling/Heating Stages for HS CPU Profile
+ - comments resolved
+ - Merged PR 7982: Generating alert for all OTA requests
+ - 17497: CCU : Hyperstat Fan Control Based on Cooling/Heating Stages for HS CPU Profile
+ - Merged PR 8143: Secondary PR to master 641
+ - Secondary PR to master 641
+ - Merged PR 8082: fix for Bug 20482: CCU | Inaccurate ota Status point displayed for Smart Node...
+ - Refractorisation and resolving some errors while point creation
+ - Comments resolved
+ - Merged PR 8055: auto-commissioning bugs -20515,20523 and 20516
+ - Merged PR 7950: If it is an active alert, CCU will fix the that programmatically.
+ - Merged PR 8023: CCU acknowledging all the messages based on message timetoken
+ - Merged PR 7899: we were taking the index value from the preference hence we were facing issue...
+ - Merged PR 7980: Added a click listener to make sure itemSelected is called only when user int...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/20374_ui_not_updating
+ - tags "output" and "rate" removed for config and logical point respectively
+ - Merged PR 8041: poll refresh api change, if point array is changed, point will be shared
+ - Merged PR 8045: bacnet config, added new radio button neither, this is default radio button
+ - bacnet config, added new radio button neither, this is default radio button
+ - poll refresh api change, if point array is changed, point will be shared, based on priority, review comments
+ - poll refresh api change, if point array is changed, point will be shared
+ - Log import added
+ - - Added Occupancy check for CFM setpoint calc when TrueCFM is enabled. CFM setpoint is now 0 when zone is unoccupied and in deadband. - In VAVReheatProfile, re-ordered T&R calculation to ensure that SP requests were calculated right after CFM calc when TrueCFM is enabled. - Changed TrueCFMUtil to require minimum CFM setpoint during AUTOFORCEOCCUPIED and FORCEDOCCUPIED, in addition to OCCUPIED.
+ - Update thermistor look up
+ - Merged PR 8005: Response for pointWrite API
+ - Comments resolved
+ - Merge branch 'US/18902/UI_HyperStat_staged' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18963/BHARATH/Point_creation
+ - Merged PR 8002: changes for bacnet config offset values, show hide edit text and text view ba...
+ - changes for bacnet config offset values, show hide edit text and text view based on initialize bacnet button click
+ - Merged PR 7991: changes for bacnet, sub, unsub, poll apis, already approved change, migrating...
+ - changes for bacnet, sub, unsub, poll apis, already approved change, migrating to new branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18902/UI_HyperStat_staged
+ - Comments resolved
+ - Merged PR 7945: changes for configuration type in Bacnet config, offset values changes
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18963/BHARATH/Point_creation
+ - Added a click listener to make sure itemSelected is called only when user interacts with the spinner to avoid the method being called while initialising
+ - Comments address
+ - Comments addressed and tags corrected
+ - Merged PR 7902: Duplicate enum 'OTA_CM_TO_DEVICE_FAILED'  is removed from otaStatusEnums
+ - Staged fan enum made to appear in the last of the enum list
+ - changes for configuration type in Bacnet config, offset values changes
+ - Merged PR 7901: Added the BACnet tags to HS-(CPU, HPU and 2PIPE) profiles
+ - Merge branch 'US/bharath/18963_point_creation_HS_CPU' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18963/BHARATH/Point_creation
+ - UI changes to support Hyperstat staged fan
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18963_point_creation_HS_CPU
+ - added a length check to avoid arrayIndexOutOfBound risks
+ - we were taking the index value from the preference hence we were facing issue after replace CCU
+ - Version bump to 1.641.0
  - Merged PR 7681: Fix for restoring equips paired with side loaded json
  - Merged PR 7888: reverting equip type change to modbus and Fix for heartbeat
  - Merged PR 7884: Data sync issues fix for master
  - Merged PR 6405: Single and dual temp support for both standalone and system profiles
  - Merged PR 6609: 16885 - Parsing nested modbus equip json file
  - Merged PR 7874: Added some logs for remove entity call
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18902_hyperstat_staged_fan
  - Merged PR 7841: printing large log message - mstr
+ - Added the Toast Message when virtual network number and local network number values are same.
+ - Merge branch 'bacnet_integration_phase2_pi8_new' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bacnet_integration_phase2_pi8_new
+ - Added the Toast Message when virtual network number and local network number values are same.
  - Merged PR 7834: added a length check to avoid arrayIndexOutOfBound risks
  - added a length check to avoid arrayIndexOutOfBound risks
  - Merged PR 7780: Periodic Reboot when OOM is thrown specifically caused by fragmentation
  - Merged PR 7773: HS 2pipe tuner mis match issue
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18902_hyperstat_staged_fan
  - Merged PR 7822: Out of memory error, handled review comments.
  - Out of memory error, handled review comments.
+ - Merged PR 7798: start and stop BACnet app
+ - Merged PR 7801:  BACnet App Configurations - Replace CCU
+ - Update thermistor look up table
  - Merged PR 7806: Dynamic priority based on max load
  - Dynamic priority based on max load
  - Merged PR 7777: Use correct tag for read sense offset config
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18902_hyperstat_staged_fan
+ - Merged PR 7796: Bacnet configuration validation includes stories - 16434,18476,18939,18948 and 16435
  - Merged PR 7770: VAV No Fan Zone: For Reheat Type as 2 Stage, App crashed when tried to Open C...
  - Merged PR 7370: Incorrect enum corrected
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18902_hyperstat_staged_fan
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
  - Merged PR 7743: added changes to release broadcast receiver, and message queue on OnDestory o...
  - Out of memory error, handled review comments.
+ - TIConfigHandler.kt refactored to accept the changes in the TI profile message.
  - added try catch for string parser
  - code refractor and added specific exception message parser to identify Fargemntation OOM
  - Periodic Reboot when OOM is thrown specifically caused by fragmentation
@@ -27,19 +237,30 @@
  - Merged PR 7772: Smartstat conditioning mode issue
  - Merged PR 7735: passing the list of device ScanFilter while invoking the startScan method.
  - VAV No Fan Zone: For Reheat Type as 2 Stage, App crashed when tried to Open Config Screen.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/19447_ti_revert_ti_sensor_option
  - Merged PR 7751: added a config file for hotfix branches
  - Merged PR 7589: Seed message for every 24Hr
  - added a hotfix config file
  - Out of memory error, handled review comments.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/19447_ti_revert_ti_sensor_option
  - Merged PR 7739: We have added the logs in removeEntity related code
  - added changes to release broadcast receiver, and message queue on OnDestory of fragment
  - Merged PR 7557: Connect wifi on background thread
+ - TIConfigHandler.kt refactored to accept the changes in the TI profile message.
  - crash fix
  - Merged PR 7443: Exclude zone's in vacation from preconditioning
  - Merged PR 7486: Ignore temp spikes from DAB/VAV system algo
  - Merged PR 7377: Cumulative damper calculation to use 1% as floor value
+ - comments addressed
+ - comments addressed
+ - comments addressed
+ - Used specific getAnalogAsociation methods for the specific profiles
  - Merged PR 7546: Skip install request when package is invalid
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/bharath/18902_hyperstat_staged_fan
+ - UI refractor
+ - UI refractor
+ - Hyperstat Linear Fan speed & Staged Fan Control Configuration for HS CPU profile (UI)
  - Use correct tag for read sense offset config
  - Merged PR 7549: Use displayInUiDefault tag from Json
  - Resolve merge conflicts
@@ -67,9 +288,13 @@
  - backfill refractor
  - Connect wifi on background thread
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/backfill_update_portal
+ - Migration code moved importTunerAndSchedule()
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18520_autoaway_migration_non_primary
  - migration added
  - migration added
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/18472_ti_audit_trial_error
+ - Update desired temp for other equips in the same zone
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/18307_lower_the_default_outsidetemplockout
  - Merged PR 7502: Fix for sync issue after replace ccu
  - Merged PR 7300: 18916 VAV not installed option
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/18916/bharath_vav_rehat
@@ -89,10 +314,12 @@
  - Merged PR 7490: Pull Request 7390: Handle lastModifiedDate as non marker in schedules
  - Merged PR 7257: revert changes
  - Handle update entity concurrentmodification exception
+ - Autoaway setback tuner migration failed for non primary CCUs
  - Merged PR 7455: BISKIT support for dev_qa build
  - Merged PR 7311: Remove Not Implemented Options in UI
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/9678_remove_not_implemented_ui
  - Merged PR 7403: CCU is crashing when configuring MODBUS Equip
+ - Update to 637.2 reverted TI sensor option
  - WIP
  - Merge branch 'master' into Bug/samjith/19455_hyperstat_reconfig_empty_val
  - comments addressed
@@ -121,6 +348,7 @@
  -  OTA Upgradation Issue from 1.638.2/1.639.1 to 1.640.0
  -  CCU is crashing when configuring MODBUS Equip
  - Gracefully handle empty val field for hyperstat reconfig
+ -  Lower the Default 'outsideTempLockoutHeating'
  - Merged PR 7386: Master Version bump to 640
  - Merged PR 7339: Added false check while getting element Hdict
  - Merged PR 7304: Fix lastModifiedTime when adding new CCUs
@@ -167,6 +395,7 @@
  - User Story 16826: Ability to backfill the latest data first
  - Review comments
  - migration added
+ - flag based migration changed
  - Remove Not Implemented Options in UI
  - Fix lastModifiedTime when adding new CCUs
  - 18916 VAV not installed option
@@ -183,6 +412,7 @@
  - staticPressureSPTrim(INH2O) tuner discrepancy
  - Merge branch 'US/16828/backfill_enhancement' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/16828/backfill_enhancement
+ - staticPressureSPTrim(INH2O) tuner discrepancy
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/14110_desired_ui_issue
  - Merged PR 7188: Fix for 19085 - Added tags for building vacation and adding marker tags at th...
  - equipRef added
@@ -679,7 +909,6 @@
  - Fix duplicate detection point creation in smartstat FCU profiles
  - Merged PR 5143: Release test
  - Version bump to 1.642.0
- - Version bump to 1.641.0
  - Remove forced occupied handling for modbus equips
  - Remove forced occupied handling for modbus equips
  - AutforcedOccupied should consider next occupied temp

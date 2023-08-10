@@ -506,7 +506,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             HyperStatUserIntentHandler.updateHyperStatUIPoints(
                 equipRef = equipRef,
                 command = "zone and sp and fan and operation and mode",
-                value = StandaloneFanStage.AUTO.ordinal.toDouble()
+                value = StandaloneFanStage.AUTO.ordinal.toDouble(),
+                    CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.AUTO
         }
@@ -517,7 +518,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             HyperStatUserIntentHandler.updateHyperStatUIPoints(
                 equipRef = equipRef,
                 command = "zone and sp and fan and operation and mode",
-                value = actualFanMode.toDouble()
+                value = actualFanMode.toDouble(),
+                    CCUHsApi.getInstance().ccuUserName
             )
             return StandaloneFanStage.values()[actualFanMode]
         }

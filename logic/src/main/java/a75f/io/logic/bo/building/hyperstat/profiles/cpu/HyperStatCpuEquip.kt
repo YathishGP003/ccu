@@ -32,6 +32,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
     private val profileTag = "hyperstatcpu"
+    private val analogOutVoltageMax = 0
+    private val analogOutVoltageMin = 10
+    private val stageFan1DefaultVal = 10
+    private val stageFan2And3DefaultVal = 10
 
     private var masterPoints: HashMap<Any, String> = HashMap()
 
@@ -160,9 +164,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         )
         profileEquip.setupDeviceAnalogOuts(
-            config.analogOut1State.enabled, config.analogOut1State.voltageAtMin.toInt(),config.analogOut1State.voltageAtMax.toInt(),
-            config.analogOut2State.enabled, config.analogOut2State.voltageAtMin.toInt(),config.analogOut2State.voltageAtMax.toInt(),
-            config.analogOut3State.enabled, config.analogOut3State.voltageAtMin.toInt(),config.analogOut3State.voltageAtMax.toInt(),
+            config.analogOut1State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut1State),getCpuAnalogOutVoltageAtMax(config.analogOut1State),
+            config.analogOut2State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut2State),getCpuAnalogOutVoltageAtMax(config.analogOut2State),
+            config.analogOut3State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut3State),getCpuAnalogOutVoltageAtMax(config.analogOut3State),
             masterPoints, hyperStatDevice
         )
 
@@ -191,6 +195,22 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         hyperStatDevice.rssi.pointRef = heartBeatId
         hyperStatDevice.rssi.enabled = true
         hyperStatDevice.addPointsToDb()
+    }
+
+    private fun getCpuAnalogOutVoltageAtMin(analogOutState: AnalogOutState): Int {
+        return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
+            analogOutVoltageMax
+        } else {
+            analogOutState.voltageAtMin.toInt()
+        }
+    }
+
+    private fun getCpuAnalogOutVoltageAtMax(analogOutState: AnalogOutState): Int {
+        return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
+            analogOutVoltageMin
+        } else {
+            analogOutState.voltageAtMax.toInt()
+        }
     }
 
 
@@ -264,14 +284,27 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                 hyperStatConfig.displayPp2p5,hyperStatConfig.displayCo2
         )
 
-        val allConfigPoints = arrayOf(
+        var allConfigPoints = arrayOf(
             configPointsList, relayConfigPoints, analogOutConfigPoints,
             analogInConfigPoints, thConfigPointsList, userIntentPointsList,
             co2ConfigPointsList, loopOutputPoints,vocPmPointsList,deviceDisplayConfigPoints
         )
+
+        if (isStagedFanSelected(hyperStatConfig)) {
+            val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanConfigPoint(hyperStatConfig)
+            if (stagedFanConfigPoints.isNotEmpty()) {
+                allConfigPoints += stagedFanConfigPoints
+            }
+        }
         Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
 
+    }
+
+    private fun isStagedFanSelected(hyperStatConfig: HyperStatCpuConfiguration): Boolean {
+        return  (hyperStatConfig.analogOut1State.enabled && (hyperStatConfig.analogOut1State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)) ||
+                (hyperStatConfig.analogOut2State.enabled && (hyperStatConfig.analogOut2State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)) ||
+                (hyperStatConfig.analogOut3State.enabled && (hyperStatConfig.analogOut3State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED))
     }
 
     //Function to create Logical Points
@@ -368,7 +401,164 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             existingConfiguration.displayPp2p5,newConfiguration.displayPp2p5,
             existingConfiguration.displayCo2,newConfiguration.displayCo2
             )
+        updateStagedFanConfiguration(
+            existingConfiguration, newConfiguration,
+            existingConfiguration.coolingStage1FanState, newConfiguration.coolingStage1FanState,
+            existingConfiguration.coolingStage2FanState, newConfiguration.coolingStage2FanState,
+            existingConfiguration.coolingStage3FanState, newConfiguration.coolingStage3FanState,
+            existingConfiguration.heatingStage1FanState, newConfiguration.heatingStage1FanState,
+            existingConfiguration.heatingStage2FanState, newConfiguration.heatingStage2FanState,
+            existingConfiguration.heatingStage3FanState, newConfiguration.heatingStage3FanState,
+        )
+
+        updateStagedFanConfigPoints(
+            existingConfiguration, newConfiguration,
+        )
     }
+
+    private fun updateStagedFanConfigPoints(
+        existingConfiguration: HyperStatCpuConfiguration,
+        newConfiguration: HyperStatCpuConfiguration
+    ) {
+        fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuRelayAssociation) {
+            if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && !HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration)) {
+                if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration,stage)) {
+                    val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration, stage)
+                    hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+                        stagedFanConfigPoints
+                    ))
+                }
+            } else if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
+                if (!HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
+                    val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration, stage)
+                    hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+                        stagedFanConfigPoints
+                    ))
+                }
+            } else {
+                if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
+                    val pointId = hsHaystackUtil.readPointID(fanStageQuery)
+                    if (!pointId.isNullOrEmpty()) {
+                        hsHaystackUtil.removePoint(pointId)
+                    }
+                }
+            }
+        }
+        createStagedFanConfigPointIfEnabled(
+            "stage1 and cooling and fan",
+            CpuRelayAssociation.COOLING_STAGE_1)
+        createStagedFanConfigPointIfEnabled(
+            "stage2 and cooling and fan",
+            CpuRelayAssociation.COOLING_STAGE_2
+        )
+        createStagedFanConfigPointIfEnabled(
+            "stage3 and cooling and fan",
+            CpuRelayAssociation.COOLING_STAGE_3
+        )
+        createStagedFanConfigPointIfEnabled(
+            "stage1 and heating and fan",
+            CpuRelayAssociation.HEATING_STAGE_1
+        )
+        createStagedFanConfigPointIfEnabled(
+            "stage2 and heating and fan",
+            CpuRelayAssociation.HEATING_STAGE_2
+        )
+        createStagedFanConfigPointIfEnabled(
+            "stage3 and heating and fan",
+            CpuRelayAssociation.HEATING_STAGE_3
+        )
+    }
+
+
+    private fun updateStagedFanConfiguration(
+        existingConfiguration: HyperStatCpuConfiguration, newConfiguration: HyperStatCpuConfiguration,
+        coolingStage1FanOld: Int, coolingStage1FanNew: Int,
+        coolingStage2FanOld: Int, coolingStage2FanNew: Int,
+        coolingStage3FanOld: Int, coolingStage3FanNew: Int,
+        heatingStage1FanOld: Int, heatingStage1FanNew: Int,
+        heatingStage2FanOld: Int, heatingStage2FanNew: Int,
+        heatingStage3FanOld: Int, heatingStage3FanNew: Int
+    ) {
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_1) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_1) &&
+            coolingStage1FanOld != coolingStage1FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage1 and cooling and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_1))
+                coolingStage1FanNew
+            else stageFan1DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_2) &&
+            coolingStage2FanOld != coolingStage2FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage2 and cooling and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2))
+                coolingStage2FanNew
+            else stageFan2And3DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_3) &&
+            coolingStage3FanOld != coolingStage3FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage3 and cooling and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3))
+                coolingStage3FanNew
+            else stageFan2And3DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_1) &&
+            heatingStage1FanOld != heatingStage1FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage1 and heating and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1))
+                heatingStage1FanNew
+            else stageFan1DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_2) &&
+            heatingStage2FanOld != heatingStage2FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage2 and heating and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2))
+                heatingStage2FanNew
+            else stageFan2And3DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+        if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_3) &&
+            HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_3) &&
+            heatingStage3FanOld != heatingStage3FanNew
+        ) {
+            val pointId = hsHaystackUtil.readPointID("stage3 and heating and fan")
+            val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_3))
+                heatingStage3FanNew
+            else stageFan2And3DefaultVal
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
+        }
+
+    }
+
 
     // collect the existing profile configurations
     fun getConfiguration(): HyperStatCpuConfiguration {
@@ -390,6 +580,13 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         config.zoneVOCTarget = hsHaystackUtil.getVocTargetConfigValue()
         config.zonePm2p5Threshold = hsHaystackUtil.getPm2p5ThresholdConfigValue()
         config.zonePm2p5Target = hsHaystackUtil.getPm2p5TargetConfigValue()
+
+        config.coolingStage1FanState = hsHaystackUtil.getFanStageValue("cooling and stage1",7).toInt()
+        config.coolingStage2FanState = hsHaystackUtil.getFanStageValue("cooling and stage2",10).toInt()
+        config.coolingStage3FanState = hsHaystackUtil.getFanStageValue("cooling and stage3",10).toInt()
+        config.heatingStage1FanState = hsHaystackUtil.getFanStageValue("heating and stage1",7).toInt()
+        config.heatingStage2FanState = hsHaystackUtil.getFanStageValue("heating and stage2",10).toInt()
+        config.heatingStage3FanState = hsHaystackUtil.getFanStageValue("heating and stage3",10).toInt()
 
         config.displayHumidity = hsHaystackUtil.getDisplayHumidity() == 1.0
         config.displayCo2 = hsHaystackUtil.getDisplayCo2() == 1.0
@@ -451,16 +648,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao1fanHigh = 100.0
 
         if (ao1 == 1) {
-            ao1MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog1 and output and min"
-            )
-            ao1MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog1 and output and max"
-            )
+            if (ao1AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao1MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog1 and output and min"
+                )
+                ao1MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog1 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao1AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao1AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao1fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog1 and output and low"
@@ -482,16 +684,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao2fanHigh = 100.0
 
         if (ao2 == 1) {
-            ao2MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog2 and output and min"
-            )
-            ao2MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog2 and output and max"
-            )
+            if (ao2AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao2MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog2 and output and min"
+                )
+                ao2MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog2 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao2AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao2AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao2fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog2 and output and low"
@@ -513,16 +720,21 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao3fanHigh = 100.0
 
         if (ao3 == 1) {
-            ao3MinVal = hsHaystackUtil.readConfigPointValue(
-                "analog3 and output and min"
-            )
-            ao3MaxVal = hsHaystackUtil.readConfigPointValue(
-                "analog3 and output and max"
-            )
+            if (ao3AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                ao3MinVal = hsHaystackUtil.readConfigPointValue(
+                    "analog3 and output and min"
+                )
+                ao3MaxVal = hsHaystackUtil.readConfigPointValue(
+                    "analog3 and output and max"
+                )
+            }
 
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == CpuAnalogOutAssociation.MODULATING_FAN_SPEED ||
+                HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+                    ao3AssociatedTo.toInt()
+                ) == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
             ) {
                 ao3fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog3 and output and low"
@@ -770,32 +982,49 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
         if (analogOutState.enabled) {
 
-            val pointData: Triple<Any, Any, Any> = hyperStatPointsUtil.analogOutConfiguration(
-                analogOutState = analogOutState,
-                analogTag = analogOutTag
-            )
-            val minPoint = (pointData.second as Pair<*, *>)
-            val maxPoint = (pointData.third as Pair<*, *>)
+            if (analogOutState.association != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
+                val pointData: Triple<Any, Any, Any> = hyperStatPointsUtil.analogOutConfiguration(
+                    analogOutState = analogOutState,
+                    analogTag = analogOutTag
+                )
+                val minPoint = (pointData.second as Pair<*, *>)
+                val maxPoint = (pointData.third as Pair<*, *>)
 
-            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData.first as Point)
-            val newMinPointId = hyperStatPointsUtil.addPointToHaystack(minPoint.first as Point)
-            val newMaxPointId = hyperStatPointsUtil.addPointToHaystack(maxPoint.first as Point)
+                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData.first as Point)
+                val newMinPointId = hyperStatPointsUtil.addPointToHaystack(minPoint.first as Point)
+                val newMaxPointId = hyperStatPointsUtil.addPointToHaystack(maxPoint.first as Point)
 
-            if ((pointData.first as Point).markers.contains("his")) {
-                hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+                if ((pointData.first as Point).markers.contains("his")) {
+                    hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+                }
+
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+                hyperStatPointsUtil.addDefaultValueForPoint(
+                    newMinPointId,
+                    analogOutState.voltageAtMin
+                )
+                hyperStatPointsUtil.addDefaultValueForPoint(
+                    newMaxPointId,
+                    analogOutState.voltageAtMax
+                )
+
+                val pointType =
+                    "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
+                DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
+            } else {
+                val pointData: Triple<Point, Any?, Any?> = hyperStatPointsUtil.analogOutConfiguration1()
+                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData.first)
+                if ((pointData.first).markers.contains("his")) {
+                    hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+                    DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                }
             }
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-            hyperStatPointsUtil.addDefaultValueForPoint(newMinPointId, analogOutState.voltageAtMin)
-            hyperStatPointsUtil.addDefaultValueForPoint(newMaxPointId, analogOutState.voltageAtMax)
-
-            val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
-            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
-            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
 
             // check if the new state of analog is mapped to Fan Speed
             // then will create new Points for fan configurations
 
-            if (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) {
+            if (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState) || HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) {
 
                 // Create Fan configuration Points
                 val fanConfigPoints: Triple<Point, Point, Point> = hyperStatPointsUtil.createFanLowMediumHighPoint(
@@ -844,7 +1073,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     ): Boolean {
         return (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)
-                    || HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(existingAnalogOutState))))
+                    || HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(existingAnalogOutState) || HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(existingAnalogOutState))))
     }
 
      private fun updateConditioningMode() {

@@ -43,6 +43,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
 public class DataSyncHandler {
     private static final Object DELETED_BY = "deletedBy";
@@ -282,7 +283,7 @@ public class DataSyncHandler {
         for (HashMap<Object, Object> roomEntity : roomEntities) {
             logIt("Sync room entity >> " + roomEntity);
             HashMap<Object, Object> localRoom = ccuHsApi.readMapById(roomEntity.get(Tags.ID).toString());
-            if (isRoomEntityValid(roomEntity)) {
+            if (isRoomEntityValid(roomEntity, ccuHsApi)) {
                 if (isCloudEntityHasLatestValue(localRoom, roomEntity)) {
                     Zone zone = new Zone.Builder()
                             .setDisplayName(Objects.requireNonNull(roomEntity.get("dis")).toString())
@@ -301,9 +302,10 @@ public class DataSyncHandler {
             }
         }
     }
-    private boolean isRoomEntityValid(HashMap<Object, Object> roomEntity) {
+    private boolean isRoomEntityValid(HashMap<Object, Object> roomEntity, CCUHsApi ccuHsApi) {
         return roomEntity.containsKey("id") && roomEntity.containsKey("dis") && roomEntity.containsKey("siteRef")
-                && roomEntity.containsKey("floorRef") && roomEntity.containsKey("scheduleRef");
+                && roomEntity.containsKey("floorRef") && roomEntity.containsKey("scheduleRef") &&
+                ccuHsApi.isEntityExisting(roomEntity.get("id").toString());
     }
     private boolean isFloorEntityValid(HashMap<Object, Object> floorEntity, CCUHsApi ccuHsApi) {
         return floorEntity.containsKey("dis") && floorEntity.containsKey("siteRef") && floorEntity.containsKey("id")
@@ -400,12 +402,10 @@ public class DataSyncHandler {
             logIt("Point to sync " + pointToSync);
             Object priorityArrayObj = pointToSync.get(PRIORITY_ARRAY);
             HList hList = ((HList) priorityArrayObj);
-            logIt(" hList " + hList);
             if (hList != null && hList.size() > 0) {
                 for (int priorityArrayIndex = 0; priorityArrayIndex < hList.size(); priorityArrayIndex++) {
                     MapImpl priorityArrayMap = (MapImpl) hList.get(priorityArrayIndex);
-                    logIt("Priority Array Map " + priorityArrayMap);
-                    if(isMapValid(priorityArrayMap)) {
+                    if(isMapValid(priorityArrayMap, pointToSync.get(Tags.ID).toString(), ccuHsApi)) {
                         setVal(priorityArrayMap, pointToSync, ccuHsApi);
                     }else {
                         logIt("Priority Array Map is not valid "+priorityArrayMap);
@@ -415,9 +415,9 @@ public class DataSyncHandler {
         });
     }
 
-    private boolean isMapValid(MapImpl priorityArrayMap) {
+    private boolean isMapValid(MapImpl priorityArrayMap, String id, CCUHsApi ccuHsApi) {
         return priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_LEVEL) && priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_VAL) &&
-                priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_WHO);
+                priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_WHO)&& ccuHsApi.isEntityExisting(id);
     }
     private void setVal(MapImpl priorityArrayMap, HashMap<Object, Object> pointHash, CCUHsApi ccuHsApi) {
         int level = Integer.parseInt(priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).toString());
@@ -479,6 +479,9 @@ public class DataSyncHandler {
             logIt(" NumberFormatException " + e);
             ccuHsApi.writePointStrValLocal(pointRef, level, who, value, 0);
             Log.i("CCU_READ_CHANGES", " Synced Point val with exception " + value);
+        } catch (MessageHandlingFailed e) {
+            Log.i("CCU_READ_CHANGES", "Message not handled:" + e.getMessage() +", value: "+value);
+            e.printStackTrace();
         }
     }
 
@@ -519,11 +522,16 @@ public class DataSyncHandler {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if(syncData(lastCCUUpdateTime, CCUHsApi.getInstance(),
-                        getMessageExpiryTime()) == SyncStatus.COMPLETED) {
-                    Log.i(L.TAG_CCU_READ_CHANGES, " All Entities are Synced from cloud and starting to sync local data");
-                    CCUHsApi.getInstance().syncEntityWithPointWrite();
-                    setDataSyncStopped();
+                try {
+                    if (syncData(lastCCUUpdateTime, CCUHsApi.getInstance(),
+                            getMessageExpiryTime()) == SyncStatus.COMPLETED) {
+                        Log.i(L.TAG_CCU_READ_CHANGES, " All Entities are Synced from cloud and starting to sync local data");
+                        CCUHsApi.getInstance().syncEntityWithPointWrite();
+                        setDataSyncStopped();
+                    }
+                } catch (Exception e){
+                    e.printStackTrace();
+                    Log.e(L.TAG_CCU_READ_CHANGES, " Data sync failed ");
                 }
             }
         }, DELAY_FOR_DATA_SYNC);

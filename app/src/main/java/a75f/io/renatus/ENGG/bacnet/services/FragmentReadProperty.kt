@@ -178,10 +178,7 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
         btnReadProperty.isEnabled = true
         btnReadProperty.isClickable = true
         btnReadProperty.setTextColor(
-            ContextCompat.getColor(
-                UtilityApplication.context,
-                R.color.ctaOrange
-            )
+            R.attr.orange_75f
         )
     }
 

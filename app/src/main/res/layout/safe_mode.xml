@@ -31,6 +31,7 @@
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:background="@color/transparent"
+            android:textColor="?orange_75f"
             android:text="@string/exit_safe_mode"
             android:textAppearance="@style/safe_mode_cts"
             />

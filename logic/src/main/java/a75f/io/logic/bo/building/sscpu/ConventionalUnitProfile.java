@@ -56,26 +56,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     {
         return ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT;
     }
-	
-	@Override
-    public boolean isZoneDead() {
-    
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-    
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-    
-        for (short node : cpuDeviceMap.keySet())
-        {
-            double curTemp = cpuDeviceMap.get(node).getCurrentTemp();
-            if (curTemp > (buildingLimitMax + tempDeadLeeway)
-                    || curTemp < (buildingLimitMin - tempDeadLeeway))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+
     @Override
     public void updateZonePoints() {
         if (Globals.getInstance().isTestMode()){

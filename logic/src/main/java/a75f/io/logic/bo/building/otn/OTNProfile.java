@@ -179,23 +179,6 @@ public class OTNProfile extends ZoneProfile {
     }
 
     @Override
-    public boolean isZoneDead() {
-
-        double buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and " +
-                "max");
-        double buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and " +
-                "min");
-
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-        CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + mOTNEquip.getCurrentTemp() + " " +
-                "buildingLimitMax:" + buildingLimitMax + " tempDead:" + tempDeadLeeway);
-        CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + mOTNEquip.getCurrentTemp() + " " +
-                "buildingLimitMin:" + buildingLimitMin + " tempDead:" + tempDeadLeeway);
-        return mOTNEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-                || mOTNEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway);
-    }
-
-    @Override
     public ProfileType getProfileType() {
         return ProfileType.OTN;
     }

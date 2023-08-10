@@ -171,33 +171,6 @@ public abstract class VavProfile extends ZoneProfile {
         return vavDeviceMap.get(address) != null ? vavDeviceMap.get(address).getProfileConfiguration() : null;
     }
     
-    
-    @Override
-    public boolean isZoneDead() {
-    
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-    
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        for (short node : vavDeviceMap.keySet()) {
-            if (vavDeviceMap.get(node).getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-                || vavDeviceMap.get(node).getCurrentTemp() < (buildingLimitMin - tempDeadLeeway)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean isTemperatureDead() {
-        
-        for (short node : vavDeviceMap.keySet()) {
-            if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     @JsonIgnore
     public TrimResponseRequest getSATRequest(short node) {
     

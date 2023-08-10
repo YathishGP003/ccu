@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
@@ -88,6 +89,7 @@ import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
@@ -464,15 +466,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void updateTemperature(double currentTemp, short nodeAddress) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperature");
         if (getActivity() != null) {
             int i;
             if (currentTemp > 0) {
-                double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
-                double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-                double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
                 for (i = 0; i < seekArcArrayList.size(); i++) {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
@@ -487,8 +486,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                                 for (int j = 0; j < zoneEquips.size(); j++) {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                                    double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                                    if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
+                                    int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and equipRef ==\""+tempEquip.getId()+"\"").intValue();
+                                    if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);
                                     } else {
                                         noTempSensor++;
@@ -797,7 +797,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double heatLowerlimit = 0;
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
 
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
@@ -806,18 +805,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double heatDB = TunerUtil.getZoneHeatingDeadband(avgTempEquip.getRoomRef());
             double coolDB = TunerUtil.getZoneCoolingDeadband(avgTempEquip.getRoomRef());
 
-
             if (heatDB < heatDeadband || heatDeadband == 0) {
                 heatDeadband = heatDB;
             }
             if (coolDB < coolDeadband || coolDeadband == 0) {
                 coolDeadband = coolDB;
             }
-            if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
+
+            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
+            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {
                 noTempSensor++;
             }
+
             equipNodes.add(Short.valueOf(avgTempEquip.getGroup()));
             Log.i("EachzoneData", "temp:" + avgTemp + " currentAvg:" + currentAverageTemp);
 
@@ -1800,7 +1801,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         });
 
-        double pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        double pointcurrTmep = 0;
+
+        int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+p.getId()+"\"").intValue();
+        if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        }
+
         double pointbuildingMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double pointbuildingMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double pointcoolUL = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();

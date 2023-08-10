@@ -79,23 +79,6 @@ public class SingleStageProfile extends ZoneProfile
     }
 
     @Override
-    public boolean isZoneDead() {
-
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
-        if (sseEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-                || sseEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public void updateZonePoints()
     {
         if (isZoneDead()) {

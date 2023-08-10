@@ -26,15 +26,10 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -773,13 +768,11 @@ public class InstallerOptions extends Fragment {
 
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
         this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue());
-
+        this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())));
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                if (backfieldTimeSelectedValue() == i) {
+                if (backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())) == i) {
                     linearLayout.setVisibility(View.INVISIBLE);
                 } else {
                     if (!isFreshRegister) {
@@ -788,10 +781,8 @@ public class InstallerOptions extends Fragment {
                 }
                 adapterView.setSelection(i);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }

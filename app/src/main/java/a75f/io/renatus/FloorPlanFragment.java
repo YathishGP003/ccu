@@ -181,7 +181,6 @@ public class FloorPlanFragment extends Fragment {
                         } else {
                             updateModules(getSelectedZone());
                             setScheduleType(getSelectedZone().getId());
-                            BackFillViewModel.setBackFillDuration();
                         }
                         //Crash here because of activity null while moving to other fragment and return back here after edit config
                         if ((getActivity() != null) && (mPairingReceiver != null))

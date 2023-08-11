@@ -59,6 +59,7 @@ import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
+import a75f.io.api.haystack.util.BackfillUtil;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
@@ -285,6 +286,7 @@ public class CCUHsApi
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String equipId = tagsDb.addEquip(q);
         syncStatusService.addUnSyncedEntity(equipId);
+        BackfillUtil.setBackFillDuration(context);
         return equipId;
     }
 

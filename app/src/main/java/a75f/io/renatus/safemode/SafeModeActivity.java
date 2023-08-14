@@ -1,6 +1,8 @@
 package a75f.io.renatus.safemode;
 
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,6 +10,7 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,6 +20,7 @@ import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 
@@ -36,6 +40,7 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.safe_mode);
         exitSafeMode = findViewById(R.id.exit_safe_mode);
+        setExitSafeModeTheme(exitSafeMode);
 
         exitSafeMode.setOnClickListener(view -> {
             exitSafeMode();
@@ -84,6 +89,16 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
         if (mCloudConnectionStatus == null) {
             mCloudConnectionStatus = new CloudConnetionStatusThread();
             mCloudConnectionStatus.start();
+        }
+    }
+
+    private void setExitSafeModeTheme(Button exitSafeMode) {
+        if (CCUUiUtil.isCarrierThemeEnabled(getApplicationContext())) {
+            exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+        } else if (CCUUiUtil.isDaikinEnvironment(getApplicationContext())) {
+            exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+        } else {
+            exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.renatus_75f_primary));
         }
     }
 }

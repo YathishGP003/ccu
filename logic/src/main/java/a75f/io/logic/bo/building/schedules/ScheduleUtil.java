@@ -428,7 +428,7 @@ public class ScheduleUtil {
     }
     
     public static void setDesiredTempAtLevel(CCUHsApi hayStack, String pointId, int level, double desiredTemp,
-                                             long duration) {
+                                             long duration, String who) {
         if (HSUtil.getPriorityLevelVal(pointId,level) == desiredTemp) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, " DesiredTemp not changed : Skip PointWrite at level "
                                           + level + " val : " + desiredTemp + " : " + pointId);
@@ -441,7 +441,7 @@ public class ScheduleUtil {
         }
 
         hayStack.pointWrite(HRef.make(pointId.replace("@","")),
-                            level, "Scheduler",
+                            level, who,
                             HNum.make(desiredTemp),
                             HNum.make(duration));
         hayStack.writeHisValById(pointId, HSUtil.getPriorityVal(pointId));

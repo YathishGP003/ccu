@@ -50,7 +50,8 @@ const val DAMPERFEEDBACKID = 70
 const val REHEATCMDID = 71
 const val AIRFLOWID = 72
 const val AIRVELOCITYID = 73
-const val COMPOSITEDAMPERID = 78
+const val COMPOSITEDAMPERID = 74
+const val SERIESFANID = 78
 
 const val CO2SIGNALID = 81
 const val DISCHARGESPID = 77

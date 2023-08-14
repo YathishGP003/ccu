@@ -1,7 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
-import static a75f.io.logic.bo.util.DesiredTempDisplayMode.getDesiredTempDisplayMode;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
@@ -61,11 +61,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.javolution.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
 
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -91,6 +89,7 @@ import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
@@ -467,15 +466,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void updateTemperature(double currentTemp, short nodeAddress) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperature");
         if (getActivity() != null) {
             int i;
             if (currentTemp > 0) {
-                double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
-                double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-                double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
                 for (i = 0; i < seekArcArrayList.size(); i++) {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
@@ -490,8 +486,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                                 for (int j = 0; j < zoneEquips.size(); j++) {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                                    double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                                    if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
+                                    int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and equipRef ==\""+tempEquip.getId()+"\"").intValue();
+                                    if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);
                                     } else {
                                         noTempSensor++;
@@ -728,7 +725,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 String profileTempInfluence = "TEMP_INFLUENCE";
                 String profileDualDuct = "DUAL_DUCT";
                 String profileModBus = "MODBUS";
-                String profileHyperStatSense = "HYPERSTAT_SENSE";
+                String profileHyperStatMonitoring = "HYPERSTAT_MONITORING";
                 String profileOTN = "OTN";
 
                 boolean tempModule = false;
@@ -758,14 +755,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         nontempModule = true;
                     }
                 }
-                if (profileType.contains(profileHyperStatSense)) {
-                    viewSenseZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
+                if (profileType.contains(profileHyperStatMonitoring)) {
+                    viewMonitoringZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                 }
 
                 if (tempModule) {
                     viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                 }
-                if (!tempModule && nontempModule && !profileType.contains(profileHyperStatSense)) {
+                if (!tempModule && nontempModule && !profileType.contains(profileHyperStatMonitoring)) {
                     viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                     //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
                 }
@@ -800,7 +797,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double heatLowerlimit = 0;
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
 
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
@@ -809,18 +805,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double heatDB = TunerUtil.getZoneHeatingDeadband(avgTempEquip.getRoomRef());
             double coolDB = TunerUtil.getZoneCoolingDeadband(avgTempEquip.getRoomRef());
 
-
             if (heatDB < heatDeadband || heatDeadband == 0) {
                 heatDeadband = heatDB;
             }
             if (coolDB < coolDeadband || coolDeadband == 0) {
                 coolDeadband = coolDB;
             }
-            if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
+
+            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
+            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {
                 noTempSensor++;
             }
+
             equipNodes.add(Short.valueOf(avgTempEquip.getGroup()));
             Log.i("EachzoneData", "temp:" + avgTemp + " currentAvg:" + currentAverageTemp);
 
@@ -1259,7 +1257,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         textViewzone.setTextAppearance(getActivity(), R.style.label_black);
                                         textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         tableLayout.removeViewAt(row + 1);
-                                        if (viewTag.getGridItem().equals("Temp") || viewTag.getGridItem().equals("Sense")) {
+                                        if (viewTag.getGridItem().equals("Temp") || viewTag.getGridItem().equals("monitoring")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
@@ -1803,7 +1801,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         });
 
-        double pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        double pointcurrTmep = 0;
+
+        int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+p.getId()+"\"").intValue();
+        if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        }
+
         double pointbuildingMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double pointbuildingMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double pointcoolUL = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();
@@ -3568,7 +3572,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 if (coolpoint.getMarkers().contains("writable")) {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
-                    SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval, avgval);
+                    SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval
+                            , avgval, "CCU_Scheduler_"+CCUHsApi.getInstance().getCcuId());
 
                 }
 
@@ -3811,10 +3816,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
 
-    private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
+    private void loadMonitoringPointsUI(HashMap monitoringPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
 
-        String profile_name = sensePoints.get("Profile").toString() + " (" + nodeAddress + ")";
+        String profile_name = monitoringPoints.get("Profile").toString() + " (" + nodeAddress + ")";
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
@@ -3833,7 +3838,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         linearLayoutZonePoints.addView(viewStatus);
 
-        if (sensePoints.get("isTh1Enable").equals("true")) {
+        if (monitoringPoints.get("isTh1Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
@@ -3844,15 +3849,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
             if( isCelsiusTunerAvailableStatus()) {
-                String label_string = sensePoints.get("Thermistor1").toString() +
+                String label_string = monitoringPoints.get("Thermistor1").toString() +
                         " (" + getString(R.string.thermistor1_label) + ") " + " : ";
-                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
+                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(monitoringPoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
                 label.setText(label_string);
                 val.setText(val_string);
             } else {
-                String label_string = sensePoints.get("Thermistor1").toString() +
+                String label_string = monitoringPoints.get("Thermistor1").toString() +
                         " (" + getString(R.string.thermistor1_label) + ") " + " : ";
-                String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
+                String val_string = (monitoringPoints.get("Th1Val").toString()) + " " + (monitoringPoints.get(
                         "Unit3").toString());
 
                 label.setText(label_string);
@@ -3862,7 +3867,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
-        if (sensePoints.get("isTh2Enable").equals("true")) {
+        if (monitoringPoints.get("isTh2Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
@@ -3872,15 +3877,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
             if( isCelsiusTunerAvailableStatus()) {
-                String label_string = sensePoints.get("Thermistor2").toString() +
+                String label_string = monitoringPoints.get("Thermistor2").toString() +
                         " (" + getString(R.string.thermistor2_label) + ") " + " : ";
-                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
+                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(monitoringPoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
                 label.setText(label_string);
                 val.setText(val_string);
             } else {
-                String label_string = sensePoints.get("Thermistor2").toString() +
+                String label_string = monitoringPoints.get("Thermistor2").toString() +
                         " (" + getString(R.string.thermistor2_label)+") " + " : ";
-                String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
+                String val_string = (monitoringPoints.get("Th2Val").toString()) + " " + (monitoringPoints.get(
                         "Unit4").toString());
 
                 label.setText(label_string);
@@ -3890,7 +3895,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
-        if (sensePoints.get("iAn1Enable").equals("true")) {
+        if (monitoringPoints.get("iAn1Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
@@ -3899,10 +3904,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
-            String label_string = sensePoints.get("Analog1").toString() +
-                    (sensePoints.get("Unit1").toString()) +
+            String label_string = monitoringPoints.get("Analog1").toString() +
+                    (monitoringPoints.get("Unit1").toString()) +
                     " (" + getString(R.string.analog1_label) + ")"+ " : ";
-            String val_string = (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get(
+            String val_string = (monitoringPoints.get("An1Val").toString()) + " " + (monitoringPoints.get(
                     "Unit1").toString());
 
             label.setText(label_string);
@@ -3911,7 +3916,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
 
-        if (sensePoints.get("iAn2Enable").equals("true")) {
+        if (monitoringPoints.get("iAn2Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
@@ -3921,10 +3926,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
 
-            String label_string = sensePoints.get("Analog2").toString() +
-                    (sensePoints.get("Unit2").toString()) +
+            String label_string = monitoringPoints.get("Analog2").toString() +
+                    (monitoringPoints.get("Unit2").toString()) +
                     " (" + getString(R.string.analog2_label) + ") " + " : ";
-            String val_string = (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get(
+            String val_string = (monitoringPoints.get("An2Val").toString()) + " " + (monitoringPoints.get(
                     "Unit2").toString());
 
 
@@ -3934,7 +3939,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
     }
-    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive) {
+    private void viewMonitoringZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive) {
 
         Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -3969,7 +3974,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
-        gridItemObj.setGridItem("Sense");
+        gridItemObj.setGridItem("monitoring");
         gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
         gridItemObj.setZoneEquips(zoneMap);
         arcView.setClickable(true);
@@ -3981,8 +3986,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         seekArc.scaletoNormal(260, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
-        seekArc.setSense(true);
-        seekArc.setSenseData(false, (float)(curTemp));
+        seekArc.setMonitoring(true);
+        seekArc.setMonitoringData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
         vacationStatusTV.setVisibility(View.GONE);
         vacationText.setVisibility(View.GONE);
@@ -4047,7 +4052,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         statusView.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         tableLayout.removeViewAt(row + 1);
                                         gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        if (viewTag.getGridItem().equals("Sense") || viewTag.getGridItem().equals("Temp")) {
+                                        if (viewTag.getGridItem().equals("monitoring") || viewTag.getGridItem().equals("Temp")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
@@ -4145,10 +4150,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 linearLayoutZonePoints.removeAllViews();
                 for (int k = 0; k < openZoneMap.size(); k++) {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
-                    if (updatedEquip.getProfile().contains("SENSE")) {
-                        HashMap sensePoints = ZoneViewData.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
-                        seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
-                        loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+                    if (updatedEquip.getProfile().contains("MONITORING")) {
+                        HashMap monitoringEquipPoints = ZoneViewData.getHyperStatMonitoringEquipPoints(updatedEquip.getGroup());
+                        seekArc.setCurrentTemp(Float.parseFloat(monitoringEquipPoints.get("curtempwithoffset").toString()));
+                        loadMonitoringPointsUI(monitoringEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
                 }
             }

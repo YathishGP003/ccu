@@ -31,9 +31,6 @@ public class HeartBeat {
                 .addMarker("logical")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz);
-        if (profile.equals(Tags.SENSE)) {
-            heartBeatBuilder.addMarker(Tags.MONITORING);
-        }
         heartBeat = heartBeatBuilder.build();
         addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
 

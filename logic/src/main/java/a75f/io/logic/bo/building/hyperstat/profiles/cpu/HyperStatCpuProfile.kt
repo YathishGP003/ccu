@@ -661,20 +661,6 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         return cpuDeviceMap.keys
     }
 
-    override fun isZoneDead(): Boolean {
-        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
-        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
-        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
-        for (node in cpuDeviceMap.keys) {
-            if (cpuDeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
-                || cpuDeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
-            ) {
-                return true
-            }
-        }
-        return false
-    }
-
     private fun resetAllLogicalPointValues(equip: HyperStatCpuEquip) {
         equip.hsHaystackUtil.updateAllLoopOutput(0,0,0,false,0)
         resetAllLogicalPointValues()

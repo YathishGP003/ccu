@@ -775,7 +775,7 @@ public class VavEquip
                                    String tz,
                                    String fanType
     ) {
-        int bacnetID = Objects.equals(fanType, "series") ? BacnetIdKt.COMPOSITEDAMPERID : BacnetIdKt.PARALLELFANID;
+        int bacnetID = Objects.equals(fanType, "series") ? BacnetIdKt.SERIESFANID : BacnetIdKt.PARALLELFANID;
         Point fan = new Point.Builder()
                               .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-"+fanType+"Fan")
                               .setEquipRef(equipRef)

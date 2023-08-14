@@ -15,7 +15,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
@@ -111,7 +110,6 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			for (Device d : HSUtil.getDevices(sZone.getId())) {
 
 				//Todo Notifies to BACnet Data Layer
-				BACnetUtils.removeModule(Short.parseShort(d.getAddr()));
 				L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 			}
 			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());

@@ -124,4 +124,8 @@ public class HDictBuilder
     return map.remove(name);
   }
   private HashMap map;
+
+  public HashMap getMap() {
+    return map;
+  }
 }

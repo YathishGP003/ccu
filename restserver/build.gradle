@@ -40,6 +40,11 @@ android {
         qa {
             minifyEnabled false
         }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
         dev_qa {
             minifyEnabled false
         }
@@ -165,6 +170,7 @@ dependencies {
     implementation 'io.ktor:ktor-gson:1.6.4'
     implementation 'io.ktor:ktor-server-netty:1.6.2'
     implementation 'io.ktor:ktor-websockets:1.6.2'
+    annotationProcessor 'org.apache.logging.log4j:log4j-core:2.14.0'
 
 }
 repositories {

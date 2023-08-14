@@ -99,9 +99,10 @@ public class ObjectboxPerformanceTest {
     }
     
     public void doHisReadOnAllPoints(CCUHsApi hayStack) {
+        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint();
         for (int i = 1; i <= ITEM_COUNT_DB; i++) {
             HashMap idMap = hayStack.read("point and tag" + i);
-            List<HisItem> unsyncedHisItems = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString());
+            List<HisItem> unsyncedHisItems = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString(), numberOfHisEntryPerPoint);
             /*for (HisItem item : unsyncedHisItems) {
                 //System.out.println("id " + idMap.get("id") + " val " + item.getVal());
             }*/
@@ -109,12 +110,28 @@ public class ObjectboxPerformanceTest {
     }
     
     public void doUpdateHisItemSynced(CCUHsApi hayStack) {
-    
+
+        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint();
         for (int i = 1; i <= ITEM_COUNT_DB; i++) {
             HashMap idMap = hayStack.read("point and tag" + i);
-            List<HisItem> items = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString());
+            List<HisItem> items = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString(), numberOfHisEntryPerPoint);
             hayStack.tagsDb.updateHisItemSynced(items);
         }
+    }
+
+    private int getNumberOfHisEntriesPerPoint() {
+        int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
+        int numberOfEntryPerMinute;
+        if (equipCount > 40) {
+            numberOfEntryPerMinute = 12;
+        } else if (equipCount > 30) {
+            numberOfEntryPerMinute = 16;
+        } else if (equipCount > 20) {
+            numberOfEntryPerMinute = 24;
+        } else {
+            numberOfEntryPerMinute = 12;
+        }
+        return numberOfEntryPerMinute;
     }
     
     

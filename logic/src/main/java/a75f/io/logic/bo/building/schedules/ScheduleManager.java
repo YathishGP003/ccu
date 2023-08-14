@@ -24,7 +24,6 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,13 +40,14 @@ import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -330,7 +330,7 @@ public class ScheduleManager {
     public void updateDesiredTemp(Set<ZoneProfile> zoneProfiles) {
 
         for (ZoneProfile profile : zoneProfiles) {
-            if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
+            if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
                 continue;
             }
             EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
@@ -719,9 +719,9 @@ public class ScheduleManager {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
                                          cachedOccupied.getVacation().getEndDateString());
         } else {
-            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and " +
+            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +
                                                                               "his and  equipRef == \"" + equipId +
-                                                                              "\"") == ZoneTempState.TEMP_DEAD.ordinal();
+                                                                              "\"") == ZoneState.TEMPDEAD.ordinal();
             if(curOccupancyMode == PRECONDITIONING && !isZoneTempDead) {//Currently handled only for standalone
                 if (cachedOccupied.getNextOccupiedSchedule() == null){
                     CcuLog.i(TAG_CCU_SCHEDULER,

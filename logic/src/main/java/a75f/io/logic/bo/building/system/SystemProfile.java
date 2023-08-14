@@ -21,7 +21,6 @@ import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.Units;
@@ -36,6 +35,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -183,7 +183,7 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
-                       q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat")) {
                 //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {
@@ -786,7 +786,7 @@ public abstract class SystemProfile
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
-        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
 
     }
 
@@ -855,7 +855,7 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
 
-        BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
 
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }

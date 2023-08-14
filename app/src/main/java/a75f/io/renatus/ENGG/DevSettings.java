@@ -110,6 +110,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
     public  @BindView(R.id.daikin_theme_config) CheckBox daikinThemeConfig;
+    public  @BindView(R.id.carrier_theme_config) CheckBox carrierThemeConfig;
 
     @BindView(R.id.ackdMessagingBtn) ToggleButton ackdMessagingBtn;
 
@@ -322,13 +323,34 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         }
 
         configureBtuProxy(zeroToHundredDataAdapter);
-        btnRestart.setOnClickListener((v)->CCUUiUtil.triggerRestart(getContext()));
-        daikinThemeConfig.setChecked(CCUUiUtil.isDaikinThemeEnabled(getContext()));
-        daikinThemeConfig.setOnCheckedChangeListener((buttonView, isChecked)-> {
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit().
-                    putBoolean(getContext().getString(R.string.prefs_theme_key),isChecked).commit();
 
+        btnRestart.setOnClickListener(v -> CCUUiUtil.triggerRestart(getContext()));
+
+        daikinThemeConfig.setChecked(CCUUiUtil.isDaikinThemeEnabled(getContext()));
+        daikinThemeConfig.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit()
+                    .putBoolean(getContext().getString(R.string.prefs_theme_key), isChecked)
+                    .apply();
+
+            // Disable carrierThemeConfig checkbox when daikinThemeConfig is checked
+            if (isChecked) {
+                carrierThemeConfig.setChecked(false);
+            }
         });
+
+        carrierThemeConfig.setChecked(CCUUiUtil.isCarrierThemeEnabled(getContext()));
+        carrierThemeConfig.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit()
+                    .putBoolean(getContext().getString(R.string.prefs_carrier_theme_key), isChecked)
+                    .apply();
+
+            if (isChecked) {
+                daikinThemeConfig.setChecked(false);
+            }
+        });
+
 
         resetPassword.setOnClickListener(view12 -> {
             final EditText taskEditText = new EditText(getActivity());

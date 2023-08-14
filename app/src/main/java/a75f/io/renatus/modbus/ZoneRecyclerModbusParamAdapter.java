@@ -248,6 +248,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
             }
         }
+        if(minValue == maxValue){
+            doubleArrayList.add(minValue);
+            userIntentsMap.put(unit, doubleArrayList);
+            return userIntentsMap;
+        }
         for (int pos = (int) (100 * minValue); pos <= (100 * maxValue); pos += (100 * incValue)) {
             doubleArrayList.add(pos / 100.0);
         }

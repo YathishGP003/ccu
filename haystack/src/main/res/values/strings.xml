@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Haystack</string>
+    <string name="insert_fail">Error in pairing the module, please delete the module and pair again</string>
 </resources>

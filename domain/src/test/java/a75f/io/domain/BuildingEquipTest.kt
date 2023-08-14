@@ -3,6 +3,7 @@ package a75f.io.domain
 import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.util.ModelLoader
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import org.junit.After
 import org.junit.Before
@@ -70,5 +71,19 @@ class BuildingEquipTest {
         assert(updatedPointArr[16]["val"].toString().toInt() == 220)
         val deletedPoint = Domain.readPoint("forcedOccupiedTime")
         assert(deletedPoint.isEmpty())
+    }
+
+    @Test
+    fun testPackagedModelLoader() {
+        val dmModel = ModelLoader.getBuildingEquipModelDef()
+        assert(dmModel != null)
+        println(dmModel.toString())
+
+        assert(dmModel.points.isNotEmpty())
+        dmModel.points.forEach{
+            println(it)
+        }
+        assert(dmModel.domainName.isNotEmpty())
+        println(dmModel.domainName)
     }
 }

@@ -95,4 +95,11 @@ object ResourceHelper {
         val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
         return modelDirectiveFactory.fromJson(modelData)
     }
+
+    fun loadModel(fileName : String) : ModelDirective {
+        @Nullable val modelData: String? = loadString(fileName)
+        val objectMapper = ObjectMapperConfig().objectMapper()
+        val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
+        return modelDirectiveFactory.fromJson(modelData!!)
+    }
 }

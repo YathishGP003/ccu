@@ -1242,7 +1242,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_TWO,
                         0.0
                     )
                 )
@@ -1298,7 +1298,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_THREE,
                         0.0
                     )
                 )

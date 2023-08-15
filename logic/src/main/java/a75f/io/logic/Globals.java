@@ -413,7 +413,7 @@ public class Globals {
         HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
-            BuildingTuners.getInstance().addBuildingTunerEquip();
+            //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {

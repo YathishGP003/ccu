@@ -206,6 +206,7 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation project(':data')
+    implementation project(':domain')
 }
 repositories {
     mavenCentral()

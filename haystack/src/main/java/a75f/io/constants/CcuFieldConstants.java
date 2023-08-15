@@ -9,4 +9,10 @@ public class CcuFieldConstants {
     public static final String AHUREF = "ahuRef";
     public static final String FACILITY_MANAGER_EMAIL = "fmEmail";
     public static final String INSTALLER_EMAIL = "installerEmail";
+
+    public static final String TUNER = "tuner";
+
+    public static final String MODEL_ID = "modelId";
+
+    public static final String MODEL_VERSION = "modelVersion";
 }

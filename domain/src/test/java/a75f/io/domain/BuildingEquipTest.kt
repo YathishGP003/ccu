@@ -85,5 +85,16 @@ class BuildingEquipTest {
         }
         assert(dmModel.domainName.isNotEmpty())
         println(dmModel.domainName)
+
+        println(dmModel.id)
+    }
+
+    @Test
+    fun testRegistrationJson() {
+        val equipBuilder = TunerEquipBuilder(mockHayStack)
+        equipBuilder.buildTunerEquipAndPoints(dmModel)
+
+        println(mockHayStack.readEntity("tuner and equip"))
+        println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h"))
     }
 }

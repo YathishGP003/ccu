@@ -42,6 +42,10 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
+        //TODO - Fetch from model when support is added
+        equipBuilder.addTag("modelId", HStr.make("64abb6a3a97798751b2bda14"))
+        equipBuilder.addTag("modelVersion", HStr.make("1.0.0"))
+
         return equipBuilder.build()
     }
 

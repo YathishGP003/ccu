@@ -74,6 +74,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -939,7 +940,7 @@ public class CreateNewSite extends Fragment {
         if (!curTz.equals(s75f.getTz())) {
             CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
         }
-        BuildingTuners.getInstance();
+        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();

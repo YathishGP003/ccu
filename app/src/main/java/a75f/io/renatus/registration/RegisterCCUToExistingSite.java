@@ -49,6 +49,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -217,7 +218,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     );
                     CCUHsApi.getInstance().addPoint(snBand);
                     if(!Globals.getInstance().siteAlreadyCreated()) {
-                        BuildingTuners.getInstance();
+                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                         DefaultSchedules.setDefaultCoolingHeatingTemp();
                     }
                 },

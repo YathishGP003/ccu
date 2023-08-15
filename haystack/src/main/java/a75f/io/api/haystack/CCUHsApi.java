@@ -32,7 +32,6 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
-import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
@@ -64,7 +63,6 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
-import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -187,8 +185,8 @@ public class CCUHsApi
     //For Unit test
     public CCUHsApi()
     {
-        hsClient = new AndroidHSClient();
-        tagsDb = (CCUTagsDb) hsClient.db();
+        hsClient = new TestHSClient();
+        tagsDb = (TestTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
         //hisSyncHandler = new HisSyncHandler(this);
@@ -2307,6 +2305,14 @@ public class CCUHsApi
 
             ccuJsonRequest.put(CcuFieldConstants.FACILITY_MANAGER_EMAIL, facilityManagerEmail);
             ccuJsonRequest.put(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
+
+            HashMap<Object, Object> tunerEquip = readEntity("equip and tuner");
+            if (!tunerEquip.isEmpty()) {
+                JSONObject tunerFiled = new JSONObject();
+                tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
+                tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
+            }
 
         } catch (JSONException jsonException) {
             ccuJsonRequest = null;

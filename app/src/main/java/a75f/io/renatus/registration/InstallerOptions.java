@@ -55,6 +55,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -682,7 +683,7 @@ public class InstallerOptions extends Fragment {
             protected Void doInBackground(Void... voids) {
 
                 if (!Globals.getInstance().siteAlreadyCreated()) {
-                    BuildingTuners.getInstance();
+                    BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }

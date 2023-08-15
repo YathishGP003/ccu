@@ -91,7 +91,7 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_ID_MAP = "idMap";
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
-    private static final String TAG_CCU_HS = "CCU_HS";
+    public static final String TAG_CCU_HS = "CCU_HS";
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
     private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
@@ -112,7 +112,7 @@ public class CCUTagsDb extends HServer {
     public String waString;
 
     private BoxStore boxStore;
-    private Box<HisItem> hisBox;
+    protected Box<HisItem> hisBox;
     private static final File TEST_DIRECTORY = new File("objectbox-test/tags-db");
 
     public ConcurrentHashMap<String, String> idMap;
@@ -812,6 +812,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 
         HRef ref = (HRef) b.get("id");
         if(p.getBacnetType() != null)
@@ -871,6 +872,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         if(p.getBacnetType() != null)
         {
             b.add(Tags.BACNET_ID, p.getBacnetId());
@@ -933,6 +935,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
@@ -988,6 +991,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
@@ -1123,6 +1127,7 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+        d.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
@@ -1166,6 +1171,7 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+        d.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/

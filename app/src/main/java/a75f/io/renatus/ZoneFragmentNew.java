@@ -2714,6 +2714,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
+        //Brute force approach to avoid a crash due to invalid configuration.
+        if (fanMode >= fanModeAdapter.getCount()) {
+            fanMode = 0;
+        }
+        if (conditionMode >= conModeAdapter.getCount()) {
+            conditionMode = 0;
+        }
         spinnerValue1.setSelection(conditionMode, false);
         spinnerValue2.setSelection(fanMode, false);
 
@@ -2947,6 +2954,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         fanSpinner.setAdapter(fanModeAdapter);
+
+        //Brute force approach to avoid a crash due to invalid configuration.
+        if (fanMode >= fanModeAdapter.getCount()) {
+            fanMode = 0;
+        }
+        if (conditionMode >= conModeAdapter.getCount()) {
+            conditionMode = 0;
+        }
 
         conditionSpinner.setSelection(conditionMode, false);
         fanSpinner.setSelection(fanMode, false);
@@ -3200,6 +3215,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
+        //Brute force approach to avoid a crash due to invalid configuration.
+        if (fanMode >= fanModeAdapter.getCount()) {
+            fanMode = 0;
+        }
+        if (conditionMode >= conModeAdapter.getCount()) {
+            conditionMode = 0;
+        }
+
         spinnerValue1.setSelection(conditionMode, false);
         spinnerValue2.setSelection(fanMode, false);
 
@@ -3360,6 +3383,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
+
+        //Brute force approach to avoid a crash due to invalid configuration.
+        if (fanMode >= fanModeAdapter.getCount()) {
+            fanMode = 0;
+        }
+        if (conditionMode >= conModeAdapter.getCount()) {
+            conditionMode = 0;
+        }
 
         spinnerValue1.setSelection(conditionMode, false);
         spinnerValue2.setSelection(fanMode, false);

@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
 import android.annotation.SuppressLint;
@@ -466,12 +467,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             // already unregistered
         }
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
-    }
-
-    private void abortCCUDownloadProcess() {
-        UpdateCCUFragment.stopAllDownloads();
-        PreferenceUtil.stopUpdateCCU();
-        PreferenceUtil.installationCompleted();
     }
 
     private void appRestarted() {

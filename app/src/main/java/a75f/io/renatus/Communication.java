@@ -622,7 +622,7 @@ public class Communication extends Fragment {
                                 if(validateEntries()){
                                     initializeBACnet.setEnabled(true);
                                     initializeBACnet.setClickable(true);
-                                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                    initializeBACnet.setTextColor(R.attr.orange_75f);
                                 }else{
                                     initializeBACnet.setEnabled(false);
                                     initializeBACnet.setClickable(false);
@@ -636,7 +636,7 @@ public class Communication extends Fragment {
                             if(validateEntries()){
                                 initializeBACnet.setEnabled(true);
                                 initializeBACnet.setClickable(true);
-                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                initializeBACnet.setTextColor(R.attr.orange_75f);
                             }else{
                                 initializeBACnet.setEnabled(false);
                                 initializeBACnet.setClickable(false);
@@ -709,7 +709,13 @@ public class Communication extends Fragment {
                         if(validateEntries()){
                             initializeBACnet.setEnabled(true);
                             initializeBACnet.setClickable(true);
-                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                            if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+                            } else if (CCUUiUtil.isDaikinEnvironment(context)) {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+                            } else {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+                            }
                         }else{
                             initializeBACnet.setEnabled(false);
                             initializeBACnet.setClickable(false);
@@ -723,7 +729,13 @@ public class Communication extends Fragment {
                     if(validateEntries()){
                         initializeBACnet.setEnabled(true);
                         initializeBACnet.setClickable(true);
-                        initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                        if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+                        } else if (CCUUiUtil.isDaikinEnvironment(context)) {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+                        } else {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+                        }
                     }else{
                         initializeBACnet.setEnabled(false);
                         initializeBACnet.setClickable(false);

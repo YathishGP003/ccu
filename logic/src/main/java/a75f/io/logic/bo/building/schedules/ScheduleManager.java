@@ -40,6 +40,7 @@ import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -718,9 +719,9 @@ public class ScheduleManager {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
                                          cachedOccupied.getVacation().getEndDateString());
         } else {
-            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and " +
+            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +
                                                                               "his and  equipRef == \"" + equipId +
-                                                                              "\"") == ZoneTempState.TEMP_DEAD.ordinal();
+                                                                              "\"") == ZoneState.TEMPDEAD.ordinal();
             if(curOccupancyMode == PRECONDITIONING && !isZoneTempDead) {//Currently handled only for standalone
                 if (cachedOccupied.getNextOccupiedSchedule() == null){
                     CcuLog.i(TAG_CCU_SCHEDULER,

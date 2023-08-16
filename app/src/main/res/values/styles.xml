@@ -849,7 +849,7 @@
 
     <style name="safe_mode_cts" parent="@android:style/TextAppearance">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/renatus_75F_accent</item>
+        <item name="android:textColor">?orange_75f</item>
         <item name="android:fontFamily">@font/lato_bold</item>
     </style>
 

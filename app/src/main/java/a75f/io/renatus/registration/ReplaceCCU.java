@@ -28,6 +28,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,6 +65,7 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUListAdapter;
@@ -104,6 +106,20 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+    }
+    @Override
+    public void onResume() {
+        if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+            try {
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                        PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), true);
+                updateCCUFragment.show(ft, "popup");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        super.onResume();
     }
     private AlertDialog progressAlertDialog;
     private ProgressBar progressBar;

@@ -103,23 +103,6 @@ public class DabProfile extends ZoneProfile
     }
     
     @Override
-    public boolean isZoneDead() {
-        
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-    
-        if (dabEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-            || dabEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    @Override
     public void updateZonePoints() {
         
         if (isZoneDead()) {

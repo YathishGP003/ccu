@@ -173,7 +173,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         if (mSchedule.isZoneSchedule())
                         {
                             mSchedule.setDisabled(true);
-                            CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                         }
                         scheduleImageButton.setVisibility(View.GONE);
                         
@@ -188,7 +188,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                         {
                             mSchedule.setDisabled(false);
-                            CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                             scheduleImageButton.setTag(mSchedule.getId());
                         } else
                         {
@@ -204,7 +204,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 scheduleById.setDisabled(false);
                                 if (checkContainment(scheduleById))
                                 {
-                                    CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                                    CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(scheduleById, zone.getId());
                                 }
                             } else if (!zone.hasSchedule())
                             {

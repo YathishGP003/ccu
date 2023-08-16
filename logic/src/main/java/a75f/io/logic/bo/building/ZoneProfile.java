@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -13,6 +15,7 @@ import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.logic.bo.building.schedules.EquipOccupancyHandler;
 import a75f.io.logic.bo.building.schedules.EquipScheduleHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -78,6 +81,45 @@ public abstract class ZoneProfile
      * here.
      */
     public boolean isZoneDead() {
+
+        Equip equip = getEquip();
+
+        if (equip == null) {
+            CcuLog.e(L.TAG_CCU_ZONE, "Profile does not have linked equip , assume zone is dead");
+            return true;
+        }
+
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef == \""+equip.getId()+"\"");
+        if(!point.isEmpty()){
+            HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+            if (hisItem == null) {
+                CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat does not exist for "+equip.getDisplayName());
+                return true;
+            }
+            double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time",
+                                                            equip.getId());
+            if (zoneDeadTime == 0) {
+                CcuLog.e(L.TAG_CCU_ZONE, "Invalid value for zoneDeadTime tuner, use default "+equip.getDisplayName());
+                zoneDeadTime = 15;
+            }
+            if ((System.currentTimeMillis() - hisItem.getDateInMillis()) > zoneDeadTime * 60 * 1000) {
+                CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat "+hisItem.getDate().toString()+" "+equip.getDisplayName()+" "+zoneDeadTime);
+                return true;
+            }
+        }
+
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
+
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and temp and equipRef == \""+equip.getId()+"\"");
+
+        if (currentTemp > (buildingLimitMax + tempDeadLeeway)
+                || currentTemp < (buildingLimitMin - tempDeadLeeway)) {
+            CcuLog.e(L.TAG_CCU_ZONE, "Equip dead : "+equip.getDisplayName()+" currentTemp "+currentTemp);
+            return true;
+        }
+
         return false;
     }
     
@@ -133,7 +175,6 @@ public abstract class ZoneProfile
     }
     
     public void updateOccupancy(CCUHsApi hayStack) {
-        CcuLog.i(TAG_CCU_SCHEDULER, "UpdateOccupancy for Profile: "+getEquip().getDisplayName());
         if (equipScheduleHandler == null || equipOccupancyHandler == null) {
             Equip currentEquip = getEquip();
             if (currentEquip == null) {

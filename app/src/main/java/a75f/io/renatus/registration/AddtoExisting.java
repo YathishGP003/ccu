@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +42,7 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.util.PreferenceConstants;
@@ -123,8 +125,23 @@ public class AddtoExisting extends Fragment {
             toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
             ccuUpdateToast = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
             if(!CCUHsApi.getInstance().isCCURegistered()) {
-                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
-                updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), ccuUpdateToast, getContext(), requireActivity());
+                if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+                    FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                    Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                    if (fragmentByTag != null) {
+                        ft.remove(fragmentByTag);
+                    }
+                    try {
+                        UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                                PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                        updateCCUFragment.show(ft, "popup");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+                    updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), ccuUpdateToast, getContext(), requireActivity());
+                }
             }
 
             mContext = getContext().getApplicationContext();
@@ -501,7 +518,26 @@ public class AddtoExisting extends Fragment {
 
         return siteId;
     }
-
+    @Override
+    public void onResume() {
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+                try {
+                    FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                    Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                    if (fragmentByTag != null) {
+                        ft.remove(fragmentByTag);
+                    }
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                            PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                    updateCCUFragment.show(ft, "popup");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onResume();
+    }
     private void showSiteDialog(String siteId) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -561,10 +597,14 @@ public class AddtoExisting extends Fragment {
                 ProgressDialogUtils.hideProgressDialog();
 
                 if (success) {
-                    Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                    if(getActivity() != null) {
+                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                    }
                     navigateToCCUScreen();
                 } else {
-                    Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                    if(getActivity() != null) {
+                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         };

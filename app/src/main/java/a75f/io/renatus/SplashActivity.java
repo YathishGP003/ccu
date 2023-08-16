@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import org.json.JSONException;
 
 import java.util.HashMap;
 
@@ -23,8 +26,10 @@ import a75f.io.logic.L;
 import a75f.io.logic.SystemProperties;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.safemode.SafeModeActivity;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
@@ -60,12 +65,15 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
 
     private void launchUI() {
         HashMap<Object, Object> site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0 || RestoreCCU.isReplaceCCUUnderProcess()) {
+        if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+            resumeUpdateCCU();
+        } else if (site.size() == 0 || RestoreCCU.isReplaceCCUUnderProcess()) {
             Log.i(TAG,"No Site Synced navigate to Register");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             startActivity(i);
             finish();
-        } else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP)) {
+        }  else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP) &&
+            prefs.getString("INSTALL_TYPE").equals("CREATENEW")) {
             Log.i(TAG,"CCU Setup is not completed");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
@@ -113,7 +121,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             Log.i(TAG,"ADD CCU is not completed");
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
-            i.putExtra("viewpager_position", 23);
+            i.putExtra("viewpager_position", 21);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }else if(prefs.getString("INSTALL_TYPE").equals("ADDCCU") && !prefs.getBoolean("ADD_CCU")){
@@ -125,6 +133,41 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                 && !prefs.getBoolean("REGISTRATION")){
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
+            startActivity(i);
+            finish();
+        } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
+                && !prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
+            Intent i = new Intent(SplashActivity.this,
+                    FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
+            startActivity(i);
+            finish();
+        }
+    }
+
+    private void resumeUpdateCCU(){
+        if (prefs.getString("INSTALL_TYPE").equals("CREATENEW")) {
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 3);
+            startActivity(i);
+            finish();
+        } else if (prefs.getString("INSTALL_TYPE").equals("REPLACECCU")){
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment previousFragment = getSupportFragmentManager().findFragmentByTag("popup");
+            if (previousFragment != null) {
+                ft.remove(previousFragment);
+            }
+            try {
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                        PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), true);
+                updateCCUFragment.show(ft, "popup");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        } else if (prefs.getString("INSTALL_TYPE").equals("ADDCCU")){
+            Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
         }

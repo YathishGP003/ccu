@@ -1010,7 +1010,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (position == 0 && (mScheduleType != -1)) {
                     if (mSchedule.isZoneSchedule()) {
                         mSchedule.setDisabled(true);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
@@ -1037,7 +1037,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
                         specialScheduleImageButton.setTag(mSchedule.getId());
@@ -1054,7 +1054,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
-                            CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(scheduleById, zone.getId());
                         } else {
                             Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
                             /* We are in a situation where there is a zone without a scheduleRef.
@@ -1671,7 +1671,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (position == 0 && (mScheduleType != -1)) {
                     if (mSchedule.isZoneSchedule()) {
                         mSchedule.setDisabled(true);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                     }
 
                     scheduleImageButton.setVisibility(View.GONE);
@@ -1700,7 +1700,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
                         specialScheduleImageButton.setTag(mSchedule.getId());
@@ -1716,7 +1716,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
-                            CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(scheduleById, zone.getId());
                         } else {
                             Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
                             /* We are in a situation where there is a zone without a scheduleRef.

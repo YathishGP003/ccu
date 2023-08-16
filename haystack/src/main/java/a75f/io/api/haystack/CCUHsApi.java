@@ -1982,6 +1982,11 @@ public class CCUHsApi
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
 
+    public void updateZoneScheduleWithoutUpdatingLastModifiedTime(Schedule schedule, String zoneId) {
+        tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
+    }
+
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         tagsDb.addHDict(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
         Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));

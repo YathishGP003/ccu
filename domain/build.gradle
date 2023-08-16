@@ -21,32 +21,32 @@ android {
         }
         dev {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-dev.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.dev.service.75f.io/\"'
         }
         dev_qa {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-qa.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io/\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-75f-service.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.prod.service.75f.io/\"'
         }
         qa {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-qa.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io\"'
 
         }
         staging {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-staging.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.staging.service.75f.io\"'
         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler-service-75f-daikin_prod.azurewebsites.net/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.daikin_prod.service.75f.io\"'
         }
     }
     compileOptions {

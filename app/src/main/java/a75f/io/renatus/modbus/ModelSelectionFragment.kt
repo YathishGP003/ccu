@@ -1,6 +1,8 @@
 package a75f.io.renatus.modbus
 
 import a75f.io.renatus.R
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
@@ -106,8 +108,8 @@ class ModelSelectionFragment : DialogFragment() {
                     placeholder = { Text(placeholder) },
                     singleLine = true,
                     colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = Color.Red,
-                        unfocusedIndicatorColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor,
+                        unfocusedIndicatorColor = greyColor,
                         containerColor = Color.White
 
                     ),

@@ -1,5 +1,7 @@
 package a75f.io.renatus.compose
 
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,8 +22,6 @@ import androidx.compose.ui.unit.dp
  * Created by Manjunath K on 12-06-2023.
  */
 
-var primaryColor = Color(android.graphics.Color.parseColor("#E24301"))
-var greyColor = Color(android.graphics.Color.parseColor("#A1A1A1"))
 @Composable
 fun ToggleButton(
     defaultSelection : Boolean,

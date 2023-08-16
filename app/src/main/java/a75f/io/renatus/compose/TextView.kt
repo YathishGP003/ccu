@@ -1,6 +1,8 @@
 package a75f.io.renatus.compose
 
-import a75f.io.renatus.R
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,8 +25,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,12 +34,6 @@ import androidx.compose.ui.unit.sp
  * Created by Manjunath K on 18-07-2023.
  */
 
-val myFontFamily = FontFamily(
-    Font(R.font.lato_light, FontWeight.Light),
-    Font(R.font.lato_regular, FontWeight.Normal),
-    Font(R.font.lato_regular, FontWeight.Medium),
-    Font(R.font.lato_bold, FontWeight.Bold)
-)
 
 @Composable
 fun HeaderTextView(text: String) {
@@ -103,7 +97,7 @@ fun TitleTextView(text: String) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 33.5.sp,
-            color = Color(android.graphics.Color.parseColor("#E24301")),
+            color = primaryColor
         ),
         text = text
     )
@@ -121,7 +115,7 @@ fun SubTitle(text: String) {
             fontWeight = FontWeight.Normal,
             fontFamily = myFontFamily,
             fontSize =  18.sp,
-            color = Color.Gray
+            color = greyColor
         ),
         text = text
     )
@@ -132,7 +126,7 @@ fun SaveTextView(text: String,onClick: () -> Unit) {
     Button(
         onClick = {onClick()},
         colors = ButtonDefaults.buttonColors(
-            contentColor = Color(android.graphics.Color.parseColor("#E24301")),
+            contentColor = primaryColor,
             containerColor = Color.White // text color
         )
     ) {
@@ -220,7 +214,7 @@ fun TextViewCompose(text: String) {
         modifier = Modifier.width(100.dp),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Red,
+            focusedIndicatorColor = primaryColor,
             unfocusedIndicatorColor = Color.Gray,
             containerColor = Color.White,
             disabledTextColor = Color.Black,

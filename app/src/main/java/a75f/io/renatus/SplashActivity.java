@@ -114,7 +114,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             Log.i(TAG,"ADD CCU is not completed");
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
-            i.putExtra("viewpager_position", 23);
+            i.putExtra("viewpager_position", 21);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }else if(prefs.getString("INSTALL_TYPE").equals("ADDCCU") && !prefs.getBoolean("ADD_CCU")){

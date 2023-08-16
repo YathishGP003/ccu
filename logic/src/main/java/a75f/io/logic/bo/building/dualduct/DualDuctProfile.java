@@ -86,7 +86,7 @@ public class DualDuctProfile extends ZoneProfile {
             CCUHsApi.getInstance().readEntity("equip and group == \"" + dualDuctEquip.nodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
-    
+
     @Override
     public synchronized void updateZonePoints()
     {

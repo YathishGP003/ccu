@@ -176,6 +176,15 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
                 {
                     CCUHsApi.getInstance().deleteEntity(schedule.get("id").toString());
                 }
+
+				ArrayList<HashMap<Object, Object>> schedulablePoints = CCUHsApi.getInstance().readAllEntities("schedulable and zone and roomRef == \"" + sZone.getId()+"\"");
+				for (HashMap<Object, Object> point : schedulablePoints) {
+					if (point.get("writable") != null) {
+						CCUHsApi.getInstance().deleteWritableArray(point.get("id").toString());
+					}
+					CCUHsApi.getInstance().deleteEntityItem(point.get("id").toString());
+				}
+
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
 			boolean usedByOtherApplication = HSUtilKtKt.isFloorUsedByOtherApplicationAsync(floorId);

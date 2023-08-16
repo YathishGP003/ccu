@@ -221,8 +221,8 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 1.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 1.0);
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
             .setDisplayName(equipDis+"-zoneDynamicPriority")

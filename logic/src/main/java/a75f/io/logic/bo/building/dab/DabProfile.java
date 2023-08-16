@@ -101,7 +101,7 @@ public class DabProfile extends ZoneProfile
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+dabEquip.nodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
-    
+
     @Override
     public void updateZonePoints() {
         

@@ -4,7 +4,10 @@ import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -26,6 +29,8 @@ import android.widget.HorizontalScrollView;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import a75f.io.renatus.R;
 
@@ -84,11 +89,11 @@ public class MasterControl extends View {
     //Amount of degrees below the bottom reading and above the top reading.
     int mEdgeDegrees = 2;
 
-    int mDefaultStartDegree = 63;
+    int mDefaultStartDegree = 60;
     int mDefaultVisibleDegrees = 35;
 
     float mLowerBound = 32.0f;
-    float mUpperBound = 110.0f;
+    float mUpperBound = 140.0f;
 
     float mZoneDifferential = 3.0f;
     float mSetBack = 5.0f;
@@ -117,6 +122,8 @@ public class MasterControl extends View {
     }
 
     RectF[] hitBoxes = new RectF[MasterControlState.values().length];
+    RectF heatingRect = new RectF();
+    RectF coolingRect = new RectF();
     float[] temps = new float[MasterControlState.values().length];
     Bitmap[] bitmaps = new Bitmap[MasterControlState.values().length];
     Matrix matrix = new Matrix();
@@ -162,7 +169,8 @@ public class MasterControl extends View {
 
     private MasterControlState isHitBoxTouched(float x, float y) {
         for (int i = 0; i < hitBoxes.length; i++) {
-            if (hitBoxes[i].contains(x, y)) {
+            Log.d("MasterControl", "HitBox was selected: " + hitBoxes[i]);
+            if (hitBoxes[i].contains(x,y)) {
                 MasterControlState retVal = MasterControlState.values()[i];
                 Log.d("MasterControl", "HitBox was selected: " + retVal.name());
 
@@ -173,66 +181,54 @@ public class MasterControl extends View {
         return MasterControlState.NONE;
     }
 
+    /*
+    parameters - x and y value of the touch.
+    returns - if its heating or cooling line
+    here we return Upper limit as we donot have a separate state for
+    whole line.
+     */
+    private MasterControlState isHitLineTouched(float x, float y) {
+       if(heatingRect.contains(x,y))
+           return MasterControlState.UPPER_HEATING_LIMIT;
+       else if(coolingRect.contains(x,y))
+           return  MasterControlState.UPPER_COOLING_LIMIT;
+       else
+           return MasterControlState.NONE;
+    }
+
     private MasterControlState mSelected = MasterControlState.NONE;
 
+    private static Activity unwrap(Context context) {
+        while (!(context instanceof Activity) && context instanceof ContextWrapper) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+
+        return (Activity) context;
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        Log.i("MasterControl", "X: " + event.getX() + " Y: " + event.getY());
+        Log.i("MasterControl", "X: " + event.getX() + " Y: " + event.getY()+"Action is"+event.getAction());
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mSelected = isHitBoxTouched(event.getX(), event.getY());
+                mSelected = isHitLineTouched(event.getX(), event.getY());
                 getParent().requestDisallowInterceptTouchEvent(false);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float selectedTemp = getTempForPX((int) event.getX());
-                if (selectedTemp >= mLowerBound && selectedTemp <= mUpperBound) {
+                Boolean flag = null;
+                if(mSelected == MasterControlState.LOWER_HEATING_LIMIT ||
+                        mSelected == MasterControlState.UPPER_HEATING_LIMIT)
+                    flag = true;
+                else if(mSelected == MasterControlState.LOWER_COOLING_LIMIT ||
+                        mSelected == MasterControlState.UPPER_COOLING_LIMIT)
+                    flag = false;
 
-                    if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
-                        if (selectedTemp >= (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()]+(hdb+cdb)) && selectedTemp <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] - cdb) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    } else if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
-                        if (selectedTemp >= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb &&
-                                selectedTemp >= (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()]+(cdb+hdb))&&
-                                selectedTemp <= (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential)) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    }
-                    else if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
-                        if (selectedTemp>= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb && selectedTemp <= (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]-(cdb+hdb))) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    }
-                    else if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
-                        if (selectedTemp <= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - hdb &&
-                                 selectedTemp<= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]-(cdb+hdb) &&
-                                selectedTemp >= (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    } else if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
-                        if (selectedTemp <= ((temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack) - mZoneDifferential)) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    } else if (mSelected == MasterControlState.UPPER_BUILDING_LIMIT) {
-                        if (selectedTemp >= (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = selectedTemp;
-                        }
-                    }
-
-                    invalidate();
+                if(flag != null) {
+                    UserLimitScaleFragment fragment = UserLimitScaleFragment.Companion.newInstance(flag);
+                    Context unwrappedContext = unwrap(getContext());
+                    androidx.fragment.app.FragmentActivity fm = (androidx.fragment.app.FragmentActivity) unwrappedContext;
+                    fragment.show(fm.getSupportFragmentManager(), "dialog");
                 }
-                break;
-            case MotionEvent.ACTION_UP:
-                mSelected = MasterControlState.NONE;
-                invalidate();
                 break;
         }
 
@@ -567,6 +563,10 @@ public class MasterControl extends View {
                 drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT, lowerBuildingTemp);
             }
         }
+
+        // add the left of lower limit and right of higher limit to cover whole line as a rectangle
+        heatingRect.set(hitBoxes[4].left,hitBoxes[4].top,hitBoxes[3].right,hitBoxes[3].bottom);
+        coolingRect.set(hitBoxes[5].left,hitBoxes[5].top,hitBoxes[6].right,hitBoxes[6].bottom);
     }
 
     private void drawArrowDiffText(Canvas canvas, String text,
@@ -638,7 +638,6 @@ public class MasterControl extends View {
         matrix.reset();
         hitBoxes[controlState.ordinal()].set(0, 0, bitmaps[controlState.ordinal()].getWidth() - 10,
                 (float) bitmaps[controlState.ordinal()].getHeight() - 10);
-
 
         matrix.reset();
         matrix.postTranslate((float) xLoc - mHitBoxPadding, yLoc - mHitBoxPadding);

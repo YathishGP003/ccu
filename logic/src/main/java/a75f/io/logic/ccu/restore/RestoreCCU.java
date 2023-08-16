@@ -503,6 +503,8 @@ public class RestoreCCU {
         restoreCCUHsApi.importZoneSchedule(roomRefSet, retryCountCallback);
         restoreCCUHsApi.importNamedSchedule(retryCountCallback);
         restoreCCUHsApi.importZoneSpecialSchedule(roomRefSet, retryCountCallback);
+        restoreCCUHsApi.importSchedulablePoints(roomRefSet,retryCountCallback);
+
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.ZONE_SCHEDULE, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

@@ -14,6 +14,8 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -65,16 +67,20 @@ import java.util.TimeZone;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
@@ -925,12 +931,19 @@ public class CreateNewSite extends Fragment {
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
         BuildingTuners.getInstance().updateBuildingTuners();
+        SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
         //SystemEquip.getInstance();
         DiagEquip.getInstance().create();
+        updateMigrationDiagWithAppVersion();
         L.ccu().systemProfile = new DefaultSystem();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);
+        HashMap<Object, Object> buildingOccupancy =
+                CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
+        if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
+            BuildingOccupancy.buildDefaultBuildingOccupancy();
+        }
 
         new Handler().postDelayed(() -> CCUHsApi.getInstance().importNamedScheduleWithOrg(
                 new HClient(CCUHsApi.getInstance().getHSUrl(),
@@ -977,6 +990,7 @@ public class CreateNewSite extends Fragment {
             CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
         }
         BuildingTuners.getInstance();
+        SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();
@@ -1009,6 +1023,19 @@ public class CreateNewSite extends Fragment {
     private Spanned getHTMLCodeForHints( int resource){
         return Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory)
                 + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(resource) + "</font></big>");
+    }
+
+    private void updateMigrationDiagWithAppVersion(){
+        PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+        try {
+            PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
+            String appVersion = info.versionName + "." + info.versionCode;
+            CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", appVersion);
+            CcuLog.d(TAG, "Update Migration Diag Point for NewSite");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void updateBacnetConfig(String siteName, String ccuName) {

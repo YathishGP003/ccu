@@ -102,23 +102,21 @@ public class DeviceUtil {
         if (equip == null) {
             return false;
         }
-        double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
-                                                  + equip.getId()+"\"");
+        double coolingDeadband = CCUHsApi.getInstance().readPointPriorityVal("cooling and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
     
-        double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-                                                  +equip.getId()+"\"");
+        double heatingDeadband = CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
         
         BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
         if ((desiredTemp + coolingDeadband) > buildingTuner.getMaxCoolingUserLimit() ||
-            (desiredTemp + coolingDeadband) < buildingTuner.getMinCoolingUserLimit() ||
-            (desiredTemp - heatingDeadband) < buildingTuner.getMinHeatingUserLimit() ||
-            (desiredTemp - heatingDeadband > buildingTuner.getMaxHeatingUserLimit())) {
+                (desiredTemp + coolingDeadband) < buildingTuner.getMinCoolingUserLimit() ||
+                (desiredTemp - heatingDeadband) < buildingTuner.getMinHeatingUserLimit() ||
+                (desiredTemp - heatingDeadband > buildingTuner.getMaxHeatingUserLimit())) {
             CcuLog.d(L.TAG_CCU_DEVICE,
                      "validateDesiredTempUserLimits desiredTemp "+desiredTemp+" coolingDeadband "+coolingDeadband+"" +
-                     " heatingDeadband "+heatingDeadband+" maxCoolingLimit "+buildingTuner.getMaxCoolingUserLimit()+
-                     " minCoolingLimit "+buildingTuner.getMinCoolingUserLimit()+
-                     " minHeatingLimit "+buildingTuner.getMinHeatingUserLimit()+
-                     " maxHeatingLimit "+buildingTuner.getMaxHeatingUserLimit());
+                             " heatingDeadband "+heatingDeadband+" maxCoolingLimit "+buildingTuner.getMaxCoolingUserLimit()+
+                             " minCoolingLimit "+buildingTuner.getMinCoolingUserLimit()+
+                             " minHeatingLimit "+buildingTuner.getMinHeatingUserLimit()+
+                             " maxHeatingLimit "+buildingTuner.getMaxHeatingUserLimit());
             return false;
         }
         return true;

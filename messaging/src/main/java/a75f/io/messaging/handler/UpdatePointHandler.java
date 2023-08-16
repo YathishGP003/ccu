@@ -60,7 +60,7 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
-        if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
+        if (HSUtil.isBuildingTuner(pointUid, hayStack)  ||  (HSUtil.isSchedulable(pointUid, hayStack))) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
@@ -169,7 +169,7 @@ public class UpdatePointHandler implements MessageHandler
                 updateBackfillDuration(backFillVal.getAsDouble());
             }
         }
-        
+
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
             fetchRemotePoint(pointUid, isDataSync, msgObject);

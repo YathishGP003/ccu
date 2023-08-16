@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.util.SchedulableMigrationKt.doPointWriteForSchedulable;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -32,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.exception.NullHGridException;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.SyncStatusService;
@@ -590,7 +593,7 @@ public class RestoreCCUHsApi {
         try {
             HDict buildingDict =
                     new HDictBuilder().add("filter",
-                            "building and schedule and not special and siteRef == " +
+                            "building and schedule and vacation and not special and siteRef == " +
                                     StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid buildingSch = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict), retryCountCallback);
 
@@ -616,10 +619,49 @@ public class RestoreCCUHsApi {
         Log.i(TAG, "Import building schedule completed");
     }
 
-    private void importBuildingSpecialSchedule(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
+    public void importBuildingOccupancy(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
+        Log.i(TAG, "Import building Occupancy started");
+        HashMap<Object, Object> buildingOccupancyMap =
+                CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
+        if (!buildingOccupancyMap.isEmpty()) {
+            //CCU already has a building occupancy.
+            CcuLog.i(TAG, " importBuildingOccupancy : buildingOccupancy exists");
+            return;
+        }
+        try {
+            HDict buildingDict =
+                    new HDictBuilder().add("filter",
+                            "building and occupancy and siteRef == " + siteId).toDict();
+            HGrid buildingOcc = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict),retryCountCallback);
+
+            if (buildingOcc == null) {
+                return;
+            }
+
+            Iterator it = buildingOcc.iterator();
+            while (it.hasNext()) {
+                HRow r = (HRow) it.next();
+                BuildingOccupancy buildingOccupancy =
+                        new BuildingOccupancy.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+
+                String guid = buildingOccupancy.getId();
+                buildingOccupancy.setSiteRef(siteId);
+                CCUHsApi.getInstance().addSchedule(guid, buildingOccupancy.getBuildingOccupancyHDict());
+                CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
+            }
+        } catch (UnknownRecException e) {
+            Log.i(TAG, "Exception occurred while Importing Building Occupancy "+e.getMessage());
+            e.printStackTrace();
+        }
+        Log.i(TAG, "Import building Occupancy completed");
+
+    }
+
+
+    public void importBuildingSpecialSchedule(String siteId, HClient hClient,boolean isSchedulableMigration,RetryCountCallback retryCountCallback){
 
         HashMap<Object, Object>  currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and special");
-        if (!currentBuildingSchedule.isEmpty()) {
+        if (!currentBuildingSchedule.isEmpty() && !isSchedulableMigration) {
             //CCU already has a building special schedule.
             CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
             return;
@@ -660,6 +702,7 @@ public class RestoreCCUHsApi {
         CcuLog.i(TAG, " import BuildingTuners started");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
+        ArrayList<Point> schedulablePoints = new ArrayList<>();
         try {
             HDict tunerEquipDict = new HDictBuilder().add("filter",
                     "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
@@ -680,6 +723,27 @@ public class RestoreCCUHsApi {
             List<HashMap> pointMaps = ccuHsApi.HGridToList(tunerPointsGrid);
             pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
 
+
+            HDict schedulablePointsDict = new HDictBuilder().add("filter",
+                    "schedulable and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid schedulablePointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(schedulablePointsDict),retryCountCallback);
+            if (schedulablePointsGrid == null) {
+                throw new NullHGridException("Null occurred while importing building schedulable");
+            }
+
+            List<HashMap> schedpointMaps = ccuHsApi.HGridToList(schedulablePointsGrid);
+            schedpointMaps.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
+
+            HDict buildinglimitDict = new HDictBuilder().add("filter",
+                    "building and (limit or differential) and not tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid buildinglimitGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildinglimitDict),retryCountCallback);
+            if (buildinglimitGrid == null) {
+                throw new NullHGridException("Null occurred while importing building limits");
+            }
+
+            List<HashMap> buildingLimits = ccuHsApi.HGridToList(buildinglimitGrid);
+            buildingLimits.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
+
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }
@@ -687,6 +751,7 @@ public class RestoreCCUHsApi {
 
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Equip q : equips) {
+            CcuLog.i(TAG, " Equip -"+q.getDisplayName());
             if (q.getMarkers().contains("tuner"))
             {
                 String equiUuid;
@@ -716,6 +781,27 @@ public class RestoreCCUHsApi {
                             hsApi.setSynced(pointLuid);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
+                        }
+
+                    }
+                }
+
+                //Points
+                for (Point p : schedulablePoints)
+                {
+                    if (p.getEquipRef().equals(q.getId()))
+                    {
+                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
+                        HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
+                        if (point.isEmpty()) {
+                            p.setSiteRef(hsApi.getSiteIdRef().toString());
+                            p.setFloorRef("@SYSTEM");
+                            p.setRoomRef("@SYSTEM");
+                            p.setEquipRef(equiUuid);
+                            String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
+                            hsApi.setSynced(pointLuid);
+                        } else {
+                            CcuLog.i(TAG, "Schedulable default Point already imported "+p.getId());
                         }
 
                     }
@@ -767,11 +853,13 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        importBuildingSchedule(siteId, hClient, retryCountCallback);
+       importBuildingSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient,retryCountCallback);
+
+        //import building occupancy
+        importBuildingOccupancy(StringUtils.prependIfMissing(siteId, "@"), hClient,retryCountCallback);
 
         //import building special schedule
-        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient, retryCountCallback);
-
+        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"),hClient,false, retryCountCallback);
         //import building tuners
         importBuildingTuners(siteId, hClient, retryCountCallback);
 
@@ -901,6 +989,46 @@ public class RestoreCCUHsApi {
         HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(equipId, "@"))).toDict();
 
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
+    }
+
+    public void importSchedulablePoints(Set<String> zoneRefSet ,RetryCountCallback retryCountCallback) {
+        Log.i(TAG, " Importing Zone  schedulable started");
+        ArrayList<Point> points = new ArrayList<>();
+        StringBuffer zoneRefString = new StringBuffer("(");
+        int index = 0;
+        for (String zoneRef : zoneRefSet) {
+            zoneRefString.append("roomRef == ");
+            zoneRefString.append(StringUtils.prependIfMissing(zoneRef, "@"));
+            if (index == zoneRefSet.size() - 1) {
+                zoneRefString.append(" ) ");
+            } else {
+                zoneRefString.append(" or ");
+            }
+            index++;
+        }
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict zoneSchedulableDict = new HDictBuilder().add("filter",
+                "schedulable and zone and " + zoneRefString).toDict();
+        HGrid schedulableZonePointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneSchedulableDict),retryCountCallback);
+        if (schedulableZonePointsGrid == null) {
+            throw new NullHGridException("Null occurred while importing schedulable zone points");
+        }
+        List<HashMap> zonepointMaps = ccuHsApi.HGridToList(schedulableZonePointsGrid);
+        zonepointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+
+
+        for (Point point : points) {
+            String pointId = StringUtils.prependIfMissing(point.getId(), "@");
+            HashMap<Object, Object> p = ccuHsApi.readMapById(pointId);
+            if (p.isEmpty()) {
+                String pointLuid = ccuHsApi.addRemotePoint(point, point.getId().replace("@", ""));
+                ccuHsApi.setSynced(pointLuid);
+            } else {
+                CcuLog.i(TAG, "Point already imported " + point.getId());
+            }
+        }
+        doPointWriteForSchedulable();
+        Log.i(TAG, " Importing schedulable zone points completed");
     }
 
 }

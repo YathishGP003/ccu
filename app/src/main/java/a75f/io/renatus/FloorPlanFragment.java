@@ -68,6 +68,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
@@ -1189,6 +1190,7 @@ public class FloorPlanFragment extends Fragment {
                         .setSiteRef(siteMap.get("id").toString())
                         .build();
                 String zoneId = CCUHsApi.getInstance().addZone(hsZone);
+                SchedulabeLimits.Companion.addSchedulableLimits(false,zoneId,hsZone.getDisplayName());
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                 hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));

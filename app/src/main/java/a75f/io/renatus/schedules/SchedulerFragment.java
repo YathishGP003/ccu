@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Space;
@@ -66,16 +67,36 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
+import a75f.io.renatus.StatusPagerAdapter;
+import a75f.io.renatus.ZoneFragmentNew;
+import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import static a75f.io.usbserial.UsbModbusService.TAG;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener {
 
@@ -117,6 +138,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private OnExitListener mOnExitListener;
     private VacationAdapter mVacationAdapter;
     private RecyclerView specialScheduleRecycler;
+    FrameLayout frameLayout;
 
     @Override
     public void onStop() {
@@ -203,6 +225,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -243,6 +266,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewFriday = rootView.findViewById(R.id.textViewFriday);
         textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
         textViewSunday = rootView.findViewById(R.id.textViewSunday);
+        frameLayout = rootView.findViewById(R.id.zoneScheduleFragmentContainer);
 
         //Time lines with 2 hrs Interval 00:00 to 24:00
         view00 = rootView.findViewById(R.id.view00);
@@ -311,6 +335,15 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewScheduletitle.setFocusable(true);
 
+        Fragment childFragment;
+        if(getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)) {
+            childFragment = new ZoneScheduleFragment(getArguments().getString(PARAM_ROOM_REF));
+        }else {
+            childFragment = new ZoneScheduleFragment();
+        }
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.zoneScheduleFragmentContainer, childFragment).commit();
+
         return rootView;
     }
 
@@ -357,14 +390,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         
-        if(schedule != null && schedule.isZoneSchedule()||(getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)))
+        if((getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)))
         {
             textViewScheduletitle.setText("Zone Schedule");
+
+            updateUI();
+        }else {
+            frameLayout.setVisibility(View.GONE);
+            textViewScheduletitle.setVisibility(View.GONE);
         }
-        
         loadVacations();
         loadSpecialSchedules();
-        updateUI();
     }
 
     private void updateUI() {
@@ -437,15 +473,55 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
         SpecialScheduleDialogFragment  specialScheduleDialogFragment =
                 new SpecialScheduleDialogFragment(specialScheduleId, roomRef,
-                        (scheduleName, startDate, endDate, coolVal, heatVal) -> {
+                        (scheduleName, startDate, endDate, coolVal, heatVal,
+                         coolingUserLimitMax,
+                         coolingUserLimitMin,
+                         heatingUserLimitMax,
+                         heatingUserLimitMin,
+                         coolingDeadband,
+                         heatingDeadband) -> {
+                    String warning = SpecialSchedule.validateSpecialSchedule(coolVal, heatVal,coolingUserLimitMax,
+                            coolingUserLimitMin,
+                            heatingUserLimitMax,
+                            heatingUserLimitMin,
+                            coolingDeadband,
+                            heatingDeadband);
+                    if(warning != null){
+                        android.app.AlertDialog.Builder builder =
+                                new android.app.AlertDialog.Builder(getActivity());
+                        builder.setMessage(warning);
+                        builder.setCancelable(false);
+                        builder.setTitle(R.string.warning_ns);
+                        builder.setIcon(R.drawable.ic_alert);
+                        builder.setNegativeButton("OKAY", (dialog1, id) -> {
+                            dialog1.dismiss();
+                        });
+
+                        AlertDialog alert = builder.create();
+                        alert.show();
+
+                        return;
+                    }
+
                             ProgressDialogUtils.showProgressDialog(SchedulerFragment.this.getActivity(),
                                     "Adding Special Schedule...");
                             if (StringUtils.isEmpty(roomRef)) {
                                 SpecialSchedule.createSpecialSchedule(specialScheduleId, scheduleName, startDate,
-                                        endDate, coolVal, heatVal, false, null);
+                                        endDate, coolVal, heatVal,coolingUserLimitMax,
+                                        coolingUserLimitMin,
+                                        heatingUserLimitMax,
+                                        heatingUserLimitMin,
+                                        coolingDeadband,
+                                        heatingDeadband, false, null);
                             } else {
                                 SpecialSchedule.createSpecialSchedule(specialScheduleId, scheduleName, startDate,
-                                        endDate, coolVal, heatVal, true, roomRef);
+                                        endDate, coolVal, heatVal,
+                                        coolingUserLimitMax,
+                                        coolingUserLimitMin,
+                                        heatingUserLimitMax,
+                                        heatingUserLimitMin,
+                                        coolingDeadband,
+                                        heatingDeadband,true, roomRef);
                             }
 
                             CCUHsApi.getInstance().saveTagsData();
@@ -763,8 +839,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
                 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Zone Schedule is outside building schedule currently set. " +
-                                   "Proceed with trimming the zone schedules to be within the building schedule \n"+spillZones)
+                builder.setMessage("Zone Schedule is outside building occupancy currently set. " +
+                                   "Proceed with trimming the zone schedules to be within the building occupancy \n"+spillZones)
                        .setCancelable(false)
                        .setTitle("Schedule Errors")
                        .setIcon(android.R.drawable.ic_dialog_alert)
@@ -826,12 +902,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 String zoneSchedulesWarning = "" ;
                 if (schedules.contains("named")) {
                     namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
-                            "building schedule.\n"
+                            "building occupancy.\n"
                             + ((spillNamedZones.toString()).equals("") ? "" : "\tThe Schedule is " +
                             "outside by \n\t" + spillNamedZones.toString()+"\n");
                     if(schedules.contains("zone")){
                         zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                                "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                                "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
                                 "is outside by \n\t" + spillZones.toString());
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -852,7 +928,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
                 else if(schedules.contains("zone")){
                     zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                            "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                            "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
                             "is outside by \n\t" + spillZones.toString());
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(zoneSchedulesWarning)
@@ -918,19 +994,19 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
             ArrayList<Interval> intervalSpills = new ArrayList<>();
             ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals(daysArrayList);
-    
+
             for (Interval v : systemIntervals)
             {
                 CcuLog.d(L.TAG_CCU_UI,"Merged System interval " + v);
             }
-            
+
             ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals(daysArrayList);
-    
+
             for (Interval v : zoneIntervals)
             {
                 CcuLog.d(L.TAG_CCU_UI, "Zone interval "+v);
             }
-            
+
             for(Interval z : zoneIntervals) {
                 boolean add = true;
                for (Interval s: systemIntervals) {
@@ -965,7 +1041,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             {
                 spillsMap.put(schedule.getRoomRef(), intervalSpills);
             }
-            
+
         } else if (schedule.isBuildingSchedule()) {
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
             Collections.sort(zones, (lhs, rhs) -> lhs.get("floorRef").toString().compareTo(rhs.get("floorRef").toString()));
@@ -1332,6 +1408,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 if(mScheduleId != null) {
                     schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
                 }
+
+                Schedule.Days day = schedule.getDays().get(clickedPosition);
                     ArrayList<Schedule.Days> days = schedule.getDays();
                     try {
                         Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));

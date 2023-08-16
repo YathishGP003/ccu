@@ -172,7 +172,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     {
                         if (mSchedule.isZoneSchedule())
                         {
-                            mSchedule.setDisabled(true);
+                            //mSchedule.setDisabled(true);
                             CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                         }
                         scheduleImageButton.setVisibility(View.GONE);
@@ -381,7 +381,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             }
     
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            builder.setMessage("Zone Schedule is outside building schedule currently set. " +
+            builder.setMessage("Zone Schedule is outside building occupancy currently set. " +
                                "Proceed with trimming the zone schedules to be within the building schedule \n"+spillZones)
                    .setCancelable(false)
                    .setTitle("Schedule Errors")

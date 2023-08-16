@@ -393,11 +393,9 @@ public class SystemScheduleUtil {
             CcuLog.d(L.TAG_CCU_SCHEDULER, "Failed to read schedule : schedule type update cannot be completed for "
                      +zone+" scheduleRef "+scheduleById);
         }
-        if (CCUHsApi.getInstance().readPointPriorityVal(p.getId()) == ScheduleType.ZONE.ordinal()) {
-            schedule.setDisabled(false);
-        } else {
-            schedule.setDisabled(true);
-        }
+
+        schedule.setDisabled(false);
+
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null){
             CCUHsApi.getInstance().updateScheduleNoSync(schedule, schedule.getRoomRef());
         }

@@ -21,6 +21,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.util.CCUUiUtil;
 
@@ -127,6 +128,7 @@ public class RegisterGatherSiteDetails extends Activity {
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
         Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         BuildingTuners.getInstance();
+        SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
         //SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();

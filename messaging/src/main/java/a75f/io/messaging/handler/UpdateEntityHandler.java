@@ -24,6 +24,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -75,6 +76,8 @@ public class UpdateEntityHandler implements MessageHandler {
                         ccuHsApi.updateFloorLocally(floor, floor.getId());
                     }
                 }
+            } else if (entity.containsKey(Tags.BUILDING) && entity.containsKey(Tags.OCCUPANCY)) {
+                updateBuildingOccupancy(uid);
             }
         });
 
@@ -187,5 +190,27 @@ public class UpdateEntityHandler implements MessageHandler {
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         long timeToken = jsonObject.get("timeToken").getAsLong();
         updateEntity(jsonObject, timeToken);
+    }
+
+    private static void updateBuildingOccupancy(String uid){
+        String response = getResponseString(uid);
+        if (response != null) {
+            HZincReader hZincReader = new HZincReader(response);
+            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+            while (hZincReaderIterator.hasNext()) {
+                HDict schedule = (HDict) hZincReaderIterator.next();
+                CCUHsApi.getInstance().updateHDictNoSync(uid,
+                        new HDictBuilder().add(schedule).toDict());
+                final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(schedule).toDict()).build();
+                UpdateScheduleHandler.trimZoneSchedules(s);
+            }
+        }
+    }
+
+    private static String getResponseString(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
 }

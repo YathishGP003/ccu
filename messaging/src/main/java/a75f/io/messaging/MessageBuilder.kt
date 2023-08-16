@@ -29,9 +29,14 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
     var messagePojo = Message(messageId)
     messagePojo.command = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_COMMAND)?.asString
 
+
+
     if (messagePojo.command == null) {
         throw InvalidMessageFormatException("Invalid Command")
     }
+
+    if(messagePojo.command == SchedulerRevampMigrationHandler.CMD)
+        return messagePojo
 
     messagePojo.id = messagePojo.command?.let { parseId(messageContent as JsonObject, it) }
     messagePojo.ids = messagePojo.command?.let { parseIds(messageContent as JsonObject, it) }

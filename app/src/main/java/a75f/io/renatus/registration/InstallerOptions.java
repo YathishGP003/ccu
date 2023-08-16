@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -33,12 +34,17 @@ import android.widget.ToggleButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Iterator;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
@@ -141,7 +147,8 @@ public class InstallerOptions extends Fragment {
     private View toastLayout;
 
     private static final String TAG = InstallerOptions.class.getSimpleName();
-
+    ArrayList<String> regAddressBands = new ArrayList<>();
+    ArrayList<String> addressBand = new ArrayList<>();
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
         imageTemp.setTempControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
 
@@ -254,30 +261,15 @@ public class InstallerOptions extends Fragment {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
 
-        ArrayList<String> addressBand = new ArrayList<>();
         for (int addr = 1000; addr <= 10900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
 
-        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, addressBand);
-        analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-
-        mAddressBandSpinner.setAdapter(analogAdapter);
-
-
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        //if ccu exists
-        if (ccu.size() > 0) {
-            for (String addBand : addressBand) {
-                String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
-                if (addBand.equals(addB)) {
-                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand),false);
-                    break;
-                }
-            }
-        } else {
-            ccu().setSmartNodeAddressBand((short) 1000);
-        }
+        ArrayList<HashMap> equipments = CCUHsApi.getInstance().readAll("equip and zone");
+        if (equipments.size() == 0)
+            getRegisteredAddressBand(); // doing this when no equips available
+        else
+            setNodeAddress();
 
         mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -321,6 +313,7 @@ public class InstallerOptions extends Fragment {
 
         if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
         else mNext.setVisibility(View.GONE);
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (ccu.size() == 0) {
@@ -785,5 +778,67 @@ public class InstallerOptions extends Fragment {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+    }
+
+    private void getRegisteredAddressBand() {
+        RxjavaUtil.executeBackgroundTask(
+                ()->{
+                    regAddressBands.clear();
+                },
+                ()->{
+                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                    HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
+                    HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                    if(addressPoint == null) {
+                        Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(getActivity(),"Couldn't find the remote node addresses, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
+                            setNodeAddress();
+                        });
+                    }
+                    Iterator it = addressPoint.iterator();
+                    while (it.hasNext())
+                    {
+                        HRow r = (HRow) it.next();
+                        if (r.getStr("group") != null) {
+                            regAddressBands.add(r.getStr("group"));
+                        }
+                    }
+                },
+                ()->{
+                    for(int i = 0; i < regAddressBands.size(); i++)
+                    {
+                        for(int j = 0; j < addressBand.size(); j++)
+                        {
+                            if(regAddressBands.get(i).equals(addressBand.get(j)))
+                            {
+                                addressBand.remove(regAddressBands.get(i));
+                            }
+                        }
+                    }
+                    setNodeAddress();
+                }
+        );
+    }
+
+    public void setNodeAddress(){
+        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, addressBand);
+        analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        mAddressBandSpinner.setAdapter(analogAdapter);
+
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        //if ccu exists
+        if (ccu.size() > 0) {
+            for (String addBand : addressBand) {
+                String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
+                if (addBand.equals(addB)) {
+                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand),false);
+                    break;
+                }
+            }
+        } else {
+            ccu().setSmartNodeAddressBand((short) 1000);
+        }
     }
 }

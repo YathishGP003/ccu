@@ -29,10 +29,12 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.messaging.MessageHandler;
 
 public class UpdateEntityHandler implements MessageHandler {
     public static final String CMD = "updateEntity";
+    private static ZoneDataInterface zoneDataInterface = null;
     public static void updateEntity(JsonObject msgObject, long timeToken){
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
@@ -118,12 +120,35 @@ public class UpdateEntityHandler implements MessageHandler {
                 zone.setCreatedDateTime(getCreatedDateTime(row));
                 zone.setLastModifiedDateTime(getLastModifiedTime(row));
                 zone.setLastModifiedBy(getLastModifiedBy(row, ccuHsApi));
-                zone.setBacnetId(Integer.parseInt(row.get("bacnetId").toString()));
-                zone.setBacnetType(row.get("bacnetType").toString());
+                zone.setBacnetId(getBacnetId(row, ccuHsApi));
+                zone.setBacnetType(getBacnetType(row, ccuHsApi));
                 CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
+
+                if (zoneDataInterface != null) {
+                    zoneDataInterface.refreshScreen("");
+                }
             }
         }
     }
+
+    private static String getBacnetType(HRow row, CCUHsApi ccuHsApi) {
+        if(row.has("bacnetType")) {
+            return row.get("bacnetType").toString();
+        }else {
+            Zone zone = new Zone.Builder().setHashMap(ccuHsApi.readMapById(row.get("id").toString())).build();
+            return zone.getBacnetType();
+        }
+    }
+
+    private static int getBacnetId(HRow row, CCUHsApi ccuHsApi) {
+        if(row.has("bacnetId")) {
+            return Integer.parseInt(row.get("bacnetId").toString());
+        }else {
+            Zone zone = new Zone.Builder().setHashMap(ccuHsApi.readMapById(row.get("id").toString())).build();
+            return zone.getBacnetId();
+        }
+    }
+
     private static String getLastModifiedBy(HRow row, CCUHsApi ccuHsApi) {
         Object lastModifiedBy = row.get("lastModifiedBy", false);
         if(lastModifiedBy != null){
@@ -150,6 +175,8 @@ public class UpdateEntityHandler implements MessageHandler {
             return HDateTime.make(System.currentTimeMillis());
         }
     }
+    public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
+
     @NonNull
     @Override
     public List<String> getCommand() {

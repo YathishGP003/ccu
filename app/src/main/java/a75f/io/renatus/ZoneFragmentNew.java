@@ -108,6 +108,7 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
@@ -3637,6 +3638,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
         UpdatePointHandler.setZoneDataInterface(this);
+        UpdateEntityHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {
@@ -3649,6 +3651,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             HyperStatMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
             UpdatePointHandler.setZoneDataInterface(this);
+            UpdateEntityHandler.setZoneDataInterface(this);
         }
     }
 
@@ -3663,6 +3666,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
         UpdatePointHandler.setZoneDataInterface(null);
+        UpdateEntityHandler.setZoneDataInterface(null);
     }
 
     @Override

@@ -44,6 +44,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -75,6 +76,7 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -144,9 +146,25 @@ public class CreateNewSite extends Fragment {
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
         if(!CCUHsApi.getInstance().isCCURegistered()) {
-            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
-            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+            if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()){
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                if (fragmentByTag != null) {
+                    ft.remove(fragmentByTag);
+                }
+                try {
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                            PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                    updateCCUFragment.show(ft,"popup");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+                updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), toastLayout, getContext(), requireActivity());
+            }
         }
+
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
@@ -498,7 +516,26 @@ public class CreateNewSite extends Fragment {
 
         return rootView;
     }
-
+    @Override
+    public void onResume() {
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+                try {
+                    FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                    Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                    if (fragmentByTag != null) {
+                        ft.remove(fragmentByTag);
+                    }
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                            PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                    updateCCUFragment.show(ft, "popup");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onResume();
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

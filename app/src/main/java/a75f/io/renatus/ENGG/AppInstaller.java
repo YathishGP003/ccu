@@ -197,7 +197,7 @@ public class AppInstaller
         return dowloadId;
     }
 
-    private void checkDownload(long downloadId, DownloadManager downloadManager, Fragment currentFragment, FragmentActivity activity) {
+    public void checkDownload(long downloadId, DownloadManager downloadManager, Fragment currentFragment, FragmentActivity activity) {
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
             @Override

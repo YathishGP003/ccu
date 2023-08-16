@@ -112,7 +112,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
     }
 
 
-    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize) {
+    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize) throws JSONException {
         String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
             FragmentTransaction ft = parentFragmentManager.beginTransaction();
             Fragment previousFragment = parentFragmentManager.findFragmentByTag("popup");
@@ -120,7 +120,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                 ft.remove(previousFragment);
             }
             UpdateCCUFragment newFragment = new UpdateCCUFragment(currentAppVersionWithPatch,
-                    ccu, fileSize);
+                    ccu, fileSize, true);
             newFragment.show(ft, "popup");
     }
 

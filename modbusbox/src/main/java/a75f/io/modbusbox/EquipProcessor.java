@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.EquipmentDevice_;
@@ -39,37 +36,10 @@ public class EquipProcessor
     }
 
 
-    public List<String> getEquipNamesByProfile(String equipType){
-
-        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
-        configQuery.equal(EquipmentDevice_.equipType, equipType);
-        List<String> modbusNames = new ArrayList<>();
-        for(EquipmentDevice equipmentDevice : configQuery.build().find()){
-            modbusNames.add(equipmentDevice.getName());
-        }
-        return modbusNames;
-    }
-
     public EquipmentDevice getEquipBySlave(int slaveId){
         QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
         configQuery.equal(EquipmentDevice_.slaveId, slaveId);
         configQuery.equal(EquipmentDevice_.isPaired, true);
-        return configQuery.build().findFirst();
-    }
-
-
-    public EquipmentDevice getEquipByEquipTypeAndName(String equipType, String name){
-        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
-        configQuery.equal(EquipmentDevice_.equipType, equipType);
-        configQuery.equal(EquipmentDevice_.name, name);
-        return configQuery.build().findFirst();
-    }
-
-    public  EquipmentDevice getEquipByVendorAndModel(String vendor, String model){
-
-        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
-        configQuery.equal(EquipmentDevice_.vendor, vendor);
-        configQuery.contains(EquipmentDevice_.modelNumbers, model);
         return configQuery.build().findFirst();
     }
 

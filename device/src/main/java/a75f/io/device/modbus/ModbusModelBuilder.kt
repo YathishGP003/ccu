@@ -79,7 +79,7 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     equipDevice.modbusEquipIdId = null
     equipDevice.description = null
     equipDevice.id = 0L
-    equipDevice.name = equip.displayName
+    equipDevice.name = getModelName(equip.displayName)
     equipDevice.equipType = equip.equipType
     equipDevice.vendor = equip.vendor
     equipDevice.modelNumbers = mutableListOf<String>(equip.model)
@@ -334,4 +334,12 @@ private fun getParentEquipMapByZone(zoneRef: String): ArrayList<HashMap<Any, Any
 private fun getChildEquipMap(equipRef: String): ArrayList<HashMap<Any, Any>> {
     return CCUHsApi.getInstance()
         .readAllEntities("equip and modbus and equipRef== \"$equipRef\"")
+}
+
+/**
+ * @param
+ */
+private fun getModelName(name: String): String {
+    val splitData = name.split("-")
+    return if (splitData.isNotEmpty()) splitData[1] else name
 }

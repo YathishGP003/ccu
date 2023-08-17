@@ -52,7 +52,7 @@ class HyperStatSplitPointsUtil(
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name)
                 .setPriority(priority)
-                .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
+                .addMarker(Tags.HYPERSTATSPLIT)
                 .addMarker(Tags.EQUIP).addMarker(Tags.STANDALONE)
                 .addMarker(Tags.ZONE).addMarker(profileName)
                 .setGatewayRef(gatewayRef)
@@ -73,9 +73,9 @@ class HyperStatSplitPointsUtil(
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name)
                 .setPriority(priority)
-                .addMarker(Tags.HYPERSTAT)
-                .addMarker(Tags.SPLIT).addMarker(Tags.EQUIP)
-                .addMarker(Tags.ZONE).addMarker(profileName).addMarker(Tags.STANDALONE)
+                .addMarker(Tags.HYPERSTATSPLIT)
+                .addMarker(Tags.EQUIP).addMarker(Tags.ZONE)
+                .addMarker(profileName).addMarker(Tags.STANDALONE)
                 .setGatewayRef(gatewayRef)
                 .setTz(tz)
                 .setGroup(nodeAddress)
@@ -394,7 +394,7 @@ class HyperStatSplitPointsUtil(
         val zoneOAOPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val insideEnthalpyPointMarker = arrayOf(
-            "oao", "inside", "enthalpy", "his", "sp", "cpuecon"
+            "oao", "inside", "enthalpy", "his", "sp", "cpu"
         )
         val insideEnthalpyPoint = createHaystackPointWithUnit(
             "$equipDis-insideEnthalpy",
@@ -405,7 +405,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(insideEnthalpyPoint, 0.0))
 
         val outsideEnthalpyPointMarker = arrayOf(
-            "oao", "outside", "enthalpy", "his", "sp", "cpuecon"
+            "oao", "outside", "enthalpy", "his", "sp", "cpu"
         )
         val outsideEnthalpyPoint = createHaystackPointWithUnit(
             "$equipDis-outsideEnthalpy",
@@ -416,7 +416,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideEnthalpyPoint, 0.0))
 
         val economizingAvailablePointMarker = arrayOf(
-            "oao", "economizing", "available", "his", "sp", "cpuecon"
+            "oao", "economizing", "available", "his", "sp", "cpu"
         )
         val economizingAvailablePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-economizingAvailable",
@@ -426,7 +426,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(economizingAvailablePoint, 0.0))
 
         val dcvAvailablePointMarker = arrayOf(
-            "oao", "dcv", "available", "his", "sp", "cpuecon"
+            "oao", "dcv", "available", "his", "sp", "cpu"
         )
         val dcvAvailablePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-dcvAvailable",
@@ -436,7 +436,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(dcvAvailablePoint, 0.0))
 
         val matThrottlePointMarker = arrayOf(
-            "oao", "mat", "available", "his", "sp", "cpuecon"
+            "oao", "mat", "available", "his", "sp", "cpu"
         )
         val matThrottlePoint = createHaystackPointWithOnlyEnum(
             "$equipDis-matThrottle",
@@ -446,7 +446,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(matThrottlePoint, 0.0))
 
         val economizingLoopOutputPointMarker = arrayOf(
-            "oao", "economizing", "loop", "output", "his", "sp", "cpuecon"
+            "oao", "economizing", "loop", "output", "his", "sp", "cpu"
         )
         val economizingLoopOutputPoint = createHaystackPointWithUnit(
             "$equipDis-economizingLoopOutput",
@@ -457,7 +457,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(economizingLoopOutputPoint, 0.0))
 
         val outsideAirCalculatedMinDamperPointMarker = arrayOf(
-            "oao", "outside", "air", "calculated", "min", "damper", "his", "sp", "cpuecon"
+            "oao", "outside", "air", "calculated", "min", "damper", "his", "sp", "cpu"
         )
         val outsideAirCalculatedMinDamperPoint = createHaystackPointWithUnit(
             "$equipDis-outsideAirCalculatedMinDamper",
@@ -468,7 +468,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideAirCalculatedMinDamperPoint, 0.0))
 
         val outsideAirFinalLoopOutputPointMarker = arrayOf(
-            "oao", "outside", "air", "final", "loop", "output", "his", "sp", "cpuecon"
+            "oao", "outside", "air", "final", "loop", "output", "his", "sp", "cpu"
         )
         val outsideAirFinalLoopOutputPoint = createHaystackPointWithUnit(
             "$equipDis-outsideAirFinalLoopOutput",
@@ -479,7 +479,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideAirFinalLoopOutputPoint, 0.0))
 
         val weatherOutsideTempPointMarker = arrayOf(
-            "oao", "outsideWeather", "air", "temp", "sensor", "his", "cpuecon"
+            "oao", "outsideWeather", "air", "temp", "sensor", "his", "cpu"
         )
         val weatherOutsideTempPoint = createHaystackPointWithUnit(
             "$equipDis-weatherOutsideTemp",
@@ -490,7 +490,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(weatherOutsideTempPoint, 0.0))
 
         val weatherOutsideHumidityPointMarker = arrayOf(
-            "oao", "outsideWeather", "air", "humidity", "sensor", "his", "cpuecon"
+            "oao", "outsideWeather", "air", "humidity", "sensor", "his", "cpu"
         )
         val weatherOutsideHumidityPoint = createHaystackPointWithUnit(
             "$equipDis-weatherOutsideHumidity",
@@ -501,7 +501,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(weatherOutsideHumidityPoint, 0.0))
 
         val outsideDamperMinOpenPointMarker = arrayOf(
-            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpuecon"
+            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpu"
         )
         val outsideDamperMinOpenPoint = createHaystackPointWithUnit(
             "$equipDis-outsideDamperMinOpen",
@@ -512,7 +512,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(outsideDamperMinOpenPoint, 0.0))
 
         val exhaustFanStage1ThresholdPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp", "cpuecon"
+            "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp", "cpu"
         )
         val exhaustFanStage1ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanStage1Threshold",
@@ -523,7 +523,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(exhaustFanStage1ThresholdPoint, 50.0))
 
         val exhaustFanStage2ThresholdPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "stage2", "threshold" , "sp", "cpuecon"
+            "config", "oao", "writable", "exhaust", "fan", "stage2", "threshold" , "sp", "cpu"
         )
         val exhaustFanStage2ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanStage2Threshold",
@@ -534,7 +534,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(exhaustFanStage2ThresholdPoint, 90.0))
 
         val exhaustFanHysteresisPointMarker = arrayOf(
-            "config", "oao", "writable", "exhaust", "fan", "hysteresis" , "sp", "cpuecon"
+            "config", "oao", "writable", "exhaust", "fan", "hysteresis" , "sp", "cpu"
         )
         val exhaustFanHysteresisPoint = createHaystackPointWithUnit(
             "$equipDis-exhaustFanHysteresis",

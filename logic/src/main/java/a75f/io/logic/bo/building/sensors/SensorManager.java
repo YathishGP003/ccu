@@ -168,7 +168,6 @@ public class SensorManager {
         return externalSensors;
     }
 
-    // Added sensors for HyperStat Split CPU/Economizer, Nick P, 07-24-2023
     public List<Sensor> getExternalSensorList() {
         if (externalSensors != null) {
             return externalSensors;
@@ -187,9 +186,6 @@ public class SensorManager {
         externalSensors.add(new Sensor("CT (0-20)","amps",0,10,0,20,0.1));
         externalSensors.add(new Sensor("CT (0-50)","amps",0,10,0,50,0.1));
         externalSensors.add(new Sensor("ION Meter (0-1 Million)","ions/cc",0,10,0,1000000,1000));
-        externalSensors.add(new Sensor("CT (0-100)", "amps",0,10,0,100,0.1));
-        externalSensors.add(new Sensor("CT (0-150)", "amps",0,10,0,150,0.1));
-        externalSensors.add(new Sensor("Pressure Sensor (0-1)", Consts.PRESSURE_UNIT,0,10,0,1,0.1));
         return externalSensors;
     }
 }

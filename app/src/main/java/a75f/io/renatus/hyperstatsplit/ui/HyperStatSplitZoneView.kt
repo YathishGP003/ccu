@@ -34,6 +34,9 @@ import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
 import java.util.*
+import a75f.io.device.HyperSplit
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator
+import a75f.io.logic.bo.util.TemperatureMode
 
 fun loadHyperStatSplitCpuEconProfile(
     cpuEconEquipPoints: HashMap<*, *>, inflater: LayoutInflater,
@@ -85,6 +88,14 @@ fun loadHyperStatSplitCpuEconProfile(
     if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) linearLayoutZonePoints.addView(viewSat)
     linearLayoutZonePoints.addView(viewPointRow2)
     linearLayoutZonePoints.addView(viewPointRow1)
+
+    // When uncommented, the below lines will create a controls/settings message based on current app state and print it to logs
+    // These will be removed later
+
+    // val settingsMessage: HyperSplit.HyperSplitSettingsMessage_t = HyperSplitMessageGenerator.getSettingsMessage("Whatever", nodeAddress.toInt(), equipId, TemperatureMode.DUAL)
+    // val settings2Message: HyperSplit.HyperSplitSettingsMessage2_t = HyperSplitMessageGenerator.getSetting2Message(nodeAddress.toInt(), equipId)
+    // val settings3Message: HyperSplit.HyperSplitSettingsMessage3_t = HyperSplitMessageGenerator.getSetting3Message(nodeAddress.toInt(), equipId)
+    // val controlMessage: HyperSplit.HyperSplitControlsMessage_t = HyperSplitMessageGenerator.getControlMessage(nodeAddress.toInt(), equipId, TemperatureMode.DUAL).build()
 
 }
 
@@ -338,7 +349,7 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
 
     if (isAnyInputMappedToSupplyAirTemperature(config)) {
         val dischargePoint = hsSplitHaystackUtil.readHisVal(
-            "sensor and supply and air and temp"
+            "sensor and discharge and air and temp"
         )
         cpuEconPoints[HSSplitZoneStatus.DISCHARGE_AIRFLOW.name] = "$dischargePoint \u2109"
     }

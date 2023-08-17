@@ -93,7 +93,7 @@ public class HyperStatSplitDevice {
         Device d = new Device.Builder()
                 .setDisplayName("HSS-" + address)
                 .addMarker("network").addMarker("node")
-                .addMarker(Tags.HYPERSTAT).addMarker(Tags.SPLIT)
+                .addMarker(Tags.HYPERSTATSPLIT)
                 .setEquipRef(equipRef)
                 .setAddr(address)
                 .setSiteRef(site)

@@ -234,6 +234,18 @@ class HSSplitHaystackUtil(
         )
     }
 
+    fun getOutsideAirTempSensor(): Double {
+        return haystack.readHisValByQuery(
+            "point and outside and air and temp and sensor and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideAirHumiditySensor(): Double {
+        return haystack.readHisValByQuery(
+            "point and outside and air and humidity and sensor and equipRef == \"$equipRef\""
+        )
+    }
+
     private fun readPointIdWithAll(markers: String): String {
         val points: ArrayList<*> = haystack.readAll(
             "point and $markers and sp and equipRef == \"$equipRef\""

@@ -794,7 +794,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate").addMarker("system")
+                    .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate").addMarker("standalone")
                     .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setTz(tz)
                     .build();
@@ -815,7 +815,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("system")
+                    .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("standalone")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setTz(tz)
                     .build();
@@ -836,7 +836,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("system")
+                    .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("standalone")
                     .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("\u00B0F")
                     .setTz(tz)
@@ -858,7 +858,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("system")
+                    .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("standalone")
                     .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("\u00B0F")
                     .setTz(tz)
@@ -880,7 +880,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("system")
+                    .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("standalone")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("%")
                     .setTz(tz)
@@ -902,7 +902,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("system")
+                    .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("standalone")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("%")
                     .setTz(tz)
@@ -924,7 +924,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("system")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("standalone")
                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("\u00B0F")
                     .setTz(tz)
@@ -946,7 +946,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("system")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("standalone")
                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("\u00B0F")
                     .setTz(tz)
@@ -967,7 +967,7 @@ public class OAOTuners
                     .setDisplayName(equipdis + "-" + "economizingToMainCoolingLoopMap")
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
-                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("system")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("standalone")
                     .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("%")
@@ -984,6 +984,38 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
         }
+        if (!verifyPointsAvailability("not default","economizing and dry and bulb and threshold",equipref)) {
+            Point economizingDryBulbThreshold = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "economizingDryBulbThreshold")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("70").setIncrementVal("0.5").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);
+            HashMap economizingDryBulbThresholdPoint = hayStack.read("point and tuner and default and oao and " +
+                    "economizing and dry and bulb and threshold");
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingDryBulbThresholdPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingDryBulbThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD, 0);
+                hayStack.writeHisValById(economizingDryBulbThresholdId, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD);
+            } else {
+                ArrayList<HashMap> economizingDryBulbThresholdPointArr = hayStack.readPoint(economizingDryBulbThresholdPoint.get("id").toString());
+                for (HashMap valMap : economizingDryBulbThresholdPointArr) {
+                    if (valMap.get("val") != null) {
+                        hayStack.pointWrite(HRef.copy(economizingDryBulbThresholdId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
+                }
+                hayStack.writeHisValById(economizingDryBulbThresholdId, HSUtil.getPriorityVal(economizingDryBulbThresholdId));
+            }
+
+        }
+
     }
 
     private static void deleteNonUsableSystemPoints(String tags, String equipref){

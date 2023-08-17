@@ -207,6 +207,8 @@ enum class CpuEconAnalogOutAssociation {
 
 // Order is important -- see comment above.
 enum class UniversalInAssociation {
+   GENERIC_VOLTAGE,
+   GENERIC_RESISTANCE,
    CURRENT_TX_0_10,
    CURRENT_TX_0_20,
    CURRENT_TX_0_50,
@@ -215,14 +217,12 @@ enum class UniversalInAssociation {
    SUPPLY_AIR_TEMPERATURE,
    MIXED_AIR_TEMPERATURE,
    OUTSIDE_AIR_TEMPERATURE,
-   FILTER_NC,
    FILTER_NO,
-   CONDENSATE_NC,
+   FILTER_NC,
    CONDENSATE_NO,
+   CONDENSATE_NC,
    DUCT_PRESSURE_0_1,
-   DUCT_PRESSURE_0_2,
-   GENERIC_VOLTAGE,
-   GENERIC_RESISTANCE
+   DUCT_PRESSURE_0_2
 }
 
 enum class CpuEconSensorBusTempAssociation {

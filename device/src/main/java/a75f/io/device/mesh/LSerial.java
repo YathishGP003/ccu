@@ -17,6 +17,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
@@ -468,6 +469,23 @@ public class LSerial
                 HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                         d.getEquipRef(), false, TemperatureMode.values()[modeType]);
             }
+            LSerial.getInstance().setNodeSeeding(false);
+        }
+    }
+
+    public void sendHyperSplitSeedMessage(Short addr, String roomRef, String floorRef) {
+        if (isConnected()) {
+            isNodeSeeding = true;
+            CcuLog.d(L.TAG_CCU_DEVICE,
+                    "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
+            Device d = HSUtil.getDevice(addr);
+            Zone zone = HSUtil.getZone(roomRef, floorRef);
+            int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef " +
+                    "== \"" + roomRef + "\"").intValue();
+
+            HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                    d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+
             LSerial.getInstance().setNodeSeeding(false);
         }
     }

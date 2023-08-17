@@ -5,7 +5,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Tags.CPUECON
 import a75f.io.api.haystack.Tags.HYPERSTAT
-import a75f.io.api.haystack.Tags.SPLIT
+import a75f.io.api.haystack.Tags.HYPERSTATSPLIT
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -135,7 +135,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     }
 
     fun initEquipReference(node: Short) {
-        val equip = haystack.read("equip and $HYPERSTAT and $SPLIT and group == \"$node\"")
+        val equip = haystack.read("equip and $HYPERSTATSPLIT and group == \"$node\"")
         if (equip.isEmpty()) {
             Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " Unable to find the equip details for node $node ")
             return
@@ -196,15 +196,16 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             masterPoints, hyperStatSplitDevice
         )
 
+        // For Universal Inputs, "analogType" tag corresponds to UniversalInAssociation, not SensorType
         profileEquip.setupDeviceUniversalIns(
-            config.universalIn1State.enabled, HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn1State.association),
-            config.universalIn2State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn2State.association),
-            config.universalIn3State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn3State.association),
-            config.universalIn4State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn4State.association),
-            config.universalIn5State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn5State.association),
-            config.universalIn6State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn6State.association),
-            config.universalIn7State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn7State.association),
-            config.universalIn8State.enabled,HyperStatSplitAssociationUtil.getSensorNameByType(config.universalIn8State.association),
+            config.universalIn1State.enabled, config.universalIn1State.association.toString(),
+            config.universalIn2State.enabled, config.universalIn2State.association.toString(),
+            config.universalIn3State.enabled, config.universalIn3State.association.toString(),
+            config.universalIn4State.enabled, config.universalIn4State.association.toString(),
+            config.universalIn5State.enabled, config.universalIn5State.association.toString(),
+            config.universalIn6State.enabled, config.universalIn6State.association.toString(),
+            config.universalIn7State.enabled, config.universalIn7State.association.toString(),
+            config.universalIn8State.enabled, config.universalIn8State.association.toString(),
             masterPoints, hyperStatSplitDevice
         )
 
@@ -1362,6 +1363,14 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         return hsSplitHaystackUtil.getCurrentTemp()
     }
 
+    fun getOutsideAirTempSensor(): Double {
+        return hsSplitHaystackUtil.getOutsideAirTempSensor()
+    }
+
+    fun getOutsideAirHumiditySensor(): Double {
+        return hsSplitHaystackUtil.getOutsideAirHumiditySensor()
+    }
+
     /**
      * Function  which collects all the logical associated points
      */
@@ -1403,10 +1412,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         logicalPoints.forEach { (key, id) -> Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "key : $key  : $id") }
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "=================================")
         return logicalPoints
-    }
-
-    fun getHisVal(tags: String): Double {
-        return haystack.readHisValByQuery("point and " + tags + "and group == \"" + nodeAddress + "\"")
     }
 
     fun setHisVal(tags: String, writeVal: Double) {

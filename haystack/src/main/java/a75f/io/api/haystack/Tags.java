@@ -116,7 +116,7 @@ public class Tags
     public static final String SCHEDULE_TYPE = "scheduleType";
     public static final String HUMIDIFICATION = "humidification";
     public static final String HYPERSTAT = "hyperstat";
-    public static final String SPLIT = "split";
+    public static final String HYPERSTATSPLIT = "hyperstatsplit";
     public static final String SENSE = "sense";
     public static final String OTN = "otn";
     public static final String PLC = "pid";

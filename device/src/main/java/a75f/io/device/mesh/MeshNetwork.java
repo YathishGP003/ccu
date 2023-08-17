@@ -19,8 +19,11 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.HyperSplit;
 import a75f.io.device.HyperStat;
 import a75f.io.device.daikin.IEDeviceHandler;
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator;
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
@@ -90,28 +93,28 @@ public class MeshNetwork extends DeviceNetwork
                         switch (deviceType) {
                             case SMART_NODE:
                                 String snprofile = "dab";
-                                if(d.getMarkers().contains("sse"))
+                                if (d.getMarkers().contains("sse"))
                                     snprofile = "sse";
-                                else if(d.getMarkers().contains("lcm"))
+                                else if (d.getMarkers().contains("lcm"))
                                     snprofile = "lcm";
-                                else if(d.getMarkers().contains("iftt"))
+                                else if (d.getMarkers().contains("iftt"))
                                     snprofile = "iftt";
-                                if(bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getId());
-                                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN SEEDS=====================" + zone.getId());
+                                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
-                                }else {
+                                } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings=====================");
-                                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
+                                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     if (sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN CONTROLS=====================");
-                                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef());
                                     //Check duplicated without current time and then append time to control package.
-                                    if(!checkDuplicateStruct((short)controlsMessage.smartNodeAddress.get(),controlsMessage)){
+                                    if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
                                         controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
                                         sendStructToNodes(controlsMessage);
                                     }
@@ -119,48 +122,48 @@ public class MeshNetwork extends DeviceNetwork
                                 break;
                             case SMART_STAT:
                                 String profile = "cpu";
-                                if(d.getMarkers().contains("hpu"))
+                                if (d.getMarkers().contains("hpu"))
                                     profile = "hpu";
-                                else if(d.getMarkers().contains("pipe2"))
+                                else if (d.getMarkers().contains("pipe2"))
                                     profile = "pipe2";
-                                else if(d.getMarkers().contains("pipe4"))
+                                else if (d.getMarkers().contains("pipe4"))
                                     profile = "pipe4";
-                                if(bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SS SEEDS====================="+zone.getId());
-                                        CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);
-                                        if (sendStructToCM( seedSSMessage)) {
-                                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                        }
-                                }else {
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SS SEEDS=====================" + zone.getId());
+                                    CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), profile);
+                                    if (sendStructToCM(seedSSMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT Settings=====================");
-                                    CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);
+                                    CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), profile);
                                     if (sendStruct((short) settingsMessage.address.get(), settingsMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT CONTROLS=====================");
-                                    CcuToCmOverUsbSmartStatControlsMessage_t controlsSSMessage = LSmartStat.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
-                                    if(!checkDuplicateStruct((short)controlsSSMessage.address.get(),controlsSSMessage)){
+                                    CcuToCmOverUsbSmartStatControlsMessage_t controlsSSMessage = LSmartStat.getControlMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef());
+                                    if (!checkDuplicateStruct((short) controlsSSMessage.address.get(), controlsSSMessage)) {
                                         controlsSSMessage = LSmartStat.getCurrentTimeForControlMessage(controlsSSMessage);
                                         sendStructToNodes(controlsSSMessage);
                                     }
                                 }
                                 break;
-                                
-                                
+
+
                             case HYPER_STAT:
                                 String hyperStatProfile = "monitoring"; //TODO
                                 Equip equip = new Equip.Builder()
-                                                  .setHashMap(CCUHsApi.getInstance()
-                                                                      .read("equip and group ==\""+d.getAddr()+ "\"")).build();
+                                        .setHashMap(CCUHsApi.getInstance()
+                                                .read("equip and group ==\"" + d.getAddr() + "\"")).build();
                                 int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + equip.getRoomRef() + "\"").intValue();
                                 TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 
 
                                 if (bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
-                                                              "SEEDS ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                            "SEEDS ===================== " + d.getAddr());
                                     if (equip.getMarkers().contains("vrv")) {
-                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU Controls ===================== "+d.getAddr());
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU Controls ===================== " + d.getAddr());
                                         HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false, temperatureMode);
                                         HyperStatMessageSender.sendIduSeedControlMessage(Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
                                     } else {
@@ -168,22 +171,21 @@ public class MeshNetwork extends DeviceNetwork
                                                 d.getEquipRef(), false, temperatureMode);
                                     }
                                 } else {
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== " + d.getAddr());
                                     HyperStatMessageSender.sendSettingsMessage(zone, Integer.parseInt(d.getAddr()), d.getEquipRef());
 
-                                    if (!equip.getMarkers().contains("vrv") ) {
+                                    if (!equip.getMarkers().contains("vrv")) {
                                         /** Sending the setting2 and setting3 messages */
                                         CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperStat setting Messages ===" + d.getAddr());
                                         HyperStatMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
                                     }
-                                    if (equip.getMarkers().contains("vrv") ){
-                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat IDU Controls ===================== "+d.getAddr());
+                                    if (equip.getMarkers().contains("vrv")) {
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat IDU Controls ===================== " + d.getAddr());
                                         HyperStatMessageSender.sendIduControlMessage(
                                                 Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
-                                    }
-                                    else if (!equip.getMarkers().contains("monitoring")){
-                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Controls ===================== "+d.getAddr());
-                                        if(sendControlMessage){
+                                    } else if (!equip.getMarkers().contains("monitoring")) {
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Controls ===================== " + d.getAddr());
+                                        if (sendControlMessage) {
                                             HyperStat.HyperStatControlsMessage_t.Builder controls =
                                                     HyperStatMessageGenerator.getControlMessage(
                                                             Integer.parseInt(d.getAddr()), d.getEquipRef(), temperatureMode);
@@ -193,8 +195,39 @@ public class MeshNetwork extends DeviceNetwork
                                         HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
                                     }
 
+                                }
+
+                            case HYPERSTATSPLIT:
+                                Equip hssEquip = new Equip.Builder()
+                                        .setHashMap(CCUHsApi.getInstance()
+                                                .read("equip and group ==\""+d.getAddr()+ "\"")).build();
+                                int hssModeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + hssEquip.getRoomRef() + "\"").intValue();
+                                TemperatureMode hssTempMode = TemperatureMode.values()[hssModeType];
+
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperSplit " +
+                                            "SEEDS ===================== "+d.getAddr());
+                                    HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                                            d.getEquipRef(), false, hssTempMode);
+                                } else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperSplit Settings ===================== "+d.getAddr());
+                                    HyperSplitMessageSender.sendSettingsMessage(zone, Integer.parseInt(d.getAddr()), d.getEquipRef());
+
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperSplit setting Messages ===" + d.getAddr());
+                                    HyperSplitMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
+
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperSplit Controls ===================== "+d.getAddr());
+                                    if(sendControlMessage){
+                                        HyperSplit.HyperSplitControlsMessage_t.Builder controls =
+                                                HyperSplitMessageGenerator.getControlMessage(
+                                                        Integer.parseInt(d.getAddr()), d.getEquipRef(), hssTempMode);
+                                        HyperSplitMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
+                                                MessageType.HYPERSPLIT_CONTROLS_MESSAGE, false);
+                                    }
+                                    HyperSplitMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
 
                                 }
+
                         }
                     }
                 }

@@ -47,10 +47,14 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
+
         if (coolingLoopOutput > (divider + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (coolingLoopOutput <= (divider - (relayActivationHysteresis / 2)))
+        else if (coolingLoopOutput <= (divider - (relayActivationHysteresis / 2)))
             relayState = 0.0
+        else if (coolingLoopOutput == 0)
+            relayState = 0.0
+
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
@@ -68,10 +72,14 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
+
         if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
+        else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
+        else if (coolingLoopOutput == 0)
+            relayState = 0.0
+
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
@@ -89,10 +97,14 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
+
         if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
+        else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
+        else if (coolingLoopOutput == 0)
+            relayState = 0.0
+
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
@@ -315,6 +327,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         } else {
             updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
         }
+
     }
 
     override fun doAnalogHeating(
@@ -340,12 +353,16 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         analogOutStages: HashMap<String, Int>,
         outsideAirFinalLoopOutput: Int
     ) {
-        if (conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+        // If cooling is enabled, OAO damper should follow Economizer or DCV Loop (whichever is greater)
+        if (conditioningMode.ordinal != StandaloneConditioningMode.COOL_ONLY.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal
         ) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
             if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
         }
+        // If Conditioning mode is HEAT_ONLY, OAO damper should operate only for DCV
+
     }
 
     /*

@@ -1,8 +1,8 @@
 package a75f.io.renatus.hyperstatsplit.ui
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.HyperStat
+import a75f.io.device.HyperSplit
 import a75f.io.device.mesh.LSerial
-import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -331,7 +331,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 0.rangeTo(100).toList()
             )
 
-            // TODO: control messages once they are designed
             relay1Test.setOnCheckedChangeListener { _, _ -> sendControl() }
             relay2Test.setOnCheckedChangeListener { _, _ -> sendControl() }
             relay3Test.setOnCheckedChangeListener { _, _ -> sendControl() }
@@ -572,8 +571,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                         CCUHsApi.getInstance().resetCcuReady()
                         viewModel.setConfigSelected()
                         CCUHsApi.getInstance().setCcuReady()
-                        LSerial.getInstance().sendHyperStatSeedMessage(
-                            this.meshAddress, roomName, floorName, false
+                        LSerial.getInstance().sendHyperSplitSeedMessage(
+                            this.meshAddress, roomName, floorName
                        )
                     }, {
                         ProgressDialogUtils.hideProgressDialog()
@@ -847,7 +846,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    // TODO: Control message once structure is set
     @SuppressLint("LogNotTimber")
     private fun sendControl() {
         if (!viewModel.isProfileConfigured()) {
@@ -855,29 +853,31 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 "--------------HyperStat Split CPU & Economiser test signal sendControl: Not Ready")
             return
         }
-        val testSignalControlMessage: HyperStat.HyperStatControlsMessage_t  = getControlMessage()
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON,
-            "--------------HyperStat Split CPU & Economiser test signal sendControl: ------------------\n" +
-                    "Node address  ${meshAddress.toInt()}\n" +
-                    "setTemp Heating  ${testSignalControlMessage.setTempHeating}\n" +
-                    "setTemp Cooling  ${testSignalControlMessage.setTempCooling}\n" +
-                    "conditioningMode  ${testSignalControlMessage.conditioningMode}\n" +
-                    "Fan Mode  ${testSignalControlMessage.fanSpeed}\n" +
-                    "Relay1 ${testSignalControlMessage.relay1}\n" +
-                    "Relay2 ${testSignalControlMessage.relay2}\n" +
-                    "Relay3 ${testSignalControlMessage.relay3}\n" +
-                    "Relay4 ${testSignalControlMessage.relay4}\n" +
-                    "Relay5 ${testSignalControlMessage.relay5}\n" +
-                    "Relay6 ${testSignalControlMessage.relay6}\n" +
-                    //"Relay7 ${testSignalControlMessage.relay7}\n" +
-                   // "Relay8 ${testSignalControlMessage.relay8}\n" +
-                    "Analog Out1 ${testSignalControlMessage.analogOut1.percent}\n" +
-                    "Analog Out2 ${testSignalControlMessage.analogOut2.percent}\n" +
-                    "Analog Out3 ${testSignalControlMessage.analogOut3.percent}\n" +
-                   // "Analog Out4 ${testSignalControlMessage.analogOut4.percent}\n" +
-                    "-------------------------------------------------------------")
-        HyperStatMessageSender.writeControlMessage(
-            testSignalControlMessage, meshAddress.toInt(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
+        val testSignalControlMessage: HyperSplit.HyperSplitControlsMessage_t  = getControlMessage()
+
+        Log.i("CCU_HSS_MESSAGE",
+            "--------------HyperStat Split CPU & Economiser Test Signal Controls Message: ------------------\n" +
+                    "Node address " + meshAddress + "\n" +
+                    "setTemp Heating " +  testSignalControlMessage.getSetTempHeating() + "\n" +
+                    "setTemp Cooling " +  testSignalControlMessage.getSetTempCooling() + "\n" +
+                    "conditioningMode " +  testSignalControlMessage.getConditioningMode() + "\n" +
+                    "Fan Mode " +  testSignalControlMessage.getFanSpeed() + "\n" +
+                    "Relay1 " +  testSignalControlMessage.getRelay1() + "\n" +
+                    "Relay2 " +  testSignalControlMessage.getRelay2() + "\n" +
+                    "Relay3 " +  testSignalControlMessage.getRelay3() + "\n" +
+                    "Relay4 " +  testSignalControlMessage.getRelay4() + "\n" +
+                    "Relay5 " +  testSignalControlMessage.getRelay5() + "\n" +
+                    "Relay6 " +  testSignalControlMessage.getRelay6() + "\n" +
+                    "Relay7 " +  testSignalControlMessage.getRelay7() + "\n" +
+                    "Relay8 " +  testSignalControlMessage.getRelay8() + "\n" +
+                    "Analog Out1 " +  testSignalControlMessage.getAnalogOut1().getPercent() + "\n" +
+                    "Analog Out2 " +  testSignalControlMessage.getAnalogOut2().getPercent() + "\n" +
+                    "Analog Out3 " +  testSignalControlMessage.getAnalogOut3().getPercent() + "\n" +
+                    "Analog Out4 " +  testSignalControlMessage.getAnalogOut4().getPercent() + "\n" +
+                    "-------------------------------------------------------------");
+        
+        HyperSplitMessageSender.writeControlMessage(
+            testSignalControlMessage, meshAddress.toInt(), MessageType.HYPERSPLIT_CONTROLS_MESSAGE,
             false
         )
         if (relay1Test.isChecked || relay2Test.isChecked || relay3Test.isChecked
@@ -894,8 +894,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
-    // TODO: Control message once structure is set
-    private fun getControlMessage(): HyperStat.HyperStatControlsMessage_t {
+    private fun getControlMessage(): HyperSplit.HyperSplitControlsMessage_t {
         if (meshAddress != null) {
             val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
             val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
@@ -909,40 +908,46 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             val ao4Min = analogOutUIs[3].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
             val ao4Max = analogOutUIs[3].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-            return HyperStat.HyperStatControlsMessage_t.newBuilder()
+            return HyperSplit.HyperSplitControlsMessage_t.newBuilder()
                 .setRelay1(relay1Test.isChecked)
                 .setRelay2(relay2Test.isChecked)
                 .setRelay3(relay3Test.isChecked)
                 .setRelay4(relay4Test.isChecked)
                 .setRelay5(relay5Test.isChecked)
                 .setRelay6(relay6Test.isChecked)
-                //.setRelay7(relay7Test.isChecked)
-               // .setRelay8(relay8Test.isChecked)
+                .setRelay7(relay7Test.isChecked)
+                .setRelay8(relay8Test.isChecked)
                 .setAnalogOut1(
-                    HyperStat.HyperStatAnalogOutputControl_t
+                    HyperSplit.HyperSplitAnalogOutputControl_t
                         .newBuilder().setPercent(
                             getAnalogVal(ao1Min, ao1Max, analogOut1Test.selectedItem.toString().toDouble())
                         ).build()
                 )
                 .setAnalogOut2(
-                    HyperStat.HyperStatAnalogOutputControl_t
+                    HyperSplit.HyperSplitAnalogOutputControl_t
                         .newBuilder().setPercent(
                             getAnalogVal(ao2Min, ao2Max, analogOut2Test.selectedItem.toString().toDouble())
                         ).build()
                 )
                 .setAnalogOut3(
-                    HyperStat.HyperStatAnalogOutputControl_t
+                    HyperSplit.HyperSplitAnalogOutputControl_t
                         .newBuilder().setPercent(
                             getAnalogVal(ao3Min, ao3Max, analogOut3Test.selectedItem.toString().toDouble())
                         ).build()
                 )
+                .setAnalogOut4(
+                    HyperSplit.HyperSplitAnalogOutputControl_t
+                        .newBuilder().setPercent(
+                            getAnalogVal(ao4Min, ao4Max, analogOut4Test.selectedItem.toString().toDouble())
+                        ).build()
+                )
                 .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
                 .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
-                .setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO)
-                .setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO)
+                .setFanSpeed(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO)
+                .setConditioningMode(HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO)
                 .build()
         } else {
-            return HyperStat.HyperStatControlsMessage_t.newBuilder().build()
+            return HyperSplit.HyperSplitControlsMessage_t.newBuilder().build()
         }
     }
     private fun getDesiredTempCooling(node: Short): Double {

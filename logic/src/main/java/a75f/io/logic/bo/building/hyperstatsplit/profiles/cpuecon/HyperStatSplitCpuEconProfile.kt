@@ -23,6 +23,7 @@ import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
 
+
 /**
  * @author tcase@75f.io (HyperStat CPU)
  * Created on 7/7/21.
@@ -189,11 +190,13 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
 
         logIt("Equip Running : $curState")
+
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState, economizingLoopOutput,
             equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
         )
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile() complete")
+
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents){
@@ -410,13 +413,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
      */
     private fun isEconomizingEnabledOnDryBulb(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
 
-        var dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("oao and economizing and dry and bulb and " +
-                "threshold", equip.equipRef)
+        var dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("economizing and dry and bulb and threshold", equip.equipRef)
 
         var outsideAirTemp = externalTemp
 
-        //
-        if (externalHumidity == 0.0 && externalTemp == 0.0) outsideAirTemp = equip.getHisVal("outside and air and temp")
+        if (externalHumidity == 0.0 && externalTemp == 0.0) outsideAirTemp = equip.getOutsideAirTempSensor()
 
         if (outsideAirTemp > economizingMinTemp) return outsideAirTemp < dryBulbTemperatureThreshold
 
@@ -435,11 +436,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
      */
     private fun isEconomizingTempAndHumidityInRange(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
 
-        val economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
+        val economizingMaxTemp = TunerUtil.readTunerValByQuery("economizing and max and " +
                 "temp",equip.equipRef)
-        val economizingMinHumidity = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
+        val economizingMinHumidity = TunerUtil.readTunerValByQuery("economizing and min and " +
                 "humidity",equip.equipRef)
-        val economizingMaxHumidity = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
+        val economizingMaxHumidity = TunerUtil.readTunerValByQuery("economizing and max and " +
                 "humidity",equip.equipRef)
 
         var outsideTemp = externalTemp
@@ -453,8 +454,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 equip.getConfiguration().address1State,
                 equip.getConfiguration().address2State)
         ) {
-            outsideTemp = equip.getHisVal("outside and air and temp")
-            outsideHumidity = equip.getHisVal("outside and air and humidity")
+            outsideTemp = equip.getOutsideAirTempSensor()
+            outsideHumidity = equip.getOutsideAirHumiditySensor()
         }
 
         if (outsideTemp > economizingMinTemp
@@ -482,15 +483,17 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         var outsideEnthalpyToUse = outsideEnthalpy
 
+        // Our enthalpy calc returns a value of 0.12 for zero temp and humidity.
+        // We will assume anything less than 1 translates to system weather data being dead
         if (
-            outsideEnthalpy == 0.0 &&
+            outsideEnthalpy < 1 &&
             HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToOutsideAir(
                 equip.getConfiguration().address0State,
                 equip.getConfiguration().address1State,
                 equip.getConfiguration().address2State)
         ) {
-            val sensorBusOutsideTemp = equip.getHisVal("outside and air and temp")
-            val sensorBusOutsideHumidity = equip.getHisVal("outside and air and humidity")
+            val sensorBusOutsideTemp = equip.getOutsideAirTempSensor()
+            val sensorBusOutsideHumidity = equip.getOutsideAirHumiditySensor()
             outsideEnthalpyToUse = getAirEnthalpy(sensorBusOutsideTemp, sensorBusOutsideHumidity)
         }
 
@@ -935,11 +938,72 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
+    override fun doAnalogCooling(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        coolingLoopOutput: Int
+    ) {
+        if (conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+        ) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, coolingLoopOutput.toDouble())
+            if (coolingLoopOutput > 0) {
+                analogOutStages[AnalogOutput.COOLING.name] = coolingLoopOutput
+                curState = ZoneState.COOLING
+            }
+        } else {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+        }
+
+    }
+
+    override fun doAnalogHeating(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        heatingLoopOutput: Int
+    ) {
+        if (conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+        ) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, heatingLoopOutput.toDouble())
+            if (heatingLoopOutput > 0) {
+                analogOutStages[AnalogOutput.HEATING.name] = heatingLoopOutput
+                curState = ZoneState.HEATING
+            }
+        } else {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+        }
+    }
+
     private fun getOperatingMode(): Double {
 
         return hsSplitHaystackUtil.readHisVal("point and operating and mode")
 
     }
+
+    fun doAnalogOAOAction(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        outsideAirFinalLoopOutput: Int,
+        dcvLoopOutput: Int
+    ) {
+        // If cooling is enabled, OAO damper should follow Economizer or DCV Loop (whichever is greater)
+        if (conditioningMode.ordinal != StandaloneConditioningMode.COOL_ONLY.ordinal ||
+            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+        ) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
+            if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
+        }
+        // If Conditioning mode is HEAT_ONLY, OAO damper should operate only for DCV
+        else if (conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+            if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = dcvLoopOutput
+        }
+    }
+
 
     private fun handleDeadZone(equip: HyperStatSplitCpuEconEquip) {
 

@@ -88,7 +88,10 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
-                switch (i) {
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.profileContainer, new AHUControlConfigFragment()).commit();
+
+                /*switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
                             getActivity().getSupportFragmentManager().beginTransaction()
@@ -191,7 +194,7 @@ public class SystemProfileFragment extends Fragment {
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
                         break;
-                }
+                }*/
             }
 
             @Override

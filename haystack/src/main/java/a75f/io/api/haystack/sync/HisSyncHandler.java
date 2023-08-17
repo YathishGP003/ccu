@@ -176,8 +176,11 @@ public class HisSyncHandler
         for (HashMap zone : zonesToSync) {
             String roomId = zone.get("id").toString();
 
-            List<HashMap> allPointsForZone =
+            ArrayList<HashMap> allPointsForZone =
                 ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
+            ArrayList<HashMap> schedulablePoints = ccuHsApi.readAll("point and his and schedulable and roomRef == \"" + roomId + "\"");
+            allPointsForZone.addAll(schedulablePoints);
+            CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
             List<HashMap> hvacModePoint =
                     ccuHsApi.readAll("hvacMode and his and zone and roomRef == \""+ roomId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points"+hvacModePoint);

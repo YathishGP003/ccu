@@ -964,6 +964,8 @@ public class HClient extends HProj
           Log.i("CCU_REPLACE","Exception occurred while hitting "+uriStr);
           Log.i("CCU_REPLACE", "Retry "+Log.getStackTraceString(e));
         }
+        finally {
+        }
         retry++;
         retryCountCallback.onRetry(retry);
         isOKResponse = false;

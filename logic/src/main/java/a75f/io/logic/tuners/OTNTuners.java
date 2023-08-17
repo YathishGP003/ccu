@@ -49,36 +49,7 @@ public class OTNTuners {
         hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
 
-        Point coolingDb = new Point.Builder()
-                .setDisplayName(equipDis+"-OTN-"+"coolingDeadband")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
-                .addMarker("his")
-                .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.DEFAULT_VAL_LEVEL,TunerConstants.VAV_COOLING_DB, 0);
-        hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
 
-
-        Point heatingDb = new Point.Builder()
-                .setDisplayName(equipDis+"-OTN-"+"heatingDeadband")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
-                .addMarker("his").addMarker("system")
-                .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.DEFAULT_VAL_LEVEL,TunerConstants.VAV_HEATING_DB, 0);
-        hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
 
         Point propGain = new Point.Builder()
                 .setDisplayName(equipDis+"-OTN-"+"proportionalKFactor ")
@@ -159,8 +130,6 @@ public class OTNTuners {
                 .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
-        hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.DEFAULT_VAL_LEVEL,2.0, 0);
-        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
 
         Point zonePriorityMultiplier = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
@@ -177,40 +146,6 @@ public class OTNTuners {
         BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
         hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
-
-        Point coolingDb = new Point.Builder()
-                .setDisplayName(equipdis+"-"+"coolingDeadband")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipref)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
-                .addMarker("zone").addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
-                .setTz(tz)
-                .setUnit("\u00B0F")
-                .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
-        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.DEFAULT_VAL_LEVEL,2.0, 0);
-        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
-
-        Point heatingDb = new Point.Builder()
-                .setDisplayName(equipdis+"-"+"heatingDeadband")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipref)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
-                .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
-                .setTz(tz)
-                .setUnit("\u00B0F")
-                .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
-        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.DEFAULT_VAL_LEVEL,2.0, 0);
-        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
 
         Point propGain = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"proportionalKFactor")

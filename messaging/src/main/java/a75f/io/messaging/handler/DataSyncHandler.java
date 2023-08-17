@@ -37,6 +37,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
@@ -169,7 +170,8 @@ public class DataSyncHandler {
         while ((iterator.hasNext())) {
             HRow row = (HRow) iterator.next();
             logIt("row" + row);
-            if (row.has(Tags.SCHEDULE) && !row.has(DELETED_BY.toString())) {
+            if( (row.has(Tags.SCHEDULE) && !row.has(DELETED_BY.toString())) ||
+                    (row.has(Tags.BUILDING) && row.has(Tags.OCCUPANCY)) )  {
                 HDict scheduleDict = new HDictBuilder().add(row).toDict();
                 schedulesToSync.add(scheduleDict);
             }
@@ -355,6 +357,10 @@ public class DataSyncHandler {
         if (scheduleDict.has(Tags.BUILDING) && scheduleDict.has(Tags.VACATION)) {
             ccuHsApi.addSchedule(scheduleId.replace("@", ""), schedule.getScheduleHDict());
         }
+        if (scheduleDict.has(Tags.BUILDING) && scheduleDict.has(Tags.OCCUPANCY)) {
+            new BuildingOccupancy.Builder().setHDict(scheduleDict);
+            ccuHsApi.updateBuildingOccupancy( new BuildingOccupancy.Builder().setHDict(scheduleDict).build());
+        }
         if (scheduleDict.has(Tags.ZONE) && scheduleDict.has(Tags.VACATION)) {
             ccuHsApi.addSchedule(scheduleId.replace("@", ""),
                     schedule.getZoneScheduleHDict(schedule.getRoomRef()));
@@ -369,6 +375,11 @@ public class DataSyncHandler {
         }
         if (scheduleDict.has(Tags.SPECIAL)) {
             ccuHsApi.updateSpecialScheduleNoSync(scheduleId.replace("@",""), scheduleDict);
+            return;
+        }
+        if(scheduleDict.has(Tags.OCCUPANCY)){
+            new BuildingOccupancy.Builder().setHDict(scheduleDict);
+            ccuHsApi.updateBuildingOccupancy( new BuildingOccupancy.Builder().setHDict(scheduleDict).build());
             return;
         }
         Schedule schedule = new Schedule.Builder().setHDict(scheduleDict).build();
@@ -508,7 +519,8 @@ public class DataSyncHandler {
      * In production 7days
      *  */
     public static long getMessageExpiryTime() {
-        if(BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa")){
+        if(BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa") ||
+                BuildConfig.BUILD_TYPE.equals("dev_qa")){
             return MESSAGE_EXPIRY_TIME_FOR_DEV_QA;
         }else if(BuildConfig.BUILD_TYPE.equals("staging")) {
             return MESSAGE_EXPIRY_TIME_FOR_STAGING;

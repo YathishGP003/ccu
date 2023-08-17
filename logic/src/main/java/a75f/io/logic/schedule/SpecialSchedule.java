@@ -39,7 +39,13 @@ public class SpecialSchedule {
     private static final String OVERLAP_DAY = "YYYY-MM-dd";
 
     public static void createSpecialSchedule(String specialScheduleId, String scheduleName, DateTime startDate,
-                                             DateTime endDate, double coolVal, double heatVal, boolean isZone,
+                                             DateTime endDate, double coolVal, double heatVal,
+                                             double coolingUserLimitMax,
+                                             double coolingUserLimitMin,
+                                             double heatingUserLimitMax,
+                                             double heatingUserLimitMin,
+                                             double coolingDeadband,
+                                             double heatingDeadband,boolean isZone,
                                              String zoneId){
 
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
@@ -54,6 +60,12 @@ public class SpecialSchedule {
                 .add("etmm", isLastHour ? 00 : endDate.getMinuteOfHour())
                 .add("coolVal", HNum.make(coolVal))
                 .add("heatVal", HNum.make(heatVal))
+                .add("coolingUserLimitMax", HNum.make(coolingUserLimitMax))
+                .add("coolingUserLimitMin", HNum.make(coolingUserLimitMin))
+                .add("heatingUserLimitMax", HNum.make(heatingUserLimitMax))
+                .add("heatingUserLimitMin", HNum.make(heatingUserLimitMin))
+                .add("coolingDeadband", HNum.make(coolingDeadband))
+                .add("heatingDeadband", HNum.make(heatingDeadband))
                 .toDict();
 
         HDictBuilder specialSchedule = new HDictBuilder()
@@ -233,7 +245,13 @@ public class SpecialSchedule {
                             .add(Tags.ETHH, HNum.make(endHour))
                             .add(Tags.ETMM, HNum.make(endMin))
                             .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
-                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
+                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())))
+                            .add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MAX).toString())))
+                            .add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MIN).toString())))
+                            .add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MAX).toString())))
+                            .add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MIN).toString())))
+                            .add(Tags.COOLING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.COOLING_DEADBAND).toString())))
+                            .add(Tags.HEATING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.HEATING_DEADBAND).toString())));
                     if(intrinsicDayNum == dayNumber){
                         daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
                     }
@@ -243,6 +261,54 @@ public class SpecialSchedule {
             }
         }
         return daysList;
+    }
+
+    public static String validateSpecialSchedule(
+            double coolVal,double heatVal,double coolingUserLimitMax,
+                                                 double coolingUserLimitMin,
+                                                 double heatingUserLimitMax,
+                                                 double heatingUserLimitMin,
+                                                 double coolingDeadband,
+                                                 double heatingDeadband){
+
+        double buildingLimitMax = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max");
+        double buildingLimitMin = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min");
+        double buildingZoneDifferential = CCUHsApi.getInstance().readPointPriorityValByQuery("building and differential");
+        String WarningMessage = null;
+        double unoccupiedZoneSetback;
+        if(CCUHsApi.getInstance().readEntity("unoccupied and zone and setback").size() == 0){
+            unoccupiedZoneSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("unoccupied and setback");
+        }else
+           unoccupiedZoneSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("unoccupied and zone and setback");
+
+        if (buildingLimitMin > (heatingUserLimitMin - (buildingZoneDifferential + unoccupiedZoneSetback))) {
+            WarningMessage = "Please go back and edit the Heating limit min temperature to be within the temperature limits of the building  " +
+                    "or adjust the temperature limits of the building to accommodate the required Heating user limit min temperature";
+        } else if (buildingLimitMax < (coolingUserLimitMax + (buildingZoneDifferential + unoccupiedZoneSetback))) {
+            WarningMessage = "Please go back and edit the Cooling limit max temperature to be within the temperature limits of the building  " +
+                    "or adjust the temperature limits of the building to accommodate the required Cooling user limit max temperature";
+        } else if ((heatingUserLimitMax - heatingUserLimitMin) < heatingDeadband) {
+            WarningMessage = "Heating limits are violating the deadband to be maintained, " +
+                    "the difference in heating limit maximum and minimum to be more or than or equal to the heating deadband ";
+
+        } else if ((coolingUserLimitMax - coolingUserLimitMin) < coolingDeadband) {
+            WarningMessage = "Cooling limits are violating the deadband to be maintained, " +
+                    "the difference in cooling limit maximum and minimum to be more or than or equal to the cooling deadband ";
+
+        } else if ((heatingUserLimitMax + heatingDeadband + coolingDeadband) > coolingUserLimitMax) {
+            WarningMessage = "Heating Limit Max is violating the Deadband to be maintained, it can be extended only till following condition is satisfied,\n" +
+                    "Heating Limit Max + deadband (heating + cooling) should be less than or equal to Cooling Limit Max ";
+
+        } else if ((heatingUserLimitMin + heatingDeadband + coolingDeadband) > coolingUserLimitMin) {
+            WarningMessage = "Cooling Limit Min is violating the Deadband to be maintained, it can be extended only till following condition is satisfied, " +
+                    "Cooling Limit min - deadband (heating + cooling) should be greater than or equal to Heating Limit Min.";
+        }else if(heatVal > heatingUserLimitMax || heatVal < heatingUserLimitMin){
+            WarningMessage = "Heating Desired temp is violating the limits, it should be within Heating Min and Max";
+        }else if(coolVal > coolingUserLimitMax || coolVal < coolingUserLimitMin){
+            WarningMessage = "Cooling Desired temp is violating the limits, it should be within Cooling Min and Max";
+        }
+
+        return WarningMessage;
     }
 
 }

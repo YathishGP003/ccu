@@ -267,8 +267,8 @@ public class OTNEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 1.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 1.0);
 
 
         Point desiredTemp = new Point.Builder()

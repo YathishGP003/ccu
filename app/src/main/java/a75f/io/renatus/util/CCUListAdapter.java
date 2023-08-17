@@ -52,7 +52,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private boolean isCCUReplaceable(int position){
         String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
-        String ccuVersion = ccuList.get(position).getVersion();
+            String ccuVersion = ccuList.get(position).getVersion();
         String lastUpdatedDateTime = ccuList.get(position).getLastUpdated();
         if (StringUtils.isEmpty(ccuCurrVersion) || StringUtils.isEmpty(ccuVersion) || lastUpdatedDateTime.equalsIgnoreCase("n/a")) {
             return false;

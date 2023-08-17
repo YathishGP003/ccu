@@ -59,6 +59,8 @@ android {
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"\"'
         }
@@ -70,6 +72,8 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.dev.service.75f.io/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.dev.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.dev.service.75f.io/version/all\"'
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.dev.service.75f.io/version/getDetails\"'
@@ -81,6 +85,7 @@ android {
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.qa.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/all\"'
@@ -93,6 +98,8 @@ android {
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.qa.service.75f.io/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-qa\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.qa.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.qa.service.75f.io/version/all\"'
@@ -106,6 +113,7 @@ android {
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.carrier.service.75f.io/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.carrier.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.carrier.service.75f.io/\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.carrier.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.carrier.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.carrier.service.75f.io//version/all\"'
@@ -123,7 +131,8 @@ android {
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.staging.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.staging.service.75f.io/version/all\"'
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.staging.service.75f.io/version/getDetails\"'
-
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.staging.service.75f.io/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-staging\"'
             minifyEnabled false
         }
         prod {
@@ -137,7 +146,8 @@ android {
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.prod.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.prod.service.75f.io/version/all\"'
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.prod.service.75f.io/version/getDetails\"'
-
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.prod.service.75f.io/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
@@ -152,7 +162,8 @@ android {
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.daikin.service.75f.io/api/v1/\"'
             buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.daikin.service.75f.io/version/all\"'
             buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.daikin.service.75f.io/version/getDetails\"'
-
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.daikin.service.75f.io/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }

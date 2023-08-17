@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTunerCache;
 
 public class EmergencyConditioning implements OccupancyTrigger{

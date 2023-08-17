@@ -364,7 +364,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void loadIntrinsicSchedule(){
-		RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, this::updateUI);
+		RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, () -> { updateUI();
+		});
 	}
 
 	private void buildIntrinsicSchedule(){

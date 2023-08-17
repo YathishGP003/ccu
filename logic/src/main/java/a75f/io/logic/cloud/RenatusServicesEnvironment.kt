@@ -77,6 +77,7 @@ class RenatusServicesEnvironment(
             BuildConfig.FILE_STORAGE_API_BASE,
             BuildConfig.MESSAGING_API_BASE,
             BuildConfig.WEATHER_API_BASE,
+            BuildConfig.GATEWAY_API_BASE,
             BuildConfig.CCU_VERSION_API_BASE,
             BuildConfig.CCU_FILE_SIZE_API_BASE
          )
@@ -92,9 +93,10 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + FILESTORAGE_EXT,
             HTTP + baseIp + MESSAGING_EXT,
             HTTP + baseIp + WEATHER_EXT,
+            HTTP + baseIp ,
             HTTP + baseIp + CCU_VERSION_EXT,
-            HTTP + baseIp + CCU_VERSION_EXT
-            )
+            HTTP + baseIp +CCU_VERSION_EXT
+         )
       }
 
    @SuppressLint("ApplySharedPref")
@@ -142,7 +144,7 @@ class RenatusServicesEnvironment(
 
    private fun setupUrls() {
       AlertManager.getInstance().setAlertsApiBase(urls.alertsUrl)
-      CCUHsApi.getInstance().resetBaseUrls(urls.haystackUrl, urls.caretakerUrl)
+      CCUHsApi.getInstance().resetBaseUrls(urls.haystackUrl, urls.caretakerUrl, urls.gatewayUrl)
    }
 }
 
@@ -153,6 +155,7 @@ data class RenatusServicesUrls(
    val remoteStorageUrl: String,
    val messagingUrl: String,
    val weatherUrl: String,
+   val gatewayUrl : String,
    val recommendedCCUVersion : String,
    val getCCUFileSize : String
 ) {

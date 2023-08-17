@@ -9,6 +9,10 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.renatus.registration.InstallerOptions;
+import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
@@ -64,18 +68,21 @@ public class TempLimitView extends LinearLayout {
 
 
     public void updateData() {
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+       /* HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
-
-        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
+        HashMap<Object,Object> coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
+        HashMap<Object,Object> heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
+        HashMap<Object,Object> coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
+        HashMap<Object,Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
+        */
         HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
-        setTempControl((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
-                (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),
+        setTempControl((float)MasterControlUtil.zoneMaxHeatingVal(),
+                (float) MasterControlUtil.zoneMinHeatingVal(),
+                (float) MasterControlUtil.zoneMinCoolingVal(),
+                (float) MasterControlUtil.zoneMaxCoolingVal(),
                 (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()));
     }
 

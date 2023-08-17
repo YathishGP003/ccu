@@ -224,7 +224,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
                             hDicts.add(pid);
                         }
-                        CCUHsApi.getInstance().importPointArrays(hDicts, null);
+                        CCUHsApi.getInstance().importPointArrays(hDicts);
                     },
                     () -> {
                         ProgressDialogUtils.hideProgressDialog();

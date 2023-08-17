@@ -74,6 +74,9 @@
     <color name="max_temp">#5990B4</color>
     <color name="bg_temp">#1A000000</color>
 
+    <color name="occupancy_occupied">#80FA8733</color>
+    <color name="occupancy_unoccupied">#80D0E39D</color>
+
     <color name="text_color">#DE000000</color>
     <color name="dark_text">#DE000000</color>
     <color name="title_color">#55565A</color>

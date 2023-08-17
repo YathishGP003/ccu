@@ -17,33 +17,7 @@ public class StandAloneTuners {
     public static void addDefaultStandaloneTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                                   String tz) {
 
-        Point saHeatingDeadBand = new Point.Builder()
-                                      .setDisplayName(equipDis+"-standaloneHeatingDeadband")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipRef).setHisInterpolate("cov")
-                                      .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his")
-                                      .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
-        String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
-        hayStack.writePointForCcuUser(saHeatingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT, 0);
-        hayStack.writeHisValById(saHeatingDeadBandId, TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT);
 
-        Point saCoolingDeadBand = new Point.Builder()
-                                      .setDisplayName(equipDis+"-standaloneCoolingDeadband")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipRef).setHisInterpolate("cov")
-                                      .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
-                                      .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
-        String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
-        hayStack.writePointForCcuUser(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
-        hayStack.writeHisValById(saCoolingDeadBandId, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT);
         Point saStage1Hysteresis = new Point.Builder()
                                        .setDisplayName(equipDis+"-standaloneStage1Hysteresis")
                                        .setSiteRef(siteRef)
@@ -296,37 +270,7 @@ public class StandAloneTuners {
                                                     String equipref, String roomRef, String floorRef, String tz) {
     
         List<HisItem> hisItems = new ArrayList<>();
-        Point saHeatingDeadBand = new Point.Builder()
-                                      .setDisplayName(equipdis+"-"+"standaloneHeatingDeadband")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .setRoomRef(roomRef)
-                                      .setFloorRef(floorRef).setHisInterpolate("cov")
-                                      .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his")
-                                      .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
-        String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
-        BuildingTunerUtil.updateTunerLevels(saHeatingDeadBandId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(saHeatingDeadBandId));
 
-        Point saCoolingDeadBand = new Point.Builder()
-                                      .setDisplayName(equipdis+"-"+"standaloneCoolingDeadband")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .setRoomRef(roomRef)
-                                      .setFloorRef(floorRef).setHisInterpolate("cov")
-                                      .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
-                                      .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
-        String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
-        BuildingTunerUtil.updateTunerLevels(saCoolingDeadBandId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(saCoolingDeadBandId));
 
         Point saStage1Hysteresis = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"standaloneStage1Hysteresis")

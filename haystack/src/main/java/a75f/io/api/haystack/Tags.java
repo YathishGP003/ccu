@@ -28,7 +28,8 @@ public class Tags
     public static final String GROUP= "group";
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
-    
+    public static final String SITEREF = "siteRef";
+
     public static final String WRITABLE = "writable";
     public static final String HIS = "his";
     public static final String SP = "sp";
@@ -132,7 +133,9 @@ public class Tags
     public static final String OUTSIDE_TEMP = "outsideTemp";
     public static final String LOCKOUT = "lockout";
     public static final String CLOUD = "cloud";
+    public static final String KIND = "kind";
 
+    public static final String DAYS = "days";
     public static final String DAY = "day";
     public static final String STDT = "stdt";
     public static final String ETDT = "etdt";
@@ -140,6 +143,14 @@ public class Tags
     public static final String STMM = "stmm";
     public static final String ETHH = "ethh";
     public static final String ETMM = "etmm";
+    public static final String HEATING_USER_LIMIT_MIN = "heatingUserLimitMin";
+    public static final String HEATING_USER_LIMIT_MAX = "heatingUserLimitMax";
+    public static final String COOLING_USER_LIMIT_MIN = "coolingUserLimitMin";
+    public static final String COOLING_USER_LIMIT_MAX = "coolingUserLimitMax";
+    public static final String COOLING_DEADBAND = "coolingDeadband";
+    public static final String HEATING_DEADBAND = "heatingDeadband";
+    public static final String UNOCCUPIED_ZONE_SETBACK = "unoccupiedZoneSetback";
+    public static final String FOLLOW_BUILDING = "followBuilding";
     public static final String COOLVAL = "coolVal";
     public static final String HEATVAL = "heatVal";
     public static final String SERIES = "series";
@@ -175,7 +186,10 @@ public class Tags
     public static final String ZONE_HVAC_MODE = "zoneHvacMode";
     public static final String OCCUPANCY_STATE = "occupancyState";
 
-    public static final String TZ = "tz";
+    public static final String SCHEDULABLE = "schedulable";
+    public static final String LIMIT = "limit";
+    public static final String DIFF = "differential";
+
     public static final String HELIO_NODE = "helionode";
     public static final String SMART_NODE = "smartnode";
     public static final String SMART_STAT = "smartstat";
@@ -191,11 +205,12 @@ public class Tags
     public static final String HS = "HS";
     public static final String SS = "SS";
     public static final String MESSAGE = "message";
-    public static final String KIND = "kind";
+
     public static final String VACATION = "vacation";
     public static final String NAMED = "named";
     public static final String LAST_MODIFIED_TIME = "lastModifiedDateTime";
     public static final String MODBUS = "modbus";
+    public static final String TZ = "tz";
 
     public static final String PIPEREF = "pipeRef";
     public static final String MONITORING = "monitoring";

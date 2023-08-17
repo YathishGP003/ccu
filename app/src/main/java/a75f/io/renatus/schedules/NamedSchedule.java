@@ -5,9 +5,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -29,6 +27,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -39,11 +38,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -60,10 +62,11 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.FontManager;
+import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 public class NamedSchedule extends DialogFragment {
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
@@ -181,7 +184,7 @@ public class NamedSchedule extends DialogFragment {
                     CcuLog.d(TAG, "roomref = " + roomRef);
                     List<HashMap<Object, Object>> scheduleTypePoints =
                             CCUHsApi.getInstance().readAllEntities(
-                            "scheduleType and roomRef ==\"" + getArguments().getString(PARAM_ROOM_REF) + "\"");
+                                    "scheduleType and roomRef ==\"" + getArguments().getString(PARAM_ROOM_REF) + "\"");
                     if (!scheduleTypePoints.isEmpty()) {
                         for (HashMap<Object, Object> scheduleType : scheduleTypePoints) {
                             CCUHsApi.getInstance().writeDefaultValById(Objects.requireNonNull(scheduleType.get("id")).toString(), 2.0);
@@ -331,7 +334,6 @@ public class NamedSchedule extends DialogFragment {
             Schedule namedSchedule =
                     CCUHsApi.getInstance().getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
             String roomRef = getArguments().getString(PARAM_ROOM_REF);
-            BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
 
             for (Interval v : systemIntervals) {
                 CcuLog.d("CCU_UI", "Merged System interval " + v);
@@ -368,27 +370,27 @@ public class NamedSchedule extends DialogFragment {
                     spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
                             .append(" ").append("").append(i.getStart().hourOfDay().get())
                             .append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" :
-                            i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":")
+                                    i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":")
                             .append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
 
                 }
 
                 warningMessage.append(getText(R.string.warning_msg)).append("\n\t").append(spillZones)
-                .append("\n\n");
+                        .append("\n\n");
                 isValid = false;
             }
 
             double coolingDeadband = TunerUtil.getZoneCoolingDeadband(roomRef);
             double heatingDeadband = TunerUtil.getZoneHeatingDeadband(roomRef);
             if( isCelsiusTunerAvailableStatus()) {
-                 coolingDeadband = fahrenheitToCelsiusRelative(coolingDeadband);
-                 heatingDeadband = fahrenheitToCelsiusRelative(heatingDeadband);
+                coolingDeadband = fahrenheitToCelsiusRelative(coolingDeadband);
+                heatingDeadband = fahrenheitToCelsiusRelative(heatingDeadband);
                 for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
                     double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
                     deadbandNamedSched=fahrenheitToCelsiusRelative(deadbandNamedSched);
                     if(deadbandNamedSched < coolingDeadband+heatingDeadband){
                         warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
-                                .append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append(" \u00B0C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append(" \u00B0C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append(" \u00B0C").append("\n\n");
+                                .append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append("\u00B0C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\u00B0C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\u00B0C").append("\n\n");
                         isValid = false;
                         break;
                     }
@@ -398,7 +400,7 @@ public class NamedSchedule extends DialogFragment {
                     double deadbandNamedSched = namedSchedDay.getCoolingVal() - namedSchedDay.getHeatingVal();
                     if (deadbandNamedSched < coolingDeadband + heatingDeadband) {
                         warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
-                                .append(deadbandNamedSched).append(" \u00B0F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\u00B0F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\u00B0F").append("\n\n");
+                                .append(deadbandNamedSched).append("\u00B0F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\u00B0F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\u00B0F").append("\n\n");
                         isValid = false;
                         break;
                     }
@@ -408,48 +410,144 @@ public class NamedSchedule extends DialogFragment {
             StringBuilder desiredTempWarning = new StringBuilder();
             boolean isDesiredTempValid = true;
             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
-                if (!(namedSchedDay.getHeatingVal() <= buildingTuner.getMaxHeatingUserLimit()
-                && namedSchedDay.getHeatingVal() >= buildingTuner.getMinHeatingUserLimit()
-                && namedSchedDay.getCoolingVal() <= buildingTuner.getMaxCoolingUserLimit()
-                && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
-                    String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
-                            "Saturday","Sunday"};
-                    if(isCelsiusTunerAvailableStatus()) {
-                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                if (!(namedSchedDay.getHeatingVal() <= namedSchedDay.getHeatingUserLimitMax()
+                        && namedSchedDay.getHeatingVal() >= namedSchedDay.getHeatingUserLimitMin()
+                        && namedSchedDay.getCoolingVal() <= namedSchedDay.getCoolingUserLimitMax()
+                        && namedSchedDay.getCoolingVal() >= namedSchedDay.getCoolingUserLimitMin())) {
+                    String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                            "Saturday", "Sunday"};
+                    if (isCelsiusTunerAvailableStatus()) {
+                        desiredTempWarning.append("\t").append(dayName[namedSchedDay.getDay()]).append("-")
                                 .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
                                 .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
-                                .append("(CDT - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingVal())).append(" \u00B0C").append(";")
-                                .append("HDT - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingVal())).append(" \u00B0C").append(")").append("\n\t\t");
+                                .append("(CDT - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingVal())).append("\u00B0C").append(";")
+                                .append("HDT - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingVal())).append("\u00B0C").append(")")
+                                .append("Schedule user limit : Heating - ")
+                                .append((fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin()))).append("\u00B0C").append("~").append((fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMax()))).append("\u00B0C")
+                                .append("\n\t Cooling - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMin())).append("\u00B0C").append("~").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("\u00B0C")
+                                .append("\n\n").append("\n\t\t");
                     } else {
                         desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
                                 .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
                                 .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
-                                .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(" \u00B0F").append(";")
-                                .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(" \u00B0F").append(")").append("\n\t\t");
+                                .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append("\u00B0F").append(";")
+                                .append("HDT - ").append(namedSchedDay.getHeatingVal()).append("\u00B0F").append(")")
+                                .append("Schedule user limit : Heating  - ")
+                                .append(namedSchedDay.getHeatingUserLimitMin()).append("\u00B0F").append("~").append(namedSchedDay.getHeatingUserLimitMax()).append("\u00B0F")
+                                .append("\n\t\t Cooling - ").append(namedSchedDay.getCoolingUserLimitMin()).append("\u00B0F").append("~").append(namedSchedDay.getCoolingUserLimitMax()).append("\u00B0F")
+                                .append("\n\n");
                     }
-                    isValid = false;
-                    isDesiredTempValid= false;
+                    isDesiredTempValid = false;
                 }
-
             }
-            if(!isDesiredTempValid) {
-                if(isCelsiusTunerAvailableStatus()) {
+
+            if (!isDesiredTempValid) {
+
+                if (isCelsiusTunerAvailableStatus()) {
                     warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
                             .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
-                            .append("Building desired temps limit : HDT - ")
-                            .append((fahrenheitToCelsius(buildingTuner.getMinHeatingUserLimit()))).append(" \u00B0C").append("~").append((fahrenheitToCelsius(buildingTuner.getMaxHeatingUserLimit()))).append(" \u00B0C")
-                            .append("\n\t\t CDT - ").append(fahrenheitToCelsius(buildingTuner.getMinCoolingUserLimit())).append(" \u00B0C").append("~").append(fahrenheitToCelsius(buildingTuner.getMaxCoolingUserLimit())).append(" \u00B0C")
-                            .append("\n\n");
+                    ;
                 } else {
                     warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
-                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
-                            .append("Building desired temps limit : HDT - ")
-                            .append(buildingTuner.getMinHeatingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxHeatingUserLimit()).append(" \u00B0F")
-                            .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxCoolingUserLimit()).append(" \u00B0F")
-                            .append("\n\n");
+                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning);
                 }
+
+                isValid = false;
             }
 
+
+
+
+
+            StringBuilder userLimitWarning = new StringBuilder();
+            boolean isLimitValid = true;
+            for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
+                if (!(MasterControlUtil.validateNamed(namedSchedDay.getHeatingUserLimitMin(),
+                        namedSchedDay.getCoolingUserLimitMax(), namedSchedule.getUnoccupiedZoneSetback()))) {
+                    String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                            "Saturday", "Sunday"};
+                    if (isCelsiusTunerAvailableStatus()) {
+                        userLimitWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("(Heating User Limit Min  - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin())).append("\u00B0C")
+                                .append("Cooling User Limit Max  - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("\u00B0C").append(")").append("\n\t\t");
+                    } else {
+                        userLimitWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("(Heating User Limit Min - ").append(namedSchedDay.getHeatingUserLimitMin()).append("\u00B0F")
+                               .append("Cooling User Limit Max - ").append(namedSchedDay.getCoolingUserLimitMax()).append("\u00B0F").append(")").append("\n\t\t");
+                    }
+                    isLimitValid = false;
+                }
+            }
+            if (!isLimitValid) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    warningMessage.append(getText(R.string.limits_warning)).append("\n\t")
+                            .append("Named schedule limits : \n\t\t").append(userLimitWarning)
+                            .append("Building limits :")
+                            .append((fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMin()))).append("\u00B0C").append("~").append(fahrenheitToCelsius(BuildingTunerCache.getInstance().getBuildingLimitMax())).append("\u00B0C")
+                            .append("\n\n");
+                } else {
+                    warningMessage.append(getText(R.string.limits_warning)).append("\n\t")
+                            .append("Named schedule limits : \n\t\t").append(userLimitWarning)
+                            .append("Building limits : ")
+                            .append(BuildingTunerCache.getInstance().getBuildingLimitMin()).append("\u00B0F").append("~")
+                            .append(BuildingTunerCache.getInstance().getBuildingLimitMax()).append("\u00B0F")
+                            .append("\n\n");
+                }
+
+                isValid = false;
+            }
+
+
+            StringBuilder deadBandWarning = new StringBuilder();
+            boolean isDeadBandValid = true;
+            for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
+                if (!MasterControlUtil.validateNamedDeadBand(namedSchedDay.getHeatingUserLimitMin(),
+                        namedSchedDay.getHeatingUserLimitMax(),
+                        namedSchedDay.getCoolingUserLimitMin(),
+                        namedSchedDay.getCoolingUserLimitMax(),namedSchedDay.getHeatingDeadBand(),
+                namedSchedDay.getCoolingDeadBand())) {
+                    String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                            "Saturday", "Sunday"};
+                    if (isCelsiusTunerAvailableStatus()) {
+                        deadBandWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("(Heating Lim Min|Max - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin())).append("\u00B0C")
+                                .append("|").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMax())).append("\u00B0C").append(";")
+                                .append("\nCooling Lim Min|Max- ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMin())).append("\u00B0C")
+                                .append("|").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("\u00B0C").append(")")
+                                .append("\nCooling deadBand- ").append(fahrenheitToCelsius(namedSchedDay.getCoolingDeadBand())).append("\u00B0C")
+                                .append(" Heating deadBand- ").append(fahrenheitToCelsius(namedSchedDay.getHeatingDeadBand())).append("\u00B0C")
+                                .append("\n\t\t");
+                    } else {
+                        deadBandWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("( Heating Lim Min|Max - ").append(namedSchedDay.getHeatingUserLimitMin()).append("\u00B0F")
+                                .append("|").append(namedSchedDay.getHeatingUserLimitMax()).append("\u00B0F").append(";")
+                                .append("\nCooling Lim Min|Max- ").append(namedSchedDay.getHeatingUserLimitMin()).append("\u00B0F").append("|")
+                                .append(namedSchedDay.getCoolingUserLimitMax()).append("\u00B0F")
+                                .append("\nCooling deadBand- ").append(namedSchedDay.getCoolingDeadBand()).append("\u00B0F")
+                                .append("  Heating deadBand- ").append(namedSchedDay.getHeatingDeadBand()).append("\u00B0F")
+                                .append("|").append(namedSchedDay.getCoolingUserLimitMax()).append("\u00B0F").append(")").append("\n\t\t");
+                    }
+                    isDeadBandValid = false;
+                }
+            }
+            if (!isDeadBandValid) {
+                warningMessage.append("Named schedule limits and deadbands are viloating on below zones: \n\t\t").append(deadBandWarning)
+                        .append("\n\t\tThe difference in limit maximum and minimum to be more or than or equal to the deadband and " +
+                                "\n\t\tHeating Limit Max + deadband (heating + cooling) should be less than or equal to Cooling Limit Max" +
+                                "\n\t\tCooling Limit min - deadband (heating + cooling) should be greater than or equal to Heating Limit Min ")
+                        .append("\n\n");
+
+
+                isValid = false;
+            }
         }
         if (!isValid) {
             warningMessage.append("\n\n").append(getText(R.string.pls_goback));
@@ -479,7 +577,14 @@ public class NamedSchedule extends DialogFragment {
             CcuLog.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         CcuLog.d(TAG,"PARAM_SCHEDULE_ID "+mScheduleId);
-        String title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME);
+        String namedScheduledis = getArguments().getString(PARAM_SCHED_NAME);
+        String title;
+        if(namedScheduledis.length() > 20){
+            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME).substring(0,20)+"...";
+        }else{
+            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME);
+        }
+
         textViewScheduletitle.setText(title);
         updateUI();
     }
@@ -494,12 +599,18 @@ public class NamedSchedule extends DialogFragment {
             days.sort(Comparator.comparingInt(Schedule.Days::getSthh));
             days.sort(Comparator.comparingInt(Schedule.Days::getDay));
 
+            for(int i = 0; i < 7; i++){
+                drawSchedule(i, 0,0,0, 23, 0, 59, DAYS.values()[i],
+                        false,
+                        false);
+            }
+
             for (int i = 0; i < days.size(); i++) {
                 Schedule.Days daysElement = days.get(i);
                 drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
                         daysElement.getSthh(), daysElement.getEthh(),
                         daysElement.getStmm(), daysElement.getEtmm(),
-                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection(),true);
             }
         });
     }
@@ -546,27 +657,31 @@ public class NamedSchedule extends DialogFragment {
     private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface,
                                    int tempStartTime, int tempEndTime,
                                    int startTimeMM, int endTimeMM, TextView textView,
-                                   boolean leftBreak, boolean rightBreak, boolean intersection) {
+                                   boolean leftBreak, boolean rightBreak, boolean intersection,boolean isOccupied) {
 
         CcuLog.i(TAG, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
-        if(getContext()==null) return;
+        if (getContext() == null) return;
         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
+
+
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
         String celsiusUnitMin = FontManager.getColoredSpanned("\u00B0C", colorMinTemp);
         String celsiusUnitMax = FontManager.getColoredSpanned("\u00B0C", colorMaxTemp);
         String farenUnitMin = FontManager.getColoredSpanned("\u00B0F", colorMinTemp);
         String farenUnitMax = FontManager.getColoredSpanned("\u00B0F", colorMaxTemp);
-        if(isCelsiusTunerAvailableStatus()) {
-            textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
-        } else {
-            textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
+        if (isOccupied) {
+            if (isCelsiusTunerAvailableStatus()) {
+                textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
+            }
         }
-        if(typeface!=null)
+        if (typeface != null)
             textViewTemp.setTypeface(typeface);
         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         textViewTemp.setMaxLines(2);
-        textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);
+        textViewTemp.setContentDescription(textView.getText().toString() + "_" + tempStartTime + ":" + startTimeMM + "-" + tempEndTime + ":" + endTimeMM);
         textViewTemp.setId(ViewCompat.generateViewId());
         textViewTemp.setTag(position);
 
@@ -584,11 +699,12 @@ public class NamedSchedule extends DialogFragment {
         Drawable drawableCompat;
 
         if (leftBreak) {
-            drawableCompat =  ContextCompat.getDrawable(requireContext(),R.drawable.temperature_background_left);
+            drawableCompat =  ContextCompat.getDrawable(requireContext(),R.drawable.occupancy_background_left);
             if (intersection) {
                 Drawable rightGreyBar = ContextCompat.getDrawable(requireContext(),R.drawable.vline);
-                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
-            }else
+                if(isOccupied)
+                    textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
+            }else if(isOccupied)
                 textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
 
             Space space = new Space(getActivity());
@@ -610,8 +726,9 @@ public class NamedSchedule extends DialogFragment {
 
 
         } else if (rightBreak) {
-            drawableCompat = ContextCompat.getDrawable(requireContext(),R.drawable.temperature_background_right);
-            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
+            drawableCompat = ContextCompat.getDrawable(requireContext(),R.drawable.occupancy_background_left);
+            if(isOccupied)
+              textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
             Space space = new Space(getActivity());
             space.setId(View.generateViewId());
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
@@ -634,7 +751,8 @@ public class NamedSchedule extends DialogFragment {
             }
 
 
-            drawableCompat = ContextCompat.getDrawable(requireContext(),R.drawable.temperature_background);
+            drawableCompat = ContextCompat.getDrawable(requireContext(),isOccupied ? R.drawable.occupancy_background_left
+                    :R.drawable.occupancy_background_unoccupied);
 
             if (endTimeMM > 0)
                 tempEndTime++;
@@ -645,6 +763,47 @@ public class NamedSchedule extends DialogFragment {
 
         textViewTemp.setBackground(drawableCompat);
         constraintScheduler.addView(textViewTemp, lp);
+
+
+        textViewTemp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isOccupied) {
+                    FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+                    NamedScheduleUnoccupiedDailog namedScheduleUnoccupiedDailog =
+                            NamedScheduleUnoccupiedDailog.newInstance(mScheduleId,(int)v.getTag());
+                    namedScheduleUnoccupiedDailog.show(fragmentTransaction, "popup");
+
+                } else {
+                    // force refresh schedule
+                    if (mScheduleId != null) {
+                        schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                        ArrayList<Schedule.Days> days = schedule.getDays();
+
+
+                        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+                        Fragment namedSchedulefragment = getChildFragmentManager().findFragmentByTag("popup");
+                        if (namedSchedulefragment != null) {
+                            fragmentTransaction.remove(namedSchedulefragment);
+                        }
+                        NamedScheduleDialogFragment namedScheduleDialogFragment =
+                                NamedScheduleDialogFragment.newInstance(mScheduleId,(int)v.getTag());
+                        namedScheduleDialogFragment.show(fragmentTransaction, "popup");
+                        int clickedPosition = (int) v.getTag();
+
+
+                        try {
+                            Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                            Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+
+
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            Log.d(TAG, "onClick: " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        });
 
     }
 
@@ -675,7 +834,9 @@ public class NamedSchedule extends DialogFragment {
     }
 
 
-    private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
+    private void drawSchedule(int position, double heatingTemp, double coolingTemp,
+                              int startTimeHH, int endTimeHH, int startTimeMM,
+                              int endTimeMM, DAYS day, boolean intersection,boolean isOccupied) {
 
 
         if(isCelsiusTunerAvailableStatus()) {
@@ -695,16 +856,19 @@ public class NamedSchedule extends DialogFragment {
         if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
                     24, startTimeMM, 0,
-                    getTextViewFromDay(day), false, true, intersection);
+                    getTextViewFromDay(day), false, true, intersection,isOccupied);
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, 0,
                     endTimeHH, 0, endTimeMM,
-                    getTextViewFromDay(day.getNextDay()), true, false, intersection);
+                    getTextViewFromDay(day.getNextDay()), true, false, intersection
+                    ,isOccupied);
         } else {
             drawScheduleBlock(position, strminTemp, strmaxTemp,
                     typeface, startTimeHH, endTimeHH, startTimeMM,
-                    endTimeMM, getTextViewFromDay(day), false, false, intersection);
+                    endTimeMM, getTextViewFromDay(day), false, false,
+                    intersection,isOccupied);
         }
 
 
     }
+
 }

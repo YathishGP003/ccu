@@ -370,7 +370,7 @@ public class SeekArc extends View
         CcuLog.i(L.TAG_CCU_UI,
                  "SeekArc setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
                             +" coolingLowerLimit "+coolingLowerLimit+" coolingUpperLimit "+coolingUpperLimit +" " +
-                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand+" TemperatreMode "+modeType);
+                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand+" TemperatreMode "+modeType+" currentTemp "+currentTemp);
         mHeatingDeadBand = heatingDeadBand;
         mCoolingDeadBand = coolingDeadBand;
         mBuildingLowerTempLimit = buildingLowerLimit;

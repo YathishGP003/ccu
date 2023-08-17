@@ -23,8 +23,10 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -104,7 +106,7 @@ public class DiagEquip
         CCUHsApi.getInstance().writeDefaultValById(autoCommissionPintId, 0.0);
         CCUHsApi.getInstance().writeHisValById(autoCommissionPintId, 0.0);
         AutoCommissioningUtil.setAutoCommissionState(AutoCommissioningState.NOT_STARTED);
-    
+
         Point chargingStatus = new Point.Builder()
                                      .setDisplayName(equipDis+"-chargingStatus")
                                      .setEquipRef(equipRef)
@@ -222,6 +224,7 @@ public class DiagEquip
                 .setKind(Kind.STRING)
                 .build();
         hsApi.addPoint(appVersion);
+
         Point internalDiskStorage = new Point.Builder()
                 .setDisplayName(equipDis+"-availableInternalDiskStorage")
                 .setEquipRef(equipRef)
@@ -232,6 +235,37 @@ public class DiagEquip
                 .setTz(tz)
                 .build();
         hsApi.addPoint(internalDiskStorage);
+
+
+        addMigrationVersionPoint(hsApi, equipDis, equipRef, siteRef, tz);
+    }
+
+    private static void addMigrationVersionPoint(CCUHsApi hsApi, String equipDis, String equipRef, String siteRef, String tz) {
+        Point appVersion = new Point.Builder()
+                .setDisplayName(equipDis+"-migrationVersion")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("migration").addMarker("version").addMarker("writable")
+                .setUnit("")
+                .setTz(tz)
+                .setKind(Kind.STRING)
+                .build();
+        hsApi.addPoint(appVersion);
+    }
+
+    public static void createMigrationVersionPoint(CCUHsApi hsApi) {
+        HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
+        if (diagEquipMap.isEmpty()) {
+            CcuLog.d(L.TAG_CCU," createMigrationVersionPoint - DiagEquip does not exist. ");
+            return;
+        }
+        HashMap<Object,Object> migrationVerionsMap = CCUHsApi.getInstance().readEntity("point and diag and migration and version");
+        if (!migrationVerionsMap.isEmpty()) {
+            return;
+        }
+        Equip diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
+        addMigrationVersionPoint(hsApi, diagEquip.getDisplayName(), diagEquip.getId(),
+                                                diagEquip.getSiteRef(), diagEquip.getTz());
     }
     
     
@@ -296,6 +330,8 @@ public class DiagEquip
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
+                if(SchedulableMigrationKt.validateMigration())
+                    CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
             }
 
         } catch (PackageManager.NameNotFoundException e) {

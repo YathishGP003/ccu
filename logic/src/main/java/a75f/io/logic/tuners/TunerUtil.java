@@ -132,7 +132,7 @@ public class TunerUtil
         double maxDb = 0;
         boolean isDefault = true;
         for (Equip q : zoneEquips){
-            HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
+            HashMap cdb = hayStack.read("point and deadband and cooling and not adr and not multiplier and roomRef == \""+roomRef+"\"");
 
             if (!cdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(cdb.get("id").toString());
@@ -167,7 +167,7 @@ public class TunerUtil
         boolean isDefault = true;
 
         for (Equip q : zoneEquips) {
-            HashMap hdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \"" + q.getId() + "\"");
+            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomref == \"" + roomRef + "\"");
 
             if (!hdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(hdb.get("id").toString());

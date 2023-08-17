@@ -21,7 +21,7 @@ class BackfillPref {
     }
 
     fun getBackFillTimeDuration () : Int {
-        return sharedPreferences.getInt(BACKFILL_TIME_DURATION, BACKFILL_DEFAULT_TIME)
+        return sharedPreferences.getInt(BACKFILL_TIME_SP_SELECTED, BACKFILL_DEFAULT_TIME_SP)
     }
 
     enum class BackFillDuration(val displayName: String) {
@@ -78,6 +78,7 @@ class BackfillPref {
         const val BACKFILL_TIME_DURATION = "backFillTimeDuration"
         const val BACKFILL_TIME_SP_SELECTED = "backFillTimeSpSelected"
         const val BACKFILL_DEFAULT_TIME = 24
+        const val BACKFILL_DEFAULT_TIME_SP = 6
     }
 
 }

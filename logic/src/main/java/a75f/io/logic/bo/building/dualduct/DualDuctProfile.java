@@ -86,18 +86,7 @@ public class DualDuctProfile extends ZoneProfile {
             CCUHsApi.getInstance().readEntity("equip and group == \"" + dualDuctEquip.nodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
-    
-    @Override
-    public boolean isZoneDead() {
-        
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        return dualDuctEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway) ||
-               dualDuctEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway);
-    }
-    
+
     @Override
     public synchronized void updateZonePoints()
     {

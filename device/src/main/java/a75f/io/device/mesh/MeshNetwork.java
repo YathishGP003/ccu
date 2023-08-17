@@ -1,5 +1,16 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.logic.L.ccu;
+
+import android.util.Log;
+
+import java.util.HashMap;
+import java.util.List;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -24,17 +35,10 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
-
-import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
-import static a75f.io.logic.L.ccu;
-
-import android.util.Log;
 
 
 /**
@@ -54,7 +58,9 @@ public class MeshNetwork extends DeviceNetwork
         }
         if(LSerial.getInstance().isNodesSeeding())
             return;
-        MeshUtil.sendHeartbeat((short)0);
+        if (isAnyEquipAlive(CCUHsApi.getInstance())) {
+            MeshUtil.sendHeartbeat((short) 0);
+        }
         
         MeshUtil.tSleep(1000);
         boolean sendControlMessage = (((System.currentTimeMillis() -  HyperStatSettingsUtil.Companion.getCcuControlMessageTimer())/ 1000) / 60)>20;
@@ -272,5 +278,17 @@ public class MeshNetwork extends DeviceNetwork
         msg.analog2.set((short) systemProfile.getSystemController().getAverageSystemHumidity());
         msg.analog3.set((short) (systemProfile.getCmdSignal("staticPressure") * 10));
         MeshUtil.sendStructToCM(msg);
+    }
+
+    private boolean isAnyEquipAlive(CCUHsApi hayStack) {
+        List<HashMap<Object, Object>> allStatusPoints = hayStack.readAllEntities("point and status and not ota and his");
+
+        for (HashMap point : allStatusPoints) {
+            int statusVal = hayStack.readHisValById(point.get("id").toString()).intValue();
+            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

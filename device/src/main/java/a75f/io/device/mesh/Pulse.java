@@ -419,8 +419,8 @@ public class Pulse
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp = 0;
 		double averageTemp;
-		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
-		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
+		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double hdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 		Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 		if(occ != null) {
@@ -429,10 +429,18 @@ public class Pulse
 		}
 
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
-		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
+		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+
+
+		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
+				buildingTuner.getMinCoolingUserLimit()
+		);
+		/*double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
 				+ equip.getId()+"\"");
 		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-				+equip.getId()+"\"");
+				+equip.getId()+"\"");*/
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -501,10 +509,8 @@ public class Pulse
 				" == \"" + equip.getRoomRef() + "\"").intValue();
 		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
-		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
-				+ equip.getId()+"\"");
-		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-				+equip.getId()+"\"");
+		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
 
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");

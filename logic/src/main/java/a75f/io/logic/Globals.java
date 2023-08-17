@@ -24,11 +24,16 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -69,6 +74,9 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
@@ -227,11 +235,13 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
-        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
     }
 
     public void startTimerTask(){
         Log.d(L.TAG_CCU_JOB, " running after db is done");
+       // CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
@@ -327,6 +337,7 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
+                        new MigrationHandler(CCUHsApi.getInstance()).doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
                         performBuildingTunerUprades(site);
                         migrateHeartbeatPointForEquips(site);

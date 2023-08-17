@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.constants.WhoFiledConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -115,7 +116,9 @@ public class EquipScheduleHandler implements Schedulable {
                                          "Invalid occupied values for "+schedule);
             return;
         }
-        double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equipRef);
+
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery
+                ("zone and unoccupied and setback and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
     
         double avgTemp = (occupiedSchedule.getCoolingVal() + occupiedSchedule.getHeatingVal()) / 2.0;
 
@@ -193,9 +196,12 @@ public class EquipScheduleHandler implements Schedulable {
             coolingDesiredTemp = occ.getCoolingVal();
         } else {
             double averageDt = hayStack.readDefaultVal("average and desired and temp and equipRef == \""+equipRef+"\"");
-            double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equipRef, hayStack);
+            String zone = HSUtil.getZoneIdFromEquipId(equipRef);
+            double coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery
+                    ("zone and cooling and deadband and roomRef == \""+zone+"\"");
             coolingDesiredTemp = averageDt + coolingDeadBand;
-            double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equipRef, hayStack);
+            double heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery
+                    ("zone and heating and deadband and roomRef == \""+zone+"\"");
             heatingDesiredTemp = averageDt - heatingDeadBand;
         }
 

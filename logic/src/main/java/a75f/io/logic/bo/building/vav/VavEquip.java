@@ -625,7 +625,8 @@ public class VavEquip
                                            .setEnums("building,zone,named")
                                            .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), 0.0));
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 1.0);
+        hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), 1.0));
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-zoneDynamicPriority")

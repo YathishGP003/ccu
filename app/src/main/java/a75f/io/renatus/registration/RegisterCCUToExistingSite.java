@@ -222,8 +222,8 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     }
                 },
                 ()->{
-                    prefs.setBoolean("CCU_SETUP", true);
                     L.saveCCUState();
+                    prefs.setBoolean("CCU_SETUP", true);
                     CCUHsApi.getInstance().log();
                     CCUHsApi.getInstance().syncEntityTree();
                     ProgressDialogUtils.hideProgressDialog();

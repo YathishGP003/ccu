@@ -30,7 +30,7 @@ import a75f.io.renatus.views.MasterControl.MasterControlView;
 public class TempLimit extends View {
 
     //
-    public static final float RECOMMENDED_WIDTH_DP = 500.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 350.0f;
     //
     private Paint mLinePaint;
     private Paint mTempIconPaint;
@@ -60,7 +60,7 @@ public class TempLimit extends View {
     int mDefaultVisibleDegrees = 35;
 
     float mLowerBound = 32.0f;
-    float mUpperBound = 110.0f;
+    float mUpperBound = 240.0f;
 
     int mDegreeIncremntPX = 0;
     boolean mMeasured = false;

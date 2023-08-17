@@ -188,7 +188,14 @@ public class CCUUtils
                 SpecialSchedule.createSpecialSchedule(zoneSpecialSchedule.get("id").toString(),
                         zoneSpecialSchedule.get("dis").toString(), beginDateTime, endDateTime,
                         Double.parseDouble(range.get("coolVal").toString()),
-                        Double.parseDouble(range.get("heatVal").toString()), true,
+                        Double.parseDouble(range.get("heatVal").toString()),
+                        Double.parseDouble(range.get("coolingUserLimitMax" ).toString()),
+                        Double.parseDouble(range.get("coolingUserLimitMin" ).toString()),
+                        Double.parseDouble(range.get("heatingUserLimitMax" ).toString()),
+                        Double.parseDouble(range.get("heatingUserLimitMin" ).toString()),
+                        Double.parseDouble(range.get("coolingDeadband" ).toString()),
+                        Double.parseDouble(range.get("heatingDeadband" ).toString()),
+                       true,
                         zoneSpecialSchedule.get("roomRef").toString());
 
 

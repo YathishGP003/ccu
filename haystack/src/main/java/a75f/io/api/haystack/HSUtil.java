@@ -153,7 +153,6 @@ public class HSUtil
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         return new Equip.Builder().setHashMap(equipHashMap).build();
     }
-    
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();
@@ -493,6 +492,23 @@ public class HSUtil
                 || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
     }
 
+
+
+    public static double getLevelValueFrom10(String id){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> values = hayStack.readPoint(id);
+        if (values != null && !values.isEmpty()) {
+            HashMap<Object,Object> valMapAtLevel10 =  values.get(9);
+            HashMap<Object,Object> valMapAtLevel17 =  values.get(16);
+            if (valMapAtLevel10.containsKey("val")) {
+                return Double.parseDouble(valMapAtLevel10.get("val").toString());
+            }else if(valMapAtLevel17.containsKey("val")){
+                return Double.parseDouble(valMapAtLevel17.get("val").toString());
+            }
+        }
+        return 0;
+    }
+
 //    /**
 //     * Checks a given point is a limit tuner.
 //     * @param id
@@ -513,6 +529,61 @@ public class HSUtil
 //                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
 //                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
 //    }
+
+    public static double getLevelValueFrom16ByQuery(String query){
+        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(query);
+        if(!point.isEmpty())
+            return getLevelValueFrom16(point.get("id").toString());
+        return 0;
+    }
+
+    public static double getLevelValueFrom16(String id){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> values = hayStack.readPoint(id);
+        if (values != null && !values.isEmpty()) {
+            for (int l = 16; l <= 17; l++) {
+                HashMap<Object,Object> valMap =  values.get(l - 1);
+                if (valMap.containsKey("val")) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+
+    public static void writeValToALLLevel16(ArrayList<HashMap<Object, Object>> points, float val){
+        for (HashMap<Object, Object> point:points) {
+            writeValtolevel16(point,val);
+        }
+    }
+
+    public static void writeValtolevel16(HashMap<Object, Object> point, float val) {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        String pointId = point.get("id").toString();
+        double level16Val = getPriorityLevelVal(pointId,16);
+        if((level16Val == 0 && getPriorityLevelVal(pointId,17) == val)
+               || (level16Val > 0 && level16Val == val))
+                return;
+
+        hsApi.writePointForCcuUser(pointId, 16, (double) val, 0);
+        hsApi.writeHisValById(pointId, (double) val);
+
+    }
+
+    public static void writeValLevel10(HashMap<Object, Object> point, double val) {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        String pointId = point.get("id").toString();
+        hsApi.writePointForCcuUser(pointId, 10, val, 60000);
+        hsApi.writeHisValById(pointId, val);
+
+    }
+
+    public static boolean isSchedulable(String entityId, CCUHsApi hayStack) {
+        HashMap<Object, Object> entityMap = hayStack.readMapById(entityId);
+        return entityMap.containsKey(Tags.SCHEDULABLE) ||
+                (entityMap.containsKey(Tags.BUILDING) && !entityMap.containsKey(Tags.TUNER) &&
+                        (entityMap.containsKey(Tags.LIMIT) || entityMap.containsKey(Tags.DIFF)));
+    }
 
     public static void addPointToLocalDB(HDict dict){
         HashMap<Object, Object> map = new HashMap<>();

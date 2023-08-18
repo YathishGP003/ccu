@@ -95,7 +95,6 @@ public class HyperSplitMessageCache {
     }
 
 
-    // TODO: update for any additional OAO fields
     private boolean compareControlMessage(HyperSplit.HyperSplitControlsMessage_t oldControlMessage,
                                           HyperSplit.HyperSplitControlsMessage_t newControlMessage) {
         return  (oldControlMessage.getRelay1() != newControlMessage.getRelay1()

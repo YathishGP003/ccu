@@ -1187,23 +1187,12 @@ class HyperStatSplitPointsUtil(
 
         val co2ConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
-        val co2DamperOpeningRatePointMarkers = arrayOf(
-            "config", "writable", "his", "zone", "co2", "damper", "opening", "rate","actuator","sp"
-        )
         val zoneCO2ThresholdPointMarkers = arrayOf(
             "config", "writable", "his", "zone", "co2", "threshold", "sp","concentration"
         )
         val zoneCO2TargetPointMarkers = arrayOf(
             "config", "writable", "his", "zone", "co2", "target", "sp","concentration"
         )
-
-
-        val co2DamperOpeningRatePoint = createHaystackPointWithUnit(
-            "$equipDis-co2DamperOpeningRate",
-            co2DamperOpeningRatePointMarkers,
-            "cov","%"
-        )
-
 
         val zoneCO2ThresholdPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Threshold",
@@ -1217,9 +1206,6 @@ class HyperStatSplitPointsUtil(
             "cov","ppm"
         )
 
-        co2ConfigPointsList.add(
-            Pair(co2DamperOpeningRatePoint, zoneCO2DamperOpeningRate)
-        )
         co2ConfigPointsList.add(
             Pair(zoneCO2ThresholdPointPoint, zoneCO2Threshold)
         )

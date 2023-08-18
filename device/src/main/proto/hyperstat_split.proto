@@ -1,0 +1,385 @@
+syntax = "proto3";
+
+package a75f.io.device;
+
+option java_package = "a75f.io.device";
+option java_outer_classname = "HyperSplit";
+
+enum HyperSplitRequestType_e {
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_UNKNOWN = 0; // default for unsupported decrypt, open-enums
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_SETTINGS = 1; // standard device settings (Same as HYPERSTAT_REQUEST_TYPE_SETTINGS)
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_CONTROLS = 2; // standard device controls (Same as HYPERSTAT_REQUEST_TYPE_CONTROLS)
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_IDU_CONTROLS = 3; // special request for Daikin-P1P2-variant controls (Same as HYPERSTAT_REQUEST_TYPE_IDU_CONTROLS)
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings (Same as HYPERSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS)
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_SETTINGS_2 = 5; // standard device settings 2 (Same as HYPERSTAT_REQUEST_TYPE_SETTINGS_2)
+  HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_SETTINGS_3 = 6; // standard device settings 3 (Same as HYPERSTAT_REQUEST_TYPE_SETTINGS_3)
+  HYPERSPLIT_REQUEST_TYPE_CONTROLS = 7;   // Hyperstat Split specific controls
+  HYPERSPLIT_REQUEST_TYPE_SETTINGS_2 = 8; // Hyperstat Split specific settings 2
+  HYPERSPLIT_REQUEST_TYPE_SETTINGS_3 = 9; // Hyperstat Split specific settings 3
+}
+
+message HyperSplitRequestMessage_t {
+  HyperSplitRequestType_e type = 1; // enum specifies what data is being requested
+}
+
+enum HyperSplitTemperatureMode_e {
+  HYPERSPLIT_TEMP_MODE_SINGLE = 0;
+  HYPERSPLIT_TEMP_MODE_DUAL_FIXED_DB = 1;
+  HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
+}
+
+enum HyperSplitProfiles_t {
+  HYPERSPLIT_PROFILE_NONE = 0;
+  HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT = 1;
+  HYPERSPLIT_PROFILE_HEAT_PUMP_UNIT = 2;
+  HYPERSPLIT_PROFILE_2_PIPE_FANCOIL_UNIT = 3;
+  HYPERSPLIT_PROFILE_4_PIPE_FANCOIL_UNIT = 4;
+  HYPERSPLIT_PROFILE_VRV = 5;
+  HYPERSPLIT_PROFILE_SENSE = 6;
+  HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT_ECONOMIZER = 7;
+}
+
+message HyperSplitTunersGeneric_t {
+  uint32 unoccupiedSetback = 1; // Amount by which temperature is setback when no occupancy is detected 1/10 of a degree F (Currently not used)
+  uint32 heatingDeadbandMultiplier = 2; // To be removed
+  uint32 relayActivationHysteresis = 3; // Hysterisis value used for changing relay
+  uint32 analogFanSpeedMultiplier = 4; // 1/10 of multiplier value for fan speed
+  uint32 humidityHysteresis = 5; // Hysterisis value for setting humidifier and dehumidifier
+  uint32 forcedOccupiedTime = 6; // Not used in standalone since schedules are not implemented yet
+  uint32 autoAwayTime = 7; // Time in minutes after which autoaway mode is activated 
+  uint32 autoAwayZoneSetbackTemp = 8; //  When no occupancy /keycard detected. 1/10 of deg F. 
+}
+
+message HyperSplitTunersFcu_t {
+  uint32 auxHeating1Activate  = 1; // 1/10 of the temperature value
+  uint32 auxHeating2Activate  = 2; // 1/10 of the temperature value
+  uint32 twoPipeHeatingThreshold = 3; //Typical values 70-130
+  uint32 twoPipeCoolingThreshold = 4; // Typical values 35-70
+  uint32 waterValueSamplingOnTime = 5; // Typical value 0-30
+  uint32 watreValueSamplingWaitTime = 6; // Typical value 5-300
+  uint32 waterValveSamplingDuringLoopDeadbandOnTime = 7; // Typical value 0-30
+  uint32 waterValveSamplingDuringLoopDeadbandWaitTime = 8; // Typical value 5-300
+}
+
+message HyperSplitTunersEco_t {
+  uint32 economizingToMainCoolingLoopMap = 1;
+  uint32 economizingMinTemp = 2;
+  uint32 economizingMaxTemp = 3;
+  uint32 economizingMinHumidity = 4;
+  uint32 economizingMaxHumidity = 5;
+  uint32 economizingDryBulbThreshold = 6;
+  uint32 enthalpyDuctCompensationOffset = 7;
+  uint32 exhaustFanStage1Threshold = 8;
+  uint32 exhaustFanStage2Threshold = 9;
+  uint32 exhaustFanHysteresis = 10;
+  uint32 oaoDamperMatTarget = 11;
+  uint32 oaoDamperMatMin = 12;
+  uint32 outsideDamperMinOpen = 13;
+}
+
+message HyperSplitSettingsMessage_t {
+  string roomName = 1; // [(nanopb).max_size = 25];
+  int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
+  int32 minHeatingUserTemp = 3; // Minimum temperature the user can set in degrees F (default 67)
+  int32 maxCoolingUserTemp = 4; // Maximum temperature the user can set in degrees F (default 77)
+  int32 minCoolingUserTemp = 5; // Minimum temperature the user can set in degrees F (default 74)
+  sint32 temperatureOffset = 6; // Offset to be added to the measured room temperature (default 0). Unit is 1/10 of a degree F.
+  int32 heatingDeadBand = 7; // Amount above set temperature at which heating is activated. Unit is 1/10 of a degree F.
+  int32 coolingDeadBand = 8; // Amount below set temperature at which cooling is activated. Unit is 1/10 of a degree F.
+  HyperSplitTemperatureMode_e temperatureMode = 9;
+  int32 co2AlertTarget = 10;
+  int32 vocAlertTarget = 11;
+  int32 pm25AlertTarget = 12;
+  bool displayCO2 = 13;
+  bool displayPM25 = 14;
+  bool displayVOC = 15;
+  bool displayHumidity = 16;
+  bool showCentigrade = 17; // 0: show Fahrenheit, 1: show Celsius
+  /* miscSettings
+       bit 0: enableExternal10kTemperatureSensor(1 if external sensor is enabled
+       bit 1: disableTouch(1 will disable touch)
+       bit 2: brightnessVariationEnable (1 will enable automatic brightness control) */
+  uint32 miscSettings1 =18;
+  bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
+  uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
+  uint32 humidityMaxSetpoint = 21; // Maximum humidity setpont 0-100% in which Hyperstat will set system to Dehumidity/Dry if humidity level is greater than
+  uint32 occupancySensorSensitivityLevel = 22; // Sensitivity level setting for the motion sensor 1-10, one being the most sensitive
+}
+
+message HyperSplitSettingsMessage3_t {
+  HyperSplitTunersGeneric_t genertiTuners = 1; // Generic tuner
+  HyperSplitTunersFcu_t  fcuTuners = 2;
+  HyperSplitTunersEco_t  ecoTuners = 3;
+}
+
+
+enum HyperSplitFanSpeed_e {
+  HYPERSPLIT_FAN_SPEED_OFF = 0;
+  HYPERSPLIT_FAN_SPEED_AUTO = 1;
+  HYPERSPLIT_FAN_SPEED_LOW = 2;
+  HYPERSPLIT_FAN_SPEED_MED = 3;
+  HYPERSPLIT_FAN_SPEED_HIGH = 4;
+}
+
+enum HyperSplitConditioningMode_e {
+  HYPERSPLIT_CONDITIONING_MODE_OFF = 0;
+  HYPERSPLIT_CONDITIONING_MODE_AUTO = 1;
+  HYPERSPLIT_CONDITIONING_MODE_HEATING = 2;
+  HYPERSPLIT_CONDITIONING_MODE_COOLING = 3;
+}
+
+enum HyperSplitOperatingMode_e {
+  HYPERSPLIT_OPERATING_MODE_OFF = 0;
+  HYPERSPLIT_OPERATING_MODE_HEATING = 1;
+  HYPERSPLIT_OPERATING_MODE_COOLING = 2;
+}
+
+message HyperSplitSystemTimePb_t {
+  int32 day = 1; // The day of the week. Refer to ::DayOfWeek_t for a mapping of values.
+  int32 hours = 2; // Number of hours passed since midnight, from 0 to 23
+  int32 minutes = 3; // Number of minutes passed, from 0 to 59
+}
+
+message HyperSplitAnalogOutputControl_t {
+  int32 percent = 1; // Determines the output level (0-100%)
+  bool pulseEnabled = 2; // 1 if the output should be pulsed, 0 if the output is a constant voltage
+}
+
+message HyperSplitLocalControlsOverrideMessage_t {
+  int32 setTempCooling = 1; // The user-specified set temperature. Measured in 2x degrees F.
+  int32 setTempHeating = 2; // The user-specified set temperature. Measured in 2x degrees F.
+  HyperSplitFanSpeed_e fanSpeed = 3; // The user-specified fan speed
+  HyperSplitConditioningMode_e conditioningMode = 4;
+}
+
+message HyperSplitCcuDatabaseSeedMessage_t {
+  bytes encryptionKey = 1; // [(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedHyperSplitControlsData = 3; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSPLIT_CONTROLS_MESSAGE
+  bytes serializedHyperSplitSettings2Data = 4; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSPLIT_SETTINGS2_MESSAGE
+  bytes serializedHyperSplitSettings3Data = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSPLIT_SETTINGS3_MESSAGE
+}
+
+
+message HyperSplitCmToCcuSerializedMessage_t {
+  uint32 address = 1; // The (16-bit) mesh address of a device
+  int32 cmLqi = 2; // LQI of this received data packet @ CM
+  int32 cmRssi = 3; // RSSI of this received data packet @ CM
+  int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
+  bytes serializedMessageData = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+}
+
+message HyperSplitCcuToCmSerializedMessage_t {
+  uint32 address = 1; // The (16-bit) mesh address of a device
+  int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
+  bytes serializedMessageData = 3; // [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+}
+
+/////////// Hyperstat Split Specific messaging //////////////
+
+enum HyperSplitRelayMapping_t {
+  HYPERSPLIT_RELAY_DISABLED = 0;
+  HYPERSPLIT_RELAY_COOLING_STAGE_1 = 1;
+  HYPERSPLIT_RELAY_COOLING_STAGE_2 = 2;
+  HYPERSPLIT_RELAY_COOLING_STAGE_3 = 3;
+  HYPERSPLIT_RELAY_HEATING_STAGE_1 = 4;
+  HYPERSPLIT_RELAY_HEATING_STAGE_2 = 5;
+  HYPERSPLIT_RELAY_HEATING_STAGE_3 = 6;
+  HYPERSPLIT_RELAY_FAN_LOW_SPEED = 7;
+  HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED = 8;
+  HYPERSPLIT_RELAY_FAN_HIGH_SPEED = 9;
+  HYPERSPLIT_RELAY_FAN_ENABLE = 10;
+  HYPERSPLIT_RELAY_OCCUPIED_ENABLE = 11;
+  HYPERSPLIT_RELAY_HUMIDIFIER = 12;
+  HYPERSPLIT_RELAY_DEHUMIDIFIER = 13;
+  HYPERSPLIT_RELAY_EXAUST_1 = 14;
+  HYPERSPLIT_RELAY_EXAUST_2 = 15;
+}
+
+enum HyperSplitUniversalInMapping_t {
+  HYPERSPLIT_UIN_DISABLED = 0;
+  HYPERSPLIT_UNI_GENERIC_VOLTAGE = 1;
+  HYPERSPLIT_UNI_GENERIC_RESISTANCE = 2;
+  HYPERSPLIT_UIN_CURRENT_0_10 = 3;
+  HYPERSPLIT_UIN_CURRENT_0_20 = 4;
+  HYPERSPLIT_UIN_CURRENT_0_50 = 5;
+  HYPERSPLIT_UIN_CURRENT_0_100 = 6;
+  HYPERSPLIT_UIN_CURRENT_0_150 = 7;
+  HYPERSPLIT_UIN_SAT = 8;
+  HYPERSPLIT_UIN_MAT = 9;
+  HYPERSPLIT_UIN_OAT = 10;
+  HYPERSPLIT_UIN_FILTER_NO = 11;
+  HYPERSPLIT_UIN_FILTER_NC = 12;
+  HYPERSPLIT_UIN_CONDENSATE_NO = 13;
+  HYPERSPLIT_UIN_CONDENSATE_NC = 14;
+  HYPERSPLIT_UIN_PRESSURE_0_1 = 15;
+  HYPERSPLIT_UIN_PRESSURE_0_2 = 16;
+}
+
+enum HyperSplitSenorBusMapping_t {
+  HYPERSPLIT_SBUS_DISABLED = 0;
+  HYPERSPLIT_SBUS_SAT = 1;
+  HYPERSPLIT_SBUS_MAT = 2;
+  HYPERSPLIT_SBUS_OAT = 3;
+  HYPERSPLIT_SBUS_PRESSURE = 4;
+}
+
+enum SensorBusConnectedTypes_t {
+  SENSOR_BUS_SENSOR_TYPE_TEMPERATURE = 0;
+  SENSOR_BUS_SENSOR_TYPE_HUMIDITY = 1;
+  SENSOR_BUS_SENSOR_TYPE_PRESSURE = 2;
+  SENSOR_BUS_SENSOR_TYPE_CO2 = 3;
+  SENSOR_BUS_SENSOR_TYPE_OCCUPANCY = 4;
+}
+
+message HyperSplitRelayConfig_t {
+  HyperSplitRelayMapping_t relay1Mapping = 1;
+  HyperSplitRelayMapping_t relay2Mapping = 2;
+  HyperSplitRelayMapping_t relay3Mapping = 3;
+  HyperSplitRelayMapping_t relay4Mapping = 4;
+  HyperSplitRelayMapping_t relay5Mapping = 5;
+  HyperSplitRelayMapping_t relay6Mapping = 6;
+  HyperSplitRelayMapping_t relay7Mapping = 7;
+  HyperSplitRelayMapping_t relay8Mapping = 8;
+}
+
+enum HyperSplitAnalogOutMapping_t {
+  HYPERSPLIT_AOUT_DISABLED = 0;
+  HYPERSPLIT_AOUT_COOLING = 1;
+  HYPERSPLIT_AOUT_LINEAR_FAN = 2;
+  HYPERSPLIT_AOUT_HEATING = 3;
+  HYPERSPLIT_AOUT_OAO_DAMPER = 4;
+  HYPERSPLIT_AOUT_STAGED_FAN = 5;
+}
+
+message HyperSplitAnalogOutConfig_t {
+  HyperSplitAnalogOutMapping_t analogOut1Mapping = 1; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut1AtMinSetting = 2; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut1AtMaxSetting = 3; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+  HyperSplitAnalogOutMapping_t analogOut2Mapping = 4; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut2AtMinSetting = 5; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut2AtMaxSetting = 6; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+  HyperSplitAnalogOutMapping_t analogOut3Mapping = 7; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut3AtMinSetting = 8; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut3AtMaxSetting = 9; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+  HyperSplitAnalogOutMapping_t analogOut4Mapping = 10; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut4AtMinSetting = 11; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut4AtMaxSetting = 12; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+}
+
+message HyperSplitUniversalInConfig_t {
+  HyperSplitUniversalInMapping_t universalIn1Mapping = 1;
+  HyperSplitUniversalInMapping_t universalIn2Mapping = 2;
+  HyperSplitUniversalInMapping_t universalIn3Mapping = 3;
+  HyperSplitUniversalInMapping_t universalIn4Mapping = 4;
+  HyperSplitUniversalInMapping_t universalIn5Mapping = 5;
+  HyperSplitUniversalInMapping_t universalIn6Mapping = 6;
+  HyperSplitUniversalInMapping_t universalIn7Mapping = 7;
+  HyperSplitUniversalInMapping_t universalIn8Mapping = 8;
+}
+
+/// Contains mappings for the sensor bus of the connect-module
+message HyperSplitSensorBusConfig_t {
+  HyperSplitSenorBusMapping_t sensorBus1Mapping = 1;
+  HyperSplitSenorBusMapping_t sensorBus2Mapping = 2;
+  HyperSplitSenorBusMapping_t sensorBus3Mapping = 3;
+  HyperSplitSenorBusMapping_t sensorBus4Mapping = 4;
+}
+
+message HyperSplitSettingsMessage2_t {
+  HyperSplitProfiles_t profile = 1;  // Current profile to be executed on Hyperstat
+  bool enableForceOccupied = 2;
+  bool enableAutoAway = 3;
+  HyperSplitRelayConfig_t hyperSplitRelayConfig = 4;
+  HyperSplitAnalogOutConfig_t hyperSplitAnalogOutConfig = 5;
+  HyperSplitUniversalInConfig_t hyperSplitUniversalInConfig = 6;
+  uint32 zoneCO2DamperOpeningRate = 7; // Same as system/ 10 (%/100ppm) 
+  uint32 zoneCO2Threshold = 8; // Same as system/800 (ppm)  
+  uint32 zoneCO2Target = 9; // Same as system/1000 (ppm) 
+  uint32 proportionalConstant = 10; // default 50 - k constants for Proportional in 1/100
+  uint32 integralConstant = 11; // default 50 - k constant for Integral in 1/100
+  uint32 proportionalTemperatureRange = 12; // default 15 - temp range in 1/10 deg that the proportional control will apply
+  uint32 integrationTime = 13; // default 30 - time in  minutes the integration takes to max out
+  HyperSplitSensorBusConfig_t hyperSplitSensorBusConfig = 14;
+}
+
+message HyperSplitControlsMessage_t {
+  HyperSplitSystemTimePb_t time = 1; // Used to update the current system time
+  int32 setTempCooling = 2; // The desired room temperature. Measured in 2x degrees F. Default 150 (i.e. 75 degrees F).
+  int32 setTempHeating = 3; // The desired room temperature. Measured in 2x degrees F. Default 150 (i.e. 75 degrees F).
+  HyperSplitFanSpeed_e fanSpeed = 4; // The desired fan speed
+  HyperSplitConditioningMode_e conditioningMode = 5;
+  HyperSplitOperatingMode_e operatingMode = 6; // The current operating mode
+  bool relay1 = 7; // digital out for activation
+  bool relay2 = 8; // digital out for activation
+  bool relay3 = 9; // digital out for activation
+  bool relay4 = 10; // digital out for activation
+  bool relay5 = 11; // digital out for activation
+  bool relay6 = 12; // digital out for activation
+  bool relay7 = 13; // digital out for activation
+  bool relay8 = 14; // digital out for activation
+  HyperSplitAnalogOutputControl_t analogOut1 = 15; // output for PWM channel 1
+  HyperSplitAnalogOutputControl_t analogOut2 = 16; // output for PWM channel 2
+  HyperSplitAnalogOutputControl_t analogOut3 = 17; // output for PWM channel 3
+  HyperSplitAnalogOutputControl_t analogOut4 = 18; // output for PWM channel 4
+  bool unoccupiedMode = 19; // CCU in scheduled unoccupied mode
+  bool reset = 20; // Force a reset of the device remotely when set to 1
+}
+
+message RegularUpdateCommon_t {
+  int32 lqi = 1; // Link Quality Indicator of last received data packet
+  int32 rssi = 2; // Received Signal Strength Indicator of last received data packet
+  int32 roomTemperature = 3; // Room temperature in 1/10 of a degree F. This is the adjusted temp and is offset + measured temp.
+  int32 humidity = 4; // Humidity in 1/10 of a percent
+  int32 co2 = 5;
+  int32 voc = 6;
+  int32 pressure = 7;
+  int32 sound = 8;
+  int32 pm2p5 = 9;
+  int32 pm10 = 10;
+  int32 illuminance = 11; // Illuminance in tens of lux. Typical range for office lighting is 320-500 lux.
+  int32 ultravioletIndex = 12; // A linear scale of UV radiation. Typical range is 0-10.
+  bool occupantDetected = 13; // 0 is no, 1 is yes
+}
+
+// This submessage shall never be populated with > 10 fields
+message SensorBusReadings_t {
+  int32 sensorAddress0Temperature = 1;
+  uint32 sensorAddress0Humidity = 2;
+  uint32 sensorAddress0Pressure = 3;
+  uint32 sensorAddress0Co2 = 4;
+  int32 sensorAddress1Temperature = 5;
+  uint32 sensorAddress1Humidity = 6;
+  uint32 sensorAddress1Pressure = 7;
+  uint32 sensorAddress1Co2 = 8;
+  int32 sensorAddress2Temperature = 9;
+  uint32 sensorAddress2Humidity = 10;
+  uint32 sensorAddress2Pressure = 11;
+  uint32 sensorAddress2Co2 = 12;
+  int32 sensorAddress3Temperature = 13;
+  uint32 sensorAddress3Humidity = 14;
+  uint32 sensorAddress3Pressure = 15;
+  uint32 sensorAddress3Co2 = 16;
+}
+
+message HyperSplitRegularUpdateMessage_t {
+  RegularUpdateCommon_t regularUpdateCommon = 1;
+  uint32 universalInput1Value = 2; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput2Value = 3; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput3Value = 4; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput4Value = 5; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput5Value = 6; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput6Value = 7; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput7Value = 8; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  uint32 universalInput8Value = 9; // 16 bits of data where bit[15] = mode, bits[14..0] = value. If mode = 0 (Voltage), in units of millivolts, If mode = 1 (Thermistor), in units of tens of ohms
+  SensorBusReadings_t sensorBusReadingsConnect = 10;
+}
+
+message HyperSplitDiagnosticsMessage_t {
+  uint32 sensorBusBitfieldExternal = 1; // 20 bits of data where bits[4..0] = Sensor Address 0, bits[9..5] = Sensor Address 1, bits[14..10] = Sensor Address 2, bits[19..15] = Sensor Address 3
+  // Each index within each address subfield corresponds to indexes defined in SensorBusConnectedTypes_t
+  // For example 0b00100000110001100011, means Sensor Address 0, T & H connected, Sensor Address 1, T & H connected, Sensor Address 2, T & H connected, Sensor Address 3, P connected
+  uint32 sensorBusBitfieldInternal = 2; // 20 bits of data where bits[4..0] = Sensor Address 0, bits[9..5] = Sensor Address 1, bits[14..10] = Sensor Address 2, bits[19..15] = Sensor Address 3
+  // Each index within each address subfield corresponds to indexes defined in SensorBusConnectedTypes_t
+  // For example 0b00100000110001100011, means Sensor Address 0, T & H connected, Sensor Address 1, T & H connected, Sensor Address 2, T & H connected, Sensor Address 3, P connected
+}

@@ -447,7 +447,7 @@ public class HyperSplitMessageGenerator {
     }
 
     public static HyperSplit.HyperSplitControlsMessage_t getHypersplitRebootControl(int address){
-        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstat and split" +
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstatsplit" +
                 " and group == \"" + address + "\"");
         String equipRef =equip.get("id").toString();
         Log.d(L.TAG_CCU_SERIAL,"Reset set to true");
@@ -456,7 +456,7 @@ public class HyperSplitMessageGenerator {
         return getControlMessage(address ,equipRef, TemperatureMode.values()[modeType]).setReset(true).build();
     }
 
-    public static double getFanMode(String equipRef){
+    public static double getConditioningMode(String equipRef){
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery(
                     "point and zone and sp and conditioning and mode and equipRef == \"" + equipRef + "\"");
@@ -465,7 +465,7 @@ public class HyperSplitMessageGenerator {
         }
     }
 
-    public static double getConditioningMode(String equipRef){
+    public static double getFanMode(String equipRef){
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery(
                     "point and zone and fan and mode and operation and equipRef == \""+equipRef+ "\"");

@@ -814,7 +814,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 coolDeadband = coolDB;
             }
 
-            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
+            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and not writable and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
             if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {

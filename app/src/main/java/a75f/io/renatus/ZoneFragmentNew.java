@@ -814,7 +814,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 coolDeadband = coolDB;
             }
 
-            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and not writable and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
+            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
             if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {
@@ -1851,7 +1851,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         float coolingDeadBand ;
         double currentTemp = 0;
 
-        int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and equipRef ==\""+p.getId()+"\"").intValue();
+        int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+p.getId()+"\"").intValue();
         if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
             currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
         }

@@ -2367,7 +2367,7 @@ class HyperStatSplitPointsUtil(
         logicalTempPointsList.add(Triple(equipStatusPoint, LogicalKeyID.EQUIP_STATUS, 0.0))
         logicalTempPointsList.add(Triple(equipStatusMessagePoint, LogicalKeyID.EQUIP_STATUS_MESSAGE, "OFF"))
         logicalTempPointsList.add(Triple(equipScheduleStatusPoint, LogicalKeyID.EQUIP_SCHEDULE_STATUS, ""))
-        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, 0.0))
+        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, 1.0))
 
         return logicalTempPointsList
     }

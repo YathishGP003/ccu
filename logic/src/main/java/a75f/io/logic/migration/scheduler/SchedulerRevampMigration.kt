@@ -30,7 +30,7 @@ class SchedulerRevampMigration(hsApi : CCUHsApi) : Migration {
             call.enqueue(object : Callback<ResponseBody> {
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     CcuLog.d(L.TAG_CCU_SCHEDULER, "Schedule migration failure:  ${t.message}")
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
 
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {

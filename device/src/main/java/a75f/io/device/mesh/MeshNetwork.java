@@ -90,6 +90,9 @@ public class MeshNetwork extends DeviceNetwork
                         else if (d.getMarkers().contains("hyperstat")) {
                             deviceType = NodeType.HYPER_STAT;
                         }
+                        else if (d.getMarkers().contains("hyperstatsplit")) {
+                            deviceType = NodeType.HYPERSTATSPLIT;
+                        }
                         switch (deviceType) {
                             case SMART_NODE:
                                 String snprofile = "dab";
@@ -205,8 +208,7 @@ public class MeshNetwork extends DeviceNetwork
                                 TemperatureMode hssTempMode = TemperatureMode.values()[hssModeType];
 
                                 if (bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperSplit " +
-                                            "SEEDS ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false, hssTempMode);
                                 } else {

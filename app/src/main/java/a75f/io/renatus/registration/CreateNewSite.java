@@ -144,7 +144,7 @@ public class CreateNewSite extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")) {
             UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
             updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
         }
@@ -888,7 +888,9 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
-        BuildingTuners.getInstance().updateBuildingTuners();
+        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        //TODO- COMMON-DATA-FEATURE
+        //BuildingTuners.getInstance().updateBuildingTuners();
         //SystemEquip.getInstance();
         DiagEquip.getInstance().create();
         L.ccu().systemProfile = new DefaultSystem();

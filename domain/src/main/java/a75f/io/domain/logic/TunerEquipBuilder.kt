@@ -4,12 +4,16 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
+import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ResourceHelper
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 
 class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
+    fun buildEquipAndPoints() : String{
+        return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef())
+    }
     fun buildTunerEquipAndPoints(modelDef: ModelDirective): String {
         val hayStackEquip = buildEquip(modelDef, null)
         val equipId = hayStack.addEquip(hayStackEquip)

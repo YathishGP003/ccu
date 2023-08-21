@@ -21,6 +21,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.util.CCUUiUtil;
 
@@ -126,7 +127,8 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
         Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
-        BuildingTuners.getInstance();
+        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        //BuildingTuners.getInstance();
         //SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();

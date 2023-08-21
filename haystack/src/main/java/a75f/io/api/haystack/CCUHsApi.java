@@ -103,6 +103,8 @@ public class CCUHsApi
     private long appAliveMinutes = 0;
 
     public Boolean isAuthorized = false;
+
+    private List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -2249,6 +2251,7 @@ public class CCUHsApi
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                             });
+                            onCcuRegistrationCompletedListeners.forEach(l->l.onRegistrationCompleted(this));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -2259,7 +2262,6 @@ public class CCUHsApi
                 Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
                 // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
                 CCUHsApi.getInstance().setCcuRegistered();
-
                 if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
                     Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
@@ -2871,5 +2873,20 @@ public class CCUHsApi
             });
         }
         return HZincWriter.gridToString(b.toGrid());
+    }
+
+    public interface OnCcuRegistrationCompletedListener {
+        void onRegistrationCompleted(CCUHsApi hsApi);
+    }
+
+    public void registerOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
+        onCcuRegistrationCompletedListeners.add(listener);
+        if (isCCURegistered()) {
+            CcuLog.i("CCU_HS","CCU Already registered");
+            listener.onRegistrationCompleted(this);
+        }
+    }
+    public void unRegisterOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
+        onCcuRegistrationCompletedListeners.remove(listener);
     }
 }

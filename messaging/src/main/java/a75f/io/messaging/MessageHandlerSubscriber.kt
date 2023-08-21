@@ -69,5 +69,10 @@ class MessageHandlerSubscriber @Inject constructor(){
                 MessageHandlerFactory.Command.AutoCommissioningMode
             )
         )
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.SCHEDULE_MIGRATED
+            )
+        )
     }
 }

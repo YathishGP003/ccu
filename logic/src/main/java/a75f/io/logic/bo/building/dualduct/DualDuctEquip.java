@@ -412,8 +412,8 @@ public class DualDuctEquip {
                                       .setTz(tz)
                                       .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(scheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 1.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 1.0);
     }
     
     private void createEquipOperationPoints(String siteRef, String equipDis, String roomRef, String floorRef, String tz) {

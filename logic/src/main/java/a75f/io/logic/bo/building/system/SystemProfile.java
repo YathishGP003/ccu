@@ -213,28 +213,6 @@ public abstract class SystemProfile
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
 
-        Point userLimitSpread = new Point.Builder()
-                                    .setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread")
-                                    .setSiteRef(siteRef).setEquipRef(equipRef)
-                                    .setHisInterpolate("cov").addMarker("system").addMarker("tuner")
-                                    .addMarker("writable").addMarker("his").addMarker("user").addMarker("limit")
-                                    .addMarker("spread").addMarker("sp")
-                                    .setMinVal("1").setMaxVal("20").setIncrementVal("1")
-                                    .setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
-                                    .setTz(tz).setUnit(Units.FAHRENHEIT)
-                                    .build();
-
-        String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
-        HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");
-        ArrayList<HashMap> userLimitSpreadPointArr = hayStack.readPoint(userLimitSpreadPoint.get("id").toString());
-        for (HashMap valMap : userLimitSpreadPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(userLimitSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(userLimitSpreadId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
 
         Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)

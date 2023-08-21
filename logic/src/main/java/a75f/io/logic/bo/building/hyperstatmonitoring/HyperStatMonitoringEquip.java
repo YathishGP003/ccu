@@ -94,8 +94,8 @@ public class HyperStatMonitoringEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        mHayStack.writeDefaultValById(equipScheduleTypeId, 0.0);
-        mHayStack.writeHisValById(equipScheduleTypeId, 0.0);
+        mHayStack.writeDefaultValById(equipScheduleTypeId, 1.0);
+        mHayStack.writeHisValById(equipScheduleTypeId, 1.0);
 
 
         Point isAnalog1enaled = new Point.Builder()

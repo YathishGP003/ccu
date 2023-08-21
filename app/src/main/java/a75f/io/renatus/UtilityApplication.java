@@ -80,6 +80,7 @@ import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.ota.OTAUpdateHandlerService;
 import a75f.io.renatus.ota.OtaCache;
+import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.restserver.server.HttpServer;
@@ -227,7 +228,7 @@ public abstract class UtilityApplication extends Application {
 
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
-        PreferenceUtil.installationCompleted();
+        UpdateCCUFragment.abortCCUDownloadProcess();
 
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
@@ -291,7 +292,7 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("carrier_prod")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 handleSafeMode(paramThrowable);
-                RaygunClient.send(paramThrowable);
+               // RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
                 RenatusApp.closeApp();

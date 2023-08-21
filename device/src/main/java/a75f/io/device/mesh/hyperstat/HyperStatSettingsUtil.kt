@@ -2,6 +2,7 @@ package a75f.io.device.mesh.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
@@ -305,8 +306,9 @@ class HyperStatSettingsUtil {
          */
         private fun getGenericTunerDetails(equipRef: String): HyperStat.HyperStatTunersGeneric_t {
             val genericTuners = HyperStat.HyperStatTunersGeneric_t.newBuilder()
-            genericTuners.unoccupiedSetback = (TunerUtil.readTunerValByQuery(
-                "unoccupied and setback", equipRef) * 10).toInt()
+            val equip = CCUHsApi.getInstance().readHDictById(equipRef)
+            genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery
+            ("zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
             genericTuners.relayActivationHysteresis =
                 TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =

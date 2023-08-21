@@ -2,7 +2,6 @@ package a75f.io.renatus.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
@@ -13,7 +12,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
@@ -34,6 +34,7 @@ public class RangeBarView extends LinearLayout {
     private double coolValue = 74.0;
     private double heatValue = 70.0;
     private Schedule mSchedule;
+    private Schedule.Days mDay;
 
     public RangeBarView(Context context) {
         super(context);
@@ -77,9 +78,9 @@ public class RangeBarView extends LinearLayout {
         layoutParams.weight = 1;
         this.addView(rangeBar, layoutParams);
 
-         if (mSchedule!= null && !mSchedule.isBuildingSchedule() && mSchedule.isZoneSchedule()) {
+        if (mSchedule!= null && !mSchedule.isBuildingSchedule() && mSchedule.isZoneSchedule() && MasterControlUtil.isMigrated()) {
             getZoneHeatAndCoolingDeadBand();
-        } else  if (mSchedule!= null && mSchedule.isBuildingSchedule() && !mSchedule.isZoneSchedule()) {
+        } else  if (mSchedule!= null && mSchedule.isBuildingSchedule()) {
             getBuildingHeatAndCoolingDeadBand();
         }
 
@@ -93,12 +94,37 @@ public class RangeBarView extends LinearLayout {
         }
     }
 
+    public void setUnOccupiedFragment(boolean unOccupiedSetBackFragment) {
+        if (rangeBar != null){
+            RangeBar.setUnOccupiedFragment(unOccupiedSetBackFragment);
+        }
+    }
+
     public void setLowerHeatingTemp(double lowerHeatTemp) {
         if (rangeBar != null){
             rangeBar.setLowerHeatingTemp((float) lowerHeatTemp);
         }
     }
-
+    public void setHeatingLimitMin(double heatingLimitMin) {
+        if (rangeBar != null){
+            rangeBar.setHeatingLimitMin((float) heatingLimitMin);
+        }
+    }
+    public void setCoolingLimitMax(double coolingLimitMax) {
+        if (rangeBar != null){
+            rangeBar.setCoolingLimitMax((float) coolingLimitMax);
+        }
+    }
+    public void setHeatingLimitMax(double heatingLimitMax) {
+        if (rangeBar != null){
+            rangeBar.setHeatingLimitMax((float) heatingLimitMax);
+        }
+    }
+    public void setCoolingLimitMin(double coolingLimitMin) {
+        if (rangeBar != null){
+            rangeBar.setCoolingLimitMin((float) coolingLimitMin);
+        }
+    }
     public float getHeatValue() {
         return rangeBar.getLowerHeatingTemp();
     }
@@ -111,21 +137,21 @@ public class RangeBarView extends LinearLayout {
         this.mSchedule = schedule;
     }
 
+    public void setmDay(Schedule.Days mday) {
+        this.mDay = mday;
+    }
     private void getBuildingHeatAndCoolingDeadBand() {
 
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
+        BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
+        HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
+        HashMap<Object,Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
 
-        hdb = TunerUtil.getHeatingDeadband(p.getId());
-        cdb = TunerUtil.getCoolingDeadband(p.getId());
-        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        heatLL = getTuner(heatLLMap.get("id").toString());
-        heatUL = getTuner(heatULMap.get("id").toString());
-        coolLL = getTuner(coolLLMap.get("id").toString());
-        coolUL = getTuner(coolULMap.get("id").toString());
+        hdb = HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
+        cdb = HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
+        heatLL = buildingTunerCache.getMaxHeatingUserLimit().floatValue();
+        heatUL = buildingTunerCache.getMinHeatingUserLimit().floatValue();
+        coolLL = buildingTunerCache.getMinCoolingUserLimit().floatValue();
+        coolUL = buildingTunerCache.getMaxCoolingUserLimit().floatValue();
 
         rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
 
@@ -145,20 +171,33 @@ public class RangeBarView extends LinearLayout {
 
     private void getZoneHeatAndCoolingDeadBand() {
 
+        String roomRef = mSchedule.getRoomRef();
         Equip p = HSUtil.getEquipFromZone(mSchedule.getRoomRef());
 
-        hdb = TunerUtil.getZoneHeatingDeadband(mSchedule.getRoomRef());
-        cdb = TunerUtil.getZoneCoolingDeadband(mSchedule.getRoomRef());
-        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getId()+"\"");
-        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getId()+"\"");
-        heatLL = getTuner(heatLLMap.get("id").toString());
-        heatUL = getTuner(heatULMap.get("id").toString());
-        coolLL = getTuner(coolLLMap.get("id").toString());
-        coolUL = getTuner(coolULMap.get("id").toString());
+        HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and zone and roomRef == \""+roomRef+"\"");
+        HashMap<Object,Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and zone and roomRef == \""+roomRef+"\"");
+
+        hdb = (float) HSUtil.getPriorityVal(heatDB.get("id").toString());
+        cdb = (float) HSUtil.getPriorityVal(coolDB.get("id").toString());
+        HashMap<Object,Object> coolULMap = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and zone and roomRef == \""+roomRef+"\"");
+        HashMap<Object,Object> heatULMap = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and zone and roomRef == \""+roomRef+"\"");
+        HashMap<Object,Object> coolLLMap = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and zone and roomRef == \""+roomRef+"\"");
+        HashMap<Object,Object> heatLLMap = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and zone and roomRef == \""+roomRef+"\"");
+        heatLL = HSUtil.getPriorityVal(heatLLMap.get("id").toString());
+        heatUL = HSUtil.getPriorityVal(heatULMap.get("id").toString());
+        coolLL = HSUtil.getPriorityVal(coolLLMap.get("id").toString());
+        coolUL = HSUtil.getPriorityVal(coolULMap.get("id").toString());
+        if(mDay != null) {
+            heatLL = mDay.getHeatingUserLimitMax();
+            heatUL = mDay.getHeatingUserLimitMin();
+            coolUL = mDay.getCoolingUserLimitMax();
+            coolLL = mDay.getCoolingUserLimitMin();
+            hdb = mDay.getHeatingDeadBand();
+            cdb = mDay.getCoolingDeadBand();
+        }
+        HashMap<Object, Object> coolDT = CCUHsApi.getInstance().readEntity("point and desired and cooling and temp and equipRef == \""+p.getId()+"\"");
+        HashMap<Object, Object> heatDT = CCUHsApi.getInstance().readEntity("point and desired and heating and temp and equipRef == \""+p.getId()+"\"");
+
         coolValue = getTuner(coolDT.get("id").toString());
         heatValue = getTuner(heatDT.get("id").toString());
 

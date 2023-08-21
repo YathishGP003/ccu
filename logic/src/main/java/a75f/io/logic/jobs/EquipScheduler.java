@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.MockTime;
@@ -48,9 +49,11 @@ public class EquipScheduler {
         occ.setSystemZone(true);
 
         double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
-        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
-        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
-        double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+
+        double heatingDeadBand = getDeadband(equip,"heating");
+        double coolingDeadBand = getDeadband(equip,"cooling");
+
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \""+equip.getRoomRef()+"\"");
 
         double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
                 " mode and equipRef == \"" + equip.getId() + "\"");
@@ -192,6 +195,24 @@ public class EquipScheduler {
         }
         return 0;
 
+    }
+
+    public static double getDeadband(Equip equip, String tags){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object,Object> cdb = CCUHsApi.getInstance().readEntity("point and deadband and "+tags+" and roomRef == \""+equip.getRoomRef()+"\"");
+        if((cdb != null) && (cdb.get("id") != null) ) {
+
+            ArrayList<HashMap> values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap<Object,Object> valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+        return 0;
     }
     
     

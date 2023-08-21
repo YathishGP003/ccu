@@ -105,6 +105,12 @@ public class ScheduleUtil {
                 dayBO.setSunset(false);
                 dayBO.setSunrise(false);
                 dayBO.setDay(d.getDay());
+                dayBO.setHeatingUserLimitMin(d.getHeatingUserLimitMin());
+                dayBO.setHeatingUserLimitMax(d.getHeatingUserLimitMax());
+                dayBO.setCoolingUserLimitMin(d.getCoolingUserLimitMin());
+                dayBO.setCoolingUserLimitMax(d.getCoolingUserLimitMax());
+                dayBO.setHeatingDeadBand(d.getHeatingDeadBand());
+                dayBO.setCoolingDeadBand(d.getCoolingDeadBand());
                 s.getDays().remove(d);
                 s.getDays().add(dayBO);
             }

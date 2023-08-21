@@ -323,8 +323,8 @@ class VrvEquip(hsApi : CCUHsApi,
             .setTz(equip.tz)
             .build()
         val equipScheduleTypeId = hayStack.addPoint(equipScheduleType)
-        hayStack.writeDefaultValById(equipScheduleTypeId, 0.0)
-        hayStack.writeHisValById(equipScheduleTypeId, 0.0)
+        hayStack.writeDefaultValById(equipScheduleTypeId, 1.0)
+        hayStack.writeHisValById(equipScheduleTypeId, 1.0)
     }
 
     private fun createConfigPoints(

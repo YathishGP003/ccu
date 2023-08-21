@@ -31,7 +31,7 @@ import a75f.io.renatus.R;
 public class RangeBar extends View {
 
     //
-    public static final float RECOMMENDED_WIDTH_DP = 730.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 500.0f;
     //
     private Paint mLinePaint;
     private Paint mTempIconPaint;
@@ -58,13 +58,15 @@ public class RangeBar extends View {
     int mDefaultVisibleDegrees = 39;
 
     float mLowerBound = 32.0f;
-    float mUpperBound = 110.0f;
+    float mUpperBound = 140.0f;
 
     int mDegreeIncremntPX = 1;
     boolean mMeasured = false;
 
     double cdb = 2.0;
     double hdb = 2.0;
+
+    private static boolean isUnoccupiedSetBackFragment;
 
     private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
     boolean isZoneSchedule;
@@ -157,6 +159,9 @@ public class RangeBar extends View {
     public boolean onTouchEvent(MotionEvent event) {
 
         Log.i("RangeControl", "X: " + event.getX() + " Y: " + event.getY());
+        if(isUnoccupiedSetBackFragment){
+            return false;
+        }
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -225,7 +230,7 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
-        Log.d("RangeControl"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
+        Log.d("amardebug"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
                              +" lowerCoolingTemp "+lowerCoolingTemp+" upperCoolingTemp "+upperCoolingTemp+" cdb "+cdb+" hdb "+hdb);
               mDataSet = true;
         invalidate();
@@ -366,6 +371,52 @@ public class RangeBar extends View {
     public void setLowerCoolingTemp(float lowerCoolingTemp) {
         temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = lowerCoolingTemp;
         invalidate();
+    }
+
+    public void setHeatingLimitMin(float heatingLimitMin) {
+      if(heatingLimitMin <= lowerHeatingTemp) {
+          this.upperHeatingTemp = heatingLimitMin;
+            if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] <= heatingLimitMin) {
+                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMin;
+            }
+        }
+        invalidate();
+    }
+
+    public void setCoolingLimitMax(float coolingLimitMax) {
+        if(coolingLimitMax >= lowerCoolingTemp) {
+            this.upperCoolingTemp = coolingLimitMax;
+            if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] >= coolingLimitMax){
+                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMax;
+            }
+        }
+        invalidate();
+    }
+
+    public void setHeatingLimitMax(float heatingLimitMax) {
+        Log.i("amardebug","hee "+heatingLimitMax+upperHeatingTemp+lowerHeatingTemp+temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]);
+        if(heatingLimitMax <= lowerHeatingTemp) {
+            this.lowerHeatingTemp = heatingLimitMax;
+            if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] >= heatingLimitMax) {
+                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMax;
+            }
+        }
+        invalidate();
+    }
+
+    public void setCoolingLimitMin(float coolingLimitMin) {
+        Log.i("amardebug","coo "+coolingLimitMin+upperCoolingTemp+temps[RangeBarState.UPPER_COOLING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()]);
+        if(coolingLimitMin <= upperCoolingTemp) {
+            this.lowerCoolingTemp = coolingLimitMin;
+            if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] <= coolingLimitMin){
+                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMin;
+            }
+        }
+        invalidate();
+    }
+
+    public static void setUnOccupiedFragment(boolean unOccupiedSetBackFragment) {
+        isUnoccupiedSetBackFragment = unOccupiedSetBackFragment;
     }
 
     public void setLowerHeatingTemp(float lowerHeatingTemp) {

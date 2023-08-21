@@ -41,20 +41,6 @@ class GenericTuners {
         String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
         hayStack.writePointForCcuUser(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
-    
-        Point buildingLimitMin = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"buildingLimitMin")
-                                     .setSiteRef(siteRef)
-                                     .setEquipRef(equipRef).setHisInterpolate("cov")
-                                     .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                     .addMarker("system").addMarker("building").addMarker("limit").addMarker("min").addMarker("sp")
-                                     .setMinVal("50").setMaxVal("90").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                     .setUnit("\u00B0F")
-                                     .setTz(tz)
-                                     .build();
-        String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
-        hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MIN, 0);
-        hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
 
         Point useCelsius = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"displayUnit")
@@ -71,32 +57,9 @@ class GenericTuners {
         hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.USE_CELSIUS_FLAG_DISABLED, 0);
         hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED);
 
-        Point buildingLimitMax = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"buildingLimitMax")
-                                     .setSiteRef(siteRef)
-                                     .setEquipRef(equipRef).setHisInterpolate("cov")
-                                     .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                     .addMarker("system").addMarker("building").addMarker("limit").addMarker("max").addMarker("sp")
-                                     .setMinVal("50").setMaxVal("90").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                     .setUnit("\u00B0F")
-                                     .setTz(tz)
-                                     .build();
-        String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
-        hayStack.writePointForCcuUser(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MAX, 0);
-        hayStack.writeHisValById(buildingLimitMaxId, TunerConstants.BUILDING_LIMIT_MAX);
+
     
-        Point buildingToZoneDifferential = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"buildingToZoneDifferential")
-                                               .setSiteRef(siteRef)
-                                               .setEquipRef(equipRef).setHisInterpolate("cov")
-                                               .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                               .addMarker("system").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp")
-                                               .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                               .setTz(tz).setUnit(Units.FAHRENHEIT)
-                                               .build();
-        String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
-        hayStack.writePointForCcuUser(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
-        hayStack.writeHisValById(buildingToZoneDifferentialId, TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL);
+
     
         Point zoneTemperatureDeadLeeway = new Point.Builder()
                                               .setDisplayName(equipDis+"-"+"zoneTemperatureDeadLeeway")
@@ -111,79 +74,8 @@ class GenericTuners {
         String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
         hayStack.writePointForCcuUser(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
         hayStack.writeHisValById(zoneTemperatureDeadLeewayId, TunerConstants.ZONE_TEMP_DEAD_LEEWAY);
-    
-    
-        Point unoccupiedZoneSetback  = new Point.Builder()
-                                           .setDisplayName(equipDis+"-"+"unoccupiedZoneSetback")
-                                           .setSiteRef(siteRef)
-                                           .setEquipRef(equipRef).setHisInterpolate("cov")
-                                           .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                           .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                           .setUnit("\u00B0F")
-                                           .setTz(tz)
-                                           .build();
-        String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
-        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
-                TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
-        hayStack.writeHisValById(unoccupiedZoneSetbackId,TunerConstants.ZONE_UNOCCUPIED_SETBACK);
-    
-        Point heatingUserLimitMin  = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"heatingUserLimitMin")
-                                         .setSiteRef(siteRef)
-                                         .setEquipRef(equipRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                         .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
-                                         .setMinVal("65").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                         .setUnit("\u00B0F")
-                                         .setTz(tz)
-                                         .build();
-        String heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin);
-        hayStack.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
-        hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
-    
-        Point heatingUserLimitMax  = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"heatingUserLimitMax")
-                                         .setSiteRef(siteRef)
-                                         .setEquipRef(equipRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                         .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
-                                         .setMinVal("65").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                         .setUnit("\u00B0F")
-                                         .setTz(tz)
-                                         .build();
-        String heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax);
-        hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
-        hayStack.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
-    
-        Point coolingUserLimitMin  = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"coolingUserLimitMin")
-                                         .setSiteRef(siteRef)
-                                         .setEquipRef(equipRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").setMinVal("70").setMaxVal("77")
-                                         .setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                         .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
-                                         .setMinVal("70").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                         .setUnit("\u00B0F")
-                                         .setTz(tz)
-                                         .build();
-        String coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin);
-        hayStack.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
-        hayStack.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
-    
-        Point coolingUserLimitMax  = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"coolingUserLimitMax")
-                                         .setSiteRef(siteRef)
-                                         .setEquipRef(equipRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                         .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
-                                         .setMinVal("70").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                         .setUnit("\u00B0F")
-                                         .setTz(tz)
-                                         .build();
-        String coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax);
-        hayStack.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
-        hayStack.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
+
+
         Point humidityCompensationOffset = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"humidityCompensationOffset")
                                                .setSiteRef(siteRef)

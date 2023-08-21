@@ -19,7 +19,10 @@ import a75f.io.api.haystack.HSUtilKtKt;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.cloud.CloudConnectionManager;
+import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.util.NetworkUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -102,34 +105,59 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	}
 
 	private void deleteSelectedFloors() {
+		if (!NetworkUtil.isNetworkConnected(floorPlanActivity.getActivity())) {
+			Toast.makeText(floorPlanActivity.getActivity(), "Floor cannot be deleted when CCU is offline. Please " +
+					"connect to network.", Toast.LENGTH_LONG).show();
+			return;
+		}
 		floorPlanActivity.showWait(floorPlanActivity.getString(R.string.deleting_floor));
 
-		Completable task = Completable.fromCallable((Callable<Void>) () -> {
-			deleteSelectedFloorsAsync();
-			return null;
-		});
+		CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
 
-		deleteFloorDisposable = task
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribe(
-					() -> {
-						int floorSelectedIndex = floorPlanActivity.mFloorListAdapter.getSelectedPostion();
-						selectedFloor.clear();
-						floorPlanActivity.refreshScreen();
-						floorPlanActivity.hideWait();
-						if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
-							floorPlanActivity.systemDeviceOnClick();
-						}
-					},
-					error -> {
-						Toast.makeText(floorPlanActivity.requireContext(),
-								"Error deleting floor",
-								Toast.LENGTH_LONG)
-							 .show();
-						floorPlanActivity.hideWait();
-						CcuLog.w("CCU_UI", "Unable to delete floor", error);
-					});
+			@Override
+			public void onSuccessResponse(boolean isOk) {
+				if(!isOk){
+					floorPlanActivity.hideWait();
+					Toast.makeText(floorPlanActivity.getActivity(), "Floor cannot be deleted when service is down ",
+							Toast.LENGTH_LONG).show();
+					return;
+				}
+
+				Completable task = Completable.fromCallable((Callable<Void>) () -> {
+					deleteSelectedFloorsAsync();
+					return null;
+				});
+
+				deleteFloorDisposable = task
+						.subscribeOn(Schedulers.io())
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(
+								() -> {
+									int floorSelectedIndex = floorPlanActivity.mFloorListAdapter.getSelectedPostion();
+									selectedFloor.clear();
+									floorPlanActivity.refreshScreen();
+									floorPlanActivity.hideWait();
+									if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
+										floorPlanActivity.systemDeviceOnClick();
+									}
+								},
+								error -> {
+									Toast.makeText(floorPlanActivity.requireContext(), "Error deleting floor",
+													Toast.LENGTH_LONG).show();
+									floorPlanActivity.hideWait();
+									CcuLog.w("CCU_UI", "Unable to delete floor", error);
+								});
+			}
+
+			@Override
+			public void onErrorResponse(boolean isOk) {
+				floorPlanActivity.hideWait();
+				Toast.makeText(floorPlanActivity.getActivity(), "Floor cannot be deleted when service is down ",
+						Toast.LENGTH_LONG).show();
+			}
+		};
+		new CloudConnectionManager().processAboutResponse(responseCallback);
+
 	}
 	
 	private void deleteSelectedFloorsAsync()
@@ -148,6 +176,15 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
                 {
                     CCUHsApi.getInstance().deleteEntity(schedule.get("id").toString());
                 }
+
+				ArrayList<HashMap<Object, Object>> schedulablePoints = CCUHsApi.getInstance().readAllEntities("schedulable and zone and roomRef == \"" + sZone.getId()+"\"");
+				for (HashMap<Object, Object> point : schedulablePoints) {
+					if (point.get("writable") != null) {
+						CCUHsApi.getInstance().deleteWritableArray(point.get("id").toString());
+					}
+					CCUHsApi.getInstance().deleteEntityItem(point.get("id").toString());
+				}
+
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
 			boolean usedByOtherApplication = HSUtilKtKt.isFloorUsedByOtherApplicationAsync(floorId);

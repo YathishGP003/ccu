@@ -68,6 +68,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
@@ -601,10 +602,6 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
         floorToRename = null;
-        if (!NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
-            return;
-        }
         isConnectedToServer(FloorHandledCondition.ALLOW_NEW_FLOOR, null);
     }
 
@@ -615,9 +612,6 @@ public class FloorPlanFragment extends Fragment {
         showKeyboard(addFloorEdit);
     }
 
-    private void serverDownWhileRenamingFloor(){
-        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
-    }
 
     @OnClick(R.id.lt_addfloor)
     public void addFloorBtn() {
@@ -1031,10 +1025,6 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void renameFloor(Floor floor) {
-        if (!NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
-            return;
-        }
         isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
     }
 
@@ -1047,8 +1037,8 @@ public class FloorPlanFragment extends Fragment {
         showKeyboard(addFloorEdit);
     }
 
-    private void serverDownWhileAddingNewFloor(){
-        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
+    public void toastMessageOnServerDown(){
+        Toast.makeText(getActivity(), "Floor cannot be handled when server is down", Toast.LENGTH_LONG).show();
     }
 
     private void isConnectedToServer(FloorHandledCondition condition, Floor floor){
@@ -1060,6 +1050,11 @@ public class FloorPlanFragment extends Fragment {
         CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
             @Override
             public void onSuccessResponse(boolean isOk) {
+                if(!isOk){
+                    hideWait();
+                    toastMessageOnServerDown();
+                    return;
+                }
                 switch (condition) {
                     case ALLOW_NEW_FLOOR:
                         allowNewFloor();
@@ -1078,16 +1073,8 @@ public class FloorPlanFragment extends Fragment {
 
             @Override
             public void onErrorResponse(boolean isOk) {
-                switch (condition) {
-                    case ADD_NEW_FLOOR:
-                    case ALLOW_NEW_FLOOR:
-                        serverDownWhileAddingNewFloor();
-                        break;
-                    case ALLOW_RENAMING_FLOOR:
-                    case ADD_RENAMED_FLOOR:
-                        serverDownWhileRenamingFloor();
-                        break;
-                }
+                hideWait();
+                toastMessageOnServerDown();
             }
         };
         new CloudConnectionManager().processAboutResponse(responseCallback);
@@ -1203,6 +1190,7 @@ public class FloorPlanFragment extends Fragment {
                         .setSiteRef(siteMap.get("id").toString())
                         .build();
                 String zoneId = CCUHsApi.getInstance().addZone(hsZone);
+                SchedulabeLimits.Companion.addSchedulableLimits(false,zoneId,hsZone.getDisplayName());
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                 hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));

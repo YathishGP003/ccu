@@ -992,6 +992,7 @@
     <string name="txt_equipment_status">Equipment Status:</string>
     <string name="txt_schedule">Schedule:</string>
     <string name="txt_intrinsic_schedule">Intrinsic Schedule</string>
+    <string name="txt_building_occupancy">Building Occupancy</string>
     <string name="txt_economy">ECONOMY</string>
     <string name="txt_comfort">COMFORT</string>
     <string name="txt_min_humidity">Min Inside Humidity</string>
@@ -1344,14 +1345,15 @@
     <string name="sunday">SUNDAY</string>
     <string name="preview">Preview  </string>
     <string name="warning_ns">WARNING</string>
-    <string name="warning_msg">Named Schedule is outside building schedule.This Named Schedule is outside by</string>
+    <string name="warning_msg">Named Schedule is outside building occupancy.This Named Schedule is outside by</string>
     <string name="validation_title">Schedule Validation</string>
     <string name="validation_msg">Validation in progress.Please wait…</string>
     <string name="validation_toast">Validating Named Schedule in Progress…Please wait</string>
     <string name="success_alert">Named Schedule set successfully</string>
     <string name="pls_goback">Please go back to the NamedSchedule to edit OR Apply any other NamedSchedule</string>
     <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
-    <string name="desiredTemp_warning">Desired temperatures of this NamedSChedule is outside the desired temperature limits of the building</string>
+    <string name="desiredTemp_warning">Desired temperatures of this NamedSchedule is outside the desired temperature limits of the building</string>
+    <string name="limits_warning">UserLimits of this NamedSchedule is outside the limits of the building</string>
 
     <!-- Thermistor for TI Profile -->
     <string name="mainsensor">Main Temperature/Humidity Sensor</string>
@@ -1377,6 +1379,91 @@
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>
     <string name="label_analog2_max_reheat">Analog2-Out at\nMax Reheat</string>
     <string name="label_min_reheat_damper_pos">Min Reheat \nDamper Pos</string>
+    <!-- Scheduler Revamp -->
+    <string name="building_limits">Building Limits</string>
+    <string name="user_limits">User Limits</string>
+    <string name="deadbands">Deadbands</string>
+    <string name="save_schedule">Save Schedule</string>
+    <string name="follow_building_user_limits">Follow Building\'s User Limits and Deadbands</string>
+    <string name="unoccupied_zone_setback">Unoccupied Zone Setback</string>
+    <string name="building_to_zone_diff">Building to Zone Differential</string>
+    <string name="building_limit_min">Building Limit Min</string>
+    <string name="building_limit_max">Building Limit Max</string>
+    <string name="heating_user_limit_min">Heating User Limit Min</string>
+    <string name="heating_user_limit_max">Heating User Limit Max</string>
+    <string name="cooling_user_limit_min">Cooling User Limit Min</string>
+    <string name="cooling_user_limit_max">Cooling User Limit Max</string>
+    <string name="heating_deadband">Heating Deadband</string>
+    <string name="cooling_deadband">Cooling Deadband</string>
+    <string name="setback">Setback</string>
+    <string name="buildingtozonediff">BuildingToZoneDifferential</string>
+    <string name="message">Please note that, parameter values captured below will be considered for
+        all the zones, when the zones are following building temperature settings</string>
+    <string name="un_occupied_message">The setback to be considered as per the next upcoming occupied slots
+        desired temperatures</string>
+    <string-array name="cooling_limit">
+        <item> 70 </item>
+        <item> 71 </item>
+        <item> 72 </item>
+        <item> 73 </item>
+        <item> 74 </item>
+        <item> 75 </item>
+        <item> 76</item>
+        <item> 77</item>
+        <item> 78</item>
+        <item> 79</item>
+        <item> 80 </item>
+    </string-array>
+    <string-array name="heating_limit">
+        <item> 65</item>
+        <item> 66</item>
+        <item> 67</item>
+        <item> 68</item>
+        <item> 69</item>
+        <item> 70</item>
+        <item> 71</item>
+        <item> 72</item>
+        <item> 73</item>
+        <item> 74</item>
+        <item> 75</item>
+    </string-array>
+    <string-array name="deadband">
+        <item> 0</item>
+        <item> 0.5</item>
+        <item> 1</item>
+        <item> 1.5</item>
+        <item> 2.0</item>
+        <item> 2.5</item>
+        <item> 3.0</item>
+        <item> 3.5</item>
+        <item> 4.0</item>
+        <item> 4.5</item>
+        <item> 5.0</item>
+        <item> 5.5</item>
+        <item> 6.0</item>
+        <item> 6.5</item>
+        <item> 7.0</item>
+        <item> 7.5</item>
+        <item> 8.0</item>
+        <item> 8.5</item>
+        <item> 9.0</item>
+        <item> 9.5</item>
+        <item> 10</item>
+    </string-array>
+    <string name="heating_userlimit_Title">Heating User Limit Scale</string>
+    <string name="cooling_userlimit_Title">Cooling User Limit Scale</string>
+    <string name="txt_zoneSearch">Search for Zones</string>
+    <string name="txt_zoneName">Zone Name</string>
+    <string name="heating_desired">Heating Desired Temperature</string>
+    <string name="cooling_desired">Cooling Desired Temperature</string>
+    <string name="heating_user_limit_min_max">Heating User Limit Min/Max</string>
+    <string name="cooling_user_limit_min_max">Cooling User Limit Min/Max</string>
+    <string name="occupied">  Occupied</string>
+
+    <string name="schedule_error">Schedule Errors</string>
+
+
+
     <string name="space">\" \"</string>
 
 

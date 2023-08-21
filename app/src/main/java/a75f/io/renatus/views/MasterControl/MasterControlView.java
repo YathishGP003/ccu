@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -43,20 +42,21 @@ import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
+import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 
 public class MasterControlView extends LinearLayout {
@@ -128,6 +128,7 @@ public class MasterControlView extends LinearLayout {
         mHorizontalScrollView.setFillViewport(true);
         mHorizontalScrollView.setHorizontalScrollBarEnabled(false);
         mHorizontalScrollView.setScrollBarSize(0);
+        mHorizontalScrollView.setForegroundGravity(Gravity.CENTER_VERTICAL);
 
 
         //mHorizontalScrollView.setEnabled(false);
@@ -140,7 +141,7 @@ public class MasterControlView extends LinearLayout {
 
 
         //Disable touch.
-        masterControl.setOnTouchListener((v, event) -> false);
+        // masterControl.setOnTouchListener((v, event) -> false);
 
         this.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -164,15 +165,20 @@ public class MasterControlView extends LinearLayout {
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
 
-        hdb = TunerUtil.getHeatingDeadband(p.getId());
-        cdb = TunerUtil.getCoolingDeadband(p.getId());
-        coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
+        HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
+        HashMap<Object,Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
+
+        hdb = HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
+        cdb = HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
+       /* coolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
+        heatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
+        coolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
+        heatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
+*/
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-        setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+        setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and default");
         zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
     }
@@ -180,15 +186,8 @@ public class MasterControlView extends LinearLayout {
     public void setTuner(Dialog dialog) {
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
-        Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
-
-        // initial ccu setup building/zone schedules are empty
-        if (buildingSchedules == null) {
-            saveBuildingData(dialog);
-            return;
-        }
-
-        getSchedule(p.getSiteRef(), dialog);
+        //getSchedule(p.getSiteRef(), dialog);
+        saveBuildingData(dialog);
     }
 
     private void checkForSchedules(Dialog dialog, ArrayList<Schedule> schedulesList) {
@@ -204,10 +203,10 @@ public class MasterControlView extends LinearLayout {
         Set<String> namedSchedulesIds = new HashSet<String>();
 
 
-        coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        coolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
+        heatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
+        coolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
+        heatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
@@ -343,7 +342,7 @@ public class MasterControlView extends LinearLayout {
                         masterDialog.dismiss();
                     dialog1.dismiss();
                 })
-        .setNegativeButton("Re-Edit", (dialog, which) -> dialog.dismiss());
+                .setNegativeButton("Re-Edit", (dialog, which) -> dialog.dismiss());
 
         AlertDialog alert = namedSchedBuilder.create();
         alert.show();
@@ -413,7 +412,6 @@ public class MasterControlView extends LinearLayout {
                                 Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization()+"\"").toDict();
                 HGrid namedschedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
 
-
                 CcuLog.d(LOG_PREFIX, "org ="+CCUHsApi.getInstance().getSite().getOrganization());
 
                 if (schedulePoint != null) {
@@ -442,11 +440,7 @@ public class MasterControlView extends LinearLayout {
             @Override
             protected void onPostExecute(ArrayList<Schedule> schedules) {
                 ProgressDialogUtils.hideProgressDialog();
-                if (scheduleList.isEmpty()) {
-                    Toast.makeText(getContext(), "Unable to fetch schedules, please confirm your WiFi connectivity.", Toast.LENGTH_LONG).show();
-                } else {
-                    checkForSchedules(dialog, schedules);
-                }
+                    saveBuildingData(dialog);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
@@ -491,14 +485,7 @@ public class MasterControlView extends LinearLayout {
 
         warningDialog.findViewById(R.id.btnEdit).setOnClickListener(view -> warningDialog.dismiss());
 
-        warningDialog.findViewById(R.id.btnForceTrim).setOnClickListener(view -> {
 
-            saveScheduleData(schedules, masterControlDialog);
-            warningDialog.dismiss();
-            if (masterControlDialog != null && masterControlDialog.isShowing()) {
-                masterControlDialog.dismiss();
-            }
-        });
 
         warningDialog.show();
     }
@@ -663,13 +650,13 @@ public class MasterControlView extends LinearLayout {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+              /*  HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 String ccuName = ccu.get("dis").toString();
 
-                HashMap buildingCoolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-                HashMap buildingHeatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
-                HashMap buildingCoolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-                HashMap buildingHeatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+                HashMap<Object,Object> buildingCoolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
+                HashMap<Object,Object> buildingHeatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
+                HashMap<Object,Object> buildingCoolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
+                HashMap<Object,Object> buildingHeatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
                 HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
                 HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
@@ -704,13 +691,14 @@ public class MasterControlView extends LinearLayout {
                     CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTemperatureLowerLimit);
                 }
-                BuildingTunerCache.getInstance().updateTuners();
+                BuildingTunerCache.getInstance().updateTuners();*/
                 return null;
             }
 
             @Override
             protected void onPostExecute(final Void result) {
                 super.onPostExecute(result);
+                Toast.makeText(getContext(),"Building limits has been successfully updated",Toast.LENGTH_LONG).show();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
@@ -783,4 +771,67 @@ public class MasterControlView extends LinearLayout {
                     lowerBuildingTemp, upperBuildingTemp,
                     setBack, zoneDiff, hdb, cdb);
     }
+
+    public void saveUserLimitChange(int whichLimit, String adapterVal) {
+        float val ;
+        val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);
+
+        masterControl.temps[whichLimit] = val;
+        if(whichLimit == MasterControl.MasterControlState.LOWER_BUILDING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allHeatingLowerLimit =
+                    CCUHsApi.getInstance().readAllEntities("point and limit and min and building and default and not tuner");
+            HSUtil.writeValToALLLevel16(allHeatingLowerLimit,val);
+        }
+        if(whichLimit == MasterControl.MasterControlState.UPPER_BUILDING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allHeatingLowerLimit =
+                    CCUHsApi.getInstance().readAllEntities("point and limit and max and building and default and not tuner");
+            HSUtil.writeValToALLLevel16(allHeatingLowerLimit,val);
+        }
+        if(whichLimit == MasterControl.MasterControlState.LOWER_HEATING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allHeatingLowerLimit =
+                    CCUHsApi.getInstance().readAllEntities("schedulable and point and limit and max and heating and user");
+            HSUtil.writeValToALLLevel16(allHeatingLowerLimit,val);
+        }
+        if(whichLimit == MasterControl.MasterControlState.UPPER_HEATING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allHeatingupperLimit =
+                    CCUHsApi.getInstance().readAllEntities("schedulable and point and limit and min and heating and user");
+            HSUtil.writeValToALLLevel16(allHeatingupperLimit,val);
+        }
+        if(whichLimit == MasterControl.MasterControlState.LOWER_COOLING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allCoolingLowerLimit =
+                    CCUHsApi.getInstance().readAllEntities("schedulable and point and limit and min and cooling and user");
+            HSUtil.writeValToALLLevel16(allCoolingLowerLimit,val);
+        }
+        if(whichLimit == MasterControl.MasterControlState.UPPER_COOLING_LIMIT.ordinal()){
+            ArrayList<HashMap<Object, Object>> allCoolingUpperLimit =
+                    CCUHsApi.getInstance().readAllEntities("schedulable and point and limit and max and cooling and user");
+            HSUtil.writeValToALLLevel16(allCoolingUpperLimit,val);
+        }
+    }
+
+    public void updateDeadBand(String tag, String adapterVal){
+        float val ;
+        val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);
+        ArrayList<HashMap<Object, Object>> alldeadBands =
+                CCUHsApi.getInstance().readAllEntities("schedulable and "+tag+" and deadband");
+        HSUtil.writeValToALLLevel16(alldeadBands,val);
+    }
+
+    public void updateUnoccupiedZoneSetBack(String adapterVal){
+        float val ;
+        val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);
+        ArrayList<HashMap<Object, Object>> unoccupiedZoneObj = CCUHsApi.getInstance().readAllEntities(
+                "schedulable and unoccupied and setback");
+        HSUtil.writeValToALLLevel16(unoccupiedZoneObj,val);
+    }
+
+    public void updateBuildingToZoneDiff(String adapterVal){
+        float val ;
+        val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);
+        HashMap<Object, Object> buildingtoZone = CCUHsApi.getInstance().readEntity(
+                "building and zone and differential and cur");
+        HSUtil.writeValtolevel16(buildingtoZone,val);
+    }
+
+
 }

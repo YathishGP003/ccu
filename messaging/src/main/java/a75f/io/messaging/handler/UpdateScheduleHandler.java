@@ -98,7 +98,7 @@ public class UpdateScheduleHandler implements MessageHandler
                     return;
                 }
                 if(scheduleDict.has(Tags.SPECIAL)){
-                    CCUHsApi.getInstance().updateSpecialScheduleNoSync(uid, scheduleDict);
+                    CCUHsApi.getInstance().updateHDictNoSync(uid, scheduleDict);
                     break;
                 }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();

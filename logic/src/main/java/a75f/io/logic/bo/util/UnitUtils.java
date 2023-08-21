@@ -101,7 +101,6 @@ public class UnitUtils {
     }
 
     public static double celsiusToFahrenheitTuner(double value) {
-
         double conversionToFarh = (value * 9 / 5) + 32;
         double conversionValue = (((conversionToFarh) * 10) / 10);
         return Math.round(conversionValue);
@@ -241,4 +240,13 @@ public class UnitUtils {
     public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {
         return   tunerItem.containsKey("deadband");
     }
+
+
+
+
+    public static double roundToPointFive(double value){
+        return Math.round(value * 2) / 2.0;
+    }
+
+
 }

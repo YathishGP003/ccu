@@ -52,7 +52,7 @@ class DiffManagerTest {
         val migrationHandler = MigrationHandler(mockHayStack)
         val newVersionFiles = getModelFileVersionDetails(DiffManger.NEW_VERSION)
         val versionFiles = getModelFileVersionDetails(DiffManger.VERSION)
-        diffManger.updateEquipModels(newVersionFiles,versionFiles,migrationHandler)
+        diffManger.updateEquipModels(newVersionFiles,versionFiles,migrationHandler, "@TestSiteRef")
         println(versionFiles)
         Domain.site?.floors?.entries?.forEach{
             val floor = it.value
@@ -120,7 +120,7 @@ class DiffManagerTest {
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef
-            equipBuilder.buildEquipAndPoints(profileConfig, dmModel)
+            equipBuilder.buildEquipAndPoints(profileConfig, dmModel,"@TestSiteRef")
         }
         DomainManager.buildDomain(hayStack)
     }

@@ -2,8 +2,15 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.logic.DomainManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 
 object Domain {
+
+    val domainScope = CoroutineScope(Dispatchers.IO + Job())
+
     var site: Site? = null
 
     /**

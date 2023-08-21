@@ -295,6 +295,7 @@ public class Globals {
             if (CCUHsApi.getInstance().isPrimaryCcu()) {
                         /* Only primary CCUs shall create new tuners created in the upgrade releases and
                         non-primary CCUs should fetch in the next app start up.*/
+                ////TODO- COMMON-DATA-FEATURE
                 BuildingTuners.getInstance().updateBuildingTuners();
             } else {
                         /*If a non-primary tuner fails to load all the  building tuners, it should

@@ -65,7 +65,7 @@ class DomainBuilderTest {
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef
-            equipBuilder.buildEquipAndPoints(profileConfig, dmModel)
+            equipBuilder.buildEquipAndPoints(profileConfig, dmModel, "@TestSiteRef")
         }
 
         DomainManager.buildDomain(hayStack)

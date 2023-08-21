@@ -161,7 +161,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(q.getLastModifiedBy() != null){
             equip.add("lastModifiedBy", q.getLastModifiedBy());
         }
-
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
+        }
         if(q.getEquipRef() != null){
             equip.add("equipRef",q.getEquipRef());
         }
@@ -225,6 +227,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(q.getModel() != null){
             equip.add("model",q.getModel());
         }
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
+        }
         if(q.getEquipRef() != null){
             equip.add("equipRef", q.getEquipRef());
         }
@@ -244,6 +249,7 @@ public class TestTagsDb extends CCUTagsDb {
             equip.add(m);
         }
         q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
+
         HRef id = (HRef) equip.get("id");
         tagsMap.put(id.toVal(), equip.toDict());
     }
@@ -290,6 +296,10 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -331,7 +341,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -381,7 +393,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -428,6 +442,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -464,6 +481,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -496,7 +516,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -533,7 +555,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(d.getLastModifiedBy() != null){
             b.add("lastModifiedBy", d.getLastModifiedBy());
         }
-
+        if (d.getDomainName() != null) {
+            b.add("domainName", d.getDomainName());
+        }
         for (String m : d.getMarkers()) {
             b.add(m);
         }
@@ -567,7 +591,9 @@ public class TestTagsDb extends CCUTagsDb {
         if(d.getLastModifiedBy() != null){
             b.add("lastModifiedBy", d.getLastModifiedBy());
         }
-
+        if (d.getDomainName() != null) {
+            b.add("domainName", d.getDomainName());
+        }
         for (String m : d.getMarkers()) {
             b.add(m);
         }

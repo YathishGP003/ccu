@@ -38,14 +38,15 @@ class DiffManger(var context: Context?) {
             val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
             val newVersionFiles = getModelFileVersionDetails(NEW_VERSION)
             val versionFiles = getModelFileVersionDetails(VERSION)
-            updateEquipModels (newVersionFiles, versionFiles, migrationHandler)
+            updateEquipModels (newVersionFiles, versionFiles, migrationHandler, "TEST")//TODO-
         }
     }
 
     fun updateEquipModels(
         newVersionFiles: List<ModelMeta>,
         versionFiles: List<ModelMeta>,
-        handler: MigrationHandler
+        handler: MigrationHandler,
+        siteRef : String
     ) {
         newVersionFiles.forEach { version ->
             val currentModelMeta = getCurrentModel(versionFiles, version.modelId)
@@ -56,7 +57,7 @@ class DiffManger(var context: Context?) {
                     val newModel = getModelDetective("$NEW_FIle_PATH${version.modelId}.json")
                     if (originalModel is SeventyFiveFProfileDirective) {
                         val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
-                        handler.migrateModel(entityConfiguration,newModel as SeventyFiveFProfileDirective)
+                        handler.migrateModel(entityConfiguration,newModel as SeventyFiveFProfileDirective, siteRef)
                     } else {
                         // No updates in definition
                     }

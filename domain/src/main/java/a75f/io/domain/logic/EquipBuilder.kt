@@ -5,9 +5,8 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.config.ProfileConfiguration
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 
 interface EquipBuilder {
-    fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?) : Equip
-    fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String) : Point
+    fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String) : Equip
+    fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef : String) : Point
 }

@@ -15,19 +15,20 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
  */
 class MigrationHandler(var haystack: CCUHsApi) {
 
-    fun migrateModel(entityData: EntityConfiguration,newModel: SeventyFiveFProfileDirective) {
+    fun migrateModel(entityData: EntityConfiguration,newModel: SeventyFiveFProfileDirective, siteRef: String) {
         val equipDetails = getEquipDetailsByDomain(newModel.domainName)
-        addEntityData(entityData.tobeAdded,newModel,equipDetails)
+        addEntityData(entityData.tobeAdded,newModel,equipDetails, siteRef)
         removeEntityData(entityData.tobeDeleted,newModel,equipDetails)
-        updateEntityData(entityData.tobeUpdated,newModel,equipDetails)
+        updateEntityData(entityData.tobeUpdated,newModel,equipDetails, siteRef)
     }
-    private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
+    private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective,
+                              equips: List<a75f.io.domain.api.Equip>, siteRef : String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeAdded.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
-                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration)
+                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration, siteRef)
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)
@@ -39,7 +40,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
                 profileConfiguration.floorRef = equipDetails["floorRef"].toString()
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id)
+                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id, siteRef)
                     val pointId = haystack.addPoint(hayStackPoint)
                     hayStackPoint.id = pointId
                     DomainManager.addPoint(hayStackPoint)
@@ -51,13 +52,14 @@ class MigrationHandler(var haystack: CCUHsApi) {
     // TODO remove change set
         println(tobeRemove)
     }
-    private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
+    private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective,
+                                 equips: List<a75f.io.domain.api.Equip>, siteRef: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeUpdate.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
-                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration)
+                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration, siteRef)
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)
@@ -66,7 +68,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
             equips.forEach {equip ->
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id)
+                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id, siteRef)
                     val currentPoint = equip.points.filter { it.value.domainName == diffDomain.domainName }
                     val existingId = currentPoint[diffDomain.domainName]?.id
                     hayStackPoint.id = existingId

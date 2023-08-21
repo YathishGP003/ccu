@@ -290,7 +290,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             if (!parentEquip.getEquips().isEmpty()) {
                 modbusSubEquipList.addAll(parentEquip.getEquips());
             }
-
+        } else {
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
 
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
@@ -376,12 +377,15 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
         }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+
+
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
             if (!parentEquip.getEquips().isEmpty()) {
                 modbusSubEquipList.addAll(parentEquip.getEquips());
             }
-
+        } else {
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
         /*if (equip.getEquipRef() != null) {
             modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));

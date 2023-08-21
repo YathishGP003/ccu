@@ -157,7 +157,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             if (!parentEquip.getEquips().isEmpty()) {
                 modbusSubEquipList.addAll(parentEquip.getEquips());
             }
-
+        } else {
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
 
         HashMap<Object, Object> physicalPoint = CCUHsApi.getInstance()

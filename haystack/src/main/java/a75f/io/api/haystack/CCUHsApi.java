@@ -18,6 +18,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -2932,6 +2933,7 @@ public class CCUHsApi
             if (timeZone.contains(tz)) {
                 AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                 am.setTimeZone(timeZone);
+                DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
                 break;
             }
         }
@@ -3080,4 +3082,17 @@ public class CCUHsApi
         return responseHGrid;
     }
 
+    public void updateLocalTimeZone(){
+        String tz = Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getTz();
+        String[] tzIds = TimeZone.getAvailableIDs();
+        for (String timeZone : tzIds) {
+            if (timeZone.contains(tz)) {
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.setTimeZone(timeZone);
+                DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
+                CcuLog.e(TAG, "updateLocalTimeZone : local timezone updated to "+timeZone);
+                break;
+            }
+        }
+    }
 }

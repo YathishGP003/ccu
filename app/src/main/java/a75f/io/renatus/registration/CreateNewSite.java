@@ -50,6 +50,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HRef;
@@ -361,7 +362,7 @@ public class CreateNewSite extends Fragment {
                 mNext.setEnabled(true);
             }
         });
-        
+
         View.OnClickListener editSiteOnClickListener = v -> {
             if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
                 enableViews(true);
@@ -989,6 +990,12 @@ public class CreateNewSite extends Fragment {
         CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
         if (!curTz.equals(s75f.getTz())) {
             CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
+            String[] tzIds = TimeZone.getAvailableIDs();
+            for (String timeZone : tzIds) {
+                if (timeZone.contains(s75f.getTz())) {
+                    DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
+                }
+            }
         }
         BuildingTuners.getInstance();
         SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);

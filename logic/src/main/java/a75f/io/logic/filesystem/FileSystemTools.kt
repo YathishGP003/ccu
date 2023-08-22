@@ -28,7 +28,7 @@ class FileSystemTools(private val appContext: Context) {
       File(Environment.getExternalStorageDirectory().absolutePath + File.separator + LOGS_DIR)
 
    /** Our common Date time format for file names */
-   fun timeStamp(): String = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+   fun timeStamp(): String = SimpleDateFormat("yyyy_MM_dd'T'HH_mm_ss", Locale.getDefault())
       .format(Date())
 
    //  This code exists in DevSettings.java and RenatusApp.java.  However, those are both in the

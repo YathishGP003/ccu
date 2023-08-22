@@ -440,7 +440,9 @@ public class SeekArc extends View
                 if (inCoolingSelectionMode) {
                     drawCoolingLimitBar(canvas);
                     drawCoolingSliderIcon(canvas, coolingModeTemp);
-                    checkForCoolingLine(canvas, coolingModeTemp);
+                    if(ModeType == TemperatureMode.DUAL) {
+                        checkForCoolingLine(canvas, coolingModeTemp);
+                    }
                     drawCoolingText(canvas, coolingModeTemp);
                 }
 
@@ -454,7 +456,9 @@ public class SeekArc extends View
                 if (inHeatingSelectionMode) {
                     drawHeatingLimitBar(canvas);
                     drawHeatingSliderIcon(canvas, heatingModeTemp);
-                    checkForHeatingLine(canvas, heatingModeTemp);
+                    if(ModeType == TemperatureMode.DUAL) {
+                        checkForHeatingLine(canvas, heatingModeTemp);
+                    }
                     drawHeatingText(canvas, heatingModeTemp);
                 }
             }

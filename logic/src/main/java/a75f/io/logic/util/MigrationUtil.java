@@ -2137,6 +2137,8 @@ public class MigrationUtil {
                         "fan and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
                 HashMap<Object, Object> conditioningMode = CpuPointsMigration.Companion.readPoint(
                         "conditioning and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
+                HashMap<Object, Object> operatingMode = CCUHsApi.getInstance()
+                        .readEntity("operating and mode and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
 
                 if (!fanMode.isEmpty() && !fanMode.containsKey("userIntent")) {
                     MigratePointsUtil.Companion.updateMarkers(
@@ -2150,6 +2152,13 @@ public class MigrationUtil {
                             conditioningMode,
                             new String[]{"userIntent"},
                             new String[]{},
+                            null);
+                }
+                if (!operatingMode.isEmpty()) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            operatingMode,
+                            new String[]{},
+                            new String[]{"writable"},
                             null);
                 }
             }

@@ -93,7 +93,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         //CcuLog.d(L.TAG_CCU_DEVICE, "Modbus SendSystemControl");
     }
 
-    public void writeRegister(String id) {
+    public void writeRegister(String id ) {
         HashMap<Object, Object> writablePoint = CCUHsApi.getInstance().readMapById(id);
         if (writablePoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_MODBUS, "Cant find the point to update "+id);

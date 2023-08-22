@@ -170,6 +170,16 @@ public class UpdatePointHandler implements MessageHandler
             }
         }
 
+        if (localPoint.getMarkers().contains("modbus")){
+            ModbusHandler.updatePoint(msgObject,localPoint);
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(localPoint.getId());
+            }
+            if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(localPoint.getId());
+            }
+        }
+
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
             fetchRemotePoint(pointUid, isDataSync, msgObject);

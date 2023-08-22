@@ -281,7 +281,7 @@
     },
     {
       "id": "4:648221881845039292",
-      "lastPropertyId": "17:2171657581980711684",
+      "lastPropertyId": "19:2479800096680730437",
       "name": "Parameter",
       "properties": [
         {
@@ -375,6 +375,16 @@
           "name": "bitParam",
           "type": 5,
           "flags": 2
+        },
+        {
+          "id": "18:615382826188324102",
+          "name": "multiplier",
+          "type": 9
+        },
+        {
+          "id": "19:2479800096680730437",
+          "name": "wordOrder",
+          "type": 9
         }
       ],
       "relations": []

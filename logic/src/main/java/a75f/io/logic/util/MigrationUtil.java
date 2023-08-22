@@ -414,9 +414,24 @@ public class MigrationUtil {
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
 
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
+        migrateAirFlowTunerPoints(CCUHsApi.getInstance());
         L.saveCCUState();
     }
-
+    private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
+        allSnTuners.forEach(snTuner -> {
+            String pointName = snTuner.get(Tags.DIS).toString();
+            /* Remove "sn" tag and change display name from siteName-roomName-profile-nodeAddress-snCoolingAirflowTemp
+             to siteName-roomName-profile-nodeAddress-coolingAirflowTemp*/
+            int snIndex = pointName.indexOf("sn");
+            String modifiedDisplayName = pointName.substring(0, snIndex) +
+                    Character.toLowerCase(pointName.charAt(snIndex + 2)) +
+                    pointName.substring(snIndex + 3);
+            Point modifiedPoint  = new Point.Builder().setHashMap(snTuner).removeMarker("sn")
+                    .setDisplayName(modifiedDisplayName).build();
+            ccuHsApi.updatePoint(modifiedPoint, modifiedPoint.getId());
+        });
+    }
     private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> tiEquips = ccuHsApi.readAllEntities("equip and ti");

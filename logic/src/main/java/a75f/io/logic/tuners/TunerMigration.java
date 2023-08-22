@@ -57,8 +57,8 @@ class TunerMigration {
         valueObjMap.put("stage1CoolingAirflowTempLowerOffset", new ValueObj("-120", "0.0", "1.0"));
       //  valueObjMap.put("adrHeatingDeadband", new ValueObj("0.0", "10", "0.5"));
         //valueObjMap.put("adrCoolingDeadband", new ValueObj("0.0", "10", "0.5"));
-        valueObjMap.put("snHeatingAirflowTemp", new ValueObj("65", "150", "1.0"));
-        valueObjMap.put("snCoolingAirflowTemp", new ValueObj("35", "75", "1.0"));
+        valueObjMap.put("heatingAirflowTemp", new ValueObj("65", "150", "1.0"));
+        valueObjMap.put("coolingAirflowTemp", new ValueObj("35", "75", "1.0"));
         valueObjMap.put("zoneDeadTime", new ValueObj("1.0", "300", "1.0"));
         valueObjMap.put("forcedOccupiedTime", new ValueObj("0", "300", "1.0"));
         valueObjMap.put("autoAwayTime", new ValueObj("0", "300", "1.0"));

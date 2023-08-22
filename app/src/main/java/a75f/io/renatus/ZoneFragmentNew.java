@@ -488,7 +488,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                                 for (int j = 0; j < zoneEquips.size(); j++) {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                                    int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and equipRef ==\""+tempEquip.getId()+"\"").intValue();
+                                    int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
                                     if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
                                         double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);

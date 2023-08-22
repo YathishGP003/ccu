@@ -216,16 +216,16 @@ public class CCUTagsDb extends HServer {
     private void doTagsRoomDbMigration() {
         CcuLog.i(TAG_CCU_ROOM_DB, "doTagsRoomDbMigration ");
         try {
-            TagDbMigration.doTagStringToRoomDBMigration(appContext, hsTypeAdapter);
-            PreferenceManager.getDefaultSharedPreferences(appContext).edit()
-                    .putBoolean(PREFS_HAS_MIGRATED_ROOM_DB, true)
-                    .apply();
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
                     DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
                     EventBus.getDefault().postSticky(databaseEvent);
+                    TagDbMigration.doTagStringToRoomDBMigration(appContext, hsTypeAdapter);
+                    PreferenceManager.getDefaultSharedPreferences(appContext).edit()
+                            .putBoolean(PREFS_HAS_MIGRATED_ROOM_DB, true)
+                            .apply();
                     CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed @@--------------");
                 }
             }, 1000);

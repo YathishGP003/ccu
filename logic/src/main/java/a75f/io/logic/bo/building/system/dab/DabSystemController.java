@@ -129,9 +129,9 @@ public class DabSystemController extends SystemController
                                                            .getInstance()
                                                            .readAllEntities("equip and zone and (dab or dualDuct or " +
                                                                             "ti or otn)");
-    
+        updateDeadZones(allEquips);
         updateSystemTempHumidity(allEquips);
-        
+
         processZoneEquips(allEquips);
         processCCUAsZoneEquip();
         
@@ -167,6 +167,16 @@ public class DabSystemController extends SystemController
         updateSatConditioning(CCUHsApi.getInstance());
         updateDabZoneDamperPositions();
         
+    }
+
+    private void updateDeadZones(ArrayList<HashMap<Object, Object>> allEquips) {
+        deadZones.clear();
+        allEquips.forEach( equip -> {
+            String equipId = equip.get(Tags.ID).toString();
+            if (isZoneDead(equipId)) {
+                deadZones.add(equipId);
+            }
+        });
     }
 
     private void initializeAlgoLoopVariables() {
@@ -241,7 +251,7 @@ public class DabSystemController extends SystemController
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
-            if (isZoneDead(equip.getId())) {
+            if (deadZones.contains(equip.getId())) {
                 zoneDeadCount++;
             } else if (hasTemp(equip)) {
                 double zoneCurTemp = getEquipCurrentTemp(equip.getId());
@@ -713,7 +723,7 @@ public class DabSystemController extends SystemController
                         "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
-                if (!isZoneDead(equip.getId()) && (tempVal > 0)) {
+                if (!deadZones.contains(equip.getId()) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
                 }
@@ -838,7 +848,7 @@ public class DabSystemController extends SystemController
     
             primaryDamperPos = damperPosMap.get(normalizedPrimaryDamper.get("id").toString());
             secondaryDamperPos = damperPosMap.get(normalizedSecondaryamper.get("id").toString());
-            if (isZoneDead(dabEquip.get("id").toString())) {
+            if (deadZones.contains(dabEquip.get("id").toString())) {
                 Log.d("CCU_SYSTEM", "Skip Normalize, Equip Dead " + dabEquip.toString());
                 normalizedPrimaryDamperPos = primaryDamperPos;
                 normalizedSecondaryDamperPos = secondaryDamperPos;
@@ -865,7 +875,7 @@ public class DabSystemController extends SystemController
     private double getMaxDamperPos(ArrayList<HashMap<Object, Object>> dabEquips) {
         double maxDamperPos = 0;
         for (HashMap<Object, Object> dabEquip : dabEquips) {
-            if (isZoneDead(dabEquip.get("id").toString())) {
+            if (deadZones.contains(dabEquip.get("id").toString())) {
                 continue;
             }
             HashMap<Object, Object> damper = CCUHsApi.getInstance()
@@ -907,44 +917,26 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening + " cumulativeDamperTarget : " +
                                    cumulativeDamperTarget);
         if (weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
-            
-            int damperAdjPercent = getDamperAdjustmentTargetPercent(dabEquips,
-                                                                     normalizedDamperPosMap,
-                                                                     cumulativeDamperTarget);
-    
-            HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(dabEquips,
-                                                                               normalizedDamperPosMap,
-                                                                               damperAdjPercent);
-            
-            
-            weightedDamperOpening = getWeightedDamperOpening(dabEquips, normalizedDamperPosMap);
-            CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening +
-                                       " cumulativeDamperTarget : " + cumulativeDamperTarget +
-                                        " damperAdjPercent : "+damperAdjPercent);
+            HashMap<String, Double> adjustedDamperPosMap = normalizedDamperPosMap;
+            double adjustedWeightedDamperOpening;
+            do {
+                adjustedDamperPosMap = adjustDamperOpening(dabEquips,
+                        adjustedDamperPosMap,
+                        SystemConstants.DEFAULT_DAMPER_ADJ_INCREMENT
+                );
+
+                adjustedWeightedDamperOpening = getWeightedDamperOpening(dabEquips, adjustedDamperPosMap);
+                CcuLog.d(L.TAG_CCU_SYSTEM, " adjustDamperOpening : weightedDamperOpening "+weightedDamperOpening+
+                                        " adjustedWeightedDamperOpening "+adjustedWeightedDamperOpening);
+                //Adjust is not yielding any results. Zones could be dead
+                if (adjustedWeightedDamperOpening == weightedDamperOpening) {
+                    break;
+                }
+            } while (adjustedWeightedDamperOpening < cumulativeDamperTarget);
+
             return adjustedDamperPosMap;
         }
         return normalizedDamperPosMap;
-    }
-    
-    public int getDamperAdjustmentTargetPercent(ArrayList<HashMap<Object, Object>> dabEquips,
-                                                   HashMap<String, Double> damperPosMap,
-                                                   double damperTargetOpening) {
-        
-        double currentWeightedDamperOpening = getWeightedDamperOpening(dabEquips, damperPosMap);
-        
-        HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(dabEquips,
-                                                                           damperPosMap,
-                                                                           SystemConstants.DEFAULT_DAMPER_ADJ_INCREMENT
-        );
-        
-        double adjustedWeightedDamperOpening = getWeightedDamperOpening(dabEquips, adjustedDamperPosMap);
-        
-        double damperChangeFor1Percentage = adjustedWeightedDamperOpening - currentWeightedDamperOpening;
-        
-        double requiredAdjustment = (damperTargetOpening - currentWeightedDamperOpening ) / damperChangeFor1Percentage;
-        
-        return (int)Math.ceil(requiredAdjustment);
-        
     }
     
     public double getWeightedDamperOpening(ArrayList<HashMap<Object, Object>> dabEquips,
@@ -1005,7 +997,7 @@ public class DabSystemController extends SystemController
             double adjustedDamperPos = primaryDamperVal + (primaryDamperVal * percent) / 100;
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
-            if (isZoneDead(dabEquip.get("id").toString())) {
+            if (deadZones.contains(dabEquip.get("id").toString())) {
                 Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
                 adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), primaryDamperVal);
             } else {
@@ -1021,7 +1013,7 @@ public class DabSystemController extends SystemController
             adjustedDamperPos = secondaryDamperVal + (secondaryDamperVal * percent) / 100;
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
-            if (isZoneDead(dabEquip.get("id").toString())) {
+            if (deadZones.contains(dabEquip.get("id").toString())) {
                 Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
                 adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), secondaryDamperVal);
             } else {
@@ -1175,7 +1167,7 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> equipsWithValidSAT = new ArrayList<>();
         double satSum = 0;
         for (HashMap dabEquip : allEquips) {
-            if (isZoneDead(dabEquip.get("id").toString())) {
+            if (deadZones.contains(dabEquip.get("id").toString())) {
                 continue;
             }
             double supplyAirTemp = getSupplyAirTemp(dabEquip, hayStack);

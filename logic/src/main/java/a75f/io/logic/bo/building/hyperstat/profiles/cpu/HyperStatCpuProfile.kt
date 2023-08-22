@@ -543,7 +543,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
        logIt("Zone is Dead ${equip.node}")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", 0.0)
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
         if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
         val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()

@@ -1047,20 +1047,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         return cpuEconDeviceMap.keys
     }
 
-    override fun isZoneDead(): Boolean {
-        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
-        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
-        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
-        for (node in cpuEconDeviceMap.keys) {
-            if (cpuEconDeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
-                || cpuEconDeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
-            ) {
-                return true
-            }
-        }
-        return false
-    }
-
     private fun resetAllLogicalPointValues(equip: HyperStatSplitCpuEconEquip) {
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(0,0,0,false,0)
         equip.hsSplitHaystackUtil.updateOaoLoopOutput(0,0,0,0)

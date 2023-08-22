@@ -1115,7 +1115,7 @@ public class DabSystemController extends SystemController
     }
     
     public double getStatus(String nodeAddr) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
     
     @Override

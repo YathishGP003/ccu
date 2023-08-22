@@ -612,7 +612,7 @@ public class OTNEquip {
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and group == " +
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == " +
                 "\"" + mNodeAddr + "\"");
     }
 

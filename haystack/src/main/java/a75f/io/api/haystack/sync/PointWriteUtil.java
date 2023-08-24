@@ -34,6 +34,7 @@ public class PointWriteUtil {
                 String value = Objects.toString(valMap.get("val"), "");
                 String level = Objects.toString(valMap.get("level"), "");
                 String who = Objects.toString(valMap.get("who"), "");
+                HNum duration = HNum.make(Double.parseDouble(valMap.get("duration").toString()));
                 boolean isDouble = false;
                 double numValue = 0.0;
                 
@@ -49,7 +50,8 @@ public class PointWriteUtil {
                                       .add("level", (int) Double.parseDouble(level))
                                       .add("who", who)
                                       .add("val", isDouble? HNum.make(numValue) :
-                                                                                    HStr.make(value));
+                                                                                    HStr.make(value))
+                            .add("duration", duration);
                 dictArr.add(b.toDict());
             }
         }

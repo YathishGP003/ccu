@@ -504,6 +504,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 ReplaceCCU.this.loadRenatusLandingIntent();
                 ReplaceCCU.this.updatePreference();
                 MessagingClient.getInstance().init();
+                CCUHsApi.getInstance().updateLocalTimeZone();
             }
         });
         return equipResponseCallback;

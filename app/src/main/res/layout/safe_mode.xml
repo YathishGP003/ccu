@@ -33,7 +33,6 @@
             android:background="@color/transparent"
             android:textColor="?orange_75f"
             android:text="@string/exit_safe_mode"
-            android:textColor="?orange_75f"
             android:textAppearance="@style/safe_mode_cts"
             />
     </LinearLayout>

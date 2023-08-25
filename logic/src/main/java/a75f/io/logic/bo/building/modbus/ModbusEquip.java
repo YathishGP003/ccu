@@ -25,6 +25,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.modbusbox.ModbusCategory;
 
@@ -63,8 +64,14 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType;
+        double equipScheduleTypeVal;
 
-        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
+        if(roomRef.contains("SYSTEM")) {
+            equipScheduleTypeVal = ScheduleType.ZONE.ordinal();
+        }else{
+            equipScheduleTypeVal = (UtilKt.getSchedule(roomRef, floorRef)).isZoneSchedule()? ScheduleType.ZONE.ordinal() :
+                    ScheduleType.NAMED.ordinal();
+        }
 
         List<String> modbusEquipTypes = Arrays.asList(equipmentInfo.getEquipType().replaceAll("\\s", "").split(","));
         if (hasEquipType(ModbusEquipTypes.EMR_ZONE, modbusEquipTypes)) {
@@ -142,8 +149,8 @@ public class ModbusEquip {
                     .setTz(tz).build();
 
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, equipScheduleTypeVal);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId,equipScheduleTypeVal);
 
         Device modbusDevice = new Device.Builder()
                 .setDisplayName(modbusEquipType+"-"+equipmentInfo.getSlaveId())

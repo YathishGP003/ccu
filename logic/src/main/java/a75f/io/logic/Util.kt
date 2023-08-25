@@ -52,7 +52,10 @@ fun reportToCrashlytics(e: Throwable) {
 
 fun getSchedule(roomRef : String, floorRef: String) : Schedule{
    val roomMap: Zone = HSUtil.getZone(roomRef, floorRef)
-   val scheduleRef: String = roomMap.getScheduleRef()
-   val roomSchedule: Schedule = CCUHsApi.getInstance().getScheduleById(scheduleRef)
-   return roomSchedule
+   if(roomMap != null) {
+      val scheduleRef: String = roomMap.getScheduleRef()
+      val roomSchedule: Schedule = CCUHsApi.getInstance().getScheduleById(scheduleRef)
+      return roomSchedule
+   }
+   return Schedule();
 }

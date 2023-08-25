@@ -81,6 +81,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var sensorBusTemps: List<SensorBusWidgets>
     lateinit var sensorBusPress: List<SensorBusWidgets>
 
+    lateinit var cancelButton: Button
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
     private lateinit var zoneCO2DamperOpeningRate: Spinner
@@ -306,6 +307,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             zonePMThreshold = findViewById(R.id.zonepmThresholdSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
 
+            cancelButton = findViewById(R.id.cancelButton)
             setButton = findViewById(R.id.setButton)
 
             /**
@@ -551,6 +553,9 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             if(enableDisplay(displayPp2p5))
                 viewModel.onDisplayP2pmSelected(isChecked)
         }
+
+        // On click, close out of the modal and return to the floor plan fragment
+        cancelButton.setOnClickListener { closeAllBaseDialogFragments() }
 
         /*
             On Click, save the CPU & Economizer configuration.

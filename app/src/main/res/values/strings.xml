@@ -767,6 +767,8 @@
     <string name="label_enablefanstage1">Enable Fan Stage1 During Occupied</string>
     <string name="label_extsensor">Use External 10k Temp Sensor</string>
     <string name="button_set">SET</string>
+    <string name="button_cancel">CANCEL</string>
+    <string name="button_save">SAVE</string>
     <string name="label_cpucoolstage1">Cooling Stage 1</string>
     <string name="label_cpucoolstage2">Cooling Stage 2</string>
     <string name="label_cpuheatstage1">Heating Stage 1</string>

@@ -70,37 +70,37 @@ public class ZoneTuners {
         BuildingTunerUtil.updateTunerLevels(forcedOccupiedTimeId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(forcedOccupiedTimeId));
 
-        Point snCoolingAirflowTemp = new Point.Builder()
-                                         .setDisplayName(equipdis+"-"+"snCoolingAirflowTemp")
+        Point coolingAirflowTemp = new Point.Builder()
+                                         .setDisplayName(equipdis+"-"+"coolingAirflowTemp")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("writable").addMarker("his")
-                                         .addMarker("zone").addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
+                                         .addMarker("zone").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
                                          .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
-        String snCoolingAirflowTempId = hayStack.addPoint(snCoolingAirflowTemp);
-        BuildingTunerUtil.updateTunerLevels(snCoolingAirflowTempId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(snCoolingAirflowTempId));
+        String coolingAirflowTempId = hayStack.addPoint(coolingAirflowTemp);
+        BuildingTunerUtil.updateTunerLevels(coolingAirflowTempId, roomRef, hayStack);
+        hisItems.add(HSUtil.getHisItemForWritable(coolingAirflowTempId));
 
-        Point snHeatingAirflowTemp = new Point.Builder()
-                                         .setDisplayName(equipdis+"-"+"snHeatingAirflowTemp")
+        Point heatingAirflowTemp = new Point.Builder()
+                                         .setDisplayName(equipdis+"-"+"heatingAirflowTemp")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("writable").addMarker("his")
-                                         .addMarker("zone").addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
+                                         .addMarker("zone").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
                                          .setMinVal("65").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
-        String snHeatingAirflowTempId = hayStack.addPoint(snHeatingAirflowTemp);
-        BuildingTunerUtil.updateTunerLevels(snHeatingAirflowTempId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(snHeatingAirflowTempId));
+        String heatingAirflowTempId = hayStack.addPoint(heatingAirflowTemp);
+        BuildingTunerUtil.updateTunerLevels(heatingAirflowTempId, roomRef, hayStack);
+        hisItems.add(HSUtil.getHisItemForWritable(heatingAirflowTempId));
 
         Point constantTempAlertTime = new Point.Builder()
                                           .setDisplayName(equipdis+"-"+"constantTempAlertTime")

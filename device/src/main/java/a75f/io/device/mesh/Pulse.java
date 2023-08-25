@@ -158,7 +158,7 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
-						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
 						}
@@ -859,7 +859,7 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
-						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
 						}

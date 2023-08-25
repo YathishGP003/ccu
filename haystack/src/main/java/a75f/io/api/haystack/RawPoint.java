@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
@@ -503,7 +504,8 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("registerType"))
                 {
                     this.registerType = pair.getValue().toString();
-                }else if (pair.getKey().equals("parameterId"))
+                }
+                else if (pair.getKey().equals("parameterId"))
                 {
                     this.parameterId = pair.getValue().toString();
                 }
@@ -526,8 +528,10 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("domainName"))
                 {
                     this.domainName = pair.getValue().toString();
+                } else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
                 }
-                //it.remove();
+
             }
             return this;
         }

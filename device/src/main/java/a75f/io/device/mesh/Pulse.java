@@ -301,7 +301,7 @@ public class Pulse
 			  if value is negative or not, if value is negative bit 12 is set to 1 and binary value
 			  becomes greater than 2048.*/
 			if(t == SensorType.PRESSURE && val > 2048 ){
-				val = (getPressureValue(Integer.toBinaryString((int) val))*(-1));
+				val = (getPressureValue(Integer.toBinaryString((int) val)));
 			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {

@@ -177,6 +177,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                             model.jsonContent = response
                             model.equipDevice.value = equipmentDevice
                             model.parameters = getParameters(equipmentDevice)
+                            model.version.value = getVersionByID(modelId)
                             val subDeviceList = mutableListOf<MutableState<EquipModel>>()
                             equipModel.value = model
                             if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {
@@ -220,6 +221,9 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun getModelIdByName(name: String): String {
         return deviceModelList.find { it.name == name }!!.id
+    }
+    private fun getVersionByID(id: String): String {
+        return deviceModelList.find { it.id == id }!!.version
     }
 
     private fun isValidConfiguration(): Boolean {
@@ -294,7 +298,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             modbusProfile = ModbusProfile()
             modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
                 equipModel.value.equipDevice.value, getParametersList(equipModel.value.equipDevice.value),
-                profileType, subEquipmentDevices,moduleLevel)
+                profileType, subEquipmentDevices,moduleLevel,equipModel.value.version.value)
 
             L.ccu().zoneProfiles.add(modbusProfile)
             L.saveCCUState()

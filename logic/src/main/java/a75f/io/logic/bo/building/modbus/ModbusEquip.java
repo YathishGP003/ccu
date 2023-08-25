@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.modbus;
 
 import android.util.Log;
 
-import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class ModbusEquip {
     }
 
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel) {
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel,String modelVersion) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -79,6 +78,7 @@ public class ModbusEquip {
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
                     .addMarker("equip").addMarker("modbus")
+                    .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {
             mbEquip.setEquipRef(parentEquipId);

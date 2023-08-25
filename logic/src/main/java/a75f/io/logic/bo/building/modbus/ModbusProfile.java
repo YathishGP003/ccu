@@ -21,9 +21,9 @@ public class ModbusProfile extends ZoneProfile {
 
     public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentDevice,
                            List<Parameter> configParams, ProfileType profileType,
-                           List<EquipmentDevice> subEquipmentDevices, String modbusLevel) {
+                           List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
-        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,null,false, modbusLevel);
+        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,null,false, modbusLevel,modelVersion);
         equipmentDevice.setEquips(null);
         List<EquipmentDevice> intermediateList = new ArrayList<>();
         for(EquipmentDevice subEquipmentDevice : subEquipmentDevices){
@@ -48,7 +48,7 @@ public class ModbusProfile extends ZoneProfile {
             }
             boolean isSlaveIdSameAsParent = subEquipmentDevice.getSlaveId() == equipmentDevice.getSlaveId();
             String subEquipRef = modBusEquip.createEntities(floorRef, roomRef, subEquipmentDevice, parameterList,
-                    equipRef, isSlaveIdSameAsParent,modbusLevel);
+                    equipRef, isSlaveIdSameAsParent,modbusLevel,null);
             subEquipmentDevice.setDeviceEquipRef(subEquipRef);
             intermediateList.add(subEquipmentDevice);
         }

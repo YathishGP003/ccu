@@ -115,29 +115,33 @@ class ModbusConfigView : BaseDialogFragment() {
                     contentAlignment = Alignment.Center
                 ) { HeaderTextView(EQUIP_TYPE) }
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    if (viewModel.equipModel.value.isDevicePaired) {
-                        viewModel.modelName.value =
-                            getName(viewModel.equipModel.value.equipDevice.value.name)
-                        TextViewWithClick(
-                            text = viewModel.modelName,
-                            onClick = { },
-                            enableClick = false,
-                            isCompress = false
-                        )
-                    } else {
-                        TextViewWithClick(
-                            text = viewModel.modelName,
-                            onClick = {
-                                ProgressDialogUtils.showProgressDialog(context, LOADING)
-                                showDialogFragment(
-                                    ModelSelectionFragment.newInstance(
-                                        viewModel.deviceList,
-                                        viewModel.onItemSelect,SEARCH_MODEL
-                                    ), ModelSelectionFragment.ID
-                                )
-                            },
-                            enableClick = true, isCompress = false
-                        )
+                    Row {
+                        if (viewModel.equipModel.value.isDevicePaired) {
+                            viewModel.modelName.value =
+                                getName(viewModel.equipModel.value.equipDevice.value.name)
+                            TextViewWithClick(
+                                text = viewModel.modelName,
+                                onClick = { },
+                                enableClick = false,
+                                isCompress = false
+                            )
+                            HeaderTextView(viewModel.equipModel.value.equipDevice.value.version)
+                        } else {
+                            TextViewWithClick(
+                                text = viewModel.modelName,
+                                onClick = {
+                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
+                                    showDialogFragment(
+                                        ModelSelectionFragment.newInstance(
+                                            viewModel.deviceList,
+                                            viewModel.onItemSelect, SEARCH_MODEL
+                                        ), ModelSelectionFragment.ID
+                                    )
+                                },
+                                enableClick = true, isCompress = false
+                            )
+                            HeaderTextView(viewModel.equipModel.value.version.value)
+                        }
                     }
                 }
                 Row(

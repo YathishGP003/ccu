@@ -478,6 +478,8 @@ public class Equip extends Entity
                 }
                 else if(pair.getKey().equals("capacity")) {
                     this.capacity = pair.getValue().toString();
+                } else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
                 }
             }
             return this;

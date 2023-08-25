@@ -30,6 +30,7 @@ const val MIN_VAL = "minVal"
 const val MAX_VAL = "maxVal"
 const val INCREMENTAL_VAL = "incrementVal"
 const val CELL = "cell"
+const val VERSION = "version"
 
 /**
  * @param zoneRef
@@ -78,6 +79,7 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     val equip = Equip.Builder().setHashMap(equipMap).build()
     equipDevice.modbusEquipIdId = null
     equipDevice.description = null
+    equipDevice.version = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else null
     equipDevice.id = 0L
     equipDevice.name = getModelName(equip.displayName)
     equipDevice.equipType = equip.equipType

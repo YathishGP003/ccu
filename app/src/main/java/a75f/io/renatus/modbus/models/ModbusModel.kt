@@ -18,4 +18,5 @@ class EquipModel {
     var subEquips = mutableListOf<MutableState<EquipModel>>()
     var jsonContent = String()
     var isDevicePaired = false
+    var version: MutableState<String> = mutableStateOf("")
 }

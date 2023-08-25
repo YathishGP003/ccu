@@ -13,12 +13,14 @@ fun getModelListFromJson(response: String): List<ModelMetaData> {
         val data = JSONArray(response)
         for (i in 0 until data.length()) {
             val item = data.getJSONObject(i)
+            val versionObj = item.getJSONObject(VERSION)
             modelList.add(
                 ModelMetaData(
                     item.getString(ID),
                     item.getString(NAME),
                     item.getString(DESCRIPTION),
-                    arrayToList(item.getJSONArray(TAG_NAMES))
+                    arrayToList(item.getJSONArray(TAG_NAMES)),
+                    "V${versionObj.getString(MAJOR)}.${versionObj.getString(MINOR)}.${versionObj.getString(PATCH)}"
                 )
             )
         }

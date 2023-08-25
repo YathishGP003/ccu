@@ -665,7 +665,7 @@ class HyperStatSplitPointsUtil(
         // Common Relay Markers
         val relayMarkers: MutableList<String> = LinkedList()
         relayMarkers.addAll(
-            arrayOf("config", "relay", "writable", "zone", "output", "sp")
+            arrayOf("config", "writable", "zone", "output", "sp")
         )
 
         /**  Relay 1 config and association point */
@@ -850,7 +850,7 @@ class HyperStatSplitPointsUtil(
 
         val analogMarkers: MutableList<String> = LinkedList()
         analogMarkers.addAll(
-            arrayOf("config", "analog", "writable", "sp", "zone", "output")
+            arrayOf("config", "writable", "sp", "zone", "output")
         )
 
         /**  analog 1 config and association point */
@@ -962,7 +962,7 @@ class HyperStatSplitPointsUtil(
 
         val universalMarkers: MutableList<String> = LinkedList()
         universalMarkers.addAll(
-            arrayOf("config", "writable", "universal", "zone", "sp", "input")
+            arrayOf("config", "writable", "zone", "sp", "input")
         )
 
         universalMarkers.add("universal1")

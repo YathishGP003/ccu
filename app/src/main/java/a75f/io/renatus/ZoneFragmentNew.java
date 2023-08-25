@@ -974,7 +974,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         scheduleImageButton.setOnClickListener(v ->
-                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),false));
 
         vacationImageButton.setOnClickListener(v ->
         {
@@ -991,7 +991,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             });
         });
         specialScheduleImageButton.setOnClickListener(v ->
-                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
 
         if(mScheduleType >= 2){
             int spinnerposition = 2;
@@ -1487,8 +1487,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void imageButtonClickListener(View v, String zoneId, String[] equipId,
-                                        FragmentManager childFragmentManager2) {
-        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, true);
+                                        FragmentManager childFragmentManager2,boolean isSpecial) {
+        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
         FragmentManager childFragmentManager = childFragmentManager2;
         childFragmentManager.beginTransaction();
         schedulerFragment.show(childFragmentManager, "dialog");

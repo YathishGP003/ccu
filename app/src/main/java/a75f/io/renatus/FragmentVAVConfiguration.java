@@ -225,8 +225,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
         reheatType = view.findViewById(R.id.vavReheatType);
         setButton = (Button) view.findViewById(R.id.setBtn);
-    
-        mVavProfile = (VavProfile) L.getProfile(mSmartNodeAddress);
+
+        if (L.getProfile(mSmartNodeAddress) != null && L.getProfile(mSmartNodeAddress) instanceof VavProfile) {
+            mVavProfile = (VavProfile) L.getProfile(mSmartNodeAddress);
+        }
     
         if (mVavProfile != null) {
             CcuLog.d(L.TAG_CCU_UI,  "Get VavConfig: ");

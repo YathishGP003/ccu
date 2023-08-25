@@ -304,14 +304,6 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
-
-    override fun zonePmThresholdSelect(position: Int) {
-        viewState.onNext(
-            currentState.copy(
-                zonePm2p5ThresholdPos = position
-            )
-        )
-    }
     override fun zonePmTargetSelect(position: Int) {
         viewState.onNext(
             currentState.copy(

@@ -42,7 +42,6 @@ interface HyperStatSplitModel {
     fun zoneCO2TargetSelect(position: Int)
     fun zoneVOCThresholdSelect(position: Int)
     fun zoneVOCTargetSelect(position: Int)
-    fun zonePmThresholdSelect(position: Int)
     fun zonePmTargetSelect(position: Int)
     fun onDisplayHumiditySelected(checked: Boolean)
     fun onDisplayCo2Selected(checked: Boolean)

@@ -40,7 +40,6 @@ import android.util.Log
     var zoneCO2TargetPos: Int,
     var zoneVocThresholdPos: Int,
     var zoneVocTargetPos: Int,
-    var zonePm2p5ThresholdPos: Int,
     var zonePm2p5TargetPos: Int,
     var isDisplayHumidityEnabled: Boolean,
     var isDisplayVOCEnabled: Boolean,
@@ -166,7 +165,6 @@ import android.util.Log
             zoneCO2TargetPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Target),
             zoneVocThresholdPos = vocSetIndexFromValue(config.zoneVOCThreshold),
             zoneVocTargetPos = vocSetIndexFromValue(config.zoneVOCTarget),
-            zonePm2p5ThresholdPos = pmSetIndexFromValue(config.zonePm2p5Threshold),
             zonePm2p5TargetPos = pmSetIndexFromValue(config.zonePm2p5Target),
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
@@ -314,7 +312,6 @@ import android.util.Log
             zoneCO2Target = openingDamperValueFromIndex(zoneCO2TargetPos)
             zoneVOCThreshold = vocValueFromIndex(zoneVocThresholdPos)
             zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
-            zonePm2p5Threshold = pm25ValueFromIndex(zonePm2p5ThresholdPos)
             zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
             displayHumidity = isDisplayHumidityEnabled
             displayCo2 = isDisplayCo2Enabled

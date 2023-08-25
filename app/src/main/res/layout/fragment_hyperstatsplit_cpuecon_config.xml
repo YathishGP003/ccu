@@ -1371,13 +1371,13 @@
 
             </LinearLayout>
 
-
             <LinearLayout
-                android:id="@+id/dcvCo2Config"
+                android:id="@+id/dcvCo2DamperConfig"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="34dp"
-                android:layout_marginEnd="48dp">
+                android:layout_marginEnd="48dp"
+                android:weightSum="3">
 
                 <TextView
                     android:id="@+id/zoneCO2DamperOpeningRate"
@@ -1389,6 +1389,15 @@
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
                     style="@style/Damper_HyperStat"
                     android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dcvCo2Config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp">
 
                 <TextView
                     android:id="@+id/zoneCO2Threshold"
@@ -1406,6 +1415,7 @@
 
                 <Spinner
                     android:id="@+id/zoneCO2TargetSpinner"
+                    android:paddingLeft="@dimen/appbar_padding_top"
                     style="@style/Damper_HyperStat" />
 
 
@@ -1437,7 +1447,7 @@
                     android:id="@+id/zoneVocThresholdSpinner"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" />
+                    android:layout_weight="0.5" />
 
                 <TextView
                     android:id="@+id/zoneVocTarget"
@@ -1445,16 +1455,16 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="left"
-                    android:paddingLeft="@dimen/appbar_padding_top"
                     android:text="@string/zoneVocTarget"
                     android:textAppearance="@style/label_values"
                     android:textColor="@drawable/label_textselector" />
 
                 <Spinner
                     android:id="@+id/zoneVocTargetSpinner"
+                    android:paddingLeft="@dimen/appbar_padding_top"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" />
+                    android:layout_weight="0.5" />
 
 
             </LinearLayout>
@@ -1466,25 +1476,9 @@
                 android:layout_marginStart="34dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="48dp"
+                android:weightSum="3"
                 android:paddingTop="@dimen/appbar_padding_top"
                 android:paddingBottom="@dimen/appbar_padding_top">
-
-
-                <TextView
-                    android:id="@+id/zonepmThresholdLable"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="left"
-                    android:text="@string/zonepmThreshold"
-                    android:textAppearance="@style/label_values"
-                    android:textColor="@drawable/label_textselector" />
-
-                <Spinner
-                    android:id="@+id/zonepmThresholdSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
 
                 <TextView
                     android:id="@+id/zonepmtagertLabel"
@@ -1492,7 +1486,6 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="left"
-                    android:paddingLeft="@dimen/appbar_padding_top"
                     android:text="@string/zonepmTarget"
                     android:textAppearance="@style/label_values"
                     android:textColor="@drawable/label_textselector" />
@@ -1501,7 +1494,7 @@
                     android:id="@+id/zonepmTargetSpinner"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" />
+                    android:layout_weight="0.5" />
 
 
             </LinearLayout>
@@ -1609,7 +1602,7 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="34dp"
@@ -1623,6 +1616,7 @@
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="24dp"
                     android:layout_marginBottom="57dp"
+                    android:layout_toStartOf="@+id/setButton"
                     android:background="@null"
                     android:button="@null"
                     android:fontFamily="@font/lato_regular"
@@ -1640,6 +1634,7 @@
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="24dp"
                     android:layout_marginBottom="57dp"
+                    android:layout_alignParentEnd="true"
                     android:background="@null"
                     android:button="@null"
                     android:fontFamily="@font/lato_regular"
@@ -1648,7 +1643,7 @@
                     android:textColor="@color/renatus_75f_primary"
                     android:textSize="19.5dp"
                     tools:ignore="SpUsage" />
-            </LinearLayout>
+            </RelativeLayout>
 
         </LinearLayout>
     </ScrollView>

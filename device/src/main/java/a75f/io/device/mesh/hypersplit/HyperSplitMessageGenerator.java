@@ -95,7 +95,7 @@ public class HyperSplitMessageGenerator {
                 .setDisplayVOC(isDisplayVov(equipRef))
                 .setDisplayPM25(isDisplayP2p5(equipRef))
                 .setCo2AlertTarget((int)readCo2ThresholdValue(equipRef))
-                .setPm25AlertTarget((int)readPm2p5ThresholdValue(equipRef))
+                .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
                 .setVocAlertTarget((int)readVocThresholdValue(equipRef))
                 .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB);
@@ -414,9 +414,9 @@ public class HyperSplitMessageGenerator {
                 "point and voc and threshold and equipRef == \""+equipRef+ "\"");
     }
 
-    public static double readPm2p5ThresholdValue(String equipRef) {
+    public static double readPm2p5TargetValue(String equipRef) {
         return CCUHsApi.getInstance().readDefaultVal(
-                "point and pm2p5 and threshold and equipRef == \""+equipRef+ "\"");
+                "point and pm2p5 and target and equipRef == \""+equipRef+ "\"");
     }
 
     public static boolean isDisplayHumidity(String equipRef){

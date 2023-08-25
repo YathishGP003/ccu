@@ -179,14 +179,8 @@ open class HyperStatSplitEquip {
     }
 
     fun updatePm25Values(
-        oldPm2p5Threshold: Double, newPm2p5Threshold: Double,
         oldPm2p5Target: Double, newPm2p5Target: Double ){
 
-        if (oldPm2p5Threshold != newPm2p5Threshold) {
-            val pointId = hsSplitHaystackUtil.readPointID("pm2p5 and threshold") as String
-            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newPm2p5Threshold)
-            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newPm2p5Threshold)
-        }
         if (oldPm2p5Target != newPm2p5Target) {
             val pointId = hsSplitHaystackUtil.readPointID("pm2p5 and target") as String
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newPm2p5Target)

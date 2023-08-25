@@ -112,7 +112,6 @@ class CpuEconReconfiguration {
                 zoneCO2Target = original.zoneCO2Target
                 zoneVOCThreshold = original.zoneVOCThreshold
                 zoneVOCTarget = original.zoneVOCTarget
-                zonePm2p5Threshold = original.zonePm2p5Threshold
                 zonePm2p5Target = original.zonePm2p5Target
             }
         }

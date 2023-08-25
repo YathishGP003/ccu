@@ -277,7 +277,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val vocPmPointsList: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil
             .createPointVOCPmConfigPoint( equipDis!!,
                 hyperStatSplitConfig.zoneVOCThreshold,hyperStatSplitConfig.zoneVOCTarget,
-                hyperStatSplitConfig.zonePm2p5Threshold,hyperStatSplitConfig.zonePm2p5Target
+                hyperStatSplitConfig.zonePm2p5Target
             )
 
         val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createConditioningLoopOutputPoints(false)
@@ -458,7 +458,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         )
 
         updatePm25Values(
-            existingConfiguration.zonePm2p5Threshold, newConfiguration.zonePm2p5Threshold,
             existingConfiguration.zonePm2p5Target, newConfiguration.zonePm2p5Target
         )
 
@@ -644,8 +643,6 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.zoneCO2Target = hsSplitHaystackUtil.getCo2TargetConfigValue()
         config.zoneVOCThreshold = hsSplitHaystackUtil.getVocThresholdConfigValue()
         config.zoneVOCTarget = hsSplitHaystackUtil.getVocTargetConfigValue()
-        config.zonePm2p5Threshold = hsSplitHaystackUtil.getPm2p5ThresholdConfigValue()
-        config.zonePm2p5Target = hsSplitHaystackUtil.getPm2p5TargetConfigValue()
 
         config.coolingStage1FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage1",7).toInt()
         config.coolingStage2FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage2",10).toInt()

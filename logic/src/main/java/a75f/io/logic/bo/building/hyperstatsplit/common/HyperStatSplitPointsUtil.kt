@@ -1222,7 +1222,6 @@ class HyperStatSplitPointsUtil(
         equipDis: String,
         zoneVOCThreshold: Double,
         zoneVOCTarget: Double,
-        zonePm2p5Threshold: Double,
         zonePm2p5Target: Double
     ): MutableList<Pair<Point, Any>> {
         val pointsList: MutableList<Pair<Point, Any>> = LinkedList()
@@ -1248,12 +1247,6 @@ class HyperStatSplitPointsUtil(
             "cov","ppb"
         )
 
-        val zonePm2p5ThresholdPoint = createHaystackPointWithUnit(
-            "$equipDis-zonePm2p5Threshold",
-            pm2p5Markers.stream().toArray { arrayOfNulls(it) },
-            "cov","ug/\u33A5"
-        )
-
         pm2p5Markers.remove("threshold")
         pm2p5Markers.add("target")
         val zonePm2p5TargetPoint = createHaystackPointWithUnit(
@@ -1266,7 +1259,6 @@ class HyperStatSplitPointsUtil(
         pointsList.add(Pair(zoneVOCThresholdPoint, zoneVOCThreshold))
         pointsList.add(Pair(zoneVOCTargetPoint, zoneVOCTarget))
 
-        pointsList.add(Pair(zonePm2p5ThresholdPoint, zonePm2p5Threshold))
         pointsList.add(Pair(zonePm2p5TargetPoint, zonePm2p5Target))
 
         return pointsList

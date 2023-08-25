@@ -91,7 +91,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
     lateinit var zoneVOCThreshold: Spinner
     lateinit var zoneVOCTarget: Spinner
-    lateinit var zonePMThreshold: Spinner
+
     lateinit var zonePMTarget: Spinner
 
     lateinit var displayHumidity: ToggleButton
@@ -304,7 +304,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
-            zonePMThreshold = findViewById(R.id.zonepmThresholdSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
 
             cancelButton = findViewById(R.id.cancelButton)
@@ -411,7 +410,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneVOCThreshold.adapter = vocAdapter
         zoneVOCTarget.adapter = vocAdapter
 
-        zonePMThreshold.adapter = pmAdapter
         zonePMTarget.adapter = pmAdapter
 
 
@@ -419,7 +417,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneVOCThreshold.setSelection(zoneVOCThreshold.adapter.count -1)
         zoneVOCTarget.setSelection(zoneVOCTarget.adapter.count -1)
 
-        zonePMThreshold.setSelection(zonePMThreshold.adapter.count -1)
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
 
@@ -527,7 +524,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
         zoneVOCThreshold.setOnItemSelected { position ->viewModel.zoneVOCThresholdSelect(position)  }
         zoneVOCTarget.setOnItemSelected { position ->viewModel.zoneVOCTargetSelect(position)  }
-        zonePMThreshold.setOnItemSelected { position ->viewModel.zonePmThresholdSelect(position)  }
         zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
 
         stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
@@ -750,7 +746,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneVOCThreshold.setSelection(viewState.zoneVocThresholdPos)
         zoneVOCTarget.setSelection(viewState.zoneVocTargetPos)
 
-        zonePMThreshold.setSelection(viewState.zonePm2p5ThresholdPos)
         zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
         displayHumidity.isChecked = viewState.isDisplayHumidityEnabled
         displayCo2.isChecked = viewState.isDisplayCo2Enabled

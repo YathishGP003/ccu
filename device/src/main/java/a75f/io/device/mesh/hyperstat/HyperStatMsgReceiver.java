@@ -200,7 +200,7 @@ public class HyperStatMsgReceiver {
     private static void writeHeartbeat(RawPoint rawPoint, Point point,
                                        HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
         hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRssi());
-        hayStack.writeHisValueByIdWithoutCOV(point.getId(), (double)regularUpdateMessage.getRssi());
+        hayStack.writeHisValueByIdWithoutCOV(point.getId(), 1.0);
     }
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,

@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,6 +42,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
+import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -162,9 +165,11 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        twoPfcuProfile = (TwoPipeFanCoilUnitProfile) L.getProfile(mSmartNodeAddress);
+        if (L.getProfile(mSmartNodeAddress) != null && L.getProfile(mSmartNodeAddress) instanceof TwoPipeFanCoilUnitProfile) {
+            twoPfcuProfile = (TwoPipeFanCoilUnitProfile) L.getProfile(mSmartNodeAddress);
+        }
 
         if (twoPfcuProfile != null) {
             Log.d("CPUConfig", "Get Config: "+twoPfcuProfile.getProfileType()+","+twoPfcuProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);

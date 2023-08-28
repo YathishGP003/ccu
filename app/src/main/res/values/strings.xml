@@ -288,8 +288,6 @@
     <string name="sensorbusaddress3"> Address 3</string>
 
     <string-array name="hyperstatsplit_universal_in_selector">
-        <item>  @string/generic_voltage </item>
-        <item>  @string/generic_resistance </item>
         <item>  @string/current_tx_0_10 </item>
         <item>  @string/current_tx_0_20 </item>
         <item>  @string/current_tx_0_50 </item>
@@ -298,12 +296,14 @@
         <item>  @string/supply_air_temperature </item>
         <item>  @string/mixed_air_temperature </item>
         <item>  @string/outside_air_temperature </item>
-        <item>  @string/filter_no </item>
         <item>  @string/filter_nc </item>
-        <item>  @string/condensate_no </item>
+        <item>  @string/filter_no </item>
         <item>  @string/condensate_nc </item>
+        <item>  @string/condensate_no </item>
         <item>  @string/duct_pressure_0_1 </item>
         <item>  @string/duct_pressure_0_2 </item>
+        <item>  @string/generic_voltage </item>
+        <item>  @string/generic_resistance </item>
     </string-array>
 
     <string-array name="hyperstatsplit_sensor_temp_selector">

@@ -509,7 +509,7 @@ class HyperSplitSettingsUtil {
             }
 
             if (readConfig(hsApi, equipRef, "universal7 and input and config and enabled") == 0.0) {
-                universalIn.universalIn1Mapping = getHyperSplitUniversalInMapping(0)
+                universalIn.universalIn7Mapping = getHyperSplitUniversalInMapping(0)
             } else {
                 universalIn.universalIn7Mapping = getHyperSplitUniversalInMapping(
                     readConfig(hsApi, equipRef, "universal7 and input and config and association").toInt() + 1
@@ -529,23 +529,31 @@ class HyperSplitSettingsUtil {
 
         private fun getHyperSplitUniversalInMapping(intAssociation: Int): HyperSplit.HyperSplitUniversalInMapping_t {
 
+            /*
+            I'm not proud of what's happening here.
+
+            The Universal In enum that gets sent in the settings message is in a different order than the enum for the
+            corresponding Haystack point.
+
+            Rather than change one of these and have everything lineup nicely, this discrepancy is mapped over in this method.
+             */
             if (intAssociation == 0) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
-            else if (intAssociation == 1) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-            else if (intAssociation == 2) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-            else if (intAssociation == 3) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
-            else if (intAssociation == 4) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
-            else if (intAssociation == 5) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
-            else if (intAssociation == 6) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_100
-            else if (intAssociation == 7) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_150
-            else if (intAssociation == 8) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
-            else if (intAssociation == 9) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
-            else if (intAssociation == 10) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
-            else if (intAssociation == 11) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
-            else if (intAssociation == 12) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
-            else if (intAssociation == 13) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
-            else if (intAssociation == 14) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC           
-            else if (intAssociation == 15) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_1
-            else if (intAssociation == 16) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_2  
+            else if (intAssociation == 1) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
+            else if (intAssociation == 2) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
+            else if (intAssociation == 3) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
+            else if (intAssociation == 4) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_100
+            else if (intAssociation == 5) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_150
+            else if (intAssociation == 6) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
+            else if (intAssociation == 7) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
+            else if (intAssociation == 8) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
+            else if (intAssociation == 9) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
+            else if (intAssociation == 10) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
+            else if (intAssociation == 11) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
+            else if (intAssociation == 12) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
+            else if (intAssociation == 13) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_1
+            else if (intAssociation == 14) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_2
+            else if (intAssociation == 15) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+            else if (intAssociation == 16) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
 
             // This should never happen
             else { return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED }

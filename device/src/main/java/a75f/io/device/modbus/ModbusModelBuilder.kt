@@ -170,7 +170,7 @@ private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Pa
     addTagValues(param,logicalPoint.incrementVal,INCREMENTAL_VAL,isWritable)
     addTagValues(param,logicalPoint.cell, CELL,isWritable)
     if (!logicalPoint.enums.isNullOrEmpty()) {
-        if (logicalPoint.markers.contains(Tags.CMD))
+        if (logicalPoint.markers.contains(Tags.CMD) || logicalPoint.markers.contains(Tags.SP))
             param.commands = getCommands(logicalPoint.enums)
         else
             param.conditions = getConditions(logicalPoint.enums)

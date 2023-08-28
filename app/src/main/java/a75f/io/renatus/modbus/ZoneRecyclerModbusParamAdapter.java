@@ -387,13 +387,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         } else {
             modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
-        /*if (equip.getEquipRef() != null) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
-        } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
-        }*/
-
-
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
                 for (Parameter pam : register.getParameters()) {

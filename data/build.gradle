@@ -64,14 +64,6 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
-    /*sourceSets {
-        main {
-            java {
-                srcDirs = [ 'src/main/java','src/androidTest/java']
-            }
-        }
-    }*/
-
     testOptions {
         unitTests {
             all {
@@ -89,7 +81,7 @@ configurations {
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:20230621.10-dev') {
+    customImplementation('io.seventyfivef:domain-modeler-lib:20230825.1-qa') {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'

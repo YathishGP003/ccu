@@ -23,7 +23,7 @@ class DiffFinder {
 
     /**
      * @param domainName it main model equipName
-     * @param entityConfiguration diff detilas to add delete and update
+     * @param entityConfiguration diff details to add delete and update
      * @param diffType type of change
      */
     private fun updateEntityConfiguration(domainName: String?, entityConfiguration: EntityConfiguration, diffType: DiffType){
@@ -48,10 +48,10 @@ class DiffFinder {
         diff.let { it ->
             it.points?.diff?.forEach {
                 if(it.diffType == DiffType.REMOVED) {
-                    updateEntityConfiguration(it.left?.domainName!!,entityConfiguration,it.diffType)
+                    updateEntityConfiguration(it.left?.point?.domainName!!,entityConfiguration,it.diffType)
                 }
                 else if(it.diffType != DiffType.EQUAL) {
-                    updateEntityConfiguration(it.right?.domainName!!,entityConfiguration,it.diffType)
+                    updateEntityConfiguration(it.right?.point?.domainName!!,entityConfiguration,it.diffType)
                 }
             }
         }

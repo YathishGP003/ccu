@@ -85,33 +85,6 @@ public class BackFillViewModel {
         }
     }
 
-    public static void setBackFillDuration() {
-        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
-        boolean backFillTimeChange = false;
-
-        Map<Integer, Double> thresholdMap = new HashMap<>();
-        thresholdMap.put(40, 1.0);
-        thresholdMap.put(30, 6.0);
-        thresholdMap.put(20, 12.0);
-        thresholdMap.put(6, 24.0);
-
-        double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
-
-        for (Map.Entry<Integer, Double> entry : thresholdMap.entrySet()) {
-            int threshold = entry.getKey();
-            double thresholdValue = entry.getValue();
-            if (equipCount > threshold && currentBackFillTime > thresholdValue) {
-                currentBackFillTime = thresholdValue;
-                backFillTimeChange = true;
-            }
-        }
-
-        if (backFillTimeChange) {
-            updateBackfillDuration(currentBackFillTime);
-        }
-    }
-
     public static int getBackFillDuration() {
         return backfillPref.getBackFillTimeDuration();
     }

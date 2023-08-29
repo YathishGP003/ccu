@@ -186,6 +186,8 @@ android {
 }
 
 dependencies {
+    implementation files('libs/RootTools.aar')
+    implementation files('libs/RootShell.aar')
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation project(':logic')
     implementation project(':device')

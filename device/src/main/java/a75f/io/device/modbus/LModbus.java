@@ -68,7 +68,7 @@ public class LModbus {
      * */
     
     public static synchronized void readRegister(Short slaveId, Register register, int offset) {
-        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString()+" SERIAL_COMM_TIMEOUT_MS "+SERIAL_COMM_TIMEOUT_MS);
+        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString()+" SERIAL_COMM_TIMEOUT_MS "+SERIAL_COMM_TIMEOUT_MS+" slaveId "+slaveId);
         byte[] requestData = LModbus.getModbusData(slaveId,
                                                    register.registerType,
                                                    register.registerAddress,

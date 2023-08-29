@@ -65,7 +65,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         CcuLog.d(L.TAG_CCU_MODBUS,
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
                                 ", count: "+count+
-                                ", registerRequestCount: "+registerRequestCount);
+                                ", registerRequestCount: "+registerRequestCount+
+                                        ", slaveId: "+slaveId);
                     }
                 }
             } catch (Exception e) {

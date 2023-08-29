@@ -1,13 +1,12 @@
 package a75f.io.logic.filesystem
 
-import a75f.io.alerts.AlertManager
-import a75f.io.api.haystack.Alert
 import a75f.io.data.RenatusDatabaseBuilder
 import a75f.io.data.message.MessageDatabaseHelper
 import a75f.io.logic.Globals
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
+import android.util.Log
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,6 +22,7 @@ private const val LOGS_DIR = "RenatusLogs"
  * Created on 1/5/21.
  */
 class FileSystemTools(private val appContext: Context) {
+   private val TAG_BAC_APP_LOGS = "BacAppLogs"
 
    private val logDir =
       File(Environment.getExternalStorageDirectory().absolutePath + File.separator + LOGS_DIR)
@@ -134,5 +134,41 @@ class FileSystemTools(private val appContext: Context) {
       writer.flush()
       writer.close()
       return file
+   }
+
+   fun getBacAppLogs(directoryName: String, logFileName: String): File? {
+      val logsDir =
+         Environment.getExternalStorageDirectory().absolutePath + File.separator + directoryName
+      removeZipFiles(logsDir)
+      val logFile =
+         File(logsDir + File.separator + logFileName)
+
+      if (!logFile.exists()) {
+         Log.d(TAG_BAC_APP_LOGS, "----bac app log file not present");
+         return null
+      }
+      return logFile
+   }
+
+   private fun removeZipFiles(folderPath: String) {
+      val folder = File(folderPath)
+
+      if (!folder.exists() || !folder.isDirectory) {
+         Log.d(TAG_BAC_APP_LOGS, "The specified path is not a valid directory.")
+         return
+      }
+
+      val zipFiles = folder.listFiles { _, name -> name.toLowerCase().endsWith(".zip") }
+      zipFiles?.forEach { file ->
+         try {
+            if (file.delete()) {
+               Log.d(TAG_BAC_APP_LOGS, "Deleted file: ${file.name}")
+            } else {
+               Log.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}")
+            }
+         } catch (e: Exception) {
+            Log.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}, Error: ${e.message}")
+         }
+      }
    }
 }

@@ -394,7 +394,7 @@ open class HyperStatEquip {
 
     private fun getPointBasicInfo(): PointBasicInfo {
         val siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE) as HashMap<Any, Any>
-        val systemEquip = CCUHsApi.getInstance().readEntity("equip and system") as HashMap<Any, Any>
+        val systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus") as HashMap<Any, Any>
 
         return PointBasicInfo(
             siteMap[Tags.ID].toString(),

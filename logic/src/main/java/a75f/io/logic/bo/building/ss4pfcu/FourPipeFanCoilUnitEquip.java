@@ -66,7 +66,7 @@ public class FourPipeFanCoilUnitEquip  {
         String equipDis = siteDis+"-4PFCU-"+nodeAddr;
         String profile = "pipe4";
         String gatewayRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }

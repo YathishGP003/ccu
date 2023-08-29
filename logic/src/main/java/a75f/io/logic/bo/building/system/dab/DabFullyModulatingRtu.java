@@ -158,7 +158,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
+        HashMap equip = hayStack.read("equip and system and not modbus");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
@@ -196,7 +196,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
@@ -936,7 +936,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
         
         if(curConfig != val){
-            HashMap equipMap = hayStack.read("equip and system");
+            HashMap equipMap = hayStack.read("equip and system and not modbus");
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             switch (tags){
                 case Tags.ANALOG1:
@@ -992,7 +992,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CcuLog.i(L.TAG_CCU_SYSTEM, "enableDcwb");
         //Remove analog1 Command points
         setConfigEnabled(Tags.ANALOG1, 0);
-        HashMap equipMap = hayStack.read("equip and system");
+        HashMap equipMap = hayStack.read("equip and system and not modbus");
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createConfigPoints(systemEquip, hayStack);
         createAnalog4LoopConfigPoints(Tags.COOLING,systemEquip, hayStack);
@@ -1038,7 +1038,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         }
         CcuLog.i(L.TAG_CCU_SYSTEM, "updateDcwbAnalog4Mapping "+loopType+" -> "+newLoopType);
         deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, hayStack);
-        HashMap equipMap = hayStack.read("equip and system");
+        HashMap equipMap = hayStack.read("equip and system and not modbus");
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createAnalog4LoopConfigPoints(newLoopType == 0 ? Tags.COOLING : Tags.CO2, systemEquip, hayStack);
         hayStack.writeDefaultVal("analog4 and loop and output and type", newLoopType);

@@ -109,7 +109,7 @@ public class DualDuctEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-DualDuct-" + nodeAddr;
         String ahuRef = null;
-        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }

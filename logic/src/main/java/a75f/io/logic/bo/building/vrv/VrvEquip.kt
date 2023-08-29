@@ -52,7 +52,7 @@ class VrvEquip(hsApi : CCUHsApi,
         floorRef: String,
     ): String {
 
-        val systemEquip = hayStack.read("equip and system")
+        val systemEquip = hayStack.read("equip and system and not modbus")
         lateinit var ahuRef: String
         if (systemEquip.isNotEmpty()) ahuRef = systemEquip["id"].toString()
 

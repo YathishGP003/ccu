@@ -1508,4 +1508,8 @@
     <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
     <string name="menutoggle">menutoggle</string>
     <string name="display_toast_message">display toast message</string>
+    <string name="txt_add">ADD</string>
+    <string name="txt_remove">REMOVE</string>
+    <string name="txt_mask">Mask <font color="#e5561a">*</font></string>
+    <string name="txt_mask_hint">Recommended 0 to 32</string>
 </resources>

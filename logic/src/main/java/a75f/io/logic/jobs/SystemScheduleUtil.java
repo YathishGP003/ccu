@@ -84,8 +84,6 @@ public class SystemScheduleUtil {
 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.USER_APP_WRITE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                         - System.currentTimeMillis(), "ms"));
-                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
-                        - System.currentTimeMillis(), "ms"));
                 setAppOverrideExpiry(point, (overrideExpiry.getMillis()
                         - System.currentTimeMillis())/1000);
                 CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());

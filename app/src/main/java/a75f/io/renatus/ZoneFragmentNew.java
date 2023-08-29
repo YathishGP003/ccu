@@ -2349,6 +2349,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             for (int i = 0; i < modbusDevices.size(); i++) {
                                 if(modbusDevices.get(i).getDeviceEquipRef() == null){
                                     modbusDevices.get(i).setDeviceEquipRef(modbusDevices.get(i).getEquipRef());
+                                    modbusDevices.get(i).setEquipRef(null);
                                 }
                                 if(null != modbusDevices.get(i).getEquips()) {
                                     modbusDevices.addAll(modbusDevices.get(i).getEquips());
@@ -2384,9 +2385,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     equipString.append(" ");
                                 }
                                 tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
-                                if((Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
-                                null == modbusDevices.get(i).getEquipRef()) ||
-                                        (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId())) {
+                                if(isLastUpdatedTimeShowable(parentModbusEquip, modbusDevices, i)) {
                                     textViewModule.setVisibility(View.VISIBLE);
                                     textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
                                     textViewUpdatedTime.setVisibility(View.VISIBLE);
@@ -2394,8 +2393,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             Integer.toString(modbusDevices.get(i).getSlaveId()));
                                     textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
                                             Integer.toString(modbusDevices.get(i).getSlaveId())));
-                                }
-                                else{
+                                }else{
                                     textViewModule.setVisibility(View.GONE);
                                     textViewUpdatedTimeHeading.setVisibility(View.GONE);
                                     textViewUpdatedTime.setVisibility(View.GONE);
@@ -2425,6 +2423,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         });
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone Done");
 
+    }
+
+    private boolean isLastUpdatedTimeShowable(HashMap<Object, Object> parentModbusEquip, List<EquipmentDevice> modbusDevices, int i) {
+        return (Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
+                (null == modbusDevices.get(i).getEquipRef() || (modbusDevices.get(i).getEquipRef() == modbusDevices.get(i).getDeviceEquipRef())))
+                || (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId());
     }
 
     public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {

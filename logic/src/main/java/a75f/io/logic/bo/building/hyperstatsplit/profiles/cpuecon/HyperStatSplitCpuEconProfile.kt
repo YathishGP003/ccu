@@ -513,7 +513,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         dcvAvailable = false
         var zoneSensorCO2 = hsSplitHaystackUtil.getZoneCO2()
         var zoneCO2Threshold = hsSplitHaystackUtil.getZoneCO2Threshold()
-        var co2DamperOpeningRate = hsSplitHaystackUtil.getZoneCO2DamperOpeningRate()
+        var co2DamperOpeningRate = hsSplitHaystackUtil.getCO2DamperOpeningRate()
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
         if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
             if (zoneSensorCO2 > zoneCO2Threshold) {

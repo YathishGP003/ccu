@@ -262,6 +262,42 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    override fun outsideDamperMinOpenSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                outsideDamperMinOpenPos = position
+            )
+        )
+
+    }
+
+    override fun exhaustFanStage1ThresholdSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                exhaustFanStage1ThresholdPos = position
+            )
+        )
+
+    }
+
+    override fun exhaustFanStage2ThresholdSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                exhaustFanStage2ThresholdPos = position
+            )
+        )
+
+    }
+
+    override fun exhaustFanHysteresisSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                exhaustFanHysteresisPos = position
+            )
+        )
+
+    }
+
     override fun zoneCO2DamperOpeningRateSelect(position: Int) {
         viewState.onNext(
             currentState.copy(
@@ -403,6 +439,15 @@ const val ANALOG_FAN_MAX_SPEED = 100
 const val ANALOG_FAN_MIN_SPEED = 0
 const val ANALOG_FAN_SPEED_INC = 1.0
 
+const val oaMinOpenMin = 0
+const val oaMinOpenMax = 100
+
+const val efStageThresholdMin = 0
+const val efStageThresholdMax = 100
+
+const val efHysteresisMin = 0
+const val efHysteresisMax = 25
+
 const val OpeningRateMin = 0
 const val OpeningRateMax = 200
 
@@ -413,6 +458,7 @@ const val INC = 10
 
 const val VOC_INC = 100
 const val PM_INC = 5
+const val EF_HYS_INC = 1
 
 const val VOCMin = 0
 const val VOCMax = 10000
@@ -456,6 +502,18 @@ fun analogFanLevelSpeedValue(): Array<String?> {
     )
 }
 
+fun outsideDamperMinOpenValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenValue()[index].toString().replace(" %", "").toDouble()
+}
+fun exhaustFanStage1ThresholdValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else exhaustFanStage1ThresholdValue()[index].toString().replace(" %", "").toDouble()
+}
+fun exhaustFanStage2ThresholdValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else exhaustFanStage2ThresholdValue()[index].toString().replace(" %", "").toDouble()
+}
+fun exhaustFanHysteresisFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else exhaustFanHysteresisValue()[index].toString().replace(" %", "").toDouble()
+}
 fun co2DCVDamperValueFromIndex(index: Int) = offsetFromIndex(CO2Min, INC.toDouble(), index)
 // fun openingDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
 fun openingDamperValueFromIndex(index: Int): Double{
@@ -478,11 +536,55 @@ fun co2DCVOpeningDamperSetIndexFromValue(value: Double) =
 fun vocSetIndexFromValue(value: Double): Int{
     return if(value == DISABLED) 0 else offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)+1
 }
+fun outsideDamperMinOpenSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, INC.toDouble(), value)+1
+}
+fun exhaustFanStage1ThresholdSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(efStageThresholdMin, INC.toDouble(), value)+1
+}
+fun exhaustFanStage2ThresholdSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(efStageThresholdMin, INC.toDouble(), value)+1
+}
+fun exhaustFanHysteresisSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(efHysteresisMin, EF_HYS_INC.toDouble(), value)+1
+}
 // fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
 //fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
 
 fun pmSetIndexFromValue(value: Double): Int{
     return if(value == DISABLED) 0 else offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)+1
+}
+fun outsideDamperMinOpenValue(): Array<String?> {
+    val outsideDamperMinOpenList: MutableList<String?> = offsetSpinnerValues(
+        oaMinOpenMax, oaMinOpenMin,
+        INC.toDouble(), true, " %"
+    ).toMutableList()
+    outsideDamperMinOpenList.add(0,"Disabled")
+    return outsideDamperMinOpenList.toTypedArray()
+}
+fun exhaustFanStage1ThresholdValue(): Array<String?> {
+    val exhaustFanStage1ThresholdList: MutableList<String?> = offsetSpinnerValues(
+        efStageThresholdMax, efStageThresholdMin,
+        INC.toDouble(), true, " %"
+    ).toMutableList()
+    exhaustFanStage1ThresholdList.add(0,"Disabled")
+    return exhaustFanStage1ThresholdList.toTypedArray()
+}
+fun exhaustFanStage2ThresholdValue(): Array<String?> {
+    val exhaustFanStage2ThresholdList: MutableList<String?> = offsetSpinnerValues(
+        efStageThresholdMax, efStageThresholdMin,
+        INC.toDouble(), true, " %"
+    ).toMutableList()
+    exhaustFanStage2ThresholdList.add(0,"Disabled")
+    return exhaustFanStage2ThresholdList.toTypedArray()
+}
+fun exhaustFanHysteresisValue(): Array<String?> {
+    val exhaustFanHysteresisList: MutableList<String?> = offsetSpinnerValues(
+        efHysteresisMax, efHysteresisMin,
+        EF_HYS_INC.toDouble(), true, " %"
+    ).toMutableList()
+    exhaustFanHysteresisList.add(0,"Disabled")
+    return exhaustFanHysteresisList.toTypedArray()
 }
 fun co2DCVDamperValue(): Array<String?> {
     val co2List: MutableList<String?> = offsetSpinnerValues(

@@ -389,7 +389,10 @@ class HyperStatSplitPointsUtil(
         Same points and tuners as System-Level OAO Profile, just with a "zone" tag instead of "system".
         (Also, no Return Air CO2.)
      */
-    fun createZoneOAOPoints(): MutableList<Pair<Point, Any>> {
+    fun createZoneOAOPoints(
+        outsideDamperMinOpen: Double, exhaustFanStage1Threshold: Double,
+        exhaustFanStage2Threshold: Double, exhaustFanHysteresis: Double
+    ): MutableList<Pair<Point, Any>> {
 
         val zoneOAOPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
@@ -509,7 +512,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
-        zoneOAOPointsList.add(Pair(outsideDamperMinOpenPoint, 0.0))
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenPoint, outsideDamperMinOpen))
 
         val exhaustFanStage1ThresholdPointMarker = arrayOf(
             "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp", "cpu"
@@ -520,7 +523,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
-        zoneOAOPointsList.add(Pair(exhaustFanStage1ThresholdPoint, 50.0))
+        zoneOAOPointsList.add(Pair(exhaustFanStage1ThresholdPoint, exhaustFanStage1Threshold))
 
         val exhaustFanStage2ThresholdPointMarker = arrayOf(
             "config", "oao", "writable", "exhaust", "fan", "stage2", "threshold" , "sp", "cpu"
@@ -531,7 +534,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
-        zoneOAOPointsList.add(Pair(exhaustFanStage2ThresholdPoint, 90.0))
+        zoneOAOPointsList.add(Pair(exhaustFanStage2ThresholdPoint, exhaustFanStage2Threshold))
 
         val exhaustFanHysteresisPointMarker = arrayOf(
             "config", "oao", "writable", "exhaust", "fan", "hysteresis" , "sp", "cpu"
@@ -542,7 +545,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
-        zoneOAOPointsList.add(Pair(exhaustFanHysteresisPoint, 5.0))
+        zoneOAOPointsList.add(Pair(exhaustFanHysteresisPoint, exhaustFanHysteresis))
 
         return zoneOAOPointsList
 

@@ -35,6 +35,10 @@ import android.util.Log
     val universalIns: List<ConfigState>,
     val sensorBusTemps: List<ConfigState>,
     val sensorBusPress: List<ConfigState>,
+    var outsideDamperMinOpenPos: Int,
+    var exhaustFanStage1ThresholdPos: Int,
+    var exhaustFanStage2ThresholdPos: Int,
+    var exhaustFanHysteresisPos: Int,
     var zoneCO2DamperOpeningRatePos: Int,
     var zoneCO2ThresholdPos: Int,
     var zoneCO2TargetPos: Int,
@@ -160,6 +164,10 @@ import android.util.Log
                     config.universalIn8State.association.ordinal
                 ),
             ),
+            outsideDamperMinOpenPos = outsideDamperMinOpenSetIndexFromValue(config.outsideDamperMinOpen),
+            exhaustFanStage1ThresholdPos = exhaustFanStage1ThresholdSetIndexFromValue(config.exhaustFanStage1Threshold),
+            exhaustFanStage2ThresholdPos = exhaustFanStage2ThresholdSetIndexFromValue(config.exhaustFanStage2Threshold),
+            exhaustFanHysteresisPos = exhaustFanHysteresisSetIndexFromValue(config.exhaustFanHysteresis),
             zoneCO2DamperOpeningRatePos = co2DCVOpeningDamperSetIndexFromValue(config.zoneCO2DamperOpeningRate),
             zoneCO2ThresholdPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Threshold),
             zoneCO2TargetPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Target),
@@ -306,6 +314,11 @@ import android.util.Log
             heatingStage1FanState = stagedFanUis[3]
             heatingStage2FanState = stagedFanUis[4]
             heatingStage3FanState = stagedFanUis[5]
+
+            outsideDamperMinOpen = outsideDamperMinOpenValueFromIndex(outsideDamperMinOpenPos)
+            exhaustFanStage1Threshold = exhaustFanStage1ThresholdValueFromIndex(exhaustFanStage1ThresholdPos)
+            exhaustFanStage2Threshold = exhaustFanStage2ThresholdValueFromIndex(exhaustFanStage2ThresholdPos)
+            exhaustFanHysteresis = exhaustFanHysteresisFromIndex(exhaustFanHysteresisPos)
 
             zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
             zoneCO2Threshold = openingDamperValueFromIndex(zoneCO2ThresholdPos)

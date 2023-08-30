@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Tags.CPUECON
-import a75f.io.api.haystack.Tags.HYPERSTAT
 import a75f.io.api.haystack.Tags.HYPERSTATSPLIT
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -23,7 +22,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getSelectedFanLevel
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.getTempPort
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames
 import a75f.io.logic.bo.building.hyperstatsplit.common.LogicalKeyID
 import a75f.io.logic.bo.building.hyperstatsplit.common.LogicalPointsUtil
@@ -260,6 +258,8 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
      */
     private fun createProfileConfigurationPoints(hyperStatSplitConfig: HyperStatSplitCpuEconConfiguration) {
 
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, hyperStatSplitConfig.toString())
+
         hyperStatSplitPointsUtil.addProfilePoints()
 
         hyperStatSplitPointsUtil.createTemperatureOffSetPoint(hyperStatSplitConfig.temperatureOffset * 10)
@@ -282,7 +282,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createConditioningLoopOutputPoints(false)
 
-        val zoneOAOPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createZoneOAOPoints()
+        val zoneOAOPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createZoneOAOPoints(
+            hyperStatSplitConfig.outsideDamperMinOpen, hyperStatSplitConfig.exhaustFanStage1Threshold,
+            hyperStatSplitConfig.exhaustFanStage2Threshold, hyperStatSplitConfig.exhaustFanHysteresis)
 
         OAOTuners.updateZoneOaoTuners(
             haystack,
@@ -446,6 +448,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             existingConfiguration.isEnableAutoForceOccupied, newConfiguration.isEnableAutoForceOccupied,
         )
 
+        updateOAOValues(
+            existingConfiguration.outsideDamperMinOpen,newConfiguration.outsideDamperMinOpen,
+            existingConfiguration.exhaustFanStage1Threshold,newConfiguration.exhaustFanStage1Threshold,
+            existingConfiguration.exhaustFanStage2Threshold,newConfiguration.exhaustFanStage2Threshold,
+            existingConfiguration.exhaustFanHysteresis,newConfiguration.exhaustFanHysteresis
+        )
+
         updateCO2Values(
             existingConfiguration.zoneCO2DamperOpeningRate,newConfiguration.zoneCO2DamperOpeningRate,
             existingConfiguration.zoneCO2Threshold,newConfiguration.zoneCO2Threshold,
@@ -484,7 +493,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
 
     }
-
+    
     private fun updateStagedFanConfigPoints(
         existingConfiguration: HyperStatSplitCpuEconConfiguration,
         newConfiguration: HyperStatSplitCpuEconConfiguration
@@ -626,6 +635,39 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         }
     }
 
+    private fun updateOAOValues(
+        oldOutsideDamperMinOpen: Double, newOutsideDamperMinOpen: Double,
+        oldExhaustFanStage1Threshold: Double, newExhaustFanStage1Threshold: Double,
+        oldExhaustFanStage2Threshold: Double, newExhaustFanStage2Threshold: Double,
+        oldExhaustFanHysteresis: Double, newExhaustFanHysteresis: Double
+    ) {
+
+        if (oldOutsideDamperMinOpen != newOutsideDamperMinOpen) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpen)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpen)
+        }
+
+        if (oldExhaustFanStage1Threshold != newExhaustFanStage1Threshold) {
+            val pointId = hsSplitHaystackUtil.readPointID("exhaust and fan and stage1 and threshold") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newExhaustFanStage1Threshold)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newExhaustFanStage1Threshold)
+        }
+
+        if (oldExhaustFanStage2Threshold != newExhaustFanStage2Threshold) {
+            val pointId = hsSplitHaystackUtil.readPointID("exhaust and fan and stage2 and threshold") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newExhaustFanStage2Threshold)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newExhaustFanStage2Threshold)
+        }
+
+        if (oldExhaustFanHysteresis != newExhaustFanHysteresis) {
+            val pointId = hsSplitHaystackUtil.readPointID("exhaust and fan and hysteresis") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newExhaustFanHysteresis)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newExhaustFanHysteresis)
+        }
+        
+    }
+    
     // collect the existing profile configurations
     fun getConfiguration(): HyperStatSplitCpuEconConfiguration {
         val config = HyperStatSplitCpuEconConfiguration()
@@ -638,7 +680,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.temperatureOffset = hsSplitHaystackUtil.getTempOffValue()
         config.isEnableAutoForceOccupied = hsSplitHaystackUtil.isAutoForceOccupyEnabled()
         config.isEnableAutoAway =  hsSplitHaystackUtil.isAutoAwayEnabled()
-        config.zoneCO2DamperOpeningRate = hsSplitHaystackUtil.getZoneCO2DamperOpeningRate()
+
+        config.outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen()
+        config.exhaustFanStage1Threshold = hsSplitHaystackUtil.getExhaustFanStage1Threshold()
+        config.exhaustFanStage2Threshold = hsSplitHaystackUtil.getExhaustFanStage2Threshold()
+        config.exhaustFanHysteresis = hsSplitHaystackUtil.getExhaustFanHysteresis()
+
+        config.zoneCO2DamperOpeningRate = hsSplitHaystackUtil.getCO2DamperOpeningRate()
         config.zoneCO2Threshold = hsSplitHaystackUtil.getCo2DamperThresholdConfigValue()
         config.zoneCO2Target = hsSplitHaystackUtil.getCo2TargetConfigValue()
         config.zoneVOCThreshold = hsSplitHaystackUtil.getVocThresholdConfigValue()

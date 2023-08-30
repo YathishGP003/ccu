@@ -222,17 +222,36 @@ class HSSplitHaystackUtil(
         )
     }
 
-    fun getZoneCO2DamperOpeningRate(): Double {
+    fun getCO2DamperOpeningRate(): Double {
         return haystack.readHisValByQuery(
-            "point and zone and co2 and damper and opening and rate and equipRef == \"$equipRef\""
+            "point and co2 and damper and opening and rate and equipRef == \"$equipRef\""
         )
     }
 
     fun getOutsideDamperMinOpen(): Double {
-        return haystack.readPointPriorityValByQuery(
-            "point and oao and outside and damper and min and open and equipRef == \"$equipRef\""
+        return haystack.readDefaultVal(
+            "point and outside and damper and min and open and equipRef == \"$equipRef\""
         )
     }
+
+    fun getExhaustFanStage1Threshold(): Double {
+        return haystack.readDefaultVal(
+            "point and exhaust and fan and stage1 and threshold and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getExhaustFanStage2Threshold(): Double {
+        return haystack.readDefaultVal(
+            "point and exhaust and fan and stage2 and threshold and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getExhaustFanHysteresis(): Double {
+        return haystack.readDefaultVal(
+            "point and exhaust and fan and hysteresis and equipRef == \"$equipRef\""
+        )
+    }
+
 
     fun getOutsideAirTempSensor(): Double {
         return haystack.readHisValByQuery(

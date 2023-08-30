@@ -37,6 +37,10 @@ interface HyperStatSplitModel {
     fun universalInMappingSelected(index: Int, position: Int)
     fun getUniversalInMapping(): Array<String>
     fun isDamperSelected(association: Int): Boolean
+    fun outsideDamperMinOpenSelect(position: Int)
+    fun exhaustFanStage1ThresholdSelect(position: Int)
+    fun exhaustFanStage2ThresholdSelect(position: Int)
+    fun exhaustFanHysteresisSelect(position: Int)
     fun zoneCO2DamperOpeningRateSelect(position: Int)
     fun zoneCO2ThresholdSelect(position: Int)
     fun zoneCO2TargetSelect(position: Int)

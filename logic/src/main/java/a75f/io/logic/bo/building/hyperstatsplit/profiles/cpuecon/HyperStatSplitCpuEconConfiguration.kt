@@ -59,6 +59,11 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var heatingStage2FanState = 10
    var heatingStage3FanState = 10
 
+   var outsideDamperMinOpen = 0.0
+   var exhaustFanStage1Threshold = 50.0
+   var exhaustFanStage2Threshold = 90.0
+   var exhaustFanHysteresis = 5.0
+
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0
    var zoneCO2Target = 4000.0
@@ -110,6 +115,10 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
               "heatingStage1FanState: $heatingStage1FanState\n" +
               "heatingStage2FanState: $heatingStage2FanState\n" +
               "heatingStage3FanState: $heatingStage3FanState\n\n" +
+              "outsideDamperMinOpen: $outsideDamperMinOpen\n" +
+              "exhaustFanStage1Threshold: $exhaustFanStage1Threshold\n" +
+              "exhaustFanStage2Threshold: $exhaustFanStage2Threshold\n" +
+              "exhaustFanHysteresis: $exhaustFanHysteresis\n" +
               "zoneCO2DamperOpeningRate: $zoneCO2DamperOpeningRate\n" +
               "zoneCO2Threshold: $zoneCO2Threshold\n" +
               "zoneCO2Target: $zoneCO2Target\n\n" +

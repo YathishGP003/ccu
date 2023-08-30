@@ -1372,6 +1372,59 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/oaMinOpenConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp"
+                android:weightSum="3">
+
+                <TextView
+                    android:id="@+id/outsideDamperMinOpen"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_oadamper_min_open"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/outsideDamperMinOpenSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/exhaustFanConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp"
+                android:weightSum="3">
+
+                <TextView
+                    android:id="@+id/exhaustFanStage1Threshold"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_exfan_stage1_threshold"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/exhaustFanStage1ThresholdSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/exhaustFanStage2Threshold"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_exfan_stage2_threshold"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/exhaustFanStage2ThresholdSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/dcvCo2DamperConfig"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -1387,6 +1440,17 @@
 
                 <Spinner
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/exhaustFanHysteresis"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_exfan_hysteresis"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/exhaustFanHysteresisSpinner"
                     style="@style/Damper_HyperStat"
                     android:visibility="gone" />
 

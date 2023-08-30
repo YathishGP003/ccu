@@ -209,7 +209,7 @@ open class HyperStatSplitEquip {
         oldCO2Threshold: Double, newCO2Threshold: Double,
         oldCO2Target: Double, newCO2Target: Double){
         if (oldCO2DamperOpeningRate != newCO2DamperOpeningRate) {
-            val pointId = hsSplitHaystackUtil.readPointID("zone and co2 and damper and opening and rate") as String
+            val pointId = hsSplitHaystackUtil.readPointID("co2 and damper and opening and rate") as String
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newCO2DamperOpeningRate)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newCO2DamperOpeningRate)
         }

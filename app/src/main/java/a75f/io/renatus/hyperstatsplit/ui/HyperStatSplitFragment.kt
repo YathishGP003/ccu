@@ -84,10 +84,19 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var cancelButton: Button
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
-    private lateinit var zoneCO2DamperOpeningRate: Spinner
-    private lateinit var zoneCO2Threshold: Spinner
-    private lateinit var zoneCO2Target: Spinner
-    private lateinit var tvZoneCO2DamperOpeningRate: TextView
+    lateinit var zoneCO2DamperOpeningRate: Spinner
+    lateinit var zoneCO2Threshold: Spinner
+    lateinit var zoneCO2Target: Spinner
+    lateinit var tvZoneCO2DamperOpeningRate: TextView
+
+    lateinit var outsideDamperMinOpen: Spinner
+    lateinit var tvOutsideDamperMinOpen: TextView
+    lateinit var exhaustFanStage1Threshold: Spinner
+    lateinit var tvExhaustFanStage1Threshold: TextView
+    lateinit var exhaustFanStage2Threshold: Spinner
+    lateinit var tvExhaustFanStage2Threshold: TextView
+    lateinit var exhaustFanHysteresis: Spinner
+    lateinit var tvExhaustFanHysteresis: TextView
 
     lateinit var zoneVOCThreshold: Spinner
     lateinit var zoneVOCTarget: Spinner
@@ -297,6 +306,15 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 StagedFanWidgets(findViewById(R.id.fanOutHeatingStage3Label), findViewById(R.id.fanOutHeatingStage3Spinner)),
             )
 
+            outsideDamperMinOpen = findViewById(R.id.outsideDamperMinOpenSpinner)
+            tvOutsideDamperMinOpen = findViewById(R.id.outsideDamperMinOpen)
+            exhaustFanStage1Threshold = findViewById(R.id.exhaustFanStage1ThresholdSpinner)
+            tvExhaustFanStage1Threshold = findViewById(R.id.exhaustFanStage1Threshold)
+            exhaustFanStage2Threshold = findViewById(R.id.exhaustFanStage2ThresholdSpinner)
+            tvExhaustFanStage2Threshold = findViewById(R.id.exhaustFanStage2Threshold)
+            exhaustFanHysteresis = findViewById(R.id.exhaustFanHysteresisSpinner)
+            tvExhaustFanHysteresis = findViewById(R.id.exhaustFanHysteresis)
+
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
@@ -397,11 +415,19 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         // We want to set text size, but cannot do with our NumberPicker until API 29
         //val pickerTextSize = resources.getDimensionPixelSize(R.dimen.text_numberpicker_hyperstat)
 
-
+        val outsideDamperMinOpenAdapter = getAdapterValue(outsideDamperMinOpenValue())
+        val exhaustFanStage1ThresholdAdapter = getAdapterValue(exhaustFanStage1ThresholdValue())
+        val exhaustFanStage2ThresholdAdapter = getAdapterValue(exhaustFanStage2ThresholdValue())
+        val exhaustFanHysteresisAdapter = getAdapterValue(exhaustFanHysteresisValue())
         val co2Adapter = getAdapterValue(co2DCVDamperValue())
         val co2OpeningAdapter = getAdapterValue(co2DCVOpeningDamperValue())
         val vocAdapter = getAdapterValue(vocValues())
         val pmAdapter = getAdapterValue(pmValues())
+
+        outsideDamperMinOpen.adapter = outsideDamperMinOpenAdapter
+        exhaustFanStage1Threshold.adapter = exhaustFanStage1ThresholdAdapter
+        exhaustFanStage2Threshold.adapter = exhaustFanStage2ThresholdAdapter
+        exhaustFanHysteresis.adapter = exhaustFanHysteresisAdapter
 
         zoneCO2DamperOpeningRate.adapter = co2OpeningAdapter
         zoneCO2Threshold.adapter = co2Adapter
@@ -414,6 +440,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
 
         // set default values
+        outsideDamperMinOpen.setSelection(outsideDamperMinOpen.adapter.count - 1)
+        exhaustFanStage1Threshold.setSelection(exhaustFanStage1Threshold.adapter.count - 1)
+        exhaustFanStage2Threshold.setSelection(exhaustFanStage2Threshold.adapter.count - 1)
+        exhaustFanHysteresis.setSelection(exhaustFanHysteresis.adapter.count - 1)
+
         zoneVOCThreshold.setSelection(zoneVOCThreshold.adapter.count -1)
         zoneVOCTarget.setSelection(zoneVOCTarget.adapter.count -1)
 
@@ -517,6 +548,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             }
             widgets.selector.setOnItemSelected { position -> viewModel.universalInMappingSelected(index, position) }
         }
+
+        outsideDamperMinOpen.setOnItemSelected { position -> viewModel.outsideDamperMinOpenSelect(position) }
+        exhaustFanStage1Threshold.setOnItemSelected { position -> viewModel.exhaustFanStage1ThresholdSelect(position) }
+        exhaustFanStage2Threshold.setOnItemSelected { position -> viewModel.exhaustFanStage2ThresholdSelect(position) }
+        exhaustFanHysteresis.setOnItemSelected { position -> viewModel.exhaustFanHysteresisSelect(position) }
 
         zoneCO2DamperOpeningRate.setOnItemSelected { position -> viewModel.zoneCO2DamperOpeningRateSelect(position) }
         zoneCO2Threshold.setOnItemSelected { position -> viewModel.zoneCO2ThresholdSelect(position) }
@@ -737,8 +773,23 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             }
         }
 
+        outsideDamperMinOpen.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        exhaustFanStage1Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        exhaustFanStage2Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        exhaustFanHysteresis.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpen.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvExhaustFanStage1Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvExhaustFanStage2Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvExhaustFanHysteresis.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+
         zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+
+        outsideDamperMinOpen.setSelection(viewState.outsideDamperMinOpenPos)
+        exhaustFanStage1Threshold.setSelection(viewState.exhaustFanStage1ThresholdPos)
+        exhaustFanStage2Threshold.setSelection(viewState.exhaustFanStage2ThresholdPos)
+        exhaustFanHysteresis.setSelection(viewState.exhaustFanHysteresisPos)
+
         zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
         zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
         zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)

@@ -121,8 +121,7 @@ public class RangeBar extends View {
         }
         //force push the text if overlap
         int dbWidth = 0;
-        Log.d("TAG", "drawSliderIcon: coolband " + cdb);
-        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + 2.5)){
+        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + 4.75)){
             dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 20;
         }
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){

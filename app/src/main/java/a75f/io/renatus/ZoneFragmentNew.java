@@ -2481,7 +2481,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
-        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") != -1) {
             textViewValue2.setVisibility(View.VISIBLE);
             textViewLabel2.setVisibility(View.VISIBLE);
         } else {

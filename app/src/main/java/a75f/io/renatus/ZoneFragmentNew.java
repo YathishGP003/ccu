@@ -2339,9 +2339,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
-
-                         //   List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
-
                             List<EquipmentDevice> list = buildModbusModel(nonTempEquip.getRoomRef());
                             List<EquipmentDevice> modbusDevices = new ArrayList<>();
                             for(EquipmentDevice equipmentDevice : list) {
@@ -2354,8 +2351,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
-
-
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
@@ -2366,23 +2361,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     if (parameter.isDisplayInUI())
                                         parameterList.add(parameter);
                                 });
-
-                                /*
-                                   List<Parameter> parameterList = new ArrayList<>();
-                                    if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
-                                        ModbusModelBuilder.Companion
-                                        for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
-                                            if (registerTemp.getParameters() != null) {
-                                                for (Parameter p : registerTemp.getParameters()) {
-                                                    if (p.isDisplayInUI()) {
-                                                        p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-                                                        parameterList.add(p);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }*/
-
 
                                 View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
@@ -2400,9 +2378,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     equipString.append(" ");
                                 }
                                 tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
-                                if((Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
-                                null == modbusDevices.get(i).getEquipRef()) ||
-                                        (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId())) {
+                                if(isLastUpdatedTimeShowable(parentModbusEquip, modbusDevices, i)) {
                                     textViewModule.setVisibility(View.VISIBLE);
                                     textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
                                     textViewUpdatedTime.setVisibility(View.VISIBLE);
@@ -2443,6 +2419,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         });
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone Done");
 
+    }
+
+    private boolean isLastUpdatedTimeShowable(HashMap<Object, Object> parentModbusEquip, List<EquipmentDevice> modbusDevices, int i) {
+        return (Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
+                (null == modbusDevices.get(i).getEquipRef() || (modbusDevices.get(i).getEquipRef() == modbusDevices.get(i).getDeviceEquipRef())))
+                || (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId());
     }
 
     public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {

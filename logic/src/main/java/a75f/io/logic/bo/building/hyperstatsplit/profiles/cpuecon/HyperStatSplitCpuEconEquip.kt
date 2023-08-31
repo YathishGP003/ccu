@@ -691,6 +691,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.zoneCO2Target = hsSplitHaystackUtil.getCo2TargetConfigValue()
         config.zoneVOCThreshold = hsSplitHaystackUtil.getVocThresholdConfigValue()
         config.zoneVOCTarget = hsSplitHaystackUtil.getVocTargetConfigValue()
+        config.zonePm2p5Target = hsSplitHaystackUtil.getPm2p5TargetConfigValue()
 
         config.coolingStage1FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage1",7).toInt()
         config.coolingStage2FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage2",10).toInt()

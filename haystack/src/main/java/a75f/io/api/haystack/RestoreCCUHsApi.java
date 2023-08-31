@@ -327,7 +327,7 @@ public class RestoreCCUHsApi {
 
         List<String> diagEquipPointList = new LinkedList<>();
         HDict diagVersionDict = new HDictBuilder().add("filter",
-                "diag and version and " + equipRefString).toDict();
+                "diag and version and not migration and " + equipRefString).toDict();
         HGrid diagVersionGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(diagVersionDict),
                 retryCountCallback);
         if(diagVersionGrid == null){

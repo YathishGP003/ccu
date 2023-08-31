@@ -1,10 +1,6 @@
 package a75f.io.renatus;
 
 import android.os.Bundle;
-
-import a75f.io.api.haystack.CCUHsApi;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +11,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;

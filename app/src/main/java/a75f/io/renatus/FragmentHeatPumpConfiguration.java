@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -176,9 +177,11 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        mHPUProfile = (HeatPumpUnitProfile) L.getProfile(mSmartNodeAddress);
+        if (L.getProfile(mSmartNodeAddress) != null && L.getProfile(mSmartNodeAddress) instanceof HeatPumpUnitProfile) {
+            mHPUProfile = (HeatPumpUnitProfile) L.getProfile(mSmartNodeAddress);
+        }
 
         if (mHPUProfile != null) {
             Log.d("CPUConfig", "Get Config: "+mHPUProfile.getProfileType()+","+mHPUProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);

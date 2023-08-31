@@ -35,47 +35,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
     @Override
     public void sendMessage() {
-        pullRegisters();
-        /*if (!LSerial.getInstance().isModbusConnected()) {
-            CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
-            return;
-        }
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
-        LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);
-        int registerRequestCount = preferences.getInt("registerRequestCount", 3);
-
-        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
-                "equipRef and modbus");
-        for (HashMap equip : modbusEquips) {
-            try {
-                Short slaveId = Short.parseShort(equip.get("group").toString());
-                EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
-                List<EquipmentDevice> modbusDeviceList = new ArrayList<>();
-                modbusDeviceList.add(equipmentDevice);
-                if(null != equipmentDevice.getEquips()) {
-                    modbusDeviceList.addAll(equipmentDevice.getEquips());
-                }
-
-                for(EquipmentDevice modbusDevice : modbusDeviceList){
-                    int count = 0;
-                    LModbus.IS_MODBUS_DATA_RECEIVED = false;
-                    for (Register register : modbusDevice.getRegisters()) {
-                        if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
-                            break;
-                        LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
-                        CcuLog.d(L.TAG_CCU_MODBUS,
-                                "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
-                                ", count: "+count+
-                                ", registerRequestCount: "+registerRequestCount);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
-            }
-        }*/
-    }
-    private void pullRegisters(){
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
@@ -112,8 +71,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : ");
             }
         });
-
     }
+
     private int getRegisterCount(Register register) {
         
         if (register.getParameterDefinitionType().equals("int64")) {
@@ -129,7 +88,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
     
     public void sendSystemControl() {
-        //CcuLog.d(L.TAG_CCU_DEVICE, "Modbus SendSystemControl");
+
     }
 
     public void writeRegister(String id ) {
@@ -144,13 +103,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
         short groupId = Short.parseShort(writablePoint.get("group").toString());
-
-        /*List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
-        } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(groupId));
-        }*/
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (equip.getEquipRef() != null) {
             EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());

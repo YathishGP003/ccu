@@ -3,6 +3,7 @@ package a75f.io.renatus.modbus
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
+import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
@@ -79,6 +80,7 @@ class ModelSelectionFragment : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        ProgressDialogUtils.showProgressDialog(context, LOADING)
         val rootView = ComposeView(requireContext())
         rootView.apply {
             setContent {

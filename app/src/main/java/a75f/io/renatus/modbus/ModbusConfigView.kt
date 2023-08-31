@@ -130,7 +130,6 @@ class ModbusConfigView : BaseDialogFragment() {
                             TextViewWithClick(
                                 text = viewModel.modelName,
                                 onClick = {
-                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
                                     showDialogFragment(
                                         ModelSelectionFragment.newInstance(
                                             viewModel.deviceList,

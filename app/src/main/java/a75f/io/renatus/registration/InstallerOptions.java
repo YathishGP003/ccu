@@ -425,7 +425,7 @@ public class InstallerOptions extends Fragment {
             linearLayout.setVisibility(View.INVISIBLE);
         });
 
-        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(getBackFillDuration()));
+        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
     }

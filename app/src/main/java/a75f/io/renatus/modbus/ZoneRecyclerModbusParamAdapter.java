@@ -69,17 +69,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        if (modbusParam.get(position).getName().length() > 30)
-            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,30));
+        if (modbusParam.get(position).getName().length() > 25)
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,25));
         else
             viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
 
-        viewHolder.tvParamLabel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showToolTip(modbusParam.get(position).getName(), view);
-            }
-        });
+        viewHolder.tvParamLabel.setOnClickListener(view -> showToolTip(modbusParam.get(position).getName(), view));
 
         if (modbusParam.get(position).getParameterDefinitionType() != null) {
             switch (modbusParam.get(position).getParameterDefinitionType()) {
@@ -387,13 +382,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         } else {
             modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
-        /*if (equip.getEquipRef() != null) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
-        } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
-        }*/
-
-
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
                 for (Parameter pam : register.getParameters()) {

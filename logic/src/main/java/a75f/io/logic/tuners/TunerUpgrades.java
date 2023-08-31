@@ -113,7 +113,7 @@ public class TunerUpgrades {
     
     
         //If the current profile is DABFullyModulating, create new system equip tuner points.
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         if (!equipMap.isEmpty()) {
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             if (ProfileType.valueOf(systemEquip.getProfile()) == ProfileType.SYSTEM_DAB_ANALOG_RTU ) {

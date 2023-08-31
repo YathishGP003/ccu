@@ -94,7 +94,7 @@ public class RestoreCCU {
                     Date lastUpdatedDatetime = new Date(HDateTime.make(lastUpdatedDatetimeString).millis());
                     lastUpdatedDatetimeString =
                             new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime);
-                    isCCUOnline = isCCUOnline(lastUpdatedDatetime);
+                    isCCUOnline = false;// isCCUOnline(lastUpdatedDatetime);
 
                 }else{
                     lastUpdatedDatetimeString = "n/a";
@@ -134,6 +134,10 @@ public class RestoreCCU {
         RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring all the equips "+ retryCount);
         String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode, retryCountCallback);
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
+        Log.i("CCU_DEBUG", "getAllEquips: gatewayRef : "+gatewayRef);
+        Log.i("CCU_DEBUG", "getAllEquips: ahuRef : "+ahuRef);
+        Log.i("CCU_DEBUG", "getAllEquips: ccuId : "+ccuId);
+        Log.i("CCU_DEBUG", "getAllEquips: siteCode : "+siteCode);
         return restoreCCUHsApi.getAllEquips(ahuRef, gatewayRef, retryCountCallback);
     }
 

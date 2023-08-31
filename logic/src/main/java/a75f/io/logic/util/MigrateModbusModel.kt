@@ -159,13 +159,16 @@ fun migrateModbusProfiles() {
 
 fun updateIncValue(param: Parameter, physicalRawPoint: HashMap<Any, Any>) {
     Log.i(TAG, "Modbus updateIncValue stared")
-
-    param.getUserIntentPointTags().forEach {userIntentPointTags ->
-        if (userIntentPointTags.tagName!!.contentEquals("incrementVal")) {
-            val logicalPointMap = CCUHsApi.getInstance().readMapById(physicalRawPoint["pointRef"].toString())
-            val logicalPoint = Point.Builder().setHashMap(logicalPointMap).setIncrementVal(userIntentPointTags.tagValue).build()
-            CCUHsApi.getInstance().updatePoint(logicalPoint,logicalPoint.id)
-            return
+    if (param.getUserIntentPointTags().isNotEmpty()) {
+        param.getUserIntentPointTags().forEach { userIntentPointTags ->
+            if (userIntentPointTags.tagName!!.contentEquals("incrementVal")) {
+                val logicalPointMap =
+                    CCUHsApi.getInstance().readMapById(physicalRawPoint["pointRef"].toString())
+                val logicalPoint = Point.Builder().setHashMap(logicalPointMap)
+                    .setIncrementVal(userIntentPointTags.tagValue).build()
+                CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.id)
+                return
+            }
         }
     }
 }

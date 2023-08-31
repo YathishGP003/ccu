@@ -79,7 +79,7 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     val equip = Equip.Builder().setHashMap(equipMap).build()
     equipDevice.modbusEquipIdId = null
     equipDevice.description = null
-    equipDevice.version = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else null
+    equipDevice.version = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else "0.0.0"
     equipDevice.id = 0L
     equipDevice.name = getModelName(equip.displayName)
     equipDevice.equipType = equip.equipType

@@ -215,7 +215,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return new SystemFragment();
 	}
 
-	public void refreshScreen(String id)
+	public void refreshScreen(String id, boolean isRemoteChange)
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen");
 		

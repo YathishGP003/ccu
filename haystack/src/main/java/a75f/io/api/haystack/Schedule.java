@@ -254,12 +254,12 @@ public class Schedule extends Entity
 
     public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
-        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        Zone zone = new Zone.Builder().setHashMap(zoneHashMap).build();
         String ref;
         if (vacation)
-            ref = build.getVacationRef();
+            ref = zone.getVacationRef();
         else
-            ref = build.getScheduleRef();
+            ref = zone.getScheduleRef();
 
         Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
                 "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
@@ -269,19 +269,19 @@ public class Schedule extends Entity
             
             if (schedule != null )
             {
-                CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
+                CcuLog.i("CCU_SCHEDULE", "Zone Schedule: for "+zone.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
         }
-    
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
-        if (scheduleType != null && scheduleType.intValue() == 2) {
-            Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null) {
-                CcuLog.d("Schedule", "Building Schedule with special schedule:  " + schedule);
-                return schedule;
-            }
+
+        CcuLog.d("CCU_SCHEDULE", "Referenced schedule does not exist : ref "+ref);
+        List<Schedule> zoneSchedules = CCUHsApi.getInstance().getZoneSchedule(zone.getId(), false);
+        if (!zoneSchedules.isEmpty()) {
+            CcuLog.i("CCU_SCHEDULE", "Default zone schedule:  " + zoneSchedules.get(0));
+            return zoneSchedules.get(0);
         }
+
+        CcuLog.e("CCU_SCHEDULE", " !! A zone without valid schedule : something is broken for "+zone.getDisplayName());
         return null;
     }
 

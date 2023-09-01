@@ -1,5 +1,8 @@
 package a75f.io.renatus
 
+import a75f.io.domain.config.AdvancedAhuConfiguration
+import a75f.io.domain.util.ModelNames
+import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import android.app.Application
@@ -27,28 +30,34 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
     //private val domainModeler = DomainModeler(application.baseContext)
 
 
-    fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context){
-       // TODO read model definition from domain model based on profile & device selected initialise to base configuration
+    fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
+        var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        Log.i("DAB_EXT", "configModelDefinition:${modelDef!!.modelType} ")
+        Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
+        Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
+        Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
+
     }
 
 
     fun saveConfiguration() {
-       /* val profile = AdvancedAhuConfiguration(1000,"HS",0, "","")
-        domainModeler.addEquip(profileConfiguration = profile)
-        Log.i("Domain", "save configuration: ${getValues()}")
-*/
+        val profile = AdvancedAhuConfiguration(1000, "HS", 0, "", "")
+        //domainModeler.addEquip(profileConfiguration = profile)
+        //Log.i("Domain", "save configuration: ${getValues()}")
+
     }
+
     private fun getValues(): String {
         return "setPointControl: $setPointControl " +
-                "dualSetPointControl $dualSetPointControl "+
-                "heatingMinSp $heatingMinSp heatingMaxSp $heatingMaxSp "+
+                "dualSetPointControl $dualSetPointControl " +
+                "heatingMinSp $heatingMinSp heatingMaxSp $heatingMaxSp " +
                 "coolingMinSp $coolingMinSp coolingMaxSp $coolingMaxSp "
     }
 
 
     fun getOptions(): List<String> {
         // TODO read it from model profile definition
-        return listOf("1.0", "2.0", "3.0","4.0","5.0")
+        return listOf("1.0", "2.0", "3.0", "4.0", "5.0")
     }
 
     fun getIndexFromVal(value: String): Int {

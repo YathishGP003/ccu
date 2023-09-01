@@ -88,6 +88,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  DAB External AHU Controller</item>
     </string-array>
 
     <string-array name="system_profile_select_daikin">

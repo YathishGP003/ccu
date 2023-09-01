@@ -40,7 +40,7 @@ import androidx.lifecycle.ViewModelProvider
  * Created by Manjunath K on 06-06-2023.
  */
 
-class AHUControlConfigFragment : Fragment() {
+class DabExternalAHUControlConfigFragment : Fragment() {
     private lateinit var viewModel: AhuControlViewModel
 
 

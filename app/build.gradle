@@ -282,6 +282,8 @@ dependencies {
     kapt 'com.jakewharton:butterknife-compiler:10.2.0'
     implementation project(path: ':domain')
     implementation "androidx.compose.foundation:foundation:1.4.3"
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
+
 
 }
 

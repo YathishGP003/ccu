@@ -86,10 +86,7 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.profileContainer, new AHUControlConfigFragment()).commit();
-
-                /*switch (i) {
+                switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
                             getActivity().getSupportFragmentManager().beginTransaction()
@@ -192,7 +189,18 @@ public class SystemProfileFragment extends Fragment {
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
                         break;
-                }*/
+                        case 10:
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DabExternalAHUControlConfigFragment()).commit();
+
+                        } else {
+                            Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
+                        break;
+                }
             }
 
             @Override

@@ -78,10 +78,14 @@ android {
 configurations {
     customImplementation.extendsFrom implementation
 }
+/***
+ * domainLibVersion domain modeler JSON Library version please update when there is update in library
+ */
+def domainLibVersion = "20230828.1"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:20230825.1-qa') {
+    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion+'-qa') {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -125,15 +129,15 @@ task getExternalLibraryPaths {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20230621.10-dev.jar')) {
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-'+domainLibVersion+'-qa.jar')) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)
                     into domainAssets
                     includeEmptyDirs = false
                 }
-                def folderIo = "${parentFolder}/domain/src/main/assets/io" // Replace with the actual path of the folder you want to delete
-                def folderMetaInf = "${parentFolder}/domain/src/main/assets/META-INF" // Replace with the actual path of the folder you want to delete
+                def folderIo = "${parentFolder}/domain/src/main/assets/io"
+                def folderMetaInf = "${parentFolder}/domain/src/main/assets/META-INF"
                 delete folderIo
                 delete folderMetaInf
             }

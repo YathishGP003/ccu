@@ -51,34 +51,6 @@ object ResourceHelper {
         }
     }
 
-    fun loadProfileModelDefinition(fileName : String) : SeventyFiveFProfileDirective {
-        @Nullable val modelData: String? = loadString(fileName)
-
-        /*val moshiInstance = Moshi.Builder()
-            .add(NullToEmptyStringAdapter)
-            .add(
-                PolymorphicJsonAdapterFactory.of(Constraint::class.java, Constraint::constraintType.name)
-                    .withSubtype(NoConstraint::class.java, Constraint.ConstraintType.NONE.name)
-                    .withSubtype(NumericConstraint::class.java, Constraint.ConstraintType.NUMERIC.name)
-                    .withSubtype(MultiStateConstraint::class.java, Constraint.ConstraintType.MULTI_STATE.name))
-            .add(
-                PolymorphicJsonAdapterFactory.of(PointConfiguration::class.java, PointConfiguration::configType.name)
-                    .withSubtype(BaseConfiguration::class.java, PointConfiguration.ConfigType.BASE.name)
-                    .withSubtype(AssociatedConfiguration::class.java, PointConfiguration.ConfigType.ASSOCIATED.name)
-                    .withSubtype(AssociationConfiguration::class.java, PointConfiguration.ConfigType.ASSOCIATION.name)
-                    .withSubtype(DependentConfiguration::class.java, PointConfiguration.ConfigType.DEPENDENT.name)
-                    .withSubtype(DynamicSensorConfiguration::class.java, PointConfiguration.ConfigType.DYNAMIC_SENSOR.name))
-            .add(KotlinJsonAdapterFactory())
-            .build()
-        val jsonAdapter: JsonAdapter<SeventyFiveFProfileDirective> = moshiInstance.adapter(SeventyFiveFProfileDirective::class.java)
-
-        return modelData?.let {jsonAdapter.fromJson(modelData)}!!*/
-
-        val objectMapper = ObjectMapperConfig().objectMapper()
-        val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
-        return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFProfileDirective
-    }
-
     fun getModelVersion(fileName: String): JSONObject {
         @Nullable val version: String? = loadString(fileName)
         if (version != null){

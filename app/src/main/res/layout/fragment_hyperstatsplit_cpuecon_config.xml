@@ -1390,6 +1390,18 @@
                     style="@style/Damper_HyperStat"
                     android:visibility="gone" />
 
+                <TextView
+                    android:id="@+id/exhaustFanStage1Threshold"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:layout_marginStart="96dp"
+                    android:text="@string/label_exfan_stage1_threshold"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/exhaustFanStage1ThresholdSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -1399,17 +1411,6 @@
                 android:layout_marginStart="34dp"
                 android:layout_marginEnd="48dp"
                 android:weightSum="3">
-
-                <TextView
-                    android:id="@+id/exhaustFanStage1Threshold"
-                    style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/label_exfan_stage1_threshold"
-                    android:visibility="gone" />
-
-                <Spinner
-                    android:id="@+id/exhaustFanStage1ThresholdSpinner"
-                    style="@style/Damper_HyperStat"
-                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/exhaustFanStage2Threshold"
@@ -1422,30 +1423,10 @@
                     style="@style/Damper_HyperStat"
                     android:visibility="gone" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/dcvCo2DamperConfig"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="34dp"
-                android:layout_marginEnd="48dp"
-                android:weightSum="3">
-
-                <TextView
-                    android:id="@+id/zoneCO2DamperOpeningRate"
-                    style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/zoneCO2DamperOpeningRate"
-                    android:visibility="gone" />
-
-                <Spinner
-                    android:id="@+id/zoneCO2DamperOpeningRateSpinner"
-                    style="@style/Damper_HyperStat"
-                    android:visibility="gone" />
-
                 <TextView
                     android:id="@+id/exhaustFanHysteresis"
                     style="@style/FanPositionLabel_HyperStat"
+                    android:layout_marginStart="96dp"
                     android:text="@string/label_exfan_hysteresis"
                     android:visibility="gone" />
 
@@ -1464,23 +1445,43 @@
                 android:layout_marginEnd="48dp">
 
                 <TextView
+                    android:id="@+id/zoneCO2DamperOpeningRate"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/zoneCO2DamperOpeningRate"
+                    android:layout_weight="1"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/zoneCO2DamperOpeningRateSpinner"
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone"
+                    android:layout_weight="1"
+                    android:dropDownWidth="wrap_content" />
+
+                <TextView
                     android:id="@+id/zoneCO2Threshold"
                     style="@style/FanPositionLabel_HyperStat"
+                    android:layout_weight="1"
                     android:text="@string/zoneCO2Threshold" />
 
                 <Spinner
                     android:id="@+id/zoneCO2ThresholdSpinner"
-                    style="@style/Damper_HyperStat" />
+                    style="@style/Damper_HyperStat"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="96dp"
+                    android:dropDownWidth="wrap_content" />
 
                 <TextView
                     android:id="@+id/zoneCO2Target"
                     style="@style/FanPositionLabel_HyperStat"
+                    android:layout_weight="1"
                     android:text="@string/zoneCO2Target" />
 
                 <Spinner
                     android:id="@+id/zoneCO2TargetSpinner"
-                    android:paddingLeft="@dimen/appbar_padding_top"
-                    style="@style/Damper_HyperStat" />
+                    style="@style/Damper_HyperStat"
+                    android:layout_weight="1"
+                    android:dropDownWidth="wrap_content" />
 
 
             </LinearLayout>
@@ -1519,13 +1520,13 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="left"
+                    android:layout_marginStart="96dp"
                     android:text="@string/zoneVocTarget"
                     android:textAppearance="@style/label_values"
                     android:textColor="@drawable/label_textselector" />
 
                 <Spinner
                     android:id="@+id/zoneVocTargetSpinner"
-                    android:paddingLeft="@dimen/appbar_padding_top"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5" />
@@ -1558,7 +1559,8 @@
                     android:id="@+id/zonepmTargetSpinner"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.5" />
+                    android:layout_weight="0.5"
+                    android:layout_marginEnd="96dp"/>
 
 
             </LinearLayout>

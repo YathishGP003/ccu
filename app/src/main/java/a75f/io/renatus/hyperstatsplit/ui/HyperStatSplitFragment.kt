@@ -4,23 +4,21 @@ import a75f.io.device.HyperSplit
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconRelayAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
-import a75f.io.renatus.hyperstatsplit.UniversalInWidgets
 import a75f.io.renatus.hyperstatsplit.AnalogOutWidgets
 import a75f.io.renatus.hyperstatsplit.RelayWidgets
 import a75f.io.renatus.hyperstatsplit.SensorBusWidgets
 import a75f.io.renatus.hyperstatsplit.StagedFanWidgets
+import a75f.io.renatus.hyperstatsplit.UniversalInWidgets
 import a75f.io.renatus.hyperstatsplit.viewModels.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -29,6 +27,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +35,7 @@ import android.widget.*
 import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+
 
 /**
  * Created for HyperStat by Manjunath K on 15-07-2022.
@@ -88,6 +88,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var zoneCO2Threshold: Spinner
     lateinit var zoneCO2Target: Spinner
     lateinit var tvZoneCO2DamperOpeningRate: TextView
+    lateinit var tvZoneCO2Threshold: TextView
+    lateinit var tvZoneCO2Target: TextView
 
     lateinit var outsideDamperMinOpen: Spinner
     lateinit var tvOutsideDamperMinOpen: TextView
@@ -320,6 +322,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
+            tvZoneCO2Threshold = findViewById(R.id.zoneCO2Threshold)
+            tvZoneCO2Target = findViewById(R.id.zoneCO2Target)
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
@@ -771,6 +775,42 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 selector.isEnabled = universalInState.enabled
                 selector.setSelection(universalInState.association)
             }
+        }
+
+        val co2ThresholdParams = zoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+        val co2TargetParams = zoneCO2Target.layoutParams as LinearLayout.LayoutParams
+        val tvCo2ThresholdParams = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+        val tvCo2TargetParams = tvZoneCO2Target.layoutParams as LinearLayout.LayoutParams
+        if (isDampSelected) {
+
+            tvCo2ThresholdParams.weight = 1f
+            tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
+            
+            co2ThresholdParams.marginEnd = 0
+            co2ThresholdParams.weight = 1f
+            zoneCO2Threshold.layoutParams = co2ThresholdParams
+
+            tvCo2TargetParams.weight = 1f
+            tvZoneCO2Target.layoutParams = tvCo2TargetParams
+            
+            co2TargetParams.weight = 1f
+            zoneCO2Target.layoutParams = co2TargetParams
+
+        } else {
+
+            tvCo2ThresholdParams.weight = 2f
+            tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
+
+            co2ThresholdParams.marginEnd = 96
+            co2ThresholdParams.weight = 1f
+            zoneCO2Threshold.layoutParams = co2ThresholdParams
+
+            tvCo2TargetParams.weight = 2f
+            tvZoneCO2Target.layoutParams = tvCo2TargetParams
+
+            co2TargetParams.weight = 1f
+            zoneCO2Target.layoutParams = co2TargetParams
+
         }
 
         outsideDamperMinOpen.visibility = if (isDampSelected) View.VISIBLE else View.GONE

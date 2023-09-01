@@ -954,7 +954,7 @@
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
     <string name="label_return_damper_at_min">Return Damper at Min Drive (V)</string>
     <string name="label_return_damper_at_max">Return Damper at Max Drive (V)</string>
-    <string name="label_oadamper_min_open">Outside Damper Min Open (%)</string>
+    <string name="label_oadamper_min_open">Outside Damper\nMin Open (%)</string>
     <string name="label_return_damper_min_open">Return Damper Min Open (%)</string>
     <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 \nThreshold (%)</string>
     <string name="label_exfan_stage2_threshold">Exhaust Fan Stage 2 \nThreshold (%)</string>
@@ -1362,7 +1362,7 @@
     <string name="hyperstat_analog_out4_at_medium_fan">Analog-out4 at\nFan Medium</string>
     <string name="hyperstat_analog_out4_at_high_fan">Analog-out4 at\nFan High</string>
 
-    <string name="zoneCO2DamperOpeningRate">CO2 Damper\nOpeningRate</string>
+    <string name="zoneCO2DamperOpeningRate">CO2 Damper\nOpening Rate</string>
     <string name="zoneCO2Threshold">CO2 Threshold</string>
     <string name="zoneCO2Target">CO2 Target</string>
 

@@ -1474,6 +1474,11 @@ public class CCUHsApi
 
         while (it.hasNext()) {
             HRow row = (HRow) it.next();
+            Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(row).toDict()).build();
+            if(schedule.getMarkers().contains("default")
+                    && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
+                continue;
+            }
             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
             CcuLog.i(TAG, "Named schedule Imported - "+ row.get("id").toString());
         }

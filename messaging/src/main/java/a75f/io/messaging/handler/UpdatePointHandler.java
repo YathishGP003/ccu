@@ -64,7 +64,7 @@ public class UpdatePointHandler implements MessageHandler
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
-                zoneDataInterface.refreshScreen("");
+                zoneDataInterface.refreshScreen("", true);
             }
             return;
         }
@@ -301,7 +301,7 @@ public class UpdatePointHandler implements MessageHandler
 
         if (updateZoneUi && zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
-            zoneDataInterface.refreshScreen(luid);
+            zoneDataInterface.refreshScreen(luid, true);
         }
         
         if (p.getMarkers().contains("modbus")){
@@ -325,7 +325,7 @@ public class UpdatePointHandler implements MessageHandler
     private static void updateUI(Point updatedPoint) {
         if (zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh");
-            zoneDataInterface.refreshScreen(updatedPoint.getId());
+            zoneDataInterface.refreshScreen(updatedPoint.getId(), true);
         }
     }
 

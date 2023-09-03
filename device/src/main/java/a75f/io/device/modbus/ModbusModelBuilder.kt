@@ -77,9 +77,8 @@ fun buildModbusModelByEquipRef(equipRef: String): EquipmentDevice {
 private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?): EquipmentDevice {
     val equipDevice = EquipmentDevice()
     val equip = Equip.Builder().setHashMap(equipMap).build()
-    equipDevice.modbusEquipIdId = null
+    equipDevice.modbusEquipIdId = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else "0.0.0" // We are not using model id so just holding version in model id
     equipDevice.description = null
-    equipDevice.version = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else "0.0.0"
     equipDevice.id = 0L
     equipDevice.name = getModelName(equip.displayName)
     equipDevice.equipType = equip.equipType

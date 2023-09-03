@@ -425,7 +425,12 @@ public class MasterControlView extends LinearLayout {
                     Iterator it = namedschedules.iterator();
                     while (it.hasNext()) {
                         HRow r = (HRow) it.next();
-                        scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                        Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                        if(schedule.getMarkers().contains("default")
+                                && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
+                            continue;
+                        }
+                        scheduleList.add(schedule);
                     }
                 }else{
                     CcuLog.d(LOG_PREFIX, "Named sched is null");

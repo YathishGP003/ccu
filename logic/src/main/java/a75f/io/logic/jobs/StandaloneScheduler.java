@@ -234,7 +234,7 @@ public class StandaloneScheduler {
                 // continue what you are doing...
                 if (zoneDataInterface != null) {
                     Log.i("PubNub","Zone Data updateOperationalPoints Refresh");
-                    zoneDataInterface.refreshScreen("");
+                    zoneDataInterface.refreshScreen("", false);
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -244,7 +244,7 @@ public class StandaloneScheduler {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
         if (zoneDataInterface != null) {
             Log.i("PubNub","updateStandaloneEquipStatus Refresh");
-            zoneDataInterface.refreshScreen("");
+            zoneDataInterface.refreshScreen("", false);
         }
 
     }

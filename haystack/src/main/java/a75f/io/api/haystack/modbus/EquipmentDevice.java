@@ -67,7 +67,6 @@ public class EquipmentDevice {
     public String floorRef = null;
     public String deviceEquipRef = null;
     public boolean isPaired;
-    public String version;
     public EquipmentDevice(){
 
     }
@@ -86,16 +85,6 @@ public class EquipmentDevice {
     public void setName(String name) {
         this.name = name;
     }
-
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
 
     public int getSlaveId() {
         return slaveId;

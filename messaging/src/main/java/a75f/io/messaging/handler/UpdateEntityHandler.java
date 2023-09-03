@@ -128,7 +128,7 @@ public class UpdateEntityHandler implements MessageHandler {
                 CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
 
                 if (zoneDataInterface != null) {
-                    zoneDataInterface.refreshScreen("");
+                    zoneDataInterface.refreshScreen("", true);
                 }
             }
         }

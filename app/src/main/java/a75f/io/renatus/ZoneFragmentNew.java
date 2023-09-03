@@ -352,14 +352,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         weatherUpdate.run();
     }
 
-    public void refreshScreen(String id)
+    public void refreshScreen(String id, boolean isRemoteChange)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshScreen zoneOpen "+zoneOpen);
         if(getActivity() != null && isAdded()) {
             getActivity().runOnUiThread(() -> {
                 if(zoneOpen) {
                     try {
-                        updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                        updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater(), isRemoteChange);
                         tableLayout.invalidate();
                     } catch (IllegalStateException e) {
                         //getLayoutInflater() might fail if Fragment is not attached to FragmentManager yet.
@@ -1511,8 +1511,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }, 400);
     }
 
-
-    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater) {
+    private boolean isRemoteChangeApplied = false;
+    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen,
+                                             LayoutInflater inflater, boolean isRemoteChange) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones");
 
         Equip p = equipOpen;
@@ -1700,7 +1701,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
-
+        isRemoteChangeApplied = isRemoteChange;
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -1798,7 +1799,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                    }
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule
-                } else if (position >= 2 && (mScheduleType != -1)) {
+                } else if (position >= 2 && (mScheduleType != -1) && !isRemoteChangeApplied) {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
@@ -1807,13 +1808,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         zoneId,  namedScheds.get(position - 2).get("dis").toString());
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
-                        scheduleSpinner.setSelection(position);
 
                         namedSchedule.setOnExitListener(() -> {
-                            mSchedule = Schedule.getScheduleByEquipId(equipId);
-                            ScheduleManager.getInstance().updateSchedules(equipOpen);
-                            scheduleImageButton.setVisibility(View.GONE);
-                            Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                             mSchedule = Schedule.getScheduleByEquipId(equipId);
                             ScheduleManager.getInstance().updateSchedules(equipOpen);
                             Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
@@ -1823,22 +1819,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             scheduleImageButton.setVisibility(View.GONE);
                         });
                     }
-                    scheduleSpinner.setSelection(position);
-
 
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 scheduleImageButton.setTag(mSchedule.getId());
                 vacationImageButton.setTag(mSchedule.getId());
                 specialScheduleImageButton.setTag(mSchedule.getId());
+                isRemoteChangeApplied = false;
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
-
         float buildingLimitMin ;
         float buildingLimitMax ;
         float coolingUpperLimitVal ;
@@ -2473,7 +2466,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
-        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") != -1) {
             textViewValue2.setVisibility(View.VISIBLE);
             textViewLabel2.setVisibility(View.VISIBLE);
         } else {

@@ -125,7 +125,7 @@ class ModbusConfigView : BaseDialogFragment() {
                                 enableClick = false,
                                 isCompress = false
                             )
-                            HeaderTextView(viewModel.equipModel.value.equipDevice.value.version)
+                            HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
                         } else {
                             TextViewWithClick(
                                 text = viewModel.modelName,

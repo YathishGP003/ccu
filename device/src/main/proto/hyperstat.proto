@@ -161,11 +161,18 @@ message HyperstatLinearFanSpeeds_t {
   uint32 linearFanHighSpeedLevel  = 3; // in percentage
 }
 
+message HyperstatStagedFanSpeeds_t {
+  uint32 stagedFanLowSpeedLevel  = 1; // in percentage
+  uint32 stagedFanMediumSpeedLevel  = 2; // in percentage
+  uint32 stagedFanHighSpeedLevel  = 3; // in percentage
+}
+
 message HyperStatSettingsMessage3_t {
   HyperStatTunersGeneric_t genertiTuners = 1; // Generic tuner
   HyperStatTunersFcu_t	fcuTuners = 2;
   HyperstatStagedFanVoltages_t hyperstatStagedFanVoltages = 3; // When staged fan is enabled these voltages provide the fan speed control
-   HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds_t = 4; // When linear fan is enabled these voltages provide user intent
+  HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds_t = 4; // When linear fan is enabled these voltages provide user intent
+  HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 5; // When staged fan is enabled these voltages provide user intent
 }
 
 

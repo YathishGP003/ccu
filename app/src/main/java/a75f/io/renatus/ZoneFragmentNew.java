@@ -865,7 +865,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             for (HashMap<Object, Object> nameSched :
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
-                if(namedScheduledis.length() > 15){
+                if(nameSched.get("default") != null){
+                    scheduleArray.add("Default");
+                } else if(namedScheduledis.length() > 15){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
                 }else{
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
@@ -972,7 +974,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         scheduleImageButton.setOnClickListener(v ->
-                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),false));
 
         vacationImageButton.setOnClickListener(v ->
         {
@@ -989,7 +991,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             });
         });
         specialScheduleImageButton.setOnClickListener(v ->
-                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
 
         if(mScheduleType >= 2){
             int spinnerposition = 2;
@@ -1037,7 +1039,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 //                } else
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                    boolean isContainment = true;
-                   if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
+                   if (mSchedule.isZoneSchedule()) {
                        mSchedule.setDisabled(false);
                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                        scheduleImageButton.setTag(mSchedule.getId());
@@ -1485,8 +1487,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void imageButtonClickListener(View v, String zoneId, String[] equipId,
-                                        FragmentManager childFragmentManager2) {
-        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, true);
+                                        FragmentManager childFragmentManager2,boolean isSpecial) {
+        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
         FragmentManager childFragmentManager = childFragmentManager2;
         childFragmentManager.beginTransaction();
         schedulerFragment.show(childFragmentManager, "dialog");
@@ -1543,7 +1545,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             for (HashMap<Object, Object> nameSched :
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
-                if(namedScheduledis.length() > 15){
+                if(nameSched.get("default") != null){
+                    scheduleArray.add("Default");
+                }else if(namedScheduledis.length() > 15){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
                 }else{
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
@@ -1736,7 +1740,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
-                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
+                    if (mSchedule.isZoneSchedule() ) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
@@ -2385,8 +2389,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     textViewUpdatedTimeHeading.setVisibility(View.GONE);
                                     textViewUpdatedTime.setVisibility(View.GONE);
                                 }
-
-
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =

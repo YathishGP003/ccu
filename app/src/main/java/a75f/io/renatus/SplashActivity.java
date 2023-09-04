@@ -142,6 +142,13 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
+        } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
+                && !prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
+            Intent i = new Intent(SplashActivity.this,
+                    FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
+            startActivity(i);
+            finish();
         }
     }
 

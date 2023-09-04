@@ -297,6 +297,12 @@ public class Pulse
 				continue;
 			}
 			double val = r.sensorData.get();
+			/* Smartnode  represents the lower 11 bits as unsigned, as uses bit 12 to indicate
+			  if value is negative or not, if value is negative bit 12 is set to 1 and binary value
+			  becomes greater than 2048.*/
+			if(t == SensorType.PRESSURE && val > 2048 ){
+				val = (getPressureValue(Integer.toBinaryString((int) val)));
+			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
 				sp = node.addSensor(p);
@@ -362,7 +368,20 @@ public class Pulse
 		}
 	
 	}
-	
+
+	private static double getPressureValue(String pressureBinary) {
+		int originalValue = Integer.parseInt(pressureBinary, 2);
+		if ((originalValue & (1 << 11)) != 0) {
+			// If the 12th bit is set to 1, remove it by setting it to 0
+			int modifiedValue = originalValue & ~(1 << 11);
+			String modifiedBinaryData = String.format("%12s", Integer.toBinaryString(modifiedValue)).replace(' ', '0');
+			return Integer.parseInt(modifiedBinaryData, 2)*(-1);
+		} else {
+			// If the 12th bit is not set to 1, no modification needed
+			return Integer.parseInt(pressureBinary, 2);
+		}
+	}
+
 	public static double round(double val) {
 		return Math.round(100*val)/100;
 	}
@@ -411,7 +430,7 @@ public class Pulse
 		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
-	
+
 	private static void updateDesiredTemp(int node, Double dt) {
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();

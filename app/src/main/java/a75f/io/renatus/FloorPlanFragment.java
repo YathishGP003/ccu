@@ -56,6 +56,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
@@ -1001,6 +1002,17 @@ public class FloorPlanFragment extends Fragment {
             hideKeyboard();
             Toast.makeText(getActivity().getApplicationContext(),
                     "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+
+            HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                    ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
+            if(defaultNamedSchedule.isEmpty()) {
+                new Thread(() -> {
+                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                            HayStackConstants.USER, HayStackConstants.PASS), new Site.Builder().setHashMap(CCUHsApi.getInstance().readEntity("site")).build());
+                }).start();
+            }
+
+
             siteFloorList.add(hsFloor);
             if(this.floorList.size() == 0 || floorSelectedIndex == -1){
                 this.systemDeviceOnClick();
@@ -1186,7 +1198,19 @@ public class FloorPlanFragment extends Fragment {
                 SchedulabeLimits.Companion.addSchedulableLimits(false,zoneId,hsZone.getDisplayName());
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
-                hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));
+                String zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, zoneId);
+                HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                        ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
+
+                if(defaultNamedSchedule.isEmpty()){
+                    hsZone.setScheduleRef(zoneSchedule);
+                    Toast.makeText(getActivity().getApplicationContext(),
+                                "Zone following zone-schedule as default named schedule is not available", Toast.LENGTH_SHORT).show();
+                }else {
+                    hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
+
+                }
+
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();
                 CCUHsApi.getInstance().syncEntityTree();

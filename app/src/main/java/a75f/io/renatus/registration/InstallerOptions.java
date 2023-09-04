@@ -843,9 +843,11 @@ public class InstallerOptions extends Fragment {
             buildingToZoneDiff.setSelection(zoneDiffadapter.getPosition(
                     getAdapterValDiff(HSUtil.getLevelValueFrom16(buildingToZoneDiffObj.get("id").toString()))));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                    getAdapterValDeadBand(coolDBVal == 0.0 ? 2: coolDBVal, false)));
+                    getAdapterValDeadBand(//coolDBVal == 0.0 ? 2:
+                            coolDBVal, false)));
             heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                    getAdapterValDeadBand(heatDBVal == 0.0 ? 2 : heatDBVal, false)));
+                    getAdapterValDeadBand(//heatDBVal == 0.0 ? 2 :
+                            heatDBVal, false)));
             heatingLimitMin.setSelection(heatingAdapter.getPosition(
                     getAdapterVal(heatMinVal == 0.0 ? 67 : heatMinVal, false)));
             coolingLimitMin.setSelection(coolingAdapter.getPosition(
@@ -855,7 +857,8 @@ public class InstallerOptions extends Fragment {
             coolingLimitMax.setSelection(coolingAdapter.getPosition(
                     getAdapterVal(coolMaxVal == 0.0 ?77 :coolMaxVal, false)));
             unoccupiedZoneSetback.setSelection(setbackadapter.getPosition(
-                    getAdapterValDeadBand(setBack == 0.0 ? 5:setBack, false)));
+                    getAdapterValDeadBand(//setBack == 0.0 ? 5:
+                            setBack, false)));
             buildingLimitMin.setSelection(adapter.getPosition(
                     getAdapterVal(HSUtil.getLevelValueFrom16(buildingMin.get("id").toString()), false)));
             buildingLimitMax.setSelection(adapter.getPosition(

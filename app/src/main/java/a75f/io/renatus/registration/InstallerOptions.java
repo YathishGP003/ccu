@@ -359,7 +359,7 @@ public class InstallerOptions extends Fragment {
                     return;
                 }
                 mNext.setEnabled(false);
-                createInstallerPoints(ccu, false);
+                createInstallerPoints(ccu, prefs);
                 // TODO Auto-generated method stub
                 goTonext();
             }
@@ -452,20 +452,21 @@ public class InstallerOptions extends Fragment {
         transaction.replace(R.id.buildingOccupancyFragmentContainer, childFragment).commit();
     }
 
-    public void createInstallerPoints(HashMap ccu, boolean initialise) {
+    public void createInstallerPoints(HashMap ccu, Prefs prefs) {
         String ccuId = ccu.get("id").toString();
         ccuId = ccuId.replace("@", "");
         String ccuName = ccu.get("dis").toString();
         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        SettingPoint snBand = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-smartNodeBand")
-                .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-        CCUHsApi.getInstance().addPoint(snBand);
 
-
+        if(!prefs.getString("INSTALL_TYPE").equals("ADDCCU")) {
+            SettingPoint snBand = new SettingPoint.Builder()
+                    .setDeviceRef(ccuId)
+                    .setSiteRef(siteMap.get("id").toString())
+                    .setDisplayName(ccuName + "-smartNodeBand")
+                    .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+            CCUHsApi.getInstance().addPoint(snBand);
+        }
         OtaStatusDiagPoint.Companion.addOTAStatusPoint(
                 siteMap.get("dis").toString()+"-CCU",
                 ccu.get("equipRef").toString(),

@@ -344,18 +344,33 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 coolingUserLimitMin.setEnabled(true);
                 heatingDeadBand.setEnabled(true);
                 coolingDeadBand.setEnabled(true);
-                heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
-                heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
-                coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
-                coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
-                heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                        getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
-                coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                        getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+                if(mDay != null) {
+                    heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
+                    heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
+                    coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
+                    coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
+                    heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
+                    coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+                }else{
+                    heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
+                    heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(HSUtil.getLevelValueFrom16(heatLL.get("id").toString()), true)));
+                    coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(HSUtil.getLevelValueFrom16(coolLL.get("id").toString()), true)));
+                    coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), true)));
+                    heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
+                    coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(HSUtil.getLevelValueFrom16(coolDB.get("id").toString()), true)));
+                }
             }
         });
 

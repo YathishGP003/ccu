@@ -368,37 +368,39 @@ public class MasterControlUtil {
 
         for (HashMap<Object, Object> zone : zones) {
             String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and roomRef == \"" + zone.get("id").toString() + "\"");
-            int scheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
-            if (scheduleType == 1) {
-                Schedule schedule = CCUHsApi.getInstance().getZoneSchedule(zone.get("id").toString(), false).get(0);
+            if (scheduleTypeId != null) {
+                int scheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+                if (scheduleType == 1) {
+                    Schedule schedule = CCUHsApi.getInstance().getZoneSchedule(zone.get("id").toString(), false).get(0);
 
-                Double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback() ;
-                if(unoccupiedZoneSetBackval == null){
-                    String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unoccupied and setback and roomRef == \"" + zone.get("id").toString() + "\"");
-                    unoccupiedZoneSetBackval =  CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
-                }
-                if (schedule.getMarkers().contains("followBuilding")) {
-                    StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),false);
-                    if(val != null)
-                        WarningMessage = WarningMessage.append(val);
+                    Double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
+                    if (unoccupiedZoneSetBackval == null) {
+                        String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unoccupied and setback and roomRef == \"" + zone.get("id").toString() + "\"");
+                        unoccupiedZoneSetBackval = CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
+                    }
+                    if (schedule.getMarkers().contains("followBuilding")) {
+                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                                heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), false);
+                        if (val != null)
+                            WarningMessage = WarningMessage.append(val);
 
-                }else{
+                    } else {
+                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                                heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), true);
+                        if (val != null)
+                            WarningMessage = WarningMessage.append(val);
+                    }
+                } else if (scheduleType == 2) {
+                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString());
+                    double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
                     StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),true);
+                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), true);
                     if (val != null)
                         WarningMessage = WarningMessage.append(val);
+
                 }
-            } else if (scheduleType == 2) {
-                Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString());
-                double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
-                StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                        heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),true);
-                if (val != null)
-                    WarningMessage = WarningMessage.append(val);
 
             }
-
         }
 
         if (WarningMessage.length() > 1) {

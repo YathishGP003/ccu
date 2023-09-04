@@ -113,7 +113,7 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'carrier_prod' + "_" + versionSuffix
-            debuggable true
+            debuggable false
             manifestPlaceholders = [ applicationLabel:"@string/app_carrier",appicon:"@drawable/appicon_carrier",roundicon:"@drawable/appicon_carrier"]
         }
         staging {

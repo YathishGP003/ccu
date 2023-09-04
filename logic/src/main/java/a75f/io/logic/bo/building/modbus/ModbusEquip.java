@@ -11,15 +11,19 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.Condition;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.modbusbox.ModbusCategory;
@@ -59,6 +63,9 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType;
+
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
+
         List<String> modbusEquipTypes = Arrays.asList(equipmentInfo.getEquipType().replaceAll("\\s", "").split(","));
         if (hasEquipType(ModbusEquipTypes.EMR_ZONE, modbusEquipTypes)) {
             modbusEquipType = String.valueOf(ModbusEquipTypes.EMR);
@@ -135,8 +142,8 @@ public class ModbusEquip {
                     .setTz(tz).build();
 
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
 
         Device modbusDevice = new Device.Builder()
                 .setDisplayName(modbusEquipType+"-"+equipmentInfo.getSlaveId())

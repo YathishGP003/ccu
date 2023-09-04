@@ -1463,15 +1463,15 @@ public class CCUHsApi
         HDict nameScheduleDict = new HDictBuilder().add("filter",
                 "named and schedule and organization == \""+org+"\"").toDict();
         CcuLog.d(TAG, "nameScheduleDict = "+nameScheduleDict);
-        HGrid nameScheduleGrid = hClient.call("read",
-                HGridBuilder.dictToGrid(nameScheduleDict));
+        String response = fetchRemoteEntityByQuery("named and schedule and organization == \""+org+"\"");
 
-        if (nameScheduleGrid == null) {
-            CcuLog.d(TAG, "nameScheduleGrid is null");
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
             return;
         }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
 
-        Iterator it = nameScheduleGrid.iterator();
         while (it.hasNext()) {
             HRow row = (HRow) it.next();
             Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(row).toDict()).build();
@@ -1480,7 +1480,7 @@ public class CCUHsApi
                 continue;
             }
             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-            CcuLog.i(TAG, "Named schedule Imported");
+            CcuLog.i(TAG, "Named schedule Imported - "+ row.get("id").toString());
         }
 
     }
@@ -2409,6 +2409,7 @@ public class CCUHsApi
                             defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                                importNamedSchedule(hsClient);
                             });
 
                         } catch (JSONException e) {

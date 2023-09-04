@@ -1,4 +1,4 @@
-package a75f.io.renatus.compositcomponents
+package a75f.io.renatus.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

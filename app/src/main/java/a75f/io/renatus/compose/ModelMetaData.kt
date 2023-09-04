@@ -1,7 +1,5 @@
 package a75f.io.renatus.compose
 
-import android.os.Build.VERSION
-
 /**
  * Created by Manjunath K on 14-07-2023.
  */

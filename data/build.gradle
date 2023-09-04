@@ -25,29 +25,29 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-        }
+         }
         dev {
             minifyEnabled false
-        }
+         }
         dev_qa {
             minifyEnabled false
-        }
+         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-        }
+         }
         qa {
             minifyEnabled false
-        }
+         }
         carrier_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-        }
+         }
         staging {
             minifyEnabled false
-        }
+         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
@@ -81,7 +81,7 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20230828.1"
+def domainLibVersion = "20230825.1"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])

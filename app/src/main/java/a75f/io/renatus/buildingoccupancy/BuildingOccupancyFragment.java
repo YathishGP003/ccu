@@ -19,6 +19,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -51,6 +52,7 @@ import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment.BuildingOccupancyDialogListener;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
+import a75f.io.renatus.util.NetworkUtil;
 
 
 public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener {
@@ -203,6 +205,14 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
     BuildingOccupancy.Days removeEntry = null;
     public boolean onClickSave(int position, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                                ArrayList<DAYS> days){
+
+        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
+                    "connect to network.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
             try {

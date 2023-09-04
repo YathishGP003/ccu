@@ -36,9 +36,8 @@ import java.util.concurrent.Future;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.HSUtilKtKt;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
@@ -286,6 +285,16 @@ public class BuildingOccupancyViewModel {
                 for (Interval i : spillsMap.get(zone)) {
                     Zone z = new Zone();
                     Floor f = new Floor();
+                    List<Equip> equipList = new ArrayList<>();
+                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                    HDict equipDict = new HDictBuilder().add("filter", "equip and roomRef == " + zone).toDict();
+                    HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
+                    if(equipGrid != null) {
+                        List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
+                        for (HashMap equip : equipMaps) {
+                            equipList.add(new Equip.Builder().setHashMap(equip).build());
+                        }
+                    }
                     String response = CCUHsApi.getInstance().fetchRemoteEntity(zone);
 
                     if (response != null) {
@@ -320,25 +329,27 @@ public class BuildingOccupancyViewModel {
                         }
                     }
 
-                    if ((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isNamedSchedule()) {
-                        schedules = schedules.concat("named");
-                        if (!namedheaders.contains(f.getDisplayName())) {
-                            spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
-                            namedheaders.add(f.getDisplayName());
+                    if(equipList.size() > 0 && !MasterControlUtil.isNonTempModule(equipList.get(0).getProfile())) {
+                        if ((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isNamedSchedule()) {
+                            schedules = schedules.concat("named");
+                            if (!namedheaders.contains(f.getDisplayName())) {
+                                spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                namedheaders.add(f.getDisplayName());
+                            }
+                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ")
+                                    .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
+                                    .append(" (").append(i.getStart().hourOfDay().get()).append(":")
+                                    .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
+                                    .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
+                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                        } else {
+                            schedules = schedules.concat(Tags.ZONE);
+                            if (!zoneheaders.contains(f.getDisplayName())) {
+                                spillZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                zoneheaders.add(f.getDisplayName());
+                            }
+                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
-                        spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ")
-                                .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
-                                .append(" (").append(i.getStart().hourOfDay().get()).append(":")
-                                .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
-                                .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
-                                .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
-                    } else {
-                        schedules = schedules.concat(Tags.ZONE);
-                        if (!zoneheaders.contains(f.getDisplayName())) {
-                            spillZones.append("\t").append(f.getDisplayName()).append("->\n");
-                            zoneheaders.add(f.getDisplayName());
-                        }
-                        spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                     }
                 }
             }

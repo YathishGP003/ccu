@@ -59,6 +59,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -882,6 +883,8 @@ public class InstallerOptions extends Fragment {
                 ProgressDialogUtils.showProgressDialog(getContext(), "Validating...");
 
                 ArrayList<Schedule> scheduleList = new ArrayList<>();
+                List<Zone> zones = new ArrayList<>();
+                List<Equip> equipList = new ArrayList<>();
                 HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
                 final String[] warning = new String[1];
 
@@ -899,6 +902,22 @@ public class InstallerOptions extends Fragment {
                             scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                         }
                     }
+                    HDict zoneDict = new HDictBuilder().add("filter", "room and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                    HGrid zoneGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneDict));
+                    if(zoneGrid != null) {
+                        List<HashMap> zoneMaps = CCUHsApi.getInstance().HGridToList(zoneGrid);
+                        for (HashMap zone : zoneMaps) {
+                            zones.add(new Zone.Builder().setHashMap(zone).build());
+                        }
+                    }
+                    HDict equipDict = new HDictBuilder().add("filter", "equip and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                    HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
+                    if(equipGrid != null) {
+                        List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
+                        for (HashMap equip : equipMaps) {
+                            equipList.add(new Equip.Builder().setHashMap(equip).build());
+                        }
+                    }
                     handler.post(() -> {
                         ProgressDialogUtils.hideProgressDialog();
                         if(scheduleList.isEmpty()){
@@ -914,7 +933,7 @@ public class InstallerOptions extends Fragment {
                                     buildingLimitMin.getSelectedItem().toString(),
                                     buildingLimitMax.getSelectedItem().toString(),
                                     unoccupiedZoneSetback.getSelectedItem().toString(),
-                                    buildingToZoneDiff.getSelectedItem().toString());
+                                    buildingToZoneDiff.getSelectedItem().toString(), zones, equipList);
                             if (warning[0] == null) {
                                 masterControlView.saveUserLimitChange(1, buildingLimitMin.getSelectedItem().toString());
                                 masterControlView.saveUserLimitChange(2, buildingLimitMax.getSelectedItem().toString());

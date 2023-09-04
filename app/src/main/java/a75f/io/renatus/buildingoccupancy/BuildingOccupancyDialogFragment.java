@@ -295,9 +295,6 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting schedule...");
             buildingOccupancyDialogListener.onClickSave(mPosition, 0, 0, 0, 0, null);
             alertDialog.dismiss();
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-            }, 1000);
             dismiss();
         });
 

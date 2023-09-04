@@ -57,5 +57,5 @@ fun getSchedule(roomRef : String, floorRef: String) : Schedule{
       val roomSchedule: Schedule = CCUHsApi.getInstance().getScheduleById(scheduleRef)
       return roomSchedule
    }
-   return Schedule();
+   return Schedule()
 }

@@ -190,7 +190,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             double minVal = convertingRelativeValueFtoC(0);
             double maxVal = convertingRelativeValueFtoC(10);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
-                deadBand.add( ((val)) + "\u00B0C");
+                deadBand.add(((val)) + "\u00B0C");
             }
 
         }else{
@@ -560,8 +560,8 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             coolingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingLimitMin.getSelectedItem().toString(), "\u00B0C" )));
             heatingUserLimitMaxVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingLimitMax.getSelectedItem().toString(), "\u00B0C" )));
             heatingUserLimitMinVal = celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingLimitMin.getSelectedItem().toString(), "\u00B0C" )));
-            heatingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C" ))));
             coolingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C" ))));
+            heatingDeadBandVal = roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C" ))));
         }else{
             coolingUserLimitMaxVal = MasterControlUtil.getAdapterFarhenheitVal(coolingLimitMax.getSelectedItem().toString());
             coolingUserLimitMinVal = MasterControlUtil.getAdapterFarhenheitVal(coolingLimitMin.getSelectedItem().toString());

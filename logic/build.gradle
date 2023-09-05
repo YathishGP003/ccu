@@ -18,13 +18,7 @@ android {
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
-        /*javaCompileOptions {
-            annotationProcessorOptions {
-                includeCompileClasspath true
-            }
-        }*/
 
-        // Default base IP is empty string.  We only need it for local env, where we overwrite it.
         buildConfigField "String", 'API_BASE_IP', '\"\"'
     }
 
@@ -69,7 +63,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.dev.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.dev.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.dev.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https:// alerts.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.dev.service.75f.io/\"'
@@ -83,7 +77,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.qa.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.qa.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
@@ -96,7 +90,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.qa.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.qa.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.qa.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.qa.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.qa.service.75f.io/\"'
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.qa.service.75f.io/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-qa\"'
@@ -125,7 +119,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.staging.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.staging.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.staging.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.staging.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.staging.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-staging\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.staging.service.75f.io/api/v1/\"'
@@ -140,7 +134,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.prod.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.prod.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.prod.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.prod.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.prod.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.prod.service.75f.io/api/v1/\"'
@@ -156,7 +150,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.daikin.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.daikin.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.daikin.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-daikin-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.daikin.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.daikin.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.daikin.service.75f.io/api/v1/\"'

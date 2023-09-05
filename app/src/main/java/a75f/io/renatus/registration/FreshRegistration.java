@@ -1249,7 +1249,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 InstallerOptions installerOptions = new InstallerOptions();
                 HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
-                installerOptions.createInstallerPoints(ccu, true);
+                installerOptions.createInstallerPoints(ccu, prefs);
                 prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
                 prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
                 ProgressDialogUtils.hideProgressDialog();

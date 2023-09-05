@@ -348,7 +348,6 @@ public class Globals {
                         migrateIduPoints(site);
                         migrateSNPoints(site);
                         CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
-                        loadEquipProfiles();
                         isInitCompleted = true;
                         Site siteObject = new Site.Builder().setHashMap(site).build();
                         CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),

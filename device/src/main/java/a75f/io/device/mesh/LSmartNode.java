@@ -651,7 +651,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            Equip equip = HSUtil.getEquipForModule((Short) device.get("id"));
+            Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
             controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }

@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.renatus.Communication.isPortAvailable;
+import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
@@ -47,6 +49,8 @@ import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -118,6 +122,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+        executorService = Executors.newFixedThreadPool(1);
         CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate");
         prefs = new Prefs(this);
         CCUUiUtil.setThemeDetails(this);
@@ -654,9 +659,26 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void intializeBACnet() {
         if(UtilityApplication.isBACnetIntialized()) {
-            UtilityApplication.stopRestServer();
-            UtilityApplication.startRestServer();
+            executeTask();
         }
+    }
+
+    private ExecutorService executorService;
+    private void executeTask() {
+        executorService.submit(() -> {
+            boolean isPortAvailable = isPortAvailable(5001);
+            this.runOnUiThread(() -> {
+                handleClick(isPortAvailable);
+            });
+        });
+    }
+
+    private void handleClick(boolean isPortAvailable){
+        if(!isPortAvailable){
+            Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        UtilityApplication.startRestServer();
     }
 
 }

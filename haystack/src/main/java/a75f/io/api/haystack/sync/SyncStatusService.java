@@ -108,9 +108,11 @@ public class SyncStatusService {
     
     public void addUpdatedEntity(String id) {
         CcuLog.i(HayStackConstants.LOG_TAG," addUpdatedEntity "+id);
-        updatedIdList.add(id);
-        //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
-        putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        if(!(updatedIdList.contains(id))) {
+            updatedIdList.add(id);
+            //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
+            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        }
     }
     
     public void addDeletedEntity(String id, boolean saveImmediate) {

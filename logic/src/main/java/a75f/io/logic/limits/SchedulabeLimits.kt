@@ -187,7 +187,7 @@ class SchedulabeLimits {
                         "and limit and max and default")
                 val pointVal = HSUtil.getPriorityLevelVal(buildingPoint["id"].toString(), 16)
                 if (pointVal > 0)
-                hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                   hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
                         pointVal , 0)
             }
 

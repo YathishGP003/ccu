@@ -188,7 +188,7 @@ class HyperStatUserIntentHandler {
                 CCUHsApi.getInstance().writeDefaultVal(
                     "point and status and message and writable and equipRef == \"$equipId\"", status
                 )
-                zoneDataInterface?.refreshScreen("")
+                zoneDataInterface?.refreshScreen("", false)
             }
         }
 
@@ -225,7 +225,7 @@ class HyperStatUserIntentHandler {
 
                 },
                 {
-                    zoneDataInterface?.refreshScreen("")
+                    zoneDataInterface?.refreshScreen("", false)
                 }
             )
 

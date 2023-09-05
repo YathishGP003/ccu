@@ -27,6 +27,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -64,7 +65,7 @@ public class UpdatePointHandler implements MessageHandler
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
-                zoneDataInterface.refreshScreen("");
+                zoneDataInterface.refreshScreen("", true);
             }
             return;
         }
@@ -170,6 +171,16 @@ public class UpdatePointHandler implements MessageHandler
             }
         }
 
+        if (localPoint.getMarkers().contains("modbus")){
+            ModbusHandler.updatePoint(msgObject,localPoint);
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(localPoint.getId());
+            }
+            if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(localPoint.getId());
+            }
+        }
+        
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
             fetchRemotePoint(pointUid, isDataSync, msgObject);
@@ -242,11 +253,13 @@ public class UpdatePointHandler implements MessageHandler
                     //If duration shows it has already expired, then just write 1ms to force-expire it locally.
                     duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                            CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
-                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
-                        CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
+
             }
 
         }
@@ -291,17 +304,9 @@ public class UpdatePointHandler implements MessageHandler
 
         if (updateZoneUi && zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
-            zoneDataInterface.refreshScreen(luid);
+            zoneDataInterface.refreshScreen(luid, true);
         }
-        
-        if (p.getMarkers().contains("modbus")){
-            if (modbusDataInterface != null) {
-                modbusDataInterface.refreshScreen(luid);
-            }
-            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
-                modbusWritableDataInterface.writeRegister(p.getId());
-            }
-        }
+
         if(isScheduleType){
             UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
         }
@@ -315,7 +320,7 @@ public class UpdatePointHandler implements MessageHandler
     private static void updateUI(Point updatedPoint) {
         if (zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh");
-            zoneDataInterface.refreshScreen(updatedPoint.getId());
+            zoneDataInterface.refreshScreen(updatedPoint.getId(), true);
         }
     }
 

@@ -59,6 +59,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -359,7 +360,7 @@ public class InstallerOptions extends Fragment {
                     return;
                 }
                 mNext.setEnabled(false);
-                createInstallerPoints(ccu, false);
+                createInstallerPoints(ccu, prefs);
                 // TODO Auto-generated method stub
                 goTonext();
             }
@@ -425,7 +426,7 @@ public class InstallerOptions extends Fragment {
             linearLayout.setVisibility(View.INVISIBLE);
         });
 
-        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(getBackFillDuration()));
+        buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
     }
@@ -452,20 +453,21 @@ public class InstallerOptions extends Fragment {
         transaction.replace(R.id.buildingOccupancyFragmentContainer, childFragment).commit();
     }
 
-    public void createInstallerPoints(HashMap ccu, boolean initialise) {
+    public void createInstallerPoints(HashMap ccu, Prefs prefs) {
         String ccuId = ccu.get("id").toString();
         ccuId = ccuId.replace("@", "");
         String ccuName = ccu.get("dis").toString();
         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        SettingPoint snBand = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-smartNodeBand")
-                .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-        CCUHsApi.getInstance().addPoint(snBand);
 
-
+        if(!prefs.getString("INSTALL_TYPE").equals("ADDCCU")) {
+            SettingPoint snBand = new SettingPoint.Builder()
+                    .setDeviceRef(ccuId)
+                    .setSiteRef(siteMap.get("id").toString())
+                    .setDisplayName(ccuName + "-smartNodeBand")
+                    .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+            CCUHsApi.getInstance().addPoint(snBand);
+        }
         OtaStatusDiagPoint.Companion.addOTAStatusPoint(
                 siteMap.get("dis").toString()+"-CCU",
                 ccu.get("equipRef").toString(),
@@ -842,9 +844,11 @@ public class InstallerOptions extends Fragment {
             buildingToZoneDiff.setSelection(zoneDiffadapter.getPosition(
                     getAdapterValDiff(HSUtil.getLevelValueFrom16(buildingToZoneDiffObj.get("id").toString()))));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                    getAdapterValDeadBand(coolDBVal == 0.0 ? 2: coolDBVal, false)));
+                    getAdapterValDeadBand(//coolDBVal == 0.0 ? 2:
+                            coolDBVal, false)));
             heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                    getAdapterValDeadBand(heatDBVal == 0.0 ? 2 : heatDBVal, false)));
+                    getAdapterValDeadBand(//heatDBVal == 0.0 ? 2 :
+                            heatDBVal, false)));
             heatingLimitMin.setSelection(heatingAdapter.getPosition(
                     getAdapterVal(heatMinVal == 0.0 ? 67 : heatMinVal, false)));
             coolingLimitMin.setSelection(coolingAdapter.getPosition(
@@ -854,7 +858,8 @@ public class InstallerOptions extends Fragment {
             coolingLimitMax.setSelection(coolingAdapter.getPosition(
                     getAdapterVal(coolMaxVal == 0.0 ?77 :coolMaxVal, false)));
             unoccupiedZoneSetback.setSelection(setbackadapter.getPosition(
-                    getAdapterValDeadBand(setBack == 0.0 ? 5:setBack, false)));
+                    getAdapterValDeadBand(//setBack == 0.0 ? 5:
+                            setBack, false)));
             buildingLimitMin.setSelection(adapter.getPosition(
                     getAdapterVal(HSUtil.getLevelValueFrom16(buildingMin.get("id").toString()), false)));
             buildingLimitMax.setSelection(adapter.getPosition(
@@ -878,6 +883,8 @@ public class InstallerOptions extends Fragment {
                 ProgressDialogUtils.showProgressDialog(getContext(), "Validating...");
 
                 ArrayList<Schedule> scheduleList = new ArrayList<>();
+                List<Zone> zones = new ArrayList<>();
+                List<Equip> equipList = new ArrayList<>();
                 HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
                 final String[] warning = new String[1];
 
@@ -895,6 +902,22 @@ public class InstallerOptions extends Fragment {
                             scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                         }
                     }
+                    HDict zoneDict = new HDictBuilder().add("filter", "room and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                    HGrid zoneGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneDict));
+                    if(zoneGrid != null) {
+                        List<HashMap> zoneMaps = CCUHsApi.getInstance().HGridToList(zoneGrid);
+                        for (HashMap zone : zoneMaps) {
+                            zones.add(new Zone.Builder().setHashMap(zone).build());
+                        }
+                    }
+                    HDict equipDict = new HDictBuilder().add("filter", "equip and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                    HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
+                    if(equipGrid != null) {
+                        List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
+                        for (HashMap equip : equipMaps) {
+                            equipList.add(new Equip.Builder().setHashMap(equip).build());
+                        }
+                    }
                     handler.post(() -> {
                         ProgressDialogUtils.hideProgressDialog();
                         if(scheduleList.isEmpty()){
@@ -910,7 +933,7 @@ public class InstallerOptions extends Fragment {
                                     buildingLimitMin.getSelectedItem().toString(),
                                     buildingLimitMax.getSelectedItem().toString(),
                                     unoccupiedZoneSetback.getSelectedItem().toString(),
-                                    buildingToZoneDiff.getSelectedItem().toString());
+                                    buildingToZoneDiff.getSelectedItem().toString(), zones, equipList);
                             if (warning[0] == null) {
                                 masterControlView.saveUserLimitChange(1, buildingLimitMin.getSelectedItem().toString());
                                 masterControlView.saveUserLimitChange(2, buildingLimitMax.getSelectedItem().toString());

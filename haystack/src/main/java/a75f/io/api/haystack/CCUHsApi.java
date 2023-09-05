@@ -18,6 +18,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -63,6 +64,7 @@ import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
+import a75f.io.api.haystack.util.BackfillUtil;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
@@ -298,6 +300,7 @@ public class CCUHsApi
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String equipId = tagsDb.addEquip(q);
         syncStatusService.addUnSyncedEntity(equipId);
+        BackfillUtil.setBackFillDuration(context);
         return equipId;
     }
 
@@ -1461,19 +1464,24 @@ public class CCUHsApi
         HDict nameScheduleDict = new HDictBuilder().add("filter",
                 "named and schedule and organization == \""+org+"\"").toDict();
         CcuLog.d(TAG, "nameScheduleDict = "+nameScheduleDict);
-        HGrid nameScheduleGrid = hClient.call("read",
-                HGridBuilder.dictToGrid(nameScheduleDict));
+        String response = fetchRemoteEntityByQuery("named and schedule and organization == \""+org+"\"");
 
-        if (nameScheduleGrid == null) {
-            CcuLog.d(TAG, "nameScheduleGrid is null");
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
             return;
         }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
 
-        Iterator it = nameScheduleGrid.iterator();
         while (it.hasNext()) {
             HRow row = (HRow) it.next();
+            Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(row).toDict()).build();
+            if(schedule.getMarkers().contains("default")
+                    && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
+                continue;
+            }
             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-            CcuLog.i(TAG, "Named schedule Imported");
+            CcuLog.i(TAG, "Named schedule Imported - "+ row.get("id").toString());
         }
 
     }
@@ -2402,6 +2410,7 @@ public class CCUHsApi
                             defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                                importNamedSchedule(hsClient);
                             });
 
                         } catch (JSONException e) {
@@ -2932,6 +2941,7 @@ public class CCUHsApi
             if (timeZone.contains(tz)) {
                 AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                 am.setTimeZone(timeZone);
+                DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
                 break;
             }
         }
@@ -3080,4 +3090,17 @@ public class CCUHsApi
         return responseHGrid;
     }
 
+    public void updateLocalTimeZone(){
+        String tz = Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getTz();
+        String[] tzIds = TimeZone.getAvailableIDs();
+        for (String timeZone : tzIds) {
+            if (timeZone.contains(tz)) {
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.setTimeZone(timeZone);
+                DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
+                CcuLog.e(TAG, "updateLocalTimeZone : local timezone updated to "+timeZone);
+                break;
+            }
+        }
+    }
 }

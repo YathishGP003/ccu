@@ -1,5 +1,7 @@
 package a75f.io.logic.tuners;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -9,6 +11,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.logic.L;
 
 public class OAOTuners
 {
@@ -320,6 +323,149 @@ public class OAOTuners
         
         }
 
+        if(isNewSite || !verifyPointsAvailability("default","standalone and enthalpy and duct and compensation and offset",equipRef)) {
+            Point standaloneEnthalpyDuctCompensationOffset = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEnthalpyDuctCompensationOffset")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setTz(tz)
+                    .build();
+            String standaloneEnthalpyDuctCompensationOffsetId = hayStack.addPoint(standaloneEnthalpyDuctCompensationOffset);
+            hayStack.writePointForCcuUser(standaloneEnthalpyDuctCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET, 0);
+            hayStack.writeHisValById(standaloneEnthalpyDuctCompensationOffsetId, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and min and temp",equipRef)) {
+            Point standaloneEconomizingMinTemperature = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingMinTemperature")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("standalone")
+                    .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingMinTemperatureId = hayStack.addPoint(standaloneEconomizingMinTemperature);
+            hayStack.writePointForCcuUser(standaloneEconomizingMinTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_TEMP, 0);
+            hayStack.writeHisValById(standaloneEconomizingMinTemperatureId, TunerConstants.OAO_ECONOMIZING_MIN_TEMP);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and max and temp",equipRef)) {
+            Point standaloneEconomizingMaxTemperature = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingMaxTemperature")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("standalone")
+                    .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingMaxTemperatureId = hayStack.addPoint(standaloneEconomizingMaxTemperature);
+            hayStack.writePointForCcuUser(standaloneEconomizingMaxTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_TEMP, 0);
+            hayStack.writeHisValById(standaloneEconomizingMaxTemperatureId, TunerConstants.OAO_ECONOMIZING_MAX_TEMP);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and min and humidity",equipRef)) {
+            Point standaloneEconomizingMinHumidity = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingMinHumidity")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingMinHumidityId = hayStack.addPoint(standaloneEconomizingMinHumidity);
+            hayStack.writePointForCcuUser(standaloneEconomizingMinHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY, 0);
+            hayStack.writeHisValById(standaloneEconomizingMinHumidityId, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and max and humidity",equipRef)) {
+            Point standaloneEconomizingMaxHumidity = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingMaxHumidity")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingMaxHumidityId = hayStack.addPoint(standaloneEconomizingMaxHumidity);
+            hayStack.writePointForCcuUser(standaloneEconomizingMaxHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY, 0);
+            hayStack.writeHisValById(standaloneEconomizingMaxHumidityId, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and outside and damper and mat and target",equipRef)) {
+            Point standaloneOutsideDamperMixedAirTarget = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneOutsideDamperMixedAirTarget")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("standalone")
+                    .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneOutsideDamperMixedAirTargetId = hayStack.addPoint(standaloneOutsideDamperMixedAirTarget);
+            hayStack.writePointForCcuUser(standaloneOutsideDamperMixedAirTargetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_TARGET, 0);
+            hayStack.writeHisValById(standaloneOutsideDamperMixedAirTargetId, TunerConstants.OAO_OA_DAMPER_MAT_TARGET);
+        }
+        
+        if(isNewSite || !verifyPointsAvailability("default","standalone and outside and damper and mat and min",equipRef)) {
+            Point standaloneOutsideDamperMixedAirMinimum = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneOutsideDamperMixedAirMinimum")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("standalone")
+                    .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneOutsideDamperMixedAirMinimumId = hayStack.addPoint(standaloneOutsideDamperMixedAirMinimum);
+            hayStack.writePointForCcuUser(standaloneOutsideDamperMixedAirMinimumId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_MIN, 0);
+            hayStack.writeHisValById(standaloneOutsideDamperMixedAirMinimumId, TunerConstants.OAO_OA_DAMPER_MAT_MIN);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and main and cooling and loop and map",equipRef)) {
+            Point standaloneEconomizingToMainCoolingLoopMap = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingToMainCoolingLoopMap")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("standalone")
+                    .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                    .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("%")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingToMainCoolingLoopMapId = hayStack.addPoint(standaloneEconomizingToMainCoolingLoopMap);
+            hayStack.writePointForCcuUser(standaloneEconomizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
+            hayStack.writeHisValById(standaloneEconomizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
+        }
+
+        if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and dry and bulb and threshold",equipRef)) {
+            Point standaloneEconomizingDryBulbThreshold = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingDryBulbThreshold")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("70").setIncrementVal("0.5").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneEconomizingDryBulbThresholdId = hayStack.addPoint(standaloneEconomizingDryBulbThreshold);
+            hayStack.writePointForCcuUser(standaloneEconomizingDryBulbThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD, 0);
+            hayStack.writeHisValById(standaloneEconomizingDryBulbThresholdId, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD);
+        }
+        
     }
     private static boolean verifyPointsAvailability(String defaulttuner, String tags, String equipref){
         HashMap verifyablePoint = CCUHsApi.getInstance().read("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
@@ -785,42 +931,24 @@ public class OAOTuners
         
     }
 
-    public static void updateZoneOaoTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipdis,
-                                             String tz) {
+    public static void updateStandaloneOaoTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipdis,
+                                             String tz, String floorRef, String roomRef) {
 
-        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate",equipref)) {
-            Point co2DamperOpeningRate = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "co2DamperOpeningRate")
-                    .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
-                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate").addMarker("standalone")
-                    .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setTz(tz)
-                    .build();
-            String co2DamperOpeningRateId = hayStack.addPoint(co2DamperOpeningRate);
-            HashMap co2DamperOpeningRatePoint = hayStack.read("point and tuner and default and oao and co2 and damper and opening and rate");
-            ArrayList<HashMap> co2DamperOpeningRatePointArr = hayStack.readPoint(co2DamperOpeningRatePoint.get("id").toString());
-            for (HashMap valMap : co2DamperOpeningRatePointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(co2DamperOpeningRateId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                }
-            }
-            hayStack.writeHisValById(co2DamperOpeningRateId, HSUtil.getPriorityVal(co2DamperOpeningRateId));
-        }
-        if (!verifyPointsAvailability("not default","enthalpy and duct and compensation and offset",equipref)) {
+        if (!verifyPointsAvailability("not default","standalone and enthalpy and duct and compensation and offset",equipref)) {
             Point enthalpyDuctCompensationOffset = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "enthalpyDuctCompensationOffset")
+                    .setDisplayName(equipdis + "-" + "standaloneEnthalpyDuctCompensationOffset")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("standalone")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setTz(tz)
                     .build();
             String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
-            HashMap enthalpyDuctCompensationOffsetPoint = hayStack.read("point and tuner and default and oao and enthalpy and duct and compensation and offset");
+            HashMap enthalpyDuctCompensationOffsetPoint = hayStack.read("point and tuner and default and standalone and oao and enthalpy and duct and compensation and offset");
             ArrayList<HashMap> enthalpyDuctCompensationOffsetPointArr = hayStack.readPoint(enthalpyDuctCompensationOffsetPoint.get("id").toString());
             for (HashMap valMap : enthalpyDuctCompensationOffsetPointArr) {
                 if (valMap.get("val") != null) {
@@ -830,11 +958,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
         }
-        if (!verifyPointsAvailability("not default","economizing and min and temp",equipref)) {
+
+        if (!verifyPointsAvailability("not default","standalone and economizing and min and temp",equipref)) {
             Point economizingMinTemperature = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingMinTemperature")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingMinTemperature")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("standalone")
                     .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -842,7 +974,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
-            HashMap economizingMinTemperaturePoint = hayStack.read("point and tuner and default and oao and economizing and min and temp");
+            HashMap economizingMinTemperaturePoint = hayStack.read("point and tuner and default and standalone and oao and economizing and min and temp");
             ArrayList<HashMap> economizingMinTemperaturePointArr = hayStack.readPoint(economizingMinTemperaturePoint.get("id").toString());
             for (HashMap valMap : economizingMinTemperaturePointArr) {
                 if (valMap.get("val") != null) {
@@ -852,11 +984,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingMinTemperatureId, HSUtil.getPriorityVal(economizingMinTemperatureId));
         }
-        if(!verifyPointsAvailability("not default","economizing and max and temp",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and economizing and max and temp",equipref)) {
             Point economizingMaxTemperature = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingMaxTemperature")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingMaxTemperature")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("standalone")
                     .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -864,7 +1000,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
-            HashMap economizingMaxTemperaturePoint = hayStack.read("point and tuner and default and oao and economizing and max and temp");
+            HashMap economizingMaxTemperaturePoint = hayStack.read("point and tuner and default and standalone and oao and economizing and max and temp");
             ArrayList<HashMap> economizingMaxTemperaturePointArr = hayStack.readPoint(economizingMaxTemperaturePoint.get("id").toString());
             for (HashMap valMap : economizingMaxTemperaturePointArr) {
                 if (valMap.get("val") != null) {
@@ -874,11 +1010,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingMaxTemperatureId, HSUtil.getPriorityVal(economizingMaxTemperatureId));
         }
-        if(!verifyPointsAvailability("not default","economizing and min and humidity",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and economizing and min and humidity",equipref)) {
             Point economizingMinHumidity = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingMinHumidity")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingMinHumidity")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("standalone")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -886,7 +1026,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
-            HashMap economizingMinHumidityPoint = hayStack.read("point and tuner and default and oao and economizing and min and humidity");
+            HashMap economizingMinHumidityPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and min and humidity");
             ArrayList<HashMap> economizingMinHumidityPointArr = hayStack.readPoint(economizingMinHumidityPoint.get("id").toString());
             for (HashMap valMap : economizingMinHumidityPointArr) {
                 if (valMap.get("val") != null) {
@@ -896,11 +1036,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingMinHumidityId, HSUtil.getPriorityVal(economizingMinHumidityId));
         }
-        if(!verifyPointsAvailability("not default","economizing and max and humidity",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and economizing and max and humidity",equipref)) {
             Point economizingMaxHumidity = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingMaxHumidity")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingMaxHumidity")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("standalone")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -908,7 +1052,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
-            HashMap economizingMaxHumidityPoint = hayStack.read("point and tuner and default and oao and economizing and max and humidity");
+            HashMap economizingMaxHumidityPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and max and humidity");
             ArrayList<HashMap> economizingMaxHumidityPointArr = hayStack.readPoint(economizingMaxHumidityPoint.get("id").toString());
             for (HashMap valMap : economizingMaxHumidityPointArr) {
                 if (valMap.get("val") != null) {
@@ -918,11 +1062,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingMaxHumidityId, HSUtil.getPriorityVal(economizingMaxHumidityId));
         }
-        if(!verifyPointsAvailability("not default","outside and damper and mat and target",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and outside and damper and mat and target",equipref)) {
             Point outsideDamperMixedAirTarget = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "outsideDamperMixedAirTarget")
+                    .setDisplayName(equipdis + "-" + "standaloneOutsideDamperMixedAirTarget")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("standalone")
                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -930,7 +1078,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
-            HashMap outsideDamperMixedAirTargetPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and target");
+            HashMap outsideDamperMixedAirTargetPoint = hayStack.read("point and tuner and default and standalone and oao and outside and damper and mat and target");
             ArrayList<HashMap> outsideDamperMixedAirTargetPointArr = hayStack.readPoint(outsideDamperMixedAirTargetPoint.get("id").toString());
             for (HashMap valMap : outsideDamperMixedAirTargetPointArr) {
                 if (valMap.get("val") != null) {
@@ -940,11 +1088,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(outsideDamperMixedAirTargetId, HSUtil.getPriorityVal(outsideDamperMixedAirTargetId));
         }
-        if(!verifyPointsAvailability("not default","outside and damper and mat and min",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and outside and damper and mat and min",equipref)) {
             Point outsideDamperMixedAirMinimum = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "outsideDamperMixedAirMinimum")
+                    .setDisplayName(equipdis + "-" + "standaloneOutsideDamperMixedAirMinimum")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("standalone")
                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -952,7 +1104,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
-            HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and min");
+            HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and standalone and oao and outside and damper and mat and min");
             ArrayList<HashMap> outsideDamperMixedAirMinimumPointArr = hayStack.readPoint(outsideDamperMixedAirMinimumPoint.get("id").toString());
             for (HashMap valMap : outsideDamperMixedAirMinimumPointArr) {
                 if (valMap.get("val") != null) {
@@ -962,11 +1114,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(outsideDamperMixedAirMinimumId, HSUtil.getPriorityVal(outsideDamperMixedAirMinimumId));
         }
-        if(!verifyPointsAvailability("not default","economizing and main and cooling and loop and map",equipref)) {
+
+        if(!verifyPointsAvailability("not default","standalone and economizing and main and cooling and loop and map",equipref)) {
             Point economizingToMainCoolingLoopMap = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingToMainCoolingLoopMap")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingToMainCoolingLoopMap")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("standalone")
                     .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -974,7 +1130,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
-            HashMap economizingToMainCoolingLoopMapPoint = hayStack.read("point and tuner and default and oao and economizing and main and cooling and loop and map");
+            HashMap economizingToMainCoolingLoopMapPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and main and cooling and loop and map");
             ArrayList<HashMap> economizingToMainCoolingLoopMapPointArr = hayStack.readPoint(economizingToMainCoolingLoopMapPoint.get("id").toString());
             for (HashMap valMap : economizingToMainCoolingLoopMapPointArr) {
                 if (valMap.get("val") != null) {
@@ -984,11 +1140,15 @@ public class OAOTuners
             }
             hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
         }
-        if (!verifyPointsAvailability("not default","economizing and dry and bulb and threshold",equipref)) {
+
+        if (!verifyPointsAvailability("not default","standalone and economizing and dry and bulb and threshold",equipref)) {
             Point economizingDryBulbThreshold = new Point.Builder()
-                    .setDisplayName(equipdis + "-" + "economizingDryBulbThreshold")
+                    .setDisplayName(equipdis + "-" + "standaloneEconomizingDryBulbThreshold")
                     .setSiteRef(siteRef)
-                    .setEquipRef(equipref).setHisInterpolate("cov")
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold").addMarker("standalone")
                     .setMinVal("0").setMaxVal("70").setIncrementVal("0.5").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
@@ -996,7 +1156,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);
-            HashMap economizingDryBulbThresholdPoint = hayStack.read("point and tuner and default and oao and " +
+            HashMap economizingDryBulbThresholdPoint = hayStack.read("point and tuner and default and standalone and oao and " +
                     "economizing and dry and bulb and threshold");
             //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
             // default values

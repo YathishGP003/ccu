@@ -286,12 +286,14 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             hyperStatSplitConfig.outsideDamperMinOpen, hyperStatSplitConfig.exhaustFanStage1Threshold,
             hyperStatSplitConfig.exhaustFanStage2Threshold, hyperStatSplitConfig.exhaustFanHysteresis)
 
-        OAOTuners.updateZoneOaoTuners(
+        OAOTuners.updateStandaloneOaoTuners(
             haystack,
             basicInfo.siteRef,
             equipRef,
             equipDis,
-            basicInfo.timeZone
+            basicInfo.timeZone,
+            floorRef,
+            roomRef
         )
 
         val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createIsRelayEnabledConfigPoints(

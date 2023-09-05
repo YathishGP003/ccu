@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
+import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
@@ -158,6 +159,8 @@ public class LSerial
 
             } else if (isHyperStatMessage(messageType) ) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+            } else if (isHyperSplitMessage(messageType)) {
+                HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
             else if (messageType == MessageType.CM_TO_CCU_OTA_STATUS) {
                 CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
@@ -495,4 +498,11 @@ public class LSerial
                messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
+
+    private static boolean isHyperSplitMessage(MessageType messageType) {
+        return messageType == MessageType.HYPERSPLIT_CM_TO_CCU_SERIALIZED_MESSAGE ||
+                messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
+                messageType == MessageType.HYPERSPLIT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
+    }
+
 }

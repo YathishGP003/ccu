@@ -201,7 +201,7 @@ public class HyperSplitMessageGenerator {
             Log.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
 
-        Log.i("CCU_HSS_MESSAGE",
+        Log.i(L.TAG_CCU_SERIAL,
                 "--------------HyperStat Split CPU & Economiser Controls Message: ------------------\n" +
                         "Node address " + address + "\n" +
                         "setTemp Heating " +  controls.getSetTempHeating() + "\n" +

@@ -100,7 +100,7 @@ public class HyperSplitMessageGenerator {
                 .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB);
 
-        Log.i("CCU_HSS_MESSAGE",
+        Log.i(L.TAG_CCU_SERIAL,
                 "--------------HyperStat Split CPU & Economiser Settings Message: ------------------\n" +
                         "Node address " + address + "\n" +
                         "roomName " + msg.getRoomName() + "\n" +

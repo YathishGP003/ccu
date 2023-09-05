@@ -946,7 +946,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
         val testSignalControlMessage: HyperSplit.HyperSplitControlsMessage_t  = getControlMessage()
 
-        Log.i("CCU_HSS_MESSAGE",
+        Log.i(L.TAG_CCU_SERIAL,
             "--------------HyperStat Split CPU & Economiser Test Signal Controls Message: ------------------\n" +
                     "Node address " + meshAddress + "\n" +
                     "setTemp Heating " +  testSignalControlMessage.getSetTempHeating() + "\n" +

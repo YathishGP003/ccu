@@ -3,6 +3,7 @@ package a75f.io.device.mesh.hypersplit
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.device.HyperSplit
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
@@ -49,7 +50,7 @@ class HyperSplitSettingsUtil {
                 }
             }
 
-            Log.i("CCU_HSS_MESSAGE",
+            Log.i(L.TAG_CCU_SERIAL,
                 "--------------HyperStat Split CPU & Economiser Settings2 Message: ------------------\n" +
                         "Node address " + nodeAddress + "\n" +
                         "enableForceOccupied " + settings2.enableForceOccupied + "\n" +
@@ -128,7 +129,7 @@ class HyperSplitSettingsUtil {
                 }
             }
 
-            Log.i("CCU_HSS_MESSAGE",
+            Log.i(L.TAG_CCU_SERIAL,
                 "--------------HyperStat Split CPU & Economiser Settings3 Message: ------------------\n" +
                         "Node address " + nodeAddress + "\n" +
                         "unoccupiedSetback " + settings3.genertiTuners.unoccupiedSetback + "\n" +
@@ -535,7 +536,7 @@ class HyperSplitSettingsUtil {
             The Universal In enum that gets sent in the settings message is in a different order than the enum for the
             corresponding Haystack point.
 
-            Rather than change one of these and have everything lineup nicely, this discrepancy is mapped over in this method.
+            Rather than change one of these and have everything line up nicely, this discrepancy is mapped over in this method.
              */
             if (intAssociation == 0) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
             else if (intAssociation == 1) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
@@ -555,8 +556,8 @@ class HyperSplitSettingsUtil {
             else if (intAssociation == 15) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
             else if (intAssociation == 16) return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
 
-            // This should never happen
-            else { return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED }
+            // This should never happen.
+            return HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
 
         }
 
@@ -597,7 +598,7 @@ class HyperSplitSettingsUtil {
             if (readConfig(hsApi, equipRef, "addr3 and sensorBus and config and enabled") == 0.0) {
                 sensorBus.sensorBus4Mapping = getHyperSplitSensorBusMapping(0)
             } else {
-                sensorBus.sensorBus4Mapping = getHyperSplitSensorBusMapping(3)
+                sensorBus.sensorBus4Mapping = getHyperSplitSensorBusMapping(4)
             }
 
             return sensorBus.build()

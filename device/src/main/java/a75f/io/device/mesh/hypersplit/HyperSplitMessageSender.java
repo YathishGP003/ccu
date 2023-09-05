@@ -102,7 +102,7 @@ public class HyperSplitMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        Log.d("CCU_HSS_MESSAGE", "sendControlMessage("+address+","+equipRef+")");
+        Log.d(L.TAG_CCU_SERIAL, "sendControlMessage("+address+","+equipRef+")");
         Equip equip = HSUtil.getEquipInfo(equipRef);
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + equip.getRoomRef() + "\"").intValue();

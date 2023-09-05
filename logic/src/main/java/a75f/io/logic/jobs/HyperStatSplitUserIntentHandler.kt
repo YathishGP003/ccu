@@ -236,7 +236,7 @@ class HyperStatSplitUserIntentHandler {
                 CCUHsApi.getInstance().writeDefaultVal(
                     "point and status and message and writable and equipRef == \"$equipId\"", status
                 )
-                zoneDataInterface?.refreshScreen("")
+                zoneDataInterface?.refreshScreen("", false)
             }
         }
 
@@ -273,7 +273,7 @@ class HyperStatSplitUserIntentHandler {
 
                 },
                 {
-                    zoneDataInterface?.refreshScreen("")
+                    zoneDataInterface?.refreshScreen("", false)
                 }
             )
 

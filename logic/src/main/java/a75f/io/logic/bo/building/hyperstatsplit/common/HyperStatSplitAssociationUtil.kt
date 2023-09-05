@@ -110,11 +110,11 @@ class HyperStatSplitAssociationUtil {
             return when (state) {
                 // Order is important here
 
-                0 -> CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY
-                1 -> CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY
+                0 -> CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY
+                1 -> CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY
                 2 -> CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY
                 // assuming it never going to call
-                else -> CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY
+                else -> CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY
             }
 
         }

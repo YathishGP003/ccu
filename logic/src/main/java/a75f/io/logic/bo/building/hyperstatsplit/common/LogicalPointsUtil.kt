@@ -1196,13 +1196,13 @@ class LogicalPointsUtil {
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State))
-                removePoint(readDuctPressureSensor(equipRef, "ductPressure1in"))
+                removePoint(readDuctPressureSensor(equipRef, "pressure1"))
             if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToDuctPressure0to2(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State))
-                removePoint(readDuctPressureSensor(equipRef, "ductPressure2in"))
+                removePoint(readDuctPressureSensor(equipRef, "pressure2"))
             if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToCondensateNO(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,

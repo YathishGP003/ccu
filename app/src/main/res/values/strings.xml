@@ -307,8 +307,8 @@
     </string-array>
 
     <string-array name="hyperstatsplit_sensor_temp_selector">
-        <item>  @string/mixed_air </item>
         <item>  @string/supply_air </item>
+        <item>  @string/mixed_air </item>
         <item>  @string/outside_air </item>
     </string-array>
 

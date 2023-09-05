@@ -235,8 +235,8 @@ enum class UniversalInAssociation {
 }
 
 enum class CpuEconSensorBusTempAssociation {
-   MIXED_AIR_TEMPERATURE_HUMIDITY,
    SUPPLY_AIR_TEMPERATURE_HUMIDITY,
+   MIXED_AIR_TEMPERATURE_HUMIDITY,
    OUTSIDE_AIR_TEMPERATURE_HUMIDITY
 }
 

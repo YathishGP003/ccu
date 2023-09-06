@@ -269,6 +269,8 @@ class VrvEquip(hsApi : CCUHsApi,
         roomRef: String,
         floorRef: String
     ) {
+
+        val roomSchedule = getSchedule(roomRef, floorRef)
         /*val equipStatus = Point.Builder()
             .setDisplayName(equip.displayName + "-equipStatus")
             .setEquipRef(equip.id)
@@ -323,8 +325,9 @@ class VrvEquip(hsApi : CCUHsApi,
             .setTz(equip.tz)
             .build()
         val equipScheduleTypeId = hayStack.addPoint(equipScheduleType)
-        hayStack.writeDefaultValById(equipScheduleTypeId, 1.0)
-        hayStack.writeHisValById(equipScheduleTypeId, 1.0)
+        hayStack.writeDefaultValById(equipScheduleTypeId,
+            if (roomSchedule.isZoneSchedule()) 1.0 else 2.0)
+        hayStack.writeHisValById(equipScheduleTypeId, if (roomSchedule.isZoneSchedule()) 1.0 else 2.0)
     }
 
     private fun createConfigPoints(

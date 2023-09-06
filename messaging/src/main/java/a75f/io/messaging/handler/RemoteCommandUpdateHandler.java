@@ -37,6 +37,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;
+    public static final String DOWNLOAD_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
+
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
@@ -111,6 +113,14 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 CcuLog.d("RemoteCommand", "RemoteCommand handle exit_safe_mode");
                                 if (safeModeInterface != null)
                                     safeModeInterface.handleExitSafeMode();
+                                break;
+                            case DOWNLOAD_BAC_APP:
+                                    CcuLog.d("RemoteCommand", "RemoteCommand download bac app");
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
+                                break;
                         }
                     }
                     break;

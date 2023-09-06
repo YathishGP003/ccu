@@ -292,7 +292,7 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("carrier_prod")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 handleSafeMode(paramThrowable);
-               // RaygunClient.send(paramThrowable);
+                RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
                 RenatusApp.closeApp();

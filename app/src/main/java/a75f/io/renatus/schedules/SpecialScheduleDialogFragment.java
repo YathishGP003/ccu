@@ -3,6 +3,7 @@ package a75f.io.renatus.schedules;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -186,8 +187,10 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             for (int val = 50;  val <= 100; val += 1) {
                 coolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
-            for (double val = 0;  val <= 10; val += 0.5) {
-                deadBand.add(roundToPointFive(convertingDeadBandValueFtoC(val)) + "\u00B0C");
+            double minVal = convertingRelativeValueFtoC(0);
+            double maxVal = convertingRelativeValueFtoC(10);
+            for (double val = minVal;  val <= maxVal; val += 0.5) {
+                deadBand.add(((val)) + "\u00B0C");
             }
 
         }else{

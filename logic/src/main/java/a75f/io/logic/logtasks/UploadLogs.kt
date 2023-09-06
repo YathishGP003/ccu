@@ -6,6 +6,7 @@ import a75f.io.logic.cloud.RemoteFileStorageManager
 import a75f.io.logic.cloudservice.ServiceGenerator
 import a75f.io.logic.filesystem.FileSystemTools
 import a75f.io.logic.reportNull
+import java.io.File
 
 /**
  * A repository-level class, providing an interface to the filesystem layer and network layer, implementing
@@ -51,9 +52,18 @@ class UploadLogs(
 
       val messageFile = fileSystemTools.writeMessages("Renatus_Messages_$dateStr.txt")
 
+      val bacAppLogFile = fileSystemTools.getBacAppLogs( "ccu/bacnet", "logs.txt")
+
+      val listOfFiles: List<File> = if (bacAppLogFile != null) {
+         listOf(logFile, prefsFile, messageFile, bacAppLogFile)
+
+      } else {
+         listOf(logFile, prefsFile, messageFile)
+      }
+
       // This specific file id format is a requirement (Earth(CCU)-4726)
       val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
-      val zipFile = fileSystemTools.zipFiles(listOf(logFile, prefsFile, messageFile), fileId)
+      val zipFile = fileSystemTools.zipFiles(listOfFiles, fileId)
 
       val siteRef = haystackApi.siteIdRef.toString()
 

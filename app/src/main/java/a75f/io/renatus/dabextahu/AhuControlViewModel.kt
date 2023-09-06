@@ -37,7 +37,7 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
 
     fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
-      /*  var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        /*var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         Log.i("DAB_EXT", "configModelDefinition:${modelDef!!.modelType} ")
         Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
         Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")

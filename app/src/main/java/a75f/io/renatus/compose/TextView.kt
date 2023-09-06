@@ -75,7 +75,7 @@ fun LabelTextView(text: String) {
     Text(
         modifier = Modifier
             .padding(PaddingValues(top = 5.dp, start = 20.dp))
-            .width(450.dp),
+            .width(350.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,

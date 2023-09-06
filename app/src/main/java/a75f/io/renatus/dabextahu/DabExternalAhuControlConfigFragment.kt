@@ -2,10 +2,8 @@ package a75f.io.renatus.dabextahu
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.SetPointControlCompose
-import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.compose.SpinnerElement
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,7 +12,6 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -41,7 +37,7 @@ import androidx.lifecycle.ViewModelProvider
  * Created by Manjunath K on 06-06-2023.
  */
 
-class DabExternalAHUControlConfigFragment : Fragment() {
+class DabExternalAhuControlConfigFragment : Fragment() {
     private lateinit var viewModel: AhuControlViewModel
 
 
@@ -85,7 +81,7 @@ class DabExternalAHUControlConfigFragment : Fragment() {
                                     Column {
                                         Row(
                                             modifier = Modifier
-                                                .width(1200.dp)
+                                                .width(1000.dp)
                                                 .wrapContentHeight()
                                         ) {
                                             LabelTextView(text = "SAT Heating Setpoint Min")

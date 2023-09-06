@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
-import a75f.io.renatus.dabextahu.DabExternalAHUControlConfigFragment;
+import a75f.io.renatus.dabextahu.DabExternalAhuControlConfigFragment;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -87,7 +87,7 @@ public class SystemProfileFragment extends Fragment {
                     spSystemProfile.getLayoutParams().width = 340;
                 }
                 getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.profileContainer, new DabExternalAHUControlConfigFragment()).commit();
+                        .replace(R.id.profileContainer, new DabExternalAhuControlConfigFragment()).commit();
               /*  switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){

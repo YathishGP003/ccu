@@ -1365,6 +1365,31 @@ class HyperStatSplitAssociationUtil {
             return StandaloneFanStage.OFF.ordinal
         }
 
+        fun getPhysicalPointUnit(assoc: UniversalInAssociation): String {
+
+            return when (assoc) {
+
+                UniversalInAssociation.CURRENT_TX_0_10 -> "mV"
+                UniversalInAssociation.CURRENT_TX_0_20 -> "mV"
+                UniversalInAssociation.CURRENT_TX_0_50 -> "mV"
+                UniversalInAssociation.CURRENT_TX_0_100 -> "mV"
+                UniversalInAssociation.CURRENT_TX_0_150 -> "mV"
+                UniversalInAssociation.SUPPLY_AIR_TEMPERATURE -> "kOhm"
+                UniversalInAssociation.MIXED_AIR_TEMPERATURE -> "kOhm"
+                UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE -> "kOhm"
+                UniversalInAssociation.FILTER_NC -> "kOhm"
+                UniversalInAssociation.FILTER_NO -> "kOhm"
+                UniversalInAssociation.CONDENSATE_NC -> "kOhm"
+                UniversalInAssociation.CONDENSATE_NO -> "kOhm"
+                UniversalInAssociation.DUCT_PRESSURE_0_1 -> "mV"
+                UniversalInAssociation.DUCT_PRESSURE_0_2 -> "mV"
+                UniversalInAssociation.GENERIC_VOLTAGE -> "mV"
+                UniversalInAssociation.GENERIC_RESISTANCE -> "kOhm"
+
+            }
+
+        }
+
         // Updated Sensor Manager class accordingly. 0-2" duct pressure is already included in HyperStat Sense.
         fun getSensorNameByType(sensorInputs: UniversalInAssociation): String {
             /**

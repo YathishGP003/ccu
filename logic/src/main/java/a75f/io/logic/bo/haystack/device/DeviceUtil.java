@@ -14,6 +14,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 
 public class DeviceUtil {
+
     public static void updatePhysicalPointType(int addr, String port, String type) {
         Log.d("CCU"," Update Physical point "+port+" "+type);
 
@@ -46,6 +47,24 @@ public class DeviceUtil {
         p.setPointRef(pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
+    }
+
+    public static void updatePhysicalPointUnit(int addr, String port, String unit) {
+        Log.d("CCU"," Update Physical point "+port+" "+unit);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (!point.get("unit" ).equals(unit))
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setUnit(unit);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+        }
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {

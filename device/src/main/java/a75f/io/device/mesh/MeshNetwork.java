@@ -53,18 +53,20 @@ public class MeshNetwork extends DeviceNetwork
     @Override
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
-
+/*
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
         }
+
+ */
         if(LSerial.getInstance().isNodesSeeding())
             return;
         if (isAnyEquipAlive(CCUHsApi.getInstance())) {
             MeshUtil.sendHeartbeat((short) 0);
         }
-        
+
         MeshUtil.tSleep(1000);
         boolean sendControlMessage = (((System.currentTimeMillis() -  HyperStatSettingsUtil.Companion.getCcuControlMessageTimer())/ 1000) / 60)>20;
         boolean bSeedMessage = LSerial.getInstance().isReseedMessage();
@@ -79,6 +81,7 @@ public class MeshNetwork extends DeviceNetwork
                     if(LSerial.getInstance().isNodesSeeding())break;
                     CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " =================="+bSeedMessage);
                     for(Device d : HSUtil.getDevices(zone.getId())) {
+
                         if (d.getMarkers().contains("modbus")) {
                             continue;
                         }
@@ -206,19 +209,20 @@ public class MeshNetwork extends DeviceNetwork
                                                 .read("equip and group ==\""+d.getAddr()+ "\"")).build();
                                 int hssModeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + hssEquip.getRoomRef() + "\"").intValue();
                                 TemperatureMode hssTempMode = TemperatureMode.values()[hssModeType];
-
+                                bSeedMessage = false;
                                 if (bSeedMessage) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false, hssTempMode);
                                 } else {
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperSplit Settings ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, "=================NOW SENDING HyperSplit Settings ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSettingsMessage(zone, Integer.parseInt(d.getAddr()), d.getEquipRef());
 
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperSplit setting Messages ===" + d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, "======== NOW SENDING Additional Setting HyperSplit setting Messages ===" + d.getAddr());
                                     HyperSplitMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
 
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperSplit Controls ===================== "+d.getAddr());
+                                    CcuLog.d(L.TAG_CCU_SERIAL, "=================NOW SENDING HyperSplit Controls ===================== "+d.getAddr());
+                                    sendControlMessage = true;
                                     if(sendControlMessage){
                                         HyperSplit.HyperSplitControlsMessage_t.Builder controls =
                                                 HyperSplitMessageGenerator.getControlMessage(

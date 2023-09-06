@@ -8,6 +8,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusPressState
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice
@@ -173,8 +174,13 @@ open class HyperStatSplitEquip {
             val pointType = HyperStatSplitAssociationUtil.getSensorNameByType(universalInState.association)
             DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
 
+            val pointUnit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(universalInState.association);
+            DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, pointUnit)
+
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
+        } else {
+            DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, "mV")
         }
     }
 
@@ -359,54 +365,62 @@ open class HyperStatSplitEquip {
 
     // setup Device Universal In's
      fun setupDeviceUniversalIns(
-        isUniversalIn1Enabled: Boolean, isUniversalIn1Association: String,
-        isUniversalIn2Enabled: Boolean, isUniversalIn2Association: String,
-        isUniversalIn3Enabled: Boolean, isUniversalIn3Association: String,
-        isUniversalIn4Enabled: Boolean, isUniversalIn4Association: String,
-        isUniversalIn5Enabled: Boolean, isUniversalIn5Association: String,
-        isUniversalIn6Enabled: Boolean, isUniversalIn6Association: String,
-        isUniversalIn7Enabled: Boolean, isUniversalIn7Association: String,
-        isUniversalIn8Enabled: Boolean, isUniversalIn8Association: String,
+        isUniversalIn1Enabled: Boolean, isUniversalIn1Association: UniversalInAssociation,
+        isUniversalIn2Enabled: Boolean, isUniversalIn2Association: UniversalInAssociation,
+        isUniversalIn3Enabled: Boolean, isUniversalIn3Association: UniversalInAssociation,
+        isUniversalIn4Enabled: Boolean, isUniversalIn4Association: UniversalInAssociation,
+        isUniversalIn5Enabled: Boolean, isUniversalIn5Association: UniversalInAssociation,
+        isUniversalIn6Enabled: Boolean, isUniversalIn6Association: UniversalInAssociation,
+        isUniversalIn7Enabled: Boolean, isUniversalIn7Association: UniversalInAssociation,
+        isUniversalIn8Enabled: Boolean, isUniversalIn8Association: UniversalInAssociation,
         masterPoints: HashMap<Any, String>, device: HyperStatSplitDevice) {
         if (isUniversalIn1Enabled) {
             device.universal1In.pointRef = masterPoints[Port.UNIVERSAL_IN_ONE]
             device.universal1In.enabled = true
-            device.universal1In.type = isUniversalIn1Association
+            device.universal1In.type = isUniversalIn1Association.ordinal.toString()
+            device.universal1In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn1Association)
         }
         if (isUniversalIn2Enabled) {
             device.universal2In.pointRef = masterPoints[Port.UNIVERSAL_IN_TWO]
             device.universal2In.enabled = true
-            device.universal2In.type = isUniversalIn2Association
+            device.universal2In.type = isUniversalIn2Association.ordinal.toString()
+            device.universal2In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn2Association)
         }
         if (isUniversalIn3Enabled) {
             device.universal3In.pointRef = masterPoints[Port.UNIVERSAL_IN_THREE]
             device.universal3In.enabled = true
-            device.universal3In.type = isUniversalIn3Association
+            device.universal3In.type = isUniversalIn3Association.ordinal.toString()
+            device.universal3In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn3Association)
         }
         if (isUniversalIn4Enabled) {
             device.universal4In.pointRef = masterPoints[Port.UNIVERSAL_IN_FOUR]
             device.universal4In.enabled = true
-            device.universal4In.type = isUniversalIn4Association
+            device.universal4In.type = isUniversalIn4Association.ordinal.toString()
+            device.universal4In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn4Association)
         }
         if (isUniversalIn5Enabled) {
             device.universal5In.pointRef = masterPoints[Port.UNIVERSAL_IN_FIVE]
             device.universal5In.enabled = true
-            device.universal5In.type = isUniversalIn5Association
+            device.universal5In.type = isUniversalIn5Association.ordinal.toString()
+            device.universal5In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn5Association)
         }
         if (isUniversalIn6Enabled) {
             device.universal6In.pointRef = masterPoints[Port.UNIVERSAL_IN_SIX]
             device.universal6In.enabled = true
-            device.universal6In.type = isUniversalIn6Association
+            device.universal6In.type = isUniversalIn6Association.ordinal.toString()
+            device.universal6In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn6Association)
         }
         if (isUniversalIn7Enabled) {
             device.universal7In.pointRef = masterPoints[Port.UNIVERSAL_IN_SEVEN]
             device.universal7In.enabled = true
-            device.universal7In.type = isUniversalIn7Association
+            device.universal7In.type = isUniversalIn7Association.ordinal.toString()
+            device.universal7In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn7Association)
         }
         if (isUniversalIn8Enabled) {
             device.universal8In.pointRef = masterPoints[Port.UNIVERSAL_IN_EIGHT]
             device.universal8In.enabled = true
-            device.universal8In.type = isUniversalIn8Association
+            device.universal8In.type = isUniversalIn8Association.ordinal.toString()
+            device.universal8In.unit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(isUniversalIn8Association)
         }
 
     }

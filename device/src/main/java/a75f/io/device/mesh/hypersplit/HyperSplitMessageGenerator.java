@@ -158,7 +158,7 @@ public class HyperSplitMessageGenerator {
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
         controls.setOperatingMode(getOperatingMode(equipRef));
 
-        Log.i(L.TAG_CCU_DEVICE,
+        Log.i(L.TAG_CCU_SERIAL,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef, mode) * 2)+
                         "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef, mode) * 2)+
                         "\n DeviceFanMode "+getDeviceFanMode(settings).name()+

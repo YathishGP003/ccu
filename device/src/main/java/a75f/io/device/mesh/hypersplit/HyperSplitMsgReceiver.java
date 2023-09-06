@@ -147,7 +147,7 @@ public class HyperSplitMsgReceiver {
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_DEVICE,
-                    "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point);
+                    "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point + "; port " + rawPoint.getPort());
         }
         if (point == null) {
             return;
@@ -203,9 +203,11 @@ public class HyperSplitMsgReceiver {
             writeCO2Val(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_VOC) {
+            Log.d(L.TAG_CCU_SERIAL, "Detected a VOC physical point");
             writeVOCVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_SOUND) {
+            Log.d(L.TAG_CCU_SERIAL, "Detected a Sound physical point");
             writeSoundVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PM2P5) {
@@ -374,7 +376,7 @@ public class HyperSplitMsgReceiver {
     private static boolean isSensorBusAddressMapped(CCUHsApi hsApi, String addr, int association, String equipRef) {
 
         if (hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and enabled and equipRef == \"" + equipRef + "\"") == 1.0 &&
-            hsApi.readDefaultVal("point and " + addr + "and config and sensorBus and association and equipRef == " + equipRef + "\"").intValue() == association) return true;
+            hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and association and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
 
         return false;
 
@@ -412,49 +414,50 @@ public class HyperSplitMsgReceiver {
 
     }
 
-    // If "analogType" == 7 (Supply Air Temperature), 8 (Mixed Air Temperature), or 9 (Outside Air Temperature), process the point as a thermistor
+    // If "analogType" == 5 (Supply Air Temperature), 6 (Mixed Air Temperature), or 7 (Outside Air Temperature), process the point as a thermistor
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToThermistor(RawPoint rawPoint) {
+
         return rawPoint.getEnabled()
-                && (rawPoint.getType() == "7"
-                    || rawPoint.getType() == "8"
-                    || rawPoint.getType() == "9");
+                && (rawPoint.getType().equals("5")
+                    || rawPoint.getType().equals("6")
+                    || rawPoint.getType().equals("7"));
     }
 
-    // If "analogType" == 0 (Generic Voltage), 2-6 (Current TX's), or 14-15 (Duct Pressures), process the point as 0-10V
+    // If "analogType" == 14 (Generic Voltage), 0-4 (Current TX's), or 12-13 (Duct Pressures), process the point as 0-10V
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToVoltage(RawPoint rawPoint) {
         return rawPoint.getEnabled()
-                && (rawPoint.getType() == "0"
-                    || rawPoint.getType() == "2"
-                    || rawPoint.getType() == "3"
-                    || rawPoint.getType() == "4"
-                    || rawPoint.getType() == "5"
-                    || rawPoint.getType() == "6"
-                    || rawPoint.getType() == "14"
-                    || rawPoint.getType() == "15");
+                && (rawPoint.getType().equals("0")
+                    || rawPoint.getType().equals("1")
+                    || rawPoint.getType().equals("2")
+                    || rawPoint.getType().equals("3")
+                    || rawPoint.getType().equals("4")
+                    || rawPoint.getType().equals("12")
+                    || rawPoint.getType().equals("13")
+                    || rawPoint.getType().equals("14"));
     }
 
-    // If "analogType" == 10 (Filter NO) or 12 (Condensate NO), process the point as a normally open digital input.
+    // If "analogType" == 9 (Filter NO) or 11 (Condensate NO), process the point as a normally open digital input.
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToDigitalInNO(RawPoint rawPoint) {
         return rawPoint.getEnabled()
-                && (rawPoint.getType() == "10"
-                || rawPoint.getType() == "12");
+                && (rawPoint.getType().equals("9")
+                || rawPoint.getType().equals("11"));
     }
 
-    // If "analogType" == 11 (Filter NC) or 13 (Condensate NC), process the point as a normally closed digital input.
+    // If "analogType" == 8 (Filter NC) or 10 (Condensate NC), process the point as a normally closed digital input.
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToDigitalInNC(RawPoint rawPoint) {
         return rawPoint.getEnabled()
-                && (rawPoint.getType() == "11"
-                || rawPoint.getType() == "13");
+                && (rawPoint.getType().equals("8")
+                || rawPoint.getType().equals("10"));
     }
 
     // If "analogType" == 1 (Generic Resistance), process the point as a raw resistive input.
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToGenericResistiveIn(RawPoint rawPoint) {
-        return rawPoint.getEnabled() && rawPoint.getType() == "1";
+        return rawPoint.getEnabled() && rawPoint.getType().equals("15");
     }
 
     // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
@@ -463,7 +466,6 @@ public class HyperSplitMsgReceiver {
         Bits [14-0] represent the thermistor reading (in tens of ohms).
      */
     private static void writeThermistorInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
-
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
             Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as thermistor in CCU, but stored as type Voltage in HyperStat.");
@@ -501,31 +503,31 @@ public class HyperSplitMsgReceiver {
     private static double getUniversalInVoltageConversion(RawPoint point, double volts) {
 
         // Current TX (0-10V = 0-10A)
-        if (point.getType() == "2") {
+        if (point.getType().equals("0")) {
             return volts;
         }
         // Current TX (0-10V = 0-20A)
-        else if (point.getType() == "3") {
+        else if (point.getType().equals("1")) {
             return 2 * volts;
         }
         // Current TX (0-10V = 0-50A)
-        else if (point.getType() == "4") {
+        else if (point.getType().equals("2")) {
             return 5 * volts;
         }
         // Current TX (0-10V = 0-100A)
-        else if (point.getType() == "5") {
+        else if (point.getType().equals("3")) {
             return 10 * volts;
         }
         // Current TX (0-10V = 0-150A)
-        else if (point.getType() == "6") {
+        else if (point.getType().equals("4")) {
             return 15 * volts;
         }
         // Pressure Sensor (0-10V = 0-1"wc)
-        else if (point.getType() == "14") {
+        else if (point.getType().equals("12")) {
             return volts / 10;
         }
         // Pressure Sensor (0-10V = 0-2"wc)
-        else if (point.getType() == "15") {
+        else if (point.getType().equals("13")) {
             return volts / 5;
         }
         // Else, leave logical point unscaled (Generic Voltage = Type 0)
@@ -573,7 +575,7 @@ public class HyperSplitMsgReceiver {
             // Write physical point value in kOhms
             hayStack.writeHisValById(rawPoint.getId(), ohmsReading/1000);
             // Write logical point value. For normally closed sensor, 10kOhm or above is "fault" (1), less than 10kOhm is "normal" (0)
-            hayStack.writeHisValById(point.getId(), (ohmsReading >= 10000)? 1.0 : 0.0);
+            hayStack.writeHisValById(point.getId(), (ohmsReading < 10000)? 1.0 : 0.0);
         }
     }
 
@@ -587,7 +589,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -633,12 +635,14 @@ public class HyperSplitMsgReceiver {
 
     private static void writeVOCVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
+        Log.i(L.TAG_CCU_SERIAL, "VOC : "+regularUpdateMessage.getRegularUpdateCommon().getVoc());
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getVoc());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getVoc());
     }
 
     private static void writeSoundVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
+        Log.i(L.TAG_CCU_SERIAL, "Sound : "+regularUpdateMessage.getRegularUpdateCommon().getSound());
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getSound());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getSound());
     }

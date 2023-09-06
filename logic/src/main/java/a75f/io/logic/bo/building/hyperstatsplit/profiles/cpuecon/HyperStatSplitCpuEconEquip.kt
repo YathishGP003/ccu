@@ -196,14 +196,14 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         // For Universal Inputs, "analogType" tag corresponds to UniversalInAssociation, not SensorType
         profileEquip.setupDeviceUniversalIns(
-            config.universalIn1State.enabled, config.universalIn1State.association.toString(),
-            config.universalIn2State.enabled, config.universalIn2State.association.toString(),
-            config.universalIn3State.enabled, config.universalIn3State.association.toString(),
-            config.universalIn4State.enabled, config.universalIn4State.association.toString(),
-            config.universalIn5State.enabled, config.universalIn5State.association.toString(),
-            config.universalIn6State.enabled, config.universalIn6State.association.toString(),
-            config.universalIn7State.enabled, config.universalIn7State.association.toString(),
-            config.universalIn8State.enabled, config.universalIn8State.association.toString(),
+            config.universalIn1State.enabled, config.universalIn1State.association,
+            config.universalIn2State.enabled, config.universalIn2State.association,
+            config.universalIn3State.enabled, config.universalIn3State.association,
+            config.universalIn4State.enabled, config.universalIn4State.association,
+            config.universalIn5State.enabled, config.universalIn5State.association,
+            config.universalIn6State.enabled, config.universalIn6State.association,
+            config.universalIn7State.enabled, config.universalIn7State.association,
+            config.universalIn8State.enabled, config.universalIn8State.association,
             masterPoints, hyperStatSplitDevice
         )
 

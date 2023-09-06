@@ -80,6 +80,9 @@ class HyperStatSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                    settings3.hyperstatStagedFanVoltages = getStagedFanVoltageDetails(equipRef)
+                    settings3.hyperstatLinearFanSpeedsT = getLinearFanSpeedDetails(equipRef)
+                    settings3.hyperstatStagedFanSpeeds = getStagedFanSpeedDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                 settings3.genertiTuners = getGenericTunerDetails(equipRef)
@@ -387,6 +390,108 @@ class HyperStatSettingsUtil {
             }else{
                 "cooling and user and limit and $query"
             }
+        }
+
+        /**
+         * Function to read all the staged fan voltages which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatStagedFanVoltages_t
+         */
+        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperstatStagedFanVoltages_t? {
+            val stagedFanVoltages = HyperStat.HyperstatStagedFanVoltages_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val coolingStage1Query = "cooling and stage1 and fan and $equipRefQuery"
+            val coolingStage2Query = "cooling and stage2 and fan and $equipRefQuery"
+            val coolingStage3Query = "cooling and stage3 and fan and $equipRefQuery"
+            val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
+            val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
+            val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
+
+            if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage1FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage1Query).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage2FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage2Query).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage3FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage3Query).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage1FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage1Query).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage2FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage2Query).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage3FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage3Query).toInt()
+            }
+            return stagedFanVoltages.build()
+        }
+
+        /**
+         * Function to read all the linear fan speeds which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatLinearFanSpeeds_t
+         */
+        private fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
+            val linearFanSpeedBuilder = HyperStat.HyperstatLinearFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty()) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
+                            "medium" -> linearFanSpeedBuilder.linearFanMediumSpeedLevel = fanLevel
+                            "high" -> linearFanSpeedBuilder.linearFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return linearFanSpeedBuilder.build()
+        }
+
+        /**
+         * Function to read all the staged fan speed which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatStagedFanSpeeds_t
+         */
+        private fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
+            val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty()) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
+                            "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = fanLevel
+                            "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return stagedFanSpeedBuilder.build()
         }
     }
 }

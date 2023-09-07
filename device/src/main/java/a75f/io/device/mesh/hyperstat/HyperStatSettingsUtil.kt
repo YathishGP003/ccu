@@ -2,11 +2,11 @@ package a75f.io.device.mesh.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
 
@@ -218,6 +218,8 @@ class HyperStatSettingsUtil {
          */
         private fun getAnalogOutConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperStat.HyperstatAnalogOut_t {
             val analogOutConfiguration = HyperStat.HyperstatAnalogOut_t.newBuilder()
+            val defaultAnalogOutMinSetting = 0
+            val defaultAnalogOutMaxSetting = 10
 
             analogOutConfiguration.analogOut1Enable = readConfig(
                 hsApi, equipRef, "analog1 and output and config and enabled"
@@ -236,12 +238,17 @@ class HyperStatSettingsUtil {
                     hsApi, equipRef, "analog1 and output and config and association "
                 ).toInt()
 
-                analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and max "
-                ) * 10).toInt()
+                if (analogOutConfiguration.analogOut1Mapping != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut1AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (analogOutConfiguration.analogOut2Enable) {
@@ -249,12 +256,17 @@ class HyperStatSettingsUtil {
                     hsApi, equipRef, "analog2 and output and config and association "
                 ).toInt()
 
-                analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and max "
-                ) * 10).toInt()
+                if (analogOutConfiguration.analogOut2Mapping != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut2AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (analogOutConfiguration.analogOut3Enable) {
@@ -262,12 +274,17 @@ class HyperStatSettingsUtil {
                     hsApi, equipRef, "analog3 and output and config and association "
                 ).toInt()
 
-                analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and max "
-                ) * 10).toInt()
+                if (analogOutConfiguration.analogOut3Mapping != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut3AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             return analogOutConfiguration.build()
@@ -412,26 +429,32 @@ class HyperStatSettingsUtil {
             if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage1FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(coolingStage1Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage1Query) * 10).toInt()
             }
             if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage2FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(coolingStage2Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage2Query) * 10).toInt()
             }
             if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage3FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(coolingStage3Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage3Query) * 10).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage1FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(heatingStage1Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage1Query) * 10).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage2FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(heatingStage2Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage2Query) * 10).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage3FanAnalogVoltage =
                     ccuHsApi.readPointPriorityValByQuery(heatingStage3Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage3Query) * 10).toInt()
             }
             return stagedFanVoltages.build()
         }

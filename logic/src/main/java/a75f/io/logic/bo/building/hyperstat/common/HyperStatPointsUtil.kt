@@ -746,8 +746,8 @@ class HyperStatPointsUtil(
 
     // Function to create autoaway and auto force occupy point
     fun createAutoForceAutoAwayConfigPoints(
-        isAutoAwayEnabled: Boolean,
-        isAutoForcedOccupiedEnabled: Boolean
+        isAutoForcedOccupiedEnabled: Boolean,
+        isAutoAwayEnabled: Boolean
 
     ): MutableList<Pair<Point, Any>> {
 

@@ -2,9 +2,16 @@ package a75f.io.renatus.dabextahu
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.renatus.compose.LabelTextView
+import a75f.io.renatus.compose.HeaderTextView
+import a75f.io.renatus.compose.RadioButtonCompose
+import a75f.io.renatus.compose.SetPointConfig
 import a75f.io.renatus.compose.SetPointControlCompose
-import a75f.io.renatus.compose.SpinnerElement
+import a75f.io.renatus.compose.TextViewWithClick
+import a75f.io.renatus.compose.TitleTextView
+import a75f.io.renatus.modbus.ModelSelectionFragment
+import a75f.io.renatus.modbus.util.EQUIP_TYPE
+import a75f.io.renatus.modbus.util.MODBUS
+import a75f.io.renatus.modbus.util.SEARCH_MODEL
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,14 +21,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -46,8 +54,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
     ): View {
         val rootView = ComposeView(requireContext())
         viewModel = ViewModelProvider(this)[AhuControlViewModel::class.java]
-        viewModel.configModelDefinition(NodeType.SMART_NODE,
-            ProfileType.DAB_EXTERNAL_AHU,requireContext())
+        viewModel.configModelDefinition(NodeType.SMART_NODE, ProfileType.DAB_EXTERNAL_AHU,requireContext())
         rootView.apply {
             setContent {
                 Box(
@@ -56,14 +63,13 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         .verticalScroll(rememberScrollState())) {
                     Column(
                         modifier = Modifier.padding(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(1.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
-
+                        Row{
                             SetPointControlCompose(SET_POINT_CONTROL,state = viewModel.setPointControl) {
                                 viewModel.setPointControl = it
+                                if (!viewModel.setPointControl)
+                                    viewModel.dualSetPointControl = false
                             }
                             if (viewModel.setPointControl) {
                                 SetPointControlCompose(DUAL_SET_POINT_CONTROL,state = viewModel.dualSetPointControl) {
@@ -71,75 +77,84 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 }
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
-
-                            if (viewModel.setPointControl) {
+                        Row{
+                            if (viewModel.setPointControl && !viewModel.dualSetPointControl) {
                                 Row {
                                     val items = viewModel.getOptions()
                                     Column {
-                                        Row(
-                                            modifier = Modifier
-                                                .width(1000.dp)
-                                                .wrapContentHeight()
+                                        Row( modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()
                                         ) {
-                                            LabelTextView(text = "SAT Heating Setpoint Min")
-                                            SpinnerElement(
-                                                viewModel.getIndexFromVal(viewModel.heatingMinSp),
-                                                items
-                                            ) { selected ->
-                                                viewModel.heatingMinSp = selected
-                                            }
-                                            LabelTextView(text = "SAT Heating Setpoint Max")
-                                            SpinnerElement(
-                                                viewModel.getIndexFromVal(viewModel.heatingMaxSp),
-                                                items
-                                            ) { selected ->
-                                                viewModel.heatingMaxSp = selected
-                                            }
-                                        }
+                                            SetPointConfig(SAT_SP_MIN,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
 
-                                        Row(
-                                            modifier = Modifier
-                                                .width(1200.dp)
-                                                .wrapContentHeight()
-                                        ) {
-                                            LabelTextView(text = "SAT Cooling Setpoint Min")
-                                            SpinnerElement(
-                                                viewModel.getIndexFromVal(viewModel.coolingMinSp),
-                                                items
-                                            ) { selected ->
-                                                viewModel.coolingMinSp = selected
-                                            }
-                                            LabelTextView(text = "SAT Cooling Setpoint Max")
-                                            SpinnerElement(
-                                                viewModel.getIndexFromVal(viewModel.coolingMaxSp),
-                                                items
-                                            ) { selected ->
-                                                viewModel.coolingMaxSp = selected
-                                            }
+                                            SetPointConfig(SAT_SP_MAX,viewModel.getIndexFromVal(viewModel.heatingMaxSp), items)
+                                            { selected -> viewModel.heatingMaxSp = selected }
                                         }
                                     }
                                 }
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
+                        Row{
+                            if (viewModel.dualSetPointControl) {
+                                Row {
+                                    val items = viewModel.getOptions()
+                                    Column {
+                                        Row( modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()) {
 
+                                            SetPointConfig(SAT_HEATING_SP_MIN,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
+
+                                            SetPointConfig(SAT_HEATING_SP_MAX,viewModel.getIndexFromVal(viewModel.heatingMaxSp), items)
+                                            { selected -> viewModel.heatingMaxSp = selected }
+                                        }
+                                        Row( modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()) {
+
+                                            SetPointConfig(SAT_COOLING_SP_MIN,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
+
+                                            SetPointConfig(SAT_COOLING_SP_MAX,viewModel.getIndexFromVal(viewModel.heatingMaxSp), items)
+                                            { selected -> viewModel.heatingMaxSp = selected }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row{
                             SetPointControlCompose(
                                 FAN_SP_CONTROL,
                                 state = viewModel.fanStaticSetPointControl
                             ) {
                                 viewModel.fanStaticSetPointControl = it
                             }
-
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
+                        Row{
+                            if (viewModel.fanStaticSetPointControl) {
+                                Row {
+                                    val items = viewModel.getOptions()
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            SetPointConfig(FAN_SP_MIN,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
 
+                                            SetPointConfig(FAN_SP_MAX,viewModel.getIndexFromVal(viewModel.heatingMaxSp), items)
+                                            { selected -> viewModel.heatingMaxSp = selected }
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row{
                             SetPointControlCompose(
                                 DCV_CONTROL_LABEL,
                                 state = viewModel.dcvControl
@@ -147,10 +162,27 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 viewModel.dcvControl = it
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
+                        Row{
+                            if (viewModel.dcvControl) {
+                                Row {
+                                    val items = viewModel.getOptions()
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            SetPointConfig(DCV_CONTROL_MIN,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
 
+                                            SetPointConfig(DCV_CONTROL_MAX,viewModel.getIndexFromVal(viewModel.heatingMaxSp), items)
+                                            { selected -> viewModel.heatingMaxSp = selected }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row{
                             SetPointControlCompose(
                                 OCCUPANCY_CONTROL_LABEL,
                                 state = viewModel.occupancyMode
@@ -158,10 +190,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 viewModel.occupancyMode = it
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
-
+                        Row{
                             SetPointControlCompose(
                                 HUMIDIFIER_CONTROL_LABEL,
                                 state = viewModel.humidifierControl
@@ -169,10 +198,24 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 viewModel.humidifierControl = it
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
-
+                        Row{
+                            if (viewModel.humidifierControl) {
+                                Row {
+                                    val items = viewModel.getOptions()
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            SetPointConfig(TARGET_HUMIDIFIER,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row{
                             SetPointControlCompose(
                                 DEHUMIDIFIER_CONTROL_LABEL,
                                 state = viewModel.dehumidifierControl
@@ -180,9 +223,93 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 viewModel.dehumidifierControl = it
                             }
                         }
-                        Row(
-                            modifier = Modifier.padding(10.dp)
-                        ) {
+                        Row{
+                            if (viewModel.dehumidifierControl) {
+                                Row {
+                                    val items = viewModel.getOptions()
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            SetPointConfig(TARGET_DEHUMIDIFIER,viewModel.getIndexFromVal(viewModel.heatingMinSp), items)
+                                            { selected -> viewModel.heatingMinSp = selected }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row {
+                            Row {
+                                val radioOptions = listOf("BACnet", "Modbus")
+                                RadioButtonCompose(radioOptions)
+
+                                /*if (viewModel.equipModel.value.isDevicePaired) {
+                                    viewModel.modelName.value =
+                                        getName(viewModel.equipModel.value.equipDevice.value.name)
+                                    TextViewWithClick(
+                                        text = viewModel.modelName,
+                                        onClick = { },
+                                        enableClick = false,
+                                        isCompress = false
+                                    )
+                                    HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
+                                } else {
+                                    TextViewWithClick(
+                                        text = viewModel.modelName,
+                                        onClick = {
+                                            showDialogFragment(
+                                                ModelSelectionFragment.newInstance(
+                                                    viewModel.deviceList,
+                                                    viewModel.onItemSelect, SEARCH_MODEL
+                                                ), ModelSelectionFragment.ID
+                                            )
+                                        },
+                                        enableClick = true, isCompress = false
+                                    )
+                                    HeaderTextView(viewModel.equipModel.value.version.value)
+                                }*/
+                            }
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) { HeaderTextView(EQUIP_TYPE) }
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                Row {
+                                    val radioOptions = listOf("Mangoes", "Apple", "Melons")
+                                    RadioButtonCompose(radioOptions)
+
+                                    /*if (viewModel.equipModel.value.isDevicePaired) {
+                                        viewModel.modelName.value =
+                                            getName(viewModel.equipModel.value.equipDevice.value.name)
+                                        TextViewWithClick(
+                                            text = viewModel.modelName,
+                                            onClick = { },
+                                            enableClick = false,
+                                            isCompress = false
+                                        )
+                                        HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
+                                    } else {
+                                        TextViewWithClick(
+                                            text = viewModel.modelName,
+                                            onClick = {
+                                                showDialogFragment(
+                                                    ModelSelectionFragment.newInstance(
+                                                        viewModel.deviceList,
+                                                        viewModel.onItemSelect, SEARCH_MODEL
+                                                    ), ModelSelectionFragment.ID
+                                                )
+                                            },
+                                            enableClick = true, isCompress = false
+                                        )
+                                        HeaderTextView(viewModel.equipModel.value.version.value)
+                                    }*/
+                                }
+                            }
+                        }
+
+                        Row{
 
                             Button(
                                 colors = ButtonDefaults.buttonColors(

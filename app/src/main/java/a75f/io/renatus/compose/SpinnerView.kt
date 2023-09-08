@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Created by Manjunath K on 12-06-2023.
@@ -43,7 +44,7 @@ fun SpinnerElement(defaultSelection:Int, items: List<String>, itemSelected: (Str
         )) {
         Column ( modifier = Modifier.width(100.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( modifier = Modifier.width(50.dp),text = selectedItem.value)
+                Text( fontSize = 20.sp, modifier = Modifier.width(50.dp),text = selectedItem.value)
                 Image(
 
                     imageVector = Icons.Default.ArrowDropDown,
@@ -59,7 +60,7 @@ fun SpinnerElement(defaultSelection:Int, items: List<String>, itemSelected: (Str
             items.forEach { item ->
                 DropdownMenuItem(
                     modifier = Modifier.background(Color.White),
-                    text = { Text(text = item) }, onClick = {
+                    text = { Text(fontSize = 20.sp,  text = item) }, onClick = {
                     selectedItem.value = item
                     expanded.value = false
                     itemSelected(item)

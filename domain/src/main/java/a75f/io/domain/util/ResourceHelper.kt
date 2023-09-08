@@ -1,12 +1,18 @@
 package a75f.io.domain.util
 
-import androidx.annotation.NonNull
 import androidx.annotation.Nullable
-import com.google.gson.JsonParseException
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
+import io.seventyfivef.domainmodeler.common.ConstraintDeserializer
+import io.seventyfivef.domainmodeler.common.ModelDirectiveDeserializer
+import io.seventyfivef.domainmodeler.common.PointConfigurationDeserializer
+import io.seventyfivef.domainmodeler.common.point.Constraint
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -63,8 +69,19 @@ object ResourceHelper {
         @Nullable val modelData: String? = loadString(fileName)
         if (modelData.isNullOrEmpty())
             return null
-        val objectMapper = ObjectMapperConfig().objectMapper()
-        val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
+        val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData)
+    }
+
+    private fun getObjectMapper() : ObjectMapper {
+        return jacksonObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModules(
+                SimpleModule()
+                    .addDeserializer(ModelDirective::class.java, ModelDirectiveDeserializer())
+                    .addDeserializer(Constraint::class.java, ConstraintDeserializer())
+                    .addDeserializer(PointConfiguration::class.java, PointConfigurationDeserializer())
+            )
     }
 }

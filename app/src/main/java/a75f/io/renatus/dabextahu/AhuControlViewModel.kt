@@ -20,13 +20,13 @@ import androidx.lifecycle.AndroidViewModel
 class AhuControlViewModel(application: Application) : AndroidViewModel(application) {
 
 
-    var setPointControl: Boolean by mutableStateOf(true)
-    var dualSetPointControl: Boolean by mutableStateOf(true)
-    var fanStaticSetPointControl: Boolean by mutableStateOf(true)
-    var dcvControl: Boolean by mutableStateOf(true)
-    var occupancyMode: Boolean by mutableStateOf(true)
-    var humidifierControl: Boolean by mutableStateOf(true)
-    var dehumidifierControl: Boolean by mutableStateOf(true)
+    var setPointControl: Boolean by mutableStateOf(false)
+    var dualSetPointControl: Boolean by mutableStateOf(false)
+    var fanStaticSetPointControl: Boolean by mutableStateOf(false)
+    var dcvControl: Boolean by mutableStateOf(false)
+    var occupancyMode: Boolean by mutableStateOf(false)
+    var humidifierControl: Boolean by mutableStateOf(false)
+    var dehumidifierControl: Boolean by mutableStateOf(false)
 
     var heatingMinSp: String by mutableStateOf("1.0")
     var heatingMaxSp: String by mutableStateOf("1.0")
@@ -37,11 +37,11 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
 
     fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
-        /*var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         Log.i("DAB_EXT", "configModelDefinition:${modelDef!!.modelType} ")
         Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
         Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
-        Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")*/
+        Log.i("DAB_EXT", "configModelDefinition:${modelDef.modelType} ")
 
     }
 

@@ -19,17 +19,11 @@ public class ModbusProfile extends ZoneProfile {
 
     ModbusEquip modBusEquip;
 
-    public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentInfo, List<Parameter> configParams, ProfileType profileType) {
-        modBusEquip = new ModbusEquip(profileType, slaveId);
-        modBusEquip.createEntities(floorRef, roomRef, equipmentInfo, configParams);
-        modBusEquip.init(slaveId);
-    }
-
     public void addMbEquip(short slaveId, String floorRef, String roomRef, EquipmentDevice equipmentDevice,
                            List<Parameter> configParams, ProfileType profileType,
-                           List<EquipmentDevice> subEquipmentDevices) {
+                           List<EquipmentDevice> subEquipmentDevices, String modbusLevel,String modelVersion) {
         modBusEquip = new ModbusEquip(profileType, slaveId);
-        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams);
+        String equipRef = modBusEquip.createEntities(floorRef, roomRef, equipmentDevice, configParams,null,false, modbusLevel,modelVersion);
         equipmentDevice.setEquips(null);
         List<EquipmentDevice> intermediateList = new ArrayList<>();
         for(EquipmentDevice subEquipmentDevice : subEquipmentDevices){
@@ -41,6 +35,9 @@ public class ModbusProfile extends ZoneProfile {
                             parameterTemp.setRegisterNumber(registerTemp.getRegisterNumber());
                             parameterTemp.setRegisterAddress(registerTemp.getRegisterAddress());
                             parameterTemp.setRegisterType(registerTemp.getRegisterType());
+                            parameterTemp.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+                            parameterTemp.setMultiplier(registerTemp.getMultiplier());
+                            parameterTemp.setWordOrder(registerTemp.getWordOrder());
                             parameterList.add(parameterTemp);
                         }
                     }
@@ -51,7 +48,7 @@ public class ModbusProfile extends ZoneProfile {
             }
             boolean isSlaveIdSameAsParent = subEquipmentDevice.getSlaveId() == equipmentDevice.getSlaveId();
             String subEquipRef = modBusEquip.createEntities(floorRef, roomRef, subEquipmentDevice, parameterList,
-                    equipRef, isSlaveIdSameAsParent);
+                    equipRef, isSlaveIdSameAsParent,modbusLevel,null);
             subEquipmentDevice.setDeviceEquipRef(subEquipRef);
             intermediateList.add(subEquipmentDevice);
         }
@@ -63,10 +60,17 @@ public class ModbusProfile extends ZoneProfile {
         modBusEquip.init(slaveId);
     }
 
-    public void updateMbEquip(short slaveId,String floorRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
-        modBusEquip.updateHaystackPoints(getModbusEquip(slaveId).getId(),zoneRef,equipmentDevice,configParams);
+    public void updateMbEquip(short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
+        modBusEquip.updateHaystackPoints(getModbusEquip(slaveId).getId(), equipmentDevice,configParams);
         modBusEquip.init(slaveId);
     }
+
+    public void updateModbusEquip(String equipRef, short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams){
+        modBusEquip.updateHaystackPoints(equipRef,equipmentDevice,configParams);
+        modBusEquip.init(slaveId);
+    }
+
+
     @Override
     public void updateZonePoints() {
 
@@ -83,9 +87,6 @@ public class ModbusProfile extends ZoneProfile {
         return null;
     }
 
-    public List<Parameter> getMbProfileConfiguration(short address){
-        return modBusEquip.getProfileConfiguration(address);
-    }
     @Override
     public Set<Short> getNodeAddresses() {
         return new HashSet<Short>() {{
@@ -109,7 +110,4 @@ public class ModbusProfile extends ZoneProfile {
         return new Equip.Builder().setHashMap(equip).build();
     }
 
-    public List<Parameter> getConfiguredParameters(){
-        return modBusEquip.configuredParams;
-    }
 }

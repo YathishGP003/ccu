@@ -11,7 +11,7 @@ import a75f.io.logic.bo.util.TemperatureMode;
 
 public class VavSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
-        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         Equip equip = new Equip.Builder().setHashMap(equips).build();
         switch (ProfileType.valueOf(equip.getProfile())) {
             case SYSTEM_VAV_STAGED_RTU:

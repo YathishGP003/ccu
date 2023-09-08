@@ -113,7 +113,7 @@ public class TunerUpgrades {
     
     
         //If the current profile is DABFullyModulating, create new system equip tuner points.
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         if (!equipMap.isEmpty()) {
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             if (ProfileType.valueOf(systemEquip.getProfile()) == ProfileType.SYSTEM_DAB_ANALOG_RTU ) {
@@ -134,19 +134,20 @@ public class TunerUpgrades {
                 "and user");
         HashMap<Object, Object> heatDTMax = hayStack.readEntity("point and limit and max and heating " +
                 "and user");
-        String minId = heatDTMin.get("id").toString();
-        String maxId = heatDTMax.get("id").toString();
-        forceExpireBuildingLevel(minId,hayStack);
-        forceExpireBuildingLevel(maxId,hayStack);
-
-        hayStack.writePointForCcuUser(maxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 72.0,
-                0);
-        hayStack.writeHisValById(maxId, 72.0);
-
-        hayStack.writePointForCcuUser(minId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 67.0,
-                0);
-        hayStack.writeHisValById(minId, 67.0);
-
+        if (!heatDTMin.isEmpty() && heatDTMin.containsKey("id")) {
+            String minId = heatDTMin.get("id").toString();
+            forceExpireBuildingLevel(minId,hayStack);
+            hayStack.writePointForCcuUser(minId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 67.0,
+                    0);
+            hayStack.writeHisValById(minId, 67.0);
+        }
+        if (!heatDTMax.isEmpty() && heatDTMax.containsKey("id")) {
+            String maxId = heatDTMax.get("id").toString();
+            forceExpireBuildingLevel(maxId,hayStack);
+            hayStack.writePointForCcuUser(maxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 72.0,
+                    0);
+            hayStack.writeHisValById(maxId, 72.0);
+        }
     }
 
     private static void forceExpireBuildingLevel(String id, CCUHsApi hayStack) {

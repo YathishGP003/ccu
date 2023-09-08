@@ -15,6 +15,8 @@ public class Entity {
     private HDateTime lastModifiedDateTime;
     private String lastModifiedBy;
 
+    private String domainName;
+
     public HDateTime getCreatedDateTime() {
         return createdDateTime;
     }
@@ -37,5 +39,12 @@ public class Entity {
 
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 }

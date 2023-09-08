@@ -1,6 +1,9 @@
 package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +55,7 @@ public class RawPoint extends Entity
     private String registerType;
     private String parameterId;
 
+    private String domainName;
     public boolean getEnabled()
     {
         return enabled;
@@ -62,6 +66,13 @@ public class RawPoint extends Entity
     }
     private boolean enabled;
     private String  id;
+
+    /**
+     * Support for arbitrary KVP. This is only intended for new tags/profiles at this time.
+     * Eventually we will move other existing tags to similar format.
+     */
+    private Map<String, HVal> tags = new HashMap<>();
+
     public String getId()
     {
         return id;
@@ -167,6 +178,17 @@ public class RawPoint extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
+    public Map<String, HVal> getTags() {
+        return tags;
+    }
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -193,6 +215,9 @@ public class RawPoint extends Entity
         private String endBit;
         private String registerType;
         private String parameterId;
+        private String domainName;
+
+        private Map<String, HVal> tags = new HashMap<>();
         public Builder setEnabled(boolean enabled)
         {
             this.enabled = enabled;
@@ -331,6 +356,16 @@ public class RawPoint extends Entity
             this.parameterId = parameterId;
             return this;
         }
+
+        public Builder setDomainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
+
+        public Builder addTag(String tag, HVal val) {
+            this.tags.put(tag, val);
+            return this;
+        }
     
         public RawPoint build(){
             RawPoint p = new RawPoint();
@@ -361,7 +396,8 @@ public class RawPoint extends Entity
             p.endBit = this.endBit;
             p.registerType = this.registerType;
             p.parameterId = this.parameterId;
-            //CCUHsApi.getInstance().addRawPoint(p);
+            p.domainName = this.domainName;
+            p.tags = this.tags;
             return p;
         }
 
@@ -372,6 +408,140 @@ public class RawPoint extends Entity
             {
                 Map.Entry pair = (Map.Entry) it.next();
                 //System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                {
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
+                }
+                else if (pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("roomRef"))
+                {
+                    this.roomRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("deviceRef"))
+                {
+                    this.deviceRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("pointRef"))
+                {
+                    this.pointRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("port"))
+                {
+                    this.port = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("analogType"))
+                {
+                    this.type = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("unit"))
+                {
+                    this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("kind"))
+                {
+                    String value = pair.getValue().toString();
+
+                    // support old values if needed for migration.
+                    if (value.equalsIgnoreCase("string")) {
+                        this.kind = Kind.STRING;
+                    }
+                    else {
+                        this.kind = Kind.parse(value);
+                    }
+                }
+                else if (pair.getKey().equals("portEnabled"))
+                {
+                    // we could/should say = pair.getValue == HBool.TRUE, but will hold off for now (warroom & keep code consistent)
+                    this.enabled = Boolean.parseBoolean(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("shortDis"))
+                {
+                    this.shortDis = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("maxVal"))
+                {
+                    this.maxVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("minVal"))
+                {
+                    this.minVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerAddress"))
+                {
+                    this.registerAddress = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerNumber"))
+                {
+                    this.registerNumber = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("startBit"))
+                {
+                    this.startBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("endBit"))
+                {
+                    this.endBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerType"))
+                {
+                    this.registerType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("parameterId"))
+                {
+                    this.parameterId = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                } else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
+
+            }
+            return this;
+        }
+
+        public Builder setHDict(HDict pointDict)
+        {
+            Iterator it = pointDict.iterator();
+            while (it.hasNext())
+            {
+                HDict.MapEntry pair =  (HDict.MapEntry) it.next();
                 if (pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -488,10 +658,40 @@ public class RawPoint extends Entity
                 {
                     this.lastModifiedBy = pair.getValue().toString();
                 }
-                //it.remove();
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
             }
             return this;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (this.getClass() != obj.getClass()) return false;
+        RawPoint that = (RawPoint) obj;
+        if (!this.domainName.equals(that.domainName)) return false;
+        if (!this.displayName.equals(that.displayName)) return false;
+        if (!this.deviceRef.equals(that.deviceRef)) return false;
+        if (!this.pointRef.equals(that.pointRef)) return false;
+        if (!this.type.equals(that.type)) return false;
+        if (!this.unit.equals(that.unit)) return false;
+        if (!this.port.equals(that.port)) return false;
+        if (this.enabled != that.enabled) return false;
+        if (this.markers.size() != (that.markers.size())) return false;
+        for (String marker : this.markers) {
+            if (!this.markers.contains(marker)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 

@@ -420,7 +420,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -704,7 +704,7 @@ public class Globals {
      */
     private void updateCCUAhuRef(){
         HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
-        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
+        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile and not modbus");
 
         if(systemProfile.isEmpty() || ccuDevice.isEmpty()){
             return;

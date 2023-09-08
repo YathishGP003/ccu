@@ -76,6 +76,8 @@ public class Parameter {
     private String registerNumber;
     private String registerType;
     private String parameterDefinitionType;
+    private String multiplier;
+    private String wordOrder;
     public String getParameterId() {
         return parameterId;
     }
@@ -195,6 +197,20 @@ public class Parameter {
 
     public void setParameterDefinitionType(String parameterDefinitionType) {
         this.parameterDefinitionType = parameterDefinitionType;
+    }
+
+    public String getMultiplier() {
+        return multiplier;
+    }
+
+    public void setMultiplier(String multiplier) {
+        this.multiplier = multiplier;
+    }
+    public String getWordOrder() {
+        return wordOrder;
+    }
+    public void setWordOrder(String wordOrder) {
+        this.wordOrder = wordOrder;
     }
 
     public static class EncounterCommandConverter implements PropertyConverter<List<Command>, String> {

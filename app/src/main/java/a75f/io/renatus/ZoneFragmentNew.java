@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
@@ -82,7 +84,6 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
-import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
@@ -109,10 +110,10 @@ import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -765,7 +766,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
                 if (!tempModule && nontempModule && !profileType.contains(profileHyperStatMonitoring)) {
                     viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
-                    //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
+
                 }
                 gridPosition++;
             }
@@ -2335,36 +2336,30 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
+                            List<EquipmentDevice> list = buildModbusModel(nonTempEquip.getRoomRef());
+                            List<EquipmentDevice> modbusDevices = new ArrayList<>();
+                            for(EquipmentDevice equipmentDevice : list) {
+                                modbusDevices.add(equipmentDevice);
+                                if(null != equipmentDevice.getEquips()) {
+                                    modbusDevices.addAll(equipmentDevice.getEquips());
+                                }
+                            }
 
-                            List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
-                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +
+                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +  // parent modbbus equip
                                     "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
 
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
-                                if(modbusDevices.get(i).getDeviceEquipRef() == null){
-                                    modbusDevices.get(i).setDeviceEquipRef(modbusDevices.get(i).getEquipRef());
-                                    modbusDevices.get(i).setEquipRef(null);
-                                }
-                                if(null != modbusDevices.get(i).getEquips()) {
-                                    modbusDevices.addAll(modbusDevices.get(i).getEquips());
-                                }
                                 List<Parameter> parameterList = new ArrayList<>();
-                                if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
-                                    for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
-                                        if (registerTemp.getParameters() != null) {
-                                            for (Parameter p : registerTemp.getParameters()) {
-                                                if (p.isDisplayInUI()) {
-                                                    p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-                                                    parameterList.add(p);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
 
+                                List<Parameter> allParamList = UtilSourceKt.getParametersList(modbusDevices.get(i));
+                                allParamList.forEach(parameter -> {
+                                    if (parameter.isDisplayInUI())
+                                        parameterList.add(parameter);
+                                });
+
+                                View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
 
@@ -2373,7 +2368,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         zoneDetails.findViewById(R.id.last_updated);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
 
-                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
                                 StringBuffer equipString = new StringBuffer();
                                 for(String equipType : equipTypes){
@@ -2389,7 +2383,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             Integer.toString(modbusDevices.get(i).getSlaveId()));
                                     textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
                                             Integer.toString(modbusDevices.get(i).getSlaveId())));
-                                }else{
+                                }
+                                else {
                                     textViewModule.setVisibility(View.GONE);
                                     textViewUpdatedTimeHeading.setVisibility(View.GONE);
                                     textViewUpdatedTime.setVisibility(View.GONE);

@@ -15,6 +15,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 
 /**
  * Mock API class bypasses sync and local data persisting.
@@ -25,7 +26,14 @@ public class MockCcuHsApi extends CCUHsApi {
     public MockCcuHsApi() {
         super();
     }
-    
+
+    public void closeDb() {
+        tagsDb.getBoxStore().close();
+    }
+
+    public void clearDb() {
+        tagsDb.tagsMap.clear();
+    }
     @Override
     public String addSite(Site s) {
         return tagsDb.addSite(s);
@@ -124,5 +132,10 @@ public class MockCcuHsApi extends CCUHsApi {
     @Override
     public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         return hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+    }
+
+    @Override
+    public void deleteEntity(String id) {
+        tagsDb.tagsMap.remove(id.replace("@", ""));
     }
 }

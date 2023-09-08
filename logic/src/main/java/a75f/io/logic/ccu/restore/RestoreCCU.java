@@ -3,13 +3,13 @@ package a75f.io.logic.ccu.restore;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,11 +29,7 @@ import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
-import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
-import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
-import a75f.io.modbusbox.EquipsManager;
 
 public class RestoreCCU {
 
@@ -98,7 +94,7 @@ public class RestoreCCU {
                     Date lastUpdatedDatetime = new Date(HDateTime.make(lastUpdatedDatetimeString).millis());
                     lastUpdatedDatetimeString =
                             new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime);
-                    isCCUOnline = isCCUOnline(lastUpdatedDatetime);
+                    isCCUOnline = false;// isCCUOnline(lastUpdatedDatetime);
 
                 }else{
                     lastUpdatedDatetimeString = "n/a";
@@ -138,6 +134,10 @@ public class RestoreCCU {
         RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring all the equips "+ retryCount);
         String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode, retryCountCallback);
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
+        Log.i("CCU_DEBUG", "getAllEquips: gatewayRef : "+gatewayRef);
+        Log.i("CCU_DEBUG", "getAllEquips: ahuRef : "+ahuRef);
+        Log.i("CCU_DEBUG", "getAllEquips: ccuId : "+ccuId);
+        Log.i("CCU_DEBUG", "getAllEquips: siteCode : "+siteCode);
         return restoreCCUHsApi.getAllEquips(ahuRef, gatewayRef, retryCountCallback);
     }
 
@@ -351,121 +351,11 @@ public class RestoreCCU {
                             getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
                         }
                     }
-                    saveToBox(equipRow, subEquipRowList);
                 }
                 getDevicesFromEquips(equipId, equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
                         replaceCCUTracker, retryCountCallback);
             }
         }
-    }
-
-    private EquipmentDevice getFromBoxByOnEquipType(String equipType, String name) {
-        return EquipsManager.getInstance().fetchProfileByEquipTypeAndName(equipType, name);
-    }
-
-    private EquipmentDevice getFromBoxByVendorAndModel(String vendor, String model) {
-        return EquipsManager.getInstance().fetchProfileByVendorAndModel(vendor, model);
-    }
-
-    private String getModbusName(String equipDispName, String modbusEquipType){
-        String zone = "_ZONE";
-        if(modbusEquipType.endsWith(zone)){
-            int end = modbusEquipType.lastIndexOf(zone);
-            modbusEquipType = modbusEquipType.substring(0,end);
-        }
-        List<String> modbusNames = EquipsManager.getInstance().getAllModbusNamesByEquipType(modbusEquipType);
-        for(String mbn : modbusNames){
-            if(equipDispName.contains(mbn)){
-                return mbn;
-            }
-        }
-        return null;
-    }
-
-    private String matchEquipProfileToOBjectBox(String equipProfile){
-        String objectBoxProfile = equipProfile;
-        switch(equipProfile){
-            case "UPS30" :
-                objectBoxProfile = "UPS30K";
-                break;
-            case "UPS80" :
-                objectBoxProfile = "UPS80K";
-                break;
-            case "UPS400" :
-                objectBoxProfile = "UPS400K";
-                break;
-            case "UPS150" :
-                objectBoxProfile = "UPS150K";
-                break;
-        }
-        return objectBoxProfile;
-    }
-
-    private void saveToBox(HRow equipRow, List<HRow> subEquipRowList){
-        String profile =  matchEquipProfileToOBjectBox(equipRow.get("profile").toString().
-                replace("MODBUS_",""));
-        String modbusDisplayName = equipRow.get("dis").toString();
-        String modbusName = getModbusName(modbusDisplayName, profile);
-
-        EquipmentDevice modbusDevice = (profile.equalsIgnoreCase("DEFAULT"))?
-        getFromBoxByVendorAndModel(equipRow.get("vendor").toString(), equipRow.get("model").toString()):
-                getFromBoxByOnEquipType(profile, modbusName);
-        if(modbusDevice == null){
-            throw new NullHGridException("Error while restoring Modbus with the display name : "+modbusDisplayName);
-        }
-        modbusDevice.setId(0);
-        modbusDevice.setPaired(true);
-        String zoneRef = equipRow.get("roomRef").toString().replace("@SYSTEM","SYSTEM");
-        String floorRef = equipRow.get("floorRef").toString().replace("@SYSTEM","SYSTEM");
-        modbusDevice.setDeviceEquipRef(equipRow.get("id").toString());
-        modbusDevice.setZoneRef(zoneRef);
-        modbusDevice.setFloorRef(floorRef);
-        modbusDevice.setSlaveId(Integer.parseInt(equipRow.get("group").toString()));
-        ArrayList<HashMap<Object, Object>> mbDispPointList = CCUHsApi.getInstance().readAllEntities("point and " +
-                "modbus and displayInUi and shortDis  and equipRef == \""+equipRow.get("id").toString()+ "\"");
-        for(Register register :modbusDevice.getRegisters()){
-            String desc = register.getParameters().get(0).name;
-            for(HashMap mbDispPoint : mbDispPointList){
-                if(mbDispPoint.get("shortDis").toString().equals(desc)){
-                    register.getParameters().get(0).setDisplayInUI(true);
-                }
-                register.getParameters().get(0).setRegisterType(register.getRegisterType());
-                register.getParameters().get(0).setRegisterAddress(register.getRegisterAddress());
-            }
-        }
-
-        List<EquipmentDevice> subEquipmentDevices = new ArrayList<>();
-        if(null != modbusDevice.getEquips() && subEquipRowList.size() > 0) {
-            for (EquipmentDevice subEquipmentDevice : modbusDevice.getEquips()) {
-               for(HRow subEquipRow : subEquipRowList){
-                   if(subEquipmentDevice.getModelNumbers().get(0).equalsIgnoreCase(subEquipRow.get("model").toString())){
-                       subEquipmentDevice.setDeviceEquipRef(subEquipRow.get("id").toString());
-                       subEquipmentDevice.setZoneRef(zoneRef);
-                       subEquipmentDevice.setFloorRef(floorRef);
-                       subEquipmentDevice.setSlaveId(Integer.parseInt(subEquipRow.get("group").toString()));
-                       ArrayList<HashMap<Object, Object>> mbSubEquipDispPointList =
-                               CCUHsApi.getInstance().readAllEntities("point and modbus and displayInUi and " +
-                                       "shortDis  and equipRef == \""+subEquipRow.get("id").toString()+ "\"");
-                       for(Register register :subEquipmentDevice.getRegisters()){
-                           String desc = register.getParameters().get(0).name;
-                           for(HashMap mbDispPoint : mbSubEquipDispPointList){
-                               if(mbDispPoint.get("shortDis").toString().equals(desc)){
-                                   register.getParameters().get(0).setDisplayInUI(true);
-                               }
-                               register.getParameters().get(0).setRegisterType(register.getRegisterType());
-                               register.getParameters().get(0).setRegisterAddress(register.getRegisterAddress());
-                           }
-                       }
-                       subEquipmentDevices.add(subEquipmentDevice);
-                   }
-               }
-            }
-        }
-        modbusDevice.setEquips(null);
-        modbusDevice.setEquips(subEquipmentDevices);
-
-
-        EquipsManager.getInstance().saveProfile(modbusDevice);
     }
 
     private HGrid getEquipGrid(String equipId, RetryCountCallback retryCountCallback){

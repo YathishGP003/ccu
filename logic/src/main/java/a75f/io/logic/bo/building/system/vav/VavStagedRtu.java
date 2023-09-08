@@ -123,7 +123,7 @@ public class VavStagedRtu extends VavSystemProfile
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
+        HashMap equip = hayStack.read("equip and system and not modbus");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
@@ -718,7 +718,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
@@ -955,7 +955,7 @@ public class VavStagedRtu extends VavSystemProfile
             String timeZone = CCUHsApi.getInstance().getTimeZone();
     
             Equip systemEquip = new Equip.Builder()
-                                    .setHashMap(CCUHsApi.getInstance().read("system and equip")).build();
+                                    .setHashMap(CCUHsApi.getInstance().read("system and equip and not modbus")).build();
     
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cooling and cmd and stage"+newStageNum).isEmpty()) {

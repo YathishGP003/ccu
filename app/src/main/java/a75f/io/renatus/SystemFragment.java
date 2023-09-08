@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -68,17 +68,14 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
-import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
@@ -87,8 +84,8 @@ import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
@@ -717,19 +714,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}, 100);
 			}
 		});
-		//TODO Commented this out for Automation test, we will revoke for actual prod test
-		/*systemModePicker.setOnScrollListener((view1, scrollState) -> {
-			if (scrollState == SystemNumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
-				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
-				new Handler().postDelayed(() -> {
-					if (systemModePicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
-					{
-						setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(systemModePicker.getValue())).ordinal());
-					}
-				}, 100);
-			}
-		});*/
-		
+
 		occupancyStatus = view.findViewById(R.id.occupancyStatus);
 		equipmentStatus = view.findViewById(R.id.equipmentStatus);
 		IEGatewayOccupancyStatus = view.findViewById(R.id.IE_Gateway_Occupancy_Status);
@@ -1035,44 +1020,25 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 	};
 	private void configEnergyMeterDetails(View view){
-		List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();;
-		if(modbusDevices!=null&&modbusDevices.size()>0){
-			EquipmentDevice  emDevice=null;
-			for (int i = 0; i <modbusDevices.size() ; i++) {
-				if(modbusDevices.get(i).getEquipType().equals("EMR")){
-					emDevice = modbusDevices.get(i);
-					if(emDevice.getDeviceEquipRef() == null) {
-						emDevice.setDeviceEquipRef(emDevice.getEquipRef());
-					}
-				}
-			}
-
-			if(emDevice==null)
-				return;
+		EquipmentDevice emDevice = getModbusEquip("emr");;
+		if (emDevice != null) {
 			energyMeterParams.setVisibility(View.VISIBLE);
 			energyMeterModelDetails.setVisibility(View.VISIBLE);
 			moduleStatusEmr.setVisibility(View.VISIBLE);
 			lastUpdatedEmr.setVisibility(View.VISIBLE);
-
-			/**
-			 * Assuming there is always only One Energy meter
-			 */
-
 			List<Parameter> parameterList = new ArrayList<>();
-			if (Objects.nonNull(emDevice.getRegisters())) {
-				for (Register registerTemp : emDevice.getRegisters()) {
-					if (registerTemp.getParameters() != null) {
-						for (Parameter p : registerTemp.getParameters()) {
-							if (p.isDisplayInUI()) {
-								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-								parameterList.add(p);
-							}
-						}
-					}
-				}
-			}
+
+			energyMeterParams.setVisibility(View.VISIBLE);
+			energyMeterModelDetails.setVisibility(View.VISIBLE);
+			moduleStatusEmr.setVisibility(View.VISIBLE);
+			lastUpdatedEmr.setVisibility(View.VISIBLE);
+			List<Parameter> allParamList = UtilSourceKt.getParametersList(emDevice);
+			allParamList.forEach(parameter -> {
+				if (parameter.isDisplayInUI())
+					parameterList.add(parameter);
+			});
 			String nodeAddress = String.valueOf(emDevice.getSlaveId());
-			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + nodeAddress + ")");
+			energyMeterModelDetails.setText(emDevice.getName()+ "("+emDevice.getEquipType().toUpperCase() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
@@ -1086,49 +1052,30 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	}
 
-	private List<EquipmentDevice> getSystemLevelModBusDevices(){
-		return 	EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+	private EquipmentDevice getModbusEquip(String filter){
+		HashMap<Object, Object> equipListMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and "+filter+" and roomRef==\"SYSTEM\"");
+		if (equipListMap.isEmpty())
+			return null;
+		return buildModbusModelByEquipRef(Objects.requireNonNull(equipListMap.get("id")).toString());
 	}
-
 	private void configBTUMeterDetails(View view){
-		List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();
-		if(modbusDevices!=null&&modbusDevices.size()>0){
-			EquipmentDevice  btuDevice=null;
-			for (int i = 0; i <modbusDevices.size() ; i++) {
-				if(modbusDevices.get(i).getEquipType().equals("BTU")){
-					btuDevice = modbusDevices.get(i);
-					if(btuDevice.getDeviceEquipRef() == null) {
-						btuDevice.setDeviceEquipRef(btuDevice.getEquipRef());
-					}
-				}
-			}
 
-			if(btuDevice==null)
-				return;
+		EquipmentDevice btuDevice = getModbusEquip("btu");
+		if(btuDevice != null) {
 			btuMeterParams.setVisibility(View.VISIBLE);
 			btuMeterModelDetails.setVisibility(View.VISIBLE);
 			moduleStatusBtu.setVisibility(View.VISIBLE);
 			lastUpdatedBtu.setVisibility(View.VISIBLE);
-
-			/**
-			 * Assuming there is always only One BTU meter
-			 */
-
 			List<Parameter> parameterList = new ArrayList<>();
-			if (Objects.nonNull(btuDevice.getRegisters())) {
-				for (Register registerTemp : btuDevice.getRegisters()) {
-					if (registerTemp.getParameters() != null) {
-						for (Parameter p : registerTemp.getParameters()) {
-							if (p.isDisplayInUI()) {
-								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
-								parameterList.add(p);
-							}
-						}
-					}
-				}
-			}
+
+			List<Parameter> allParamList = UtilSourceKt.getParametersList(btuDevice);
+			allParamList.forEach(parameter -> {
+				if (parameter.isDisplayInUI())
+					parameterList.add(parameter);
+			});
+
 			String nodeAddress = String.valueOf(btuDevice.getSlaveId());
-			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + nodeAddress + ")");
+			btuMeterModelDetails.setText(btuDevice.getName()+ "("+btuDevice.getEquipType().toUpperCase() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =

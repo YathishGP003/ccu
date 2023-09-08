@@ -84,8 +84,6 @@ public class SystemScheduleUtil {
 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.USER_APP_WRITE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                         - System.currentTimeMillis(), "ms"));
-                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
-                        - System.currentTimeMillis(), "ms"));
                 setAppOverrideExpiry(point, (overrideExpiry.getMillis()
                         - System.currentTimeMillis())/1000);
                 CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());
@@ -208,19 +206,19 @@ public class SystemScheduleUtil {
                     CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(coolval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(coolpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
                 if((heatpoint != null) && (heatval != 0)){
                     CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(heatval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(heatpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
                 if(avgpoint != null){
                     CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(avgval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(avgpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(avgpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
             }
             
@@ -393,11 +391,9 @@ public class SystemScheduleUtil {
             CcuLog.d(L.TAG_CCU_SCHEDULER, "Failed to read schedule : schedule type update cannot be completed for "
                      +zone+" scheduleRef "+scheduleById);
         }
-        if (CCUHsApi.getInstance().readPointPriorityVal(p.getId()) == ScheduleType.ZONE.ordinal()) {
-            schedule.setDisabled(false);
-        } else {
-            schedule.setDisabled(true);
-        }
+
+        schedule.setDisabled(false);
+
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null){
             CCUHsApi.getInstance().updateScheduleNoSync(schedule, schedule.getRoomRef());
         }

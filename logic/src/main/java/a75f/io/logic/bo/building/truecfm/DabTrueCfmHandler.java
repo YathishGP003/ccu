@@ -161,7 +161,7 @@ public class DabTrueCfmHandler {
         double currentAirflow = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipRef, damperType);
         CcuLog.i(L.TAG_CCU_SYSTEM, "updateAirflowMAQueue: "+damperPointId+" "+damperType+" currentAirflow "
                                    +currentAirflow);
-        updateAirflowQueueMap(damperPointId, currentAirflow);
+        updateAirflowQueueMap(damperPointId, Math.max(currentAirflow, 1));
     }
     
 }

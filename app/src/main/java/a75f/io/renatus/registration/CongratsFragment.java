@@ -16,7 +16,6 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
@@ -140,14 +139,14 @@ public class CongratsFragment extends Fragment {
         Equip eqp = new Equip.Builder().setHashMap(tuner).build();
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user");
-        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap minCoolMap =  CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        double maxHeatMap =  BuildingTunerCache.getInstance().getMinHeatingUserLimit();//CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        double minHeatMap =  BuildingTunerCache.getInstance().getMaxHeatingUserLimit();//CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        double maxCoolMap =  BuildingTunerCache.getInstance().getMaxCoolingUserLimit();//CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        double minCoolMap =  BuildingTunerCache.getInstance().getMinCoolingUserLimit();//CCUHsApi.getInstance().read("point and limit and min and cooling and user");
         buldingLimit = (int)buildingLimitMin+"|"+ (int)buildingLimitMax;
-        heatingLimit = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(minHeatMap.get("id").toString());
-        coolingLimit = (int)getTuner(minCoolMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
-        zoneRange = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
+        heatingLimit = (int)maxHeatMap+"|"+(int)minHeatMap;
+        coolingLimit = (int)minCoolMap+"|"+(int)maxCoolMap;
+        zoneRange = (int)maxHeatMap+"|"+(int)maxCoolMap;
         currentTemp = String.valueOf((int) SystemTemperatureUtil.getCurrentTemp(eqp.getId()));
         if (L.ccu().systemProfile instanceof DefaultSystem) {
             currentHumidity = "0.0%";

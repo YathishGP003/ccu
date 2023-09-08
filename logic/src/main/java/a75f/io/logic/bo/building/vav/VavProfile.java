@@ -37,6 +37,18 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
+import static a75f.io.logic.bo.building.system.SystemController.*;
+
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.*;
 /**
  *
  * Created by samjithsadasivan on 5/31/18.
@@ -170,34 +182,7 @@ public abstract class VavProfile extends ZoneProfile {
     {
         return vavDeviceMap.get(address) != null ? vavDeviceMap.get(address).getProfileConfiguration() : null;
     }
-    
-    
-    @Override
-    public boolean isZoneDead() {
-    
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-    
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        for (short node : vavDeviceMap.keySet()) {
-            if (vavDeviceMap.get(node).getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-                || vavDeviceMap.get(node).getCurrentTemp() < (buildingLimitMin - tempDeadLeeway)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean isTemperatureDead() {
-        
-        for (short node : vavDeviceMap.keySet()) {
-            if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
+
     @JsonIgnore
     public TrimResponseRequest getSATRequest(short node) {
     

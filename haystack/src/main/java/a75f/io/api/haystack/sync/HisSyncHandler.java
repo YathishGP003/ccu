@@ -176,8 +176,11 @@ public class HisSyncHandler
         for (HashMap zone : zonesToSync) {
             String roomId = zone.get("id").toString();
 
-            List<HashMap> allPointsForZone =
+            ArrayList<HashMap> allPointsForZone =
                 ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
+            ArrayList<HashMap> schedulablePoints = ccuHsApi.readAll("point and his and schedulable and roomRef == \"" + roomId + "\"");
+            allPointsForZone.addAll(schedulablePoints);
+            CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
             List<HashMap> hvacModePoint =
                     ccuHsApi.readAll("hvacMode and his and zone and roomRef == \""+ roomId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points"+hvacModePoint);
@@ -194,12 +197,7 @@ public class HisSyncHandler
         }
         numberOfPoints = numberOfPoints + totalNumberOfZonePoints;
         //For testing purpose, will be removed before merging
-        Log.d("BHARATH_CCU_LOGS", "syncPoints: total number of points " + numberOfPoints);
         numberOfPoints = 0;
-        Log.d("BHARATH_CCU_LOGS", "syncPoints: total number of hisItems " + totalHisItemCount);
-        Log.d("BHARATH_CCU_LOGS", " available memory  " + ccuHsApi.readHisValByQuery("available and memory"));
-        Log.d("BHARATH_CCU_LOGS", "is the system on low memory? " + ccuHsApi.readHisValByQuery("memory and low"));
-        Log.d("BHARATH_CCU_LOGS", "total memory  " + ccuHsApi.readHisValByQuery("memory and total"));
         totalHisItemCount = 0;
     }
 
@@ -405,11 +403,7 @@ public class HisSyncHandler
                     try {
                         ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
 
-                        //For testing purpose, will be removed before merging
                         int backFillDurationSelected = getBackFillDurationSelected(ccuHsApi);
-                        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint(ccuHsApi);
-                        Log.d("BHARATH_CCU_LOGS", "backfill duration selected  " + backFillDurationSelected);
-                        Log.d("BHARATH_CCU_LOGS", "number of his entry per point to be backfilled  " + numberOfHisEntryPerPoint);
 
                         for (HashMap<Object, Object> point : allHisPoints) {
                             ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()), backFillDurationSelected);

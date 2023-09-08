@@ -28,8 +28,13 @@ public class ForcedOccupied implements OccupancyTrigger {
             forcedOccupiedLevel.get("who") != null) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "ForcedOccupied : active override "+forcedOccupiedLevel );
             return Double.parseDouble(forcedOccupiedLevel.get("duration").toString()) > 0 &&
-                   !forcedOccupiedLevel.get("who").toString().equals("OccupancySensor");
+                    isNotAutoForcedOccupied(forcedOccupiedLevel);
         }
         return false;
+    }
+
+    private boolean isNotAutoForcedOccupied(Map<Object, Object> forcedOccupiedLevel) {
+        return !forcedOccupiedLevel.get("who").toString().contains("OccupancySensor") &&
+                !forcedOccupiedLevel.get("who").toString().contains("Occupancy Sensor");
     }
 }

@@ -31,6 +31,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
@@ -44,6 +46,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.service.DomainService;
+import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -224,7 +228,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
                             hDicts.add(pid);
                         }
-                        CCUHsApi.getInstance().importPointArrays(hDicts, null);
+                        CCUHsApi.getInstance().importPointArrays(hDicts);
                     },
                     () -> {
                         ProgressDialogUtils.hideProgressDialog();
@@ -428,8 +432,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
     }
-
-
 
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,

@@ -6,25 +6,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
-
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
-import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
-import butterknife.OnClick;
-
-import static a75f.io.renatus.FloorPlanFragment.selectedZone;
+import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 
 public class FragmentModbusType  extends BaseDialogFragment {
 
@@ -69,12 +61,10 @@ public class FragmentModbusType  extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         modbusequip.setOnClickListener(v -> {
-            FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS30);
-            showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
         });
         modbusem.setOnClickListener(v -> {
-            FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR_ZONE);
-            showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);
+            showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), ModbusConfigView.Companion.getID());
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         return view;

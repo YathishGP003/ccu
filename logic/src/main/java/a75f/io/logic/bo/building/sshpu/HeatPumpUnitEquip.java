@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -65,10 +66,12 @@ public class HeatPumpUnitEquip{
         String equipDis = siteDis+"-HPU-"+nodeAddr;
         String profile = "hpu";
         String gatewayRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }
+        Schedule roomSchedule = UtilKt.getSchedule(room,floor);
+
         Equip.Builder b = new Equip.Builder()
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
@@ -445,8 +448,8 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, profile, tz));

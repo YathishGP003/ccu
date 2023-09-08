@@ -101,24 +101,7 @@ public class DabProfile extends ZoneProfile
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+dabEquip.nodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
-    
-    @Override
-    public boolean isZoneDead() {
-        
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-    
-        if (dabEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-            || dabEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
+
     @Override
     public void updateZonePoints() {
         

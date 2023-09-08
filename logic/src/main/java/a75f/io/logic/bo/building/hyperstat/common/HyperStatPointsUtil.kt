@@ -1,10 +1,7 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.*
-import a75f.io.logic.ANALOG_VALUE
-import a75f.io.logic.BINARY_VALUE
-import a75f.io.logic.MULTI_STATE_VALUE
-import a75f.io.logic.addBacnetTags
+import a75f.io.logic.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -749,8 +746,8 @@ class HyperStatPointsUtil(
 
     // Function to create autoaway and auto force occupy point
     fun createAutoForceAutoAwayConfigPoints(
-        isAutoAwayEnabled: Boolean,
-        isAutoForcedOccupiedEnabled: Boolean
+        isAutoForcedOccupiedEnabled: Boolean,
+        isAutoAwayEnabled: Boolean
 
     ): MutableList<Pair<Point, Any>> {
 
@@ -1242,7 +1239,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_TWO,
                         0.0
                     )
                 )
@@ -1298,7 +1295,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_THREE,
                         0.0
                     )
                 )
@@ -1765,6 +1762,7 @@ class HyperStatPointsUtil(
             scheduleTypePointMarkers,
             "building,zone,named"
         )
+        val roomSchedule = getSchedule(roomRef, floorRef)
 
         logicalTempPointsList.add(Triple(desiredTempPoint, LogicalKeyID.DESIRED_TEMP, 72.0))
         logicalTempPointsList.add(Triple(desiredTempHeatingPoint, LogicalKeyID.DESIRED_TEMP_HEATING, 70.0))
@@ -1773,7 +1771,7 @@ class HyperStatPointsUtil(
         logicalTempPointsList.add(Triple(equipStatusPoint, LogicalKeyID.EQUIP_STATUS, 0.0))
         logicalTempPointsList.add(Triple(equipStatusMessagePoint, LogicalKeyID.EQUIP_STATUS_MESSAGE, "OFF"))
         logicalTempPointsList.add(Triple(equipScheduleStatusPoint, LogicalKeyID.EQUIP_SCHEDULE_STATUS, ""))
-        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, 0.0))
+        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, if(roomSchedule.isZoneSchedule) 1 else 2))
 
         return logicalTempPointsList
     }
@@ -1789,7 +1787,7 @@ class HyperStatPointsUtil(
         )
         val operatingModeMarkers = arrayOf (
             Tags.MODE, Tags.HIS, Tags.SP,
-            Tags.ZONE,Tags.OPERATING,Tags.WRITABLE
+            Tags.ZONE,Tags.OPERATING
         )
 
         val operatingModePointEnums = "${OFF},${COOLING},${HEATING},${TEMPDEAD}"

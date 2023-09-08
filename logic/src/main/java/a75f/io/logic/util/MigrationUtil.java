@@ -7,24 +7,14 @@ import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
+import static a75f.io.logic.util.MigrateModbusModelKt.migrateModbusProfiles;
 
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.projecthaystack.HDateTime;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
-import com.google.gson.reflect.TypeToken;
 
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HRow;
-import org.projecthaystack.HVal;
-import org.projecthaystack.io.HZincReader;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,14 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.CCUTagsDb;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -50,11 +37,6 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.data.WriteArray;
-import a75f.io.data.entities.HayStackEntity;
-import a75f.io.data.entities.EntityDBUtilKt;
-import a75f.io.data.writablearray.WritableArray;
-import a75f.io.data.writablearray.WritableArrayDBUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -100,7 +82,6 @@ public class MigrationUtil {
 
     /**
      * All the migration tasks needed to be run during an application version upgrade should be called from here.
-     *
      * This approach has a drawback the migration gets invoked when there is version downgrade
      * THis will be fixed by using longVersionCode after migrating to API30. (dev going in another branch)
      */
@@ -412,9 +393,26 @@ public class MigrationUtil {
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
         migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
-
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
+        migrateAirFlowTunerPoints(ccuHsApi);
+        migrateModbusProfiles();
         L.saveCCUState();
+    }
+
+    private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
+        allSnTuners.forEach(snTuner -> {
+            String pointName = snTuner.get(Tags.DIS).toString();
+            /* Remove "sn" tag and change display name from siteName-roomName-profile-nodeAddress-snCoolingAirflowTemp
+             to siteName-roomName-profile-nodeAddress-coolingAirflowTemp*/
+            int snIndex = pointName.indexOf("sn");
+            String modifiedDisplayName = pointName.substring(0, snIndex) +
+                    Character.toLowerCase(pointName.charAt(snIndex + 2)) +
+                    pointName.substring(snIndex + 3);
+            Point modifiedPoint  = new Point.Builder().setHashMap(snTuner).removeMarker("sn")
+                    .setDisplayName(modifiedDisplayName).build();
+            ccuHsApi.updatePoint(modifiedPoint, modifiedPoint.getId());
+        });
     }
 
     private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
@@ -984,7 +982,7 @@ public class MigrationUtil {
 
     private static void updateAhuRefForBposEquips(CCUHsApi hayStack) {
         ArrayList<HashMap> bposEquips = CCUHsApi.getInstance().readAll("equip and bpos");
-        HashMap systemEquip = hayStack.read("equip and system");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus");
         if (systemEquip.isEmpty()) {
             return;
         }
@@ -2122,6 +2120,8 @@ public class MigrationUtil {
                         "fan and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
                 HashMap<Object, Object> conditioningMode = CpuPointsMigration.Companion.readPoint(
                         "conditioning and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
+                HashMap<Object, Object> operatingMode = CCUHsApi.getInstance()
+                        .readEntity("operating and mode and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
 
                 if (!fanMode.isEmpty() && !fanMode.containsKey("userIntent")) {
                     MigratePointsUtil.Companion.updateMarkers(
@@ -2135,6 +2135,13 @@ public class MigrationUtil {
                             conditioningMode,
                             new String[]{"userIntent"},
                             new String[]{},
+                            null);
+                }
+                if (!operatingMode.isEmpty()) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            operatingMode,
+                            new String[]{},
+                            new String[]{"writable"},
                             null);
                 }
             }

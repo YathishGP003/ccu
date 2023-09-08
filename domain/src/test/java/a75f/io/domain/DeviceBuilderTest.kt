@@ -60,7 +60,6 @@ class DeviceBuilderTest {
         val zoneRef = mockHayStack.addZone(z)
 
         DomainManager.buildDomain(mockHayStack)
-
         val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
         val entityMapper = EntityMapper(profileModel)
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
@@ -117,6 +116,7 @@ class DeviceBuilderTest {
         val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
         val entityMapper = EntityMapper(profileModel)
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
+
         val profileConfig = getTestProfileConfig()
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef

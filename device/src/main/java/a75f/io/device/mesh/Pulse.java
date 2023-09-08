@@ -28,7 +28,6 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.constants.WhoFiledConstants;
-import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -51,7 +50,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -63,7 +61,6 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -158,7 +155,7 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
-						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
 						}
@@ -297,6 +294,12 @@ public class Pulse
 				continue;
 			}
 			double val = r.sensorData.get();
+			/* Smartnode  represents the lower 11 bits as unsigned, as uses bit 12 to indicate
+			  if value is negative or not, if value is negative bit 12 is set to 1 and binary value
+			  becomes greater than 2048.*/
+			if(t == SensorType.PRESSURE && val > 2048 ){
+				val = getPressureValue(Integer.toBinaryString((int) val));
+			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
 				sp = node.addSensor(p);
@@ -362,7 +365,20 @@ public class Pulse
 		}
 	
 	}
-	
+
+	private static double getPressureValue(String pressureBinary) {
+		int originalValue = Integer.parseInt(pressureBinary, 2);
+		if ((originalValue & (1 << 11)) != 0) {
+			// If the 12th bit is set to 1, remove it by setting it to 0
+			int modifiedValue = originalValue & ~(1 << 11);
+			String modifiedBinaryData = String.format("%12s", Integer.toBinaryString(modifiedValue)).replace(' ', '0');
+			return Integer.parseInt(modifiedBinaryData, 2)*(-1);
+		} else {
+			// If the 12th bit is not set to 1, no modification needed
+			return Integer.parseInt(pressureBinary, 2);
+		}
+	}
+
 	public static double round(double val) {
 		return Math.round(100*val)/100;
 	}
@@ -419,8 +435,8 @@ public class Pulse
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp = 0;
 		double averageTemp;
-		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
-		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
+		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double hdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 		Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 		if(occ != null) {
@@ -429,10 +445,18 @@ public class Pulse
 		}
 
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
-		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
+		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+
+
+		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
+				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
+				buildingTuner.getMinCoolingUserLimit()
+		);
+		/*double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
 				+ equip.getId()+"\"");
 		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-				+equip.getId()+"\"");
+				+equip.getId()+"\"");*/
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -501,10 +525,8 @@ public class Pulse
 				" == \"" + equip.getRoomRef() + "\"").intValue();
 		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
-		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
-				+ equip.getId()+"\"");
-		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-				+equip.getId()+"\"");
+		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
 
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
@@ -853,7 +875,7 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
-						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
 						}

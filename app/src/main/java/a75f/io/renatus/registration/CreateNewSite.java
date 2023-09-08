@@ -14,6 +14,8 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -44,9 +46,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HRef;
@@ -64,10 +68,13 @@ import java.util.TimeZone;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -75,7 +82,9 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -144,10 +153,27 @@ public class CreateNewSite extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+
         if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")) {
-            UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
-            updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(),toastLayout, getContext(), requireActivity());
+            if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()){
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                if (fragmentByTag != null) {
+                    ft.remove(fragmentByTag);
+                }
+                try {
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                            PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                    updateCCUFragment.show(ft,"popup");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment();
+                updateCCUFragment.checkIsCCUHasRecommendedVersion(requireActivity(), getParentFragmentManager(), toastLayout, getContext(), requireActivity());
+            }
         }
+
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
@@ -338,7 +364,7 @@ public class CreateNewSite extends Fragment {
                 mNext.setEnabled(true);
             }
         });
-        
+
         View.OnClickListener editSiteOnClickListener = v -> {
             if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
                 enableViews(true);
@@ -499,7 +525,26 @@ public class CreateNewSite extends Fragment {
 
         return rootView;
     }
-
+    @Override
+    public void onResume() {
+        if(!CCUHsApi.getInstance().isCCURegistered()) {
+            if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+                try {
+                    FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+                    Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
+                    if (fragmentByTag != null) {
+                        ft.remove(fragmentByTag);
+                    }
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                            PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
+                    updateCCUFragment.show(ft, "popup");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onResume();
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -888,15 +933,24 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
+
         BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
         //TODO- COMMON-DATA-FEATURE
         //BuildingTuners.getInstance().updateBuildingTuners();
+        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
         //SystemEquip.getInstance();
         DiagEquip.getInstance().create();
+        updateMigrationDiagWithAppVersion();
         L.ccu().systemProfile = new DefaultSystem();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);
+        HashMap<Object, Object> buildingOccupancy =
+                CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
+        if (buildingOccupancy.isEmpty() && CCUHsApi.getInstance().isPrimaryCcu()) {
+            BuildingOccupancy.buildDefaultBuildingOccupancy();
+        }
 
         RxjavaUtil.executeBackground(()->CCUHsApi.getInstance().importNamedScheduleWithOrg(
                 new HClient(CCUHsApi.getInstance().getHSUrl(),
@@ -939,8 +993,19 @@ public class CreateNewSite extends Fragment {
         CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
         if (!curTz.equals(s75f.getTz())) {
             CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
+            String[] tzIds = TimeZone.getAvailableIDs();
+            for (String timeZone : tzIds) {
+                if (timeZone.contains(s75f.getTz())) {
+                    DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZone)));
+                }
+            }
         }
+
         BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+
+        //BuildingTuners.getInstance();
+        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();
@@ -973,6 +1038,19 @@ public class CreateNewSite extends Fragment {
     private Spanned getHTMLCodeForHints( int resource){
         return Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory)
                 + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(resource) + "</font></big>");
+    }
+
+    private void updateMigrationDiagWithAppVersion(){
+        PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+        try {
+            PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
+            String appVersion = info.versionName + "." + info.versionCode;
+            CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", appVersion);
+            CcuLog.d(TAG, "Update Migration Diag Point for NewSite");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void updateBacnetConfig(String siteName, String ccuName) {

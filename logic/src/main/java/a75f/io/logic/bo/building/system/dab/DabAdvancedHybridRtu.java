@@ -44,7 +44,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
+        HashMap equip = hayStack.read("equip and system and not modbus");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
@@ -259,7 +259,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }

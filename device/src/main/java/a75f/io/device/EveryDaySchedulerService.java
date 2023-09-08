@@ -37,8 +37,9 @@ public class EveryDaySchedulerService extends BroadcastReceiver {
         startTime.setTimeInMillis(System.currentTimeMillis());
         startTime.set(Calendar.HOUR_OF_DAY, 0);
         startTime.set(Calendar.MINUTE , 0);
+        //Reseeding messages to happen every 6 hours.
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, startTime.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, seekAlarmIntent);
+                6 * AlarmManager.INTERVAL_HOUR, seekAlarmIntent);
 
     }
 }

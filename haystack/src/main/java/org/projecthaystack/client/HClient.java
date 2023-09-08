@@ -955,6 +955,7 @@ public class HClient extends HProj
         if(httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
           retry = 0;
           retryCountCallback.onRetry(0);
+          Log.i("CCU_HCLIENT","Response " + s.toString());
           return s.toString();
         }
         }catch (Exception e){
@@ -963,6 +964,8 @@ public class HClient extends HProj
           }
           Log.i("CCU_REPLACE","Exception occurred while hitting "+uriStr);
           Log.i("CCU_REPLACE", "Retry "+Log.getStackTraceString(e));
+        }
+        finally {
         }
         retry++;
         retryCountCallback.onRetry(retry);

@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -51,25 +52,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     public ProfileType getProfileType() {
         return ProfileType.SMARTSTAT_HEAT_PUMP_UNIT;
     }
-    @Override
-    public boolean isZoneDead() {
 
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
-
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-
-        for (short node : hpuDeviceMap.keySet())
-        {
-            double curTemp = hpuDeviceMap.get(node).getCurrentTemp();
-            if (curTemp > (buildingLimitMax + tempDeadLeeway)
-                    || curTemp < (buildingLimitMin - tempDeadLeeway))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
     @Override
     public void updateZonePoints() {
         if (Globals.getInstance().isTestMode()){

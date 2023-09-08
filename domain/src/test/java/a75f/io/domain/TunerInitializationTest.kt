@@ -96,7 +96,6 @@ class TunerInitializationTest {
         val testTunerDb = hayStack.readPoint(testTunerPoint["id"].toString())
         println(testTunerDb)
 
-
     }
 
     private fun getTestProfileConfig() : ProfileConfiguration {

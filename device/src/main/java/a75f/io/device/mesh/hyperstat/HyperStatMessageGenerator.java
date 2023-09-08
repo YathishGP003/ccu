@@ -320,7 +320,7 @@ public class HyperStatMessageGenerator {
 
     private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap collingDeadband = hayStack.read("point and tuner and deadband and base and cooling and equipRef == \""+equipRef+"\"");
+        HashMap collingDeadband = hayStack.read("point and deadband and cooling and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
         } catch (NullPointerException e) {
@@ -333,7 +333,7 @@ public class HyperStatMessageGenerator {
     public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
-                hayStack.read("point and tuner and deadband and base and heating and equipRef == \""+equipRef+
+                hayStack.read("point and deadband and heating and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
                 "\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());

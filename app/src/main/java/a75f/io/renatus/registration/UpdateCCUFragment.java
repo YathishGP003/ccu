@@ -3,8 +3,8 @@ package a75f.io.renatus.registration;
 import static android.content.Context.DOWNLOAD_SERVICE;
 import android.app.DownloadManager;
 import android.app.Dialog;
-import android.app.DownloadManager;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -40,7 +40,9 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
+import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -81,14 +83,41 @@ public class UpdateCCUFragment extends DialogFragment {
     LinearLayout connectivityIssues;
     TextView cancelServerDown;
     boolean isNotFirstInvocation ;
+    JSONObject config;
+    boolean resumeUpdateCCU;
+    boolean isDownloading;
+    boolean isInstalling;
 
     public UpdateCCUFragment(Boolean isServerDown) {
         this.isServerDown = isServerDown;
     }
     public UpdateCCUFragment() {
     }
+    public UpdateCCUFragment(boolean isDownloading, boolean isInstalling, boolean isReplace) throws JSONException {
+        String updateNewCCUPreference;
+        if(isReplace){
+            updateNewCCUPreference = PreferenceUtil.getStringPreference("UPDATE_CCU_REPLACE_CONFIGURATION");
+        }else {
+            updateNewCCUPreference = PreferenceUtil.getStringPreference("UPDATE_CCU_NEW_CONFIGURATION");
+        }
+        config = new JSONObject(updateNewCCUPreference);
+        this.currentVersionOfCCUString = config.getString("currentVersionOfCCUString");
+        this.recommendedVersionOfCCUString =  config.getString("recommendedVersionOfCCUString");
+        this.fileSizeString = config.getString("fileSizeString");
+        this.versionLabelString = config.getString("versionLabelString");
+        this.isReplace = isReplace;
+        this.replacingCCUName = null;
+        this.isServerDown = false;
+        this.resumeUpdateCCU = true;
+        this.isNotFirstInvocation = false;
+        if(isReplace) {
+            this.replacingCCUName = config.getString("replacingCCUName");
+        }
+        this.isDownloading = isDownloading;
+        this.isInstalling = isInstalling;
+    }
     public UpdateCCUFragment(String currentVersionOfCCU, String recommendedVersionOfCCU,
-                             String fileSize, String versionLabel) {
+                             String fileSize, String versionLabel) throws JSONException {
         this.currentVersionOfCCUString = currentVersionOfCCU;
         this.recommendedVersionOfCCUString = recommendedVersionOfCCU;
         this.fileSizeString = fileSize + " MB";
@@ -97,20 +126,40 @@ public class UpdateCCUFragment extends DialogFragment {
         this.replacingCCUName = null;
         this.isServerDown = false;
         this.isNotFirstInvocation = false;
+        this.resumeUpdateCCU = false;
+        config = new JSONObject();
+        config.put("currentVersionOfCCUString", currentVersionOfCCU);
+        config.put("recommendedVersionOfCCUString", recommendedVersionOfCCU);
+        config.put("fileSizeString", fileSize +" MB");
+        config.put("versionLabelString", versionLabel);
+        PreferenceUtil.setStringPreference("UPDATE_CCU_NEW_CONFIGURATION",config.toString());
     }
     public UpdateCCUFragment(String currentVersionOfCCU, CCU ccu,
-                             String fileSize) {
+                             String fileSize, boolean isReplace) throws JSONException {
         this.currentVersionOfCCUString = currentVersionOfCCU;
         this.fileSizeString = fileSize + " MB";
         this.recommendedVersionOfCCUString = ccu.getVersion();
-        this.isReplace = true;
+        this.isReplace = isReplace;
         this.isServerDown = false;
         this.replacingCCUName = ccu.getName();
         this.versionLabelString = getReplaceCCUApk(recommendedVersionOfCCUString);
         this.isNotFirstInvocation = false;
-    }
+        this.resumeUpdateCCU = false;
+        config = new JSONObject();
+        config.put("currentVersionOfCCUString", currentVersionOfCCU);
+        config.put("fileSizeString", fileSize +" MB");
+        config.put("recommendedVersionOfCCUString", ccu.getVersion());
+        config.put("versionLabelString", getReplaceCCUApk(ccu.getName()));
+        config.put("replacingCCUName", ccu.getName());
 
-    public static void stopAllDownloads(){
+        PreferenceUtil.setStringPreference("UPDATE_CCU_REPLACE_CONFIGURATION",config.toString());
+    }
+    public static void abortCCUDownloadProcess() {
+        UpdateCCUFragment.stopAllDownloads();
+        PreferenceUtil.stopUpdateCCU();
+        PreferenceUtil.installationCompleted();
+    }
+    private static void stopAllDownloads(){
         List<Long> downloadIds = getAllDownloadIds();
         DownloadManager downloadManager = (DownloadManager) Globals.getInstance().getApplicationContext()
                 .getSystemService(DOWNLOAD_SERVICE);
@@ -154,6 +203,14 @@ public class UpdateCCUFragment extends DialogFragment {
             updateUI();
             cancel.setOnClickListener(cancelOnClickListener);
             updateApp.setOnClickListener(updateOnClickListener);
+            if(resumeUpdateCCU) {
+                if(isDownloading) {
+                    resumeProgressBar();
+                    showProgressBar();
+                } else if(isInstalling){
+                    installNewApk();
+                }
+            }
         }
         setCancelable(false);
         return new AlertDialog.Builder(requireActivity(), R.style.NewDialogStyle)
@@ -162,6 +219,8 @@ public class UpdateCCUFragment extends DialogFragment {
     }
 
     View.OnClickListener cancelOnClickListener = view -> {
+        PreferenceUtil.stopUpdateCCU();
+        getParentFragmentManager().popBackStack();
         connectivityIssues.setVisibility(View.GONE);
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(DOWNLOAD_SERVICE);
@@ -175,6 +234,12 @@ public class UpdateCCUFragment extends DialogFragment {
                 ((FreshRegistration) requireActivity()).selectItem(2);
             }
         }
+        if (resumeUpdateCCU){
+            Intent i = new Intent(getActivity(), FreshRegistration.class);
+            i.putExtra("viewpager_position", 8);
+            startActivity(i);
+            getActivity().finish();
+        }
     };
 
     View.OnClickListener cancelInServerDownLayout = view -> {
@@ -185,16 +250,28 @@ public class UpdateCCUFragment extends DialogFragment {
     };
 
     View.OnClickListener updateOnClickListener = view -> {
-        connectivityIssues.setVisibility(View.GONE);
-        updateApp.setEnabled(false);
-        progressLayout.setVisibility(View.VISIBLE);
-        updateApp.setTextColor(Color.parseColor("#CCCCCC"));
+        PreferenceUtil.startUpdateCCU();
+        showProgressBar();
         if (versionLabelString != null) {
             RemoteCommandHandlerUtil.updateCCU(versionLabelString, UpdateCCUFragment.this, getActivity());
         }
     };
-
+    @Override
+    public void onPause() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.remove(this);
+        transaction.commit();
+        super.onPause();
+    }
+    private void showProgressBar() {
+        connectivityIssues.setVisibility(View.GONE);
+        updateApp.setEnabled(false);
+        progressLayout.setVisibility(View.VISIBLE);
+        updateApp.setTextColor(Color.parseColor("#CCCCCC"));
+    }
     public void downloadCanceled() {
+        PreferenceUtil.stopUpdateCCU();
         isNotFirstInvocation = false;
         if (getActivity() != null) {
             new Handler(Looper.getMainLooper()).post(() -> {
@@ -272,16 +349,24 @@ public class UpdateCCUFragment extends DialogFragment {
                     }
                     isNotFirstInvocation = true;
                     if (value == 100) {
-                        downloadingText.setText("Installing..");
-                        downloadedSizeText.setVisibility(View.INVISIBLE);
-                        totalSize.setVisibility(View.INVISIBLE);
-                        progressBar.setVisibility(View.GONE);
-                        cancel_update.setVisibility(View.GONE);
-                        update_details_parent.setPadding(65,0,15,15);
+                        PreferenceUtil.stopUpdateCCU();
+                        PreferenceUtil.installCCU();
+                        installNewApk();
                     }
             });
         }
     }
+
+
+    private void installNewApk() {
+        downloadingText.setText("Installing..");
+        downloadedSizeText.setVisibility(View.INVISIBLE);
+        totalSize.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.GONE);
+        cancel_update.setVisibility(View.GONE);
+        update_details_parent.setPadding(65,0,15,15);
+    }
+
     public void showCCUUpdateToast(String response, View toastLayout, Context context, FragmentActivity fragmentActivity) {
         if (response != null) {
             try {
@@ -393,5 +478,14 @@ public class UpdateCCUFragment extends DialogFragment {
     }
     private String getReplaceCCUApk(String version) {
         return BuildConfig.VERSION_NAME.split("\\d+")[0]+version+".apk";
+    }
+    public void resumeProgressBar(){
+        List<Long> downloadIds = UpdateCCUFragment.getAllDownloadIds();
+        DownloadManager downloadManager = (DownloadManager) Globals.getInstance().getApplicationContext()
+                .getSystemService(DOWNLOAD_SERVICE);
+        AppInstaller appInstaller = new AppInstaller();
+        if(downloadIds.size() > 0) {
+            appInstaller.checkDownload(downloadIds.get(0), downloadManager, UpdateCCUFragment.this, null);
+        }
     }
 }

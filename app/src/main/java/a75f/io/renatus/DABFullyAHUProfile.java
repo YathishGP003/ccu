@@ -291,6 +291,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                                          getString(R.string.text_btu_meter_status));
             updateAnalog4ConfigUI(loopType);
         } else {
+            imageView.setImageResource(R.drawable.input_dab_fullyahu);
+            imageView.getLayoutParams().height = 321;
             dcwbLayout.setVisibility(View.GONE);
             dabLayout.setVisibility(View.VISIBLE);
             dcwbText.setText(getString(R.string.label_dcwb_enable));
@@ -307,6 +309,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
      */
     private void updateAnalog4ConfigUI(double loopType) {
         CcuLog.d("CCU_UI", "loopType "+loopType);
+        imageView.setImageResource(R.drawable.input_dab_fullyahu_ao4);
+        imageView.getLayoutParams().height = 384;
         if (loopType > 0) {
             analog4OutConfigCooling.setVisibility(View.GONE);
             analog4OutConfigCo2.setVisibility(View.VISIBLE);

@@ -1,0 +1,1949 @@
+{
+  "model": [
+    "enSeries_LGSeries"
+  ],
+  "name": "Elmeasure enSeries_LGSeries",
+  "description": "Energy Meter Verified",
+  "equipType": "EMR_ZONE",
+  "vendor": "Elmeasure",
+  "registers": [
+    {
+      "registerAddress": 158,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "1.0",
+      "parameters": [
+        {
+          "parameterId": "b2b8693d-bde8-4261-bc00-8d5acfd828dc",
+          "name": "Active Energy",
+          "startBit": 1,
+          "endBit": 1,
+          "displayInUiDefault": true,
+          "bitParam": 1,
+          "logicalPointTags": [
+            {
+              "tagName": "active"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "energy"
+            },
+            {
+              "tagName": "net"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "unit",
+              "value": "%"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 102,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "1833c94b-df89-4ec6-ab6d-e6932356bc72",
+          "name": "Active Power R",
+          "displayInUiDefault": true,
+          "bitParam": 2,
+          "logicalPointTags": [
+            {
+              "tagName": "active"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 126,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "4ca6bf04-e9a7-4b6c-b682-2274758be8e4",
+          "name": "Apparent Power R",
+          "displayInUiDefault": true,
+          "bitParam": 3,
+          "logicalPointTags": [
+            {
+              "tagName": "apparent"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 110,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "45d9c878-a11a-4766-a7c4-daa21ff40b47",
+          "name": "Reactive Power R",
+          "displayInUiDefault": true,
+          "bitParam": 4,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "reactive"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 100,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "67fbac7f-113b-4d8e-80ee-a36bd6c91f10",
+          "name": "Active Power Total",
+          "displayInUiDefault": true,
+          "bitParam": 5,
+          "logicalPointTags": [
+            {
+              "tagName": "active"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 124,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "9b9e948d-c243-48fa-8940-1b476e37e3bf",
+          "name": "Apparent Power Total",
+          "displayInUiDefault": true,
+          "bitParam": 6,
+          "logicalPointTags": [
+            {
+              "tagName": "apparent"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 108,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "67b4a3ac-c7bd-433c-bfb8-8520c0537755",
+          "name": "Reactive Power Total",
+          "displayInUiDefault": true,
+          "bitParam": 7,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "reactive"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 116,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "f2a31a28-e248-419a-b307-fd8df228c912",
+          "name": "Power Factor Average",
+          "displayInUiDefault": true,
+          "bitParam": 8,
+          "logicalPointTags": [
+            {
+              "tagName": "avg"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 118,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "067e6f01-b330-43be-b3e6-73b8e3af868f",
+          "name": "Power Factor R",
+          "displayInUiDefault": true,
+          "bitParam": 9,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 104,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "22da8096-eb2a-491c-bff2-0f3e1d7d5802",
+          "name": "Active Power Y",
+          "displayInUiDefault": true,
+          "bitParam": 10,
+          "logicalPointTags": [
+            {
+              "tagName": "active"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 106,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "65132d12-084b-480c-9237-081f112d4bd4",
+          "name": "Active Power B",
+          "displayInUiDefault": true,
+          "bitParam": 11,
+          "logicalPointTags": [
+            {
+              "tagName": "active"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 112,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "529b7fb3-faf8-4d3f-8e7d-8470d1a8c1b7",
+          "name": "Reactive Power Y",
+          "displayInUiDefault": true,
+          "bitParam": 12,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "reactive"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 114,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "ee20b797-9ea7-407d-8dca-b80655387e38",
+          "name": "Reactive Power B",
+          "displayInUiDefault": true,
+          "bitParam": 13,
+          "logicalPointTags": [
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "reactive"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 128,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "2888a21d-66d5-486b-8d69-6fa4fde22303",
+          "name": "Apparent Power Y",
+          "displayInUiDefault": true,
+          "bitParam": 14,
+          "logicalPointTags": [
+            {
+              "tagName": "apparent"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 130,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "multiplier": "0.001",
+      "parameters": [
+        {
+          "parameterId": "9f4705bd-e9e3-4c3f-94e3-a383f1ec3b74",
+          "name": "Apparent Power B",
+          "displayInUiDefault": true,
+          "bitParam": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "apparent"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 120,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "8057854d-bf88-4565-9ca3-29344948f0b7",
+          "name": "Power Factor Y",
+          "displayInUiDefault": true,
+          "bitParam": 16,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 122,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "15e9c81f-d167-4dfb-908e-cb9e2e552e85",
+          "name": "Power Factor B",
+          "displayInUiDefault": true,
+          "bitParam": 17,
+          "logicalPointTags": [
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "zone"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 140,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "2bd27646-c561-436b-b6d2-091925be9fcc",
+          "name": "Voltage L-L Average",
+          "displayInUiDefault": true,
+          "bitParam": 18,
+          "logicalPointTags": [
+            {
+              "tagName": "avg"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 134,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "81cb42b4-c331-46d9-b834-0dfacff1c565",
+          "name": "Voltage R-Y",
+          "displayInUiDefault": true,
+          "bitParam": 19,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 136,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "2771e403-2f34-4ae7-b7de-11ce501e5083",
+          "name": "Voltage Y-B",
+          "displayInUiDefault": true,
+          "bitParam": 20,
+          "logicalPointTags": [
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 138,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "633d6980-343c-4707-a221-066b08f21cca",
+          "name": "Voltage B-R",
+          "displayInUiDefault": true,
+          "bitParam": 21,
+          "logicalPointTags": [
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 132,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "c36ccf6e-6a6a-42ab-bb45-ea38b4f9153a",
+          "name": "Voltage L Average",
+          "displayInUiDefault": true,
+          "bitParam": 22,
+          "logicalPointTags": [
+            {
+              "tagName": "avg"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+47
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 142,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "e5314812-b15e-45ce-8ffc-3b7f111a850a",
+          "name": "Voltage R",
+          "displayInUiDefault": true,
+          "bitParam": 23,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "neutral"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+73
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 144,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "56363aad-d9ee-4321-82e3-22ec31f9c414",
+          "name": "Voltage Y",
+          "displayInUiDefault": true,
+          "bitParam": 24,
+          "logicalPointTags": [
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "neutral"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+67
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 146,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "e2a0eea1-46c3-4f53-9ab4-82a768d39d3f",
+          "name": "Voltage B",
+          "displayInUiDefault": true,
+          "bitParam": 25,
+          "logicalPointTags": [
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "neutral"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "volt"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+90
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 150,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "b10fb18d-d39a-4168-8751-1c76018747ea",
+          "name": "Current R",
+          "displayInUiDefault": true,
+          "bitParam": 26,
+          "logicalPointTags": [
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+40
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 152,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "a33c0824-8b13-4635-9071-186b6a76be13",
+          "name": "Current Y",
+          "displayInUiDefault": true,
+          "bitParam": 27,
+          "logicalPointTags": [
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+48
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 154,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "0051209e-751b-4a5d-9657-6eff63ce1bac",
+          "name": "Current B",
+          "displayInUiDefault": true,
+          "bitParam": 28,
+          "logicalPointTags": [
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+42
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 148,
+      "registerNumber": "wewe",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "cbc9e9cb-006c-4c88-b205-2a9d9961e978",
+          "name": "Current Average",
+          "displayInUiDefault": true,
+          "bitParam": 29,
+          "logicalPointTags": [
+            {
+              "tagName": "average"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "elec"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "sensor"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 1e+41
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1245,
+      "registerNumber": "wewe",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "decimal",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "69dada98-b21a-4681-90e4-736a6b16ba85",
+          "name": "zoneAirTempUnoccCoolingSpPoint",
+          "displayInUiDefault": true,
+          "bitParam": 30,
+          "logicalPointTags": [
+            {
+              "tagName": "air"
+            },
+            {
+              "tagName": "cooling"
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "unocc"
+            },
+            {
+              "tagName": "zone"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "none"
+            },
+            {
+              "tagName": "unit",
+              "value": "°C"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 100
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 345,
+      "registerNumber": "wewe",
+      "registerType": "coil",
+      "parameterDefinitionType": "binary",
+      "wordOrder": "bigEndian",
+      "parameters": [
+        {
+          "parameterId": "3fa9ae02-7652-458a-b845-98f4117d7281",
+          "name": "chillerSetpoint",
+          "displayInUiDefault": false,
+          "bitParam": 31,
+          "logicalPointTags": [
+            {
+              "tagName": "chiller"
+            },
+            {
+              "tagName": "leaving"
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "water"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "none"
+            },
+            {
+              "tagName": "unit",
+              "value": "°C"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 120
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "chiller"
+            },
+            {
+              "tagName": "leaving"
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "water"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "none"
+            },
+            {
+              "tagName": "unit",
+              "value": "°C"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 120
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "equips": [
+    {
+      "model": [
+        "chilledWaterLeavingValveActuatorEquip_edited"
+      ],
+      "name": "Elmeasure chilledWaterLeavingValveActuatorEquip_edited",
+      "description": "Equip-type prototype_edited",
+      "equipType": "ac, actuator, chilled, leaving, valve, water",
+      "vendor": "Elmeasure",
+      "registers": [
+        {
+          "registerAddress": 1,
+          "registerNumber": "ert",
+          "registerType": "discreteInput",
+          "parameterDefinitionType": "long",
+          "parameters": [
+            {
+              "parameterId": "32624cc1-64c1-4f9c-a33e-c6a9188575f6",
+              "name": "chillerSetpoint",
+              "displayInUiDefault": false,
+              "logicalPointTags": [
+                {
+                  "tagName": "chiller"
+                },
+                {
+                  "tagName": "leaving"
+                },
+                {
+                  "tagName": "sp"
+                },
+                {
+                  "tagName": "temperature"
+                },
+                {
+                  "tagName": "water"
+                },
+                {
+                  "tagName": "writable"
+                },
+                {
+                  "tagName": "kind",
+                  "value": "Number"
+                },
+                {
+                  "tagName": "hisInterpolate",
+                  "value": "none"
+                },
+                {
+                  "tagName": "unit",
+                  "value": "°C"
+                },
+                {
+                  "tagName": "minVal",
+                  "value": 0
+                },
+                {
+                  "tagName": "maxVal",
+                  "value": 120
+                },
+                {
+                  "tagName": "incrementVal",
+                  "value": 1
+                }
+              ],
+              "userIntentPointTags": [
+                {
+                  "tagName": "chiller"
+                },
+                {
+                  "tagName": "leaving"
+                },
+                {
+                  "tagName": "sp"
+                },
+                {
+                  "tagName": "temperature"
+                },
+                {
+                  "tagName": "water"
+                },
+                {
+                  "tagName": "writable"
+                },
+                {
+                  "tagName": "kind",
+                  "value": "Number"
+                },
+                {
+                  "tagName": "hisInterpolate",
+                  "value": "none"
+                },
+                {
+                  "tagName": "unit",
+                  "value": "°C"
+                },
+                {
+                  "tagName": "minVal",
+                  "value": 0
+                },
+                {
+                  "tagName": "maxVal",
+                  "value": 120
+                },
+                {
+                  "tagName": "incrementVal",
+                  "value": 1
+                },
+                {
+                  "tagName": "writable"
+                },
+                {
+                  "tagName": "sp"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "equipRef": "$2d7de5ca-a267-47b5-929c-366c40589031",
+      "modbusEquipId (_id)": "18e80e98-412d-43d9-a232-f116e85454c0"
+    }
+  ],
+  "modbusEquipId (_id)": "2d7de5ca-a267-47b5-929c-366c40589031"
+}

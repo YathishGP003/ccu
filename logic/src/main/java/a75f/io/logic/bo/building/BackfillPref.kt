@@ -78,6 +78,7 @@ class BackfillPref {
         const val BACKFILL_TIME_DURATION = "backFillTimeDuration"
         const val BACKFILL_TIME_SP_SELECTED = "backFillTimeSpSelected"
         const val BACKFILL_DEFAULT_TIME = 24
+        const val BACKFILL_DEFAULT_TIME_SP = 6
     }
 
 }

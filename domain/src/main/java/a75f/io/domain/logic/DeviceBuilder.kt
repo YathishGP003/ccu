@@ -11,7 +11,6 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
-
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String) {
 
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef)
@@ -69,7 +68,6 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setEnabled(true)
             .setUnit(modelDef.defaultUnit)
             .setSiteRef(device.siteRef)
-
 
         modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
 

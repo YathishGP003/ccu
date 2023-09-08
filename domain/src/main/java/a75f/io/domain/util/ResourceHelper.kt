@@ -86,7 +86,6 @@ object ResourceHelper {
         val jsonAdapter: JsonAdapter<SeventyFiveFProfileDirective> = moshiInstance.adapter(SeventyFiveFProfileDirective::class.java)
 
         return modelData?.let {jsonAdapter.fromJson(modelData)}!!*/
-
         //val objectMapper = ObjectMapperConfig().objectMapper()
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFProfileDirective

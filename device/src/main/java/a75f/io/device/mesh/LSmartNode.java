@@ -145,11 +145,11 @@ public class LSmartNode
         try
         {
             double coolingDeadband =
-                TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""+equipRef+"\"");
+                    CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband));
     
             double heatingDeadband =
-                TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""+equipRef+"\"");
+                    CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             
             settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband));
         } catch (Exception e) {
@@ -651,7 +651,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            Equip equip = HSUtil.getEquipForModule((Short) device.get("id"));
+            Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
             controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }

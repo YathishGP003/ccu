@@ -206,16 +206,6 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                             .setSiteRef(siteMap.get("id").toString())
                             .setDisplayName(ccuName + "-smartNodeBand")
                             .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-
-                    HashMap<Object, Object> ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
-
-                    OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                            Objects.requireNonNull(ccu.get("dis")) +"-CCU",
-                            Objects.requireNonNull(ccu.get("equipRef")).toString(),
-                            Objects.requireNonNull(ccu.get("siteRef")).toString(),
-                            Objects.requireNonNull(siteMap.get(Tags.TZ)).toString(),
-                            CCUHsApi.getInstance()
-                    );
                     CCUHsApi.getInstance().addPoint(snBand);
                     if(!Globals.getInstance().siteAlreadyCreated()) {
                         BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
@@ -223,8 +213,8 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     }
                 },
                 ()->{
-                    prefs.setBoolean("CCU_SETUP", true);
                     L.saveCCUState();
+                    prefs.setBoolean("CCU_SETUP", true);
                     CCUHsApi.getInstance().log();
                     CCUHsApi.getInstance().syncEntityTree();
                     ProgressDialogUtils.hideProgressDialog();

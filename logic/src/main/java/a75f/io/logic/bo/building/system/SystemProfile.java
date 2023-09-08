@@ -163,7 +163,7 @@ public abstract class SystemProfile
     public String getSystemEquipRef() {
         if (equipRef == null)
         {
-            HashMap equip = CCUHsApi.getInstance().read("equip and system");
+            HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
             equipRef = equip.get("id").toString();
             equipDis = equip.get("dis").toString();
         }
@@ -213,20 +213,6 @@ public abstract class SystemProfile
         siteRef = (String) siteMap.get(Tags.ID);
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
-
-        Point userLimitSpread = new Point.Builder()
-                                    .setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread")
-                                    .setSiteRef(siteRef).setEquipRef(equipRef)
-                                    .setHisInterpolate("cov").addMarker("system").addMarker("tuner")
-                                    .addMarker("writable").addMarker("his").addMarker("user").addMarker("limit")
-                                    .addMarker("spread").addMarker("sp")
-                                    .setMinVal("1").setMaxVal("20").setIncrementVal("1")
-                                    .setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
-                                    .setTz(tz).setUnit(Units.FAHRENHEIT)
-                                    .build();
-
-        String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
-        TunerUtil.copyDefaultBuildingTunerVal(userLimitSpreadId, DomainNameKt.userLimitSpread, hayStack);
 
         Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)

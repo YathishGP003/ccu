@@ -56,7 +56,7 @@ import android.util.Log
         fun fromConfigTo(config: BaseProfileConfiguration, profileType: ProfileType): ViewState {
 
             when (profileType) {
-                ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+                ProfileType.HYPERSTATSPLIT_CPU -> {
                     val configuration = config as HyperStatSplitCpuEconConfiguration
                     return fromConfigCPUEcon(configuration)
                 }
@@ -69,7 +69,7 @@ import android.util.Log
         }
 
         private fun fromConfigCPUEcon(config: HyperStatSplitCpuEconConfiguration) = ViewState(
-            profileType = ProfileType.HYPERSTATSPLIT_CPU_ECON,
+            profileType = ProfileType.HYPERSTATSPLIT_CPU,
             tempOffsetPosition = (tempOffsetSpinnerValues().indexOf(config.temperatureOffset.toString())),
             forceOccupiedEnabled = config.isEnableAutoForceOccupied,
             autoAwayEnabled = config.isEnableAutoAway,
@@ -188,7 +188,7 @@ import android.util.Log
 
     fun toConfig(): BaseProfileConfiguration {
         when (profileType) {
-            ProfileType.HYPERSTATSPLIT_CPU_ECON -> return toCpuEconConfig()
+            ProfileType.HYPERSTATSPLIT_CPU -> return toCpuEconConfig()
             else -> {}
         }
         return toCpuEconConfig()
@@ -398,7 +398,7 @@ fun <E> Iterable<E>.updated(index: Int, elem: E) =
 
 fun getAnalogOutDisplayName(profileType: ProfileType, enumValue: Int): Int {
     when (profileType) {
-        ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+        ProfileType.HYPERSTATSPLIT_CPU -> {
             when (enumValue) {
                 CpuEconAnalogOutAssociation.COOLING.ordinal -> return R.string.cooling
                 CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal -> return R.string.linear_fan_speed

@@ -1318,7 +1318,7 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("HYPERSTATSPLIT_CPU_ECON")) {
+                if (zoneEquips.get(i).getProfile().contains("HYPERSTATSPLIT_CPU")) {
                     isHSSplitPaired = true;
                 }
             }
@@ -1518,7 +1518,7 @@ public class FloorPlanFragment extends Fragment {
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
                             HyperStatFragment.ID);
                     break;
-                case HYPERSTATSPLIT_CPU_ECON:
+                case HYPERSTATSPLIT_CPU:
                     showDialogFragment(HyperStatSplitFragment.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
                             HyperStatSplitFragment.ID);

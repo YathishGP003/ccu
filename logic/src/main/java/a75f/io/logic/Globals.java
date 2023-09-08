@@ -575,7 +575,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(vrv);
                             break;
 
-                        case HYPERSTATSPLIT_CPU_ECON:
+                        case HYPERSTATSPLIT_CPU:
                             HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile();
                             cpuEcon.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuEcon);

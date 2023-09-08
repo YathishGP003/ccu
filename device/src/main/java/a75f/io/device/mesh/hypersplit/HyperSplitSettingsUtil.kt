@@ -45,7 +45,7 @@ class HyperSplitSettingsUtil {
             settings2.integrationTime = TunerUtil.getIntegralTimeout(equipRef).toInt()
             
             when (equip.profile) {
-                ProfileType.HYPERSTATSPLIT_CPU_ECON.name -> {
+                ProfileType.HYPERSTATSPLIT_CPU.name -> {
                     settings2.profile = HyperSplit.HyperSplitProfiles_t.HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT_ECONOMIZER
                 }
             }
@@ -124,7 +124,7 @@ class HyperSplitSettingsUtil {
             settings3.setEcoTuners(ecoTunersBuilder.build())
 
             when (equip.profile) {
-                ProfileType.HYPERSTATSPLIT_CPU_ECON.name -> {
+                ProfileType.HYPERSTATSPLIT_CPU.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                 }
             }

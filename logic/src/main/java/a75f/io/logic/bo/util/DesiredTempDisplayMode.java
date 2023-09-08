@@ -55,7 +55,7 @@ public class DesiredTempDisplayMode {
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSCPU(mEquip);
                 temperatureModes.add(temperatureMode);
-            }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU_ECON.name())) {
+            }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSSplitCPUEcon(mEquip);
                 temperatureModes.add(temperatureMode);
             }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT.name())) {

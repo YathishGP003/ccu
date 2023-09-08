@@ -747,7 +747,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
                             profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
                             profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
-                            profileType.contains(ProfileType.HYPERSTATSPLIT_CPU_ECON.name())
+                            profileType.contains(ProfileType.HYPERSTATSPLIT_CPU.name())
                     ) {
                         tempModule = true;
                     }
@@ -1479,7 +1479,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
 
-                            if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU_ECON.name())) {
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(p);
                                 HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
@@ -1969,7 +1969,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
             }
 
-            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU_ECON.name())) {
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU & Econ Points:" + cpuEconEquipPoints.toString());
                 HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());

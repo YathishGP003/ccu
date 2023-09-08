@@ -359,7 +359,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.HYPERSTATSPLIT_CPU_ECON) {
+        else if (mProfileType == ProfileType.HYPERSTATSPLIT_CPU) {
             if (L.isSimulation()) {
                 showDialogFragment(
                         HyperStatSplitFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),

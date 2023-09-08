@@ -460,7 +460,6 @@ public class HyperSplitMsgReceiver {
         return rawPoint.getEnabled() && rawPoint.getType().equals("15");
     }
 
-    // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
     /*
         Bit [15] of int val should be a "1" to indicate thermistor UIN mapping.
         Bits [14-0] represent the thermistor reading (in tens of ohms).
@@ -479,7 +478,6 @@ public class HyperSplitMsgReceiver {
         }
     }
 
-    // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
     /*
         Bit [15] of int val should be a "0" to indicate voltage UIN mapping.
         Bits [14-0] represent the voltage reading (in millivolts).
@@ -763,7 +761,7 @@ public class HyperSplitMsgReceiver {
         PossibleConditioningMode possibleConditioningMode = PossibleConditioningMode.OFF;
         PossibleFanMode possibleFanMode = PossibleFanMode.OFF;
 
-        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU_ECON.name())){
+        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())){
             possibleConditioningMode = HSSplitHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
             possibleFanMode = HSSplitHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
         }

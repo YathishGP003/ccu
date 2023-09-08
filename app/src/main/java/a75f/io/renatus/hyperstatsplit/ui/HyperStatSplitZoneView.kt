@@ -55,7 +55,7 @@ fun loadHyperStatSplitCpuEconProfile(
         cpuEconEquipPoints[HSSplitZoneStatus.STATUS.name].toString(),
         HyperstatSplitProfileNames.HSSPLIT_CPUECON.toUpperCase(Locale.ROOT)
     )
-    setUpConditionFanConfig(viewPointRow1, cpuEconEquipPoints, equipId!!, nodeAddress, context, ProfileType.HYPERSTATSPLIT_CPU_ECON)
+    setUpConditionFanConfig(viewPointRow1, cpuEconEquipPoints, equipId!!, nodeAddress, context, ProfileType.HYPERSTATSPLIT_CPU)
     setUpHumidifierDeHumidifier(viewPointRow2, cpuEconEquipPoints, equipId, context, nodeAddress)
 
     if (cpuEconEquipPoints.containsKey(HSSplitZoneStatus.DISCHARGE_AIRFLOW.name)) {
@@ -221,7 +221,7 @@ private fun setUpHumidifierDeHumidifier(
         val targetHumidity = cpuEconEquipPoints[HSSplitZoneStatus.TARGET_HUMIDITY.name] as Double
         humiditySpinner.setSelection(targetHumidity.toInt() - 1, false)
         setSpinnerListenerForHyperstatSplit(
-            humiditySpinner,HSSplitZoneStatus.TARGET_HUMIDITY,equipId, nodeAddress , ProfileType.HYPERSTATSPLIT_CPU_ECON)
+            humiditySpinner,HSSplitZoneStatus.TARGET_HUMIDITY,equipId, nodeAddress , ProfileType.HYPERSTATSPLIT_CPU)
     } else {
         viewPointRow2.findViewById<View>(R.id.lt_column1).visibility = View.GONE
     }
@@ -231,7 +231,7 @@ private fun setUpHumidifierDeHumidifier(
         val targetDeHumidity = cpuEconEquipPoints[HSSplitZoneStatus.TARGET_DEHUMIDIFY.name] as Double
         dehumidifySpinner.setSelection(targetDeHumidity.toInt() - 1, false)
           setSpinnerListenerForHyperstatSplit(
-                    dehumidifySpinner,HSSplitZoneStatus.TARGET_DEHUMIDIFY,equipId, nodeAddress, ProfileType.HYPERSTATSPLIT_CPU_ECON)
+                    dehumidifySpinner,HSSplitZoneStatus.TARGET_DEHUMIDIFY,equipId, nodeAddress, ProfileType.HYPERSTATSPLIT_CPU)
         if (viewPointRow2.findViewById<View>(R.id.lt_column1).visibility == View.GONE) {
             textViewLabel4.setPadding(52, 0, 0, 0)
         }
@@ -277,7 +277,7 @@ private fun handleConditionMode(
     var actualConditioningMode = -1
 
     // CPU/Economizer Profile has combination of conditioning modes
-    if(profileType == ProfileType.HYPERSTATSPLIT_CPU_ECON) {
+    if(profileType == ProfileType.HYPERSTATSPLIT_CPU) {
         actualConditioningMode  = getActualConditioningMode(nodeAddress, selectedPosition)
     }
     if(actualConditioningMode != -1)
@@ -289,7 +289,7 @@ private fun handleConditionMode(
 private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: String , profileType: ProfileType) {
     val cacheStorage = FanModeCacheStorage()
     val actualFanMode: Int = when (profileType) {
-        ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+        ProfileType.HYPERSTATSPLIT_CPU -> {
             getActualFanMode(nodeAddress, selectedPosition)
         }
         else -> { -1 }

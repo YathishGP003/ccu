@@ -97,7 +97,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         equipRef =  profileEquip.createNewEquip(
             HyperstatSplitProfileNames.HSSPLIT_CPUECON,
             roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
-            equipDis!!, ProfileType.HYPERSTATSPLIT_CPU_ECON
+            equipDis!!, ProfileType.HYPERSTATSPLIT_CPU
         )
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  New Equip Created: $equipRef")
 
@@ -305,7 +305,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             ConfigState(hyperStatSplitConfig.relay6State.enabled, hyperStatSplitConfig.relay6State.association.ordinal),
             ConfigState(hyperStatSplitConfig.relay7State.enabled, hyperStatSplitConfig.relay7State.association.ordinal),
             ConfigState(hyperStatSplitConfig.relay8State.enabled, hyperStatSplitConfig.relay8State.association.ordinal),
-            ProfileType.HYPERSTATSPLIT_CPU_ECON
+            ProfileType.HYPERSTATSPLIT_CPU
         )
 
         val analogOutConfigPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil
@@ -314,7 +314,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ConfigState(hyperStatSplitConfig.analogOut2State.enabled, hyperStatSplitConfig.analogOut2State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.analogOut3State.enabled, hyperStatSplitConfig.analogOut3State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.analogOut4State.enabled, hyperStatSplitConfig.analogOut4State.association.ordinal),
-                ProfileType.HYPERSTATSPLIT_CPU_ECON
+                ProfileType.HYPERSTATSPLIT_CPU
             )
 
         val universalInConfigPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil
@@ -327,7 +327,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ConfigState(hyperStatSplitConfig.universalIn6State.enabled, hyperStatSplitConfig.universalIn6State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.universalIn7State.enabled, hyperStatSplitConfig.universalIn7State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.universalIn8State.enabled, hyperStatSplitConfig.universalIn8State.association.ordinal),
-                ProfileType.HYPERSTATSPLIT_CPU_ECON
+                ProfileType.HYPERSTATSPLIT_CPU
             )
 
         val sensorBusConfigPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil
@@ -336,7 +336,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ConfigState(hyperStatSplitConfig.address1State.enabled, hyperStatSplitConfig.address1State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.address2State.enabled, hyperStatSplitConfig.address2State.association.ordinal),
                 ConfigState(hyperStatSplitConfig.address3State.enabled, hyperStatSplitConfig.address3State.association.ordinal),
-                ProfileType.HYPERSTATSPLIT_CPU_ECON
+                ProfileType.HYPERSTATSPLIT_CPU
             )
 
             // For user intent Point CCU level default values need to be added

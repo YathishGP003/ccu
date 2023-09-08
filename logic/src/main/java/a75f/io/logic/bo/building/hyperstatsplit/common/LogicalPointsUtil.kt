@@ -530,7 +530,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
                     "cmd","zone","logical","cur","analog","standalone","output",
-                    "fan", "speed","his","predefined","cpuecon", "cur", "standalone"
+                    "fan", "speed","his","predefined", "cur", "standalone"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-predefinedFanSpeed")
@@ -1035,8 +1035,8 @@ class LogicalPointsUtil {
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "cleanCpuEconLogicalPoints()")
             removeCpuEconRelayLogicalPoints(config, equipRef)
             removeCpuEconAnalogLogicalPoints(config, equipRef)
-            removeUniversalInLogicalPoints(equipRef,config,ProfileType.HYPERSTATSPLIT_CPU_ECON)
-            removeSensorBusLogicalPoints(equipRef,config,ProfileType.HYPERSTATSPLIT_CPU_ECON)
+            removeUniversalInLogicalPoints(equipRef,config,ProfileType.HYPERSTATSPLIT_CPU)
+            removeSensorBusLogicalPoints(equipRef,config,ProfileType.HYPERSTATSPLIT_CPU)
         }
         private fun removeCpuEconRelayLogicalPoints(config: HyperStatSplitCpuEconConfiguration, equipRef: String){
             if(!HyperStatSplitAssociationUtil.isAnyRelayAssociatedToCoolingStage1(config))
@@ -1108,7 +1108,7 @@ class LogicalPointsUtil {
             var universalIn8State = UniversalInState(false, UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)
 
             when(profileType){
-                ProfileType.HYPERSTATSPLIT_CPU_ECON ->{
+                ProfileType.HYPERSTATSPLIT_CPU ->{
                     address0State =  (baseConfig as HyperStatSplitCpuEconConfiguration).address0State
                     address1State =  baseConfig.address1State
                     address2State =  baseConfig.address2State
@@ -1294,7 +1294,7 @@ class LogicalPointsUtil {
             var universalIn8State = UniversalInState(false, UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)
 
             when(profileType){
-                ProfileType.HYPERSTATSPLIT_CPU_ECON ->{
+                ProfileType.HYPERSTATSPLIT_CPU ->{
                     address0State =  (baseConfig as HyperStatSplitCpuEconConfiguration).address0State
                     address1State =  baseConfig.address1State
                     address2State =  baseConfig.address2State

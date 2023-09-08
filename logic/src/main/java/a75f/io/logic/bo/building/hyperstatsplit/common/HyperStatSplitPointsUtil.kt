@@ -2457,7 +2457,7 @@ class HyperStatSplitPointsUtil(
     private fun getRelayConfigEnum(profileType: ProfileType): String {
 
         when(profileType){
-            ProfileType.HYPERSTATSPLIT_CPU_ECON-> {
+            ProfileType.HYPERSTATSPLIT_CPU-> {
                 return "$COOLING_STAGE1,$COOLING_STAGE2,$COOLING_STAGE3,$HEATING_STAGE1," +
                         "$HEATING_STAGE2,$HEATING_STAGE3,$FAN_LOW,$FAN_MEDIUM,$FAN_HIGH," +
                         "$FAN_ENABLED,$OCCUPIED_ENABLED,$HUMIDIFIER,$DEHUMIDIFIER," +
@@ -2470,7 +2470,7 @@ class HyperStatSplitPointsUtil(
     }
     private fun getAnalogOutConfigEnum(profileType: ProfileType): String {
         when(profileType) {
-            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+            ProfileType.HYPERSTATSPLIT_CPU -> {
                 return "$COOLING,$LINEAR_FAN_SPEED,$HEATING,$OAO_DAMPER,$STAGED_FAN_SPEED"
             }
             else -> {}
@@ -2488,7 +2488,7 @@ class HyperStatSplitPointsUtil(
     }
     private fun getUniversalInConfigEnum(profileType: ProfileType): String {
         when(profileType) {
-            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+            ProfileType.HYPERSTATSPLIT_CPU -> {
                 return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150," +
                         "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NC," +
                         "$FILTER_NO,$CONDENSATE_NC,$CONDENSATE_NO,$PRESSURE_1,$PRESSURE_2,"+
@@ -2500,7 +2500,7 @@ class HyperStatSplitPointsUtil(
     }
     private fun getSensorBusTempConfigEnum(profileType: ProfileType): String {
         when(profileType) {
-            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+            ProfileType.HYPERSTATSPLIT_CPU -> {
                 return "$SUPPLY_AIR,$MIXED_AIR,$OUTSIDE_AIR"
             }
             else -> {}
@@ -2509,7 +2509,7 @@ class HyperStatSplitPointsUtil(
     }
     private fun getSensorBusPressureConfigEnum(profileType: ProfileType): String {
         when(profileType) {
-            ProfileType.HYPERSTATSPLIT_CPU_ECON -> {
+            ProfileType.HYPERSTATSPLIT_CPU -> {
                 return "$PRESSURE"
             }
             else -> {}

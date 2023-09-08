@@ -68,7 +68,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     lateinit var curState: ZoneState
 
-    override fun getProfileType() = ProfileType.HYPERSTATSPLIT_CPU_ECON
+    override fun getProfileType() = ProfileType.HYPERSTATSPLIT_CPU
 
     override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {
         val equip = cpuEconDeviceMap[address]
@@ -172,7 +172,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                  "DCV Loop Output:: $dcvLoopOutput \n"+
                  "Calculated Min OAO Damper:: $outsideAirCalculatedMinDamper \n"+
                  "OAO Loop Output (before MAT Safety):: $outsideAirLoopOutput \n"+
-                 "OAO Loop Output (after MAT Safety):: $outsideAirFinalLoopOutput \n"
+                 "OAO Loop Output (after MAT Safety and outsideDamperMinOpen):: $outsideAirFinalLoopOutput \n"
         )
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
@@ -291,7 +291,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
 
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON," economizingLoopOutput "+economizingLoopOutput+" dcvLoopOutput "+dcvLoopOutput
-                    +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+                    +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+" outsideDamperMinOpen "+outsideDamperMinOpen);
 
             equip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput.toDouble())
             equip.setHisVal("oao and zone and logical and damper and actuator and cmd", outsideAirFinalLoopOutput.toDouble())
@@ -332,7 +332,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             if (numberConfiguredCoolingStages > 0) {
                 economizingLoopOutput = Math.min((coolingLoopOutput * (numberConfiguredCoolingStages + 1)).toInt(), 100)
+                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, (numberConfiguredCoolingStages+1).toString() + " cooling stages available (including economizer); economizingLoopOutput = " + economizingLoopOutput);
             } else {
+                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "coolingLoopOutput = " + coolingLoopOutput + ", economizingToMainCoolingLoopMap = " + economizingToMainCoolingLoopMap + ", economizingLoopOutput = " + economizingLoopOutput);
                 economizingLoopOutput = Math.min((coolingLoopOutput * (100 / economizingToMainCoolingLoopMap)).toInt(), 100)
             }
 
@@ -397,10 +399,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         if (!isEconomizingTempAndHumidityInRange(equip, externalTemp, externalHumidity, economizingMinTemp)) return false
 
         if (isEconomizingEnabledOnEnthalpy(equip, insideEnthalpy, outsideEnthalpy)) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Economizer enabled based on enthalpy.")
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Economizing enabled based on enthalpy.")
             return true
         }
 
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Economizing disabled based on enthalpy.")
         return false
 
     }
@@ -418,7 +421,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         var outsideAirTemp = externalTemp
 
         if (externalHumidity == 0.0 && externalTemp == 0.0) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Falling back to OAT sensor");
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "System outside temp and humidity are both zero; using local OAT sensor");
             outsideAirTemp = equip.getOutsideAirTempSensor()
         }
 
@@ -438,6 +441,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             * systemOutsideHumidity > economizingMaxHumidity (100%, adj.)
      */
     private fun isEconomizingTempAndHumidityInRange(equip: HyperStatSplitCpuEconEquip, externalTemp: Double, externalHumidity: Double, economizingMinTemp: Double): Boolean {
+
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Checking outside temp and humidity against tuner min/max thresholds");
 
         val economizingMaxTemp = TunerUtil.readTunerValByQuery("economizing and max and " +
                 "temp",equip.equipRef)
@@ -466,8 +471,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             && outsideHumidity > economizingMinHumidity
             && outsideHumidity < economizingMaxHumidity) return true
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Outside air not suitable for economizing Temp : "+externalTemp
-                +" Humidity : "+externalHumidity)
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Outside air (" + outsideTemp + "°F, " + externalHumidity + "%RH) out of temp/humidity range from tuners; economizing disabled");
 
         return false
 
@@ -482,7 +486,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
      */
     private fun isEconomizingEnabledOnEnthalpy (equip: HyperStatSplitCpuEconEquip, insideEnthalpy: Double, outsideEnthalpy: Double): Boolean {
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+ outsideEnthalpy)
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Checking enthalpy-enable condition: insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+ outsideEnthalpy)
 
         var outsideEnthalpyToUse = outsideEnthalpy
 
@@ -495,7 +499,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 equip.getConfiguration().address1State,
                 equip.getConfiguration().address2State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Falling back to sensor bus outside air temp and humidity")
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"System outside temp and humidity are both zero; using local outside air temp/humidity sensor")
             val sensorBusOutsideTemp = equip.getOutsideAirTempSensor()
             val sensorBusOutsideHumidity = equip.getOutsideAirHumiditySensor()
             outsideEnthalpyToUse = getAirEnthalpy(sensorBusOutsideTemp, sensorBusOutsideHumidity)

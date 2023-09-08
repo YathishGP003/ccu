@@ -83,7 +83,7 @@ class HyperStatSplitProfileSelectionFragment : BaseDialogFragment() {
             mNodeAddress,
             mRoomName,
             mFloorName,
-            ProfileType.HYPERSTATSPLIT_CPU_ECON,
+            ProfileType.HYPERSTATSPLIT_CPU,
             NodeType.HYPERSTATSPLIT
          ), FragmentBLEInstructionScreen.ID
       )

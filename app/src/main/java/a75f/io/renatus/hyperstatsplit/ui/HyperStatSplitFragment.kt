@@ -157,7 +157,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         when(profileType){
-            ProfileType.HYPERSTATSPLIT_CPU_ECON-> {
+            ProfileType.HYPERSTATSPLIT_CPU-> {
                 val cpuEconViewModel: CpuEconViewModel by viewModels()
                 viewModel = cpuEconViewModel
                 viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)

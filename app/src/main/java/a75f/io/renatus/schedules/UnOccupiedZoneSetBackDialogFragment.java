@@ -2,6 +2,7 @@ package a75f.io.renatus.schedules;
 
 
 
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
@@ -121,8 +122,11 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
 
         ArrayList<Double> zoneSetBack = new ArrayList<>();
         if(isCelsiusTunerAvailableStatus()) {
-                for (double val = 0;  val <= 20; val += 1) {
-                    zoneSetBack.add(CCUUtils.roundToOneDecimal(fahrenheitToCelsiusRelative(val)));
+         double  minValue = convertingRelativeValueFtoC(0);
+         double  maxValue = convertingRelativeValueFtoC(20);
+
+                for (double val = minValue;  val <= maxValue; val += 1) {
+                    zoneSetBack.add(val);
                 }
         }else {
             for (double val = 0; val <= 20; val += 1) {
@@ -133,12 +137,16 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         setBackAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         unOccupiedZoneSetBack.setAdapter(setBackAdapter);
         if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
-            int unoccupiedZoneSetBackDefaultValue = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and unoccupied and default and setback").intValue();
-            unOccupiedZoneSetBack.setSelection(unoccupiedZoneSetBackDefaultValue);
+            double unoccupiedZoneSetBackDefaultValue = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and unoccupied and default and setback").intValue();
+            if(isCelsiusTunerAvailableStatus())
+                unoccupiedZoneSetBackDefaultValue = convertingRelativeValueFtoC(unoccupiedZoneSetBackDefaultValue);
+            unOccupiedZoneSetBack.setSelection((int) unoccupiedZoneSetBackDefaultValue);
             unOccupiedZoneSetBack.setEnabled(false);
         }else {
             HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("unoccupied and zone and setback and schedulable and  roomRef == \"" + mSchedule.getRoomRef() + "\"");
             int unoccupiedZoneVal = (int) (CCUHsApi.getInstance().readPointPriorityVal(unoccupiedZoneObj.get("id").toString()));
+            if(isCelsiusTunerAvailableStatus())
+                unoccupiedZoneVal = (int) convertingRelativeValueFtoC(unoccupiedZoneVal);
             unOccupiedZoneSetBack.setSelection(unoccupiedZoneVal);
         }
         unOccupiedZoneSetBack.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

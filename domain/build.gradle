@@ -48,6 +48,12 @@ android {
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.daikin_prod.service.75f.io\"'
         }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.carrier_prod.service.75f.io\"'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -417,7 +417,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         var outsideAirTemp = externalTemp
 
-        if (externalHumidity == 0.0 && externalTemp == 0.0) outsideAirTemp = equip.getOutsideAirTempSensor()
+        if (externalHumidity == 0.0 && externalTemp == 0.0) {
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Falling back to OAT sensor");
+            outsideAirTemp = equip.getOutsideAirTempSensor()
+        }
 
         if (outsideAirTemp > economizingMinTemp) return outsideAirTemp < dryBulbTemperatureThreshold
 
@@ -492,6 +495,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 equip.getConfiguration().address1State,
                 equip.getConfiguration().address2State)
         ) {
+            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Falling back to sensor bus outside air temp and humidity")
             val sensorBusOutsideTemp = equip.getOutsideAirTempSensor()
             val sensorBusOutsideHumidity = equip.getOutsideAirHumiditySensor()
             outsideEnthalpyToUse = getAirEnthalpy(sensorBusOutsideTemp, sensorBusOutsideHumidity)

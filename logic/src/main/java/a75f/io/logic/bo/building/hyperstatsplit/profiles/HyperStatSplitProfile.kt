@@ -43,17 +43,26 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         port: Port,
         coolingLoopOutput: Int,
         relayActivationHysteresis: Int,
-        divider: Int,
+        threshold: Int,
         relayStages: HashMap<String, Int>
     ) {
         var relayState = -1.0
 
-        if (coolingLoopOutput > (divider + (relayActivationHysteresis / 2)))
-            relayState = 1.0
-        else if (coolingLoopOutput <= (divider - (relayActivationHysteresis / 2)))
-            relayState = 0.0
-        else if (coolingLoopOutput == 0)
-            relayState = 0.0
+        // Need to treat stage 1 cooling as true first stage if economizer is disabled (same on/off conditions as fan)
+        // If economizer is enabled and stage 1 cooling is the second stage, follow logic for stage 2
+        if (threshold == 0) {
+            if (coolingLoopOutput > relayActivationHysteresis)
+                relayState = 1.0
+            if (coolingLoopOutput == 0)
+                relayState = 0.0
+        } else {
+            if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
+                relayState = 1.0
+            else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
+                relayState = 0.0
+            else if (coolingLoopOutput == 0)
+                relayState = 0.0
+        }
 
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)

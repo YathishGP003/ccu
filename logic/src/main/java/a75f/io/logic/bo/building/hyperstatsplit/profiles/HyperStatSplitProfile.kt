@@ -473,7 +473,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
     }
 
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSSPLIT_HST, msg)
+        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, msg)
     }
 
     // To run specific fan speed while running aux heating

@@ -269,7 +269,7 @@ class HyperStatSplitUserIntentHandler {
                             haystack.writeHisValById(id, value)
                         }
                     }
-                    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " update Hyperstat UI Points work done")
+                    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
 
                 },
                 {

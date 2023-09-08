@@ -338,6 +338,22 @@ public class OAOTuners
             hayStack.writeHisValById(standaloneEnthalpyDuctCompensationOffsetId, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET);
         }
 
+        if(isNewSite || !verifyPointsAvailability("default","standalone and duct and temperature and offset",equipRef)) {
+            Point standaloneDuctTemperatureOffset = new Point.Builder()
+                    .setDisplayName(equipDis + "-OAO-" + "standaloneDuctTemperatureOffset")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("duct").addMarker("temperature").addMarker("offset").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String standaloneDuctTemperatureOffsetId = hayStack.addPoint(standaloneDuctTemperatureOffset);
+            hayStack.writePointForCcuUser(standaloneDuctTemperatureOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_STANDALONE_DUCT_TEMPERATURE_OFFSET, 0);
+            hayStack.writeHisValById(standaloneDuctTemperatureOffsetId, TunerConstants.OAO_STANDALONE_DUCT_TEMPERATURE_OFFSET);
+        }
+
         if(isNewSite || !verifyPointsAvailability("default","standalone and economizing and min and temp",equipRef)) {
             Point standaloneEconomizingMinTemperature = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "standaloneEconomizingMinTemperature")
@@ -957,6 +973,32 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
+        }
+
+        if (!verifyPointsAvailability("not default","standalone and duct and temperature and offset",equipref)) {
+            Point ductTemperatureOffset = new Point.Builder()
+                    .setDisplayName(equipdis + "-" + "standaloneDuctTemperatureOffset")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipref)
+                    .setFloorRef(floorRef)
+                    .setRoomRef(roomRef)
+                    .setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                    .addMarker("duct").addMarker("temperature").addMarker("offset").addMarker("standalone")
+                    .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            String ductTemperatureOffsetId = hayStack.addPoint(ductTemperatureOffset);
+            HashMap ductTemperatureOffsetPoint = hayStack.read("point and tuner and default and standalone and oao and duct and temperature and offset");
+            ArrayList<HashMap> ductTemperatureOffsetPointArr = hayStack.readPoint(ductTemperatureOffsetPoint.get("id").toString());
+            for (HashMap valMap : ductTemperatureOffsetPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(ductTemperatureOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(ductTemperatureOffsetId, HSUtil.getPriorityVal(ductTemperatureOffsetId));
         }
 
         if (!verifyPointsAvailability("not default","standalone and economizing and min and temp",equipref)) {

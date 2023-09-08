@@ -201,6 +201,7 @@ public class MeshNetwork extends DeviceNetwork
                                     }
 
                                 }
+                                break;
 
                             case HYPERSTATSPLIT:
                                 Equip hssEquip = new Equip.Builder()

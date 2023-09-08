@@ -53,14 +53,13 @@ public class MeshNetwork extends DeviceNetwork
     @Override
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
-/*
+
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
         }
 
- */
         if(LSerial.getInstance().isNodesSeeding())
             return;
         if (isAnyEquipAlive(CCUHsApi.getInstance())) {
@@ -209,7 +208,7 @@ public class MeshNetwork extends DeviceNetwork
                                                 .read("equip and group ==\""+d.getAddr()+ "\"")).build();
                                 int hssModeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + hssEquip.getRoomRef() + "\"").intValue();
                                 TemperatureMode hssTempMode = TemperatureMode.values()[hssModeType];
-                                bSeedMessage = false;
+
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
@@ -222,7 +221,7 @@ public class MeshNetwork extends DeviceNetwork
                                     HyperSplitMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
 
                                     CcuLog.d(L.TAG_CCU_SERIAL, "=================NOW SENDING HyperSplit Controls ===================== "+d.getAddr());
-                                    sendControlMessage = true;
+
                                     if(sendControlMessage){
                                         HyperSplit.HyperSplitControlsMessage_t.Builder controls =
                                                 HyperSplitMessageGenerator.getControlMessage(

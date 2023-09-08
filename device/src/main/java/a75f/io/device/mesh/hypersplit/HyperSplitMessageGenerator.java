@@ -149,9 +149,9 @@ public class HyperSplitMessageGenerator {
         // EffectiveConditioningMode is not sent to the HyperSplit as part of the settings message,
         // so I think this is okay. Confirm.
         BasicSettings settings = new BasicSettings(
-                StandaloneConditioningMode.values()[(int)getFanMode(equipRef)],
-                StandaloneConditioningMode.values()[(int)getFanMode(equipRef)],
-                StandaloneFanStage.values()[(int)getConditioningMode(equipRef)]
+                StandaloneConditioningMode.values()[(int)getConditioningMode(equipRef)],
+                StandaloneConditioningMode.values()[(int)getConditioningMode(equipRef)],
+                StandaloneFanStage.values()[(int)getFanMode(equipRef)]
         );
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));

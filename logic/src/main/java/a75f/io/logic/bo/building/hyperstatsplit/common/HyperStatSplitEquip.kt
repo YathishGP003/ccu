@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -168,11 +169,9 @@ open class HyperStatSplitEquip {
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
-
             DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
 
-            val pointType = HyperStatSplitAssociationUtil.getSensorNameByType(universalInState.association)
-            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, universalInState.association.ordinal.toDouble().toInt().toString())
 
             val pointUnit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(universalInState.association);
             DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, pointUnit)
@@ -180,6 +179,7 @@ open class HyperStatSplitEquip {
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
         } else {
+            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, "0-10v")
             DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, "mV")
         }
     }

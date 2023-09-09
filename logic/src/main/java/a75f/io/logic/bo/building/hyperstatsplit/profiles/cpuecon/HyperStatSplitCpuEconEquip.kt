@@ -1117,53 +1117,44 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration,
         existingConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"updateUniversalInConfig()")
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn1State, existingConfiguration.universalIn1State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui1")
             updateUniversalInDetails(newConfiguration.universalIn1State, "universal1", Port.UNIVERSAL_IN_ONE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn2State, existingConfiguration.universalIn2State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui2")
             updateUniversalInDetails(newConfiguration.universalIn2State, "universal2", Port.UNIVERSAL_IN_TWO)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn3State, existingConfiguration.universalIn3State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui3")
             updateUniversalInDetails(newConfiguration.universalIn3State, "universal3", Port.UNIVERSAL_IN_THREE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn4State, existingConfiguration.universalIn4State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui4")
             updateUniversalInDetails(newConfiguration.universalIn4State, "universal4", Port.UNIVERSAL_IN_FOUR)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn5State, existingConfiguration.universalIn5State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui5")
             updateUniversalInDetails(newConfiguration.universalIn5State, "universal5", Port.UNIVERSAL_IN_FIVE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn6State, existingConfiguration.universalIn6State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui6")
             updateUniversalInDetails(newConfiguration.universalIn6State, "universal6", Port.UNIVERSAL_IN_SIX)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn7State, existingConfiguration.universalIn7State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui7")
             updateUniversalInDetails(newConfiguration.universalIn7State, "universal7", Port.UNIVERSAL_IN_SEVEN)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn8State, existingConfiguration.universalIn8State)
         ) {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"Need to update ui8")
             updateUniversalInDetails(newConfiguration.universalIn8State, "universal8", Port.UNIVERSAL_IN_EIGHT)
         }
     }

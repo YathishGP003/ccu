@@ -104,6 +104,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             }
             else
             {
+                mBLEProvisionService.retryCount = 1;
                 mBLEProvisionService.connect(mDevice.getAddress());
             }
         }
@@ -277,6 +278,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     @Override
                     public void run()
                     {
+                        mBLEProvisionService.retryCount = 1;
                         mBLEProvisionService.connect(mDevice.getAddress());
                     }
                 }, RETRY_TIME_GATT_SERVICES_UNAVAILABLE);

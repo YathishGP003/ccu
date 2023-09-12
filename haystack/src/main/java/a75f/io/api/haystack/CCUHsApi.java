@@ -291,15 +291,19 @@ public class CCUHsApi
         return equip.getMarkers().contains("tuner");
     }
     public String addEquip(Equip q) {
-        if(!isBuildingTunerEquip(q)){
+        boolean isBuildingTunerEquip = isBuildingTunerEquip(q);
+        if(!isBuildingTunerEquip){
             q.setCcuRef(getCcuId());
         }
         q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String equipId = tagsDb.addEquip(q);
-        syncStatusService.addUnSyncedEntity(equipId);
-        BackfillUtil.setBackFillDuration(context);
+        //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
+        if (!isBuildingTunerEquip) {
+            syncStatusService.addUnSyncedEntity(equipId);
+            BackfillUtil.setBackFillDuration(context);
+        }
         return equipId;
     }
 
@@ -318,14 +322,19 @@ public class CCUHsApi
         return false;
     }
     public String addPoint(Point p) {
-        if(!isBuildingTunerPoint(p)){
+        boolean isBuildingTunerPoint = isBuildingTunerPoint(p);
+        if(!isBuildingTunerPoint){
             p.setCcuRef(getCcuId());
         }
         p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String pointId = tagsDb.addPoint(p);
-        syncStatusService.addUnSyncedEntity(pointId);
+
+        //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
+        if(!isBuildingTunerPoint) {
+            syncStatusService.addUnSyncedEntity(pointId);
+        }
         return pointId;
     }
 

@@ -207,4 +207,6 @@ public class Tags
     public static final String BACNET_TYPE = "bacnetType";
     public static final String MIN_VAL = "minVal";
     public static final String MAX_VAL = "maxVal";
+
+    public static final String DOMAIN_NAME = "domainName";
 }

@@ -73,7 +73,14 @@ object Domain {
         }
         return equips
     }
+
+    @JvmStatic
     fun readPoint(domainName: String) : Map<Any,Any> {
         return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")
+    }
+
+    @JvmStatic
+    fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
+        return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
 }

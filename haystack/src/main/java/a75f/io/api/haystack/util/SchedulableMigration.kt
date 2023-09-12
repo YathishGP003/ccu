@@ -68,7 +68,7 @@ fun importSchedules() {
 
         restoreCCUHsApi.importBuildingOccupancy(siteUID, hClient,retryCountCallback)
         restoreCCUHsApi.importZoneSchedule(zoneRefSet, retryCountCallback)
-        restoreCCUHsApi.importNamedSchedule(retryCountCallback)
+        CCUHsApi.getInstance().importNamedSchedule(hClient)
         restoreCCUHsApi.importZoneSpecialSchedule(zoneRefSet,retryCountCallback)
         restoreCCUHsApi.importBuildingSpecialSchedule(siteUID,hClient,true,retryCountCallback)
 

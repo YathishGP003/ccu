@@ -54,6 +54,7 @@ import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SystemFragment;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.VavAnalogRtuProfile;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
@@ -1296,6 +1297,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                         if (Globals.getInstance().isAckdMessagingEnabled()) {
                             MessagingClient.getInstance().init();
                         }
+                        UtilityApplication.scheduleMessagingAckJob();
                         CCUHsApi.getInstance().syncEntityWithPointWrite();
                     },  // ignore success
                     error -> {

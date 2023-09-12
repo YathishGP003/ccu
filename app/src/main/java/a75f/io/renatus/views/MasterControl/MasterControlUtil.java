@@ -10,6 +10,7 @@ import org.projecthaystack.HDict;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,8 +18,11 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -537,7 +541,7 @@ public class MasterControlUtil {
 
     public static boolean isMigrated(){
         ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-        return (!(isSchedulableAvailable == null));
+        return ((isSchedulableAvailable != null && SchedulableMigrationKt.validateMigration()));
     }
 
     public static boolean isNonTempModule(String profileType){

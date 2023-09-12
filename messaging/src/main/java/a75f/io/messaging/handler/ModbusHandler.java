@@ -9,11 +9,19 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 
 public class ModbusHandler {
 
     public static void updatePoint(JsonObject msgObject, Point configPoint) {
+        //When a level is deleted, it currently generates a message with empty value.
+        //Handle it here.
+        if (msgObject.get("val").toString().equals("\"\"") || msgObject.get("val").toString().isEmpty()) {
+            CCUHsApi.getInstance().clearPointArrayLevel(configPoint.getId(), msgObject.get("level").getAsInt(), true);
+            CCUHsApi.getInstance().writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
+            return;
+        }
         double duration = 0;
         HDateTime lastModifiedDateTime;
 

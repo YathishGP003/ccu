@@ -1,13 +1,18 @@
 package a75f.io.domain
 
 import a75f.io.api.haystack.mock.MockCcuHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.util.ModelLoader
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
+import io.seventyfivef.ph.core.Tags
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class BuildingEquipTest {
 
@@ -64,7 +69,7 @@ class BuildingEquipTest {
         val updatedModel = ResourceHelper.loadModel("building_tuner_equip_2.0.json") as SeventyFiveFTunerDirective
 
         val tunerEquip = mockHayStack.readEntity("equip and tuner")
-        equipBuilder.updateEquipAndPoints(updatedModel, tunerEquip["id"].toString(), "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(updatedModel, equipBuilder.getEntityConfigForUpdate(updatedModel, tunerEquip[Tags.ID].toString()) ,"@TestSiteRef")
         val addedPoint = Domain.readPoint("forcedOccupiedTimeTest")
         println(addedPoint.isNotEmpty())
         val updatedPointArr = mockHayStack.readPoint(addedPoint["id"].toString())
@@ -97,4 +102,22 @@ class BuildingEquipTest {
         println(mockHayStack.readEntity("tuner and equip"))
         println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h"))
     }
+    @Test
+    fun tunerEquipUpgradeTest() {
+
+        val equipBuilder = TunerEquipBuilder(mockHayStack)
+        equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
+
+        val diffManger = DiffManger(null)
+        diffManger.processModelMigration("@TestSiteRef")
+        val updatedPoint = Domain.readPoint("forcedOccupiedTime")
+        println(updatedPoint)
+        println(hayStack.readPointArr(updatedPoint.getId()))
+    }
+
+    private fun Map<Any, Any>.getId() : String {
+        return this[Tags.ID].toString()
+    }
+
+
 }

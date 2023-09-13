@@ -7,6 +7,7 @@ import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.ph.core.Tags
 
 class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -71,20 +72,27 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         }
     }
 
-    fun updateEquipAndPoints(modelDef: ModelDirective, equipId: String, siteRef: String) : String{
+    fun updateEquipAndPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
+        val tunerEquip = hayStack.readEntity("tuner and equip")
+        if (tunerEquip.isNotEmpty()) {
+            updateEquipAndPoints(modelDef, updateConfig, tunerEquip.get(Tags.ID).toString(), siteRef)
+        }
+
+    }
+    fun updateEquipAndPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, equipId: String, siteRef: String) : String{
 
         val hayStackEquip = buildEquip(modelDef, null, siteRef)
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
-        val updateConfig = getEntityConfigForUpdate(modelDef, equipId)
+        //val updateConfig = getEntityConfigForUpdate(modelDef, equipId)
         createPoints(modelDef, updateConfig, equipId, siteRef)
         updatePoints(modelDef, updateConfig, equipId, siteRef)
         deletePoints(updateConfig, equipId)
         return equipId
     }
 
-    private fun getEntityConfigForUpdate(modelDef: ModelDirective, equipRef: String) : EntityConfiguration{
+    fun getEntityConfigForUpdate(modelDef: ModelDirective, equipRef: String) : EntityConfiguration{
         val entityNameMap = mutableMapOf<String, Double>()
         val tunerPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")

@@ -9,20 +9,32 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
 
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.logger.CcuLog
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 
 /**
  * Created by Manjunath K on 16-06-2023.
  */
 class MigrationHandler(var haystack: CCUHsApi) {
 
-    fun migrateModel(entityData: EntityConfiguration,newModel: SeventyFiveFProfileDirective, siteRef: String) {
-        val equipDetails = getEquipDetailsByDomain(newModel.domainName)
-        addEntityData(entityData.tobeAdded,newModel,equipDetails, siteRef)
-        removeEntityData(entityData.tobeDeleted,newModel,equipDetails)
-        updateEntityData(entityData.tobeUpdated,newModel,equipDetails, siteRef)
+    fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String) {
+        if (newModel is SeventyFiveFTunerDirective) {
+            CcuLog.printLongMessage("CCU_TUNER",
+                "Building equip model upgrade detected : Run migration to $newModel"
+            )
+            val tunerEquipBuilder = TunerEquipBuilder(haystack)
+            tunerEquipBuilder.updateEquipAndPoints(newModel,entityData, siteRef )
+        } else {
+            val equipDetails = getEquipDetailsByDomain(newModel.domainName)
+            addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef)
+            removeEntityData(entityData.tobeDeleted, newModel, equipDetails)
+            updateEntityData(entityData.tobeUpdated, newModel, equipDetails, siteRef)
+        }
     }
-    private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective,
+    private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: ModelDirective,
                               equips: List<a75f.io.domain.api.Equip>, siteRef : String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
@@ -49,12 +61,12 @@ class MigrationHandler(var haystack: CCUHsApi) {
             }
         }
     }
-    private fun removeEntityData(tobeRemove: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective, equips: List<a75f.io.domain.api.Equip>) {
+    private fun removeEntityData(tobeRemove: MutableList<EntityConfig>, newModel: ModelDirective, equips: List<a75f.io.domain.api.Equip>) {
     // TODO remove change set
         println(tobeRemove)
     }
 
-    private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: SeventyFiveFProfileDirective,
+    private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: ModelDirective,
                                  equips: List<a75f.io.domain.api.Equip>, siteRef: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()

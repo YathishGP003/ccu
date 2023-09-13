@@ -2,7 +2,6 @@ package a75f.io.logic.bo.util;
 
 import android.content.Context;
 import android.util.Log;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -98,7 +97,7 @@ public class CCUUtils
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
             HashMap<Object, Object> firmwarePoint =
                     hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-            hayStack.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
+            hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
     }
 

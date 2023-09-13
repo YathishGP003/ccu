@@ -158,7 +158,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
+        HashMap equip = hayStack.read("equip and system and not modbus");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
@@ -196,7 +196,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
@@ -733,7 +733,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 if(cmd != null &&(cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").
+                    setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
+                            .setDisplayName(equipDis + "-dehumidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString()+","+cmd.get("id").toString()+","+cmdPoint.getId());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -746,7 +748,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime")
+                            .setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
+                            .addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString()+","+cmd.get("id").toString()+","+cmdPoint.getId());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -888,7 +892,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
-                                    .setEnums("off,on")
+                                    .setEnums("off,on").setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
                                     .setTz(tz)
                                     .build();
                             String cmdHumdityPtId = CCUHsApi.getInstance().addPoint(humidPt);
@@ -907,7 +911,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
-                                    .setEnums("off,on")
+                                    .setEnums("off,on").setBacnetId(BacnetIdKt.DEHUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
                                     .setTz(tz)
                                     .build();
                             String cmdDehumidPtId = CCUHsApi.getInstance().addPoint(dehumidPt);
@@ -936,7 +940,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
         
         if(curConfig != val){
-            HashMap equipMap = hayStack.read("equip and system");
+            HashMap equipMap = hayStack.read("equip and system and not modbus");
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             switch (tags){
                 case Tags.ANALOG1:
@@ -992,7 +996,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CcuLog.i(L.TAG_CCU_SYSTEM, "enableDcwb");
         //Remove analog1 Command points
         setConfigEnabled(Tags.ANALOG1, 0);
-        HashMap equipMap = hayStack.read("equip and system");
+        HashMap equipMap = hayStack.read("equip and system and not modbus");
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createConfigPoints(systemEquip, hayStack);
         createAnalog4LoopConfigPoints(Tags.COOLING,systemEquip, hayStack);
@@ -1038,7 +1042,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         }
         CcuLog.i(L.TAG_CCU_SYSTEM, "updateDcwbAnalog4Mapping "+loopType+" -> "+newLoopType);
         deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, hayStack);
-        HashMap equipMap = hayStack.read("equip and system");
+        HashMap equipMap = hayStack.read("equip and system and not modbus");
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createAnalog4LoopConfigPoints(newLoopType == 0 ? Tags.COOLING : Tags.CO2, systemEquip, hayStack);
         hayStack.writeDefaultVal("analog4 and loop and output and type", newLoopType);

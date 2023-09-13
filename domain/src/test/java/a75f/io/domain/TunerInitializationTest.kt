@@ -86,21 +86,15 @@ class TunerInitializationTest {
         hayStack.writePointLocal(pointId, 17, "TunerInitialzationTest", 500.0,0 )
         DomainManager.buildDomain(hayStack)
 
-        dmModel?.let {
-            val equipBuilder = ProfileEquipBuilder(hayStack)
-            val profileConfig = getTestProfileConfig()
-            profileConfig.floorRef = floorRef
-            profileConfig.roomRef = zoneRef
-            equipBuilder.buildEquipAndPoints(profileConfig, dmModel)
-            TestUtil.dumpDomain()
-            val testTunerPoint = hayStack.readEntity("point and domainName == \"testTuner\" and roomRef == \"$zoneRef\"")
-            val testTuner = hayStack.readPoint(testTunerPoint["id"].toString())
-            println(testTuner)
-        }
-
-
-
-
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val profileConfig = getTestProfileConfig()
+        profileConfig.floorRef = floorRef
+        profileConfig.roomRef = zoneRef
+        equipBuilder.buildEquipAndPoints(profileConfig, dmModel, "@TestSiteRef")
+        TestUtil.dumpDomain()
+        val testTunerPoint = hayStack.readEntity("point and domainName == \"testTuner\" and roomRef == \"$zoneRef\"")
+        val testTunerDb = hayStack.readPoint(testTunerPoint["id"].toString())
+        println(testTunerDb)
 
     }
 

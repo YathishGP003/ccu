@@ -1,7 +1,12 @@
 package a75f.io.logic
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.Schedule
+import a75f.io.api.haystack.Zone
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L.TAG_CCU
+
 
 /**
  * Miscellaneous utility functions.
@@ -43,4 +48,14 @@ inline fun <T : Any> T?.reportNull(
 fun reportToCrashlytics(e: Throwable) {
    // We do not currently have Crashylitics set up -- that is a ccu modernization todue.
    CcuLog.e(TAG_CCU, e.message, e)
+}
+
+fun getSchedule(roomRef : String, floorRef: String) : Schedule{
+   val roomMap: Zone = HSUtil.getZone(roomRef, floorRef)
+   if(roomMap != null) {
+      val scheduleRef: String = roomMap.getScheduleRef()
+      val roomSchedule: Schedule = CCUHsApi.getInstance().getScheduleById(scheduleRef)
+      return roomSchedule
+   }
+   return Schedule()
 }

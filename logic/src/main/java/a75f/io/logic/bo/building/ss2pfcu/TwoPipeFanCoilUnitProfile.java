@@ -55,28 +55,6 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     @Override
-    public boolean isZoneDead() {
-
-        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
-        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-
-        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
-        for (short node : twoPfcuDeviceMap.keySet())
-        {
-            double curTemp = twoPfcuDeviceMap.get(node).getCurrentTemp();
-            Log.d("SmartStat","isZoneDead="+buildingLimitMax+","+buildingLimitMin+","+tempDeadLeeway+","+curTemp);
-            if (curTemp > (buildingLimitMax + tempDeadLeeway)
-                    || curTemp < (buildingLimitMin - tempDeadLeeway))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    @Override
     public void updateZonePoints() {
         if (Globals.getInstance().isTestMode()){
             return;

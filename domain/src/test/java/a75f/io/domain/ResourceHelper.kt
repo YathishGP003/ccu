@@ -2,7 +2,10 @@ package a75f.io.domain
 
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+<<<<<<< HEAD
 import io.seventyfivef.domainmodeler.client.ModelDirective
+=======
+>>>>>>> master
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -64,6 +67,7 @@ object ResourceHelper {
         val modelDirectiveFactory = ModelDirectiveFactory(objectMapper)
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFDeviceDirective
     }
+<<<<<<< HEAD
 
     fun loadModel(fileName : String) : ModelDirective {
         @Nullable val modelData: String? = loadString(fileName)
@@ -72,6 +76,8 @@ object ResourceHelper {
         return modelDirectiveFactory.fromJson(modelData!!)
     }
 
+=======
+>>>>>>> master
     fun getModelVersion(fileName: String): JSONObject? {
         return loadString(fileName)?.let { JSONObject(it) }
     }

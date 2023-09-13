@@ -8,14 +8,18 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -109,7 +113,7 @@ public class DualDuctEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-DualDuct-" + nodeAddr;
         String ahuRef = null;
-        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity("equip and system");
+        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
@@ -366,6 +370,7 @@ public class DualDuctEquip {
     }
     
     private void createUserIntentPoints(String siteRef, String equipDis, String roomRef, String floorRef, String tz) {
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
     
         Point desiredTempCooling = new Point.Builder()
                                            .setDisplayName(equipDis+"-desiredTempCooling")
@@ -412,8 +417,8 @@ public class DualDuctEquip {
                                       .setTz(tz)
                                       .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(scheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
     }
     
     private void createEquipOperationPoints(String siteRef, String equipDis, String roomRef, String floorRef, String tz) {

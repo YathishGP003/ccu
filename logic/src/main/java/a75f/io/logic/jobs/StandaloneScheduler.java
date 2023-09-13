@@ -54,9 +54,9 @@ public class StandaloneScheduler {
 
         double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
 
-        double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
-        double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
-        double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+        double heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+        double coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \""+equip.getRoomRef()+"\"");
 
         occ.setUnoccupiedZoneSetback(setback);
         occ.setHeatingDeadBand(heatingDeadBand);
@@ -234,7 +234,7 @@ public class StandaloneScheduler {
                 // continue what you are doing...
                 if (zoneDataInterface != null) {
                     Log.i("PubNub","Zone Data updateOperationalPoints Refresh");
-                    zoneDataInterface.refreshScreen("");
+                    zoneDataInterface.refreshScreen("", false);
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -244,7 +244,7 @@ public class StandaloneScheduler {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
         if (zoneDataInterface != null) {
             Log.i("PubNub","updateStandaloneEquipStatus Refresh");
-            zoneDataInterface.refreshScreen("");
+            zoneDataInterface.refreshScreen("", false);
         }
 
     }

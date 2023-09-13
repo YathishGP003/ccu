@@ -10,7 +10,6 @@ import kotlinx.coroutines.SupervisorJob
 object Domain {
 
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
-
     var site: Site? = null
 
     /**
@@ -74,7 +73,6 @@ object Domain {
         }
         return equips
     }
-
     fun readPoint(domainName: String) : Map<Any,Any> {
         return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")
     }

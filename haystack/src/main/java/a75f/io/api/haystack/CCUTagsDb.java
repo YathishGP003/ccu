@@ -216,16 +216,16 @@ public class CCUTagsDb extends HServer {
     private void doTagsRoomDbMigration() {
         CcuLog.i(TAG_CCU_ROOM_DB, "doTagsRoomDbMigration ");
         try {
-            TagDbMigration.doTagStringToRoomDBMigration(appContext, hsTypeAdapter);
-            PreferenceManager.getDefaultSharedPreferences(appContext).edit()
-                    .putBoolean(PREFS_HAS_MIGRATED_ROOM_DB, true)
-                    .apply();
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
                     DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
                     EventBus.getDefault().postSticky(databaseEvent);
+                    TagDbMigration.doTagStringToRoomDBMigration(appContext, hsTypeAdapter);
+                    PreferenceManager.getDefaultSharedPreferences(appContext).edit()
+                            .putBoolean(PREFS_HAS_MIGRATED_ROOM_DB, true)
+                            .apply();
                     CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed @@--------------");
                 }
             }, 1000);
@@ -872,6 +872,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
         if(p.getBacnetType() != null)
         {
@@ -936,9 +937,7 @@ public class CCUTagsDb extends HServer {
             b.add(m);
         }
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
+
         HRef ref = (HRef) b.get("id");
         HDict dict = b.toDict();
         if (!insertEntity(dict, id)) {
@@ -992,9 +991,6 @@ public class CCUTagsDb extends HServer {
             b.add(m);
         }
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1038,9 +1034,6 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1081,9 +1074,6 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1127,10 +1117,8 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+
         d.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1171,10 +1159,8 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+
         d.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1209,9 +1195,6 @@ public class CCUTagsDb extends HServer {
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict dict = b.toDict();
         if (!insertEntity(dict, id)) {
@@ -1242,9 +1225,6 @@ public class CCUTagsDb extends HServer {
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 
@@ -1281,9 +1261,6 @@ public class CCUTagsDb extends HServer {
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
-                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
-                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         HDict hDict = b.toDict();
 

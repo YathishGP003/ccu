@@ -2,11 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:layout_constraintCircleRadius="100dp">
+
 
     <RelativeLayout
-        android:layout_width="970dp"
+        android:layout_width="1170dp"
         android:layout_height="wrap_content">
 
         <RelativeLayout
@@ -14,63 +17,358 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="10dp"
-            android:background="@color/selection_gray"
+            android:background="@color/tuner_header_bg"
             android:orientation="horizontal"
             android:padding="10dp">
 
             <TextView
-                style="@style/text_appearance"
+                style="@style/set_limits"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SETLIMITS"
-                android:textColor="@color/white" />
+                android:layout_marginStart="25dp"
+                android:text="SET LIMITS" />
 
             <ImageView
                 android:id="@+id/btnClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:padding="10dp"
-                android:src="@drawable/icon_close"
-                app:tint="@color/white" />
+                android:layout_marginEnd="25dp"
+                android:src="@drawable/ic_baseline_close_24"
+                app:tint="?orange_75f" />
         </RelativeLayout>
 
-        <a75f.io.renatus.views.MasterControl.MasterControlView
-            android:id="@+id/masterControlView"
-            android:layout_width="940dp"
-            android:layout_height="450dp"
-            android:layout_centerInParent="true"
-            android:layout_margin="20dp"
-            android:gravity="center" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <ScrollView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/masterControlView"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:orientation="horizontal">
+            android:layout_below="@+id/header"
+            >
 
-            <TextView
-                android:id="@+id/btnCancel"
-                style="?action_text_appearance"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="50dp"
-                android:padding="8dp"
-                android:text="CANCEL" />
+                android:layout_marginStart="25dp"
+                android:gravity="center">
 
-            <TextView
-                android:id="@+id/btnSet"
-                style="?action_text_appearance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
-                android:layout_marginEnd="40dp"
-                android:padding="8dp"
-                android:text="SET" />
-        </LinearLayout>
+
+                <a75f.io.renatus.views.MasterControl.MasterControlView
+                    android:id="@+id/masterControlView"
+                    android:layout_width="1170dp"
+                    android:layout_height="400dp"
+
+                    android:gravity="center" />
+
+                <LinearLayout
+                    android:id="@+id/buildinglimit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/masterControlView"
+                    android:layout_marginTop="-70dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/title_limits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="@font/lato_bold"
+                        android:text="@string/building_limits"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:text="@string/building_limit_min" />
+
+                        <Spinner
+                            android:id="@+id/buildinglimmin"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="125dp"
+                            android:dropDownWidth="160dp"
+                            android:overlapAnchor="false"
+
+                            android:textColor="@color/selection_gray"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="100dp"
+                            android:text="@string/building_limit_max" />
+
+                        <Spinner
+                            android:id="@+id/buildinglimitmax"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="20dp"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="25dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:text="@string/building_to_zone_diff" />
+
+                        <Spinner
+                            android:id="@+id/buildingtozonediff"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="28dp"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/custom_toast_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10sp"
+                            android:paddingTop="5dp"
+                            android:src="@drawable/ic_warning" />
+
+                        <TextView
+                            android:id="@+id/custom_toast_message_success"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lato_regular"
+                            android:text="@string/message"
+                            android:textColor="?orange_75f"
+                            android:textSize="19.5sp" />
+
+                    </LinearLayout>
+
+
+                    <TextView
+                        style="@style/title_limits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="20dp"
+                        android:text="@string/user_limits" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:text="@string/heating_user_limit_min" />
+
+                        <Spinner
+                            android:id="@+id/heatinglimmin"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="80dp"
+                            android:entries="@array/heating_limit"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="100dp"
+                            android:text="@string/cooling_user_limit_min" />
+
+                        <Spinner
+                            android:id="@+id/coolinglimmin"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="24dp"
+                            android:entries="@array/cooling_limit"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="30dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:text="@string/heating_user_limit_max" />
+
+                        <Spinner
+                            android:id="@+id/heatinglimmax"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="75dp"
+                            android:entries="@array/heating_limit"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="100dp"
+                            android:text="@string/cooling_user_limit_max" />
+
+                        <Spinner
+                            android:id="@+id/coolinglimmax"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="20dp"
+                            android:entries="@array/cooling_limit"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/title_limits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="@string/deadbands" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="30dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="20dp"
+                            android:text="@string/heating_deadband" />
+
+                        <Spinner
+                            android:id="@+id/heatingdeadband"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="120dp"
+                            android:entries="@array/deadband"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="100dp"
+                            android:text="@string/cooling_deadband" />
+
+                        <Spinner
+                            android:id="@+id/coolingdeadband"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="60dp"
+                            android:entries="@array/deadband"
+                            android:overlapAnchor="false"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/title_limits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="@string/unoccupied_zone_setback" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/ToggleLimits"
+                            android:layout_marginStart="20dp"
+                            android:text="@string/setback" />
+
+                        <Spinner
+                            android:id="@+id/unoccupiedzonesetback"
+                            style="@style/TableSpinnermaster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="220dp"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/buildinglimit"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btnCancel"
+                        style="?action_text_appearance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:padding="8dp"
+                        android:text="CANCEL" />
+
+                    <View
+                        android:layout_width="0.9dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentBottom="true"
+                        android:alpha="0.37"
+                        android:background="@color/text_color" />
+
+                    <TextView
+                        android:id="@+id/btnSet"
+                        style="?action_text_appearance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="40dp"
+                        android:padding="8dp"
+                        android:text="SET" />
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+
     </RelativeLayout>
 </LinearLayout>

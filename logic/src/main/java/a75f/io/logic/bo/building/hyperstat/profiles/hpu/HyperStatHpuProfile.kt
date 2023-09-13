@@ -867,7 +867,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         logIt( "updatePointsForEquip: Dead Zone ")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", 0.0)
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
         if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
 
@@ -918,19 +918,6 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         return null
     }
 
-    override fun isZoneDead(): Boolean {
-        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
-        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
-        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
-        for (node in hpuDeviceMap.keys) {
-            if (hpuDeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
-                || hpuDeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
-            ) {
-                return true
-            }
-        }
-        return false
-    }
     private fun dumpOutput() {
         relayOutputPoints.forEach { (i, s) ->
             logIt(" ${HpuRelayAssociation.values()[i].name} : ${getCurrentLogicalPointStatus(s)}   : $s")

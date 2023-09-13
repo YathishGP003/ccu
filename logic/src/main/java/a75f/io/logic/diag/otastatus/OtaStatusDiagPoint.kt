@@ -139,7 +139,7 @@ class OtaStatusDiagPoint {
             val hsApi = CCUHsApi.getInstance()
             nodes.forEach { i ->
                 if (isCMDevice(i)) {
-                    val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip")
+                    val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus")
                     hsApi.writeHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"",status.ordinal.toDouble())
                 } else {
                     hsApi.writeHisValByQuery("ota and status and group ==\"$i\"",status.ordinal.toDouble())
@@ -151,7 +151,7 @@ class OtaStatusDiagPoint {
         fun updateOtaStatusPoint(status: OtaStatus,node: Int) {
             val hsApi = CCUHsApi.getInstance()
             if (isCMDevice(node)) {
-                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip")
+                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus")
                 hsApi.writeHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"",status.ordinal.toDouble())
             } else {
                 hsApi.writeHisValByQuery("ota and status and group ==\"$node\"",status.ordinal.toDouble())
@@ -165,7 +165,7 @@ class OtaStatusDiagPoint {
         fun getCurrentOtaStatus(node: Int): Double {
             Log.i(L.TAG_CCU_OTA_PROCESS, "Reading OTA status $node" );
             return if (isCMDevice(node)) {
-                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip")
+                val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus")
                 CCUHsApi.getInstance().readHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"")
             } else {
                 CCUHsApi.getInstance().readHisValByQuery("ota and status and group ==\"$node\"")

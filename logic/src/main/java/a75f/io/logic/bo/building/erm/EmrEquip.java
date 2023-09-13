@@ -4,10 +4,14 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.StringUtil;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -45,11 +49,14 @@ public class EmrEquip
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-EMR-" + nodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = hayStack.read("equip and system");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0)
         {
             ahuRef = systemEquip.get("id").toString();
         }
+
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
+
         Equip b = new Equip.Builder().setSiteRef(siteRef)
                                      .setDisplayName(equipDis)
                                      .setRoomRef(roomRef)
@@ -116,8 +123,8 @@ public class EmrEquip
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "emr", tz, false));

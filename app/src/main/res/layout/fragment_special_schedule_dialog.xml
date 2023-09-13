@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="32dp">
@@ -16,18 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-
-
-            <ImageButton
-                android:id="@+id/buttonDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"
-                app:srcCompat="@android:drawable/ic_menu_delete" />
-
             <EditText
                 android:id="@+id/editText_specialScheduleName"
                 android:layout_width="match_parent"
@@ -36,34 +25,24 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:ems="10"
                 android:hint="Special Schedule Name"
                 android:inputType="textPersonName"
-                app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/desiredTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editText_specialScheduleName"
-                android:orientation="horizontal">
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/desired_temperature"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editText_specialScheduleName" />
 
-                <TextView
-                    android:id="@+id/textViewDesiredTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="left"
-                    android:text="Desired Temperature"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-                    app:layout_constraintBottom_toBottomOf="@+id/editText_specialScheduleName"
-                    app:layout_constraintTop_toTopOf="@+id/editText_specialScheduleName" />
-
-            </LinearLayout>
 
             <a75f.io.renatus.views.RangeBarView
                 android:id="@+id/rangeSeekBar"
@@ -71,7 +50,7 @@
                 android:layout_height="100dp"
                 android:layout_centerInParent="true"
                 android:layout_gravity="center"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/desiredTemp" />
@@ -126,7 +105,7 @@
                 android:id="@+id/textViewAppliesto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="1dp"
                 android:text="Applies To"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -134,13 +113,178 @@
 
             <LinearLayout
                 android:id="@+id/radioGrp"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto">
+                app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto"
+                tools:ignore="MissingConstraints">
+
+                <EditText
+                    android:id="@+id/textSpecialScheduleDate"
+                    android:layout_width="0dp"
+                    android:layout_weight="6.5"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="1dp" />
+
+                <Button
+                    android:id="@+id/calendarSpecialSchedule"
+                    android:layout_width="0dp"
+                    android:layout_weight="3.5"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/transparent"
+                    android:clickable="true"
+                    android:textSize="28sp"
+                    android:enabled="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:drawablePadding="12dp"
+                    android:drawableLeft="@drawable/ic_baseline_calendar_today_24"/>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/limits"
+                app:layout_constraintTop_toBottomOf="@+id/radioGrp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="@string/user_limits"
+                    android:textAppearance="@style/title_normal" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:text="@string/heating_user_limit_min"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/heatinglimmin"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/heating_limit"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:layout_marginStart="40dp"
+                        android:text="@string/cooling_user_limit_min"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/coolinglimmin"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/cooling_limit"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:text="@string/heating_user_limit_max"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/heatinglimmax"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/heating_limit"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:layout_marginStart="40dp"
+                        android:text="@string/cooling_user_limit_max"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/coolinglimmax"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/cooling_limit"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:text="@string/deadbands" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:layout_marginStart="40dp"
+                        android:text="@string/heating_deadband"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/heatingdeadband"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/deadband"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                    <TextView
+                        style="@style/ToggleLabel"
+                        android:layout_marginStart="70dp"
+                        android:text="@string/cooling_deadband"
+                        android:textColor="@color/selection_gray" />
+
+                    <Spinner
+                        android:id="@+id/coolingdeadband"
+                        style="@style/TableSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:entries="@array/deadband"
+                        android:overlapAnchor="false"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+
+                </LinearLayout>
+
+
             </LinearLayout>
 
 
@@ -148,20 +292,20 @@
                 android:id="@+id/buttonSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="10dp"
                 android:background="@null"
                 android:fontFamily="@font/lato_regular"
                 android:text="SAVE"
                 android:textColor="?orange_75f"
                 android:textSize="20dp"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
+                app:layout_constraintTop_toBottomOf="@+id/limits" />
 
             <Button
                 android:id="@+id/buttonCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginRight="50dp"
                 android:background="@null"
                 android:fontFamily="@font/lato_regular"
@@ -170,7 +314,7 @@
                 android:textSize="20dp"
                 app:layout_constraintRight_toLeftOf="@+id/buttonSave"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
+                app:layout_constraintTop_toBottomOf="@+id/limits" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

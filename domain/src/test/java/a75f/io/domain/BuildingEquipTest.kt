@@ -31,7 +31,7 @@ class BuildingEquipTest {
         println(dmModel)
 
         val equipBuilder = TunerEquipBuilder(mockHayStack)
-        equipBuilder.buildTunerEquipAndPoints(dmModel)
+        equipBuilder.buildTunerEquipAndPoints(dmModel, "TestSite")
 
         val tunerEquip = mockHayStack.readEntity("equip and tuner")
         assert(tunerEquip.isNotEmpty())
@@ -53,7 +53,7 @@ class BuildingEquipTest {
         println(dmModel)
 
         val equipBuilder = TunerEquipBuilder(mockHayStack)
-        equipBuilder.buildTunerEquipAndPoints(dmModel)
+        equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
 
         val pointOrig = Domain.readPoint("forcedOccupiedTime")
         assert(pointOrig.isNotEmpty())
@@ -64,7 +64,7 @@ class BuildingEquipTest {
         val updatedModel = ResourceHelper.loadModel("building_tuner_equip_2.0.json") as SeventyFiveFTunerDirective
 
         val tunerEquip = mockHayStack.readEntity("equip and tuner")
-        equipBuilder.updateEquipAndPoints(updatedModel, tunerEquip["id"].toString())
+        equipBuilder.updateEquipAndPoints(updatedModel, tunerEquip["id"].toString(), "@TestSiteRef")
         val addedPoint = Domain.readPoint("forcedOccupiedTimeTest")
         println(addedPoint.isNotEmpty())
         val updatedPointArr = mockHayStack.readPoint(addedPoint["id"].toString())
@@ -92,7 +92,7 @@ class BuildingEquipTest {
     @Test
     fun testRegistrationJson() {
         val equipBuilder = TunerEquipBuilder(mockHayStack)
-        equipBuilder.buildTunerEquipAndPoints(dmModel)
+        equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
 
         println(mockHayStack.readEntity("tuner and equip"))
         println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h"))

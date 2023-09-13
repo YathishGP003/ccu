@@ -1,6 +1,8 @@
 
 package a75f.io.device.modbus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
@@ -21,7 +23,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataInterface
 {
@@ -34,7 +35,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
     @Override
     public void sendMessage() {
-        
         if (!LSerial.getInstance().isModbusConnected()) {
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
@@ -45,15 +45,13 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
         ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and not " +
                 "equipRef and modbus");
-        for (HashMap equip : modbusEquips) {
+        modbusEquips.forEach(equipMap -> {
             try {
-                Short slaveId = Short.parseShort(equip.get("group").toString());
-                EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
+                EquipmentDevice equipDevice = buildModbusModelByEquipRef(equipMap.get("id").toString());
                 List<EquipmentDevice> modbusDeviceList = new ArrayList<>();
-                modbusDeviceList.add(equipmentDevice);
-                if(null != equipmentDevice.getEquips()) {
-                    modbusDeviceList.addAll(equipmentDevice.getEquips());
-                }
+                modbusDeviceList.add(equipDevice);
+                if (!equipDevice.getEquips().isEmpty())
+                    modbusDeviceList.addAll(equipDevice.getEquips());
 
                 for(EquipmentDevice modbusDevice : modbusDeviceList){
                     int count = 0;
@@ -64,15 +62,15 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
                         CcuLog.d(L.TAG_CCU_MODBUS,
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
-                                ", count: "+count+
-                                ", registerRequestCount: "+registerRequestCount);
+                                        ", count: "+count+
+                                        ", registerRequestCount: "+registerRequestCount);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
+                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : ");
             }
-        }
+        });
     }
 
     private int getRegisterCount(Register register) {
@@ -90,10 +88,10 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
     
     public void sendSystemControl() {
-        //CcuLog.d(L.TAG_CCU_DEVICE, "Modbus SendSystemControl");
+
     }
 
-    public void writeRegister(String id) {
+    public void writeRegister(String id ) {
         HashMap<Object, Object> writablePoint = CCUHsApi.getInstance().readMapById(id);
         if (writablePoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_MODBUS, "Cant find the point to update "+id);
@@ -105,13 +103,16 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
         short groupId = Short.parseShort(writablePoint.get("group").toString());
-
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
         } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(groupId));
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
+
         HashMap<Object, Object> physicalPoint = CCUHsApi.getInstance()
                 .readEntity("point and pointRef == \""+writablePoint.get("id").toString()+"\"");
         

@@ -12,7 +12,7 @@ private val backfillPref = BackfillPref()
 fun addBackFillDurationPointIfNotExists(ccuHsApi: CCUHsApi) {
 
     val siteMap = ccuHsApi.readEntity(Tags.SITE)
-    val equipMap = ccuHsApi.readEntity("equip and system")
+    val equipMap = ccuHsApi.readEntity("equip and system and not modbus")
     val equip = Equip.Builder().setHashMap(equipMap).build()
     val equipRef = equip.id
     val siteRef = Objects.requireNonNull(siteMap[Tags.ID]).toString()
@@ -57,7 +57,6 @@ fun verifyBackFillPointAvailability(equipRef: String?): Boolean {
 fun updateBackfillDuration(currentBackFillTime: Double) {
     val ccuHsApi = CCUHsApi.getInstance()
     val backFIllQuery = "backfill and duration"
-
     if (isBackfillPointExisting(ccuHsApi)) {
         ccuHsApi.writeDefaultVal(backFIllQuery, currentBackFillTime)
         backfillPref.saveBackfillConfig(

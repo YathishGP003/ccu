@@ -67,19 +67,7 @@ public class VavTuners {
         hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
 
-        Point coolingDb = new Point.Builder()
-                              .setDisplayName(equipDis+"-VAV-"+"coolingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
-                              .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                              .setUnit("\u00B0F")
-                              .setTz(tz)
-                              .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_COOLING_DB, 0);
-        hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
+
 
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipDis+"-VAV-"+"coolingDeadbandMultiplier")
@@ -94,19 +82,7 @@ public class VavTuners {
         hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
 
-        Point heatingDb = new Point.Builder()
-                              .setDisplayName(equipDis+"-VAV-"+"heatingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
-                              .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                              .setUnit("\u00B0F")
-                              .setTz(tz)
-                              .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_HEATING_DB, 0);
-        hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
+
 
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipDis+"-VAV-"+"heatingDeadbandMultiplier")
@@ -775,19 +751,20 @@ public class VavTuners {
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
         List<HisItem> hisItems = new ArrayList<>();
         Point zonePrioritySpread = new Point.Builder()
-                                       .setDisplayName(equipdis+"-"+"zonePrioritySpread")
-                                       .setSiteRef(siteRef)
-                                       .setEquipRef(equipref)
-                                       .setRoomRef(roomRef)
-                                       .setFloorRef(floorRef).setHisInterpolate("cov")
-                                       .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                       .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
-                                       .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
-                                       .build();
+                .setDisplayName(equipdis+"-"+"zonePrioritySpread")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz).setUnit(Units.FAHRENHEIT)
+                .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zonePrioritySpreadId));
+
 
         Point zonePriorityMultiplier = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
@@ -804,21 +781,6 @@ public class VavTuners {
         BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zonePriorityMultiplierId));
 
-        Point coolingDb = new Point.Builder()
-                              .setDisplayName(equipdis+"-"+"coolingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipref)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                              .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                              .setTz(tz)
-                              .setUnit("\u00B0F")
-                              .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(coolingDbId));
 
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -834,22 +796,6 @@ public class VavTuners {
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(coolingDbMultiplierId));
-
-        Point heatingDb = new Point.Builder()
-                              .setDisplayName(equipdis+"-"+"heatingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipref)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                              .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                              .setTz(tz)
-                              .setUnit("\u00B0F")
-                              .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(heatingDbId));
 
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")

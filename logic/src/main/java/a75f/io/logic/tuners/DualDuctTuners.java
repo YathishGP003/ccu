@@ -53,20 +53,7 @@ public class DualDuctTuners {
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
-        
-        Point coolingDb = new Point.Builder()
-                              .setDisplayName(equipDis+"-DualDuct-"+"coolingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
-                              .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                              .setUnit("\u00B0F")
-                              .setTz(tz)
-                              .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_COOLING_DB, 0);
-        hayStack.writeHisValById(coolingDbId, TunerConstants.DEFAULT_COOLING_DB);
+
         
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipDis+"-DualDuct-"+"coolingDeadbandMultiplier")
@@ -80,20 +67,7 @@ public class DualDuctTuners {
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.DEFAULT_COOLING_DB_MULTPLIER);
-        
-        Point heatingDb = new Point.Builder()
-                              .setDisplayName(equipDis+"-DualDuct-"+"heatingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
-                              .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                              .setUnit("\u00B0F")
-                              .setTz(tz)
-                              .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_HEATING_DB, 0);
-        hayStack.writeHisValById(heatingDbId, TunerConstants.DEFAULT_HEATING_DB);
+
         
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipDis+"-DualDuct-"+"heatingDeadbandMultiplier")
@@ -257,22 +231,7 @@ public class DualDuctTuners {
         BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zonePriorityMultiplierId));
     
-        
-        Point coolingDb = new Point.Builder()
-                              .setDisplayName(equipdis+"-"+"coolingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipref)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
-                              .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                              .setTz(tz)
-                              .setUnit("\u00B0F")
-                              .build();
-        String coolingDbId = hayStack.addPoint(coolingDb);
-        BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(coolingDbId));
+
         
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -288,22 +247,7 @@ public class DualDuctTuners {
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(coolingDbMultiplierId));
-        
-        Point heatingDb = new Point.Builder()
-                              .setDisplayName(equipdis+"-"+"heatingDeadband")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipref)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef).setHisInterpolate("cov")
-                              .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
-                              .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                              .setTz(tz)
-                              .setUnit("\u00B0F")
-                              .build();
-        String heatingDbId = hayStack.addPoint(heatingDb);
-        BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
-        hisItems.add(HSUtil.getHisItemForWritable(heatingDbId));
+
         
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")

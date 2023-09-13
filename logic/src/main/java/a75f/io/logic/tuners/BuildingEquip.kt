@@ -33,8 +33,12 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
         //Building Equip does not exist, create new one.
         if (tunerEquip.isEmpty()) {
             CcuLog.i(L.TAG_CCU_TUNER, "Create Building Equip")
+            if (haystack.site == null) {
+                CcuLog.i(L.TAG_CCU_TUNER, "Site does not exist , cant initialize tuner equip")
+                return
+            }
             val equipBuilder = TunerEquipBuilder(haystack)
-            equipBuilder.buildEquipAndPoints()
+            equipBuilder.buildEquipAndPoints(haystack.site!!.id)
             haystack.registerOnCcuRegistrationCompletedListener { this }
         } else {
             onRegistrationCompleted(haystack)

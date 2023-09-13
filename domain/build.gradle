@@ -21,25 +21,38 @@ android {
         }
         dev {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.dev.service.75f.io/\"'
         }
         dev_qa {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io/\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.prod.service.75f.io/\"'
         }
         qa {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io\"'
+
         }
         staging {
             minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.staging.service.75f.io\"'
         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.daikin_prod.service.75f.io\"'
+        }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.carrier_prod.service.75f.io\"'
         }
     }
     compileOptions {
@@ -83,6 +96,10 @@ dependencies {
     implementation "com.squareup.moshi:moshi:1.8.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.8.0"
     implementation("com.squareup.moshi:moshi-adapters:1.8.0")
-
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 }

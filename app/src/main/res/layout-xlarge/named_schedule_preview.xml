@@ -22,16 +22,83 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/scheduleTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="28sp"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-                android:textStyle="bold"
-                app:fontFamily="@font/lato_bold"
-                app:layout_constraintLeft_toLeftOf="parent"
-                tools:ignore="MissingConstraints" />
+            <LinearLayout
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="MissingConstraints">
+
+                <TextView
+                    android:id="@+id/scheduleTitle"
+                    android:layout_width="500dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    app:fontFamily="@font/lato_bold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    tools:ignore="MissingConstraints" />
+
+                <View
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/occupancy_occupied"
+                    app:layout_constraintRight_toLeftOf="@+id/occupied"
+                    tools:ignore="MissingConstraints"
+                    tools:layout_editor_absoluteY="0dp" />
+
+                <TextView
+                    android:id="@+id/occupied"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="OCCUPIED"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                    android:textSize="18sp"
+                    app:layout_constraintRight_toLeftOf="@+id/unoccupiedView"
+                    tools:ignore="MissingConstraints"
+                    tools:layout_editor_absoluteY="3dp" />
+
+                <View
+                    android:id="@+id/unoccupiedView"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/occupancy_unoccupied"
+                    app:layout_constraintRight_toLeftOf="@+id/unoccupied"
+                    tools:ignore="MissingConstraints" />
+
+                <TextView
+                    android:id="@+id/unoccupied"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="UNOCCUPIED"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                    android:textSize="18sp"
+                    tools:ignore="MissingConstraints" />
+
+                <Button
+                    android:id="@+id/setButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@null"
+                    android:button="@null"
+                    android:text="@string/button_set"
+                    android:textColor="?orange_75f"
+                    android:textSize="19sp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </LinearLayout>
+
 
 
 
@@ -39,8 +106,8 @@
                 android:id="@+id/constraintLt_Scheduler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="32dp"
-                app:layout_constraintTop_toBottomOf="@+id/scheduleTitle">
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@+id/header">
 
                 <TextView
                     android:id="@+id/textViewMonday"
@@ -329,7 +396,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato_light"
-                    android:text="24:00"
+                    android:text="00:00"
                     android:textSize="17sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintHorizontal_bias="0.998"
@@ -641,22 +708,9 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <Button
-                android:id="@+id/setButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:text="@string/button_set"
-                android:textSize="19sp"
-                android:textColor="?orange_75f"
-                android:background="@null"
-                android:button="@null"
-                android:layout_marginTop="1000dp"
-                app:layout_constraintBottom_toTopOf="@+id/constraintLt_Scheduler"
-                app:layout_constraintEnd_toEndOf="@+id/constraintLt_Scheduler"
-                app:layout_constraintTop_toTopOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

@@ -287,7 +287,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         logIt( "Zone is Dead ${equip.equipRef}")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues()
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", 0.0)
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
         if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
 
@@ -1293,20 +1293,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             }
         }
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
-    }
-
-    override fun isZoneDead(): Boolean {
-        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
-        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
-        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
-        for (node in pipe2DeviceMap.keys) {
-            if (pipe2DeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
-                || pipe2DeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
-            ) {
-                return true
-            }
-        }
-        return false
     }
 
     private fun milliToMin(milliseconds: Long): Long {

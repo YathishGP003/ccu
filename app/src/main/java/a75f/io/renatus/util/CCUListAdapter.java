@@ -52,7 +52,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private boolean isCCUReplaceable(int position){
         String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
-        String ccuVersion = ccuList.get(position).getVersion();
+            String ccuVersion = ccuList.get(position).getVersion();
         String lastUpdatedDateTime = ccuList.get(position).getLastUpdated();
         if (StringUtils.isEmpty(ccuCurrVersion) || StringUtils.isEmpty(ccuVersion) || lastUpdatedDateTime.equalsIgnoreCase("n/a")) {
             return false;
@@ -112,7 +112,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
     }
 
 
-    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize) {
+    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize) throws JSONException {
         String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
             FragmentTransaction ft = parentFragmentManager.beginTransaction();
             Fragment previousFragment = parentFragmentManager.findFragmentByTag("popup");
@@ -120,7 +120,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                 ft.remove(previousFragment);
             }
             UpdateCCUFragment newFragment = new UpdateCCUFragment(currentAppVersionWithPatch,
-                    ccu, fileSize);
+                    ccu, fileSize, true);
             newFragment.show(ft, "popup");
     }
 

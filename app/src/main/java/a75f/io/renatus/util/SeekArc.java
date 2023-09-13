@@ -370,7 +370,7 @@ public class SeekArc extends View
         CcuLog.i(L.TAG_CCU_UI,
                  "SeekArc setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
                             +" coolingLowerLimit "+coolingLowerLimit+" coolingUpperLimit "+coolingUpperLimit +" " +
-                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand+" TemperatreMode "+modeType);
+                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand+" TemperatreMode "+modeType+" currentTemp "+currentTemp);
         mHeatingDeadBand = heatingDeadBand;
         mCoolingDeadBand = coolingDeadBand;
         mBuildingLowerTempLimit = buildingLowerLimit;
@@ -440,7 +440,9 @@ public class SeekArc extends View
                 if (inCoolingSelectionMode) {
                     drawCoolingLimitBar(canvas);
                     drawCoolingSliderIcon(canvas, coolingModeTemp);
-                    checkForCoolingLine(canvas, coolingModeTemp);
+                    if(ModeType == TemperatureMode.DUAL) {
+                        checkForCoolingLine(canvas, coolingModeTemp);
+                    }
                     drawCoolingText(canvas, coolingModeTemp);
                 }
 
@@ -454,7 +456,9 @@ public class SeekArc extends View
                 if (inHeatingSelectionMode) {
                     drawHeatingLimitBar(canvas);
                     drawHeatingSliderIcon(canvas, heatingModeTemp);
-                    checkForHeatingLine(canvas, heatingModeTemp);
+                    if(ModeType == TemperatureMode.DUAL) {
+                        checkForHeatingLine(canvas, heatingModeTemp);
+                    }
                     drawHeatingText(canvas, heatingModeTemp);
                 }
             }

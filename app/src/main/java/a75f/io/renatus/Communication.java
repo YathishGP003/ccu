@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import static android.widget.Toast.LENGTH_LONG;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
@@ -36,11 +35,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -53,6 +47,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -60,7 +55,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,10 +71,12 @@ import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import a75f.io.logic.L;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.DataBbmd;
+import a75f.io.renatus.util.DataBbmdObj;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class Communication extends Fragment {
     
@@ -171,6 +174,8 @@ public class Communication extends Fragment {
 
     @BindView(R.id.fdInputView) View fdInputView;
 
+    @BindView(R.id.bbmdInputContainer) View bbmdInputContainer;
+
     @BindView(R.id.etFdIP) EditText etFdIp;
 
     @BindView(R.id.etFdPort) EditText etFdPort;
@@ -178,6 +183,13 @@ public class Communication extends Fragment {
     @BindView(R.id.etFdTime) EditText etFdTime;
 
     @BindView(R.id.tvFdSubmit) View tvFdSubmit;
+
+    @BindView(R.id.tvBbmdAdd) View tvBbmdAdd;
+
+    @BindView(R.id.tvBbmdSubmit) View tvBbmdSubmit;
+
+    @BindView(R.id.bbmdInputViews)
+    LinearLayout bbmdInputViews;
 
     SharedPreferences sharedPreferences;
     JSONObject config;
@@ -288,6 +300,8 @@ public class Communication extends Fragment {
             handleConfigurationType(label);
         });
 
+        bbmdInputContainer.setVisibility(View.GONE);
+
         fdInputView.setVisibility(View.GONE);
         tvFdSubmit.setOnClickListener(view1 -> {
             if (validateFdData()) {
@@ -300,6 +314,48 @@ public class Communication extends Fragment {
                 intent.putExtra("port", etFdPort.getText().toString().trim());
                 intent.putExtra("time", etFdTime.getText().toString().trim());
                 context.sendBroadcast(intent);
+            }
+        });
+
+        tvBbmdAdd.setOnClickListener(view1 -> {
+            Log.d(TAG_CCU_BACNET, "add bbmd config");
+            View bbmdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_bbmd_view, null);
+            bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
+                View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
+                bbmdInputViews.removeView(parent);
+            });
+            bbmdInputViews.addView(bbmdView);
+        });
+
+        tvBbmdSubmit.setOnClickListener(view1 -> {
+            if (validateBbmdData()) {
+                Toast.makeText(context, "device configured as bbmd", Toast.LENGTH_SHORT).show();
+                try {
+                    DataBbmdObj dataBbmdObj = new DataBbmdObj();
+                    for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
+                        View childView = bbmdInputViews.getChildAt(i);
+                        EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+                        EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+                        EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+
+                        Log.d(TAG_CCU_BACNET, "bbmd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
+                                etBbmdPort.getText().toString() + "<--mask-->" + etBbmdMask.getText().toString());
+                        dataBbmdObj.addItem(new DataBbmd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+                                Integer.parseInt(etBbmdMask.getText().toString())));
+                    }
+
+                    String jsonString = new Gson().toJson(dataBbmdObj);
+                    Log.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
+
+                    RadioButton radioButton = view.findViewById(R.id.rb_bbmd);
+                    String label = radioButton.getText().toString();
+                    Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
+                    intent.putExtra("message", label);
+                    intent.putExtra("data", jsonString);
+                    context.sendBroadcast(intent);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -323,11 +379,42 @@ public class Communication extends Fragment {
         return true;
     }
 
+    private boolean validateBbmdData() {
+        for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
+            View childView = bbmdInputViews.getChildAt(i);
+            EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+            EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+            EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+
+            if (etBbmdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etBbmdIp.getText().toString().trim()))) {
+                etBbmdIp.setError(getString(R.string.error_ip_address));
+                return false;
+            }
+            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
+                etBbmdPort.setError(getString(R.string.txt_error_port));
+                return false;
+            }
+            if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+                etBbmdMask.setError(getString(R.string.txt_valid_number));
+                return false;
+            }
+            etBbmdIp.setError(null);
+            etBbmdPort.setError(null);
+            etBbmdMask.setError(null);
+        }
+        return true;
+    }
+
     private void handleConfigurationType(String label){
-        if(label.equalsIgnoreCase(getString(R.string.label_foreign_device))){
+        if(label.equalsIgnoreCase(getString(R.string.label_bbmd))){
+            bbmdInputContainer.setVisibility(View.VISIBLE);
+            fdInputView.setVisibility(View.GONE);
+        }else if(label.equalsIgnoreCase(getString(R.string.label_foreign_device))){
             fdInputView.setVisibility(View.VISIBLE);
+            bbmdInputContainer.setVisibility(View.GONE);
         }else{
             fdInputView.setVisibility(View.GONE);
+            bbmdInputContainer.setVisibility(View.GONE);
             sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
         }
     }
@@ -624,7 +711,7 @@ public class Communication extends Fragment {
                                 if(validateEntries()){
                                     initializeBACnet.setEnabled(true);
                                     initializeBACnet.setClickable(true);
-                                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                    initializeBACnet.setTextColor(R.attr.orange_75f);
                                 }else{
                                     initializeBACnet.setEnabled(false);
                                     initializeBACnet.setClickable(false);
@@ -638,7 +725,7 @@ public class Communication extends Fragment {
                             if(validateEntries()){
                                 initializeBACnet.setEnabled(true);
                                 initializeBACnet.setClickable(true);
-                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                                initializeBACnet.setTextColor(R.attr.orange_75f);
                             }else{
                                 initializeBACnet.setEnabled(false);
                                 initializeBACnet.setClickable(false);
@@ -711,7 +798,13 @@ public class Communication extends Fragment {
                         if(validateEntries()){
                             initializeBACnet.setEnabled(true);
                             initializeBACnet.setClickable(true);
-                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                            if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+                            } else if (CCUUiUtil.isDaikinEnvironment(context)) {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+                            } else {
+                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+                            }
                         }else{
                             initializeBACnet.setEnabled(false);
                             initializeBACnet.setClickable(false);
@@ -725,7 +818,13 @@ public class Communication extends Fragment {
                     if(validateEntries()){
                         initializeBACnet.setEnabled(true);
                         initializeBACnet.setClickable(true);
-                        initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.ctaOrange));
+                        if (CCUUiUtil.isCarrierThemeEnabled(context)) {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
+                        } else if (CCUUiUtil.isDaikinEnvironment(context)) {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+                        } else {
+                            initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.renatus_75F_accent));
+                        }
                     }else{
                         initializeBACnet.setEnabled(false);
                         initializeBACnet.setClickable(false);

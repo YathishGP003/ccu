@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -85,20 +86,30 @@ public class CCUUtils
 
     public static void writeFirmwareVersion(String firmwareVersion, short address, boolean isCMReboot){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap device;
+        HashMap<Object, Object> device;
         if(isCMReboot){
-            device = CCUHsApi.getInstance().read("device and cm");
+            device = CCUHsApi.getInstance().readEntity("device and cm");
+            writeFirmwareVersionForTiDevices(hayStack, firmwareVersion);
         }
         else {
-            device = hayStack.read("device and addr == \"" + address + "\"");
+            device = hayStack.readEntity("device and addr == \"" + address + "\"");
         }
         if (!device.isEmpty()) {
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
-            HashMap firmwarePoint =
-                    hayStack.read("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-            hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
+            HashMap<Object, Object> firmwarePoint =
+                    hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            hayStack.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
         }
+    }
 
+    private static void writeFirmwareVersionForTiDevices(CCUHsApi ccuHsApi, String firmwareVersion) {
+        ArrayList<HashMap<Object, Object>> tiDevices = ccuHsApi.readAllEntities("device and ti");
+        for (HashMap<Object, Object> tiDevice : tiDevices) {
+            Device deviceInfo = new Device.Builder().setHashMap(tiDevice).build();
+            HashMap<Object, Object> firmwarePoint =
+                    ccuHsApi.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            ccuHsApi.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
+        }
     }
 
     public static boolean isDaikinEnvironment(Context context){
@@ -188,7 +199,14 @@ public class CCUUtils
                 SpecialSchedule.createSpecialSchedule(zoneSpecialSchedule.get("id").toString(),
                         zoneSpecialSchedule.get("dis").toString(), beginDateTime, endDateTime,
                         Double.parseDouble(range.get("coolVal").toString()),
-                        Double.parseDouble(range.get("heatVal").toString()), true,
+                        Double.parseDouble(range.get("heatVal").toString()),
+                        Double.parseDouble(range.get("coolingUserLimitMax" ).toString()),
+                        Double.parseDouble(range.get("coolingUserLimitMin" ).toString()),
+                        Double.parseDouble(range.get("heatingUserLimitMax" ).toString()),
+                        Double.parseDouble(range.get("heatingUserLimitMin" ).toString()),
+                        Double.parseDouble(range.get("coolingDeadband" ).toString()),
+                        Double.parseDouble(range.get("heatingDeadband" ).toString()),
+                       true,
                         zoneSpecialSchedule.get("roomRef").toString());
 
 

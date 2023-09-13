@@ -149,15 +149,35 @@ public class Schedule extends Entity
                 weekStartDate = calendar.getTime();
                 if(currentDateTime.getDayOfYear() >= beginDateTime.getDayOfYear() &&
                         currentDateTime.getDayOfYear() <= endDateTime.getDayOfYear()){
-                    HDictBuilder hDictDay = new HDictBuilder()
-                            .add(Tags.DAY, HNum.make(dayNumber))
-                            .add(Tags.STHH, HNum.make(beginHour))
-                            .add(Tags.STMM, HNum.make(beginMin))
-                            .add(Tags.ETHH, HNum.make(endHour))
-                            .add(Tags.ETMM, HNum.make(endMin))
-                            .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
-                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
+
+                    if(range.has(Tags.COOLING_USER_LIMIT_MAX)) {
+
+                        HDictBuilder hDictDay = new HDictBuilder()
+                                .add(Tags.DAY, HNum.make(dayNumber))
+                                .add(Tags.STHH, HNum.make(beginHour))
+                                .add(Tags.STMM, HNum.make(beginMin))
+                                .add(Tags.ETHH, HNum.make(endHour))
+                                .add(Tags.ETMM, HNum.make(endMin))
+                                .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
+                                .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())))
+                                .add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MAX).toString())))
+                                .add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MIN).toString())))
+                                .add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MAX).toString())))
+                                .add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MIN).toString())))
+                                .add(Tags.COOLING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.COOLING_DEADBAND).toString())))
+                                .add(Tags.HEATING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.HEATING_DEADBAND).toString())));
                         daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
+                    }else{
+                        HDictBuilder hDictDay = new HDictBuilder()
+                                .add(Tags.DAY, HNum.make(dayNumber))
+                                .add(Tags.STHH, HNum.make(beginHour))
+                                .add(Tags.STMM, HNum.make(beginMin))
+                                .add(Tags.ETHH, HNum.make(endHour))
+                                .add(Tags.ETMM, HNum.make(endMin))
+                                .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
+                                .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
+                                daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
+                    }
 
                 }
                 dayNumber++;
@@ -166,7 +186,7 @@ public class Schedule extends Entity
         return daysList;
     }
 
-    private static List<Schedule.Days> getSpecialScheduleDaysForZone(String zoneId){
+    public static List<Schedule.Days> getSpecialScheduleDaysForZone(String zoneId){
         return getSpecialScheduleDaysForRunningWeek(zoneId);
     }
 
@@ -180,15 +200,33 @@ public class Schedule extends Entity
             Schedule.Days[] zonesDaySchedule = new Schedule.Days[specialScheduleForZone.size()];
             zonesDaySchedule = specialScheduleForZone.toArray(zonesDaySchedule);
             List<HDict> specialScheduleList = new ArrayList<>();
-            for(int i=0; i < specialScheduleForZone.size(); i++){
-                HDictBuilder hDictDay = new HDictBuilder()
-                        .add(Tags.DAY, HNum.make(zonesDaySchedule[i].getDay()))
-                        .add(Tags.STHH, HNum.make(zonesDaySchedule[i].getSthh()))
-                        .add(Tags.STMM, HNum.make(zonesDaySchedule[i].getStmm()))
-                        .add(Tags.ETHH, HNum.make(zonesDaySchedule[i].getEthh()))
-                        .add(Tags.ETMM, HNum.make(zonesDaySchedule[i].getEtmm()))
-                        .add(Tags.COOLVAL, HNum.make(zonesDaySchedule[i].getCoolingVal()))
-                        .add(Tags.HEATVAL, HNum.make(zonesDaySchedule[i].getHeatingVal()));
+            for(int i=0; i < specialScheduleForZone.size(); i++) {
+                HDictBuilder hDictDay;
+                if (zonesDaySchedule[i].getCoolingUserLimitMin() != null){
+                    hDictDay = new HDictBuilder()
+                            .add(Tags.DAY, HNum.make(zonesDaySchedule[i].getDay()))
+                            .add(Tags.STHH, HNum.make(zonesDaySchedule[i].getSthh()))
+                            .add(Tags.STMM, HNum.make(zonesDaySchedule[i].getStmm()))
+                            .add(Tags.ETHH, HNum.make(zonesDaySchedule[i].getEthh()))
+                            .add(Tags.ETMM, HNum.make(zonesDaySchedule[i].getEtmm()))
+                            .add(Tags.COOLVAL, HNum.make(zonesDaySchedule[i].getCoolingVal()))
+                            .add(Tags.HEATVAL, HNum.make(zonesDaySchedule[i].getHeatingVal()))
+                            .add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(zonesDaySchedule[i].getCoolingUserLimitMin()))
+                            .add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(zonesDaySchedule[i].getCoolingUserLimitMax()))
+                            .add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(zonesDaySchedule[i].getHeatingUserLimitMin()))
+                            .add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(zonesDaySchedule[i].getHeatingUserLimitMax()))
+                            .add(Tags.COOLING_DEADBAND, HNum.make(zonesDaySchedule[i].getCoolingDeadBand()))
+                            .add(Tags.HEATING_DEADBAND, HNum.make(zonesDaySchedule[i].getHeatingDeadBand()));
+            }else{
+                    hDictDay = new HDictBuilder()
+                            .add(Tags.DAY, HNum.make(zonesDaySchedule[i].getDay()))
+                            .add(Tags.STHH, HNum.make(zonesDaySchedule[i].getSthh()))
+                            .add(Tags.STMM, HNum.make(zonesDaySchedule[i].getStmm()))
+                            .add(Tags.ETHH, HNum.make(zonesDaySchedule[i].getEthh()))
+                            .add(Tags.ETMM, HNum.make(zonesDaySchedule[i].getEtmm()))
+                            .add(Tags.COOLVAL, HNum.make(zonesDaySchedule[i].getCoolingVal()))
+                            .add(Tags.HEATVAL, HNum.make(zonesDaySchedule[i].getHeatingVal()));
+            }
                 specialScheduleList.add(hDictDay.toDict());
             }
             HList hList = HList.make(specialScheduleList);
@@ -216,31 +254,34 @@ public class Schedule extends Entity
 
     public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
-        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        Zone zone = new Zone.Builder().setHashMap(zoneHashMap).build();
         String ref;
         if (vacation)
-            ref = build.getVacationRef();
+            ref = zone.getVacationRef();
         else
-            ref = build.getScheduleRef();
+            ref = zone.getScheduleRef();
 
         Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
                 "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
         //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
         if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null ) {
-                CcuLog.d("CCU_SCHEDULER", "Zone Schedule for "+build.getDisplayName()+" : "
-                        + schedule.toString());
+            
+            if (schedule != null )
+            {
+                CcuLog.i("CCU_SCHEDULE", "Zone Schedule: for "+zone.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule"+scheduleType);
-        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
-        if (retVal != null && retVal.size() > 0) {
-            Schedule schedule = retVal.get(0);
-            CcuLog.d("CCU_SCHEDULER", "Building Schedule :  "+schedule);
-            return schedule;
+
+        CcuLog.d("CCU_SCHEDULE", "Referenced schedule does not exist : ref "+ref);
+        List<Schedule> zoneSchedules = CCUHsApi.getInstance().getZoneSchedule(zone.getId(), false);
+        if (!zoneSchedules.isEmpty()) {
+            CcuLog.i("CCU_SCHEDULE", "Default zone schedule:  " + zoneSchedules.get(0));
+            return zoneSchedules.get(0);
         }
+
+        CcuLog.e("CCU_SCHEDULE", " !! A zone without valid schedule : something is broken for "+zone.getDisplayName());
         return null;
     }
 
@@ -466,36 +507,40 @@ public class Schedule extends Entity
         return combinedSpecialSchedules;
     }
 
-    public static Schedule getScheduleForZoneScheduleProcessing(String zoneId, boolean vacation)
+    public static Schedule getScheduleForZoneScheduleProcessing(String zoneId)
     {
         Set<Schedule.Days> combinedSpecialSchedules =  combineSpecialSchedules(zoneId);
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
-        String ref;
-        if (vacation)
-            ref = build.getVacationRef();
-        else
-            ref = build.getScheduleRef();
+        String ref = build.getScheduleRef();
 
-        Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
-                "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
-        //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
-        if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
+        if (ref != null && !ref.equals(""))
+        {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
+            if (schedule != null)
+            {
                 schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
-                CcuLog.d("CCU_SCHEDULER", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
+                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
                         + schedule.toString());
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule"+scheduleType);
-        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
-        if (retVal != null && retVal.size() > 0) {
-            Schedule schedule = retVal.get(0);
-            schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
-            CcuLog.d("CCU_SCHEDULER", "Building Schedule with special schedule:  "+schedule);
-            return schedule;
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+
+        CcuLog.d("Schedule", " Zone Id ="+zoneId);
+        HashMap<Object,Object> scheduleTypePoint = CCUHsApi.getInstance().readEntity("scheduleType and roomRef == \"" + zoneId + "\"");
+        if(scheduleTypePoint.isEmpty()){
+            return null;
+        }
+
+        double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("scheduleType and roomRef == \"" + zoneId + "\"");
+        if (scheduleType == 2) {
+            Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
+            if (schedule != null) {
+                schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
+                CcuLog.d("Schedule", "Building Schedule with special schedule:  " + schedule);
+                return schedule;
+            }
         }
         return null;
     }
@@ -813,6 +858,7 @@ public class Schedule extends Entity
     private String          mId;
     private boolean         mIsVacation;
     private String          mDis;
+    private Double unoccupiedZoneSetback;
     private HashSet<String> mMarkers;
     private String          mKind;
     private String          mUnit;
@@ -876,6 +922,10 @@ public class Schedule extends Entity
     public String getDis()
     {
         return mDis;
+    }
+
+    public Double getUnoccupiedZoneSetback() {
+        return unoccupiedZoneSetback ;
     }
 
     public HashSet<String> getMarkers()
@@ -1122,6 +1172,12 @@ public class Schedule extends Entity
                 d.setVal(day.mVal);
                 d.setCoolingVal(day.getCoolingVal());
                 d.setHeatingVal(day.getHeatingVal());
+                d.setHeatingUserLimitMin(day.getHeatingUserLimitMin());
+                d.setHeatingUserLimitMax(day.getHeatingUserLimitMax());
+                d.setCoolingUserLimitMin(day.getCoolingUserLimitMin());
+                d.setCoolingUserLimitMax(day.getCoolingUserLimitMax());
+                d.setCoolingDeadBand(day.getCoolingDeadBand());
+                d.setHeatingDeadBand(day.getHeatingDeadBand());
                 days.add(d);
 
                 Days d2 = new Days();
@@ -1139,6 +1195,12 @@ public class Schedule extends Entity
 
                 d2.setCoolingVal(day.getCoolingVal());
                 d2.setHeatingVal(day.getHeatingVal());
+                d2.setHeatingUserLimitMin(day.getHeatingUserLimitMin());
+                d2.setHeatingUserLimitMax(day.getHeatingUserLimitMax());
+                d2.setCoolingUserLimitMin(day.getCoolingUserLimitMin());
+                d2.setCoolingUserLimitMax(day.getCoolingUserLimitMax());
+                d2.setCoolingDeadBand(day.getCoolingDeadBand());
+                d2.setHeatingDeadBand(day.getHeatingDeadBand());
                 days.add(d2);
 
                 continue;
@@ -1314,6 +1376,7 @@ public class Schedule extends Entity
 
         private boolean         mIsVacation;
         private String          mDis;
+        private Double unoccupiedZoneSetback;
         private HashSet<String> mMarkers = new HashSet<String>();
         private String          mKind;
         private String          mUnit;
@@ -1340,7 +1403,7 @@ public class Schedule extends Entity
             this.ccuRef = ccuRef;
             return this;
         }
-        
+
         public Schedule.Builder setId(String id)
         {
             this.mId = id;
@@ -1403,6 +1466,7 @@ public class Schedule extends Entity
             s.mMarkers = this.mMarkers;
             s.mIsVacation = this.mIsVacation;
             s.mDis = this.mDis;
+            s.unoccupiedZoneSetback = this.unoccupiedZoneSetback;
             s.mKind = this.mKind;
             s.mSiteId = this.mSiteId;
             s.mUnit = this.mUnit;
@@ -1433,7 +1497,12 @@ public class Schedule extends Entity
                 } else if (pair.getKey().equals("dis"))
                 {
                     this.mDis = pair.getValue().toString();
-                } else if (pair.getKey().equals("vacation"))
+                }
+                else if (pair.getKey().equals("unoccupiedZoneSetback"))
+                {
+                    this.unoccupiedZoneSetback = Double.valueOf(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("vacation"))
                 {
                     this.mIsVacation = true;
                 } else if (pair.getKey().equals("kind"))
@@ -1530,13 +1599,21 @@ public class Schedule extends Entity
                     mSunset == days.mSunset &&
                     Objects.equals(mVal, days.mVal) &&
                     Objects.equals(mHeatingVal, days.mHeatingVal) &&
-                    Objects.equals(mCoolingVal, days.mCoolingVal);
+                    Objects.equals(mCoolingVal, days.mCoolingVal) &&
+                    Objects.equals(heatingUserLimitMin, days.heatingUserLimitMin) &&
+                    Objects.equals(heatingUserLimitMax, days.heatingUserLimitMax) &&
+                    Objects.equals(coolingUserLimitMin, days.coolingUserLimitMin) &&
+                    Objects.equals(coolingUserLimitMax, days.coolingUserLimitMax) &&
+                    Objects.equals(coolingDeadBand, days.coolingDeadBand) &&
+                    Objects.equals(heatingDeadBand, days.heatingDeadBand);
         }
 
         @Override
         public int hashCode()
         {
-            return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset);
+            return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset,
+                    heatingUserLimitMin, heatingUserLimitMax, coolingUserLimitMin, coolingUserLimitMax, coolingDeadBand,
+                    heatingDeadBand);
         }
 
 
@@ -1551,6 +1628,12 @@ public class Schedule extends Entity
         private int     mEthh;
         private boolean mSunrise;
         private boolean mSunset;
+        private Double  heatingUserLimitMin;
+        private Double  heatingUserLimitMax;
+        private Double  coolingUserLimitMin;
+        private Double  coolingUserLimitMax;
+        private Double  coolingDeadBand;
+        private Double  heatingDeadBand;
 
 
         public int getSthh()
@@ -1632,7 +1715,55 @@ public class Schedule extends Entity
         {
             this.mSunset = sunset;
         }
-        
+
+        public Double getHeatingUserLimitMin() {
+            return heatingUserLimitMin;
+        }
+
+        public void setHeatingUserLimitMin(Double heatingUserLimitMin) {
+            this.heatingUserLimitMin = heatingUserLimitMin;
+        }
+
+        public Double getHeatingUserLimitMax() {
+            return heatingUserLimitMax;
+        }
+
+        public void setHeatingUserLimitMax(Double heatingUserLimitMax) {
+            this.heatingUserLimitMax = heatingUserLimitMax;
+        }
+
+        public Double getCoolingUserLimitMin() {
+            return coolingUserLimitMin;
+        }
+
+        public void setCoolingUserLimitMin(Double coolingUserLimitMin) {
+            this.coolingUserLimitMin = coolingUserLimitMin;
+        }
+
+        public Double getCoolingUserLimitMax() {
+            return coolingUserLimitMax;
+        }
+
+        public void setCoolingUserLimitMax(Double coolingUserLimitMax) {
+            this.coolingUserLimitMax = coolingUserLimitMax;
+        }
+
+        public Double getCoolingDeadBand() {
+            return coolingDeadBand;
+        }
+
+        public void setCoolingDeadBand(Double coolingDeadBand) {
+            this.coolingDeadBand = coolingDeadBand;
+        }
+
+        public Double getHeatingDeadBand() {
+            return heatingDeadBand;
+        }
+
+        public void setHeatingDeadBand(Double heatingDeadBand) {
+            this.heatingDeadBand = heatingDeadBand;
+        }
+
         public static ArrayList<Days> parse(HList value)
         {
             ArrayList<Days> days = new ArrayList<Days>();
@@ -1659,6 +1790,12 @@ public class Schedule extends Entity
             days.mVal = hDict.has("curVal") ? hDict.getDouble("curVal") : null;
             days.mCoolingVal = hDict.has("coolVal") ? hDict.getDouble("coolVal") : null;
             days.mHeatingVal = hDict.has("heatVal") ? hDict.getDouble("heatVal") : null;
+            days.heatingUserLimitMin = hDict.has(Tags.HEATING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MIN) : null;
+            days.heatingUserLimitMax = hDict.has(Tags.HEATING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MAX) : null;
+            days.coolingUserLimitMin = hDict.has(Tags.COOLING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MIN) : null;
+            days.coolingUserLimitMax = hDict.has(Tags.COOLING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MAX) : null;
+            days.coolingDeadBand = hDict.has(Tags.COOLING_DEADBAND) ? hDict.getDouble(Tags.COOLING_DEADBAND) : null;
+            days.heatingDeadBand = hDict.has(Tags.HEATING_DEADBAND) ? hDict.getDouble(Tags.HEATING_DEADBAND) : null;
 
             return days;
         }
@@ -1699,7 +1836,13 @@ public class Schedule extends Entity
             StringBuilder str = new StringBuilder();
             str.append(" {mDay: "+mDay);
             str.append(" Time "+mSthh+":"+mStmm+" - "+mEthh+":"+mEtmm);
-            str.append(" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal+"}");
+            str.append(" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal);
+            str.append(" heatingUserLimitMin :"+heatingUserLimitMin);
+            str.append(" heatingUserLimitMax :"+heatingUserLimitMax);
+            str.append(" coolingUserLimitMin :"+coolingUserLimitMin);
+            str.append(" coolingUserLimitMax :"+coolingUserLimitMax);
+            str.append(" coolingDeadBand :"+coolingDeadBand);
+            str.append(" heatingDeadBand :"+heatingDeadBand +"}");
             return str.toString();
         }
     }
@@ -1743,12 +1886,24 @@ public class Schedule extends Entity
         for (int i = 0; i < getDays().size(); i++)
         {
             Days day = mDays.get(i);
-            HDictBuilder hDictDay = new HDictBuilder()
+                    HDictBuilder hDictDay = new HDictBuilder()
                     .add("day", HNum.make(day.mDay))
                     .add("sthh", HNum.make(day.mSthh))
                     .add("stmm", HNum.make(day.mStmm))
                     .add("ethh", HNum.make(day.mEthh))
                     .add("etmm", HNum.make(day.mEtmm));
+            if (day.heatingUserLimitMin != null)
+                hDictDay.add("heatingUserLimitMin", HNum.make(day.heatingUserLimitMin));
+            if (day.heatingUserLimitMax != null)
+                hDictDay.add("heatingUserLimitMax", HNum.make(day.heatingUserLimitMax));
+            if (day.coolingUserLimitMin != null)
+                hDictDay.add("coolingUserLimitMin", HNum.make(day.coolingUserLimitMin));
+            if (day.coolingUserLimitMax != null)
+                hDictDay.add("coolingUserLimitMax", HNum.make(day.coolingUserLimitMax));
+            if (day.coolingDeadBand != null)
+                hDictDay.add("coolingDeadBand", HNum.make(day.coolingDeadBand));
+            if (day.heatingDeadBand != null)
+                hDictDay.add("heatingDeadBand", HNum.make(day.heatingDeadBand));
             if (day.mHeatingVal != null)
                 hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
             if (day.mCoolingVal != null)
@@ -1767,9 +1922,13 @@ public class Schedule extends Entity
         HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", HRef.copy(getId()))
                 .add("kind", getKind())
-                .add("dis", "Building Schedule")
+                .add("dis", "Zone Schedule")
                 .add("days", hList)
                 .add("siteRef", HRef.copy(mSiteId));
+
+        if(mRoomRef != null)
+            defaultSchedule.add("roomRef", HRef.copy(mRoomRef));
+
         if (getCreatedDateTime() != null) {
             defaultSchedule.add("createdDateTime", getCreatedDateTime());
         }
@@ -1779,7 +1938,7 @@ public class Schedule extends Entity
         if (getLastModifiedBy() != null) {
             defaultSchedule.add("lastModifiedBy", getLastModifiedBy());
         }
-        
+
         for (String marker : getMarkers())
         {
             defaultSchedule.add(marker);
@@ -1841,7 +2000,19 @@ public class Schedule extends Entity
                 hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
             if (day.mVal != null)
                 hDictDay.add("curVal", HNum.make(day.getVal()));
-            
+            if (day.heatingUserLimitMin != null)
+                hDictDay.add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(day.getHeatingUserLimitMin()));
+            if (day.heatingUserLimitMax != null)
+                hDictDay.add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(day.getHeatingUserLimitMax()));
+            if (day.coolingUserLimitMin != null)
+                hDictDay.add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(day.getCoolingUserLimitMin()));
+            if (day.coolingUserLimitMax != null)
+                hDictDay.add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(day.getCoolingUserLimitMax()));
+            if (day.coolingDeadBand != null)
+                hDictDay.add(Tags.COOLING_DEADBAND, HNum.make(day.getCoolingDeadBand()));
+            if (day.heatingDeadBand != null)
+                hDictDay.add(Tags.HEATING_DEADBAND, HNum.make(day.getHeatingDeadBand()));
+
             //need boolean & string support
             if (day.mSunset) hDictDay.add("sunset", day.mSunset);
             if (day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
@@ -1853,11 +2024,15 @@ public class Schedule extends Entity
         HDictBuilder defaultSchedule = new HDictBuilder()
                                                .add("id", HRef.copy(getId()))
                                                .add("kind", getKind())
+
                                                .add("dis", "Zone Schedule")
                                                .add("days", hList)
                                                .add("roomRef",HRef.copy(roomRef))
                                                .add("siteRef", HRef.copy(mSiteId))
                                                .add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
+
+        if(getUnoccupiedZoneSetback() != null)
+            defaultSchedule.add("unoccupiedZoneSetback", getUnoccupiedZoneSetback());
 
         if (getCreatedDateTime() != null) {
             defaultSchedule.add("createdDateTime", getCreatedDateTime());
@@ -1874,6 +2049,10 @@ public class Schedule extends Entity
         }
 
         return defaultSchedule.toDict();
+    }
+
+    public void setUnoccupiedZoneSetback(Double unoccupiedZoneSetback){
+        this.unoccupiedZoneSetback = unoccupiedZoneSetback;
     }
 
 }

@@ -22,6 +22,7 @@ import android.util.Log;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,10 +37,12 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -54,6 +57,20 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerUtil;
+
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
+import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 
 public class ScheduleManager {
     
@@ -128,10 +145,22 @@ public class ScheduleManager {
         occ.setSystemZone(true);
         
         double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
-        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
-        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
-        double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
-        
+
+        double heatingDeadBand ;
+        double coolingDeadBand ;
+        double setback ;
+
+        ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+        HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+        if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
+            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \"" + equip.getRoomRef() + "\"");
+        }else{
+            heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
+            coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
+            setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+        }
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
@@ -174,6 +203,14 @@ public class ScheduleManager {
         updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
         updateDesiredTemp(zoneProfiles);
 
+
+        ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+
+        if (!isSchedulableAvailable.isEmpty())
+            updateLimitsAndDeadBand();
+
+
+
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
@@ -181,7 +218,7 @@ public class ScheduleManager {
         }
         ScheduleUtil.deleteExpiredVacation();
         ScheduleUtil.deleteExpiredSpecialSchedules();
-
+    
         //TODO - refactor. This can only be done after updating desired temp.
         for (ZoneProfile profile : zoneProfiles) {
 
@@ -208,9 +245,10 @@ public class ScheduleManager {
         }
 
     }
-    
+
     private void processScheduleForEquip(Equip equip, Schedule activeSystemVacation) {
-        Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""), false);
+        Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""));
+
         if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM")) {
             CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
             return;
@@ -341,9 +379,9 @@ public class ScheduleManager {
                 continue;
             }
 
-            Equip equip = profile.getEquip();
-            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
-                    .replace("@", ""), false);
+                Equip equip = profile.getEquip();
+                Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
+                        .replace("@", ""));
 
             CcuLog.i(TAG_CCU_SCHEDULER,
                     " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
@@ -354,8 +392,74 @@ public class ScheduleManager {
             }
         }
     }
-    
-    
+
+    public void updateLimitsAndDeadBand() {
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+
+            if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
+                continue;
+            }
+
+            Equip equip = profile.getEquip();
+            String roomRef = equip.getRoomRef();
+            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
+                    .replace("@", ""));
+            ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
+            if (!equipSchedule.getMarkers().contains("specialschedule")) {
+                if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
+                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                        updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
+                    Occupied occ = equipSchedule.getCurrentValues();
+                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                        occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
+                    int day = DateTime.now().dayOfWeek().get() - 1;
+                    Calendar calender = Calendar.getInstance();
+                    int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+                    int min = calender.get(Calendar.MINUTE);
+                    int curTime = hrs + min;
+                    for (Schedule.Days d : mDays) {
+                        if (d.getDay() == day) {
+                            int startSchTime = (d.getSthh() * 60) + d.getStmm();
+                            int endSchTime = (d.getEthh() * 60) + d.getEtmm();
+                            if (curTime > startSchTime && curTime < endSchTime) {
+                                saveUserLimitChange("max and heating ", (d.getHeatingUserLimitMax()).intValue(), roomRef);
+                                saveUserLimitChange("min and heating ", (d.getHeatingUserLimitMin()).intValue(), roomRef);
+                                saveUserLimitChange("max and cooling ", (d.getCoolingUserLimitMax()).intValue(), roomRef);
+                                saveUserLimitChange("min and cooling ", (d.getCoolingUserLimitMin()).intValue(), roomRef);
+                                saveDeadBandChange("heating", d.getHeatingDeadBand(), roomRef);
+                                saveDeadBandChange("cooling", d.getCoolingDeadBand(), roomRef);
+                            }
+                        }
+                    }
+                }
+            } else if (equipSchedule.getMarkers().contains("specialschedule")) {
+                Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
+                        replace("@", ""));
+                if (ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)) {
+                    for (Schedule.Days splsched : combinedSpecialSchedules) {
+                        int day = DateTime.now().dayOfWeek().get() - 1;
+                        Calendar calender = Calendar.getInstance();
+                        int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+                        int min = calender.get(Calendar.MINUTE);
+                        int curTime = hrs + min;
+                        if (splsched.getDay() == day) {
+                            int startSchTime = (splsched.getSthh() * 60) + splsched.getStmm();
+                            int endSchTime = (splsched.getEthh() * 60) + splsched.getEtmm();
+                            if (curTime > startSchTime && curTime < endSchTime) {
+                                saveUserLimitChange("max and heating ", (splsched.getHeatingUserLimitMax()).intValue(), roomRef);
+                                saveUserLimitChange("min and heating ", (splsched.getHeatingUserLimitMin()).intValue(), roomRef);
+                                saveUserLimitChange("max and cooling ", (splsched.getCoolingUserLimitMax()).intValue(), roomRef);
+                                saveUserLimitChange("min and cooling ", (splsched.getCoolingUserLimitMin()).intValue(), roomRef);
+                                saveDeadBandChange("heating", splsched.getHeatingDeadBand(), roomRef);
+                                saveDeadBandChange("cooling", splsched.getCoolingDeadBand(), roomRef);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void updateZoneOccupancy(CCUHsApi hayStack) {
         List<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
         
@@ -718,9 +822,9 @@ public class ScheduleManager {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
                                          cachedOccupied.getVacation().getEndDateString());
         } else {
-            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and " +
+            boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +
                                                                               "his and  equipRef == \"" + equipId +
-                                                                              "\"") == ZoneTempState.TEMP_DEAD.ordinal();
+                                                                              "\"") == ZoneState.TEMPDEAD.ordinal();
             if(curOccupancyMode == PRECONDITIONING && !isZoneTempDead) {//Currently handled only for standalone
                 if (cachedOccupied.getNextOccupiedSchedule() == null){
                     CcuLog.i(TAG_CCU_SCHEDULER,
@@ -878,7 +982,7 @@ public class ScheduleManager {
     }
     
     public double getSystemCoolingDesiredTemp(){
-        double setback = TunerUtil.readTunerValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getCoolingVal() + setback : currentOccupiedInfo.getCoolingVal();
@@ -889,7 +993,7 @@ public class ScheduleManager {
     }
     
     public double getSystemHeatingDesiredTemp(){
-        double setback = TunerUtil.readTunerValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getHeatingVal() - setback : currentOccupiedInfo.getHeatingVal();
@@ -913,5 +1017,23 @@ public class ScheduleManager {
         }else{
             return "No Active Schedule";
         }
+    }
+
+    private void saveUserLimitChange(String tag, int value, String roomRef) {
+        HashMap<Object, Object> userLimit =
+                CCUHsApi.getInstance().readEntity("schedulable and point and limit and user and " + tag + "and roomRef == \"" + roomRef + "\"" );
+        HSUtil.writeValLevel10(userLimit, value);
+    }
+
+    private void saveDeadBandChange(String tag, double value, String roomRef) {
+        HashMap<Object, Object> deadBand =
+                CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
+        HSUtil.writeValLevel10(deadBand, value);
+    }
+
+    private void updateUnOccupiedSetBackPoint(double value, String roomRef) {
+        HashMap<Object, Object> unOccupiedZoneSetBack =
+                CCUHsApi.getInstance().readEntity("schedulable and unoccupied and zone and roomRef == \"" + roomRef + "\"" );
+        HSUtil.writeValLevel10(unOccupiedZoneSetBack, value);
     }
 }

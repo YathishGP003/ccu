@@ -16,9 +16,11 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.NodeType;
@@ -64,10 +66,11 @@ public class SingleStageEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis+"-SSE-"+nodeAddr;
         String ahuRef = null;
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
 
         Log.d(TAG, "setupSSEZoneProfile: association cvalue " + config.analogInAssociation);
 
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
@@ -252,8 +255,8 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
 
         Point dischargeAirTemp1 = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-airflowTempSensorTh1")

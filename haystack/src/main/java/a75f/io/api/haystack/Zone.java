@@ -314,7 +314,7 @@ public class Zone extends Entity
                 {
                     this.bacnetId = Integer.parseInt(pair.getValue().toString());
                 }
-                else if (pair.getKey().equals("bacnetId"))
+                else if (pair.getKey().equals("bacnetType"))
                 {
                     this.bacnetType = pair.getValue().toString();
                 }

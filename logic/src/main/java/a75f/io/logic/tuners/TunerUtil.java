@@ -10,6 +10,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
@@ -132,7 +135,7 @@ public class TunerUtil
         double maxDb = 0;
         boolean isDefault = true;
         for (Equip q : zoneEquips){
-            HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
+            HashMap cdb = hayStack.read("point and deadband and cooling and not adr and not multiplier and roomRef == \""+roomRef+"\"");
 
             if (!cdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(cdb.get("id").toString());
@@ -167,7 +170,7 @@ public class TunerUtil
         boolean isDefault = true;
 
         for (Equip q : zoneEquips) {
-            HashMap hdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \"" + q.getId() + "\"");
+            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomref == \"" + roomRef + "\"");
 
             if (!hdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(hdb.get("id").toString());
@@ -326,6 +329,28 @@ public class TunerUtil
             }
         }
         return 0;
+    }
+
+    /**
+     * TODO - Optmize - commondata
+     * @param systemPointId
+     * @param domainName
+     */
+    public static void copyDefaultBuildingTunerVal(String systemPointId, String domainName, CCUHsApi hayStack) {
+        HashMap<Object, Object> buildingPoint = hayStack.readDefaultPointByDomainName(domainName);
+        if (buildingPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_TUNER, "!! Default point does not exist for "+domainName);
+            //TODO- write default val?
+            return;
+        }
+
+        ArrayList<HashMap> buildingPointArray = hayStack.readPoint(buildingPoint.get(Tags.ID).toString());
+        for (HashMap valMap : buildingPointArray) {
+            if (valMap.get("val") != null) {
+                hayStack.pointWrite(HRef.copy(systemPointId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId));
     }
 
 }

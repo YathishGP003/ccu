@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 
 import java.util.HashMap;
@@ -479,6 +480,12 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("capacity")) {
                     this.capacity = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("version")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
             }
             return this;
         }
@@ -569,6 +576,9 @@ public class Equip extends Entity
                 else if (pair.getKey().equals("domainName"))
                 {
                     this.domainName = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("version")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());

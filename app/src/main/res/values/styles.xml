@@ -849,7 +849,7 @@
 
     <style name="safe_mode_cts" parent="@android:style/TextAppearance">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/renatus_75F_accent</item>
+        <item name="android:textColor">?orange_75f</item>
         <item name="android:fontFamily">@font/lato_bold</item>
     </style>
 
@@ -884,6 +884,54 @@
         <item name="android:textColor">@color/grey_select</item>
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">left</item>
+    </style>
+
+
+
+    <style name="title_limits">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <style name="ToggleLimits">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginStart">15dp</item>
+        <item name="android:textAppearance">@style/title_toggle</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+    </style>
+
+    <style name="title_toggle" >
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textColor">@color/text_color</item>
+
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+    <style name="set_limits" >
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="TableSpinnermaster" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:layout_width">128dp</item>
+        <item name="android:layout_height">31dp</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
+    <style name="TableSpinnerzone" parent="Widget.AppCompat.Spinner.Underlined">
+    <item name="android:layout_width">280dp</item>
+    <item name="android:layout_height">40dp</item>
+    <item name="android:layout_gravity">center_vertical</item>
     </style>
 
 </resources>

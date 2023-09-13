@@ -7,8 +7,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;
 
+import java.util.HashMap;
+
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
@@ -84,6 +87,16 @@ class SiteRegistrationHandler {
             siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
             siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
             siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF, false));
+
+            HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
+            if (!tunerEquip.isEmpty()) {
+                JSONObject tunerFiled = new JSONObject();
+                tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
+                tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                //tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
+                siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
             CcuLog.d(TAG, "Unable to sync site due to JSON exception. This is likely unrecoverable.");

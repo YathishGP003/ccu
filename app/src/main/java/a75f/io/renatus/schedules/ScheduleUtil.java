@@ -25,6 +25,8 @@ public class ScheduleUtil {
             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
                     "vacation and not special and roomRef == " +z.getId());
+            if(scheduleHashMap.isEmpty())
+                continue;
             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
             ArrayList<Interval> spills = spillsMap.get(zoneId);
 
@@ -105,6 +107,12 @@ public class ScheduleUtil {
                 dayBO.setSunset(false);
                 dayBO.setSunrise(false);
                 dayBO.setDay(d.getDay());
+                dayBO.setHeatingUserLimitMin(d.getHeatingUserLimitMin());
+                dayBO.setHeatingUserLimitMax(d.getHeatingUserLimitMax());
+                dayBO.setCoolingUserLimitMin(d.getCoolingUserLimitMin());
+                dayBO.setCoolingUserLimitMax(d.getCoolingUserLimitMax());
+                dayBO.setHeatingDeadBand(d.getHeatingDeadBand());
+                dayBO.setCoolingDeadBand(d.getCoolingDeadBand());
                 s.getDays().remove(d);
                 s.getDays().add(dayBO);
             }

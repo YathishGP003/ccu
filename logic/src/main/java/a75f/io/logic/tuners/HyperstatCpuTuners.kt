@@ -199,12 +199,12 @@ class HyperstatCpuTuners {
 
             // coolingDeadband = 2 (°F)
             // Min = 0 ,  Max = 10.0 ,  Default = 2 , inc 0.5 unit = u00B0F
-            val coolingDeadBandMarkers = arrayOf("cooling", "deadband","base")
+           /* val coolingDeadBandMarkers = arrayOf("cooling", "deadband","base")
             val hsCoolingDeadBandPoint = createTunerPoint(
                 HYPERSTAT_COOLING_DEADBAND, coolingDeadBandMarkers, "0", "10.0", "0.5", "\u00B0F"
             )
             listOfTunerPoints[hsCoolingDeadBandPoint] = HYPERSTAT_COOLING_DEADBAND_DEFAULT
-
+*/
             // coolingDeadbandMultiplier = 0.5
             // min = 0 , max = 5.0 , Default = 0.5 inc 0.1 unit = ?
             val hsCoolingDeadbandMultiplierMarkers = arrayOf("cooling", "deadband", "multiplier")
@@ -256,12 +256,12 @@ class HyperstatCpuTuners {
 
             // heatingDeadband = 2 (°F)
             // min = 0 max = 10.0 inc = 0.5 default = 2.0 unit "\u00B0F"
-            val heatingDeadbandMarkers = arrayOf("heating", "deadband","base")
+           /* val heatingDeadbandMarkers = arrayOf("heating", "deadband","base")
             val heatingDeadbandPoint = createTunerPoint(
                 HYPERSTAT_HEATING_DEADBAND, heatingDeadbandMarkers, "0", "10.0", "0.5", "\u00B0F"
             )
             listOfTunerPoints[heatingDeadbandPoint] = HYPERSTAT_HEATING_DEADBAND_DEFAULT
-
+*/
             val heatingDeadbandMultiplierMarkers = arrayOf("heating", "deadband", "multiplier")
             val heatingDeadbandMultiplierPoint = createTunerPoint(
                 HYPERSTAT_HEATING_DEADBAND_MULTIPLIER, heatingDeadbandMultiplierMarkers, "0", "5.0", "0.1", ""

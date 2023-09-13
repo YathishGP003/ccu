@@ -31,6 +31,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -65,6 +66,8 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.service.DomainService;
+import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -80,6 +83,7 @@ import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.ota.OTAUpdateHandlerService;
 import a75f.io.renatus.ota.OtaCache;
+import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.restserver.server.HttpServer;
@@ -225,15 +229,15 @@ public abstract class UtilityApplication extends Application {
     private void postProcessingInit(){
         Log.i("CCU_DB", "postProcessingInit - start");
 
+        //Remove this Equip Manager once all modbus models are migrated from Domain modeler
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
-        PreferenceUtil.installationCompleted();
+        UpdateCCUFragment.abortCCUDownloadProcess();
 
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
-
-        //Modbus EquipmendManager
-        EquipsManager.getInstance(this).setApplicationContext(this);
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service

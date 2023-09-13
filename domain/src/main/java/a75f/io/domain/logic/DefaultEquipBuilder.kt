@@ -16,12 +16,13 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?) : Equip {
+    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String) : Equip {
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
             .setFloorRef(profileConfiguration?.floorRef)
             .setGroup(profileConfiguration?.nodeAddress.toString())
+            .setSiteRef(siteRef)
 
         if (profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(profileConfiguration.roomRef)
@@ -44,12 +45,12 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         //TODO - Fetch from model when support is added
         equipBuilder.addTag("modelId", HStr.make("64abb6a3a97798751b2bda14"))
-        equipBuilder.addTag("modelVersion", HStr.make("1.0.0"))
+        equipBuilder.addTag("modelVersion", HStr.make("0.0.4"))
 
         return equipBuilder.build()
     }
 
-    override fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String) : Point {
+    override fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef: String) : Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
@@ -59,6 +60,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setKind(Kind.parsePointType(modelDef.kind.name))
             .setUnit(modelDef.defaultUnit)
             .setGroup(configuration?.nodeAddress.toString())
+            .setSiteRef(siteRef)
 
         if (configuration?.roomRef != null) {
             pointBuilder.setRoomRef(configuration.roomRef)

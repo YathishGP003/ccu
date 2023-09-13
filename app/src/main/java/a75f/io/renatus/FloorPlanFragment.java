@@ -56,6 +56,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
@@ -68,12 +69,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
-import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.BackFillViewModel;
+import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -181,7 +183,6 @@ public class FloorPlanFragment extends Fragment {
                         } else {
                             updateModules(getSelectedZone());
                             setScheduleType(getSelectedZone().getId());
-                            BackFillViewModel.setBackFillDuration();
                         }
                         //Crash here because of activity null while moving to other fragment and return back here after edit config
                         if ((getActivity() != null) && (mPairingReceiver != null))
@@ -601,10 +602,6 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
         floorToRename = null;
-        if (!NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
-            return;
-        }
         isConnectedToServer(FloorHandledCondition.ALLOW_NEW_FLOOR, null);
     }
 
@@ -615,9 +612,6 @@ public class FloorPlanFragment extends Fragment {
         showKeyboard(addFloorEdit);
     }
 
-    private void serverDownWhileRenamingFloor(){
-        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
-    }
 
     @OnClick(R.id.lt_addfloor)
     public void addFloorBtn() {
@@ -696,7 +690,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -721,7 +714,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -924,11 +916,7 @@ public class FloorPlanFragment extends Fragment {
                                 }
 
                             }
-                            EquipsManager.getInstance().getAllMbEquips(zone.getId())
-                                    .forEach( equip -> {
-                                        equip.setFloorRef(floor.getId());
-                                        EquipsManager.getInstance().saveProfile(equip);
-                                    });
+
                         }
 
                         refreshScreen();
@@ -1014,6 +1002,17 @@ public class FloorPlanFragment extends Fragment {
             hideKeyboard();
             Toast.makeText(getActivity().getApplicationContext(),
                     "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+
+            HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                    ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
+            if(defaultNamedSchedule.isEmpty()) {
+                new Thread(() -> {
+                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                            HayStackConstants.USER, HayStackConstants.PASS), new Site.Builder().setHashMap(CCUHsApi.getInstance().readEntity("site")).build());
+                }).start();
+            }
+
+
             siteFloorList.add(hsFloor);
             if(this.floorList.size() == 0 || floorSelectedIndex == -1){
                 this.systemDeviceOnClick();
@@ -1031,10 +1030,6 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void renameFloor(Floor floor) {
-        if (!NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
-            return;
-        }
         isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
     }
 
@@ -1047,8 +1042,8 @@ public class FloorPlanFragment extends Fragment {
         showKeyboard(addFloorEdit);
     }
 
-    private void serverDownWhileAddingNewFloor(){
-        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
+    public void toastMessageOnServerDown(){
+        Toast.makeText(getActivity(), "Floor cannot be handled when server is down", Toast.LENGTH_LONG).show();
     }
 
     private void isConnectedToServer(FloorHandledCondition condition, Floor floor){
@@ -1060,6 +1055,11 @@ public class FloorPlanFragment extends Fragment {
         CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
             @Override
             public void onSuccessResponse(boolean isOk) {
+                if(!isOk){
+                    hideWait();
+                    toastMessageOnServerDown();
+                    return;
+                }
                 switch (condition) {
                     case ALLOW_NEW_FLOOR:
                         allowNewFloor();
@@ -1078,16 +1078,8 @@ public class FloorPlanFragment extends Fragment {
 
             @Override
             public void onErrorResponse(boolean isOk) {
-                switch (condition) {
-                    case ADD_NEW_FLOOR:
-                    case ALLOW_NEW_FLOOR:
-                        serverDownWhileAddingNewFloor();
-                        break;
-                    case ALLOW_RENAMING_FLOOR:
-                    case ADD_RENAMED_FLOOR:
-                        serverDownWhileRenamingFloor();
-                        break;
-                }
+                hideWait();
+                toastMessageOnServerDown();
             }
         };
         new CloudConnectionManager().processAboutResponse(responseCallback);
@@ -1203,9 +1195,22 @@ public class FloorPlanFragment extends Fragment {
                         .setSiteRef(siteMap.get("id").toString())
                         .build();
                 String zoneId = CCUHsApi.getInstance().addZone(hsZone);
+                SchedulabeLimits.Companion.addSchedulableLimits(false,zoneId,hsZone.getDisplayName());
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
-                hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));
+                String zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, zoneId);
+                HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                        ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
+
+                if(defaultNamedSchedule.isEmpty()){
+                    hsZone.setScheduleRef(zoneSchedule);
+                    Toast.makeText(getActivity().getApplicationContext(),
+                                "Zone following zone-schedule as default named schedule is not available", Toast.LENGTH_SHORT).show();
+                }else {
+                    hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
+
+                }
+
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -1249,31 +1254,20 @@ public class FloorPlanFragment extends Fragment {
              * Modbus energy meter selection
              **/
             if (previousSelectedDevice == 2) {
-                //only one energymeter module is allowed.
-                boolean isPaired = false;
-                if (L.ccu().zoneProfiles.size() > 0) {
-                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
-                        ZoneProfile p = it.next();
-                        if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            isPaired = true;
-                            break;
-                        }
-                    }
-                }
+
+                boolean isPaired = isModbusPairedSystem();
                 if (isPaired) {
                     Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
                 }
             }
             if (previousSelectedDevice == 3) {
                 /**
                  * Modbus BTU meter selection
                  */
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1324,8 +1318,7 @@ public class FloorPlanFragment extends Fragment {
                         return;
                     }
                     showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-                    //DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
-                    //showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+
                 }
             } else {
                 if (zoneEquips.size() >= 3) {
@@ -1410,12 +1403,11 @@ public class FloorPlanFragment extends Fragment {
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
+
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1453,7 +1445,7 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                     showDialogFragment(FragmentCPUConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
                     break;
                 case SMARTSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(FragmentHeatPumpConfiguration
@@ -1474,10 +1466,6 @@ public class FloorPlanFragment extends Fragment {
                 case SSE:
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
-                    break;
-                case MODBUS_EMR_ZONE:
-                    showDialogFragment(FragmentModbusEnergyMeterConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
@@ -1518,10 +1506,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
-                    showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
+                case MODBUS_EMR_ZONE:
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
                     break;
-
             }
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
@@ -1570,5 +1557,9 @@ public class FloorPlanFragment extends Fragment {
     private void hideKeyboard(){
         ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(requireView().getWindowToken(), 0);
+    }
+
+    private boolean isModbusPairedSystem(){
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and roomRef ==\"SYSTEM\"").size() > 0;
     }
 }

@@ -11,6 +11,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainNameKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -20,6 +21,7 @@ import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.DcwbTuners;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
@@ -84,62 +86,22 @@ public abstract class DabSystemProfile extends SystemProfile
         Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and dab and target and cumulative and damper");
-        ArrayList<HashMap> targetCumulativeDamperArr = hayStack.readPoint(targetCumulativeDamperP.get("id").toString());
-        for (HashMap valMap : targetCumulativeDamperArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(targetCumulativeDamperId, HSUtil.getPriorityVal(targetCumulativeDamperId));
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.dabTargetCumulativeDamper, hayStack);
         
         Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and dab and analog and fan and speed and multiplier");
-        ArrayList<HashMap> analogFanSpeedMultiplierArr = hayStack.readPoint(analogFanSpeedMultiplierP.get("id").toString());
-        for (HashMap valMap : analogFanSpeedMultiplierArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(analogFanSpeedMultiplierId, HSUtil.getPriorityVal(analogFanSpeedMultiplierId));
+        TunerUtil.copyDefaultBuildingTunerVal(analogFanSpeedMultiplierId, DomainNameKt.dabAnalogFanSpeedMultiplier, hayStack);
         
         Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and dab and humidity and hysteresis");
-        ArrayList<HashMap> humidityHysteresisArr = hayStack.readPoint(humidityHysteresisPoint.get("id").toString());
-        for (HashMap valMap : humidityHysteresisArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
+        TunerUtil.copyDefaultBuildingTunerVal(humidityHysteresisId, DomainNameKt.dabHumidityHysteresis, hayStack);
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and dab and relay and deactivation and hysteresis");
-        ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
-        for (HashMap valMap : relayDeactivationHysteresisArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
+        TunerUtil.copyDefaultBuildingTunerVal(relayDeactivationHysteresisId, DomainNameKt.dabRelayDeactivationHysteresis, hayStack);
     
         Point rebalanceHoldTime = new Point.Builder()
                 .setDisplayName(HSUtil.getDis(equipref)+"-DAB-"+"rebalanceHoldTime")
@@ -152,16 +114,7 @@ public abstract class DabSystemProfile extends SystemProfile
                 .setTz(tz)
                 .build();
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-
-        HashMap rebalanceHoldTimePoint = hayStack.read("point and tuner and default and rebalance and hold and time");
-        ArrayList<HashMap> rebalanceHoldTimeArr = hayStack.readPoint(rebalanceHoldTimePoint.get("id").toString());
-        for (HashMap valMap : rebalanceHoldTimeArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(rebalanceHoldTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
-        hayStack.writeHisValById(rebalanceHoldTimeId, HSUtil.getPriorityVal(rebalanceHoldTimeId));
+        TunerUtil.copyDefaultBuildingTunerVal(rebalanceHoldTimeId, DomainNameKt.dabRebalanceHoldTime, hayStack);
     
         
         addNewTunerPoints(equipref);
@@ -201,24 +154,8 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .setTz(tz)
                                                  .build();
             String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
-        
-            HashMap defaultModeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and " +
-                                                                         "changeover and hysteresis");
-        
-            if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
-                hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), SYSTEM_DEFAULT_VAL_LEVEL,
-                                    HNum.make(DEFAULT_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
-            } else {
-                ArrayList<HashMap> modeChangeoverHysteresisArr =
-                    hayStack.readPoint(defaultModeChangeoverHysteresisPoint.get("id").toString());
-                for (HashMap valMap : modeChangeoverHysteresisArr) {
-                    if (valMap.get("val") != null) {
-                        hayStack.pointWrite(HRef.copy(modeChangeoverHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()),
-                                            valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                    }
-                }
-            }
-            hayStack.writeHisValById(modeChangeoverHysteresisId, HSUtil.getPriorityVal(modeChangeoverHysteresisId));
+
+            TunerUtil.copyDefaultBuildingTunerVal(modeChangeoverHysteresisId, DomainNameKt.dabModeChangeoverHysteresis, hayStack);
         }
     }
     
@@ -246,19 +183,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .setTz(tz)
                                                  .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
-            
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
-                                                                    "stageUp and timer and counter");
-    
-            ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
-                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
-            for (HashMap valMap : defaultStageUpTimerCounterPointArr) {
-                if (valMap.get("val") != null) {
-                    hayStack.pointWrite(HRef.copy(stageUpTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
-                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                }
-            }
-            hayStack.writeHisValById(stageUpTimerCounterId, HSUtil.getPriorityVal(stageUpTimerCounterId));
+            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainNameKt.dabStageUpTimerCounter, hayStack);
         }
     }
     
@@ -286,19 +211,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .setTz(tz)
                                             .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
-                                                                    "stageDown and timer and counter");
-    
-            ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
-                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
-            for (HashMap valMap : defaultStageDownTimerCounterPointArr) {
-                if (valMap.get("val") != null) {
-                    hayStack.pointWrite(HRef.copy(stageDownTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
-                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                }
-            }
-            hayStack.writeHisValById(stageDownTimerCounterId, HSUtil.getPriorityVal(stageDownTimerCounterId));
+            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainNameKt.dabStageDownTimerCounter, hayStack);
         }
     }
     

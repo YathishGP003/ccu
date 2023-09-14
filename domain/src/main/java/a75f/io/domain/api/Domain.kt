@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import org.projecthaystack.HDict
 
 object Domain {
 
@@ -77,6 +78,11 @@ object Domain {
     @JvmStatic
     fun readPoint(domainName: String) : Map<Any,Any> {
         return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")
+    }
+
+    @JvmStatic
+    fun readDict(domainName: String) : HDict {
+        return CCUHsApi.getInstance().readHDict("point and domainName == \"$domainName\"")
     }
 
     @JvmStatic

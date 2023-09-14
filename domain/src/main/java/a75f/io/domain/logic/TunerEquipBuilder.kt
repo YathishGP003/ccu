@@ -37,10 +37,11 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
 
     private fun createPoints(modelDef: ModelDirective, entityConfig: EntityConfiguration, equipRef: String, siteRef: String) {
+        val tz = hayStack.timeZone
         entityConfig.tobeAdded.forEach { point ->
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef)
+                val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef, tz)
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
                 hayStack.writeDefaultTunerValById(pointId, modelPointDef.defaultValue.toString().toDouble())
@@ -51,11 +52,12 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
 
     private fun updatePoints(modelDef: ModelDirective, entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String) {
+        val tz = hayStack.timeZone
         entityConfiguration.tobeUpdated.forEach { point ->
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef)
+                val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef, tz)
                 hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
                 hayStackPoint.id = existingPoint["id"].toString()
                 hayStack.writeDefaultTunerValById(hayStackPoint.id, modelPointDef.defaultValue.toString().toDouble())

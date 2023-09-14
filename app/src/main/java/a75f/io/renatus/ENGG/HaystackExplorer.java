@@ -56,7 +56,8 @@ public class HaystackExplorer extends Fragment
 
     // require pass code for environments QA and up.
     private boolean passCodeValidationRequired =
-        !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa"));
+        !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev") ||
+                BuildConfig.BUILD_TYPE.equals("qa") ||BuildConfig.BUILD_TYPE.equals("dev_qa"));
     
     public HaystackExplorer()
     {
@@ -107,9 +108,10 @@ public class HaystackExplorer extends Fragment
                 KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
                 taskEditText.setKeyListener(keyListener);
 
+                HashMap<Object, Object> pointTags = CCUHsApi.getInstance().readMapById(tunerMap.get(tunerName));
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                                              .setTitle(tunerName)
-                                             .setMessage(tunerVal)
+                                             .setMessage(pointTags.toString()+"\n\ncurrentVal - "+tunerVal)
                                              .setView(taskEditText)
                                              .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                                                  @Override

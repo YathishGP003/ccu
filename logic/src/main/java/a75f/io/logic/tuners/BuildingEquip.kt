@@ -18,7 +18,6 @@ import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.client.HClient
-import kotlin.coroutines.CoroutineContext
 
 object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
@@ -63,10 +62,35 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             e.printStackTrace();
         }
 
-        val pointDictTobeSynced = remotePoints.filter { Domain.readPoint(it.domainName).isNotEmpty() }
+        remotePoints.forEach {
+            if (it.domainName.isNullOrEmpty()) {
+                CcuLog.e(L.TAG_CCU_TUNER, "Invalid domain name for $it")
+            } else {
+                val localPointDict = Domain.readDict(it.domainName)
+                if (!localPointDict.isEmpty) {
+                    val localPoint = Point.Builder().setHDict(localPointDict).build()
+                    if (localPoint.id != it.id) {
+                        CcuLog.i(
+                            L.TAG_CCU_TUNER,
+                            "Update UUID of Building equip point ${localPoint.domainName}"
+                        )
+                        haystack.removeEntity(localPoint.id)
+                        localPoint.id = it.id
+                        haystack.addPoint(localPoint)
+                    } else {
+                        CcuLog.i(
+                            L.TAG_CCU_TUNER,
+                            "UUID already synced - Building equip point ${localPoint.domainName}"
+                        )
+                    }
+                }
+            }
+        }
+        val pointDictTobeSynced = remotePoints.filter { !it.domainName.isNullOrEmpty()}
+            .filter { Domain.readPoint(it.domainName).isNotEmpty() }
             .map { HDictBuilder().add("id", HRef.copy(it.id)).toDict() }
-
         syncPointArrays(pointDictTobeSynced, hClient, haystack)
+        CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Completed")
     }
 
     private fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
@@ -99,27 +123,35 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
                 val id = row["id"].toString()
                 val kind = row["kind"].toString()
                 val data = row["data"]
-                CcuLog.i(CCUHsApi.TAG, "Import point array $row")
+                CcuLog.i(L.TAG_CCU_TUNER, "Import point array $data")
                 if (data is HList && data.size() > 0) {
-                    val dataElement = data[15] as HDict
-                    val who = dataElement.getStr("who")
-                    val level = dataElement["level"].toString()
-                    val value = dataElement["val"]
-                    /*val lastModifiedTimeTag: Any? = dataElement["lastModifiedDateTime", false]
+                    for ( index in 0 until data.size()) {
+                        val dataElement = data[index] as HDict
+                        val level = dataElement["level"].toString()
+                        CcuLog.i(L.TAG_CCU_TUNER, "Write data:  $data")
+                        if (level.toInt() == 16) {
+                            CcuLog.i(L.TAG_CCU_TUNER, "Sync Level 16 to CCU")
+                            val who = dataElement.getStr("who")
+                            val value = dataElement["val"]
+                            /*val lastModifiedTimeTag: Any? = dataElement["lastModifiedDateTime", false]
                     val lastModifiedDateTime = if (lastModifiedTimeTag != null) {
                         lastModifiedTimeTag as HDateTime?
                     } else {
                         HDateTime.make(System.currentTimeMillis())
                     }*/
-                    haystack.pointWrite(
-                        HRef.copy(id),
-                        level.toInt(),
-                        who,
-                        value,
-                        HNum.make(0)
-                    )
-                    //TODO- lastModifiedTime required: Update later by changing pointWrite method.
-                    haystack.writeHisValById(id, value.toString().toDouble())
+                            haystack.pointWrite(
+                                HRef.copy(id),
+                                level.toInt(),
+                                who,
+                                value,
+                                HNum.make(0)
+                            )
+                            //TODO- lastModifiedTime required: Update later by changing pointWrite method.
+                            haystack.writeHisValById(id, value.toString().toDouble())
+                        }
+                    }
+                } else {
+                    CcuLog.i(L.TAG_CCU_TUNER, "Point array does not exist for $row")
                 }
             }
         //TODO - why this was needed
@@ -129,12 +161,16 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
     override fun onRegistrationCompleted(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Building Equip onRegistrationCompleted received")
+        syncBuildingTuners(haystack)
+        haystack.unRegisterOnCcuRegistrationCompletedListener { this }
+    }
+    fun syncBuildingTuners(haystack: CCUHsApi) {
+        CcuLog.i(L.TAG_CCU_TUNER, "Sync building Tuners");
         val hClient = HClient(haystack.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
         val siteId = haystack.siteIdRef.toString()
         Domain.domainScope.launch {
             syncBuildingTuners(siteId, hClient, haystack)
             //TODO- Propagate level 16 to system and zone tuner copies
         }
-        haystack.unRegisterOnCcuRegistrationCompletedListener { this }
     }
 }

@@ -7,6 +7,6 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 
 interface EquipBuilder {
-    fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String) : Equip
-    fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef : String) : Point
+    fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String, tz : String? = null) : Equip
+    fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef : String, tz : String? = null) : Point
 }

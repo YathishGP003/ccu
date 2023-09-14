@@ -3,6 +3,7 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -16,7 +17,7 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String) : Equip {
+    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String, tz : String?) : Equip {
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -45,12 +46,12 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         equipBuilder.addTag("modelId", HStr.make(modelDef.id))
         equipBuilder.addTag("modelVersion", HStr.make("${modelDef.version?.major}" +
-                "               .${modelDef.version?.minor}.${modelDef.version?.patch}"))
-
+                ".${modelDef.version?.minor}.${modelDef.version?.patch}"))
+        equipBuilder.setTz(tz)
         return equipBuilder.build()
     }
 
-    override fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef: String) : Point {
+    override fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef: String, tz : String?) : Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
@@ -81,6 +82,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
+        }
+        if (modelDef.tags.find { it.name == Tags.HIS } != null && modelDef.tags.find { it.name == Tags.TZ } == null) {
+           tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(tz)) }
         }
 
         return pointBuilder.build()

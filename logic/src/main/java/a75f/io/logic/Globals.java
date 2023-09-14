@@ -86,6 +86,7 @@ import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.migration.smartnode.SmartNodeMigration;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
@@ -370,7 +371,6 @@ public class Globals {
                 Site siteObject = new Site.Builder().setHashMap(site).build();
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);
-
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                         TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 

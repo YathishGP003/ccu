@@ -343,13 +343,13 @@ public class TunerUtil
             //TODO- write default val?
             return;
         }
-
         ArrayList<HashMap> buildingPointArray = hayStack.readPoint(buildingPoint.get(Tags.ID).toString());
         for (HashMap valMap : buildingPointArray) {
             if (valMap.get("val") != null) {
                 hayStack.pointWrite(HRef.copy(systemPointId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        CcuLog.e(L.TAG_CCU_TUNER, "Copy default value for "+domainName+" "+buildingPointArray);
         hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId));
     }
 

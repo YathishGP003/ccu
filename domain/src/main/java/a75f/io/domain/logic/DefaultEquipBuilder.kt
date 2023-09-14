@@ -43,9 +43,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
-        //TODO - Fetch from model when support is added
-        equipBuilder.addTag("modelId", HStr.make("64abb6a3a97798751b2bda14"))
-        equipBuilder.addTag("modelVersion", HStr.make("0.0.4"))
+        equipBuilder.addTag("modelId", HStr.make(modelDef.id))
+        equipBuilder.addTag("modelVersion", HStr.make("${modelDef.version?.major}" +
+                "               .${modelDef.version?.minor}.${modelDef.version?.patch}"))
 
         return equipBuilder.build()
     }

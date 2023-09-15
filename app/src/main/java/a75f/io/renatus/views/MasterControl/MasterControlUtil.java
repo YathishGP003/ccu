@@ -221,13 +221,15 @@ public class MasterControlUtil {
         unoccupiedZoneSetBackval = MasterControlUtil.getAdapterFarhenheitVal(unoccupiedzoneSetback);
         buildingZoneDifferentialVal = MasterControlUtil.getAdapterFarhenheitVal(buildingZoneDifferential);
 
-        if (buildingLimMinVal > (heatingMinVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Heating limit min temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Heating user limit min temperature";
-        } else if (buildingLimMaxVal < (coolingMaxVal + (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Cooling limit max temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Cooling user limit max temperature";
-        } else
+        if ((buildingLimMinVal +  (buildingZoneDifferentialVal + unoccupiedZoneSetBackval)) > heatingMinVal) {
+            WarningMessage = "Please go back and edit the Heating Limit Min temperature/ Unoccupied Zone Setback to be within the temperature limits of the building " +
+                    "or adjust the temperature limits of the building to accommodate the required Heating Limit Min temperature/ Unoccupied Zone Setback as per" +
+                    " formula \n > \"Heating User Limit Min - (unoccupiedZoneSetback + buildingToZoneDifferential) > Building Limit Min\" ";
+        } else if ((buildingLimMaxVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval) < coolingMaxVal)) {
+            WarningMessage = "Please go back and edit the Cooling Limit Max temperature/ Unoccupied Zone Setback to be within the temperature limits" +
+                    " of the building or adjust the temperature limits of the building to accommodate the required Cooling Limit Max temperature/ Unoccupied" +
+                    " Zone Setback as per formula \n > \"Cooling User Limit Max + (unoccupiedZoneSetback + buildingToZoneDifferential) < Building Limit Max \"";
+        }else
             WarningMessage = validateLimits(heatingMaxVal, heatingMinVal, heatingDeadBandVal,
                     coolingMaxVal, coolingMinVal, coolingDeadBandVal);
 
@@ -347,7 +349,7 @@ public class MasterControlUtil {
         return WarningMessage;
     }
 
-    public static String validateZone(double buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
+    public static String validateZone(double  buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
                                       double buildingLimMaxVal, double coolingMaxVal) {
         String WarningMessage = null;
 

@@ -298,7 +298,13 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    String valueFromAdapter;
+                    if(heatingLimitMin.getSelectedItem().toString().contains("\u00B0F")){
+                        valueFromAdapter = StringUtils.substringBefore(heatingLimitMin.getSelectedItem().toString(), "\u00B0F");
+                    }else
+                        valueFromAdapter = StringUtils.substringBefore(heatingLimitMin.getSelectedItem().toString(), "\u00B0C");
+
+                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(valueFromAdapter)));
                 } else {
                     rangeSeekBarView.setHeatingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(heatingLimitMin.getSelectedItem().toString()));
                 }

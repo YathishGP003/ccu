@@ -1366,6 +1366,9 @@ public class FloorPlanFragment extends Fragment {
             if (isMonitoringPaired) {
                 Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
             }
+            if (isHSSplitPaired) {
+                Toast.makeText(getActivity(), "HyperStat Split is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
             }

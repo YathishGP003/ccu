@@ -377,7 +377,7 @@ class HSSplitHaystackUtil(
      */
     fun getHumidity(): Double {
         return haystack.readHisValByQuery(
-            "point and zone and air and humidity and sensor and equipRef == \"$equipRef\""
+            "point and zone and air and humidity and sensor and not mixed and not discharge and not outside and equipRef == \"$equipRef\""
         )
 
     }

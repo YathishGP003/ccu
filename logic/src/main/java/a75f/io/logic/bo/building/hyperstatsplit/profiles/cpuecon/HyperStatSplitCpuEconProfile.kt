@@ -38,7 +38,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             val A = 0.007468 * Math.pow(temp,2.0) - 0.4344 * temp + 11.176
             val B = 0.2372 * temp + 0.1230;
-            val H = A * humidity + B;
+            val H = A * 0.01 * humidity + B;
 
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "temperature "+temp+" humidity "+humidity+" Enthalpy: "+H);
             return CCUUtils.roundToTwoDecimal(H)

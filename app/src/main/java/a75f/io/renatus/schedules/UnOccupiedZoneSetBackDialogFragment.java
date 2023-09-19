@@ -143,7 +143,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
             unOccupiedZoneSetBack.setSelection((int) unoccupiedZoneSetBackDefaultValue);
             unOccupiedZoneSetBack.setEnabled(false);
         }else {
-            HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("unoccupied and zone and setback and schedulable and  roomRef == \"" + mSchedule.getRoomRef() + "\"");
+            HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("unoccupied and zone and setback and schedulable and roomRef == \"" + mSchedule.getRoomRef() + "\"");
             int unoccupiedZoneVal = (int) (CCUHsApi.getInstance().readPointPriorityVal(unoccupiedZoneObj.get("id").toString()));
             if(isCelsiusTunerAvailableStatus())
                 unoccupiedZoneVal = (int) convertingRelativeValueFtoC(unoccupiedZoneVal);

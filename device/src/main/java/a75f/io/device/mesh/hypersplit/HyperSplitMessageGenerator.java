@@ -78,14 +78,18 @@ public class HyperSplitMessageGenerator {
                 .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
-                .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min")))
-                .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max")))
-                .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min")))
-                .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max")))
+                .setMinCoolingUserTemp((int) getUserLimit(
+                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min"), address)
+                )
+                .setMaxCoolingUserTemp((int) getUserLimit(
+                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max"), address)
+                )
+                .setMinHeatingUserTemp((int) getUserLimit(
+                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min"), address)
+                )
+                .setMaxHeatingUserTemp((int) getUserLimit(
+                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max"), address)
+                )
                 .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
                 .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
                 .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
@@ -127,6 +131,15 @@ public class HyperSplitMessageGenerator {
 
         return msg.build();
 
+    }
+
+    private static double getUserLimit(String query, int address) {
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstatsplit" +
+                " and group == \"" + address + "\"");
+
+        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                "point and schedulable and " + query +
+                        " and roomRef== \"" + equip.get("roomRef").toString() + "\"");
     }
 
     /**

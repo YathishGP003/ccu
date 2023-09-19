@@ -833,16 +833,19 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         when (relayAssociation.association) {
             CpuEconRelayAssociation.FAN_LOW_SPEED -> {
                 doFanLowSpeed(
+                    whichPort,
                     logicalPointsList[whichPort]!!,null,null, basicSettings.fanMode,
                     fanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider)
             }
             CpuEconRelayAssociation.FAN_MEDIUM_SPEED -> {
                 doFanMediumSpeed(
+                    whichPort,
                     logicalPointsList[whichPort]!!,null,basicSettings.fanMode,
                     fanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages)
             }
             CpuEconRelayAssociation.FAN_HIGH_SPEED -> {
                 doFanHighSpeed(
+                    whichPort,
                     logicalPointsList[whichPort]!!,basicSettings.fanMode,
                     fanLoopOutput,tuner.relayActivationHysteresis,relayStages)
             }

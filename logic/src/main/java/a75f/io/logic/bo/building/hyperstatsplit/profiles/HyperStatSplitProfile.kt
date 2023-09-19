@@ -19,7 +19,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
-import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import android.util.Log
 
 
@@ -33,7 +32,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
     lateinit var hsSplitHaystackUtil: HSSplitHaystackUtil
     var logicalPointsList: HashMap<Any, String> = HashMap()
     open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
-    private val haystack = CCUHsApi.getInstance()
+    protected val haystack = CCUHsApi.getInstance()
 
 
     abstract fun getHyperStatSplitEquip(node: Short): HyperStatSplitEquip?
@@ -53,15 +52,24 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         if (threshold == 0) {
             if (coolingLoopOutput > relayActivationHysteresis)
                 relayState = 1.0
-            if (coolingLoopOutput == 0)
+            else if (coolingLoopOutput <= 0)
                 relayState = 0.0
+            else {
+                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                relayState = if (currentPortStatus > 0) 1.0 else 0.0
+            }
         } else {
             if (coolingLoopOutput > (threshold + (relayActivationHysteresis / 2)))
                 relayState = 1.0
             else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
                 relayState = 0.0
-            else if (coolingLoopOutput == 0)
+            else if (coolingLoopOutput <= 0)
                 relayState = 0.0
+            else {
+                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                relayState = if (currentPortStatus > 0) 1.0 else 0.0
+            }
+
         }
 
         if (relayState != -1.0) {
@@ -86,8 +94,12 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
             relayState = 1.0
         else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
-        else if (coolingLoopOutput == 0)
+        else if (coolingLoopOutput <= 0)
             relayState = 0.0
+        else {
+            val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+            relayState = if (currentPortStatus > 0) 1.0 else 0.0
+        }
 
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
@@ -111,8 +123,12 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
             relayState = 1.0
         else if (coolingLoopOutput <= (threshold - (relayActivationHysteresis / 2)))
             relayState = 0.0
-        else if (coolingLoopOutput == 0)
+        else if (coolingLoopOutput <= 0)
             relayState = 0.0
+        else {
+            val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+            relayState = if (currentPortStatus > 0) 1.0 else 0.0
+        }
 
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
@@ -133,8 +149,12 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         var relayState = -1.0
         if (heatingLoopOutput > relayActivationHysteresis)
             relayState = 1.0
-        if (heatingLoopOutput == 0)
+        else if (heatingLoopOutput <= 0)
             relayState = 0.0
+        else {
+            val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+            relayState = if (currentPortStatus > 0) 1.0 else 0.0
+        }
 
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
@@ -156,8 +176,13 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         var relayState = -1.0
         if (heatingLoopOutput > (divider + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (heatingLoopOutput <= (divider - (relayActivationHysteresis / 2)))
+        else if (heatingLoopOutput <= (divider - (relayActivationHysteresis / 2)))
             relayState = 0.0
+        else {
+            val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+            relayState = if (currentPortStatus > 0) 1.0 else 0.0
+        }
+
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
@@ -176,8 +201,13 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         var relayState = -1.0
         if (heatingLoopOutput > (66 + (relayActivationHysteresis / 2)))
             relayState = 1.0
-        if (heatingLoopOutput <= (66 - (relayActivationHysteresis / 2)))
+        else if (heatingLoopOutput <= (66 - (relayActivationHysteresis / 2)))
             relayState = 0.0
+        else {
+            val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+            relayState = if (currentPortStatus > 0) 1.0 else 0.0
+        }
+
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
@@ -204,7 +234,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
             logicalPointsList[relayPort]!!,
             if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0
         )
-        logIt("$relayPort = DeHumidifier  ${if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0}")
+        logIt("$relayPort = OccupiedEnabled  ${if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0}")
 
     }
 
@@ -336,7 +366,6 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         } else {
             updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
         }
-
     }
 
     override fun doAnalogHeating(

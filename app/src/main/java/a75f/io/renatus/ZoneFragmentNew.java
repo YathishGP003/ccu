@@ -84,6 +84,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
+import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -102,6 +103,7 @@ import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
@@ -3743,7 +3745,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
+            HyperSplitMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
             UpdatePointHandler.setZoneDataInterface(this);
             UpdateEntityHandler.setZoneDataInterface(this);
         }
@@ -3758,7 +3762,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ScheduleManager.getInstance().setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+        HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(null);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        HyperSplitMsgReceiver.setCurrentTempInterface(null);
         UpdatePointHandler.setZoneDataInterface(null);
         UpdateEntityHandler.setZoneDataInterface(null);
     }
@@ -3774,7 +3780,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
+            HyperSplitMsgReceiver.setCurrentTempInterface(this);
         } else {
 
             ScheduleManager.getInstance().setZoneDataInterface(null);
@@ -3783,7 +3791,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(null);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
+            HyperSplitMsgReceiver.setCurrentTempInterface(null);
         }
     }
 

@@ -16,6 +16,7 @@ import android.util.Log
 abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
 
     override fun doFanLowSpeed(
+        port: Port,
         logicalPointId: String,
         mediumLogicalPoint : String?,
         highLogicalPoint : String?,
@@ -30,8 +31,13 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         if (fanMode == StandaloneFanStage.AUTO) {
             if (fanLoopOutput > relayActivationHysteresis)
                 relayState = 1.0
-            if (fanLoopOutput == 0)
+            else if (fanLoopOutput <= 0)
                 relayState = 0.0
+            else {
+                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                relayState = if (currentPortStatus > 0) 1.0 else 0.0
+            }
+
         } else {
             relayState = 1.0
         }
@@ -45,6 +51,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
     }
 
     override fun doFanMediumSpeed(
+        port: Port,
         logicalPointId: String,
         superLogicalPoint : String?,
         fanMode: StandaloneFanStage,
@@ -58,8 +65,12 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         if (fanMode == StandaloneFanStage.AUTO) {
             if (fanLoopOutput > (divider + (relayActivationHysteresis / 2)))
                 relayState = 1.0
-            if (fanLoopOutput <= (divider - (relayActivationHysteresis / 2)))
+            else if (fanLoopOutput <= (divider - (relayActivationHysteresis / 2)))
                 relayState = 0.0
+            else {
+                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                relayState = if (currentPortStatus > 0) 1.0 else 0.0
+            }
         } else {
             relayState = if (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
                 || fanMode == StandaloneFanStage.MEDIUM_OCC
@@ -80,6 +91,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
     }
 
     override fun doFanHighSpeed(
+        port: Port,
         logicalPointId: String,
         fanMode: StandaloneFanStage,
         fanLoopOutput: Int,
@@ -90,8 +102,12 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         if (fanMode == StandaloneFanStage.AUTO) {
             if (fanLoopOutput > (66 + (relayActivationHysteresis / 2)))
                 relayState = 1.0
-            if (fanLoopOutput <= (66 - (relayActivationHysteresis / 2)))
+            else if (fanLoopOutput <= (66 - (relayActivationHysteresis / 2)))
                 relayState = 0.0
+            else {
+                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                relayState = if (currentPortStatus > 0) 1.0 else 0.0
+            }
         } else {
             relayState = if (fanMode == StandaloneFanStage.HIGH_CUR_OCC
                 || fanMode == StandaloneFanStage.HIGH_OCC

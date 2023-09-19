@@ -1,0 +1,22 @@
+package a75f.io.domain
+
+import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
+
+class HyperStat2PfcuUpdateConfiguration(nodeAddress: Int,
+                                     nodeType: String, priority: Int, roomRef : String, floorRef : String) :
+    HyperStat2pfcuTestConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef){
+
+    override fun getAssociationConfigs() : List<AssociationConfig> {
+        var associations = mutableListOf<AssociationConfig>()
+        associations.add(AssociationConfig("relay1Association", 1))
+        return associations
+    }
+
+    override fun getEnableConfigs() : List<EnableConfig> {
+        var enabled = mutableListOf<EnableConfig>()
+        enabled.add(EnableConfig("relay1Enabled", true))
+        enabled.add(EnableConfig("dcwbEnabled", false))
+        return enabled
+    }
+}

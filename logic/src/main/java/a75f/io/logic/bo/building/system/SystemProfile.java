@@ -162,7 +162,7 @@ public abstract class SystemProfile
     public String getSystemEquipRef() {
         if (equipRef == null)
         {
-            HashMap equip = CCUHsApi.getInstance().read("equip and system");
+            HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
             equipRef = equip.get("id").toString();
             equipDis = equip.get("dis").toString();
         }

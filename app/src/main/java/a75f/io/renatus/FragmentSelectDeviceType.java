@@ -205,7 +205,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
     }
 
-    @OnClick(R.id.rlModbus) void onModBusClick(){
+    @OnClick(R.id.rlModbus)
+    void onModBusClick(){
         if (isNotModbus()){
             return;
         }

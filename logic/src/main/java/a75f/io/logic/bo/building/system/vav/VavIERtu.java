@@ -108,7 +108,7 @@ public class VavIERtu extends VavSystemProfile
 
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
+        HashMap equip = hayStack.read("equip and system and not modbus");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_IE_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
@@ -147,7 +147,7 @@ public class VavIERtu extends VavSystemProfile
 
     @Override
     public void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_IE_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
@@ -732,7 +732,7 @@ public class VavIERtu extends VavSystemProfile
 
     public void handleMultiZoneEnable(double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Equip systemEquip = new Equip.Builder().setHashMap(hayStack.read("system and equip")).build();
+        Equip systemEquip = new Equip.Builder().setHashMap(hayStack.read("system and equip and not modbus")).build();
 
         HashMap cmdStaticPressure = CCUHsApi.getInstance().read("point and system and cmd and staticPressure");
         HashMap cmdFanSpeed = CCUHsApi.getInstance().read("point and system and cmd and fan");

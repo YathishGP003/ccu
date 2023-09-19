@@ -206,19 +206,19 @@ public class SystemScheduleUtil {
                     CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(coolval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(coolpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
                 if((heatpoint != null) && (heatval != 0)){
                     CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(heatval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(heatpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
                 if(avgpoint != null){
                     CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL, who, HNum.make(avgval),
                             HNum.make(overrideExpiry.getMillis() - System.currentTimeMillis(), "ms"));
-                    setAppOverrideExpiry(avgpoint, overrideExpiry.getMillis());
+                    setAppOverrideExpiry(avgpoint, (overrideExpiry.getMillis()- System.currentTimeMillis())/1000);
                 }
             }
             

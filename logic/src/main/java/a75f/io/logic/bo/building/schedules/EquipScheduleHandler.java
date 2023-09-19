@@ -110,6 +110,11 @@ public class EquipScheduleHandler implements Schedulable {
     }
     
     private void updateScheduleDesiredTemp(Schedule schedule, Occupancy updatedOccupancy) {
+        if (schedule == null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER,"Skip updateScheduleDesiredTemp :" +
+                    "Schedule is null ");
+            return;
+        }
         Occupied occupiedSchedule = schedule.getCurrentValues();
         if (occupiedSchedule == null) {
             CcuLog.i(L.TAG_CCU_SCHEDULER,"Skip updateScheduleDesiredTemp :" +

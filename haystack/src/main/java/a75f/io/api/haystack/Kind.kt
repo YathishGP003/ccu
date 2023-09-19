@@ -9,11 +9,20 @@ package a75f.io.api.haystack
  */
 enum class Kind(val value: String) {
    STRING("Str"),
-   NUMBER("Number");
+   NUMBER("Number"),
+   BOOL("Bool");
    // there are other, unused Kinds in Haystack which I am not yet adding
 
    companion object {
       @JvmStatic
       fun parse(value: String) = values().firstOrNull { it.value == value } ?: NUMBER
+
+      @JvmStatic
+      fun parsePointType(value: String) = when(value) {
+         "STR" -> STRING
+         "NUMBER" -> NUMBER
+         "BOOL" -> BOOL
+         else -> null
+      }
    }
 }

@@ -22,11 +22,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyDayViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.TimeUtils;
 
@@ -286,6 +289,17 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
                 .create();
     }
     private void showDeleteAlert() {
+
+        boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
+        if(BuildConfig.BUILD_TYPE == "qa")
+            Log.d(TAG,"isCloudConnected" + isCloudConnected);
+
+        if (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) {
+            Toast.makeText(getActivity(), "Building Occupancy cannot be deleted when CCU is offline. Please " +
+                    "connect to network.", Toast.LENGTH_LONG).show();
+            return ;
+        }
+
         final Dialog alertDialog = new Dialog(getActivity());
         alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         alertDialog.setCancelable(false);

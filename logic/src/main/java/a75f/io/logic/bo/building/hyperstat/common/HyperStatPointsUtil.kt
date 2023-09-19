@@ -748,8 +748,8 @@ class HyperStatPointsUtil(
 
     // Function to create autoaway and auto force occupy point
     fun createAutoForceAutoAwayConfigPoints(
-        isAutoAwayEnabled: Boolean,
-        isAutoForcedOccupiedEnabled: Boolean
+        isAutoForcedOccupiedEnabled: Boolean,
+        isAutoAwayEnabled: Boolean
 
     ): MutableList<Pair<Point, Any>> {
 
@@ -1241,7 +1241,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_TWO,
                         0.0
                     )
                 )
@@ -1297,7 +1297,7 @@ class HyperStatPointsUtil(
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
-                        Port.ANALOG_OUT_ONE,
+                        Port.ANALOG_OUT_THREE,
                         0.0
                     )
                 )

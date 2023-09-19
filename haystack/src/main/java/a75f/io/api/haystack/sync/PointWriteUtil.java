@@ -28,6 +28,7 @@ public class PointWriteUtil {
     
     public static ArrayList<HDict> getWriteArrDict(String pointId) {
         ArrayList<HashMap> pointArr = CCUHsApi.getInstance().readPoint(pointId);
+        HDict entity = CCUHsApi.getInstance().readHDictById(pointId);
         ArrayList<HDict> dictArr = new ArrayList<>();
         for (HashMap valMap : pointArr) {
             if (valMap.get("val") != null) {
@@ -35,12 +36,13 @@ public class PointWriteUtil {
                 String level = Objects.toString(valMap.get("level"), "");
                 String who = Objects.toString(valMap.get("who"), "");
                 HNum duration = HNum.make(Double.parseDouble(valMap.get("duration").toString()), "ms");
-                boolean isDouble = false;
+                boolean isDouble = entity.get("kind").toString().equalsIgnoreCase("Number");
                 double numValue = 0.0;
                 
                 try {
-                    numValue = Double.parseDouble( value );
-                    isDouble = true;
+                    if(isDouble) {
+                        numValue = Double.parseDouble(value);
+                    }
                 } catch (NumberFormatException e) {
                     CcuLog.d("CCU_HS", "Writable Val is not Double " + value);
                 }
@@ -49,9 +51,8 @@ public class PointWriteUtil {
                     new HDictBuilder().add("id", HRef.copy(pointId))
                                       .add("level", (int) Double.parseDouble(level))
                                       .add("who", who)
-                                      .add("val", isDouble? HNum.make(numValue) :
-                                                                                    HStr.make(value))
-                            .add("duration", duration);
+                                      .add("duration", duration)
+                                      .add("val", isDouble? HNum.make(numValue) : HStr.make(value));
                 dictArr.add(b.toDict());
             }
         }

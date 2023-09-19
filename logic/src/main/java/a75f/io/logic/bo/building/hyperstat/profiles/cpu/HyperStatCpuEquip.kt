@@ -32,8 +32,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
     private val profileTag = "hyperstatcpu"
-    private val analogOutVoltageMax = 0
-    private val analogOutVoltageMin = 10
+    private val analogOutVoltageMin = 0
+    private val analogOutVoltageMax = 10
     private val stageFan1DefaultVal = 10
     private val stageFan2And3DefaultVal = 10
 
@@ -46,7 +46,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     var equipRef: String? = null
     private var roomRef: String? = null
     private var floorRef: String? = null
-    private var systemEquip = haystack.readEntity("equip and system") as HashMap<Any, Any>
+    private var systemEquip = haystack.readEntity("equip and system and not modbus") as HashMap<Any, Any>
 
     companion object {
         fun getHyperStatEquipRef(nodeAddress: Short): HyperStatCpuEquip {
@@ -199,7 +199,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     private fun getCpuAnalogOutVoltageAtMin(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMax
+            analogOutVoltageMin
         } else {
             analogOutState.voltageAtMin.toInt()
         }
@@ -207,7 +207,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     private fun getCpuAnalogOutVoltageAtMax(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMin
+            analogOutVoltageMax
         } else {
             analogOutState.voltageAtMax.toInt()
         }
@@ -1015,10 +1015,13 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             } else {
                 val pointData: Triple<Point, Any?, Any?> = hyperStatPointsUtil.analogOutConfiguration1()
                 val pointId = hyperStatPointsUtil.addPointToHaystack(pointData.first)
+                val pointType =
+                    "${analogOutVoltageMin}-${analogOutVoltageMax}v"
                 if ((pointData.first).markers.contains("his")) {
                     hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                    DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
                 }
+                DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
             }
 
             // check if the new state of analog is mapped to Fan Speed

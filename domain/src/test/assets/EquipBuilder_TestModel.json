@@ -1,0 +1,714 @@
+{
+    "id": "6483676fad855161596a5040",
+    "domainName": "dabSmartNode",
+    "name": "dabSmartNode",
+    "modelType": "PROFILE",
+    "tags": [
+        {
+            "name": "dab",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        },
+        {
+            "name": "equip",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        },
+        {
+            "name": "profile",
+            "kind": "STR",
+            "defaultValue": null,
+            "valueEnum": []
+        },
+        {
+            "name": "smartnode",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        }
+    ],
+    "tagNames": [
+        "dab",
+        "equip",
+        "profile",
+        "smartnode"
+    ],
+    "points": [
+        {
+            "id": "646ae96cb18f1b7eb926d994",
+            "name": "Relay 1 Enabled",
+            "domainName": "relay1Enabled",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "relay",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "relay1",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "config",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "relay1",
+                "kind",
+                "tz",
+                "relay",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable",
+                "config"
+            ],
+            "rootTagNames": [
+                "relay",
+                "cmd",
+                "writable"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 1,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 2,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "BASE"
+            },
+            "associatedWithDevicePoint": "relay1Output"
+        },
+        {
+            "id": "646ae906b18f1b7eb926d993",
+            "name": "Relay 1 Association",
+            "domainName": "relay1Association",
+            "tags": [
+                {
+                    "name": "association",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "relay",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "relay1",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "sp",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "relay1",
+                "kind",
+                "tz",
+                "relay",
+                "siteRef",
+                "association",
+                "id",
+                "sp",
+                "point",
+                "dis"
+            ],
+            "rootTagNames": [
+                "relay",
+                "association",
+                "sp"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "coolingStage1"
+                    },
+                    {
+                        "index": 1,
+                        "value": "coolingStage2"
+                    },
+                    {
+                        "index": 2,
+                        "value": "heatingStage1"
+                    },
+                    {
+                        "index": 3,
+                        "value": "heatingStage2"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "domainName": "relay1Enabled",
+                "value": 2,
+                "comparisonType": "EQUALS",
+                "configType": "ASSOCIATION"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646b09a9f712f76909e0ac7b",
+            "name": "Cooling Stage 1",
+            "domainName": "coolingStage1",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cooling",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "hvac",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "stage",
+                    "kind": "NUMBER",
+                    "defaultValue": 1,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "cooling",
+                "hvac",
+                "stage",
+                "kind",
+                "tz",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "hvac",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "kind": "BOOL",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 1,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "ASSOCIATED"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646b09a9f712f76909e0ac8c",
+            "name": "Cooling Stage 2",
+            "domainName": "coolingStage2",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cooling",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "hvac",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "stage",
+                    "kind": "NUMBER",
+                    "defaultValue": 2,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "cooling",
+                "hvac",
+                "stage",
+                "kind",
+                "tz",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "hvac",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "kind": "BOOL",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 1,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "ASSOCIATED"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646b09a9f712f76909e0ac7b",
+            "name": "Heating Stage 1",
+            "domainName": "heatingStage1",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "heating",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "hvac",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "stage",
+                    "kind": "NUMBER",
+                    "defaultValue": 1,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "heating",
+                "hvac",
+                "stage",
+                "kind",
+                "tz",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "hvac",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "kind": "BOOL",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 1,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "ASSOCIATED"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646ef58de9532442a4f67c17",
+            "name": "DCWB Enabled",
+            "domainName": "dcwbEnabled",
+            "tags": [
+                {
+                    "name": "config",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "enabled",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "sp",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "kind",
+                "tz",
+                "siteRef",
+                "id",
+                "config",
+                "sp",
+                "enabled",
+                "point",
+                "dis"
+            ],
+            "rootTagNames": [
+                "config",
+                "sp",
+                "enabled"
+            ],
+            "kind": "BOOL",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "NO"
+                    },
+                    {
+                        "index": 1,
+                        "value": "YES"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "BASE"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646ef603e9532442a4f67c18",
+            "name": "DCWB Valve Loop Output",
+            "domainName": "dcwbValveLoopOutput",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "loop",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "output",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "valve",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "output",
+                "kind",
+                "loop",
+                "tz",
+                "siteRef",
+                "cmd",
+                "id",
+                "valve",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "output",
+                "loop",
+                "cmd",
+                "valve",
+                "writable"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "minValue": 0.0,
+                "maxValue": 100.0,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {
+                "tagValueIncrement": 1
+            },
+            "defaultUnit": "%",
+            "configuration": {
+                "domainName": "dcwbEnabled",
+                "value": 1,
+                "comparisonType": "EQUALS",
+                "configType": "DEPENDENT"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "62ded57db877ba4d67083c42",
+            "name": "CO Sensor",
+            "domainName": "coConcentrationSensor",
+            "tags": [
+                {
+                    "name": "air",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "co",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "concentration",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "sensor",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "zone",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "zone",
+                "kind",
+                "tz",
+                "siteRef",
+                "concentration",
+                "sensor",
+                "air",
+                "id",
+                "co",
+                "point",
+                "dis"
+            ],
+            "rootTagNames": [
+                "zone",
+                "concentration",
+                "sensor",
+                "air",
+                "co"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "minValue": 0.0,
+                "maxValue": 1000.0,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {
+                "tagValueIncrement": 0.1
+            },
+            "defaultUnit": "ppm",
+            "configuration": {
+                "sensorType": "CO",
+                "value": 0,
+                "comparisonType": "GREATER_THAN",
+                "configType": "DYNAMIC_SENSOR"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646ae96cb18f1bedb926bc94",
+            "name": "Supply Air Temp",
+            "domainName": "supplyAirTemp",
+            "tags": [
+                {
+                    "name": "sensor",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "supply",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "air",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "relay1",
+                "kind",
+                "tz",
+                "relay",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "sensor",
+                "writable"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "minValue": 0.0,
+                "maxValue": 1000.0,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "BASE"
+            },
+            "associatedWithDevicePoint": "thermistor1"
+        }
+    ],
+    "equips": [],
+    "namespace": "bms75f",
+    "associatedWithDevice": {
+        "modelId": "6463b78346c72f5b1667f619",
+        "version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 5
+        }
+    },
+    "associatedWithTuner": {
+        "modelId": "646b7b2cad5b686373726bfa",
+        "version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 0
+        }
+    }
+}

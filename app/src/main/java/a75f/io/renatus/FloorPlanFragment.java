@@ -77,6 +77,8 @@ import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.BackFillViewModel;
+import a75f.io.renatus.modbus.ModbusConfigView;
+import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
@@ -691,7 +693,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -716,7 +717,6 @@ public class FloorPlanFragment extends Fragment {
                     if (zoneEquips.size() > 0) {
                         mModuleListAdapter.setSelectedItem(-1);
                     }
-                    //mRoomListAdapter.setSelectedItem(-1);
                     addFloorBtn.setEnabled(false);
                     addZonelt.setEnabled(false);
                 }
@@ -919,11 +919,7 @@ public class FloorPlanFragment extends Fragment {
                                 }
 
                             }
-                            EquipsManager.getInstance().getAllMbEquips(zone.getId())
-                                    .forEach( equip -> {
-                                        equip.setFloorRef(floor.getId());
-                                        EquipsManager.getInstance().saveProfile(equip);
-                                    });
+
                         }
 
                         refreshScreen();
@@ -1261,31 +1257,20 @@ public class FloorPlanFragment extends Fragment {
              * Modbus energy meter selection
              **/
             if (previousSelectedDevice == 2) {
-                //only one energymeter module is allowed.
-                boolean isPaired = false;
-                if (L.ccu().zoneProfiles.size() > 0) {
-                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
-                        ZoneProfile p = it.next();
-                        if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            isPaired = true;
-                            break;
-                        }
-                    }
-                }
+
+                boolean isPaired = isModbusPairedSystem();
                 if (isPaired) {
                     Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
                 }
             }
             if (previousSelectedDevice == 3) {
                 /**
                  * Modbus BTU meter selection
                  */
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1340,8 +1325,7 @@ public class FloorPlanFragment extends Fragment {
                         return;
                     }
                     showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-                    //DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
-                    //showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+
                 }
             } else {
                 if (zoneEquips.size() >= 3) {
@@ -1432,12 +1416,11 @@ public class FloorPlanFragment extends Fragment {
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu"), ModbusConfigView.Companion.getID());
+
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR,ModbusLevel.SYSTEM,"emr"), ModbusConfigView.Companion.getID());
             }
             return;
         }
@@ -1475,7 +1458,7 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                     showDialogFragment(FragmentCPUConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
                     break;
                 case SMARTSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(FragmentHeatPumpConfiguration
@@ -1496,10 +1479,6 @@ public class FloorPlanFragment extends Fragment {
                 case SSE:
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
-                    break;
-                case MODBUS_EMR_ZONE:
-                    showDialogFragment(FragmentModbusEnergyMeterConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
@@ -1545,10 +1524,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
-                    showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
+                case MODBUS_EMR_ZONE:
+                    showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
                     break;
-
             }
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
@@ -1597,5 +1575,9 @@ public class FloorPlanFragment extends Fragment {
     private void hideKeyboard(){
         ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(requireView().getWindowToken(), 0);
+    }
+
+    private boolean isModbusPairedSystem(){
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and roomRef ==\"SYSTEM\"").size() > 0;
     }
 }

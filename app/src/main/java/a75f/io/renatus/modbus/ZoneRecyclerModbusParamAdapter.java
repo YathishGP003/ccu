@@ -1,15 +1,13 @@
 package a75f.io.renatus.modbus;
 
+import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+
 import android.content.Context;
-
-import a75f.io.api.haystack.Equip;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import androidx.annotation.NonNull;
-import androidx.core.text.HtmlCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +20,14 @@ import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.tooltip.Tooltip;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -38,7 +39,6 @@ import a75f.io.device.modbus.LModbus;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
@@ -69,7 +69,13 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
+        if (modbusParam.get(position).getName().length() > 25)
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,25));
+        else
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
+
+        viewHolder.tvParamLabel.setOnClickListener(view -> showToolTip(modbusParam.get(position).getName(), view));
+
         if (modbusParam.get(position).getParameterDefinitionType() != null) {
             switch (modbusParam.get(position).getParameterDefinitionType()) {
                 case "range":
@@ -248,7 +254,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
             }
         }
-        if(minValue == maxValue){
+        if(maxValue <= minValue || incValue <= 0){
             doubleArrayList.add(minValue);
             userIntentsMap.put(unit, doubleArrayList);
             return userIntentsMap;
@@ -273,13 +279,16 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         double value = readVal(id);
-        //write to modbus
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
         } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
+
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
                 for (Parameter pam : register.getParameters()) {
@@ -363,10 +372,15 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
         }
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
-        if (null != equip.getEquipRef()) {
-            modbusSubEquipList.addAll(EquipsManager.getInstance().getModbusSubEquip(equip, point));
+
+
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
         } else {
-            modbusSubEquipList.add(EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup())));
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
         }
         for (EquipmentDevice modbusDevice : modbusSubEquipList) {
             for (Register register : modbusDevice.getRegisters()) {
@@ -382,5 +396,19 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 }
             }
         }
+    }
+
+    public void showToolTip(String text, View v) {
+        Tooltip intrinsicScheduleToolTip = new Tooltip.Builder(v)
+                .setBackgroundColor(Color.BLACK)
+                .setTextColor(Color.WHITE)
+                .setCancelable(true)
+                .setDismissOnClick(true)
+                .setGravity(Gravity.TOP)
+                .setText(text)
+                .setTextSize(20.0f)
+                .setPadding(10f)
+                .show();
+        new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
     }
 }

@@ -101,10 +101,8 @@ public class TagDbMigration {
                 }
                 String data = new Gson().toJson(roomData);
                 String key = id.replace("@", "");
-                Log.d("SpooTag", "onPointWrite@@ id->" + key + "<-data->"+data);
                 WritableArray writableArrayForRoomData = new WritableArray(key, data);
 
-                Log.d("SpooTag", " ID " + key);
                 WritableArrayDBUtilKt.insert(writableArrayForRoomData, context);
             });
         }

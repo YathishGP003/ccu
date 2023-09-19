@@ -20,7 +20,7 @@ class OtaStatusMigration {
             val hsApi = CCUHsApi.getInstance()
             val siteMap = CCUHsApi.getInstance().read(Tags.SITE)
             val ccu: HashMap<*, *> = CCUHsApi.getInstance().readEntity("device and ccu")
-            val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip")
+            val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus")
 
             migrateOtaStatusForCCU(siteMap,ccu)
             migrateOtaStatusForCM(siteMap, systemEquip[Tags.ID].toString())

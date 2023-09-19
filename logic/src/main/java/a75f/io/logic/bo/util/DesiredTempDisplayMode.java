@@ -116,7 +116,7 @@ public class DesiredTempDisplayMode {
         boolean heating = false;
         boolean cooling = false;
         Equip systemEquip = new Equip.Builder()
-                .setHashMap(ccuHsApi.readEntity("system and equip")).build();
+                .setHashMap(ccuHsApi.readEntity("system and equip and not modbus")).build();
         if (systemEquip.getMarkers().contains(Tags.DAB)) {
             if (DABSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
                     TemperatureMode.COOLING)) {

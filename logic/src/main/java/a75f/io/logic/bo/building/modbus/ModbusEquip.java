@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.modbus;
 
 import android.util.Log;
 
+import org.projecthaystack.HStr;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,12 +55,7 @@ public class ModbusEquip {
     }
 
     public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                                 List<Parameter> configParams) {
-     return createEntities(floorRef, roomRef, equipmentInfo, configParams, null, false);
-    }
-
-    public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
-                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent) {
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent,String modbusLevel,String modelVersion) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -84,7 +81,7 @@ public class ModbusEquip {
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
-        HashMap systemEquip = hayStack.read("equip and system");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }
@@ -95,6 +92,7 @@ public class ModbusEquip {
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
                     .addMarker("equip").addMarker("modbus")
+                    .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {
             mbEquip.setEquipRef(parentEquipId);
@@ -109,9 +107,7 @@ public class ModbusEquip {
                 mbEquip.addMarker(equip.trim());
             }
         }
-        if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
-            mbEquip.addMarker("zone");
-        }
+        mbEquip.addMarker(modbusLevel);
 
         if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
             mbEquip.setVendor(equipmentInfo.getVendor());
@@ -189,7 +185,13 @@ public class ModbusEquip {
                     .setRegisterType(configParam.getRegisterType())
                     .setParameterId(configParam.getParameterId())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
-                    .setTz(tz);
+                    .setTz(tz)
+                    .addTag("parameterDefinitionType", HStr.make(configParam.getParameterDefinitionType()))
+                    .addTag("multiplier", HStr.make(configParam.getMultiplier()))
+                    .addTag("wordOrder", HStr.make(configParam.getWordOrder()))
+                    .addTag("bitParamRange", HStr.make(configParam.getBitParamRange()))
+                    .addTag("bitParam", HStr.make( (configParam.getBitParam() != null) ? configParam.getBitParam().toString() : "0"));
+
             if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
             }
@@ -243,10 +245,10 @@ public class ModbusEquip {
                         if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
-                        /*if (marker.getTagName().contains("kind")) { //TODO Recheck this if needed, what side effect it causes?
+                        /*if (marker.getTagName().contains("kind")) {
                             logicalParamPoint.setKind(marker.getTagValue());
                         }*/
-                    }else {
+                    } else {
                         logicalParamPoint.addMarker(marker.getTagName());
                         physicalParamPoint.addMarker(marker.getTagName());
                     }
@@ -255,13 +257,13 @@ public class ModbusEquip {
             }
             StringBuffer enumVariables = new StringBuffer();
             if(Objects.nonNull(configParam.getConditions())) {
-                //String[] enumVariables = new String[configParam.getConditions().size()];
                 for(Condition readCondition :configParam.getConditions()) {
                     if(Objects.nonNull(readCondition.getBitValues())) {
                         if(enumVariables.length() == 0)
                             enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
                         else {
-                            enumVariables.append(",");enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
+                            enumVariables.append(",");
+                            enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
                         }
                     }
                 }
@@ -276,7 +278,8 @@ public class ModbusEquip {
                         if(enumVariables.length() == 0)
                             enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
                         else {
-                            enumVariables.append(",");enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
+                            enumVariables.append(",");
+                            enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
                         }
                     }
                 }
@@ -334,7 +337,7 @@ public class ModbusEquip {
         return equipmentRef;
     }
 
-    public void updateHaystackPoints(String equipRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
+    public void updateHaystackPoints(String equipRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {
             //Read all points for this markers
             StringBuilder tags = new StringBuilder();

@@ -49,7 +49,7 @@ public class EmrEquip
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-EMR-" + nodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = hayStack.read("equip and system");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0)
         {
             ahuRef = systemEquip.get("id").toString();

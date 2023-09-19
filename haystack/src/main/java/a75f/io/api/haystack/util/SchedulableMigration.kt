@@ -68,7 +68,7 @@ fun importSchedules() {
 
         restoreCCUHsApi.importBuildingOccupancy(siteUID, hClient,retryCountCallback)
         restoreCCUHsApi.importZoneSchedule(zoneRefSet, retryCountCallback)
-        restoreCCUHsApi.importNamedSchedule(retryCountCallback)
+        CCUHsApi.getInstance().importNamedSchedule(hClient)
         restoreCCUHsApi.importZoneSpecialSchedule(zoneRefSet,retryCountCallback)
         restoreCCUHsApi.importBuildingSpecialSchedule(siteUID,hClient,true,retryCountCallback)
 
@@ -87,11 +87,13 @@ fun setZoneEnabled() {
     val zoneSchedules = hayStack.readAllEntities("zone and schedule and not special and not vacation")
 
     for(zoneSchedule in zoneSchedules){
-        Log.d("CCU_SCHEDULABLE", "Enabling ="+zoneSchedule.get("id").toString())
+        Log.d("CCU_SCHEDULABLE", "Enabling =" + zoneSchedule.get("id").toString())
         val s = hayStack.getScheduleById(zoneSchedule.get("id").toString())
-        s.setDisabled(false)
-        CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
-        Log.d("CCU_SCHEDULABLE", "Enabled ="+s.toString())
+        if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef())) {
+            s.setDisabled(false)
+            CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
+            Log.d("CCU_SCHEDULABLE", "Enabled =" + s.toString())
+        }
 
     }
     Log.d("CCU_SCHEDULABLE", "Enable Zone Schedule completed")

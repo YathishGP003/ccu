@@ -31,6 +31,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -65,15 +66,17 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.service.DomainService;
+import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
-import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.handler.DataSyncHandler;
+import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
@@ -226,15 +229,15 @@ public abstract class UtilityApplication extends Application {
     private void postProcessingInit(){
         Log.i("CCU_DB", "postProcessingInit - start");
 
+        //Remove this Equip Manager once all modbus models are migrated from Domain modeler
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
 
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
-
-        //Modbus EquipmendManager
-        EquipsManager.getInstance(this).setApplicationContext(this);
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
@@ -532,7 +535,7 @@ public abstract class UtilityApplication extends Application {
         messageHandlerSubscriber.subscribeAllHandlers();
     }
 
-    private void scheduleMessagingAckJob() {
+    public static void scheduleMessagingAckJob() {
         if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
             String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();

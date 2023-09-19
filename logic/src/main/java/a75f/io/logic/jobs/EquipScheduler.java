@@ -178,7 +178,8 @@ public class EquipScheduler {
                         - System.currentTimeMillis(), "ms"));
         CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
 
-        SystemScheduleUtil.setAppOverrideExpiry(p,overrideExpiry.getMillis());
+        SystemScheduleUtil.setAppOverrideExpiry(p,(overrideExpiry.getMillis()
+                - System.currentTimeMillis())/1000);
     }
 
     private static double getPriorityDesiredTemp(String id){

@@ -1821,7 +1821,7 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail, String equipRef, String managerEmail)
     {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
 
         HDictBuilder hDictBuilder = new HDictBuilder();
@@ -2800,6 +2800,14 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
+    public String deleteRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
 
     }

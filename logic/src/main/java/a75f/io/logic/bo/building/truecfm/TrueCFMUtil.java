@@ -13,7 +13,7 @@ public class TrueCFMUtil {
         double kFactor = hayStack.readDefaultVal("trueCfm and kfactor and equipRef == \""+equipRef+"\"");
         double pressureInPascals = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
         CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInPascals " + pressureInPascals);
-        double pressureInWGUnit = pressureInPascals/248.84 ;
+        double pressureInWGUnit = Math.abs(pressureInPascals)/248.84 ;
         return 4005 * Math.sqrt(pressureInWGUnit/kFactor);
     }
     

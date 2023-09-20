@@ -81,6 +81,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.util.PreferenceUtil;
@@ -152,7 +153,8 @@ public class CreateNewSite extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
+
+        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")) {
             if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()){
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction();
                 Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
@@ -586,7 +588,7 @@ public class CreateNewSite extends Fragment {
     @SuppressLint("SetTextI18n")
     private void checkDebugPrepopulate() {
         //noinspection ConstantConditions
-        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev"))
+        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev_qa"))
                 && !BuildConfig.DEBUG_USER.isEmpty()) {
 
             String user = BuildConfig.DEBUG_USER;
@@ -931,8 +933,12 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
-        BuildingTuners.getInstance().updateBuildingTuners();
-        SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
+        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        //TODO- COMMON-DATA-FEATURE
+        //BuildingTuners.getInstance().updateBuildingTuners();
+        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
         //SystemEquip.getInstance();
         DiagEquip.getInstance().create();
         updateMigrationDiagWithAppVersion();
@@ -946,12 +952,9 @@ public class CreateNewSite extends Fragment {
             BuildingOccupancy.buildDefaultBuildingOccupancy();
         }
 
-        new Thread(() -> {
-            CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                    HayStackConstants.USER, HayStackConstants.PASS), new Site.Builder().setHashMap(CCUHsApi.getInstance().readEntity("site")).build());
-        }).start();
-
-
+        RxjavaUtil.executeBackground(()->CCUHsApi.getInstance().importNamedScheduleWithOrg(
+                new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),org));
         return localSiteId;
     }
 
@@ -997,8 +1000,12 @@ public class CreateNewSite extends Fragment {
                 }
             }
         }
-        BuildingTuners.getInstance();
-        SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
+        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+
+        //BuildingTuners.getInstance();
+        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();

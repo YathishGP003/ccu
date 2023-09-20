@@ -304,11 +304,6 @@ class ModbusConfigView : BaseDialogFragment() {
     }
 
     fun getName(name: String): String {
-        if (name.contains("-")) {
-            val titles = name.split("-")
-            val splitName = "${titles[1]} ${titles[2]}"
-            return if (splitName.length > 30) splitName.substring(0, 30) else splitName
-        }
         return if (name.length > 30) name.substring(0, 30) else name
 
     }

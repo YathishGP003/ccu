@@ -12,6 +12,7 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
@@ -19,6 +20,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
@@ -40,7 +42,28 @@ class TunerUpdateHandler {
         if (level != TunerConstants.TUNER_BUILDING_VAL_LEVEL) {
             return;
         }
-        
+
+        HDict remotePoint = hayStack.readRemotePoint(pointUid);
+        CcuLog.i(L.TAG_CCU_PUBNUB, "Fetched remote point "+remotePoint);
+        if (!remotePoint.has(Tags.DOMAIN_NAME)) {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Point does not domainName, tuner change cannot be applied");
+            return;
+        }
+
+        HashMap<Object, Object> tunerEquip = hayStack.readEntity("tuner and equip");
+        if (tunerEquip.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner equip does not exist on CCU, Ignore updates");
+            return;
+        }
+
+        String domainName = remotePoint.get(Tags.DOMAIN_NAME).toString();
+
+        Map<Object, Object> tunerPoint = Domain.readPointForEquip(domainName, tunerEquip.get("id").toString());
+        if (tunerEquip.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner point does not exist on CCU "+domainName);
+            return;
+        }
+
         //Do a local write to building level of BuildingTuner equip point
         writePointFromJson(pointUid, msgObject, hayStack, true);
     

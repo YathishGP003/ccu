@@ -33,7 +33,6 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
-import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
@@ -70,7 +69,6 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
-import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -114,6 +112,7 @@ public class CCUHsApi
 
     public Boolean isAuthorized = false;
 
+    private List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
@@ -196,8 +195,8 @@ public class CCUHsApi
     //For Unit test
     public CCUHsApi()
     {
-        hsClient = new AndroidHSClient();
-        tagsDb = (CCUTagsDb) hsClient.db();
+        hsClient = new TestHSClient();
+        tagsDb = (TestTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
         //hisSyncHandler = new HisSyncHandler(this);
@@ -292,15 +291,19 @@ public class CCUHsApi
         return equip.getMarkers().contains("tuner");
     }
     public String addEquip(Equip q) {
-        if(!isBuildingTunerEquip(q)){
+        boolean isBuildingTunerEquip = isBuildingTunerEquip(q);
+        if(!isBuildingTunerEquip){
             q.setCcuRef(getCcuId());
         }
         q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String equipId = tagsDb.addEquip(q);
-        syncStatusService.addUnSyncedEntity(equipId);
-        BackfillUtil.setBackFillDuration(context);
+        //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
+        if (!isBuildingTunerEquip) {
+            syncStatusService.addUnSyncedEntity(equipId);
+            BackfillUtil.setBackFillDuration(context);
+        }
         return equipId;
     }
 
@@ -319,14 +322,19 @@ public class CCUHsApi
         return false;
     }
     public String addPoint(Point p) {
-        if(!isBuildingTunerPoint(p)){
+        boolean isBuildingTunerPoint = isBuildingTunerPoint(p);
+        if(!isBuildingTunerPoint){
             p.setCcuRef(getCcuId());
         }
         p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String pointId = tagsDb.addPoint(p);
-        syncStatusService.addUnSyncedEntity(pointId);
+
+        //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
+        if(!isBuildingTunerPoint) {
+            syncStatusService.addUnSyncedEntity(pointId);
+        }
         return pointId;
     }
 
@@ -2387,7 +2395,7 @@ public class CCUHsApi
 
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
                 if (ccuRegistrationRequest != null) {
-                    Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
+                    Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest);
                     String ccuRegistrationResponse = HttpUtil.executeJson(
                             CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
                             ccuRegistrationRequest.toString(),
@@ -2411,6 +2419,7 @@ public class CCUHsApi
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                                 importNamedSchedule(hsClient);
                             });
+                            onCcuRegistrationCompletedListeners.forEach(l->l.onRegistrationCompleted(this));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -2421,7 +2430,6 @@ public class CCUHsApi
                 Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
                 // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
                 CCUHsApi.getInstance().setCcuRegistered();
-
                 if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
                     Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
@@ -3015,6 +3023,9 @@ public class CCUHsApi
             return 0.0;
         }
     }
+    public void writeDefaultTunerValById(String id, double val) {
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
+    }
     public String readPointArr(String id) {
 
         ArrayList values = readPoint(id);
@@ -3054,6 +3065,26 @@ public class CCUHsApi
         return HZincWriter.gridToString(b.toGrid());
     }
 
+    public interface OnCcuRegistrationCompletedListener {
+        void onRegistrationCompleted(CCUHsApi hsApi);
+    }
+
+    public void registerOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
+        onCcuRegistrationCompletedListeners.add(listener);
+        if (isCCURegistered()) {
+            CcuLog.i("CCU_HS","CCU Already registered");
+            listener.onRegistrationCompleted(this);
+        }
+    }
+    public void unRegisterOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
+        onCcuRegistrationCompletedListeners.remove(listener);
+    }
+    public Context getContext() {
+        return context;
+    }
+    public HashMap<Object, Object> readDefaultPointByDomainName(String domainName) {
+        return readEntity("point and default and domainName == \""+domainName+"\"");
+    }
     private HGrid invokeWithRetry(String op, HClient hClient, HGrid req){
         RetryCountCallback retryCountCallback = retryCount -> Log.i("CCU_SCHEDULABLE", "retrying to get CCU list with the retry count " + retryCount);
         HGrid responseHGrid;

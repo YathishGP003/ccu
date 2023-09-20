@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.jsoup.helper.StringUtil;
+import org.projecthaystack.HDict;
 
 import java.util.HashMap;
 
@@ -135,8 +136,8 @@ public class CongratsFragment extends Fragment {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip eqp = new Equip.Builder().setHashMap(tuner).build();
+        HDict tuner = CCUHsApi.getInstance().readHDict("equip and tuner");
+        Equip eqp = new Equip.Builder().setHDict(tuner).build();
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
         double maxHeatMap =  BuildingTunerCache.getInstance().getMinHeatingUserLimit();//CCUHsApi.getInstance().read("point and limit and min and heating and user");

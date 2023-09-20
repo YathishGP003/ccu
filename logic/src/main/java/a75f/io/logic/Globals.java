@@ -86,6 +86,7 @@ import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.migration.smartnode.SmartNodeMigration;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
@@ -305,6 +306,7 @@ public class Globals {
             if (CCUHsApi.getInstance().isPrimaryCcu()) {
                         /* Only primary CCUs shall create new tuners created in the upgrade releases and
                         non-primary CCUs should fetch in the next app start up.*/
+                ////TODO- COMMON-DATA-FEATURE
                 BuildingTuners.getInstance().updateBuildingTuners();
             } else {
                         /*If a non-primary tuner fails to load all the  building tuners, it should
@@ -369,7 +371,6 @@ public class Globals {
                 Site siteObject = new Site.Builder().setHashMap(site).build();
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);
-
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                         TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
@@ -423,7 +424,7 @@ public class Globals {
         HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
-            BuildingTuners.getInstance().addBuildingTunerEquip();
+            //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {

@@ -717,7 +717,7 @@ public class HClient extends HProj
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
-        Log.d("CCU_HCLIENT", "Request body: " + req);
+        Log.d("CCU_HTTP_HCLIENT", "Request body: " + req);
 
         URL url = new URL(uriStr);
         HttpURLConnection c = openHttpConnection(url, "POST");

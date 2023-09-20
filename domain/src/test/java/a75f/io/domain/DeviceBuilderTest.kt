@@ -9,7 +9,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import org.junit.After
 import org.junit.Before
@@ -60,21 +60,17 @@ class DeviceBuilderTest {
         val zoneRef = mockHayStack.addZone(z)
 
         DomainManager.buildDomain(mockHayStack)
+        val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
+        val entityMapper = EntityMapper(profileModel)
+        val equipBuilder = ProfileEquipBuilder(mockHayStack)
+        val profileConfig = getTestProfileConfig()
+        profileConfig.floorRef = floorRef
+        profileConfig.roomRef = zoneRef
 
-        dmModel?.let {
-            val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
-            val entityMapper = EntityMapper(profileModel)
-            val equipBuilder = EquipBuilder(mockHayStack)
-            val profileConfig = getTestProfileConfig()
-            profileConfig.floorRef = floorRef
-            profileConfig.roomRef = zoneRef
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
 
-            val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel)
-
-            val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
-            deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId)
-        }
-
+        val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
         TestUtil.dumpDomain()
         val device = mockHayStack.readAllEntities("device")
         assert(device.size == 1)
@@ -119,15 +115,16 @@ class DeviceBuilderTest {
 
         val profileModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
         val entityMapper = EntityMapper(profileModel)
-        val equipBuilder = EquipBuilder(mockHayStack)
+        val equipBuilder = ProfileEquipBuilder(mockHayStack)
+
         val profileConfig = getTestProfileConfig()
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
 
-        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel)
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
-        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId)
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
 
         TestUtil.dumpDomain()
 
@@ -135,8 +132,8 @@ class DeviceBuilderTest {
         println(relay1)
 
         val updatedConfig = HyperStat2PfcuDeviceUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel)
-        deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId)
+        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel, "@TestSiteRef")
+        deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId, "@TestSiteRef")
 
         val relay1Op = mockHayStack.readEntity("point and domainName == \"relay1Output\"")
         println(relay1Op)

@@ -8,6 +8,7 @@ import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDiff
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.common.Version
 
 
@@ -29,23 +30,33 @@ class DiffManger(var context: Context?) {
      * starts scanning all the models
      * check the model version and find the diff and update the model definition
      */
-    fun processModelMigration() {
-        val metaData =  getModelFileVersionDetails(NEW_VERSION)
+    fun processModelMigration(siteRef: String) {
+        val metaData : MutableList<ModelMeta> =  getModelFileVersionDetails(NEW_VERSION)
         val anyInvalidModels = ModelValidator.validateAllDomainModels(metaData)
         if (anyInvalidModels.isNotEmpty()) {
-            anyInvalidModels.forEach { Log.i("DOMAIN_MODEL", "Invalid model definition $it: ") }
-        } else {
-            val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
-            val newVersionFiles = getModelFileVersionDetails(NEW_VERSION)
-            val versionFiles = getModelFileVersionDetails(VERSION)
-            updateEquipModels (newVersionFiles, versionFiles, migrationHandler)
+            anyInvalidModels.forEach {
+                Log.i("DOMAIN_MODEL", "Invalid model definition $it: ")
+                val invalidModel = metaData.find { model -> model.modelId == it }
+                if(invalidModel != null) {
+                    metaData.remove(invalidModel)
+                }
+            }
         }
+        if (metaData.isEmpty()) {
+            Log.e("DOMAIN_MODEL", "No valid model found for migration ")
+            return
+        }
+        val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
+        val newVersionFiles = getModelFileVersionDetails(NEW_VERSION)
+        val versionFiles = getModelFileVersionDetails(VERSION)
+        updateEquipModels (newVersionFiles, versionFiles, migrationHandler, siteRef)
     }
 
     fun updateEquipModels(
         newVersionFiles: List<ModelMeta>,
         versionFiles: List<ModelMeta>,
-        handler: MigrationHandler
+        handler: MigrationHandler,
+        siteRef : String
     ) {
         newVersionFiles.forEach { version ->
             val currentModelMeta = getCurrentModel(versionFiles, version.modelId)
@@ -54,11 +65,11 @@ class DiffManger(var context: Context?) {
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
                     val originalModel = getModelDetective("$ORIGINAL_FIle_PATH${version.modelId}.json")
                     val newModel = getModelDetective("$NEW_FIle_PATH${version.modelId}.json")
-                    if (originalModel is SeventyFiveFProfileDirective) {
-                        val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
-                        handler.migrateModel(entityConfiguration,newModel as SeventyFiveFProfileDirective)
-                    } else {
-                        // No updates in definition
+
+                    val entityConfiguration =
+                        originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
+                    if (entityConfiguration != null && newModel != null) {
+                        handler.migrateModel(entityConfiguration,newModel, siteRef)
                     }
                 }
             } else {
@@ -72,7 +83,7 @@ class DiffManger(var context: Context?) {
      * Function reads an version files and returns all the model id's list
      *  @return List<String> all the models id's list from version file
      */
-    fun getModelFileVersionDetails(fileName: String): List<ModelMeta> {
+    fun getModelFileVersionDetails(fileName: String): MutableList<ModelMeta> {
         val versionDetails = ResourceHelper.getModelVersion(fileName)
         val models = mutableListOf<ModelMeta>()
         versionDetails.keys().forEach {

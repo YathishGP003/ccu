@@ -80,7 +80,7 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     equipDevice.modbusEquipIdId = if (equip.tags.containsKey(VERSION)) equip.tags[VERSION].toString() else "0.0.0" // We are not using model id so just holding version in model id
     equipDevice.description = null
     equipDevice.id = 0L
-    equipDevice.name = getModelName(equip.displayName)
+    equipDevice.name = getModelName(equip.displayName, equip.group)
     equipDevice.equipType = equip.equipType
     equipDevice.vendor = equip.vendor
     equipDevice.modelNumbers = mutableListOf<String>(equip.model)
@@ -340,7 +340,12 @@ private fun getChildEquipMap(equipRef: String): ArrayList<HashMap<Any, Any>> {
 /**
  * @param
  */
-private fun getModelName(name: String): String {
-    val splitData = name.split("-")
-    return if (splitData.isNotEmpty()) splitData[1] else name
+private fun getModelName(name: String,slaveId: String): String {
+
+   var modelName: String = name
+    if (name.contains("-")){
+        modelName = name.replace(CCUHsApi.getInstance().site!!.displayName+"-","")
+        modelName = modelName.replace("-$slaveId","")
+    }
+    return modelName
 }

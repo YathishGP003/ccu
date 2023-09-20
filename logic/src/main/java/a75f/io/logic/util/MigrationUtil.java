@@ -2205,7 +2205,6 @@ public class MigrationUtil {
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
     }
-
     private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
         Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");

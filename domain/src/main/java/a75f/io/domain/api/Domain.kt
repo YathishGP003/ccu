@@ -2,8 +2,15 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.logic.DomainManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import org.projecthaystack.HDict
 
 object Domain {
+
+    val domainScope = CoroutineScope(Dispatchers.IO + Job())
     var site: Site? = null
 
     /**
@@ -68,4 +75,18 @@ object Domain {
         return equips
     }
 
+    @JvmStatic
+    fun readPoint(domainName: String) : Map<Any,Any> {
+        return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")
+    }
+
+    @JvmStatic
+    fun readDict(domainName: String) : HDict {
+        return CCUHsApi.getInstance().readHDict("point and domainName == \"$domainName\"")
+    }
+
+    @JvmStatic
+    fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
+        return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
 }

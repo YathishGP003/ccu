@@ -14,3 +14,8 @@ cp app/build/outputs/apk/prod/*.apk .
 ./gradlew assembleDaikin_prod
 cp app/build/outputs/apk/daikin_prod/*.apk .
 
+./gradlew clean
+./gradlew assembleCarrier_prod
+cp app/build/outputs/apk/carrier_prod/*.apk .
+
+

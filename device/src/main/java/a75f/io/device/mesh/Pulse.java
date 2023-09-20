@@ -28,7 +28,6 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.constants.WhoFiledConstants;
-import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -51,7 +50,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -63,7 +61,6 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -301,7 +298,7 @@ public class Pulse
 			  if value is negative or not, if value is negative bit 12 is set to 1 and binary value
 			  becomes greater than 2048.*/
 			if(t == SensorType.PRESSURE && val > 2048 ){
-				val = (getPressureValue(Integer.toBinaryString((int) val)));
+				val = getPressureValue(Integer.toBinaryString((int) val));
 			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
@@ -430,7 +427,7 @@ public class Pulse
 		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
-
+	
 	private static void updateDesiredTemp(int node, Double dt) {
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();

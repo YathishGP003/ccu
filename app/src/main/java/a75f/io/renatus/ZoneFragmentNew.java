@@ -2405,6 +2405,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         //Non paired devices
                         LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                         LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                        LinearLayout ll_vacation = zoneDetails.findViewById(R.id.vc_schedule);
+                        ll_vacation.setVisibility(View.GONE);
                         ll_status.setVisibility(View.GONE);
                         ll_schedule.setVisibility(View.GONE);
                         loadNoDevicesPairedUI(inflater, linearLayoutZonePoints);

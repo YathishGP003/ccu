@@ -283,7 +283,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 } else {
                     outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin || matTemp > economizingMaxTemp) outsideDamperMinOpen else outsideAirLoopOutput
                 }
-                if (matTemp < oaoDamperMatTarget) matThrottle = true
+                if (matTemp < oaoDamperMatTarget || matTemp > economizingMaxTemp) matThrottle = true
             } else {
                 outsideAirFinalLoopOutput = outsideDamperMinOpen
             }

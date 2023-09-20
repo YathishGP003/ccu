@@ -472,7 +472,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             && outsideHumidity > economizingMinHumidity
             && outsideHumidity < economizingMaxHumidity) return true
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Outside air (" + outsideTemp + "°F, " + externalHumidity + "%RH) out of temp/humidity range from tuners; economizing disabled");
+        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Outside air (" + outsideTemp + "°F, " + outsideHumidity + "%RH) out of temp/humidity range from tuners; economizing disabled");
 
         return false
 

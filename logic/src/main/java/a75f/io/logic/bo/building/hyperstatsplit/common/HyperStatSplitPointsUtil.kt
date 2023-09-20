@@ -1930,56 +1930,56 @@ class HyperStatSplitPointsUtil(
         if (universalIn1State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn1State,
-                universalTag = "universal1"
+                universalInOrder = 1
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_ONE, 0.0))
         }
         if (universalIn2State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn2State,
-                universalTag = "universal2"
+                universalInOrder = 2
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_TWO, 0.0))
         }
         if (universalIn3State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn3State,
-                universalTag = "universal3"
+                universalInOrder = 3
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_THREE, 0.0))
         }
         if (universalIn4State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn4State,
-                universalTag = "universal4"
+                universalInOrder = 4
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_FOUR, 0.0))
         }
         if (universalIn5State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn5State,
-                universalTag = "universal5"
+                universalInOrder = 5
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_FIVE, 0.0))
         }
         if (universalIn6State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn6State,
-                universalTag = "universal6"
+                universalInOrder = 6
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_SIX, 0.0))
         }
         if (universalIn7State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn7State,
-                universalTag = "universal7"
+                universalInOrder = 7
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_SEVEN, 0.0))
         }
         if (universalIn8State.enabled) {
             val pointData: Point = universalInConfiguration(
                 universalInState = universalIn8State,
-                universalTag = "universal8"
+                universalInOrder = 8
             )
             configLogicalPointsList.add(Triple(pointData, Port.UNIVERSAL_IN_EIGHT, 0.0))
         }
@@ -1998,7 +1998,7 @@ class HyperStatSplitPointsUtil(
 
     }
 
-    fun universalInConfiguration(universalInState: UniversalInState, universalTag: String): Point {
+    fun universalInConfiguration(universalInState: UniversalInState, universalInOrder: Int): Point {
         return when {
 
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToSupplyAirTemperature(universalInState)) -> {
@@ -2089,13 +2089,13 @@ class HyperStatSplitPointsUtil(
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericVoltage(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForGenericVoltage(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalTag,nodeAddress
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalInOrder,nodeAddress
                 )
             }
             (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericResistance(universalInState)) -> {
 
                 LogicalPointsUtil.createPointForGenericResistance(
-                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalTag,nodeAddress
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalInOrder,nodeAddress
                 )
             }
 

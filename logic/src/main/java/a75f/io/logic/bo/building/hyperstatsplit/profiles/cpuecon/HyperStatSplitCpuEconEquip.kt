@@ -1120,42 +1120,42 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn1State, existingConfiguration.universalIn1State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn1State, "universal1", Port.UNIVERSAL_IN_ONE)
+            updateUniversalInDetails(newConfiguration.universalIn1State, 1, Port.UNIVERSAL_IN_ONE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn2State, existingConfiguration.universalIn2State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn2State, "universal2", Port.UNIVERSAL_IN_TWO)
+            updateUniversalInDetails(newConfiguration.universalIn2State, 2, Port.UNIVERSAL_IN_TWO)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn3State, existingConfiguration.universalIn3State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn3State, "universal3", Port.UNIVERSAL_IN_THREE)
+            updateUniversalInDetails(newConfiguration.universalIn3State, 3, Port.UNIVERSAL_IN_THREE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn4State, existingConfiguration.universalIn4State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn4State, "universal4", Port.UNIVERSAL_IN_FOUR)
+            updateUniversalInDetails(newConfiguration.universalIn4State, 4, Port.UNIVERSAL_IN_FOUR)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn5State, existingConfiguration.universalIn5State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn5State, "universal5", Port.UNIVERSAL_IN_FIVE)
+            updateUniversalInDetails(newConfiguration.universalIn5State, 5, Port.UNIVERSAL_IN_FIVE)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn6State, existingConfiguration.universalIn6State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn6State, "universal6", Port.UNIVERSAL_IN_SIX)
+            updateUniversalInDetails(newConfiguration.universalIn6State, 6, Port.UNIVERSAL_IN_SIX)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn7State, existingConfiguration.universalIn7State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn7State, "universal7", Port.UNIVERSAL_IN_SEVEN)
+            updateUniversalInDetails(newConfiguration.universalIn7State, 7, Port.UNIVERSAL_IN_SEVEN)
         }
         if (!HyperStatSplitAssociationUtil.isBothUniversalInHasSameConfigs
                 (newConfiguration.universalIn8State, existingConfiguration.universalIn8State)
         ) {
-            updateUniversalInDetails(newConfiguration.universalIn8State, "universal8", Port.UNIVERSAL_IN_EIGHT)
+            updateUniversalInDetails(newConfiguration.universalIn8State, 8, Port.UNIVERSAL_IN_EIGHT)
         }
     }
 

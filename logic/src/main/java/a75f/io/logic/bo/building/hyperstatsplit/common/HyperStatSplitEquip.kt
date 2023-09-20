@@ -147,11 +147,14 @@ open class HyperStatSplitEquip {
     // Function which updates the Universal In new configurations
     fun updateUniversalInDetails(
         universalInState: UniversalInState,
-        universalInTag: String,
+        universalInOrder: Int,
         physicalPort: Port
     ) {
-        val universalInId = hsSplitHaystackUtil.readPointID("config and $universalInTag and enabled") as String
-        val universalInAssociatedId = hsSplitHaystackUtil.readPointID("config and $universalInTag and association") as String
+
+        val universalInTag = getUniversalInTag(universalInOrder)
+
+        val universalInId = hsSplitHaystackUtil.readPointID("config and enabled and $universalInTag") as String
+        val universalInAssociatedId = hsSplitHaystackUtil.readPointID("config and association and $universalInTag") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(universalInId, if (universalInState.enabled) 1.0 else 0.0)
         hyperStatSplitPointsUtil.addDefaultValueForPoint(universalInAssociatedId, universalInState.association.ordinal.toDouble())
 
@@ -161,7 +164,7 @@ open class HyperStatSplitEquip {
 
             val pointData: Point = hyperStatSplitPointsUtil.universalInConfiguration(
                 universalInState = universalInState,
-                universalTag = universalInTag
+                universalInOrder = universalInOrder
             )
 
             val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData)
@@ -181,6 +184,21 @@ open class HyperStatSplitEquip {
         } else {
             DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, "0-10v")
             DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, "mV")
+        }
+    }
+
+    private fun getUniversalInTag(order: Int): String {
+        return when (order) {
+            1 -> "universal1"
+            2 -> "universal2"
+            3 -> "universal3"
+            4 -> "universal4"
+            5 -> "universal5"
+            6 -> "universal6"
+            7 -> "universal7"
+            8 -> "universal8"
+            // this should never happen
+            else -> "universal1"
         }
     }
 

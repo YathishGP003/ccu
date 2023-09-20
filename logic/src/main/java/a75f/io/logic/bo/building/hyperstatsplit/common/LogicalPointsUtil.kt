@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempSt
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 import android.util.Log
+import org.projecthaystack.HNum
 import java.util.HashMap
 
 /**
@@ -901,24 +902,16 @@ class LogicalPointsUtil {
 
         fun createPointForGenericVoltage(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String, universalTag: String, nodeAddress: String
+            roomRef: String, floorRef: String, tz: String, universalInOrder: Int, nodeAddress: String
         ): Point {
 
-            val existingPoint = readGenericVoltage(equipRef, universalTag)
+            val existingPoint = readGenericVoltage(equipRef, universalInOrder)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "generic", "voltage", "sensor", "his", "logical", "cur", "zone", "standalone", universalTag
+                    "generic", "volt", "sensor", "his", "logical", "cur", "zone", "standalone"
                 )
 
-                var genericVoltageName = "genericVoltage"
-                if (universalTag.equals("universal1")) genericVoltageName += "1"
-                else if (universalTag.equals("universal2")) genericVoltageName += "2"
-                else if (universalTag.equals("universal3")) genericVoltageName += "3"
-                else if (universalTag.equals("universal4")) genericVoltageName += "4"
-                else if (universalTag.equals("universal5")) genericVoltageName += "5"
-                else if (universalTag.equals("universal6")) genericVoltageName += "6"
-                else if (universalTag.equals("universal7")) genericVoltageName += "7"
-                else if (universalTag.equals("universal8")) genericVoltageName += "8"
+                val genericVoltageName = "genericVoltage" + universalInOrder.toString()
                 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$genericVoltageName")
@@ -926,32 +919,24 @@ class LogicalPointsUtil {
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
-                    .setUnit("V")
+                    .setUnit("V").addTag("order", HNum.make(universalInOrder))
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readGenericVoltage(equipRef, universalTag)).build()
+            return Point.Builder().setHashMap(readGenericVoltage(equipRef, universalInOrder)).build()
         }
         fun createPointForGenericResistance(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String, universalTag: String, nodeAddress: String
+            roomRef: String, floorRef: String, tz: String, universalInOrder: Int, nodeAddress: String
         ): Point {
 
-            val existingPoint = readGenericResistance(equipRef, universalTag)
+            val existingPoint = readGenericResistance(equipRef, universalInOrder)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "generic", "resistance", "sensor", "his", "logical", "cur", "zone", "standalone", universalTag
+                    "generic", "resistance", "sensor", "his", "logical", "cur", "zone", "standalone"
                 )
                 
-                var genericResistanceName = "genericResistance"
-                if (universalTag.equals("universal1")) genericResistanceName += "1"
-                else if (universalTag.equals("universal2")) genericResistanceName += "2"
-                else if (universalTag.equals("universal3")) genericResistanceName += "3"
-                else if (universalTag.equals("universal4")) genericResistanceName += "4"
-                else if (universalTag.equals("universal5")) genericResistanceName += "5"
-                else if (universalTag.equals("universal6")) genericResistanceName += "6"
-                else if (universalTag.equals("universal7")) genericResistanceName += "7"
-                else if (universalTag.equals("universal8")) genericResistanceName += "8"
+                var genericResistanceName = "genericResistance" + universalInOrder.toString()
                 
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$genericResistanceName")
@@ -959,11 +944,11 @@ class LogicalPointsUtil {
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
-                    .setUnit("kOhm")
+                    .setUnit("kOhm").addTag("order", HNum.make(universalInOrder))
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readGenericResistance(equipRef, universalTag)).build()
+            return Point.Builder().setHashMap(readGenericResistance(equipRef, universalInOrder)).build()
         }
 
         /** Read sensor points**/
@@ -1020,13 +1005,13 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "condensate and sensor and normallyOpen and equipRef == \"$equipRef\"")
         }
-        private fun readGenericVoltage(equipRef: String, universalTag: String): HashMap<Any, Any> {
+        private fun readGenericVoltage(equipRef: String, universalInOrder: Int): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and voltage and sensor and $universalTag and equipRef == \"$equipRef\"")
+                "generic and volt and sensor and order == $universalInOrder and equipRef == \"$equipRef\"")
         }
-        private fun readGenericResistance(equipRef: String, universalTag: String): HashMap<Any, Any> {
+        private fun readGenericResistance(equipRef: String, universalInOrder: Int): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and resistance and sensor and $universalTag and equipRef == \"$equipRef\"")
+                "generic and resistance and sensor and order == $universalInOrder and equipRef == \"$equipRef\"")
         }
 
 
@@ -1234,38 +1219,38 @@ class LogicalPointsUtil {
             // This is now a pain because multiple Generic Voltage/Resistance points can be mapped to one equip.
             // If a specific Generic Voltage/Resistance point is deleted, remove only that instance of the point.
             if((!(universalIn1State.enabled && universalIn1State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal1"))
+                removePoint(readGenericVoltage(equipRef, 1))
             if((!(universalIn2State.enabled && universalIn2State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal2"))
+                removePoint(readGenericVoltage(equipRef, 2))
             if((!(universalIn3State.enabled && universalIn3State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal3"))
+                removePoint(readGenericVoltage(equipRef, 3))
             if((!(universalIn4State.enabled && universalIn4State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal4"))
+                removePoint(readGenericVoltage(equipRef, 4))
             if((!(universalIn5State.enabled && universalIn5State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal5"))
+                removePoint(readGenericVoltage(equipRef, 5))
             if((!(universalIn6State.enabled && universalIn6State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal6"))
+                removePoint(readGenericVoltage(equipRef, 6))
             if((!(universalIn7State.enabled && universalIn7State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal7"))
+                removePoint(readGenericVoltage(equipRef, 7))
             if((!(universalIn8State.enabled && universalIn8State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
-                removePoint(readGenericVoltage(equipRef, "universal8"))
+                removePoint(readGenericVoltage(equipRef, 8))
 
             if((!(universalIn1State.enabled && universalIn1State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal1"))
+                removePoint(readGenericResistance(equipRef, 1))
             if((!(universalIn2State.enabled && universalIn2State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal2"))
+                removePoint(readGenericResistance(equipRef, 2))
             if((!(universalIn3State.enabled && universalIn3State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal3"))
+                removePoint(readGenericResistance(equipRef, 3))
             if((!(universalIn4State.enabled && universalIn4State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal4"))
+                removePoint(readGenericResistance(equipRef, 4))
             if((!(universalIn5State.enabled && universalIn5State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal5"))
+                removePoint(readGenericResistance(equipRef, 5))
             if((!(universalIn6State.enabled && universalIn6State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal6"))
+                removePoint(readGenericResistance(equipRef, 6))
             if((!(universalIn7State.enabled && universalIn7State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal7"))
+                removePoint(readGenericResistance(equipRef, 7))
             if((!(universalIn8State.enabled && universalIn8State.association == UniversalInAssociation.GENERIC_RESISTANCE)))
-                removePoint(readGenericResistance(equipRef, "universal8"))
+                removePoint(readGenericResistance(equipRef, 8))
 
         }
 
@@ -1346,7 +1331,7 @@ class LogicalPointsUtil {
             }
             if(!HyperStatSplitAssociationUtil.isAnySensorBusAddressMappedToDuctPressure(
                     address3State)) {
-                removePoint(readDuctPressureSensor(equipRef, "ductPressure"))
+                removePoint(readDuctPressureSensor(equipRef, "static"))
             }
         }
 

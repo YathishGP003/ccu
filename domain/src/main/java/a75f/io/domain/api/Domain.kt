@@ -10,6 +10,7 @@ import org.projecthaystack.HDict
 
 object Domain {
 
+    const val LOG_TAG = "CCU_DOMAIN"
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
     var site: Site? = null
 

@@ -320,7 +320,7 @@ public class CreateNewSite extends Fragment {
                 && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
             && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
             ) {
-
+                CcuLog.i("UI_PROFILING","Add Site Begin");
                 ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                 String siteName = mSiteName.getText().toString();
                 String siteCity = mSiteCity.getText().toString();
@@ -334,6 +334,7 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
+                CcuLog.i("UI_PROFILING","Add Save Site to DB ");
                 if (site.size() > 0) {
                     String siteId = site.get("id").toString();
                     updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
@@ -341,6 +342,7 @@ public class CreateNewSite extends Fragment {
                     saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                 }
 
+                CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
                 HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
                 Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
                 if (ccu.size() > 0) {
@@ -358,6 +360,7 @@ public class CreateNewSite extends Fragment {
                         mNext.setEnabled(true);
                         ProgressDialogUtils.hideProgressDialog();
                         goTonext();
+                        CcuLog.i("UI_PROFILING","Add CCU Complete ");
                     }
                 }, 1000);
             } else {

@@ -549,8 +549,11 @@ public class CCUHsApi
         }
         point.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updatePoint(point, id);
-        if (syncStatusService.hasEntitySynced(id)) {
-            syncStatusService.addUpdatedEntity(id);
+
+        if(!isBuildingTunerPoint(point)){
+            if (syncStatusService.hasEntitySynced(id)) {
+                syncStatusService.addUpdatedEntity(id);
+            }
         }
     }
 

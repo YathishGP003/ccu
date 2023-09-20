@@ -68,8 +68,8 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var zoneCO2Threshold = 4000.0
    var zoneCO2Target = 4000.0
 
-   var zoneVOCThreshold = 5000.0
-   var zoneVOCTarget = 4000.0
+   var zoneVOCThreshold = 4000.0
+   var zoneVOCTarget = 5000.0
 
    // zonePm2p5Threshold has been removed
    var zonePm2p5Target = 25.0

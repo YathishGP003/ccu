@@ -268,6 +268,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             val exhaustFanHysteresis = TunerUtil.readTunerValByQuery("exhaust and fan and hysteresis", equip.equipRef)
             val oaoDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",equip.equipRef)
             val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
+            val economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and temp", equip.equipRef)
 
             val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
 
@@ -280,7 +281,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                     outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                 } else {
-                    outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else outsideAirLoopOutput
+                    outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin || matTemp > economizingMaxTemp) outsideDamperMinOpen else outsideAirLoopOutput
                 }
                 if (matTemp < oaoDamperMatTarget) matThrottle = true
             } else {

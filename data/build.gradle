@@ -81,7 +81,7 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20230828.1"
+def domainLibVersion = "20230830.2"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])

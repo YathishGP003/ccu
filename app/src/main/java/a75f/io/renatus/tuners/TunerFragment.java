@@ -726,7 +726,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and not dualDuct");
         for (HashMap m : buildingTuners) {
-            if (m.get("dis").toString().contains("Building")) {
+            /*if (m.get("dis").toString().contains("Building")) {
+                tuners.add(m);
+            }*/
+
+            if (m.keySet().contains("default")) {
                 tuners.add(m);
             }
         }

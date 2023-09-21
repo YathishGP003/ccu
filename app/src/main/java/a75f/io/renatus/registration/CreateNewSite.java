@@ -5,10 +5,6 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
-import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
-
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -22,7 +18,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
@@ -72,6 +67,7 @@ import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.api.haystack.sync.SiteRegistrationHandler;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -82,8 +78,6 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingEquip;
-import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -334,35 +328,40 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-                CcuLog.i("UI_PROFILING","Add Save Site to DB ");
-                if (site.size() > 0) {
-                    String siteId = site.get("id").toString();
-                    updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
-                } else {
-                    saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
-                }
+                RxjavaUtil.executeBackgroundTask(
+                        () -> {},
+                        () -> {
+                            CcuLog.i("UI_PROFILING","Add Save Site to DB ");
+                            if (site.size() > 0) {
+                                String siteId = site.get("id").toString();
+                                updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                            } else {
+                                saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                            }
 
-                CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
-                HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
-                Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
-                if (ccu.size() > 0) {
-                    String ahuRef = ccu.get("ahuRef").toString();
-                    CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
-                    L.ccu().setCCUName(ccuName);
-                } else {
-                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.getId() ,managerEmail);
-                    L.ccu().setCCUName(ccuName);
-                    CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
-                }
-                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mNext.setEnabled(true);
-                        ProgressDialogUtils.hideProgressDialog();
-                        goTonext();
-                        CcuLog.i("UI_PROFILING","Add CCU Complete ");
-                    }
-                }, 1000);
+                            CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
+                            HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
+                            Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
+                            if (ccu.size() > 0) {
+                                String ahuRef = ccu.get("ahuRef").toString();
+                                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                                L.ccu().setCCUName(ccuName);
+                            } else {
+                                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.getId() ,managerEmail);
+                                L.ccu().setCCUName(ccuName);
+                                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                            }
+                            //SiteRegistrationHandler siteHandler = new SiteRegistrationHandler();
+                            //siteHandler.doSync();
+                        },
+                        () -> {
+                            mNext.setEnabled(true);
+                            ProgressDialogUtils.hideProgressDialog();
+                            goTonext();
+                            CcuLog.i("UI_PROFILING","Add CCU Complete ");
+                        }
+
+                );
             } else {
                 mNext.setEnabled(true);
             }
@@ -938,6 +937,8 @@ public class CreateNewSite extends Fragment {
         CCUHsApi.getInstance().setPrimaryCcu(true);
 
         BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+
+        CCUHsApi.getInstance().syncEntityTree();
         //TODO- COMMON-DATA-FEATURE
         //BuildingTuners.getInstance().updateBuildingTuners();
         //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);

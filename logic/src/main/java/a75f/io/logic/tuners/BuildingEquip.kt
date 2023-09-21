@@ -38,9 +38,11 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             }
             val equipBuilder = TunerEquipBuilder(haystack)
             equipBuilder.buildEquipAndPoints(haystack.site!!.id)
-            haystack.registerOnCcuRegistrationCompletedListener { this }
+            CcuLog.i(L.TAG_CCU_TUNER, " registerOnCcuRegistrationCompletedListener ")
+            haystack.registerOnCcuRegistrationCompletedListener(this)
         } else {
-            onRegistrationCompleted(haystack)
+            CcuLog.i(L.TAG_CCU_TUNER, "Tuner equip already exists.")
+            syncBuildingTuners(haystack)
         }
     }
 
@@ -161,8 +163,8 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
     override fun onRegistrationCompleted(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Building Equip onRegistrationCompleted received")
-        syncBuildingTuners(haystack)
         haystack.unRegisterOnCcuRegistrationCompletedListener { this }
+        syncBuildingTuners(haystack)
     }
     fun syncBuildingTuners(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Sync building Tuners");

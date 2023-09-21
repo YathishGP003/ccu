@@ -21,7 +21,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
-        CcuLog.i("CCU_DM"," Created tuner point ${hayStackEquip.domainName}")
+        CcuLog.i(Domain.LOG_TAG," Created tuner point ${hayStackEquip.domainName}")
         createPoints(modelDef, equipId, siteRef)
         return equipId
     }
@@ -34,7 +34,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             hayStackPoint.id = pointId
             hayStack.writeDefaultTunerValById(pointId, it.defaultValue.toString().toDouble())
             DomainManager.addPoint(hayStackPoint)
-            CcuLog.i("CCU_DM"," Created tuner point ${it.domainName}")
+            CcuLog.i(Domain.LOG_TAG," Created tuner point ${it.domainName}")
         }
     }
 
@@ -48,7 +48,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 hayStackPoint.id = pointId
                 hayStack.writeDefaultTunerValById(pointId, modelPointDef.defaultValue.toString().toDouble())
                 DomainManager.addPoint(hayStackPoint)
-                CcuLog.i("CCU_DM"," Created Tuner point ${point.domainName}")
+                CcuLog.i(Domain.LOG_TAG," Created Tuner point ${point.domainName}")
             }
         }
     }
@@ -64,7 +64,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 hayStackPoint.id = existingPoint["id"].toString()
                 hayStack.writeDefaultTunerValById(hayStackPoint.id, modelPointDef.defaultValue.toString().toDouble())
                 DomainManager.addPoint(hayStackPoint)
-                CcuLog.i("CCU_DM"," Updated Tuner point ${point.domainName}")
+                CcuLog.i(Domain.LOG_TAG," Updated Tuner point ${point.domainName}")
             }
         }
     }

@@ -16,7 +16,7 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 
-class SiteRegistrationHandler {
+public class SiteRegistrationHandler {
     
     public static final String TAG = "CCU_HS_SiteSyncHandler";
     

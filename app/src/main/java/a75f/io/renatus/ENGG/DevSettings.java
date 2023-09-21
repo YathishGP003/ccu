@@ -53,6 +53,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.tuners.BuildingEquip;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -219,7 +220,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                         Site site = CCUHsApi.getInstance().getSite();
                         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                         CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
-                        CCUHsApi.getInstance().importBuildingTuners();
+                        BuildingEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
+                        /*CCUHsApi.getInstance().importBuildingTuners();
 
                         ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
                                 .readAllEntities("point and tuner and default");
@@ -228,7 +230,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
                             hDicts.add(pid);
                         }
-                        CCUHsApi.getInstance().importPointArrays(hDicts);
+                        CCUHsApi.getInstance().importPointArrays(hDicts);*/
                     },
                     () -> {
                         ProgressDialogUtils.hideProgressDialog();

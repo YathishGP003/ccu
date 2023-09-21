@@ -1441,20 +1441,22 @@ public class CCUHsApi
         //import building special schedule
         importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
-        //import building tuners
-        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+        //import building tuners TODO - Common data feature.
+        //importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import Named schedule
         importNamedSchedule(hClient);
 
-        ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
+        //TODO - Common data feature
+        /*ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
                 .readAllEntities("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
         for (HashMap<Object, Object> m : writablePoints) {
             HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             hDicts.add(pid);
         }
-        return importPointArrays(hDicts);
+        return importPointArrays(hDicts);*/
+        return true;
     }
 
     public void importNamedSchedule(HClient hClient){
@@ -1880,7 +1882,7 @@ public class CCUHsApi
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
-        CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
 
 
@@ -2374,12 +2376,7 @@ public class CCUHsApi
     public void registerCcu(String installerEmail) {
 
         HashMap site = CCUHsApi.getInstance().read("site");
-        Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-        // tcase 05/26/21 -- this isNetworkConnected check is a bug.
-        //  1) The check gives the wrong answer right after I fix network by connecting to wifi.
-        //  2) If we think there is no network here, we silently fail the registration  :_(  This is like a puppy dying.
-        // I would fix it, i.e. I think it's safe to delete, but I am doing a hotfix for another issue right now, and
-        // this issue is pre-existing.
+        CcuLog.i("CCURegInfo","registerCcu");
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
             Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
             HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
@@ -2409,24 +2406,7 @@ public class CCUHsApi
                     Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
 
                     if (ccuRegistrationResponse != null) {
-                        try {
-                            JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
-                            String ccuGuid = ccuRegistrationResponseJson.getString("id");
-                            String token = ccuRegistrationResponseJson.getString("token");
-                            CCUHsApi.getInstance().setSynced(ccuLuid);
-                            CCUHsApi.getInstance().setJwt(token);
-                            CCUHsApi.getInstance().setCcuRegistered();
-                            Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-                            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
-                                importNamedSchedule(hsClient);
-                            });
-                            onCcuRegistrationCompletedListeners.forEach(l->l.onRegistrationCompleted(this));
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        completeRegistration(ccuRegistrationResponse, ccuLuid);
                     }
                 }
             } else {
@@ -2437,6 +2417,8 @@ public class CCUHsApi
                     Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
             }
+        } else {
+            Log.e("CCURegInfo","Registration cannot be completed now  - siteSynced : "+siteSynced());
         }
     }
 
@@ -2487,7 +2469,32 @@ public class CCUHsApi
         return ccuJsonRequest;
     }
 
+    public void completeRegistration(String ccuRegistrationResponse, String ccuId) {
+        Log.d("CCURegInfo", "completeRegistration");
+        try {
+            JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
+            String ccuGuid = ccuRegistrationResponseJson.getString("id");
+            String token = ccuRegistrationResponseJson.getString("token");
+            setSynced(ccuId);
+            setJwt(token);
+            setCcuRegistered();
+            Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                importNamedSchedule(hsClient);
+            });
 
+            Log.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
+            onCcuRegistrationCompletedListeners.forEach( listener -> {
+                listener.onRegistrationCompleted(this);
+                Log.d("CCURegInfo", "RegistrationCompletedListener "+listener);
+            } );
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Returns parameterized HashMaps.
@@ -3073,10 +3080,11 @@ public class CCUHsApi
     }
 
     public void registerOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
-        onCcuRegistrationCompletedListeners.add(listener);
         if (isCCURegistered()) {
-            CcuLog.i("CCU_HS","CCU Already registered");
+            CcuLog.i("CCU_HS","CCU Already registered "+listener);
             listener.onRegistrationCompleted(this);
+        } else {
+            onCcuRegistrationCompletedListeners.add(listener);
         }
     }
     public void unRegisterOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {

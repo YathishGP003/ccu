@@ -81,11 +81,12 @@ public class TunerUtil
     
     public static double readSystemUserIntentVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
-        if (cdb == null || cdb.size() == 0) {
+        HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU, "!!!! Value Not Read : User Intent does not exist for "+tags);
             return 0;
         }
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        ArrayList values = hayStack.readPoint(userIntent.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -100,12 +101,13 @@ public class TunerUtil
     
     public static void writeSystemUserIntentVal(String tags, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
+        HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);
+
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU, "!!!! Value Not set : User Intent does not exist for "+tags);
+            return;
         }
+        String id = userIntent.get("id").toString();
         hayStack.pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }

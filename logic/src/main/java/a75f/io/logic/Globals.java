@@ -303,17 +303,13 @@ public class Globals {
     private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
-            if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
-                        non-primary CCUs should fetch in the next app start up.*/
-                ////TODO- COMMON-DATA-FEATURE
+
+            ////TODO- Common data feature
+            /*if (CCUHsApi.getInstance().isPrimaryCcu()) {
                 BuildingTuners.getInstance().updateBuildingTuners();
             } else {
-                        /*If a non-primary tuner fails to load all the  building tuners, it should
-                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
-                        multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
-            }
+            }*/
 
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
@@ -394,6 +390,9 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    }
                 }
             }
         }.start();
@@ -740,7 +739,7 @@ public class Globals {
     public void registerOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.add(listener);
         if (isInitCompleted) {
-            CcuLog.i("UI_PROFILING","CCU Already registered");
+            CcuLog.i("UI_PROFILING","CCU Already initialized");
             listener.onInitCompleted();
         }
     }

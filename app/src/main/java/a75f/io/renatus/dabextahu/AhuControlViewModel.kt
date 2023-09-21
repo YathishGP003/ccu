@@ -5,6 +5,7 @@ import a75f.io.domain.util.ModelNames
 import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.renatus.modbus.models.EquipModel
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -18,6 +19,15 @@ import androidx.lifecycle.AndroidViewModel
  */
 
 class AhuControlViewModel(application: Application) : AndroidViewModel(application) {
+
+    var deviceList = mutableStateOf(emptyList<String>())
+    var slaveIdList = mutableStateOf(emptyList<String>())
+    var childSlaveIdList = mutableStateOf(emptyList<String>())
+    var equipModel = mutableStateOf(EquipModel())
+    var selectedModbusType = mutableStateOf(0)
+    var modelName = mutableStateOf("Select Model")
+
+    var configType = mutableStateOf(ConfigType.BACNET)
 
 
     var setPointControl: Boolean by mutableStateOf(false)
@@ -70,4 +80,7 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
         return getOptions().indexOf(value)
     }
 
+    enum class ConfigType {
+        BACNET,MODBUS
+    }
 }

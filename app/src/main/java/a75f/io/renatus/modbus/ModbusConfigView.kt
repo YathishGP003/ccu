@@ -305,7 +305,6 @@ class ModbusConfigView : BaseDialogFragment() {
 
     fun getName(name: String): String {
         return if (name.length > 30) name.substring(0, 30) else name
-
     }
 
     override fun getIdString(): String {

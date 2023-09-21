@@ -21,7 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Created by Manjunath K on 06-09-2023.
@@ -52,7 +55,7 @@ fun RadioButtonCompose(radioOptions: List<String>, onSelect: (String) -> Unit) {
                     .padding(horizontal = 16.dp),
             ) {
                 RadioButton(
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier.padding(end = 10.dp),
                     selected = (selectedItem == label),
                     onClick = null,
                     colors = RadioButtonDefaults.colors(
@@ -60,7 +63,7 @@ fun RadioButtonCompose(radioOptions: List<String>, onSelect: (String) -> Unit) {
                         unselectedColor = Color.Gray
                     )
                 )
-                Text(text = label)
+                Text(text = label, style =  TextStyle( fontFamily = ComposeUtil.myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
             }
         }
     }

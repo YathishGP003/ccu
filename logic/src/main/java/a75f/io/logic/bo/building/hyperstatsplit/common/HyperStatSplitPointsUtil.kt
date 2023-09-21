@@ -2191,8 +2191,12 @@ class HyperStatSplitPointsUtil(
             arrayOf("zone", "air", "co2", "sensor", "his", "cur", "logical")
         val humidityPointMarkers =
             arrayOf("zone", "air", "humidity", "sensor", "his", "cur", "logical")
+        val vocPointMarkers =
+            arrayOf("zone", "air", "voc", "sensor", "his", "cur", "logical")
         val illuminanceSensorPointMarkers =
             arrayOf("zone", "illuminance", "sensor", "his", "cur", "logical")
+        val soundSensorPointMarkers =
+            arrayOf("zone", "sound", "sensor", "his", "cur", "logical")
         val occupancySensorPointMarkers =
             arrayOf("zone", "occupancy", "sensor", "his", "cur", "logical")
 
@@ -2208,11 +2212,23 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
+        val vocPoint = createHaystackPointWithUnit(
+            "$equipDis-zone" + Port.SENSOR_VOC.portSensor,
+            vocPointMarkers,
+            "cov",
+            "ppb"
+        )
         val illuminancePoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_ILLUMINANCE.portSensor,
             illuminanceSensorPointMarkers,
             "cov",
             "lux"
+        )
+        val soundPoint = createHaystackPointWithUnit(
+            "$equipDis-zone" + Port.SENSOR_SOUND.portSensor,
+            soundSensorPointMarkers,
+            "cov",
+            "dB"
         )
         val occupancyPoint = createHaystackPointWithEnums(
             "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor,
@@ -2223,7 +2239,9 @@ class HyperStatSplitPointsUtil(
         logicalPointsList.add(Triple(co2Point, Port.SENSOR_CO2, 0.0))
         logicalPointsList.add(Triple(occupancyPoint, Port.SENSOR_OCCUPANCY, 0.0))
         logicalPointsList.add(Triple(humidityPoint, Port.SENSOR_RH, 0.0))
+        logicalPointsList.add(Triple(vocPoint, Port.SENSOR_VOC, 0.0))
         logicalPointsList.add(Triple(illuminancePoint, Port.SENSOR_ILLUMINANCE, 0.0))
+        logicalPointsList.add(Triple(soundPoint, Port.SENSOR_SOUND, 0.0))
 
         return logicalPointsList
 

@@ -6,8 +6,12 @@ import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointI
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initFirmwareVersionPointMigration;
+import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initRemoteFirmwareVersionPointMigration;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
 import static a75f.io.logic.util.MigrateModbusModelKt.migrateModbusProfiles;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -388,6 +392,7 @@ public class MigrationUtil {
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
         CCUHsApi.getInstance().removeAllNamedSchedule();
+        boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
@@ -397,8 +402,11 @@ public class MigrationUtil {
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
         L.saveCCUState();
-    }
+        boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
+        PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
+                (firmwarePointMigrationState && firmwareRemotePointMigrationState));
 
+    }
     private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
         allSnTuners.forEach(snTuner -> {

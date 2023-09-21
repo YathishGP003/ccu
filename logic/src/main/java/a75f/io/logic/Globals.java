@@ -4,8 +4,6 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HNum;
 import org.projecthaystack.client.HClient;
@@ -24,16 +22,11 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
-import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -73,25 +66,21 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
-import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
-import a75f.io.logic.util.RxjavaUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -293,12 +282,6 @@ public class Globals {
         }
     }
 
-    private void firmwareVersionPointMigration(HashMap<Object, Object> site){
-        if (!site.isEmpty()) {
-            FirmwareVersionPointMigration.initFirmwareVersionPointMigration();
-        }
-    }
-
     private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
@@ -343,7 +326,6 @@ public class Globals {
                         migrateHeartbeatDiagPointForEquips(site);
                         migrateHeartbeatwithNewtags(site);
                         OAODamperOpenReasonMigration(site);
-                        firmwareVersionPointMigration(site);
                         migrateIduPoints(site);
                         migrateSNPoints(site);
                         CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
@@ -361,7 +343,6 @@ public class Globals {
                 migrateHeartbeatDiagPointForEquips(site);
                 migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
-                firmwareVersionPointMigration(site);
                 migrateIduPoints(site);
                 migrateSNPoints(site);
                 loadEquipProfiles();

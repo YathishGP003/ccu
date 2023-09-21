@@ -2,7 +2,6 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.Preference;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -90,6 +89,9 @@ public class PreferenceUtil {
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
+
+    public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -132,13 +134,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
+        return sharedPreferences.getBoolean(FIRMWARE_VERSION_POINT_MIGRATION,false);
     }
 
-    public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
+    public static void updateMigrationStatus(String migrationName, boolean isMigrated){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
+        editor.putBoolean(migrationName, isMigrated);
         editor.apply();
     }
 
@@ -244,7 +246,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-    
+
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }

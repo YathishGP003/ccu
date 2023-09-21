@@ -210,7 +210,9 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
     public boolean onClickSave(int position, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                                ArrayList<DAYS> days){
 
-        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+        boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
+
+        if (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) {
             Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
                     "connect to network.", Toast.LENGTH_LONG).show();
             return false;

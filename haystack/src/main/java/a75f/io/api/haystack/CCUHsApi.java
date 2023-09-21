@@ -2803,6 +2803,14 @@ public class CCUHsApi
 
     }
 
+    public String deleteRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
     public void importSchedule(String id) {
         Observable.fromCallable(() -> {
                     String response = fetchRemoteEntity(id);

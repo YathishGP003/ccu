@@ -248,13 +248,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         ArrayList<String> deadBand = new ArrayList<>();
 
         if(isCelsiusTunerAvailableStatus()){
-            double minVal = Math.round(convertingRelativeValueFtoC(0));
-            double maxVal = UnitUtils.roundToHalf(convertingRelativeValueFtoC(10));
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
+            double minVal = convertingRelativeValueFtoC(0);
+            double maxVal = convertingRelativeValueFtoC(10);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
-                deadBand.add( UnitUtils.roundToPointFive(convertingDeadBandValueFtoC(val)) + "\u00B0C");
+                deadBand.add( ((val)) + "\u00B0C");
             }
 
         }else{

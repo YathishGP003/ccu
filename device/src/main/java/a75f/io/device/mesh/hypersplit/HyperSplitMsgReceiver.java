@@ -510,7 +510,7 @@ public class HyperSplitMsgReceiver {
     private static void writeThermistorInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as thermistor in CCU, but stored as type Voltage in HyperStat.");
+            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as thermistor in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -529,7 +529,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "1", then HyperSplit says input is type "thermistor" and not type "voltage". That's a problem.
         if (getBit(val, 15) == 1) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as voltage in CCU, but stored as type Thermistor in HyperStat.");
+            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as voltage in CCU, but stored as type Thermistor in HyperStat.");
             return;
         } else {
             double mvReading = getBits(val, 0, 14);
@@ -588,7 +588,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -609,7 +609,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input $rawPoint is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);

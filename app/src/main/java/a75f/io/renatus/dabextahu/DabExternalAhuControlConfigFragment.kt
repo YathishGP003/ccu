@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+
 
 /**
  * Created by Manjunath K on 06-06-2023.
@@ -76,9 +78,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                 ) {
                     item {
                         Row {
-                            Row {
-
-                            }
                             SetPointControlCompose(
                                 SET_POINT_CONTROL, state = viewModel.setPointControl
                             ) {
@@ -302,7 +301,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             contentAlignment = Alignment.Center
                         ) {
                             val radioOptions = listOf(BACNET, MODBUS)
-                            RadioButtonCompose(radioOptions) {
+                            RadioButtonCompose(radioOptions,viewModel.configType.value.ordinal) {
                                 when (it) {
                                     BACNET -> {
                                         viewModel.configType.value =
@@ -336,25 +335,26 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun SaveConfig() {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(PaddingValues(top = 20.dp)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ){
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(bottom = 20.dp, end = 10.dp)),
-                contentAlignment = Alignment.CenterEnd
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                contentAlignment = Alignment.Center
+            ) { SaveTextView(CANCEL) {  } }
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                contentAlignment = Alignment.Center
             ) {
                 SaveTextView(SET) { viewModel.saveConfiguration() }
             }
-        }
-        Row {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                SaveTextView(CANCEL) {  }
-            }
+
         }
     }
 

@@ -38,6 +38,7 @@ class HyperStatSplitUserIntentHandler {
             analogOutStages: HashMap<String, Int>,
             temperatureState: ZoneTempState,
             economizingLoopOutput: Int,
+            dcvLoopOutput: Int,
             condensateOverflow: Double,
             filterDirty: Double,
         ) {
@@ -192,7 +193,7 @@ class HyperStatSplitUserIntentHandler {
                       */
                     if(economizingLoopOutput > 0) {
                         status += "Free Cooling ON"
-                    } else {
+                    } else if (dcvLoopOutput > 0) {
                         status += "DCV ON"
                     }
                 }

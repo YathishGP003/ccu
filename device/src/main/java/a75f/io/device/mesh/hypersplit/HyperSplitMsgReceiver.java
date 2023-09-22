@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleFanMode;
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -105,10 +106,44 @@ public class HyperSplitMsgReceiver {
 
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
 
-        // TODO: add logic to check for and create any sensor points that will be added dynamically
-
         DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
                 .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack, equipRef));
+
+        writeSensorInputsToHaystackDatabase(regularUpdateMessage.getRegularUpdateCommon(), nodeAddress);
+
+    }
+
+    private static void writeSensorInputsToHaystackDatabase(HyperSplit.RegularUpdateCommon_t common, int nodeAddress) {
+
+        HyperStatSplitDevice hss = new HyperStatSplitDevice(nodeAddress);
+
+        /*
+            Onboard sensor points that are not part of base HyperLite (e.g. PM2.5) are not created with the device.
+
+            Point is only created when it appears in a regular update message.
+
+            Regular update message
+         */
+
+        if (common.getPressure() > 0) {
+            RawPoint sp = hss.getRawPoint(Port.SENSOR_PRESSURE);
+            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PRESSURE);
+        }
+
+        if (common.getPm2P5() > 0) {
+            RawPoint sp = hss.getRawPoint(Port.SENSOR_PM2P5);
+            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PM2P5);
+        }
+
+        if (common.getPm10() > 0) {
+            RawPoint sp = hss.getRawPoint(Port.SENSOR_PM10);
+            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PM10);
+        }
+
+        if (common.getUltravioletIndex() > 0) {
+            RawPoint sp = hss.getRawPoint(Port.SENSOR_UVI);
+            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_UVI);
+        }
 
     }
 
@@ -203,11 +238,9 @@ public class HyperSplitMsgReceiver {
             writeCO2Val(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_VOC) {
-            Log.d(L.TAG_CCU_SERIAL, "Detected a VOC physical point");
             writeVOCVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_SOUND) {
-            Log.d(L.TAG_CCU_SERIAL, "Detected a Sound physical point");
             writeSoundVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PM2P5) {
@@ -236,6 +269,9 @@ public class HyperSplitMsgReceiver {
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PRESSURE) {
             writePressureSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
+        }
+        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_UVI) {
+            writeUviSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
     }
 
@@ -372,7 +408,14 @@ public class HyperSplitMsgReceiver {
 
     }
 
-    // TODO: verify that this query works
+    private static void writeUviSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
+            regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
+
+        hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
+        hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
+
+    }
+
     private static boolean isSensorBusAddressMapped(CCUHsApi hsApi, String addr, int association, String equipRef) {
 
         if (hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and enabled and equipRef == \"" + equipRef + "\"") == 1.0 &&
@@ -633,14 +676,12 @@ public class HyperSplitMsgReceiver {
 
     private static void writeVOCVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
-        Log.i(L.TAG_CCU_SERIAL, "VOC : "+regularUpdateMessage.getRegularUpdateCommon().getVoc());
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getVoc());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getVoc());
     }
 
     private static void writeSoundVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
-        Log.i(L.TAG_CCU_SERIAL, "Sound : "+regularUpdateMessage.getRegularUpdateCommon().getSound());
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getSound());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getSound());
     }

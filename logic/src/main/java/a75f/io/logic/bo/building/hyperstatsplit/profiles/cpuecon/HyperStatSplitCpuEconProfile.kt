@@ -192,7 +192,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         logIt("Equip Running : $curState")
 
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
-            equip.equipRef!!, relayStages, analogOutStages, temperatureState, economizingLoopOutput,
+            equip.equipRef!!, relayStages, analogOutStages, temperatureState,
+            economizingLoopOutput, dcvLoopOutput,
             equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
         )
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile() complete")
@@ -1068,7 +1069,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             portStages = HashMap(),
             analogOutStages = HashMap(),
             temperatureState = ZoneTempState.TEMP_DEAD,
-            economizingLoopOutput,
+            economizingLoopOutput, dcvLoopOutput,
             hsSplitHaystackUtil.getCondensateOverflowStatus(),
             hsSplitHaystackUtil.getFilterStatus()
         )

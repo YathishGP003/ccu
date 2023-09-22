@@ -8,6 +8,16 @@ import static a75f.io.api.haystack.Tags.UNIVERSAL5;
 import static a75f.io.api.haystack.Tags.UNIVERSAL6;
 import static a75f.io.api.haystack.Tags.UNIVERSAL7;
 import static a75f.io.api.haystack.Tags.UNIVERSAL8;
+import static a75f.io.logic.BacnetUtilKt.ANALOG_VALUE;
+import static a75f.io.logic.BacnetUtilKt.BINARY_VALUE;
+import static a75f.io.logic.BacnetUtilKt.CO2;
+import static a75f.io.logic.BacnetUtilKt.CO2EQUIVALENT;
+import static a75f.io.logic.BacnetUtilKt.HUMIDITY;
+import static a75f.io.logic.BacnetUtilKt.ILLUMINANCE;
+import static a75f.io.logic.BacnetUtilKt.OCCUPANCY;
+import static a75f.io.logic.BacnetUtilKt.SOUND;
+import static a75f.io.logic.BacnetUtilKt.VOC;
+import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 
 import android.util.Log;
 
@@ -15,9 +25,12 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -434,6 +447,126 @@ public class HyperStatSplitDevice {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(sensor);
+    }
+
+    public RawPoint createSensorPoints(Port p) {
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
+                .read("equip and group == \""+hyperStatNodeAddress+"\"")).build();
+        String sensorUnit = "";
+        boolean isOccupancySensor = false;
+        boolean hasAirMarker = false;
+        switch (p){
+            case SENSOR_NO:
+            case SENSOR_CO2_EQUIVALENT:
+            case SENSOR_CO:
+            case SENSOR_CO2:
+                sensorUnit = "ppm";
+                hasAirMarker = true;
+                break;
+            case SENSOR_ILLUMINANCE:
+                sensorUnit = "lux";
+                break;
+            case SENSOR_PRESSURE:
+                sensorUnit = Consts.PRESSURE_UNIT;
+                break;
+            case SENSOR_SOUND:
+                sensorUnit = "dB";
+                break;
+            case SENSOR_VOC:
+                sensorUnit = "ppb";
+                hasAirMarker = true;
+                break;
+            case SENSOR_PM2P5:
+            case SENSOR_PM10:
+                sensorUnit =  "ug/\u33A5";
+                break;
+            case SENSOR_OCCUPANCY:
+                isOccupancySensor = true;
+                break;
+            default:
+                break;
+        }
+        Point.Builder equipSensor = null;
+
+        if(isOccupancySensor){
+            equipSensor = new Point.Builder()
+                    .setDisplayName(equip.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
+                    .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
+                    .setGroup(String.valueOf(hyperStatNodeAddress))
+                    .setEnums("off,on")
+                    .setTz(tz);
+
+        }else {
+            equipSensor = new Point.Builder()
+                    .setDisplayName(equip.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
+                    .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
+                    .setGroup(String.valueOf(hyperStatNodeAddress))
+                    .setUnit(sensorUnit)
+                    .setTz(tz);
+        }
+        if (equip.getMarkers().contains(Tags.MONITORING)) {
+            equipSensor.addMarker(Tags.MONITORING);
+        }
+
+        if (hasAirMarker) {
+            equipSensor.addMarker(Tags.AIR);
+        }
+
+        Point sensorPoint = equipSensor.build();
+
+        switch (p.getPortSensor()){
+            case OCCUPANCY:
+                addBacnetTags(sensorPoint, 40, BINARY_VALUE, hyperStatNodeAddress);
+                break;
+            case HUMIDITY:
+                addBacnetTags(sensorPoint, 38, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case ILLUMINANCE:
+                addBacnetTags(sensorPoint, 39, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case CO2:
+                addBacnetTags(sensorPoint, 4, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case VOC:
+                addBacnetTags(sensorPoint, 45, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case CO2EQUIVALENT:
+                addBacnetTags(sensorPoint, 5, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+            case SOUND:
+                addBacnetTags(sensorPoint, 44, ANALOG_VALUE, hyperStatNodeAddress);
+                break;
+        }
+
+        String pointRef = CCUHsApi.getInstance().addPoint(sensorPoint);
+
+        RawPoint deviceSensor = new RawPoint.Builder()
+                .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(true)
+                .addMarker("sensor").addMarker("his")
+                .setPort(p.toString())
+                .setTz(tz)
+                .build();
+        deviceSensor.setId(CCUHsApi.getInstance().addPoint(deviceSensor));
+
+        CCUHsApi.getInstance().scheduleSync();
+
+        return deviceSensor;
     }
 
     public RawPoint getRawPoint(Port p) {

@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -89,9 +90,7 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.profileContainer, new DabExternalAhuControlConfigFragment()).commit();
-              /*  switch (i) {
+                switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
                             getActivity().getSupportFragmentManager().beginTransaction()
@@ -187,7 +186,7 @@ public class SystemProfileFragment extends Fragment {
                     case 9:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new DabExternalAHUControlConfigFragment()).commit();
+                                    .replace(R.id.profileContainer, new DabExternalAhuControlConfigFragment()).commit();
 
                         } else {
                             Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
@@ -206,7 +205,7 @@ public class SystemProfileFragment extends Fragment {
                                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                     }
                     break;
-                }*/
+                }
             }
 
             @Override

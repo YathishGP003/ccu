@@ -1,8 +1,10 @@
 package a75f.io.renatus.dabextahu
 
-import a75f.io.domain.config.AdvancedAhuConfiguration
+import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
+import a75f.io.domain.util.ModelNames
+import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.compose.ModelMetaData
@@ -27,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.JsonParseException
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
  * Created by Manjunath K on 08-08-2022.
@@ -43,14 +46,9 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
     var configType = mutableStateOf(ConfigType.BACNET)
     lateinit var deviceModelList: List<ModelMetaData>
+    lateinit var profileModelDefination: SeventyFiveFProfileDirective
 
-    var setPointControl: Boolean by mutableStateOf(false)
-    var dualSetPointControl: Boolean by mutableStateOf(false)
-    var fanStaticSetPointControl: Boolean by mutableStateOf(false)
-    var dcvControl: Boolean by mutableStateOf(false)
-    var occupancyMode: Boolean by mutableStateOf(false)
-    var humidifierControl: Boolean by mutableStateOf(false)
-    var dehumidifierControl: Boolean by mutableStateOf(false)
+    var configModel = mutableStateOf(ExternalAhuConfigModel())
 
     var heatingMinSp: String by mutableStateOf("1.0")
     var heatingMaxSp: String by mutableStateOf("1.0")
@@ -88,16 +86,16 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
                         }
                         deviceList.value = itemList
                     } else {
-                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND, true)
+                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND)
                     }
                 } catch (e: Exception) {
-                    showErrorDialog(context, NO_INTERNET, true)
+                    showErrorDialog(context, NO_INTERNET)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET, true)
+                showErrorDialog(context, NO_INTERNET)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -105,27 +103,41 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
 
     fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
-        this.context = context
-        childSlaveIdList.value = getSlaveIds(false)
-        slaveIdList.value = getSlaveIds(true)
-        if (!equipModel.value.isDevicePaired)
-            equipModel.value.slaveId.value = 1
-        //var modelDef = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        try {
+
+            this.context = context
+            childSlaveIdList.value = getSlaveIds(false)
+            slaveIdList.value = getSlaveIds(true)
+            if (!equipModel.value.isDevicePaired)
+                equipModel.value.slaveId.value = 1
+
+            loadModel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            ProgressDialogUtils.hideProgressDialog()
+        }
+    }
+
+
+    private fun loadModel() {
+        val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        if (def != null) {
+            profileModelDefination = def as SeventyFiveFProfileDirective
+            configModel.value.render(profileModelDefination)
+        }
+
+    /*RxjavaUtil.executeBackground {
+
+        }*/
     }
 
 
     fun saveConfiguration() {
-        val profile = AdvancedAhuConfiguration(1000, "HS", 0, "", "")
+        val profile = ExternalAhuConfiguration(1000, "HS", 0, "", "")
         //domainModeler.addEquip(profileConfiguration = profile)
         //Log.i("Domain", "save configuration: ${getValues()}")
 
-    }
-
-    private fun getValues(): String {
-        return "setPointControl: $setPointControl " +
-                "dualSetPointControl $dualSetPointControl " +
-                "heatingMinSp $heatingMinSp heatingMaxSp $heatingMaxSp " +
-                "coolingMinSp $coolingMinSp coolingMaxSp $coolingMaxSp "
     }
 
 
@@ -172,19 +184,19 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
                                 equipModel.value.subEquips = mutableListOf()
                             }
                         } else {
-                            showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
+                            showErrorDialog(context, NO_MODEL_DATA_FOUND)
                         }
                     } catch (e: JsonParseException) {
-                        showErrorDialog(context, NO_INTERNET, true)
+                        showErrorDialog(context, NO_INTERNET)
                     }
                 } else {
-                    showErrorDialog(context, NO_INTERNET, true)
+                    showErrorDialog(context, NO_INTERNET)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET, true)
+                showErrorDialog(context, NO_INTERNET)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })

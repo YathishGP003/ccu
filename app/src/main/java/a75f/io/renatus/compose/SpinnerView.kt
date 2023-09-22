@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
  */
 
 @Composable
-fun SpinnerElement(defaultSelection:Int, items: List<String>, itemSelected: (String) -> Unit) {
+fun SpinnerElement(defaultSelection:Int, items: List<String>, unit: String, itemSelected: (String) -> Unit) {
     val selectedItem = remember { mutableStateOf(items[defaultSelection]) }
     val expanded = remember { mutableStateOf(false) }
     Box(modifier = Modifier
@@ -44,9 +44,9 @@ fun SpinnerElement(defaultSelection:Int, items: List<String>, itemSelected: (Str
         )) {
         Column ( modifier = Modifier.width(100.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( fontSize = 20.sp, modifier = Modifier.width(50.dp),text = selectedItem.value)
+                Text( fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp), text = selectedItem.value)
+                Text( fontSize = 20.sp, modifier = Modifier.width(50.dp),text = unit)
                 Image(
-
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "Custom Icon",
                     modifier = Modifier.size(24.dp).width(50.dp)
@@ -60,7 +60,9 @@ fun SpinnerElement(defaultSelection:Int, items: List<String>, itemSelected: (Str
             items.forEach { item ->
                 DropdownMenuItem(
                     modifier = Modifier.background(Color.White),
-                    text = { Text(fontSize = 20.sp,  text = item) }, onClick = {
+                    text = {  Row { Text(fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp), text = item)
+                                    Text(fontSize = 20.sp,  text = unit) }
+                           }, onClick = {
                     selectedItem.value = item
                     expanded.value = false
                     itemSelected(item)

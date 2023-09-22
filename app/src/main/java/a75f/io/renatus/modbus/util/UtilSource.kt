@@ -7,7 +7,6 @@ import a75f.io.renatus.R
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
@@ -133,15 +132,13 @@ fun getSlaveIds(isParent: Boolean): List<String> {
     return slaveAddress
 }
 
-fun showErrorDialog(context: Context, message: String, wantToDismiss: Boolean) {
+fun showErrorDialog(context: Context, message: String) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle(WARNING)
     builder.setIcon(R.drawable.ic_warning)
     builder.setMessage(message)
     builder.setCancelable(false)
     builder.setPositiveButton(OK) { dialog, _ ->
-        //     if (wantToDismiss)
-        //        _isDialogOpen.value = false
         dialog.dismiss()
     }
     builder.create().show()

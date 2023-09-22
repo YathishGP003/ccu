@@ -4,7 +4,7 @@ package a75f.io.domain.config
  * Created by Manjunath K on 13-06-2023.
  */
 
-class AdvancedAhuConfiguration(nodeAddress: Int,
+class ExternalAhuConfiguration(nodeAddress: Int,
                                nodeType: String, priority: Int, roomRef : String, floorRef : String
 ) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef ) {
     override fun getAssociationConfigs() : List<AssociationConfig> {

@@ -147,16 +147,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         }
                         deviceList.value = itemList
                     } else {
-                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND, true)
+                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND)
                     }
                 } catch (e: Exception) {
-                    showErrorDialog(context, NO_INTERNET, true)
+                    showErrorDialog(context, NO_INTERNET)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET, true)
+                showErrorDialog(context, NO_INTERNET)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -191,19 +191,19 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                                 equipModel.value.subEquips = mutableListOf()
                             }
                         } else {
-                            showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
+                            showErrorDialog(context, NO_MODEL_DATA_FOUND)
                         }
                     } catch (e: JsonParseException) {
-                        showErrorDialog(context, NO_INTERNET, true)
+                        showErrorDialog(context, NO_INTERNET)
                     }
                 } else {
-                    showErrorDialog(context, NO_INTERNET, true)
+                    showErrorDialog(context, NO_INTERNET)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET, true)
+                showErrorDialog(context, NO_INTERNET)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })

@@ -155,8 +155,9 @@ public class UpdateScheduleHandler implements MessageHandler
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                 s.setId(uid);
-                if (s.getRoomRef() != null && s.isZoneSchedule())
+                if (s.getRoomRef() != null && s.isZoneSchedule() && CCUHsApi.getInstance().isEntityExisting(s.getRoomRef()))
                 {
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Add zone schedule "+s);
                     CCUHsApi.getInstance().addSchedule(uid, s.getZoneScheduleHDict(s.getRoomRef()));
                 }
                 else if (s.isBuildingSchedule()&& !s.isZoneSchedule())
@@ -298,5 +299,10 @@ public class UpdateScheduleHandler implements MessageHandler
         }
         long timeToken = jsonObject.get("timeToken").getAsLong();
         handleMessage(jsonObject, timeToken);
+    }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        return false;
     }
 }

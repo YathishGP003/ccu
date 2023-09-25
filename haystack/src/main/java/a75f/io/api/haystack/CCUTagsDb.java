@@ -1816,4 +1816,8 @@ public class CCUTagsDb extends HServer {
     private HayStackEntity getEntityFromDict() {
         return null;
     }
+
+    public boolean isEntityExisting(HRef id) {
+        return tagsMap.keySet().contains(id.val);
+    }
 }

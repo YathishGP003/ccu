@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -190,6 +191,26 @@ public class UpdateEntityHandler implements MessageHandler {
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         long timeToken = jsonObject.get("timeToken").getAsLong();
         updateEntity(jsonObject, timeToken);
+    }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        AtomicBoolean validMessage = new AtomicBoolean(true);
+        jsonObject.get("ids").getAsJsonArray().forEach( msgJson -> {
+            CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
+            String uid = msgJson.toString().replaceAll("\"", "");
+            HashMap<Object,Object> entity = ccuHsApi.readEntity("id == " + HRef.make(uid));
+            if((entity.get(Tags.MODBUS) != null && entity.get(Tags.EQUIP) != null)
+                    || entity.get("room") != null
+                    || entity.get("floor") != null){
+                CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler handle updated "+entity);
+                validMessage.set(false);
+            }
+
+        });
+        return validMessage.get();
     }
 
     private static void updateBuildingOccupancy(String uid){

@@ -171,4 +171,9 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public List<String> getCommand() {
         return Collections.singletonList(CMD);
     }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        return false;
+    }
 }

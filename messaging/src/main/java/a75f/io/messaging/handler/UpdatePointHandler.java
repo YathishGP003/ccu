@@ -53,9 +53,9 @@ public class UpdatePointHandler implements MessageHandler
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
 
-        if (canIgnorePointUpdate(src, pointUid, hayStack)) {
+        /*if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
-        }
+        }*/
         if(!isCloudEntityHasLatestValue(pointEntity, timeToken)){
             Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
             return;
@@ -374,5 +374,13 @@ public class UpdatePointHandler implements MessageHandler
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) throws MessageHandlingFailed {
         long timeToken = jsonObject.get("timeToken").getAsLong();
         handlePointUpdateMessage(jsonObject, timeToken, false);
+    }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+
+        String src = jsonObject.get("who").getAsString();
+        String pointUid = "@" + jsonObject.get("id").getAsString();
+        return canIgnorePointUpdate(src, pointUid, CCUHsApi.getInstance());
     }
 }

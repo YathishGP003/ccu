@@ -2629,7 +2629,7 @@ public class CCUHsApi
 
     public boolean isEntityExisting(String id) {
         HashMap<Object, Object> entity = readMapById(id);
-        return !entity.isEmpty();
+        return tagsDb.isEntityExisting(HRef.copy(id));
     }
 
     public void setEntitySynced(String id) {

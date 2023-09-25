@@ -92,6 +92,8 @@ public class PreferenceUtil {
 
     public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
 
+    private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -730,5 +732,13 @@ public class PreferenceUtil {
     }
     public static void installationCompleted() {
         setBooleanPreference(INSTALL_CCU_IN_PROGRESS, false);
+    }
+
+    public static boolean getCleanUpOtherCcuZoneSchedules() {
+        return getBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES);
+    }
+
+    public static void setCleanUpOtherCcuZoneSchedules() {
+        setBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES, true);
     }
 }

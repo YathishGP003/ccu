@@ -278,6 +278,12 @@ public class MigrationUtil {
             addSingleAndDualTempSupportForAllZones(CCUHsApi.getInstance());
             PreferenceUtil.setZonesMigratedForSingleAndDualTempSupport();
         }
+
+        if (!PreferenceUtil.getCleanUpOtherCcuZoneSchedules()) {
+            cleanupOtherCcuZoneSchedules(CCUHsApi.getInstance());
+            PreferenceUtil.setCleanUpOtherCcuZoneSchedules();
+        }
+
         if(!PreferenceUtil.getCcuRefTagMigration()){
             Log.i(TAG, "ccuRef migration started");
             CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
@@ -2229,6 +2235,35 @@ public class MigrationUtil {
         points.forEach(point -> {
             Point up = new Point.Builder().setHashMap(point).addMarker("default").build();
             CCUHsApi.getInstance().updatePoint(up, up.getId());
+        });
+    }
+
+    /**
+     * There has been a bug in updateScheduleHandler that resulted in zoneSchedules from other CCUs gets saved in
+     * all the CCUs when there is an updateSchedule message.
+     * This had no functional impact , but can results invalid message and data traffic.
+     * @param hayStack
+     */
+    private static void cleanupOtherCcuZoneSchedules(CCUHsApi hayStack) {
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "cleanupOtherCcuZoneSchedules ");
+        ArrayList<HashMap<Object, Object>> zoneSpecialScheduleList = hayStack.readAllEntities("zone " +
+                "and not special and schedule");
+        String ccuId = hayStack.getCcuId();
+        zoneSpecialScheduleList.forEach( scheduleMap -> {
+            Object roomRef = scheduleMap.get(Tags.ROOMREF);
+            if (roomRef != null && !hayStack.isEntityExisting(roomRef.toString())) {
+                hayStack.removeEntity(scheduleMap.get(Tags.ID).toString());
+                CcuLog.i(TAG_CCU_MIGRATION_UTIL, "delete invalid zone schedule "+scheduleMap);
+            } else {
+                Object ccuRef = scheduleMap.get("ccuRef");
+                if (ccuRef == null || !ccuRef.toString().equals(ccuId)) {
+                    CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Update zoneSchedule ccuRef "+ccuRef+"->"+ccuId);
+                    scheduleMap.put("ccuRef", hayStack.getCcuId());
+                    Schedule schedule = hayStack.getScheduleById(scheduleMap.get("id").toString());
+                    hayStack.updateScheduleNoSync(schedule, scheduleMap.get("roomRef").toString());
+                }
+            }
+
         });
     }
 }

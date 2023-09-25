@@ -1,18 +1,21 @@
 package a75f.io.messaging.service
 
 import a75f.io.data.message.DatabaseHelper
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
 import a75f.io.data.message.Message
 import a75f.io.data.message.updateMessage
 import a75f.io.data.message.updateMessageHandled
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.messaging.MessageHandler
+import a75f.io.messaging.exceptions.InvalidMessageFormatException
 import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler
 import a75f.io.messaging.messageToJson
 import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
+import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
@@ -113,6 +116,11 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             return true
         }
         return false
+    }
+
+    fun canIgnoreTheMessage(message: Message) : Boolean {
+        val messageHandler = messageHandlers.find { it.command.contains(message.command) }
+        return messageHandler?.ignoreMessage(messageToJson(message), appContext) ?: true
     }
 
     private fun updateMessageFailed(message: Message, e : java.lang.Exception) {

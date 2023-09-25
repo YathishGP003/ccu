@@ -2461,6 +2461,14 @@ public class CCUHsApi
             ccuJsonRequest.put(CcuFieldConstants.FACILITY_MANAGER_EMAIL, facilityManagerEmail);
             ccuJsonRequest.put(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
 
+            /*HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
+            if (!tunerEquip.isEmpty()) {
+                JSONObject tunerFiled = new JSONObject();
+                tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
+                tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
+            }*/
+
         } catch (JSONException jsonException) {
             ccuJsonRequest = null;
             Log.e("CCURegInfo","Unable to construct a valid CCU registration request", jsonException);

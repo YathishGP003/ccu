@@ -44,8 +44,8 @@ fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, i
         )) {
         Column ( modifier = Modifier.width(100.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp), text = selectedItem.value)
-                Text( fontSize = 20.sp, modifier = Modifier.width(50.dp),text = unit)
+                Text( fontSize = 20.sp, modifier = Modifier.padding(end = 5.dp), text = selectedItem.value)
+                Text( fontSize = 20.sp, modifier = Modifier.width(120.dp),text = unit)
                 Image(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "Custom Icon",

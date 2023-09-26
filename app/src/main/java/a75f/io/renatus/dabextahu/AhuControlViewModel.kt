@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import java.text.DecimalFormat
 
 /**
  * Created by Manjunath K on 08-08-2022.
@@ -144,21 +145,18 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
     fun itemsFromMinMax(min: Double,max: Double, increment: Double): List<String> {
         require(min <= max) { "Minimum value must be less than or equal to the maximum value" }
         require(increment > 0.0) { "Increment value must be greater than zero" }
-
+        val decimalFormat = DecimalFormat("#." + "#".repeat(2))
         val result = mutableListOf<String>()
         var current = min
 
         while (current <= max) {
-            result.add(current.toString())
+            result.add(decimalFormat.format(current).toString())
             current += increment
         }
 
         return result
     }
 
-    fun generateListWithDoubleIncrement(min: Double, max: Double, increment: Double): List<Double> {
-
-    }
     enum class ConfigType {
         BACNET,MODBUS
     }

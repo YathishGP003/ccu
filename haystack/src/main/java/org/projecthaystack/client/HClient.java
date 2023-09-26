@@ -889,8 +889,11 @@ public class HClient extends HProj
   ///////////////////////////////////////////////////////////////////////
   public HGrid invoke(String op, HGrid req, RetryCountCallback retryCountCallback) {
     CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
-    CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
+    if (req.isEmpty()) {
+      CcuLog.d("CCU_HCLIENT", "Empty Req: "+req);
+      return null;
+    }
     String reqStr = HZincWriter.gridToString(req, getVersion());
     String resStr = postStringWithRetry(uri + op, reqStr, retryCountCallback);
     HGrid res = (resStr == null ? null : new HZincReader(resStr).readGrid());

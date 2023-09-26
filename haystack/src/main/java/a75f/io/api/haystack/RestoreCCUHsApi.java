@@ -76,6 +76,10 @@ public class RestoreCCUHsApi {
     }
 
     public void importZoneSpecialSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
+        if (zoneRefSet.isEmpty()) {
+            Log.i(TAG, "Importing Zone special schedule aborted : zoneRefSet is empty");
+            return;
+        }
         StringBuilder zoneRefString = new StringBuilder("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -109,7 +113,11 @@ public class RestoreCCUHsApi {
     }
 
     public void importZoneSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Importing Zone  schedule started");
+        Log.i(TAG, "Importing Zone schedule started");
+        if (zoneRefSet.isEmpty()) {
+            Log.i(TAG, "Importing Zone schedule aborted : zoneRefSet is empty");
+            return;
+        }
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -167,6 +175,10 @@ public class RestoreCCUHsApi {
 
     public void importFloors(Set<String> floorRefSet, RetryCountCallback retryCountCallback) {
         Log.i(TAG, " Importing floor started");
+        if (floorRefSet.isEmpty()) {
+            Log.i(TAG, " Importing floor aborted : floorRefSet is empty");
+            return;
+        }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[floorRefSet.size()];
         int index = 0;
@@ -188,6 +200,10 @@ public class RestoreCCUHsApi {
 
     public void importZones(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
         Log.i(TAG, " Importing Zone started");
+        if (zoneRefSet.isEmpty()) {
+            Log.i(TAG, " Importing zone aborted : zoneRefSet is empty");
+            return;
+        }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[zoneRefSet.size()];
         int index = 0;
@@ -690,127 +706,6 @@ public class RestoreCCUHsApi {
             e.printStackTrace();
         }
     }
-
-
-    /**
-     * copied from CCuHsApi
-     * @param siteId
-     * @param hClient
-     */
-
-    private void importBuildingTuners(String siteId, HClient hClient,RetryCountCallback retryCountCallback) {
-        CcuLog.i(TAG, " import BuildingTuners started");
-        ArrayList<Equip> equips = new ArrayList<>();
-        ArrayList<Point> points = new ArrayList<>();
-        ArrayList<Point> schedulablePoints = new ArrayList<>();
-        try {
-            HDict tunerEquipDict = new HDictBuilder().add("filter",
-                    "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerEquipGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerEquipDict), retryCountCallback);
-            if (tunerEquipGrid == null) {
-                throw new NullHGridException("Null occurred while importing building tuner");
-            }
-            List<HashMap> equipMaps = ccuHsApi.HGridToList(tunerEquipGrid);
-            equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
-
-            HDict tunerPointsDict = new HDictBuilder().add("filter",
-                    "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict), retryCountCallback);
-            if (tunerPointsGrid == null) {
-                throw new NullHGridException("Null occurred while importing building tuner");
-            }
-
-            List<HashMap> pointMaps = ccuHsApi.HGridToList(tunerPointsGrid);
-            pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
-
-
-            HDict schedulablePointsDict = new HDictBuilder().add("filter",
-                    "schedulable and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid schedulablePointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(schedulablePointsDict),retryCountCallback);
-            if (schedulablePointsGrid == null) {
-                throw new NullHGridException("Null occurred while importing building schedulable");
-            }
-
-            List<HashMap> schedpointMaps = ccuHsApi.HGridToList(schedulablePointsGrid);
-            schedpointMaps.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
-
-            HDict buildinglimitDict = new HDictBuilder().add("filter",
-                    "building and (limit or differential) and not tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid buildinglimitGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildinglimitDict),retryCountCallback);
-            if (buildinglimitGrid == null) {
-                throw new NullHGridException("Null occurred while importing building limits");
-            }
-
-            List<HashMap> buildingLimits = ccuHsApi.HGridToList(buildinglimitGrid);
-            buildingLimits.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
-
-        } catch (UnknownRecException e) {
-            e.printStackTrace();
-        }
-
-
-        CCUHsApi hsApi = CCUHsApi.getInstance();
-        for (Equip q : equips) {
-            CcuLog.i(TAG, " Equip -"+q.getDisplayName());
-            if (q.getMarkers().contains("tuner"))
-            {
-                String equiUuid;
-                HashMap tunerEquip = ccuHsApi.read("tuner and equip");
-                if (!tunerEquip.isEmpty()) {
-                    equiUuid = tunerEquip.get("id").toString();
-                } else {
-                    q.setSiteRef(hsApi.getSiteIdRef().toString());
-                    q.setFloorRef("@SYSTEM");
-                    q.setRoomRef("@SYSTEM");
-                    equiUuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                    hsApi.setSynced(equiUuid);
-                }
-                //Points
-                for (Point p : points)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
-                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
-                        HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
-                        if (point.isEmpty()) {
-                            p.setSiteRef(hsApi.getSiteIdRef().toString());
-                            p.setFloorRef("@SYSTEM");
-                            p.setRoomRef("@SYSTEM");
-                            p.setEquipRef(equiUuid);
-                            String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
-                            hsApi.setSynced(pointLuid);
-                        } else {
-                            CcuLog.i(TAG, "Point already imported "+p.getId());
-                        }
-
-                    }
-                }
-
-                //Points
-                for (Point p : schedulablePoints)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
-                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
-                        HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
-                        if (point.isEmpty()) {
-                            p.setSiteRef(hsApi.getSiteIdRef().toString());
-                            p.setFloorRef("@SYSTEM");
-                            p.setRoomRef("@SYSTEM");
-                            p.setEquipRef(equiUuid);
-                            String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
-                            hsApi.setSynced(pointLuid);
-                        } else {
-                            CcuLog.i(TAG, "Schedulable default Point already imported "+p.getId());
-                        }
-
-                    }
-                }
-            }
-        }
-        CcuLog.i(TAG," importBuildingTuners Completed");
-    }
-
     public HGrid getRemoteSite(String siteId, RetryCountCallback retryCountCallback) {
         /* Sync a site*/
         HClient hClient   = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -860,8 +755,6 @@ public class RestoreCCUHsApi {
 
         //import building special schedule
         importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"),hClient,false, retryCountCallback);
-        //import building tuners
-        importBuildingTuners(siteId, hClient, retryCountCallback);
 
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
@@ -992,7 +885,11 @@ public class RestoreCCUHsApi {
     }
 
     public void importSchedulablePoints(Set<String> zoneRefSet ,RetryCountCallback retryCountCallback) {
-        Log.i(TAG, " Importing Zone  schedulable started");
+        Log.i(TAG, " Importing Zone schedulable started");
+        if (zoneRefSet.isEmpty()) {
+            Log.i(TAG, " Importing Zone schedulable aborted : zoneRefSet is empty");
+            return;
+        }
         ArrayList<Point> points = new ArrayList<>();
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;

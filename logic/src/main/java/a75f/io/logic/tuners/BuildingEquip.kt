@@ -125,12 +125,11 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
                 val id = row["id"].toString()
                 val kind = row["kind"].toString()
                 val data = row["data"]
-                CcuLog.i(L.TAG_CCU_TUNER, "Import point array $data")
+                CcuLog.i(L.TAG_CCU_TUNER, "Imported point array $data")
                 if (data is HList && data.size() > 0) {
                     for ( index in 0 until data.size()) {
                         val dataElement = data[index] as HDict
                         val level = dataElement["level"].toString()
-                        CcuLog.i(L.TAG_CCU_TUNER, "Write data:  $data")
                         if (level.toInt() == 16) {
                             CcuLog.i(L.TAG_CCU_TUNER, "Sync Level 16 to CCU")
                             val who = dataElement.getStr("who")

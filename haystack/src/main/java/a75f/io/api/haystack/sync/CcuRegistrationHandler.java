@@ -21,7 +21,7 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 
-class CcuRegistrationHandler {
+public class CcuRegistrationHandler {
     public static final String TAG = "CCU_HS_CcuSyncHandler";
 
     public boolean doSync() {
@@ -36,6 +36,12 @@ class CcuRegistrationHandler {
             return true;
         }
 
+
+        return updateCcuDeviceId(ccu, id, null);
+    }
+
+    public boolean updateCcuDeviceId(HashMap<Object, Object> ccu, String id, String buildTunerId) {
+        CcuLog.d(TAG, "updateCcuDeviceId "+id+" buildTunerId "+buildTunerId);
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String siteRef = site.get("id").toString();
@@ -67,8 +73,9 @@ class CcuRegistrationHandler {
                     gatewayRef,
                     equipRef,
                     ccu.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString(),
-                    ccu.get(CcuFieldConstants.INSTALLER_EMAIL).toString()
-            );
+                    ccu.get(CcuFieldConstants.INSTALLER_EMAIL).toString(),
+                    buildTunerId
+                    );
 
             if (ccuUpdateJson != null) {
                 // TODO Matt Rudd - Add the ability to call put in order to sync the CCU
@@ -88,7 +95,6 @@ class CcuRegistrationHandler {
                 }
             }
         }
-
         return true;
     }
 }

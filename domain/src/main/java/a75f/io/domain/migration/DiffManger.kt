@@ -1,8 +1,11 @@
 package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.EntityConfiguration
+import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.util.ResourceHelper
+import a75f.io.logger.CcuLog
 import android.content.Context
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDiff
@@ -31,11 +34,15 @@ class DiffManger(var context: Context?) {
      * check the model version and find the diff and update the model definition
      */
     fun processModelMigration(siteRef: String) {
+        Log.i(Domain.LOG_TAG, "processModelMigration")
         val metaData : MutableList<ModelMeta> =  getModelFileVersionDetails(NEW_VERSION)
+        Log.i(Domain.LOG_TAG, " Found ${metaData.size} models at $NEW_VERSION")
         val anyInvalidModels = ModelValidator.validateAllDomainModels(metaData)
+        Log.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
+
         if (anyInvalidModels.isNotEmpty()) {
             anyInvalidModels.forEach {
-                Log.i("DOMAIN_MODEL", "Invalid model definition $it: ")
+                Log.i(Domain.LOG_TAG, "Invalid model definition $it: ")
                 val invalidModel = metaData.find { model -> model.modelId == it }
                 if(invalidModel != null) {
                     metaData.remove(invalidModel)
@@ -43,7 +50,7 @@ class DiffManger(var context: Context?) {
             }
         }
         if (metaData.isEmpty()) {
-            Log.e("DOMAIN_MODEL", "No valid model found for migration ")
+            Log.e(Domain.LOG_TAG, "No valid model found for migration ")
             return
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
@@ -62,7 +69,9 @@ class DiffManger(var context: Context?) {
             val currentModelMeta = getCurrentModel(versionFiles, version.modelId)
 
             if (currentModelMeta != null) {
+                CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
+                    CcuLog.i(Domain.LOG_TAG, " Model Updated  ${version.modelId}")
                     val originalModel = getModelDetective("$ORIGINAL_FIle_PATH${version.modelId}.json")
                     val newModel = getModelDetective("$NEW_FIle_PATH${version.modelId}.json")
 

@@ -2393,7 +2393,8 @@ public class CCUHsApi
                 String gatewayRef = ccu.get("gatewayRef").toString();
                 String equipRef = ccu.get("equipRef").toString();
 
-                JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
+                JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(),
+                        dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail, null);
                 if (ccuRegistrationRequest != null) {
                     Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest);
                     String ccuRegistrationResponse = HttpUtil.executeJson(
@@ -2433,7 +2434,8 @@ public class CCUHsApi
             String gatewayRef,
             String equipRef,
             String facilityManagerEmail,
-            String installerEmail) {
+            String installerEmail,
+            String buildingTuneId) {
         JSONObject ccuJsonRequest = null;
 
         try {
@@ -2461,13 +2463,16 @@ public class CCUHsApi
             ccuJsonRequest.put(CcuFieldConstants.FACILITY_MANAGER_EMAIL, facilityManagerEmail);
             ccuJsonRequest.put(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
 
-            /*HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
-            if (!tunerEquip.isEmpty()) {
-                JSONObject tunerFiled = new JSONObject();
-                tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
-                tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
-                ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
-            }*/
+            if (buildingTuneId != null) {
+                HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
+                if (!tunerEquip.isEmpty()) {
+                    JSONObject tunerFiled = new JSONObject();
+                    tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
+                    tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                    tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, buildingTuneId);
+                    ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
+                }
+            }
 
         } catch (JSONException jsonException) {
             ccuJsonRequest = null;
@@ -3151,5 +3156,20 @@ public class CCUHsApi
                 break;
             }
         }
+    }
+
+    public HashMap<Object, Object> getRemoteBuildingTunerEquip(String siteId) {
+        HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+
+        HDict tunerEquipDict = new HDictBuilder().add("filter",
+                "tuner and equip and siteRef == " + siteId).toDict();
+        HGrid tunerEquipGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerEquipDict));
+        if (tunerEquipGrid != null) {
+            tunerEquipGrid.dump();
+            List<HashMap> equipMaps = HGridToList(tunerEquipGrid);
+            return equipMaps.get(0);
+        }
+        CcuLog.e("CCU_HS", "Failed to fetch BuildingTuner equip");
+        return null;
     }
 }

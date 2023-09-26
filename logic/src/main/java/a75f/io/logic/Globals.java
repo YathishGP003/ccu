@@ -34,6 +34,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -381,6 +382,12 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
+
+                    //TODO - Find the right place..For now just doing if registered already
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        DiffManger diffManger = new DiffManger(getApplicationContext());
+                        diffManger.processModelMigration(site.get("id").toString());
+                    }
                 }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.

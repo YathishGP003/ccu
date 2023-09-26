@@ -2,11 +2,13 @@ package a75f.io.domain
 
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.mock.MockCcuHsApi
+import a75f.io.api.haystack.sync.CcuRegistrationHandler
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.util.ModelLoader
+import a75f.io.logger.CcuLog
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.ph.core.Tags
@@ -104,7 +106,7 @@ class BuildingEquipTest {
         equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
 
         println(mockHayStack.readEntity("tuner and equip"))
-        println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h"))
+        println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h", null))
     }
     @Test
     fun tunerEquipUpgradeTest() {
@@ -122,4 +124,6 @@ class BuildingEquipTest {
     private fun Map<Any, Any>.getId() : String {
         return this[Tags.ID].toString()
     }
+
+
 }

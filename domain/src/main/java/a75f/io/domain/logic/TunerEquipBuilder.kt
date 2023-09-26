@@ -2,6 +2,7 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.sync.CcuRegistrationHandler
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
@@ -251,6 +252,16 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             }
         }
         return newEntityConfig
+    }
+
+    fun updateBackendBuildingTuner(siteRef: String, hayStack: CCUHsApi) {
+        val buildingTuner = hayStack.getRemoteBuildingTunerEquip(siteRef)
+        CcuLog.i("CCU_TUNER", " Remote buildingTuner $buildingTuner")
+        buildingTuner?.let {
+            val ccuSyncHandler = CcuRegistrationHandler()
+            val ccu = hayStack.readEntity("device and ccu")
+            ccuSyncHandler.updateCcuDeviceId(ccu, ccu["id"].toString(), buildingTuner["id"].toString())
+        }
     }
 
 }

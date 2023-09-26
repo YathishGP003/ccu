@@ -6,6 +6,7 @@ package a75f.io.renatus.dabextahu
 
 
 const val NOT_FOUND = "Not Found"
+const val EMPTY = ""
 const val LOADING = "Loading..."
 const val LOADING_ERROR = "Error While loading"
 const val SET_POINT_CONTROL = "satSetpointControlEnable"
@@ -29,6 +30,3 @@ const val TARGET_HUMIDIFIER = "targetHumidifier"
 const val TARGET_DEHUMIDIFIER = "targetDehumidifier"
 const val BACNET = "Bacnet"
 const val MODBUS = "Modbus"
-
-
-// Domain Names

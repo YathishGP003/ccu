@@ -30,7 +30,7 @@ class ExternalAhuConfigModel {
 
 
     fun render(modelDefinition: SeventyFiveFProfileDirective) {
-        var pointDef = getPointByDomainName(modelDefinition,domainName)
+        var pointDef = getPointByDomainName(modelDefinition,SET_POINT_CONTROL)
 
     }
 
@@ -42,7 +42,7 @@ class ExternalAhuConfigModel {
     }
 
 
-    private fun getPointByDomainName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): SeventyFiveFProfilePointDef? {
+    fun getPointByDomainName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): SeventyFiveFProfilePointDef? {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
 

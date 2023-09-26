@@ -28,7 +28,7 @@ fun SetPointControlCompose(title: String, state: Boolean,  onEnabled: (Boolean) 
 }
 
 @Composable
-fun SetPointConfig(title: String, defaultSelection:Int, items: List<String>, unit: String, itemSelected: (String) -> Unit){
+fun SetPointConfig(title: String, defaultSelection:String, items: List<String>, unit: String, itemSelected: (String) -> Unit){
     Row(
         modifier = Modifier.padding(10.dp).width(500.dp)
     ) {

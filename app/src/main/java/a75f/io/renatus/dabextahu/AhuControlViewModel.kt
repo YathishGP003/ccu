@@ -141,15 +141,24 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
     }
 
 
-    fun getOptions(): List<String> {
-        // TODO read it from model profile definition
-        return listOf("1.0", "2.0", "3.0", "4.0", "5.0")
+    fun itemsFromMinMax(min: Double,max: Double, increment: Double): List<String> {
+        require(min <= max) { "Minimum value must be less than or equal to the maximum value" }
+        require(increment > 0.0) { "Increment value must be greater than zero" }
+
+        val result = mutableListOf<String>()
+        var current = min
+
+        while (current <= max) {
+            result.add(current.toString())
+            current += increment
+        }
+
+        return result
     }
 
-    fun getIndexFromVal(value: String): Int {
-        return getOptions().indexOf(value)
-    }
+    fun generateListWithDoubleIncrement(min: Double, max: Double, increment: Double): List<Double> {
 
+    }
     enum class ConfigType {
         BACNET,MODBUS
     }

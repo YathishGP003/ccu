@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.sp
  */
 
 @Composable
-fun SpinnerElement(defaultSelection:Int, items: List<String>, unit: String, itemSelected: (String) -> Unit) {
-    val selectedItem = remember { mutableStateOf(items[defaultSelection]) }
+fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, itemSelected: (String) -> Unit) {
+    val selectedItem = remember { mutableStateOf(defaultSelection) }
     val expanded = remember { mutableStateOf(false) }
     Box(modifier = Modifier
         .wrapContentSize()

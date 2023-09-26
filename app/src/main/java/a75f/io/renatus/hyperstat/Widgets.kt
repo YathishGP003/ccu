@@ -1,9 +1,9 @@
 package a75f.io.renatus.hyperstat
 
+import a75f.io.renatus.views.CustomCCUSwitch
 import android.view.View
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.ToggleButton
 
 /**
  * Created by Manjunath K on 18-07-2022.
@@ -11,12 +11,12 @@ import android.widget.ToggleButton
 
 
 class RelayWidgets(
-    val switch: ToggleButton,
+    val switch: CustomCCUSwitch,
     val selector: Spinner,
 )
 
 class AnalogOutWidgets(
-    val switch: ToggleButton,
+    val switch: CustomCCUSwitch,
     val selector: Spinner,
     val vAtMinDamperLabel: TextView,
     val vAtMinDamperSelector: Spinner,
@@ -29,7 +29,7 @@ class AnalogOutWidgets(
 )
 
 class AnalogInWidgets(
-    val switch: ToggleButton,
+    val switch: CustomCCUSwitch,
     val selector: Spinner
 )
 

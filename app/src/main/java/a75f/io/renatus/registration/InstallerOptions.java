@@ -80,6 +80,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
@@ -144,7 +145,7 @@ public class InstallerOptions extends Fragment {
     float cdb, hdb;
 
     //BACnet Setup
-    ToggleButton toggleCelsius;
+    CustomCCUSwitch toggleCelsius;
     TextView textCelsiusEnable;
 
     EditText editIPAddr,editSubnet,editGateway;
@@ -158,8 +159,8 @@ public class InstallerOptions extends Fragment {
 
     View toastLayout;
 
-    private ToggleButton toggleCoolingLockout;
-    private ToggleButton toggleHeatingLockout;
+    private CustomCCUSwitch toggleCoolingLockout;
+    private CustomCCUSwitch toggleHeatingLockout;
     private TextView textCoolingLockoutTemp;
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;

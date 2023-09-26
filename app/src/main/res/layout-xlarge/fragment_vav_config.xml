@@ -278,20 +278,16 @@
                     android:text="@string/label_enableCO2"
                     android:textAppearance="@style/title_normal" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableCO2Control"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
                     android:layout_below="@+id/relay1TextView"
                     android:layout_alignParentEnd="true"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="115dp"
                     android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textEnableAFO"
@@ -303,20 +299,15 @@
                     android:layout_marginTop="32dp"
                     android:text="@string/autoforceoccupied"
                     android:textAppearance="@style/title_normal" />
-
-                <ToggleButton
+                <include
                     android:id="@+id/enableAFOControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
                     android:layout_below="@+id/relay1TextView"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="65dp"
-                    android:layout_marginTop="35dp"
                     android:layout_toEndOf="@+id/textEnableIAQ"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginStart="65dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textEnableAutoAway"
@@ -330,19 +321,17 @@
                     android:text="@string/autoaway"
                     android:textAppearance="@style/title_normal" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableAutoAwayControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_toEndOf="@+id/textEnableIAQ"
                     android:layout_below="@+id/textEnableCO2"
                     android:layout_alignParentEnd="true"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="115dp"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="25dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_ccu_switch" />
 
 
 
@@ -357,19 +346,15 @@
                     android:text="@string/label_enableIAQ"
                     android:textAppearance="@style/title_normal" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableIAQControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
                     android:layout_below="@+id/enableAFOControl"
                     android:layout_alignStart="@id/enableAFOControl"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:layout_toEndOf="@+id/textEnableIAQ"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="18dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textEnableCFM"
@@ -380,20 +365,17 @@
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enable_cfm"
                     android:textAppearance="@style/title_normal" />
-                <ToggleButton
+
+
+                <include
                     android:id="@+id/enableCFMControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
                     android:layout_below="@+id/textEnableIAQ"
                     android:layout_alignStart="@id/enableIAQControl"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:layout_toEndOf="@+id/textEnableIAQ"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn=""
-                    />
+                    android:layout_width="wrap_content"
+                    android:layout_toEndOf="@+id/textEnableCFM"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    layout="@layout/custom_ccu_switch" />
                 <TextView
                     android:id="@+id/textKFactor"
                     android:layout_width="wrap_content"

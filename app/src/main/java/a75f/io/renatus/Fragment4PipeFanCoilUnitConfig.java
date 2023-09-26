@@ -46,6 +46,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -64,29 +65,29 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    ToggleButton switchThermistor1;
-    ToggleButton switchFanMediumY1;
+    CustomCCUSwitch switchThermistor1;
+    CustomCCUSwitch switchFanMediumY1;
     @BindView(R.id.test2pfcuRelay1)ToggleButton testFanMediumY1;
-    ToggleButton switchFanHighY2;
+    CustomCCUSwitch switchFanHighY2;
     @BindView(R.id.test2pfcuRelay2)ToggleButton testFanHighY2;
-    ToggleButton switchFanLowG;
+    CustomCCUSwitch switchFanLowG;
     @BindView(R.id.test2pfcuRelay3)ToggleButton testFanLowG;
-    ToggleButton switchHeatingWaterValve;
+    CustomCCUSwitch switchHeatingWaterValve;
     @BindView(R.id.test2pfcuRelay4)ToggleButton testAuxHeating;
-    ToggleButton switchCoolingWaterValve;
+    CustomCCUSwitch switchCoolingWaterValve;
     @BindView(R.id.test2pfcuRelay6)ToggleButton testWaterValve;
     @BindView(R.id.textAirflow)TextView textAirflow;
     @BindView(R.id.text2pfcuWaterValve)
     TextView text2pfcuWaterValve;
     @BindView(R.id.lt_enableLabel)
     LinearLayout ltEnableLabel;
-    ToggleButton switchOccSensor;
-    ToggleButton switchExtTempSensor;
+    CustomCCUSwitch switchOccSensor;
+    CustomCCUSwitch switchExtTempSensor;
     Button setButton;
     NumberPicker temperatureOffset;
 
-    ToggleButton toggleAutoaway;
-    ToggleButton toggleAutoForceOccupied;
+    CustomCCUSwitch toggleAutoaway;
+    CustomCCUSwitch toggleAutoForceOccupied;
 
     public Fragment4PipeFanCoilUnitConfig() {
     }
@@ -187,13 +188,13 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
         }
 
-        switchFanMediumY1 = (ToggleButton) view.findViewById(R.id.toggleFanMed4pfcu);
-        switchFanHighY2 = (ToggleButton) view.findViewById(R.id.toggleFanHigh4pfcu);
-        switchHeatingWaterValve = (ToggleButton) view.findViewById(R.id.toggleHeat4pfcu);
-        switchFanLowG = (ToggleButton) view.findViewById(R.id.toggleFanLow4pfcu);
-        switchCoolingWaterValve = (ToggleButton) view.findViewById(R.id.toggleCool4pfcu);
-        switchThermistor1 = (ToggleButton) view.findViewById(R.id.toggleAirflow);
-        switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleExtSensor4pfcu);
+        switchFanMediumY1 = view.findViewById(R.id.toggleFanMed4pfcu);
+        switchFanHighY2 = view.findViewById(R.id.toggleFanHigh4pfcu);
+        switchHeatingWaterValve = view.findViewById(R.id.toggleHeat4pfcu);
+        switchFanLowG = view.findViewById(R.id.toggleFanLow4pfcu);
+        switchCoolingWaterValve = view.findViewById(R.id.toggleCool4pfcu);
+        switchThermistor1 = view.findViewById(R.id.toggleAirflow);
+        switchExtTempSensor = view.findViewById(R.id.toogleExtSensor4pfcu);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
 
         toggleAutoaway = view.findViewById(R.id.toggleAutoAway);

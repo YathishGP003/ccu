@@ -55,6 +55,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -94,16 +95,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     NumberPicker minCoolingDamperPos;
     NumberPicker maxHeatingDamperPos;
     NumberPicker minHeatingDamperPos;
-    ToggleButton enableOccupancyControl;
-    ToggleButton enableCO2Control;
-    ToggleButton enableIAQControl;
+    CustomCCUSwitch enableOccupancyControl;
+    CustomCCUSwitch enableCO2Control;
+    CustomCCUSwitch enableIAQControl;
     Spinner kFactor;
     NumberPicker minCFMForIAQPos;
-    ToggleButton enableTrueCFMControl;
+    CustomCCUSwitch enableTrueCFMControl;
     TextView textKFactor;
     LinearLayout minCFMForIAQ;
-    ToggleButton enableAutoForceOccupied;
-    ToggleButton enableAutoAway;
+    CustomCCUSwitch enableAutoForceOccupied;
+    CustomCCUSwitch enableAutoAway;
 
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;

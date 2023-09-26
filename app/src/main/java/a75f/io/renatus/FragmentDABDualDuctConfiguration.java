@@ -40,6 +40,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -100,10 +101,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     @BindView(R.id.maxHeatingDamperPos) NumberPicker maxHeatingDamperPos;
     @BindView(R.id.minHeatingDamperPos) NumberPicker minHeatingDamperPos;
     
-    @BindView(R.id.enableCO2Control) ToggleButton enableCO2Control;
-    @BindView(R.id.enableIAQControl) ToggleButton enableIAQControl;
-    @BindView(R.id.enableAFOControl) ToggleButton enableAutoForceOccupied;
-    @BindView(R.id.enableAutoAwayControl) ToggleButton enableAutoAway;
+    @BindView(R.id.enableCO2Control)
+    CustomCCUSwitch enableCO2Control;
+    @BindView(R.id.enableIAQControl) CustomCCUSwitch enableIAQControl;
+    @BindView(R.id.enableAFOControl) CustomCCUSwitch enableAutoForceOccupied;
+    @BindView(R.id.enableAutoAwayControl) CustomCCUSwitch enableAutoAway;
     
     @BindView(R.id.setBtn) Button setButton;
     

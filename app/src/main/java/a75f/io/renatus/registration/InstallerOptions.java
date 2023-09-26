@@ -71,6 +71,7 @@ import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -90,6 +91,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
@@ -103,6 +105,7 @@ import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.util.BackFillViewModel.*;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDiff;
@@ -377,8 +380,14 @@ public class InstallerOptions extends Fragment {
         }
 
         imageTemp.setOnClickListener(view -> {
-            openMasterControllerDialog();
-
+            try {
+                openMasterControllerDialog();
+            } catch (ScheduleMigrationNotComplete e) {
+                e.printStackTrace();
+                if (!validateMigration()) {
+                    showMigrationErrorDialog(requireContext());
+                }
+            }
         });
 
         getTempValues();
@@ -686,7 +695,7 @@ public class InstallerOptions extends Fragment {
     }
 
     //custom dialog to control building temperature
-    private void openMasterControllerDialog() {
+    private void openMasterControllerDialog() throws ScheduleMigrationNotComplete {
         if (isAdded()) {
 
             final Dialog dialog = new Dialog(getActivity());
@@ -709,6 +718,18 @@ public class InstallerOptions extends Fragment {
             HashMap<Object,Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("schedulable and unoccupied and default and setback");
             HashMap<Object,Object> buildingToZoneDiffObj = CCUHsApi.getInstance().readEntity("building and zone and differential and cur");
 
+            if (buildingCoolingUpperLimit.isEmpty() ||
+                    buildingHeatingUpperLimit.isEmpty() ||
+                    buildingCoolingLowerLimit.isEmpty() ||
+                    buildingHeatingLowerLimit.isEmpty() ||
+                    buildingMin.isEmpty() ||
+                    buildingMax.isEmpty() ||
+                    coolingDeadbandObj.isEmpty() ||
+                    heatingDeadbandObj.isEmpty() ||
+                    unoccupiedZoneObj.isEmpty() ||
+                    buildingToZoneDiffObj.isEmpty()) {
+                throw new ScheduleMigrationNotComplete("Schedule revamp migration is not completed");
+            }
             buildingLimitMin = dialog.findViewById(R.id.buildinglimmin);
             buildingLimitMax =  dialog.findViewById(R.id.buildinglimitmax);
             unoccupiedZoneSetback =  dialog.findViewById(R.id.unoccupiedzonesetback);

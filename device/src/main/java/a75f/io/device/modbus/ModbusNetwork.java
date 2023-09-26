@@ -74,7 +74,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     }
 
     private int getRegisterCount(Register register) {
-        
         if (register.getParameterDefinitionType().equals("int64")) {
             return READ_REGISTER_FOUR;
         } else if (register.getParameterDefinitionType().equals("float") ||

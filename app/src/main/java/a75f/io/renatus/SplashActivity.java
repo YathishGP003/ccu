@@ -100,7 +100,13 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                 new Thread() {
                     @Override
                     public void run() {
-                        UploadLogs.instanceOf().saveCcuLogs();
+                        //We are already in safe mode. No reason to crash again and go into a loop, especially
+                        //if the system went to safe mode due to OOM.
+                        try {
+                            UploadLogs.instanceOf().saveCcuLogs();
+                        } catch (Exception e) {
+                            Log.e(TAG,"Failed to save logs while in safe mode");
+                        }
                     }
                 }.start();
 

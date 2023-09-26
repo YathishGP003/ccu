@@ -304,8 +304,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
                     }else
                         valueFromAdapter = StringUtils.substringBefore(heatingLimitMin.getSelectedItem().toString(), "\u00B0C");
 
-                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(valueFromAdapter)));
-                } else {
+                    rangeSeekBarView.setHeatingLimitMin(celsiusToFahrenheitTuner(Double.parseDouble(valueFromAdapter)));                } else {
                     rangeSeekBarView.setHeatingLimitMin(MasterControlUtil.getAdapterFarhenheitVal(heatingLimitMin.getSelectedItem().toString()));
                 }
             }

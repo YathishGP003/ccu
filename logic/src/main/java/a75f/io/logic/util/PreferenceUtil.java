@@ -89,7 +89,6 @@ public class PreferenceUtil {
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
-
     public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
 
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
@@ -139,7 +138,7 @@ public class PreferenceUtil {
         return sharedPreferences.getBoolean(FIRMWARE_VERSION_POINT_MIGRATION,false);
     }
 
-    public static void updateMigrationStatus(String migrationName, boolean isMigrated){
+    public static void updateMigrationStatus(String migrationName, boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(migrationName, isMigrated);
@@ -248,7 +247,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-
+    
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }
@@ -735,7 +734,7 @@ public class PreferenceUtil {
     }
 
     public static boolean getCleanUpOtherCcuZoneSchedules() {
-        return getBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES);
+       return getBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES);
     }
 
     public static void setCleanUpOtherCcuZoneSchedules() {

@@ -104,6 +104,18 @@ message HyperStatTunersFcu_t {
   uint32 waterValueSamplingDuringNoOperationOffTime = 8;
 }
 
+message HyperstatLinearFanSpeeds_t {
+  uint32 linearFanLowSpeedLevel  = 1; // in percentage
+  uint32 linearFanMediumSpeedLevel  = 2; // in percentage
+  uint32 linearFanHighSpeedLevel  = 3; // in percentage
+}
+
+message HyperstatStagedFanSpeeds_t {
+  uint32 stagedFanLowSpeedLevel  = 1; // in percentage
+  uint32 stagedFanMediumSpeedLevel  = 2; // in percentage
+  uint32 stagedFanHighSpeedLevel  = 3; // in percentage
+}
+
 message HyperStatSettingsMessage_t {
   string roomName = 1;// [(nanopb).max_size = 20];
   int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
@@ -126,6 +138,8 @@ message HyperStatSettingsMessage_t {
   bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
   uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
   uint32 humidityMaxSetpoint = 21; // Maximum humidity setpont 0-100% in which Hyperstat will set system to Dehumidity/Dry if humidity level is greater than
+  HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds_t = 23; // When linear fan is enabled these voltages provide user intent
+  HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;
 }
 
 message HyperStatSettingsMessage2_t {
@@ -146,7 +160,7 @@ message HyperStatSettingsMessage2_t {
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
 }
 
-message HyperstatStagedFanVoltages_t {
+message HyperStatConfigsCcu_t {
   uint32 coolingStage1FanAnalogVoltage  = 1; // 1/10 of the volts
   uint32 coolingStage2FanAnalogVoltage  = 2; // 1/10 of the volts
   uint32 coolingStage3FanAnalogVoltage  = 3; // 1/10 of the volts
@@ -155,24 +169,12 @@ message HyperstatStagedFanVoltages_t {
   uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
 }
 
-message HyperstatLinearFanSpeeds_t {
-  uint32 linearFanLowSpeedLevel  = 1; // in percentage
-  uint32 linearFanMediumSpeedLevel  = 2; // in percentage
-  uint32 linearFanHighSpeedLevel  = 3; // in percentage
-}
-
-message HyperstatStagedFanSpeeds_t {
-  uint32 stagedFanLowSpeedLevel  = 1; // in percentage
-  uint32 stagedFanMediumSpeedLevel  = 2; // in percentage
-  uint32 stagedFanHighSpeedLevel  = 3; // in percentage
-}
-
 message HyperStatSettingsMessage3_t {
   HyperStatTunersGeneric_t genertiTuners = 1; // Generic tuner
-  HyperStatTunersFcu_t	fcuTuners = 2;
-  HyperstatStagedFanVoltages_t hyperstatStagedFanVoltages = 3; // When staged fan is enabled these voltages provide the fan speed control
-  HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds_t = 4; // When linear fan is enabled these voltages provide user intent
-  HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 5; // When staged fan is enabled these voltages provide user intent
+  oneof profileSpecificTuners {
+    HyperStatTunersFcu_t	fcuTuners = 2;
+    HyperStatConfigsCcu_t hyperStatConfigsCcu = 3; // When staged fan is enabled these voltages provide the fan speed control
+  }
 }
 
 

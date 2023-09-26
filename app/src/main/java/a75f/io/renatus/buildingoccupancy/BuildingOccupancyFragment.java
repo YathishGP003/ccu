@@ -1,6 +1,8 @@
 package a75f.io.renatus.buildingoccupancy;
 
 
+import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 import static a75f.io.usbserial.UsbModbusService.TAG;
 
 import android.app.AlertDialog;
@@ -191,9 +193,12 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
 
                 buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
-                drawBuildingOccupancy();
-                drawCurrentTime();
-
+                if(buildingOccupancy == null && !validateMigration()){
+                    showMigrationErrorDialog(requireContext());
+                }else {
+                    drawBuildingOccupancy();
+                    drawCurrentTime();
+                }
             }
         });
 
@@ -261,6 +266,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
 
         HashMap<String, ArrayList<Interval>> spillsMap =days == null ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy):
                 buildingOccupancyViewModel.getScheduleSpills(daysList,buildingOccupancy);
+
         if (spillsMap != null && spillsMap.size() > 0 && position != ManualSchedulerDialogFragment.NO_REPLACE) {
             RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
                             "Fetching Zone Schedules..."),

@@ -10,7 +10,6 @@ import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.ini
 import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initRemoteFirmwareVersionPointMigration;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
 import static a75f.io.logic.util.MigrateModbusModelKt.migrateModbusProfiles;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
 import android.content.pm.PackageInfo;
@@ -411,8 +410,8 @@ public class MigrationUtil {
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
-
     }
+
     private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
         allSnTuners.forEach(snTuner -> {
@@ -2238,6 +2237,7 @@ public class MigrationUtil {
         });
     }
 
+
     /**
      * There has been a bug in updateScheduleHandler that resulted in zoneSchedules from other CCUs gets saved in
      * all the CCUs when there is an updateSchedule message.
@@ -2255,8 +2255,8 @@ public class MigrationUtil {
                 hayStack.removeEntity(scheduleMap.get(Tags.ID).toString());
                 CcuLog.i(TAG_CCU_MIGRATION_UTIL, "delete invalid zone schedule "+scheduleMap);
             } else {
-                Object ccuRef = scheduleMap.get("ccuRef");
-                if (ccuRef == null || !ccuRef.toString().equals(ccuId)) {
+                String ccuRef = scheduleMap.get("ccuRef").toString();
+                if (ccuRef == null || !ccuRef.equals(ccuId)) {
                     CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Update zoneSchedule ccuRef "+ccuRef+"->"+ccuId);
                     scheduleMap.put("ccuRef", hayStack.getCcuId());
                     Schedule schedule = hayStack.getScheduleById(scheduleMap.get("id").toString());

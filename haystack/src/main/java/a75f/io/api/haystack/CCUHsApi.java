@@ -2012,8 +2012,13 @@ public class CCUHsApi
     }
 
     public BuildingOccupancy getBuildingOccupancy(){
-        return new BuildingOccupancy.Builder().setHDict(
-                tagsDb.read(Queries.BUILDING_OCCUPANCY)).build();
+        BuildingOccupancy.Builder builder = new BuildingOccupancy.Builder().setHDict(
+                tagsDb.read(Queries.BUILDING_OCCUPANCY, false));
+        if (builder == null) {
+            return null;
+        } else {
+            return builder.build();
+        }
     }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
@@ -2628,7 +2633,6 @@ public class CCUHsApi
     }
 
     public boolean isEntityExisting(String id) {
-        HashMap<Object, Object> entity = readMapById(id);
         return tagsDb.isEntityExisting(HRef.copy(id));
     }
 
@@ -2983,7 +2987,7 @@ public class CCUHsApi
     public String fetchRemoteEntityByQuery(String query) {
         HDictBuilder b = new HDictBuilder().add("filter", query);
         HDict[] dictArr = {b.toDict()};
-        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+        return HttpUtil.executePost(getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
 

@@ -422,6 +422,9 @@ public class ScheduleManager {
                             int startSchTime = (d.getSthh() * 60) + d.getStmm();
                             int endSchTime = (d.getEthh() * 60) + d.getEtmm();
                             if (curTime > startSchTime && curTime < endSchTime) {
+                                if(isHeatingOrCoolingLimitsNull(d)){
+                                    continue;
+                                }
                                 saveUserLimitChange("max and heating ", (d.getHeatingUserLimitMax()).intValue(), roomRef);
                                 saveUserLimitChange("min and heating ", (d.getHeatingUserLimitMin()).intValue(), roomRef);
                                 saveUserLimitChange("max and cooling ", (d.getCoolingUserLimitMax()).intValue(), roomRef);
@@ -458,6 +461,11 @@ public class ScheduleManager {
                 }
             }
         }
+    }
+
+    public static boolean isHeatingOrCoolingLimitsNull(Schedule.Days days) {
+        return days.getHeatingUserLimitMax() == null || days.getHeatingUserLimitMin() == null ||
+                days.getCoolingUserLimitMax() == null || days.getCoolingUserLimitMin() == null;
     }
 
     public void updateZoneOccupancy(CCUHsApi hayStack) {

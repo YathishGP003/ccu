@@ -1200,9 +1200,9 @@ class HyperStatSplitPointsUtil(
             "config", "writable", "his", "zone", "co2", "target", "sp","concentration"
         )
 
-        val zoneCO2DamperOpeningRatePointPoint = createHaystackPointWithHisInterPolate(
+        val zoneCO2DamperOpeningRatePointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2DamperOpeningRate",
-            zoneCO2DamperOpeningRatePointMarkers
+            zoneCO2DamperOpeningRatePointMarkers, "cov", "%"
         )
 
         val zoneCO2ThresholdPointPoint = createHaystackPointWithUnit(

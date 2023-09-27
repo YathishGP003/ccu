@@ -154,7 +154,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         outsideAirCalculatedMinDamper = 0
         outsideAirLoopOutput = 0
         outsideAirFinalLoopOutput = 0
-        evaluateLoopOutputs(equip, userIntents, basicSettings, hyperStatSplitTuners)
+        evaluateLoopOutputs(equip, userIntents, basicSettings, hyperStatSplitTuners, isCondensateTripped)
 
         equip.hsSplitHaystackUtil.updateOccupancyDetection()
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
@@ -215,7 +215,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
-    private fun evaluateLoopOutputs(equip: HyperStatSplitCpuEconEquip, userIntents: UserIntents, basicSettings: BasicSettings, hyperStatSplitTuners: HyperStatSplitProfileTuners){
+    private fun evaluateLoopOutputs(equip: HyperStatSplitCpuEconEquip, userIntents: UserIntents, basicSettings: BasicSettings, hyperStatSplitTuners: HyperStatSplitProfileTuners, isCondensateTripped: Boolean){
 
         when (state) {
 
@@ -241,11 +241,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             fanLoopOutput = ((heatingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
 
-        evaluateOAOLoop(equip, basicSettings)
+        evaluateOAOLoop(equip, basicSettings, isCondensateTripped)
 
     }
 
-    private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip, basicSettings: BasicSettings) {
+    private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip, basicSettings: BasicSettings, isCondensateTripped: Boolean) {
 
         // If there's not an OAO damper mapped,
         if (!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(equip.getConfiguration())) {
@@ -300,14 +300,13 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             }
 
-            // If Conditioning Mode is OFF, outsideAirFinalLoop output is zero. Damper is at minimum signal.
-            // (Tripped condensate switch will also evaluate as this case.)
-            else if (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.OFF) {
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Conditioning Mode is OFF or Condensate Switch is tripped. outsideAirFinalLoopOutput set to zero.")
+            // If Condensate is tripped, outsideAirFinalLoopOutput is zero. Damper will be at minimum signal.
+            else if (isCondensateTripped) {
+                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Condensate Switch is tripped. outsideAirFinalLoopOutput set to zero.")
                 outsideAirFinalLoopOutput = 0
             }
 
-            // If Conditioning Mode is HEAT_ONLY, ignore economizingLoopOutput and do DCV only.
+            // If Conditioning Mode is HEAT_ONLY or OFF, ignore economizingLoopOutput and do DCV only.
             // Continue to use same the mixed air low-limit and high-limit as full economizing scenario.
             else {
                 val dcvOnlyOutsideAirLoopOutput = Math.max(dcvLoopOutput, outsideDamperMinOpen)
@@ -326,7 +325,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
                 outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
 
-                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Conditioning Mode is HEAT-ONLY. outsideAirFinalLoopOutput to consider DCV only.")
+                Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Conditioning Mode is HEAT-ONLY or OFF. outsideAirFinalLoopOutput to consider DCV only.")
 
             }
 

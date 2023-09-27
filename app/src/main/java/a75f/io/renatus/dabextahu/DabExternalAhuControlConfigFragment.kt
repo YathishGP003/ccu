@@ -67,15 +67,14 @@ class DabExternalAhuControlConfigFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val rootView = ComposeView(requireContext())
-        ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
         viewModel = ViewModelProvider(this)[AhuControlViewModel::class.java]
-        viewModel.configModelDefinition(
-            NodeType.SMART_NODE, ProfileType.DAB_EXTERNAL_AHU, requireContext()
-        )
-
         rootView.apply {
             setContent {
-                if (viewModel.profileModelDefination != null) {
+                ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
+                viewModel.configModelDefinition(
+                    NodeType.SMART_NODE, ProfileType.DAB_EXTERNAL_AHU, requireContext()
+                )
+                if (viewModel.profileModelDefinition != null) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -86,7 +85,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             Row {
                                 SetPointControlCompose(
                                     viewModel.configModel.value.controlName(
-                                        viewModel.profileModelDefination,
+                                        viewModel.profileModelDefinition,
                                         SET_POINT_CONTROL
                                     ), state = viewModel.configModel.value.setPointControl
                                 ) {
@@ -97,7 +96,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 if (viewModel.configModel.value.setPointControl) {
                                     SetPointControlCompose(
                                         viewModel.configModel.value.controlName(
-                                            viewModel.profileModelDefination,
+                                            viewModel.profileModelDefinition,
                                             DUAL_SET_POINT_CONTROL
                                         ),
                                         state = viewModel.configModel.value.dualSetPointControl
@@ -115,9 +114,17 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     .fillMaxWidth()
                                                     .wrapContentHeight()
                                             ) {
-                                                val satMin = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_SP_MIN)
-                                                val satMax = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_SP_MAX)
-                                                if (satMin != null ) {
+                                                val satMin =
+                                                    viewModel.configModel.value.getPointByDomainName(
+                                                        viewModel.profileModelDefinition,
+                                                        SAT_SP_MIN
+                                                    )
+                                                val satMax =
+                                                    viewModel.configModel.value.getPointByDomainName(
+                                                        viewModel.profileModelDefinition,
+                                                        SAT_SP_MAX
+                                                    )
+                                                if (satMin != null) {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satMin.valueConstraint as NumericConstraint).minValue,
                                                         (satMin.valueConstraint as NumericConstraint).maxValue,
@@ -128,10 +135,10 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satMin.defaultValue ?: 0).toString(),
                                                         items, satMin.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMinSp = selected
+                                                        viewModel.configModel.value.satMin = selected
                                                     }
                                                 }
-                                                if (satMax != null ) {
+                                                if (satMax != null) {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satMax.valueConstraint as NumericConstraint).minValue,
                                                         (satMax.valueConstraint as NumericConstraint).maxValue,
@@ -142,7 +149,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satMax.defaultValue ?: 0).toString(),
                                                         items, satMax.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMaxSp = selected
+                                                        viewModel.configModel.value.satMax = selected
                                                     }
                                                 }
                                             }
@@ -154,10 +161,26 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 if (viewModel.configModel.value.dualSetPointControl) {
                                     Row {
                                         Column {
-                                            val satHeatingMin = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_HEATING_SP_MIN)
-                                            val satHeatingMax = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_HEATING_SP_MAX)
-                                            val satCoolingMin = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_COOLING_SP_MIN)
-                                            val satCoolingMax = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,SAT_COOLING_SP_MAX)
+                                            val satHeatingMin =
+                                                viewModel.configModel.value.getPointByDomainName(
+                                                    viewModel.profileModelDefinition,
+                                                    SAT_HEATING_SP_MIN
+                                                )
+                                            val satHeatingMax =
+                                                viewModel.configModel.value.getPointByDomainName(
+                                                    viewModel.profileModelDefinition,
+                                                    SAT_HEATING_SP_MAX
+                                                )
+                                            val satCoolingMin =
+                                                viewModel.configModel.value.getPointByDomainName(
+                                                    viewModel.profileModelDefinition,
+                                                    SAT_COOLING_SP_MIN
+                                                )
+                                            val satCoolingMax =
+                                                viewModel.configModel.value.getPointByDomainName(
+                                                    viewModel.profileModelDefinition,
+                                                    SAT_COOLING_SP_MAX
+                                                )
 
                                             Row(
                                                 modifier = Modifier
@@ -169,28 +192,34 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satHeatingMin.valueConstraint as NumericConstraint).minValue,
                                                         (satHeatingMin.valueConstraint as NumericConstraint).maxValue,
-                                                        (satHeatingMin.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satHeatingMin.presentationData?.get(
+                                                            TAG_VALUE_INC
+                                                        ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satHeatingMin.name,
-                                                        (satHeatingMin.defaultValue ?: 0).toString(),
+                                                        (satHeatingMin.defaultValue
+                                                            ?: 0).toString(),
                                                         items, satHeatingMin.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMinSp = selected
+                                                        viewModel.configModel.value.heatingMinSp = selected
                                                     }
                                                 }
                                                 if (satHeatingMax != null) {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satHeatingMax.valueConstraint as NumericConstraint).minValue,
                                                         (satHeatingMax.valueConstraint as NumericConstraint).maxValue,
-                                                        (satHeatingMax.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satHeatingMax.presentationData?.get(
+                                                            TAG_VALUE_INC
+                                                        ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satHeatingMax.name,
-                                                        (satHeatingMax.defaultValue ?: 0).toString(),
+                                                        (satHeatingMax.defaultValue
+                                                            ?: 0).toString(),
                                                         items, satHeatingMax.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMaxSp = selected
+                                                        viewModel.configModel.value.heatingMaxSp = selected
                                                     }
                                                 }
                                             }
@@ -203,28 +232,34 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satCoolingMin.valueConstraint as NumericConstraint).minValue,
                                                         (satCoolingMin.valueConstraint as NumericConstraint).maxValue,
-                                                        (satCoolingMin.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satCoolingMin.presentationData?.get(
+                                                            TAG_VALUE_INC
+                                                        ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satCoolingMin.name,
-                                                        (satCoolingMin.defaultValue ?: 0).toString(),
+                                                        (satCoolingMin.defaultValue
+                                                            ?: 0).toString(),
                                                         items, satCoolingMin.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMinSp = selected
+                                                        viewModel.configModel.value.coolingMinSp = selected
                                                     }
                                                 }
                                                 if (satCoolingMax != null) {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satCoolingMax.valueConstraint as NumericConstraint).minValue,
                                                         (satCoolingMax.valueConstraint as NumericConstraint).maxValue,
-                                                        (satCoolingMax.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satCoolingMax.presentationData?.get(
+                                                            TAG_VALUE_INC
+                                                        ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satCoolingMax.name,
-                                                        (satCoolingMax.defaultValue ?: 0).toString(),
+                                                        (satCoolingMax.defaultValue
+                                                            ?: 0).toString(),
                                                         items, satCoolingMax.defaultUnit ?: EMPTY,
                                                     ) { selected ->
-                                                        viewModel.heatingMaxSp = selected
+                                                        viewModel.configModel.value.coolingMaxSp = selected
                                                     }
                                                 }
                                             }
@@ -236,7 +271,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
-                                    viewModel.profileModelDefination,
+                                    viewModel.profileModelDefinition,
                                     FAN_SP_CONTROL
                                 ),
                                 state = viewModel.configModel.value.fanStaticSetPointControl
@@ -248,8 +283,14 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             if (viewModel.configModel.value.fanStaticSetPointControl) {
                                 Row {
 
-                                    val fanSpMin = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,FAN_SP_MIN)
-                                    val fanSpMax = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,FAN_SP_MAX)
+                                    val fanSpMin = viewModel.configModel.value.getPointByDomainName(
+                                        viewModel.profileModelDefinition,
+                                        FAN_SP_MIN
+                                    )
+                                    val fanSpMax = viewModel.configModel.value.getPointByDomainName(
+                                        viewModel.profileModelDefinition,
+                                        FAN_SP_MAX
+                                    )
 
                                     Column {
                                         Row(
@@ -261,25 +302,31 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (fanSpMin.valueConstraint as NumericConstraint).minValue,
                                                     (fanSpMin.valueConstraint as NumericConstraint).maxValue,
-                                                    (fanSpMin.presentationData?.get(TAG_VALUE_INC).toString().toDouble())
+                                                    (fanSpMin.presentationData?.get(TAG_VALUE_INC)
+                                                        .toString().toDouble())
                                                 )
                                                 SetPointConfig(
                                                     fanSpMin.name,
                                                     (fanSpMin.defaultValue ?: 0).toString(),
                                                     items, fanSpMin.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMinSp = selected }
+                                                ) { selected ->
+                                                    viewModel.configModel.value.fanMinSp = selected
+                                                }
                                             }
                                             if (fanSpMax != null) {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (fanSpMax.valueConstraint as NumericConstraint).minValue,
                                                     (fanSpMax.valueConstraint as NumericConstraint).maxValue,
-                                                    (fanSpMax.presentationData?.get(TAG_VALUE_INC).toString().toDouble())
+                                                    (fanSpMax.presentationData?.get(TAG_VALUE_INC)
+                                                        .toString().toDouble())
                                                 )
                                                 SetPointConfig(
                                                     fanSpMax.name,
                                                     (fanSpMax.defaultValue ?: 0).toString(),
                                                     items, fanSpMax.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMaxSp = selected }
+                                                ) { selected ->
+                                                    viewModel.configModel.value.fanMaxSp = selected
+                                                }
                                             }
                                         }
                                     }
@@ -289,7 +336,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
-                                    viewModel.profileModelDefination,
+                                    viewModel.profileModelDefinition,
                                     DCV_CONTROL_LABEL
                                 ), state = viewModel.configModel.value.dcvControl
                             ) {
@@ -299,8 +346,14 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             if (viewModel.configModel.value.dcvControl) {
 
-                                val dcvMin = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,DCV_CONTROL_MIN)
-                                val dcvMax = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,DCV_CONTROL_MAX)
+                                val dcvMin = viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition,
+                                    DCV_CONTROL_MIN
+                                )
+                                val dcvMax = viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition,
+                                    DCV_CONTROL_MAX
+                                )
 
                                 Row {
                                     Column {
@@ -319,7 +372,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     dcvMin.name,
                                                     (dcvMin.defaultValue ?: 0).toString(),
                                                     items, dcvMin.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMinSp = selected }
+                                                ) { selected -> viewModel.configModel.value.dcvMin = selected }
                                             }
                                             if (dcvMax != null) {
                                                 val items = viewModel.itemsFromMinMax(
@@ -331,7 +384,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     dcvMax.name,
                                                     (dcvMax.defaultValue ?: 0).toString(),
                                                     items, dcvMax.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMaxSp = selected }
+                                                ) { selected -> viewModel.configModel.value.dcvMax = selected }
                                             }
                                         }
                                     }
@@ -341,7 +394,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
-                                    viewModel.profileModelDefination,
+                                    viewModel.profileModelDefinition,
                                     OCCUPANCY_CONTROL_LABEL
                                 ),
                                 state = viewModel.configModel.value.occupancyMode
@@ -350,37 +403,43 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             }
                         }
                         item {
-                                SetPointControlCompose(
-                                    viewModel.configModel.value.controlName(
-                                        viewModel.profileModelDefination,
-                                        HUMIDIFIER_CONTROL_LABEL
-                                    ),
-                                    state = viewModel.configModel.value.humidifierControl
-                                ) {
-                                    viewModel.configModel.value.humidifierControl = it
-                                }
+                            SetPointControlCompose(
+                                viewModel.configModel.value.controlName(
+                                    viewModel.profileModelDefinition,
+                                    HUMIDIFIER_CONTROL_LABEL
+                                ),
+                                state = viewModel.configModel.value.humidifierControl
+                            ) {
+                                viewModel.configModel.value.humidifierControl = it
+                            }
                         }
                         item {
                             if (viewModel.configModel.value.humidifierControl) {
                                 Row {
-                                    val humidityControl = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,TARGET_HUMIDIFIER)
+                                    val humidityControl =
+                                        viewModel.configModel.value.getPointByDomainName(
+                                            viewModel.profileModelDefinition,
+                                            TARGET_HUMIDIFIER
+                                        )
                                     Column {
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .wrapContentHeight()
                                         ) {
-                                            if ( humidityControl != null ) {
+                                            if (humidityControl != null) {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (humidityControl.valueConstraint as NumericConstraint).minValue,
                                                     (humidityControl.valueConstraint as NumericConstraint).maxValue,
-                                                    (humidityControl.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                    (humidityControl.presentationData?.get(
+                                                        TAG_VALUE_INC
+                                                    ) as Int).toDouble()
                                                 )
                                                 SetPointConfig(
                                                     humidityControl.name,
                                                     (humidityControl.defaultValue ?: 0).toString(),
                                                     items, humidityControl.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMinSp = selected }
+                                                ) { selected -> viewModel.configModel.value.targetHumidity = selected }
                                             }
                                         }
                                     }
@@ -390,7 +449,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
-                                    viewModel.profileModelDefination,
+                                    viewModel.profileModelDefinition,
                                     DEHUMIDIFIER_CONTROL_LABEL
                                 ),
                                 state = viewModel.configModel.value.dehumidifierControl
@@ -401,7 +460,11 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                         item {
                             if (viewModel.configModel.value.dehumidifierControl) {
                                 Row {
-                                    val dehumidityControl = viewModel.configModel.value.getPointByDomainName(viewModel.profileModelDefination,TARGET_DEHUMIDIFIER)
+                                    val dehumidityControl =
+                                        viewModel.configModel.value.getPointByDomainName(
+                                            viewModel.profileModelDefinition,
+                                            TARGET_DEHUMIDIFIER
+                                        )
                                     Column {
                                         Row(
                                             modifier = Modifier
@@ -412,13 +475,16 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (dehumidityControl.valueConstraint as NumericConstraint).minValue,
                                                     (dehumidityControl.valueConstraint as NumericConstraint).maxValue,
-                                                    (dehumidityControl.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                    (dehumidityControl.presentationData?.get(
+                                                        TAG_VALUE_INC
+                                                    ) as Int).toDouble()
                                                 )
                                                 SetPointConfig(
                                                     dehumidityControl.name,
-                                                    (dehumidityControl.defaultValue ?: 0).toString(),
+                                                    (dehumidityControl.defaultValue
+                                                        ?: 0).toString(),
                                                     items, dehumidityControl.defaultUnit ?: EMPTY,
-                                                ) { selected -> viewModel.heatingMinSp = selected }
+                                                ) { selected -> viewModel.configModel.value.targetDeHumidity = selected }
                                             }
                                         }
                                     }

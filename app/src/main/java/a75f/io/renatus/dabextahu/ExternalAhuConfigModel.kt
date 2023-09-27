@@ -20,12 +20,18 @@ class ExternalAhuConfigModel {
     var humidifierControl: Boolean by mutableStateOf(false)
     var dehumidifierControl: Boolean by mutableStateOf(false)
 
-    var minSp: Int by mutableStateOf(0)
-    var maxSp: Int by mutableStateOf(5)
-    var heatingMinSp: Int by mutableStateOf(0)
-    var heatingMaxSp: Int by mutableStateOf(5)
-    var coolingMinSp: Int by mutableStateOf(0)
-    var coolingMaxSp: Int by mutableStateOf(5)
+    var satMin: String by mutableStateOf("0")
+    var satMax: String by mutableStateOf("0")
+    var heatingMinSp: String by mutableStateOf("0")
+    var heatingMaxSp: String by mutableStateOf("0")
+    var coolingMinSp: String by mutableStateOf("0")
+    var coolingMaxSp: String by mutableStateOf("0")
+    var fanMinSp: String by mutableStateOf("0")
+    var fanMaxSp: String by mutableStateOf("0")
+    var dcvMin: String by mutableStateOf("0")
+    var dcvMax: String by mutableStateOf("0")
+    var targetHumidity: String by mutableStateOf("0")
+    var targetDeHumidity: String by mutableStateOf("0")
 
 
 

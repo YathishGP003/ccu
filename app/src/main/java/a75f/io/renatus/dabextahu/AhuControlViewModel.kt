@@ -20,13 +20,12 @@ import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.RxjavaUtil
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -47,14 +46,9 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
     var configType = mutableStateOf(ConfigType.BACNET)
     lateinit var deviceModelList: List<ModelMetaData>
-    lateinit var profileModelDefination: SeventyFiveFProfileDirective
+    lateinit var profileModelDefinition: SeventyFiveFProfileDirective
 
     var configModel = mutableStateOf(ExternalAhuConfigModel())
-
-    var heatingMinSp: String by mutableStateOf("1.0")
-    var heatingMaxSp: String by mutableStateOf("1.0")
-    var coolingMinSp: String by mutableStateOf("1.0")
-    var coolingMaxSp: String by mutableStateOf("1.0")
 
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
@@ -105,18 +99,16 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
 
     fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
         try {
-
             this.context = context
             childSlaveIdList.value = getSlaveIds(false)
             slaveIdList.value = getSlaveIds(true)
             if (!equipModel.value.isDevicePaired)
                 equipModel.value.slaveId.value = 1
-
             loadModel()
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            ProgressDialogUtils.hideProgressDialog()
+            //ProgressDialogUtils.hideProgressDialog()
         }
     }
 
@@ -124,13 +116,9 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
     private fun loadModel() {
         val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (def != null) {
-            profileModelDefination = def as SeventyFiveFProfileDirective
-            configModel.value.render(profileModelDefination)
+            profileModelDefinition = def as SeventyFiveFProfileDirective
+            configModel.value.render(profileModelDefinition)
         }
-
-    /*RxjavaUtil.executeBackground {
-
-        }*/
     }
 
 
@@ -149,18 +137,17 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
         val result = mutableListOf<String>()
         var current = min
 
-        while (current <= max) {
+        while (decimalFormat.format(current).toString().toDouble() <= max) {
             result.add(decimalFormat.format(current).toString())
+            current + current + increment
             current += increment
         }
-
         return result
     }
 
     enum class ConfigType {
         BACNET,MODBUS
     }
-
 
     fun fetchModelDetails(selectedDevice: String) {
         val modelId = getModelIdByName(selectedDevice)
@@ -208,9 +195,11 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
             }
         })
     }
+
     private fun getModelIdByName(name: String): String {
         return deviceModelList.find { it.name == name }!!.id
     }
+
     private fun getVersionByID(id: String): String {
         return deviceModelList.find { it.id == id }!!.version
     }

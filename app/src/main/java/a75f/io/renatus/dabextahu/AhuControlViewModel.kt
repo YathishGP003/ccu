@@ -108,7 +108,7 @@ class AhuControlViewModel(application: Application) : AndroidViewModel(applicati
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            //ProgressDialogUtils.hideProgressDialog()
+            ProgressDialogUtils.hideProgressDialog()
         }
     }
 

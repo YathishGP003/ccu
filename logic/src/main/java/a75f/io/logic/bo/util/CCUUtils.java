@@ -2,7 +2,6 @@ package a75f.io.logic.bo.util;
 
 import android.content.Context;
 import android.util.Log;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -89,6 +88,7 @@ public class CCUUtils
         HashMap<Object, Object> device;
         if(isCMReboot){
             device = CCUHsApi.getInstance().readEntity("device and cm");
+            writeFirmwareVersionForTiDevices(hayStack, firmwareVersion);
         }
         else {
             device = hayStack.readEntity("device and addr == \"" + address + "\"");
@@ -97,22 +97,17 @@ public class CCUUtils
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
             HashMap<Object, Object> firmwarePoint =
                     hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-            hayStack.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
+            hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
-        writeFirmwareVersionForTiDevices(hayStack, firmwareVersion);
     }
 
     private static void writeFirmwareVersionForTiDevices(CCUHsApi ccuHsApi, String firmwareVersion) {
         ArrayList<HashMap<Object, Object>> tiDevices = ccuHsApi.readAllEntities("device and ti");
-        if (!tiDevices.isEmpty()) {
-            for (HashMap<Object, Object> tiDevice : tiDevices) {
-                if (!tiDevice.isEmpty()) {
-                    Device deviceInfo = new Device.Builder().setHashMap(tiDevice).build();
-                    HashMap<Object, Object> firmwarePoint =
-                            ccuHsApi.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-                    ccuHsApi.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
-                }
-            }
+        for (HashMap<Object, Object> tiDevice : tiDevices) {
+            Device deviceInfo = new Device.Builder().setHashMap(tiDevice).build();
+            HashMap<Object, Object> firmwarePoint =
+                    ccuHsApi.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            ccuHsApi.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
     }
 

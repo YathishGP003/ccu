@@ -1463,19 +1463,24 @@ public class CCUHsApi
         HDict nameScheduleDict = new HDictBuilder().add("filter",
                 "named and schedule and organization == \""+org+"\"").toDict();
         CcuLog.d(TAG, "nameScheduleDict = "+nameScheduleDict);
-        HGrid nameScheduleGrid = hClient.call("read",
-                HGridBuilder.dictToGrid(nameScheduleDict));
+        String response = fetchRemoteEntityByQuery("named and schedule and organization == \""+org+"\"");
 
-        if (nameScheduleGrid == null) {
-            CcuLog.d(TAG, "nameScheduleGrid is null");
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
             return;
         }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
 
-        Iterator it = nameScheduleGrid.iterator();
         while (it.hasNext()) {
             HRow row = (HRow) it.next();
+            Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(row).toDict()).build();
+            if(schedule.getMarkers().contains("default")
+                    && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
+                continue;
+            }
             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-            CcuLog.i(TAG, "Named schedule Imported");
+            CcuLog.i(TAG, "Named schedule Imported - "+ row.get("id").toString());
         }
 
     }
@@ -1815,7 +1820,7 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail, String equipRef, String managerEmail)
     {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
 
         HDictBuilder hDictBuilder = new HDictBuilder();
@@ -2007,8 +2012,13 @@ public class CCUHsApi
     }
 
     public BuildingOccupancy getBuildingOccupancy(){
-        return new BuildingOccupancy.Builder().setHDict(
-                tagsDb.read(Queries.BUILDING_OCCUPANCY)).build();
+        BuildingOccupancy.Builder builder = new BuildingOccupancy.Builder().setHDict(
+                tagsDb.read(Queries.BUILDING_OCCUPANCY, false));
+        if (builder == null) {
+            return null;
+        } else {
+            return builder.build();
+        }
     }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
@@ -2404,6 +2414,7 @@ public class CCUHsApi
                             defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                                importNamedSchedule(hsClient);
                             });
 
                         } catch (JSONException e) {
@@ -2622,8 +2633,7 @@ public class CCUHsApi
     }
 
     public boolean isEntityExisting(String id) {
-        HashMap<Object, Object> entity = readMapById(id);
-        return !entity.isEmpty();
+        return tagsDb.isEntityExisting(HRef.copy(id));
     }
 
     public void setEntitySynced(String id) {
@@ -2793,6 +2803,14 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
+    public String deleteRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
 
     }
@@ -2969,7 +2987,7 @@ public class CCUHsApi
     public String fetchRemoteEntityByQuery(String query) {
         HDictBuilder b = new HDictBuilder().add("filter", query);
         HDict[] dictArr = {b.toDict()};
-        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+        return HttpUtil.executePost(getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
 

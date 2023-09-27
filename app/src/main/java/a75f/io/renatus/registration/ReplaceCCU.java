@@ -249,16 +249,16 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             @Override
             public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
-                toast.setGravity(Gravity.BOTTOM, 50, 50);
                 if (response.getString("valid") == "true") {
                     getAllCCUs(response.getJSONObject("siteCode").getString("siteId"), response.getJSONArray("devices"));
-
                 } else {
+                    Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                    toast.setGravity(Gravity.BOTTOM, 50, 50);
                     toast.setView(toastFail);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.show();
                 }
-                toast.setDuration(Toast.LENGTH_LONG);
-                toast.show();
+
             }
 
             @Override

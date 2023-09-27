@@ -168,7 +168,6 @@ public class FileBackupManager {
                     FileOperationsUtil.zipBytes(fileName, response.body().bytes());
                     FileOperationsUtil.unzipFile(fileName, FileConstants.MODBUS_SIDE_LOADED_JSON_PATH);
                     deleteZipFileFromCCU(new File(fileName));
-                    EquipsManager.getInstance().readExternalJSONFiles();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

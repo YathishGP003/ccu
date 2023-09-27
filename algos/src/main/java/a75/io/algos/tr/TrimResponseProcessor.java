@@ -50,11 +50,6 @@ public class TrimResponseProcessor
             trSetting.resetRequest();
             return;
         }
-        
-        //TODO - requests now get updated every minute, it should change with the time step value here
-        if (minuteCounter % trSetting.getT() != 0) {
-            return;
-        }
     
         double sp = setPoint + trSetting.getSPtrim();
         
@@ -68,11 +63,11 @@ public class TrimResponseProcessor
                 response = trSetting.getSPresmax();
             }
             sp += response;
-            trSetting.resetRequest(); //Reset request count whenever a response is generated.
             for (TrimResetListener l : trListeners) {
                 l.handleSystemReset();
             }
         }
+        trSetting.resetRequest();
         
         if (sp < trSetting.getSPmin()) {
             sp = trSetting.getSPmin();

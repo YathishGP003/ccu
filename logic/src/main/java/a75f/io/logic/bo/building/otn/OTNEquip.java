@@ -10,12 +10,16 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -65,13 +69,15 @@ public class OTNEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-OTN-" + mNodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
 
-        Log.d(LOG_TAG, "config: " + config.gettempOffset() + " - " + config.getautoAway() + " - " +
-                "--" + config.getautoforceOccupied() + " - " + config.getzonePriority());
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
+
+        /*Log.d(LOG_TAG, "config: " + config.gettempOffset() + " - " + config.getautoAway() + " - " +
+                "--" + config.getautoforceOccupied() + " - " + config.getzonePriority());*/
 
         Equip.Builder b = new Equip.Builder()
                 .setSiteRef(siteRef)
@@ -267,8 +273,8 @@ public class OTNEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 1.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 1.0);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 :2.0);
 
 
         Point desiredTemp = new Point.Builder()

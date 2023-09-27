@@ -1,0 +1,1187 @@
+{
+  "id": "62e15ad657af71540c8d54cc",
+  "name": "hyperstat2pfcu",
+  "description": "Hyperstat - 2 Pipe Fan Coil Unit ",
+  "tagNames": [
+    "dis",
+    "equip",
+    "fcu",
+    "floorRef",
+    "gatewayRef",
+    "group",
+    "hyperstat",
+    "id",
+    "pipe2",
+    "priorityLevel",
+    "profile",
+    "roomRef",
+    "siteRef",
+    "tz",
+    "zone"
+  ],
+  "points" : [
+    {
+      "point": {
+        "id": "62e75f9ca841cb7abb47050e",
+        "name": "relay1OutputEnabled",
+        "description": "Relay#1 output enabled/disabled",
+        "pointType": "NUMBER",
+        "tagNames": [
+          "config",
+          "dis",
+          "enable",
+          "enum",
+          "equipRef",
+          "id",
+          "kind",
+          "output",
+          "point",
+          "relay1",
+          "siteRef",
+          "sp",
+          "tz",
+          "writable"
+        ],
+        "tags": [
+          {
+            "id": "62dc552efda35ed65635b36c",
+            "name": "config",
+            "kind": "marker",
+            "description": "Indicates a point is configurable within the UI without requiring the user to edit tuner values.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b3b3",
+            "name": "enable",
+            "kind": "marker",
+            "description": "Secondary on/off point of an equip especially used with a vfd.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2f2",
+            "name": "enum",
+            "kind": "str",
+            "description": "Comma separated list of text names to use for a Number point. CONFLICTS WITH TAG in PH v4",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b457",
+            "name": "output",
+            "kind": "marker",
+            "description": "Indicates that a point is the output of a calculation or for a point that configures the allowed output range from a physical port. Or output over/under frequency alarm",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b495",
+            "name": "relay1",
+            "kind": "marker",
+            "description": "Indicates that a point is related to a physical relay or the settings for it_ what it's associated to_ whether it's enabled_ etc.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b4d6",
+            "name": "sp",
+            "kind": "marker",
+            "description": "Classifies a point as a setpoint_ soft point_ or process control variable.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b545",
+            "name": "writable",
+            "kind": "marker",
+            "description": "Annotates a point as a writable output with 16-level priority array.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2ee",
+            "name": "dis",
+            "kind": "str",
+            "description": "Display name for an entity.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2f3",
+            "name": "equipRef",
+            "kind": "ref",
+            "description": "Reference to equip which contains this entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b302",
+            "name": "id",
+            "kind": "ref",
+            "description": "Defines the unique identifier of an entity in system using a `ref` value type. The scope of an entity is undefined but must be unique with a given system or project. This identifier may be used by other entities for cross-referencing.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2e1",
+            "name": "kind",
+            "kind": "str",
+            "description": "Kind name used before Haystack 4.0 to identity data types",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": [
+              "Marker",
+              "Bool",
+              "NA",
+              "Number",
+              "Str",
+              "Uri",
+              "Ref",
+              "DateTime",
+              "Coord",
+              "XStr",
+              "List",
+              "Dict",
+              "Grid"
+            ]
+          },
+          {
+            "id": "62dc552efda35ed65635b46b",
+            "name": "point",
+            "kind": "marker",
+            "description": "Data point such as a sensor or actuator.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b30a",
+            "name": "siteRef",
+            "kind": "ref",
+            "description": "Reference to site which contains the entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b311",
+            "name": "tz",
+            "kind": "str",
+            "description": "Timezone identifier from standard timezone database.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          }
+        ],
+        "defaultUnit": null,
+        "is75F": true,
+        "lastUpdateTime": "2022-10-12T17:17:27.690Z",
+        "lastUpdateBy": "sjayswal@75f.io",
+        "valueConstraintType": "MULTI_STATE",
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "Off"
+          },
+          {
+            "index": 1,
+            "value": "On"
+          }
+        ],
+        "minValue": null,
+        "maxValue": null,
+        "presentationData": {}
+      },
+      "pointId": "62e75f9ca841cb7abb47050e",
+      "isGpc36": false,
+      "tagNames": [
+        "floorRef",
+        "zone",
+        "roomRef",
+        "standalone",
+        "pipe2",
+        "group"
+      ],
+      "tags": [
+        {
+          "id": "62dc552efda35ed65635b2f5",
+          "name": "floorRef",
+          "kind": "ref",
+          "description": "Stores a reference pointer to a floor entity. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b54b",
+          "name": "zone",
+          "kind": "marker",
+          "description": "Associated with a conditioned zone of a building.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b309",
+          "name": "roomRef",
+          "kind": "ref",
+          "description": "Stores a reference to a room entity. Room entities are actually zones at 75F. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b4e9",
+          "name": "standalone",
+          "kind": "marker",
+          "description": "Used to indicate that node was setup to control a space_ but that the CCU is functioning only as a gateway and will not control the system.  Also applied to any points that are part of a standalone configuration.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b469",
+          "name": "pipe2",
+          "kind": "marker",
+          "description": "Indicate that an equip or a point is related to a 2 pipe fan coil unit.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b3dd",
+          "name": "group",
+          "kind": "str",
+          "description": "Stores the address of a device in the corresponding equipment and points.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b3ed",
+          "name": "base",
+          "kind": "str",
+          "description": "Stores the address of a device in the corresponding equipment and points.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        }
+      ],
+      "defaultUnit": "",
+      "hisInterpolate": "NONE"
+    },
+    {
+      "point": {
+        "id": "62e765fda841cb7abb470514",
+        "name": "relay1OutputAssociation",
+        "description": "Point associated with Relay#1",
+        "pointType": "NUMBER",
+        "tagNames": [
+          "association",
+          "config",
+          "dis",
+          "enum",
+          "equipRef",
+          "id",
+          "kind",
+          "output",
+          "point",
+          "relay1",
+          "siteRef",
+          "sp",
+          "tz",
+          "writable"
+        ],
+        "tags": [
+          {
+            "id": "62dc552efda35ed65635b332",
+            "name": "association",
+            "kind": "marker",
+            "description": "Indicates that a point stores the mapping between a physical output and the piece of equipment that it controls.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b36c",
+            "name": "config",
+            "kind": "marker",
+            "description": "Indicates a point is configurable within the UI without requiring the user to edit tuner values.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2f2",
+            "name": "enum",
+            "kind": "str",
+            "description": "Comma separated list of text names to use for a Number point. CONFLICTS WITH TAG in PH v4",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b457",
+            "name": "output",
+            "kind": "marker",
+            "description": "Indicates that a point is the output of a calculation or for a point that configures the allowed output range from a physical port. Or output over/under frequency alarm",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b495",
+            "name": "relay1",
+            "kind": "marker",
+            "description": "Indicates that a point is related to a physical relay or the settings for it_ what it's associated to_ whether it's enabled_ etc.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b4d6",
+            "name": "sp",
+            "kind": "marker",
+            "description": "Classifies a point as a setpoint_ soft point_ or process control variable.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b545",
+            "name": "writable",
+            "kind": "marker",
+            "description": "Annotates a point as a writable output with 16-level priority array.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2ee",
+            "name": "dis",
+            "kind": "str",
+            "description": "Display name for an entity.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2f3",
+            "name": "equipRef",
+            "kind": "ref",
+            "description": "Reference to equip which contains this entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b302",
+            "name": "id",
+            "kind": "ref",
+            "description": "Defines the unique identifier of an entity in system using a `ref` value type. The scope of an entity is undefined but must be unique with a given system or project. This identifier may be used by other entities for cross-referencing.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2e1",
+            "name": "kind",
+            "kind": "str",
+            "description": "Kind name used before Haystack 4.0 to identity data types",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": [
+              "Marker",
+              "Bool",
+              "NA",
+              "Number",
+              "Str",
+              "Uri",
+              "Ref",
+              "DateTime",
+              "Coord",
+              "XStr",
+              "List",
+              "Dict",
+              "Grid"
+            ]
+          },
+          {
+            "id": "62dc552efda35ed65635b46b",
+            "name": "point",
+            "kind": "marker",
+            "description": "Data point such as a sensor or actuator.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b30a",
+            "name": "siteRef",
+            "kind": "ref",
+            "description": "Reference to site which contains the entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b311",
+            "name": "tz",
+            "kind": "str",
+            "description": "Timezone identifier from standard timezone database.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          }
+        ],
+        "defaultUnit": null,
+        "is75F": true,
+        "lastUpdateTime": "2022-10-12T17:45:08.379Z",
+        "lastUpdateBy": "sjayswal@75f.io",
+        "valueConstraintType": "MULTI_STATE",
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "COOLING_STAGE_1"
+          },
+          {
+            "index": 1,
+            "value": "COOLING_STAGE_2"
+          },
+          {
+            "index": 2,
+            "value": "COOLING_STAGE_3"
+          },
+          {
+            "index": 3,
+            "value": "HEATING_STAGE_1"
+          },
+          {
+            "index": 4,
+            "value": "HEATING_STAGE_2"
+          },
+          {
+            "index": 5,
+            "value": "HEATING_STAGE_3"
+          },
+          {
+            "index": 6,
+            "value": "FAN_LOW_SPEED"
+          },
+          {
+            "index": 7,
+            "value": "FAN_MEDIUM_SPEED"
+          },
+          {
+            "index": 8,
+            "value": "FAN_HIGH_SPEED"
+          },
+          {
+            "index": 9,
+            "value": "FAN_ENABLED"
+          },
+          {
+            "index": 10,
+            "value": "OCCUPIED_ENABLED"
+          },
+          {
+            "index": 11,
+            "value": "HUMIDIFIER"
+          },
+          {
+            "index": 12,
+            "value": "DEHUMIDIFIER"
+          },
+          {
+            "index": 13,
+            "value": "NA"
+          }
+        ],
+        "minValue": null,
+        "maxValue": null,
+        "presentationData": {}
+      },
+      "pointId": "62e765fda841cb7abb470514",
+      "isGpc36": false,
+      "tagNames": [
+        "floorRef",
+        "zone",
+        "roomRef",
+        "standalone",
+        "group",
+        "pipe2"
+      ],
+      "tags": [
+        {
+          "id": "62dc552efda35ed65635b2f5",
+          "name": "floorRef",
+          "kind": "ref",
+          "description": "Stores a reference pointer to a floor entity. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b54b",
+          "name": "zone",
+          "kind": "marker",
+          "description": "Associated with a conditioned zone of a building.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b309",
+          "name": "roomRef",
+          "kind": "ref",
+          "description": "Stores a reference to a room entity. Room entities are actually zones at 75F. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b4e9",
+          "name": "standalone",
+          "kind": "marker",
+          "description": "Used to indicate that node was setup to control a space_ but that the CCU is functioning only as a gateway and will not control the system.  Also applied to any points that are part of a standalone configuration.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b3dd",
+          "name": "group",
+          "kind": "str",
+          "description": "Stores the address of a device in the corresponding equipment and points.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b469",
+          "name": "pipe2",
+          "kind": "marker",
+          "description": "Indicate that an equip or a point is related to a 2 pipe fan coil unit.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        }
+      ],
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "Fan Low Speed"
+          },
+          {
+            "index": 1,
+            "value": "Fan Medium Speed"
+          },
+          {
+            "index": 2,
+            "value": "Fan High Speed "
+          },
+          {
+            "index": 3,
+            "value": "Fan Enable"
+          },
+          {
+            "index": 4,
+            "value": "Occupied Enable"
+          },
+          {
+            "index": 5,
+            "value": "Aux Heating Stage 1"
+          },
+          {
+            "index": 6,
+            "value": "Aux Heating Stage 2"
+          },
+          {
+            "index": 7,
+            "value": "Water Valve"
+          },
+          {
+            "index": 8,
+            "value": "Humidifier"
+          },
+          {
+            "index": 9,
+            "value": "Dehumidifier"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "defaultUnit": "",
+      "hisInterpolate": "NONE"
+    },
+    {
+      "point": {
+        "id": "62bf09614f8f39125bf8ee96",
+        "name": "fanStage1",
+        "description": "Fan Stage 1",
+        "pointType": "BOOL",
+        "tagNames": [
+          "cmd",
+          "dis",
+          "equipRef",
+          "fan",
+          "id",
+          "kind",
+          "point",
+          "runtime",
+          "siteRef",
+          "stage1",
+          "tz",
+          "writable"
+        ],
+        "tags": [
+          {
+            "id": "62dc552efda35ed65635b35e",
+            "name": "cmd",
+            "kind": "marker",
+            "description": "Classifies a point as an output_ AO/BO_ command_ or actuator.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b3c9",
+            "name": "fan",
+            "kind": "marker",
+            "description": "Fan point or equip associated with an ahu_ vav_ or coolingTower.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b4ac",
+            "name": "runtime",
+            "kind": "marker",
+            "description": "Indicates that a point stores the runtime of a piece of equipment_ equipment component_ or device.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b4e4",
+            "name": "stage1",
+            "kind": "marker",
+            "description": "Used to indicate that a point is related to a particular stage of a piece of equipment.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b545",
+            "name": "writable",
+            "kind": "marker",
+            "description": "Annotates a point as a writable output with 16-level priority array.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2ee",
+            "name": "dis",
+            "kind": "str",
+            "description": "Display name for an entity.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2f3",
+            "name": "equipRef",
+            "kind": "ref",
+            "description": "Reference to equip which contains this entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b302",
+            "name": "id",
+            "kind": "ref",
+            "description": "Defines the unique identifier of an entity in system using a `ref` value type. The scope of an entity is undefined but must be unique with a given system or project. This identifier may be used by other entities for cross-referencing.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b2e1",
+            "name": "kind",
+            "kind": "str",
+            "description": "Kind name used before Haystack 4.0 to identity data types",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": [
+              "Marker",
+              "Bool",
+              "NA",
+              "Number",
+              "Str",
+              "Uri",
+              "Ref",
+              "DateTime",
+              "Coord",
+              "XStr",
+              "List",
+              "Dict",
+              "Grid"
+            ]
+          },
+          {
+            "id": "62dc552efda35ed65635b46b",
+            "name": "point",
+            "kind": "marker",
+            "description": "Data point such as a sensor or actuator.",
+            "ph4Native": false,
+            "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b30a",
+            "name": "siteRef",
+            "kind": "ref",
+            "description": "Reference to site which contains the entity",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc552efda35ed65635b311",
+            "name": "tz",
+            "kind": "str",
+            "description": "Timezone identifier from standard timezone database.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          },
+          {
+            "id": "62dc55defda35ad65635e311",
+            "name": "associated",
+            "kind": "str",
+            "description": "Timezone identifier from standard timezone database.",
+            "ph4Native": true,
+            "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+            "lastUpdateBy": "bstelmach@75f.io",
+            "valueEnum": []
+          }
+        ],
+        "defaultUnit": null,
+        "is75F": true,
+        "lastUpdateTime": "2022-10-23T18:13:06.373Z",
+        "lastUpdateBy": "sjayswal@75f.io",
+        "valueConstraintType": "MULTI_STATE",
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "ON"
+          },
+          {
+            "index": 1,
+            "value": "OFF"
+          }
+        ],
+        "minValue": null,
+        "maxValue": null,
+        "presentationData": {}
+      },
+      "pointId": "62bf09614f8f39125bf8ee96",
+      "isGpc36": false,
+      "tagNames": [
+        "cur",
+        "roomRef",
+        "standalone",
+        "run",
+        "logical",
+        "speed",
+        "floorRef",
+        "his",
+        "low",
+        "zone",
+        "hisInterpolate",
+        "group",
+        "pipe2"
+      ],
+      "tags": [
+        {
+          "id": "62dc552efda35ed65635b379",
+          "name": "cur",
+          "kind": "marker",
+          "description": "Marker tag which indicates the point has capability for subscription to its real-time_ current value.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b309",
+          "name": "roomRef",
+          "kind": "ref",
+          "description": "Stores a reference to a room entity. Room entities are actually zones at 75F. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b4e9",
+          "name": "standalone",
+          "kind": "marker",
+          "description": "Used to indicate that node was setup to control a space_ but that the CCU is functioning only as a gateway and will not control the system.  Also applied to any points that are part of a standalone configuration.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b4aa",
+          "name": "run",
+          "kind": "marker",
+          "description": "Primary on/off point of an equip especially used with a vfd.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b41a",
+          "name": "logical",
+          "kind": "marker",
+          "description": "Indicates that a point is a logical point_ which is not represented by a physical object in the world.  For example_ when tracking temperature there may be a physical point which tracks the resistance from the temperature sensor_ and a logical point that stores that value in the desired units_ such as degrees. ",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.002Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b4db",
+          "name": "speed",
+          "kind": "marker",
+          "description": "When used as a vfd point it is speed measured in % where 0% is off and 100% is the fastest speed.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b2f5",
+          "name": "floorRef",
+          "kind": "ref",
+          "description": "Stores a reference pointer to a floor entity. PH v4 would use `spaceRef` to model this.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b3e7",
+          "name": "his",
+          "kind": "marker",
+          "description": "Indicates that a point is historized with a history log of timestamp/value pairs.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b41c",
+          "name": "low",
+          "kind": "marker",
+          "description": "Indicates that a setting is the low setting or reading  for a system_ such as fan speed.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.002Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b54b",
+          "name": "zone",
+          "kind": "marker",
+          "description": "Associated with a conditioned zone of a building.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b300",
+          "name": "hisInterpolate",
+          "kind": "str",
+          "description": "Indicates how interpolation of a historized point should be handled. Deprecated and replaced with `hisMode` in PH v4",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b3dd",
+          "name": "group",
+          "kind": "str",
+          "description": "Stores the address of a device in the corresponding equipment and points.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc552efda35ed65635b469",
+          "name": "pipe2",
+          "kind": "marker",
+          "description": "Indicate that an equip or a point is related to a 2 pipe fan coil unit.",
+          "ph4Native": false,
+          "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        },
+        {
+          "id": "62dc55defda35ad65635e311",
+          "name": "associated",
+          "kind": "str",
+          "description": "Timezone identifier from standard timezone database.",
+          "ph4Native": true,
+          "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+          "lastUpdateBy": "bstelmach@75f.io",
+          "valueEnum": []
+        }
+      ],
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "Off"
+          },
+          {
+            "index": 1,
+            "value": "On"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "defaultUnit": "",
+      "hisInterpolate": "COV"
+    }
+  ],
+  "equips": [],
+  "tags": [
+    {
+      "id": "62dc552efda35ed65635b2ee",
+      "name": "dis",
+      "kind": "str",
+      "description": "Display name for an entity.",
+      "ph4Native": true,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b3bd",
+      "name": "equip",
+      "kind": "marker",
+      "description": "Equipment asset.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b3cc",
+      "name": "fcu",
+      "kind": "marker",
+      "description": "Fan coil units are unitary heating/cooling assets which use the zone itself for supply air.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b2f5",
+      "name": "floorRef",
+      "kind": "ref",
+      "description": "Stores a reference pointer to a floor entity. PH v4 would use `spaceRef` to model this.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b3db",
+      "name": "gatewayRef",
+      "kind": "ref",
+      "description": "Stores a reference to a system equip when there is no ahuRef because the CCU is not controlling the ahu.  Indicates that the CCU is just being used as a gateway to the cloud and not to control the system.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b3dd",
+      "name": "group",
+      "kind": "str",
+      "description": "Stores the address of a device in the corresponding equipment and points.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b3f6",
+      "name": "hyperstat",
+      "kind": "marker",
+      "description": "Related to the 75F HyperStat product",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.997Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b302",
+      "name": "id",
+      "kind": "ref",
+      "description": "Defines the unique identifier of an entity in system using a `ref` value type. The scope of an entity is undefined but must be unique with a given system or project. This identifier may be used by other entities for cross-referencing.",
+      "ph4Native": true,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b469",
+      "name": "pipe2",
+      "kind": "marker",
+      "description": "Indicate that an equip or a point is related to a 2 pipe fan coil unit.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b480",
+      "name": "priorityLevel",
+      "kind": "str",
+      "description": "Stores the assigned priority of a particular zone_ such as normal_ high_ low_ or none.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b482",
+      "name": "profile",
+      "kind": "str",
+      "description": "Stores the assigned profile of a system such as Staged VAV_ DAB_ etc.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b309",
+      "name": "roomRef",
+      "kind": "ref",
+      "description": "Stores a reference to a room entity. Room entities are actually zones at 75F. PH v4 would use `spaceRef` to model this.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b30a",
+      "name": "siteRef",
+      "kind": "ref",
+      "description": "Reference to site which contains the entity",
+      "ph4Native": true,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b311",
+      "name": "tz",
+      "kind": "str",
+      "description": "Timezone identifier from standard timezone database.",
+      "ph4Native": true,
+      "lastUpdateTime": "2022-03-03T22:26:05.996Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    },
+    {
+      "id": "62dc552efda35ed65635b54b",
+      "name": "zone",
+      "kind": "marker",
+      "description": "Associated with a conditioned zone of a building.",
+      "ph4Native": false,
+      "lastUpdateTime": "2022-03-03T22:26:06.003Z",
+      "lastUpdateBy": "bstelmach@75f.io",
+      "valueEnum": []
+    }
+  ],
+  "lastUpdateTime": "2023-02-20T19:15:58.103Z",
+  "lastUpdateBy": "sjayswal@75f.io",
+  "namespace": "bms75f"
+}

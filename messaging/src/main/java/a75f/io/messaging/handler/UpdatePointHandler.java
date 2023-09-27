@@ -53,9 +53,9 @@ public class UpdatePointHandler implements MessageHandler
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
 
-        if (canIgnorePointUpdate(src, pointUid, hayStack)) {
+        /*if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
-        }
+        }*/
         if(!isCloudEntityHasLatestValue(pointEntity, timeToken)){
             Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
             return;
@@ -65,7 +65,7 @@ public class UpdatePointHandler implements MessageHandler
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
-                zoneDataInterface.refreshScreen("");
+                zoneDataInterface.refreshScreen("", true);
             }
             return;
         }
@@ -180,7 +180,7 @@ public class UpdatePointHandler implements MessageHandler
                 modbusWritableDataInterface.writeRegister(localPoint.getId());
             }
         }
-        
+
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
             fetchRemotePoint(pointUid, isDataSync, msgObject);
@@ -304,9 +304,17 @@ public class UpdatePointHandler implements MessageHandler
 
         if (updateZoneUi && zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
-            zoneDataInterface.refreshScreen(luid);
+            zoneDataInterface.refreshScreen(luid, true);
         }
-
+        
+        if (p.getMarkers().contains("modbus")){
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(luid);
+            }
+            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(p.getId());
+            }
+        }
         if(isScheduleType){
             UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
         }
@@ -320,7 +328,7 @@ public class UpdatePointHandler implements MessageHandler
     private static void updateUI(Point updatedPoint) {
         if (zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh");
-            zoneDataInterface.refreshScreen(updatedPoint.getId());
+            zoneDataInterface.refreshScreen(updatedPoint.getId(), true);
         }
     }
 
@@ -366,5 +374,13 @@ public class UpdatePointHandler implements MessageHandler
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) throws MessageHandlingFailed {
         long timeToken = jsonObject.get("timeToken").getAsLong();
         handlePointUpdateMessage(jsonObject, timeToken, false);
+    }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+
+        String src = jsonObject.get("who").getAsString();
+        String pointUid = "@" + jsonObject.get("id").getAsString();
+        return canIgnorePointUpdate(src, pointUid, CCUHsApi.getInstance());
     }
 }

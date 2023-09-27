@@ -32,7 +32,9 @@ public class BLEProvisionService extends Service
     private BluetoothAdapter mBluetoothAdapter;
     private String           mBluetoothDeviceAddress;
     private BluetoothGatt    mBluetoothGatt;
-    
+    private String nodeAddress;
+    private int GATT_STATUS_133 = 133;
+    public int retryCount = 1;
     
     
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -50,6 +52,7 @@ public class BLEProvisionService extends Service
                 
                 Log.i(TAG, "Attempting to start service discovery:" +
                            mBluetoothGatt.discoverServices());
+                retryCount = 1;
                 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = BLEAction.ACTION_GATT_DISCONNECTED;
@@ -57,8 +60,15 @@ public class BLEProvisionService extends Service
                 mBluetoothGatt.close();
                 
                 mBluetoothGatt = null;
-                Log.i(TAG, "Disconnected from GATT server.");
+                Log.i(TAG, "Disconnected from GATT server. status code: "+status);
                 broadcastUpdate(intentAction, null);
+
+                if(status == GATT_STATUS_133 && retryCount <= 3){
+                    Log.i(TAG, "re-trying with node: "+nodeAddress+" retryCount: "+retryCount);
+                    retryCount = retryCount + 1;
+                    connect(nodeAddress);
+                }
+
             }
         }
         
@@ -228,6 +238,7 @@ public class BLEProvisionService extends Service
         Log.d(TAG, "Trying to create a new connection.");
         //mBluetoothDeviceAddress = address;
         //mConnectionState = STATE_CONNECTING;
+        nodeAddress = address;
         return true;
     }
     /**

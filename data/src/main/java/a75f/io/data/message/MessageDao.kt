@@ -38,4 +38,7 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages WHERE messageId = :messageId")
     fun getMessageById(messageId : String) : Message
+
+    @Query("SELECT * FROM messages WHERE receivedTime < :expiryTime")
+    fun getAllExpiredMessages(expiryTime : Long): List<Message>
 }

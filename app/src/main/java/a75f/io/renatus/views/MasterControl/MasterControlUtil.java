@@ -1,27 +1,35 @@
 package a75f.io.renatus.views.MasterControl;
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.isHeatingOrCoolingLimitsNull;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
+import android.util.Log;
+
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.renatus.util.CCUUiUtil;
 
 public class MasterControlUtil {
 
@@ -192,7 +200,7 @@ public class MasterControlUtil {
 
     public static String isValidData(ArrayList<Schedule> schedules, String heatingMax, String heatingMin, String coolingMax, String coolingMin,
                                      String coolingDeadBand, String heatingDeadBand, String buildingLimMin,
-                                     String buildingLimMax, String unoccupiedzoneSetback, String buildingZoneDifferential) {
+                                     String buildingLimMax, String unoccupiedzoneSetback, String buildingZoneDifferential, List<Zone> zones, List<Equip> equipList) {
         String WarningMessage;
         double heatingMaxVal;
         double heatingMinVal;
@@ -217,22 +225,24 @@ public class MasterControlUtil {
         unoccupiedZoneSetBackval = MasterControlUtil.getAdapterFarhenheitVal(unoccupiedzoneSetback);
         buildingZoneDifferentialVal = MasterControlUtil.getAdapterFarhenheitVal(buildingZoneDifferential);
 
-        if (buildingLimMinVal > (heatingMinVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Heating limit min temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Heating user limit min temperature";
-        } else if (buildingLimMaxVal < (coolingMaxVal + (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Cooling limit max temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Cooling user limit max temperature";
-        } else
+        if ((buildingLimMinVal +  (buildingZoneDifferentialVal + unoccupiedZoneSetBackval)) > heatingMinVal) {
+            WarningMessage = "Please go back and edit the Heating Limit Min temperature/ Unoccupied Zone Setback to be within the temperature limits of the building " +
+                    "or adjust the temperature limits of the building to accommodate the required Heating Limit Min temperature/ Unoccupied Zone Setback as per" +
+                    " formula \n > \"Heating User Limit Min - (unoccupiedZoneSetback + buildingToZoneDifferential) > Building Limit Min\" ";
+        } else if ((buildingLimMaxVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval) < coolingMaxVal)) {
+            WarningMessage = "Please go back and edit the Cooling Limit Max temperature/ Unoccupied Zone Setback to be within the temperature limits" +
+                    " of the building or adjust the temperature limits of the building to accommodate the required Cooling Limit Max temperature/ Unoccupied" +
+                    " Zone Setback as per formula \n > \"Cooling User Limit Max + (unoccupiedZoneSetback + buildingToZoneDifferential) < Building Limit Max \"";
+        }else
             WarningMessage = validateLimits(heatingMaxVal, heatingMinVal, heatingDeadBandVal,
                     coolingMaxVal, coolingMinVal, coolingDeadBandVal);
 
 
         if (WarningMessage == null) {
             WarningMessage = validateZoneVal(buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
-                        coolingMaxVal);
+                        coolingMaxVal,unoccupiedZoneSetBackval);
             StringBuilder globalWarning = validateGlobalSchedule(schedules,buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
-                    coolingMaxVal);
+                    coolingMaxVal, zones, equipList);
             if(globalWarning.length() > 1)
                 WarningMessage = WarningMessage + globalWarning;
 
@@ -343,7 +353,7 @@ public class MasterControlUtil {
         return WarningMessage;
     }
 
-    public static String validateZone(double buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
+    public static String validateZone(double  buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
                                       double buildingLimMaxVal, double coolingMaxVal) {
         String WarningMessage = null;
 
@@ -361,44 +371,48 @@ public class MasterControlUtil {
 
     public static String validateZoneVal(double buildingLimMinVal, double buildingZoneDifferential, double buildingLimMaxVal,
                                          double heatingMinVal, double heatingMaxVal, double coolingMinVal,
-                                         double coolingMaxVal) {
+                                         double coolingMaxVal,double unoccupiedZoneSetback) {
         StringBuilder WarningMessage = new StringBuilder();
         ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities("room");
 
 
         for (HashMap<Object, Object> zone : zones) {
+            if (!checkIfNonTempEquipInZone(zone)) {
             String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and roomRef == \"" + zone.get("id").toString() + "\"");
-            int scheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
-            if (scheduleType == 1) {
-                Schedule schedule = CCUHsApi.getInstance().getZoneSchedule(zone.get("id").toString(), false).get(0);
+            if (scheduleTypeId != null) {
+                int scheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+                if (scheduleType == 1) {
+                    Schedule schedule = CCUHsApi.getInstance().getZoneSchedule(zone.get("id").toString(), false).get(0);
 
-                Double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback() ;
-                if(unoccupiedZoneSetBackval == null){
-                    String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unoccupied and setback and roomRef == \"" + zone.get("id").toString() + "\"");
-                    unoccupiedZoneSetBackval =  CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
-                }
-                if (schedule.getMarkers().contains("followBuilding")) {
-                    StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),false);
-                    if(val != null)
-                        WarningMessage = WarningMessage.append(val);
+                    Double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
+                    if (unoccupiedZoneSetBackval == null) {
+                        String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unoccupied and setback and roomRef == \"" + zone.get("id").toString() + "\"");
+                        unoccupiedZoneSetBackval = CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
+                    }
+                    if (schedule.getMarkers().contains("followBuilding")) {
+                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetback,
+                                heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), false);
+                        if (val != null)
+                            WarningMessage = WarningMessage.append(val);
 
-                }else{
+                    } else {
+                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                                heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), true);
+                        if (val != null)
+                            WarningMessage = WarningMessage.append(val);
+                    }
+                } else if (scheduleType == 2) {
+                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString());
+                    double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
                     StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),true);
+                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), true);
                     if (val != null)
                         WarningMessage = WarningMessage.append(val);
-                }
-            } else if (scheduleType == 2) {
-                Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString());
-                double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
-                StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                        heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(),true);
-                if (val != null)
-                    WarningMessage = WarningMessage.append(val);
 
+                }
             }
 
+            }
         }
 
         if (WarningMessage.length() > 1) {
@@ -458,6 +472,9 @@ public class MasterControlUtil {
                                             double coolingMaxVal, String zoneDis,boolean isNamed){
         StringBuilder WarningMessage = new StringBuilder();
         for (Schedule.Days day : schedule.getDays()) {
+            if(isHeatingOrCoolingLimitsNull(day)){
+                continue;
+            }
             if (buildingLimMinVal > (day.getHeatingUserLimitMin() - (buildingZoneDifferential + unoccupiedZoneSetBackval))) {
                 WarningMessage.append(ScheduleUtil.getDayString(day.getDay() + 1))
                         .append(" ")
@@ -498,7 +515,7 @@ public class MasterControlUtil {
             }
         }
         if(WarningMessage.length() > 2){
-            String  zoneDetails = "\tZone - ("+zoneDis+") ";
+            String  zoneDetails = "\n\tZone - ("+zoneDis+") ";
             WarningMessage.insert(0,zoneDetails);
             return WarningMessage;
         }
@@ -533,20 +550,19 @@ public class MasterControlUtil {
 
     public static boolean isMigrated(){
         ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-        return (!(isSchedulableAvailable == null));
+        return ((isSchedulableAvailable != null && SchedulableMigrationKt.validateMigration()));
     }
 
     public static boolean isNonTempModule(String profileType){
         return  (profileType.contains(ProfileType.EMR.toString()) || profileType.contains(ProfileType.PLC.toString())
                 || profileType.contains(ProfileType.TEMP_MONITOR.toString())
-                || profileType.contains(ProfileType.TEMP_INFLUENCE.toString())
-                || profileType.contains("MODBUS") || profileType.contains(ProfileType.HYPERSTAT_SENSE.toString()));
+                || profileType.contains("MODBUS") || profileType.contains(ProfileType.HYPERSTAT_MONITORING.toString()));
     }
 
 
     public static StringBuilder validateGlobalSchedule(ArrayList<Schedule> allSchedules, double buildingLimMinVal, double buildingZoneDifferential, double buildingLimMaxVal,
-                                                double heatingMinVal, double heatingMaxVal, double coolingMinVal,
-                                                double coolingMaxVal) {
+                                                       double heatingMinVal, double heatingMaxVal, double coolingMinVal,
+                                                       double coolingMaxVal, List<Zone> zones, List<Equip> equipList) {
         ArrayList<HashMap<Object, Object>> allZones = CCUHsApi.getInstance().readAllEntities("room" );
         ArrayList<String> allRoomRef  = new ArrayList<>();
         allZones.forEach( zone -> allRoomRef.add(zone.get("id").toString()));
@@ -554,8 +570,11 @@ public class MasterControlUtil {
         for (Schedule schedule : allSchedules) {
             if (schedule.getMarkers().contains("followBuilding") && !allRoomRef.contains(schedule.getRoomRef())) {
                 double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
-                StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
-                        heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, schedule.getDis(), false);
+                StringBuilder val = null;
+                if (!checkNonTempProfilePairedInRoom(getZoneIdByScheduleId(schedule.getRoomRef(), zones), equipList)) {
+                    val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                            heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, getZoneName(schedule.getRoomRef(), zones), false);
+                }
                 if (val != null)
                     WarningMessage = WarningMessage.append(val);
 
@@ -568,11 +587,43 @@ public class MasterControlUtil {
         return WarningMessage;
 
     }
+    private static String getZoneIdByScheduleId(String id, List<Zone> zones) {
+        for(Zone zone : zones){
+            if(zone.getId().equals(id)){
+                return zone.getId();
+            }
+        }
+        return null;
+    }
+
+    private static boolean checkNonTempProfilePairedInRoom(String roomRef, List<Equip> equips) {
+        ArrayList<Equip> roomEquips = new ArrayList<>();
+        for(Equip equip : equips){
+            if(equip.getRoomRef().equals(roomRef)){
+                roomEquips.add(equip);
+            }
+        }
+        return roomEquips.stream().anyMatch(equip ->
+                MasterControlUtil.isNonTempModule(equip.getProfile()));
+    }
+
+    private static String getZoneName(String id, List<Zone> zones) {
+        for(Zone zone : zones){
+            if(zone.getId().equals(id)){
+                return zone.getDisplayName();
+            }
+        }
+        return null;
+    }
 
     public static boolean checkIfNonTempEquipInZone(HashMap<Object,Object> zone){
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and roomRef ==\""
-                + zone.get("id").toString() + "\"");
-        return equips.stream().anyMatch(equip -> MasterControlUtil.isNonTempModule(equip.get("profile").toString()));
+        if(zone != null) {
+            ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and roomRef ==\""
+                    + zone.get("id").toString() + "\"");
+            return equips.stream().anyMatch(equip ->
+                    MasterControlUtil.isNonTempModule(equip.get("profile").toString()));
+        }
+        return false;
     }
 
 }

@@ -28,7 +28,6 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.constants.WhoFiledConstants;
-import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -51,7 +50,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -63,7 +61,6 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -297,6 +294,12 @@ public class Pulse
 				continue;
 			}
 			double val = r.sensorData.get();
+			/* Smartnode  represents the lower 11 bits as unsigned, as uses bit 12 to indicate
+			  if value is negative or not, if value is negative bit 12 is set to 1 and binary value
+			  becomes greater than 2048.*/
+			if(t == SensorType.PRESSURE && val > 2048 ){
+				val = getPressureValue(Integer.toBinaryString((int) val));
+			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
 				sp = node.addSensor(p);
@@ -362,7 +365,20 @@ public class Pulse
 		}
 	
 	}
-	
+
+	private static double getPressureValue(String pressureBinary) {
+		int originalValue = Integer.parseInt(pressureBinary, 2);
+		if ((originalValue & (1 << 11)) != 0) {
+			// If the 12th bit is set to 1, remove it by setting it to 0
+			int modifiedValue = originalValue & ~(1 << 11);
+			String modifiedBinaryData = String.format("%12s", Integer.toBinaryString(modifiedValue)).replace(' ', '0');
+			return Integer.parseInt(modifiedBinaryData, 2)*(-1);
+		} else {
+			// If the 12th bit is not set to 1, no modification needed
+			return Integer.parseInt(pressureBinary, 2);
+		}
+	}
+
 	public static double round(double val) {
 		return Math.round(100*val)/100;
 	}

@@ -86,16 +86,13 @@
                 android:textSize="19.5dp"/>
 
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleZonePass"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
                 android:layout_marginTop="72dp"
-                android:textOff=""
-                android:textOn="" />
+                layout="@layout/custom_ccu_switch" />
 
 
             <TextView
@@ -123,17 +120,14 @@
                 android:textSize="19.5dp"/>
 
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleSystemPass"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
                 android:layout_marginTop="48dp"
-                android:textOff=""
-                android:textOn=""
-                android:layout_below="@+id/textTapZone" />
+                android:layout_below="@+id/textTapZone"
+                layout="@layout/custom_ccu_switch" />
 
 
             <TextView
@@ -161,17 +155,14 @@
                 android:textSize="19.5dp"/>
 
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleBuildingPass"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
+                android:layout_below="@+id/textTapSystem"
                 android:layout_marginTop="48dp"
-                android:textOff=""
-                android:textOn=""
-                android:layout_below="@+id/textTapSystem" />
+                layout="@layout/custom_ccu_switch" />
 
 
             <TextView
@@ -199,16 +190,13 @@
                 android:textSize="19.5dp"/>
 
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleSetupPass"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
                 android:layout_marginTop="48dp"
-                android:textOff=""
-                android:textOn=""
+                layout="@layout/custom_ccu_switch"
                 android:layout_below="@+id/textTapBuild" />
 
 

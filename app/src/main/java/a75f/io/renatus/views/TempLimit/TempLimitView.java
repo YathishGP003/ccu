@@ -68,16 +68,12 @@ public class TempLimitView extends LinearLayout {
 
 
     public void updateData() {
-       /* HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
-        BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
-        HashMap<Object,Object> coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-        HashMap<Object,Object> heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-        HashMap<Object,Object> coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-        HashMap<Object,Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-        */
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
+        HashMap<Object, Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
+        HashMap<Object, Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
+        if (buildingMin.isEmpty()) {
+            buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min");
+            buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max");
+        }
 
         setTempControl((float)MasterControlUtil.zoneMaxHeatingVal(),
                 (float) MasterControlUtil.zoneMinHeatingVal(),

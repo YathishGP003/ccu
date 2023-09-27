@@ -48,6 +48,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -64,33 +65,33 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     private ConventionalUnitConfiguration mProfileConfig;
 
 
-    ToggleButton switchThermistor1;
-    ToggleButton switchCoolingY1;
+    CustomCCUSwitch switchThermistor1;
+    CustomCCUSwitch switchCoolingY1;
     @BindView(R.id.testCpuRelay1)
     ToggleButton testCoolingY1;
-    ToggleButton switchCoolingY2;
+    CustomCCUSwitch switchCoolingY2;
     @BindView(R.id.testCpuRelay2)
     ToggleButton testCoolingY2;
-    ToggleButton switchFanLowG;
+    CustomCCUSwitch switchFanLowG;
     @BindView(R.id.testCpuRelay3)
     ToggleButton testFanLowG;
-    ToggleButton switchHeatingW1;
+    CustomCCUSwitch switchHeatingW1;
     @BindView(R.id.testCpuRelay4)
     ToggleButton testHeatingW1;
-    ToggleButton switchHeatingW2;
+    CustomCCUSwitch switchHeatingW2;
     @BindView(R.id.testCpuRelay5)
     ToggleButton testHeatingW2;
-    ToggleButton switchFanHighOb;
+    CustomCCUSwitch switchFanHighOb;
     @BindView(R.id.testCpuRelay6)
     ToggleButton testFanHighOb;
-    ToggleButton switchOccSensor;
-    ToggleButton switchExtTempSensor;
-    ToggleButton switchEnableFanStage1;
+    CustomCCUSwitch switchOccSensor;
+    CustomCCUSwitch switchExtTempSensor;
+    CustomCCUSwitch switchEnableFanStage1;
     @BindView(R.id.textCoolStage1)
     TextView textCoolStage1;
 
-    ToggleButton toggleAutoaway;
-    ToggleButton toggleAutoForceOccupied;
+    CustomCCUSwitch toggleAutoaway;
+    CustomCCUSwitch toggleAutoForceOccupied;
 
     Button setButton;
     Button cancelButton;
@@ -180,15 +181,15 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
         }
 
-        switchCoolingY1 = (ToggleButton) view.findViewById(R.id.toggleCoolStage1);
-        switchCoolingY2 = (ToggleButton) view.findViewById(R.id.toggleCoolStage2);
-        switchHeatingW1 = (ToggleButton) view.findViewById(R.id.toggleHeatStage1);
-        switchHeatingW2 = (ToggleButton) view.findViewById(R.id.toggleHeatStage2);
-        switchFanLowG = (ToggleButton) view.findViewById(R.id.toggleCpuFanLow);
-        switchFanHighOb = (ToggleButton) view.findViewById(R.id.toggleCpuFanHigh);
-        switchThermistor1 = (ToggleButton) view.findViewById(R.id.toggleCpuAirflow);
-        switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleCpuExtSensor);
-        temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
+        switchCoolingY1 = view.findViewById(R.id.toggleCoolStage1);
+        switchCoolingY2 = view.findViewById(R.id.toggleCoolStage2);
+        switchHeatingW1 = view.findViewById(R.id.toggleHeatStage1);
+        switchHeatingW2 = view.findViewById(R.id.toggleHeatStage2);
+        switchFanLowG = view.findViewById(R.id.toggleCpuFanLow);
+        switchFanHighOb = view.findViewById(R.id.toggleCpuFanHigh);
+        switchThermistor1 = view.findViewById(R.id.toggleCpuAirflow);
+        switchExtTempSensor = view.findViewById(R.id.toogleCpuExtSensor);
+        temperatureOffset = view.findViewById(R.id.temperatureOffset);
         fanHumiDSpinner = (Spinner) view.findViewById(R.id.spinnerCpuFanHigh);
         toggleAutoaway = view.findViewById(R.id.toggleAutoAway);
         toggleAutoForceOccupied = view.findViewById(R.id.toggleAFO);

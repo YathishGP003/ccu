@@ -83,17 +83,14 @@
             tools:listitem="@layout/spinner_dropdown_item"
             android:entries="@array/system_profile_select"/>
 
-        <ToggleButton
+        <include
             android:id="@+id/toggleWifi"
-            android:layout_width="47dp"
-            android:layout_height="28dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="106dp"
-            android:background="@drawable/toggle_selector"
-            android:checked="false"
-            android:textOff=""
-            android:textOn="" />
+            layout="@layout/custom_ccu_switch" />
 
         <ImageView
             android:id="@+id/imageRefresh"

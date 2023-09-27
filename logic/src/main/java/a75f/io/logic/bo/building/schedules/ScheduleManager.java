@@ -406,22 +406,25 @@ public class ScheduleManager {
                     .replace("@", ""));
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
             if (!equipSchedule.getMarkers().contains("specialschedule")) {
-                Occupied occ = equipSchedule.getCurrentValues();
-                if(equipSchedule.getUnoccupiedZoneSetback() != null)
-                    occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
-                int day = DateTime.now().dayOfWeek().get() - 1;
-                Calendar calender = Calendar.getInstance();
-                int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
-                int min = calender.get(Calendar.MINUTE);
-                int curTime = hrs + min;
-                for (Schedule.Days d : mDays) {
-                    if (d.getDay() == day) {
-                        int startSchTime = (d.getSthh() * 60) + d.getStmm();
-                        int endSchTime = (d.getEthh() * 60) + d.getEtmm();
-                        if (curTime > startSchTime && curTime < endSchTime) {
-                            if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
-                                if(equipSchedule.getUnoccupiedZoneSetback() != null)
-                                   updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
+                if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
+                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                        updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
+                    Occupied occ = equipSchedule.getCurrentValues();
+                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                        occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
+                    int day = DateTime.now().dayOfWeek().get() - 1;
+                    Calendar calender = Calendar.getInstance();
+                    int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+                    int min = calender.get(Calendar.MINUTE);
+                    int curTime = hrs + min;
+                    for (Schedule.Days d : mDays) {
+                        if (d.getDay() == day) {
+                            int startSchTime = (d.getSthh() * 60) + d.getStmm();
+                            int endSchTime = (d.getEthh() * 60) + d.getEtmm();
+                            if (curTime > startSchTime && curTime < endSchTime) {
+                                if(isHeatingOrCoolingLimitsNull(d)){
+                                    continue;
+                                }
                                 saveUserLimitChange("max and heating ", (d.getHeatingUserLimitMax()).intValue(), roomRef);
                                 saveUserLimitChange("min and heating ", (d.getHeatingUserLimitMin()).intValue(), roomRef);
                                 saveUserLimitChange("max and cooling ", (d.getCoolingUserLimitMax()).intValue(), roomRef);
@@ -458,6 +461,11 @@ public class ScheduleManager {
                 }
             }
         }
+    }
+
+    public static boolean isHeatingOrCoolingLimitsNull(Schedule.Days days) {
+        return days.getHeatingUserLimitMax() == null || days.getHeatingUserLimitMin() == null ||
+                days.getCoolingUserLimitMax() == null || days.getCoolingUserLimitMin() == null;
     }
 
     public void updateZoneOccupancy(CCUHsApi hayStack) {

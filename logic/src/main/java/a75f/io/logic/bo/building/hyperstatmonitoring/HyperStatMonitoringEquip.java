@@ -8,8 +8,12 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
+import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
@@ -53,21 +57,13 @@ public class HyperStatMonitoringEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-MONITORING-" + mNodeAddr;
-        HashMap systemEquip = mHayStack.read("equip and system");
+        HashMap systemEquip = mHayStack.read("equip and system and not modbus");
         String ahuRef = null;
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
 
-        Log.d(LOG_TAG, "In create " + "TemperatureOffset = " + String.valueOf(config.temperatureOffset) + " /n" +
-                "isTh1Enable = " + String.valueOf(config.isTh1Enable) + " \n" +
-                "isTh2Enable = " + String.valueOf(config.isTh2Enable) + " \n" +
-                "isAnalog1Enable = " + String.valueOf(config.isAnalog1Enable) + " \n" +
-                "isAnalog2Enable = " + String.valueOf(config.isAnalog2Enable) + " \n" +
-                "th1Sensor = " + String.valueOf(config.th1Sensor) + " \n" +
-                "th2Sensor = " + String.valueOf(config.th2Sensor) + " \n" +
-                "analog1Sensor = " + String.valueOf(config.analog1Sensor) + " \n" +
-                "analog2Sensor = " + String.valueOf(config.analog2Sensor));
+        Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
 
         Equip b = new Equip.Builder()
                 .setSiteRef(siteRef)
@@ -94,8 +90,8 @@ public class HyperStatMonitoringEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        mHayStack.writeDefaultValById(equipScheduleTypeId, 1.0);
-        mHayStack.writeHisValById(equipScheduleTypeId, 1.0);
+        mHayStack.writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
+        mHayStack.writeHisValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
 
 
         Point isAnalog1enaled = new Point.Builder()

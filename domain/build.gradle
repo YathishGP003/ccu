@@ -1,0 +1,103 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'a75f.io.domain'
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        local {
+            minifyEnabled false
+        }
+        dev {
+            minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.dev.service.75f.io/\"'
+        }
+        dev_qa {
+            minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io/\"'
+        }
+        prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.prod.service.75f.io/\"'
+        }
+        qa {
+            minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io\"'
+
+        }
+        staging {
+            minifyEnabled false
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.staging.service.75f.io\"'
+        }
+        daikin_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.daikin_prod.service.75f.io\"'
+        }
+        carrier_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.carrier_prod.service.75f.io\"'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main {
+            assets {
+                srcDirs 'src\\main\\assets'
+            }
+        }
+
+        test {
+            resources {
+                srcDirs 'src\\test\\assets'
+            }
+        }
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+}
+
+dependencies {
+    implementation project(':haystack')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.0.1-SNAPSHOT')
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation 'org.json:json:20140107'
+    implementation "com.squareup.moshi:moshi:1.8.0"
+    implementation "com.squareup.moshi:moshi-kotlin:1.8.0"
+    implementation("com.squareup.moshi:moshi-adapters:1.8.0")
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+}

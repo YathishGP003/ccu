@@ -84,51 +84,38 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginLeft="10dp">
-                    <ToggleButton
+                    <include
                         android:id="@+id/th1"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginTop="10dp"
+                        layout="@layout/custom_ccu_switch" />
+                    <include
+                        android:id="@+id/th2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:layout_marginTop="20dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn=""
-                        />
-                    <ToggleButton
-                        android:id="@+id/th2"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginTop="40dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn=""/>
-                    <ToggleButton
+                        layout="@layout/custom_ccu_switch" />
+                    <include
                         android:id="@+id/anlg1"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginTop="70dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
-                    <ToggleButton
+                        android:layout_marginTop="52dp"
+                        layout="@layout/custom_ccu_switch" />
+                    <include
                         android:id="@+id/anlg2"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginTop="45dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
+                        android:layout_marginTop="30dp"
+                        layout="@layout/custom_ccu_switch" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -159,7 +146,7 @@
                         android:text="@string/analogin1"
                         android:fontFamily="@font/lato_regular"
                         android:textAppearance="@style/text_appearance"
-                        android:layout_marginTop="65dp"
+                        android:layout_marginTop="70dp"
                         />
                     <TextView
                         android:id="@+id/textangl2"

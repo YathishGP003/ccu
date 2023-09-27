@@ -115,7 +115,6 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());
 			CCUHsApi.getInstance().saveTagsData();
 			floorPlanActivity.refreshScreen();
-			EquipsManager.getInstance().deleteEquipByZone(sZone.getId());
 			BacnetUtilKt.sendBroadCast(floorPlanActivity.requireContext(),
 					INTENT_ZONE_DELETED,
 					sZone.getId());

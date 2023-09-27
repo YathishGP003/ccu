@@ -30,6 +30,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -58,10 +59,10 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
     Button mSetbtn;
 
     @BindView(R.id.toogleautoforceoccupied)
-    ToggleButton mAutoforceoccupied;
+    CustomCCUSwitch mAutoforceoccupied;
 
     @BindView(R.id.toogleautoaway)
-    ToggleButton mAutoAway;
+    CustomCCUSwitch mAutoAway;
 
 
     @BindView(R.id.zonePriority)

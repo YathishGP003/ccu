@@ -288,6 +288,8 @@ public class UsbModbusService extends Service {
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = true;
                         } else {
+                            Log.d(TAG, "Closing the connection "+connection);
+                            connection.close();
                             Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = false;
@@ -330,6 +332,11 @@ public class UsbModbusService extends Service {
                 device = entry.getValue();
                 if (UsbSerialUtil.isModbusDevice(device, context)) {
                     boolean success = grantRootPermissionToUSBDevice(device);
+                    if(connection != null)
+                    {
+                        Log.d(TAG, "Closing the connection "+connection);
+                        connection.close();
+                    }
                     connection = usbManager.openDevice(device);
                     if (connection != null && success) {
                         ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
@@ -495,7 +502,7 @@ public class UsbModbusService extends Service {
     
         private void configureMbSerialPort() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort+" connection: "+connection);
             Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
                       +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
@@ -528,6 +535,9 @@ public class UsbModbusService extends Service {
                     Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
                 } else {
+                    Log.d(TAG,"closing USB serial device "+serialPort);
+                    serialPort.close();
+                    serialPort = null;
                     Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
                     context.sendBroadcast(intent);
                 }

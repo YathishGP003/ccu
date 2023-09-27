@@ -100,7 +100,13 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                 new Thread() {
                     @Override
                     public void run() {
-                        UploadLogs.instanceOf().saveCcuLogs();
+                        //We are already in safe mode. No reason to crash again and go into a loop, especially
+                        //if the system went to safe mode due to OOM.
+                        try {
+                            UploadLogs.instanceOf().saveCcuLogs();
+                        } catch (Exception e) {
+                            Log.e(TAG,"Failed to save logs while in safe mode");
+                        }
                     }
                 }.start();
 
@@ -133,6 +139,13 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                 && !prefs.getBoolean("REGISTRATION")){
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
+            startActivity(i);
+            finish();
+        } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
+                && !prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
+            Intent i = new Intent(SplashActivity.this,
+                    FreshRegistration.class);
+            i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
         } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")

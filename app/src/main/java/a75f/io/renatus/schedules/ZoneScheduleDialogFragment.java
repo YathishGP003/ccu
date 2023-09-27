@@ -4,7 +4,6 @@ package a75f.io.renatus.schedules;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -48,7 +47,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -56,7 +54,6 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBarView;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 
 @SuppressLint("ValidFragment")
@@ -248,13 +245,14 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         ArrayList<String> deadBand = new ArrayList<>();
 
         if(isCelsiusTunerAvailableStatus()){
-            double minVal = Math.round(convertingRelativeValueFtoC(0));
-            double maxVal = UnitUtils.roundToHalf(convertingRelativeValueFtoC(10));
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
+
+            double minVal = convertingRelativeValueFtoC(0);
+            double maxVal = convertingRelativeValueFtoC(10);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
-                deadBand.add( UnitUtils.roundToPointFive(convertingDeadBandValueFtoC(val)) + "\u00B0C");
+                deadBand.add( ((val)) + "\u00B0C");
             }
 
         }else{
@@ -287,19 +285,6 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         coolingDeadBand.setAdapter(deadBandAdapter);
         heatingDeadBand.setAdapter(deadBandAdapter);
 
-        heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                getAdapterVal(72, true)));
-        heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                getAdapterVal(67, true)));
-        coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                getAdapterVal(77, true)));
-        coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                getAdapterVal(72, true)));
-        heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                getAdapterValDeadBand(2, true)));
-        coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                getAdapterValDeadBand(2, true)));
-
         if(schedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
             heatingUserLimitMax.setEnabled(false);
             heatingUserLimitMin.setEnabled(false);
@@ -316,15 +301,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             heatingDeadBand.setEnabled(true);
             coolingDeadBand.setEnabled(true);
         }
-
+        setDefaultUserLimits(heatingAdapter, coolingAdapter, deadBandAdapter);
         followBuilding.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(followBuilding.isChecked()){
-                heatingUserLimitMax.setEnabled(false);
-                heatingUserLimitMin.setEnabled(false);
-                coolingUserLimitMax.setEnabled(false);
-                coolingUserLimitMin.setEnabled(false);
-                heatingDeadBand.setEnabled(false);
-                coolingDeadBand.setEnabled(false);
                 heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
                         getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
                 heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
@@ -337,6 +316,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                         getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
                 coolingDeadBand.setSelection(deadBandAdapter.getPosition(
                         getAdapterValDeadBand(HSUtil.getLevelValueFrom16(coolDB.get("id").toString()), true)));
+                resetRangeBarLimits();
+                heatingUserLimitMax.setEnabled(false);
+                heatingUserLimitMin.setEnabled(false);
+                coolingUserLimitMax.setEnabled(false);
+                coolingUserLimitMin.setEnabled(false);
+                heatingDeadBand.setEnabled(false);
+                coolingDeadBand.setEnabled(false);
             }else {
                 heatingUserLimitMax.setEnabled(true);
                 heatingUserLimitMin.setEnabled(true);
@@ -344,18 +330,23 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 coolingUserLimitMin.setEnabled(true);
                 heatingDeadBand.setEnabled(true);
                 coolingDeadBand.setEnabled(true);
-                heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
-                heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
-                coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
-                coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
-                heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                        getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
-                coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                        getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+                if(mDay != null) {
+                    heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
+                    heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                            getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
+                    coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
+                    coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                            getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
+                    heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
+                    coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                            getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+                }else{
+                    setDefaultUserLimits(heatingAdapter, coolingAdapter, deadBandAdapter);
+                }
+                resetRangeBarLimits();
             }
         });
 
@@ -691,6 +682,55 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 .create();
 
     }
+
+    private void setDefaultUserLimits(ArrayAdapter<String> heatingAdapter, ArrayAdapter<String> coolingAdapter, ArrayAdapter<String> deadBandAdapter) {
+        if(followBuilding.isChecked()){
+            heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
+            heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(HSUtil.getLevelValueFrom16(heatLL.get("id").toString()), true)));
+            coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(HSUtil.getLevelValueFrom16(coolLL.get("id").toString()), true)));
+            coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), true)));
+            heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
+            coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(HSUtil.getLevelValueFrom16(coolDB.get("id").toString()), true)));
+        } else {
+            heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(72, true)));
+            heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(67, true)));
+            coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(77, true)));
+            coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(72, true)));
+            heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(2, true)));
+            coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(2, true)));
+        }
+    }
+
+    private void resetRangeBarLimits() {
+        if (isCelsiusTunerAvailableStatus()) {
+            rangeSeekBarView.setHeatingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
+                    StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+            rangeSeekBarView.setHeatingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
+                    StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+            rangeSeekBarView.setCoolingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
+                    StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+            rangeSeekBarView.setCoolingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
+                    StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+        } else {
+            rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
+            rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
+            rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMax.getSelectedItem().toString()));
+            rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMin.getSelectedItem().toString()));
+        }
+    }
+
     private void showDeleteAlert() {
         final Dialog alertDialog = new Dialog(getActivity());
         alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -719,8 +759,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     }
 
     private void checkTemp() {
-        rangeSeekBarView.setLowerCoolingTemp(74);
-        rangeSeekBarView.setLowerHeatingTemp(70);
+        resetRangeBarLimits();
     }
 
     private void checkTime(Schedule.Days mDay) {

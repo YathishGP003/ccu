@@ -372,8 +372,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setHeatingLimitMin(float heatingLimitMin) {
-      if(heatingLimitMin <= lowerHeatingTemp) {
+    public void setHeatingLimitMin(float heatingLimitMin, boolean forced) {
+      if(heatingLimitMin <= lowerHeatingTemp || forced) {
           this.upperHeatingTemp = heatingLimitMin;
             if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] <= heatingLimitMin) {
                 temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMin;
@@ -382,8 +382,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setCoolingLimitMax(float coolingLimitMax) {
-        if(coolingLimitMax >= lowerCoolingTemp) {
+    public void setCoolingLimitMax(float coolingLimitMax, boolean forced) {
+        if(coolingLimitMax >= lowerCoolingTemp || forced) {
             this.upperCoolingTemp = coolingLimitMax;
             if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] >= coolingLimitMax){
                 temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMax;
@@ -392,9 +392,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setHeatingLimitMax(float heatingLimitMax) {
-        Log.i("amardebug","hee "+heatingLimitMax+upperHeatingTemp+lowerHeatingTemp+temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]);
-        if(heatingLimitMax <= lowerHeatingTemp) {
+    public void setHeatingLimitMax(float heatingLimitMax, boolean forced) {
+        if(heatingLimitMax <= lowerHeatingTemp || forced) {
             this.lowerHeatingTemp = heatingLimitMax;
             if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] >= heatingLimitMax) {
                 temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMax;
@@ -403,9 +402,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setCoolingLimitMin(float coolingLimitMin) {
-        Log.i("amardebug","coo "+coolingLimitMin+upperCoolingTemp+temps[RangeBarState.UPPER_COOLING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()]);
-        if(coolingLimitMin <= upperCoolingTemp) {
+    public void setCoolingLimitMin(float coolingLimitMin, boolean forced) {
+        if(coolingLimitMin <= upperCoolingTemp || forced) {
             this.lowerCoolingTemp = coolingLimitMin;
             if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] <= coolingLimitMin){
                 temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMin;

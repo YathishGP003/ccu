@@ -23,7 +23,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 public class SystemProfileUtil {
 
     public static void createSystemProfile() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             BuildingTuners.getInstance().addBuildingTunerEquip();

@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempSt
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 import a75f.io.logic.bo.building.hyperstatsplit.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.getSchedule
 import a75f.io.logic.tuners.TunerConstants
 import android.util.Log
 import java.util.*
@@ -2383,6 +2384,7 @@ class HyperStatSplitPointsUtil(
             scheduleTypePointMarkers,
             "building,zone,named"
         )
+        val roomSchedule = getSchedule(roomRef, floorRef)
 
         logicalTempPointsList.add(Triple(desiredTempPoint, LogicalKeyID.DESIRED_TEMP, 72.0))
         logicalTempPointsList.add(Triple(desiredTempHeatingPoint, LogicalKeyID.DESIRED_TEMP_HEATING, 70.0))
@@ -2391,7 +2393,7 @@ class HyperStatSplitPointsUtil(
         logicalTempPointsList.add(Triple(equipStatusPoint, LogicalKeyID.EQUIP_STATUS, 0.0))
         logicalTempPointsList.add(Triple(equipStatusMessagePoint, LogicalKeyID.EQUIP_STATUS_MESSAGE, "OFF"))
         logicalTempPointsList.add(Triple(equipScheduleStatusPoint, LogicalKeyID.EQUIP_SCHEDULE_STATUS, ""))
-        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, 1.0))
+        logicalTempPointsList.add(Triple(equipScheduleTypePoint, LogicalKeyID.SCHEDULE_TYPE, if(roomSchedule.isZoneSchedule) 1 else 2))
 
         return logicalTempPointsList
     }

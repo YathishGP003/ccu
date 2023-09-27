@@ -385,24 +385,6 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         }
     }
 
-    override fun doAnalogOAOAction(
-        port: Port,
-        conditioningMode: StandaloneConditioningMode,
-        analogOutStages: HashMap<String, Int>,
-        outsideAirFinalLoopOutput: Int
-    ) {
-        // If cooling is enabled, OAO damper should follow Economizer or DCV Loop (whichever is greater)
-        if (conditioningMode.ordinal != StandaloneConditioningMode.COOL_ONLY.ordinal ||
-            conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal ||
-            conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal
-        ) {
-            updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
-            if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
-        }
-        // If Conditioning mode is HEAT_ONLY, OAO damper should operate only for DCV
-
-    }
-
     /*
         Right now, no usages for Door/Window or Key Card sensors in HyperStat Split.
 

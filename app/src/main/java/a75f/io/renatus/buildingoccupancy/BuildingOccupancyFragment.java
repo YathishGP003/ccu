@@ -252,7 +252,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                             "Building Occupancy are overlapping \n"+
                             buildingOccupancyViewModel.getScheduleOverlapMessage(daysList,buildingOccupancy))
                     .setCancelable(false)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setPositiveButton("OK", (dialog, id) -> {
                         if (removeEntry != null)
                             buildingOccupancy.getDays().add(position, removeEntry);
@@ -280,7 +280,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 builder.setMessage(errorMessage)
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(R.drawable.ic_dialog_alert)
                                         .setNegativeButton("Re-Edit", (dialog, id) -> {
                                             showdialog(position);
                                         });
@@ -291,7 +291,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 builder.setMessage(errorMessage)
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(R.drawable.ic_dialog_alert)
                                         .setNegativeButton("Re-Edit", (dialog, id) -> {
                                             showdialog(position);
                                         })

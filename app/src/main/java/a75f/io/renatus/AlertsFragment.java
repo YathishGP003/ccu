@@ -95,7 +95,7 @@ public class AlertsFragment extends Fragment
 				                   + "\n Alert Generated at " + getFormattedDate(a.getStartTime())
 				                   + "\n Alert Fixed at "+getFormattedDate(a.getEndTime()))
 				       .setCancelable(false)
-				       .setIcon(android.R.drawable.ic_dialog_alert)
+				       .setIcon(R.drawable.ic_dialog_alert)
 				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					       public void onClick(DialogInterface dialog, int id) {
 						       //do things
@@ -122,7 +122,7 @@ public class AlertsFragment extends Fragment
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setMessage("Delete ?")
 				   .setCancelable(true)
-				   .setIcon(android.R.drawable.ic_dialog_alert)
+				   .setIcon(R.drawable.ic_dialog_alert)
 				   .setPositiveButton("OK", (dialog, id) -> {
 						Alert alert = alertList.get(position);
 						// Remove item from local list regardless of server response.  Just log failure.

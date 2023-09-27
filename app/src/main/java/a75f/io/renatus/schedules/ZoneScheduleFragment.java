@@ -603,7 +603,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n" + overlapDays.toString())
                     .setCancelable(false)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             if (removeEntry != null)
@@ -635,7 +635,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                         "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
                         .setCancelable(false)
                         .setTitle("Schedule Errors")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setIcon(R.drawable.ic_dialog_alert)
                         .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 showDialog(position, daysArrayList);

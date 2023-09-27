@@ -336,7 +336,7 @@ public class MasterControlView extends LinearLayout {
         namedSchedBuilder.setMessage(displayMessage )
                 .setCancelable(false)
                 .setTitle("Schedule Errors")
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_dialog_alert)
                 .setPositiveButton("Discard", (dialog1, id) -> {
                     if(masterDialog !=null && masterDialog.isShowing())
                         masterDialog.dismiss();

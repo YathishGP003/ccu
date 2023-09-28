@@ -121,7 +121,7 @@ public class RangeBar extends View {
         }
         //force push the text if overlap
         int dbWidth = 0;
-            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 27;
+            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 30;
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
         } else {

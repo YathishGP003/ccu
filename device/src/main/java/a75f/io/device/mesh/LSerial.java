@@ -156,8 +156,17 @@ public class LSerial
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+            }
 
-            } else if (isHyperStatMessage(messageType) ) {
+            // HyperStat and HyperSplit message are both sent to CCU through HyperStatCmToCcuSerializedMessage.
+            // If a HyperStatCmToCcuSerializedMessage is received, call both the HyperStat and HyperSplit handler methods.
+            // The handler methods then inspect the message contents and filter out messages of the incorrect type.
+            else if (messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE) {
+                HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+                HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+            }
+
+            else if (isHyperStatMessage(messageType) ) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             } else if (isHyperSplitMessage(messageType)) {
                 HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
@@ -494,14 +503,12 @@ public class LSerial
     }
     
     private static boolean isHyperStatMessage(MessageType messageType) {
-        return messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE ||
-               messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
+        return messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 
     private static boolean isHyperSplitMessage(MessageType messageType) {
-        return messageType == MessageType.HYPERSPLIT_CM_TO_CCU_SERIALIZED_MESSAGE ||
-                messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
+        return messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
                 messageType == MessageType.HYPERSPLIT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 

@@ -87,8 +87,19 @@ public class HyperStatMsgReceiver {
             MessageType messageType = MessageType.values()[data[HYPERSTAT_MESSAGE_TYPE_INDEX]];
     
             byte[] messageArray = Arrays.copyOfRange(data, HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX, data.length);
-            
-            if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
+
+            /*
+                HyperSplit Messages arrive through the same serialized message as HyperStat messages.
+
+                If a HyperStat/Split Serialized Message is received by the CCU,
+                both the HyperStatMsgReceiver and HyperSplitMsgReceiver handler methods are called.
+
+                So, skip evaluation here if the message contents are actually a HyperSplit message.
+            */
+            if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE
+                    || messageType == MessageType.HYPERSPLIT_LOCAL_CONTROLS_OVERRIDE_MESSAGE) {
+                return;
+            } else if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
                         HyperStatRegularUpdateMessage_t.parseFrom(messageArray);
     

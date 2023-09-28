@@ -1,7 +1,7 @@
 package a75f.io.device.mesh.hypersplit;
 
 import static a75f.io.device.serial.MessageType.HYPERSPLIT_CCU_DATABASE_SEED_MESSAGE;
-import static a75f.io.device.serial.MessageType.HYPERSPLIT_CCU_TO_CM_SERIALIZED_MESSAGE;
+import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
 
 import android.util.Log;
 
@@ -154,7 +154,7 @@ public class HyperSplitMessageSender {
         byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 2 + 1];
         //CM currently supports both legacy byte array and protobuf encoding. Message type is kept as raw byte at the start to help CM determine which type
         //of decoding to be used.
-        msgBytes[0] = (byte)HYPERSPLIT_CCU_TO_CM_SERIALIZED_MESSAGE.ordinal();
+        msgBytes[0] = (byte)HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE.ordinal();
 
         //Network requires un-encoded node address occupying the first 4 bytes
         System.arraycopy(getByteArrayFromInt(address), 0, msgBytes, 1, FIXED_INT_BYTES_SIZE);

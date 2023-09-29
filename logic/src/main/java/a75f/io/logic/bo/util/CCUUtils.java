@@ -119,9 +119,9 @@ public class CCUUtils
         if(isDaikinEnvironment(context))
             return "please contact SiteLine\u2122 Customer Support.";
         else if (isCarrierEnvironment(context)) {
-            return "please contact SiteLine\u2122 Customer Support.";
+            return "please contact ClimaVision Customer Support.";
         } else
-            return "please contact ClimaVision Support.";
+            return "please contact 75F Customer Support.";
     }
 
     public static void updateCcuSpecificEntitiesWithCcuRef(CCUHsApi ccuHsApi){

@@ -1203,10 +1203,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband+" modeType"+modeType);
 
-
-        seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax, heatLowerLimitVal,
-                heatUpperLimitVal, coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired,
-                (float)currentAverageTemp, heatingDeadBand, coolingDeadBand,modeType);
+        if(heatingDesired != 0 && coolingDesired !=0)
+            seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax, heatLowerLimitVal,
+                    heatUpperLimitVal, coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired,
+                    (float)currentAverageTemp, heatingDeadBand, coolingDeadBand,modeType);
 
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1887,9 +1887,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
-        seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
-                coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float)currentTemp,
-                heatingDeadBand, coolingDeadBand,modeType);
+
+        if(heatingDesired != 0 && coolingDesired !=0)
+            seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
+                    coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float)currentTemp,
+                    heatingDeadBand, coolingDeadBand,modeType);
 
         linearLayoutZonePoints.removeAllViews();
         for (int k = 0; k < openZoneMap.size(); k++) {

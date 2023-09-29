@@ -6,10 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
@@ -64,6 +69,11 @@ public class FragmentModbusType  extends BaseDialogFragment {
             showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_DEFAULT,ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
         });
         modbusem.setOnClickListener(v -> {
+            ArrayList<Equip> zoneEquips = HSUtil.getEquips(mRoomName);
+            if (zoneEquips.size() > 0){
+                Toast.makeText(getActivity(), "Unpair all Modbus Modules and try to pair Energy meter", Toast.LENGTH_LONG).show();
+                return;
+            }
             showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), ModbusConfigView.Companion.getID());
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));

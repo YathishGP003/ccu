@@ -38,6 +38,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -262,6 +263,14 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
         }
+        if (equipModel.value.equipDevice.value.equipType.contains("EMR",true)) {
+            val zoneEquips = HSUtil.getEquips(zoneRef)
+            if (zoneEquips.size > 0) {
+                showToast("Unpair all Modbus Modules and try to pair Energy meter",context)
+                return false
+            }
+        }
+
         return true
     }
 

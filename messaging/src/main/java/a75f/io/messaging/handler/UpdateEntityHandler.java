@@ -204,7 +204,8 @@ public class UpdateEntityHandler implements MessageHandler {
             HashMap<Object,Object> entity = ccuHsApi.readEntity("id == " + HRef.make(uid));
             if((entity.get(Tags.MODBUS) != null && entity.get(Tags.EQUIP) != null)
                     || entity.get("room") != null
-                    || entity.get("floor") != null){
+                    || entity.get("floor") != null
+            || (entity.containsKey("building") && entity.containsKey("occupancy"))){
                 CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler handle updated "+entity);
                 validMessage.set(false);
             }

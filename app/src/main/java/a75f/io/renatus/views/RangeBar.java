@@ -67,6 +67,7 @@ public class RangeBar extends View {
     double hdb = 2.0;
 
     private static boolean isUnoccupiedSetBackFragment;
+    int unOccupiedSetBack = 0;
 
     private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
     boolean isZoneSchedule;
@@ -77,6 +78,10 @@ public class RangeBar extends View {
     }
 
     private static final boolean DEBUG = true;
+
+    public void setUnOccupiedSetBack(int setBack) {
+        unOccupiedSetBack = setBack;
+    }
 
     enum RangeBarState {
         NONE,
@@ -131,11 +136,22 @@ public class RangeBar extends View {
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
         }
 
-        if( isCelsiusTunerAvailableStatus()) {
-            canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
-                    xPos, (yPos - 10f), mTempIconPaint);
+        if(isCelsiusTunerAvailableStatus()) {
+            if(isUnoccupiedSetBackFragment){
+                if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT) {
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] + unOccupiedSetBack)))) - unOccupiedSetBack) + "\u00B0C",
+                            xPos, (yPos - 10f), mTempIconPaint);
+                } else {
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] - unOccupiedSetBack)))) + unOccupiedSetBack) + "\u00B0C",
+                            xPos, (yPos - 10f), mTempIconPaint);
+                }
+            }else {
+                canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
+                        xPos, (yPos - 10f), mTempIconPaint);
+            }
+
         } else {
-            canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
+            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
                     xPos, (yPos - 10f), mTempIconPaint);
         }
     }

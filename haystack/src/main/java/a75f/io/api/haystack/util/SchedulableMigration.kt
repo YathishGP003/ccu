@@ -19,13 +19,13 @@ val hayStack = CCUHsApi.getInstance();
 fun setDiagMigrationVal() {
     val version =
         hayStack.readDefaultStrVal("point and diag and app and version")
-    if(validateMigration())
+    if(validateMigration()){
         hayStack.writeDefaultVal("point and diag and migration", version)
-
-    val pointmig = hayStack.readEntity("point and diag and migration")
-    Log.d("CCU_SCHEDULABLE", "Diag Point is =  "+pointmig.get("id"))
-    Log.d("CCU_SCHEDULABLE", "Diag Point Set")
-
+        val pointmig = hayStack.readEntity("point and diag and migration")
+        Log.d("CCU_SCHEDULABLE", "Diag Point Id is =  "+pointmig.get("id")+  " Value is set to " + version)
+    }else{
+        Log.d("CCU_SCHEDULABLE", "Diag Point is not Set")
+    }
 }
 
 fun validateMigration(): Boolean {

@@ -2,8 +2,8 @@ package a75f.io.renatus.schedules;
 
 
 
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import android.annotation.SuppressLint;
@@ -26,7 +26,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.RangeBarView;
 
@@ -44,7 +43,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
 
     private UnOccupiedZoneSetBackListener mListener;
     public interface UnOccupiedZoneSetBackListener {
-        void onClickSaveSchedule(int unOccupiedZoneSetback, Schedule schedule);
+        void onClickSaveSchedule(double unOccupiedZoneSetback, Schedule schedule);
 
         void onClickCancelSaveSchedule(String scheduleId);
     }
@@ -88,7 +87,11 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
                 }
             }
             if(heatingLimitWarning.length() == 0 && coolingLimitWarning.length() == 0) {
-                mListener.onClickSaveSchedule(unOccupiedZoneSetBack.getSelectedItemPosition(), mSchedule);
+                double unOccupiedSetBackVal = unOccupiedZoneSetBack.getSelectedItemPosition();
+                if(isCelsiusTunerAvailableStatus()){
+                    unOccupiedSetBackVal = convertingRelativeValueCtoF(unOccupiedZoneSetBack.getSelectedItemPosition());
+                }
+                mListener.onClickSaveSchedule(Math.round(unOccupiedSetBackVal), mSchedule);
                 dismiss();
             }else {
                 android.app.AlertDialog.Builder builder =
@@ -137,16 +140,16 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         setBackAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         unOccupiedZoneSetBack.setAdapter(setBackAdapter);
         if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
-            double unoccupiedZoneSetBackDefaultValue = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and unoccupied and default and setback").intValue();
+            int unoccupiedZoneSetBackDefaultValue = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and unoccupied and default and setback").intValue();
             if(isCelsiusTunerAvailableStatus())
-                unoccupiedZoneSetBackDefaultValue = convertingRelativeValueFtoC(unoccupiedZoneSetBackDefaultValue);
-            unOccupiedZoneSetBack.setSelection((int) unoccupiedZoneSetBackDefaultValue);
+                unoccupiedZoneSetBackDefaultValue = (int) Math.round(convertingRelativeValueFtoC(unoccupiedZoneSetBackDefaultValue));
+            unOccupiedZoneSetBack.setSelection(unoccupiedZoneSetBackDefaultValue);
             unOccupiedZoneSetBack.setEnabled(false);
         }else {
             HashMap<Object, Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("unoccupied and zone and setback and schedulable and  roomRef == \"" + mSchedule.getRoomRef() + "\"");
             int unoccupiedZoneVal = (int) (CCUHsApi.getInstance().readPointPriorityVal(unoccupiedZoneObj.get("id").toString()));
             if(isCelsiusTunerAvailableStatus())
-                unoccupiedZoneVal = (int) convertingRelativeValueFtoC(unoccupiedZoneVal);
+                unoccupiedZoneVal =(int) Math.round(convertingRelativeValueFtoC(unoccupiedZoneVal));
             unOccupiedZoneSetBack.setSelection(unoccupiedZoneVal);
         }
         unOccupiedZoneSetBack.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -190,10 +193,13 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
 
     private void checkTemp(Schedule.Days mDay) {
         if (mDay.getCoolingVal() != null) {
-            rangeSeekBarView.setLowerCoolingTemp(mDay.getCoolingVal() + unOccupiedZoneSetBack.getSelectedItemPosition());
+            rangeSeekBarView.setLowerCoolingTemp(mDay.getCoolingVal() + (int) Double.parseDouble(unOccupiedZoneSetBack.getSelectedItem().toString()));
         }
         if (mDay.getHeatingVal() != null) {
-            rangeSeekBarView.setLowerHeatingTemp(mDay.getHeatingVal() - unOccupiedZoneSetBack.getSelectedItemPosition());
+            rangeSeekBarView.setLowerHeatingTemp(mDay.getHeatingVal() - ((int) Double.parseDouble(unOccupiedZoneSetBack.getSelectedItem().toString())));
+        }
+        if(isCelsiusTunerAvailableStatus()) {
+            rangeSeekBarView.setUnOccupiedSetBack((int) Double.parseDouble(unOccupiedZoneSetBack.getSelectedItem().toString()));
         }
         rangeSeekBarView.setUnOccupiedFragment(true);
     }

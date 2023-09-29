@@ -1840,6 +1840,7 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
+        addCCURefForDiagAndSystemEntities();
         return localId;
     }
 
@@ -1900,6 +1901,14 @@ public class CCUHsApi
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
         CCUHsApi.getInstance().syncEntityTree();
+    }
+    public void addCCURefForDiagAndSystemEntities(){
+        List<HashMap<Object, Object>> equipMapList = readAllEntities("equip and (diag or (system and not modbus))");
+        for(HashMap<Object, Object> equipMap : equipMapList) {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            CCUHsApi.getInstance().updateEquip(equip, equip.getId());
+            updateCcuRefForDiagPoints(equip);
+        }
     }
     public void updateDiagGatewayRef(String systemEquipRef){
         HashMap diag = read("equip and diag");

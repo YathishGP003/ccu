@@ -77,6 +77,7 @@ public class PreferenceUtil {
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
     private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
+    private static final String CCUREF_TAG_MIGRATION_DIAG = "ccuRefTagMigrationDiag";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
     private static final String SCHEDULES_MIGRATION = "schedulesMigration";
 
@@ -662,6 +663,14 @@ public class PreferenceUtil {
 
     public static void setCcuRefTagMigration(boolean status) {
         setBooleanPreference(CCUREF_TAG_MIGRATION, status);
+    }
+
+    public static boolean getCcuRefTagMigrationForDiag() {
+        return getBooleanPreference(CCUREF_TAG_MIGRATION_DIAG);
+    }
+
+    public static void setCcuRefTagMigrationForDiag(boolean status) {
+        setBooleanPreference(CCUREF_TAG_MIGRATION_DIAG, status);
     }
 
     private static void setLongPreference(String key, long value) {

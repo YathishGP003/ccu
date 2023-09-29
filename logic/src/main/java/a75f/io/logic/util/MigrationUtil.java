@@ -290,6 +290,13 @@ public class MigrationUtil {
             Log.i(TAG, "ccuRef migration completed");
         }
 
+        if(!PreferenceUtil.getCcuRefTagMigrationForDiag()){
+            Log.i(TAG, "ccuRef migration for diag and system equip started");
+            ccuHsApi.addCCURefForDiagAndSystemEntities();
+            PreferenceUtil.setCcuRefTagMigrationForDiag(true);
+            Log.i(TAG, "ccuRef migration for diag and system equip completed");
+        }
+
         if(!PreferenceUtil.getNewOccupancyMode()) {
             addBuildingLimitsBreachedOccupancy(CCUHsApi.getInstance());
             PreferenceUtil.setNewOccupancyMode();

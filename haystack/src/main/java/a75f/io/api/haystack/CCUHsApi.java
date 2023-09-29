@@ -3114,4 +3114,15 @@ public class CCUHsApi
             }
         }
     }
+
+    public void updatePointWithoutUpdatingLastModifiedTime(Point point, String id)
+    {
+        if(!isBuildingTunerPoint(point)){
+            point.setCcuRef(getCcuId());
+        }
+        tagsDb.updatePoint(point, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
+        }
+    }
 }

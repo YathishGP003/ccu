@@ -473,10 +473,10 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
 
     fun setOperatingMode(currentTemp: Double, averageDesiredTemp: Double, basicSettings: BasicSettings, equip: HyperStatSplitEquip){
         var zoneOperatingMode = ZoneState.DEADBAND.ordinal
-        if(currentTemp < averageDesiredTemp && basicSettings.effectiveConditioningMode != StandaloneConditioningMode.COOL_ONLY) {
+        if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY) {
             zoneOperatingMode = ZoneState.HEATING.ordinal
         }
-        else if(currentTemp >= averageDesiredTemp && basicSettings.effectiveConditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+        else if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
             zoneOperatingMode = ZoneState.COOLING.ordinal
         }
         logIt("averageDesiredTemp $averageDesiredTemp" + "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}")

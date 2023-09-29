@@ -335,7 +335,7 @@ class HSSplitHaystackUtil(
         haystack.writeHisValById(id, desiredTemp)
     }
 
-    fun getCurrentUserIntentConditioningMode(): Double {
+    fun getCurrentConditioningMode(): Double {
         return readPointPriorityVal("zone and sp and conditioning and mode")
     }
 
@@ -359,6 +359,18 @@ class HSSplitHaystackUtil(
         haystack.writeHisValByQuery(
             "point and status and not message and not ota and his and equipRef == \"$equipRef\"", status
         )
+    }
+
+    fun setConditioningMode(condMode: Double) {
+        val id = readPointIdWithAll("zone and conditioning and mode")
+        require(!(id === ""))
+        haystack.pointWriteForCcuUser(
+            HRef.copy(id),
+            HayStackConstants.DEFAULT_POINT_LEVEL,
+            HNum.make(condMode),
+            HNum.make(0)
+        )
+        haystack.writeHisValById(id, condMode)
     }
 
     fun getAnalogFanSpeedMultiplier(): Double {

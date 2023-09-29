@@ -50,6 +50,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     // One zone can have many hyperstat devices.  Each has its own address and equip representation
     private val cpuEconDeviceMap: MutableMap<Short, HyperStatSplitCpuEconEquip> = mutableMapOf()
 
+    private lateinit var lastUserIntentConditioningMode : StandaloneConditioningMode
+
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
@@ -133,14 +135,15 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
 
-        // At this point, effectiveConditioningMode will be set to OFF if Condensate Overflow is detected
-        val basicSettings = fetchBasicSettings(equip)
+        val isCondensateTripped : Boolean = hsSplitHaystackUtil.getCondensateOverflowStatus() > 0.0
+        if (isCondensateTripped) Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Condensate overflow detected")
+
+        // At this point, Conditioning Mode will be set to OFF if Condensate Overflow is detected
+        // It will revert to previous value when Condensate returns to normal
+        val basicSettings = fetchBasicSettings(equip, isCondensateTripped)
 
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
-
-        val isCondensateTripped : Boolean = hsSplitHaystackUtil.getCondensateOverflowStatus() > 0.0
-        if (isCondensateTripped) Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Condensate overflow detected")
 
         hyperstatSplitCPUEconAlgorithm.initialise(tuners = hyperStatSplitTuners)
         hyperstatSplitCPUEconAlgorithm.dumpLogs()
@@ -232,12 +235,12 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             else -> logIt(" Zone is in deadband")
         }
 
-        if (coolingLoopOutput > 0 && (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.COOL_ONLY
-                    || basicSettings.effectiveConditioningMode == StandaloneConditioningMode.AUTO) ) {
+        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+                    || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
             fanLoopOutput = ((coolingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
-        else if (heatingLoopOutput > 0  && (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.HEAT_ONLY
-                    ||basicSettings.effectiveConditioningMode == StandaloneConditioningMode.AUTO)) {
+        else if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
             fanLoopOutput = ((heatingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
 
@@ -283,7 +286,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             matThrottle = false
 
             // If Conditioning Mode is AUTO or COOL_ONLY, run full economizer loop algo
-            if (basicSettings.effectiveConditioningMode == StandaloneConditioningMode.AUTO || basicSettings.effectiveConditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+            if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
                 if (outsideAirLoopOutput > outsideDamperMinOpen) {
                     if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                         outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
@@ -581,13 +584,28 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
-    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip): BasicSettings {
+    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip, isCondensateTripped: Boolean): BasicSettings {
 
-        val userIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentUserIntentConditioningMode().toInt()]
+        /*
+            When tripped, condensate sensor will force Conditioning Mode to OFF.
+            The last Conditioning Mode set by the user is stored in the var lastUserIntentConditioningMode.
+         */
+
+        if (!this::lastUserIntentConditioningMode.isInitialized) lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+
+        // Condensate sensor has just tripped; save lastUserIntentConditioningMode and set Conditioning Mode to OFF
+        if (isCondensateTripped && (equip.hsSplitHaystackUtil.getCurrentConditioningMode() != 0.0)) {
+            lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+            equip.hsSplitHaystackUtil.setConditioningMode(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        }
+
+        // Condensate sensor has just returned to normal; set Conditioning Mode to value of lastUserIntentConditioningMode
+        else if (!isCondensateTripped && (lastUserIntentConditioningMode.ordinal != equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt())) {
+            equip.hsSplitHaystackUtil.setConditioningMode(lastUserIntentConditioningMode.ordinal.toDouble())
+        }
 
         return BasicSettings(
-            userIntentConditioningMode = userIntentConditioningMode,
-            effectiveConditioningMode = getEffectiveConditioningMode(equip, userIntentConditioningMode),
+            conditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()],
             fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
         )
     }
@@ -713,8 +731,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         when {
             (HyperStatSplitAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
 
-                if ((basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) && !isCondensateTripped
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) && !isCondensateTripped
                 ) {
                     runRelayForCooling(relayState, port, config, tuner, relayStages)
                 } else {
@@ -723,8 +741,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             }
             (HyperStatSplitAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
 
-                if ((basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.effectiveConditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) && !isCondensateTripped
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) && !isCondensateTripped
                 ) {
                     runRelayForHeating(relayState, port, config, tuner, relayStages)
                 } else {
@@ -890,7 +908,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     ) {
         logIt(" $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
-            && basicSettings.effectiveConditioningMode == StandaloneConditioningMode.OFF ) {
+            && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
             logIt("Cond is Off , Fan is Auto  : ")
             resetPort(whichPort)
             return
@@ -929,14 +947,14 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         when {
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
                 if (!isCondensateTripped) {
-                    doAnalogCooling(port,basicSettings.effectiveConditioningMode,analogOutStages,coolingLoopOutput)
+                    doAnalogCooling(port,basicSettings.conditioningMode,analogOutStages,coolingLoopOutput)
                 } else{
                     resetPort(port)
                 }
             }
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
                 if (!isCondensateTripped) {
-                    doAnalogHeating(port,basicSettings.effectiveConditioningMode,analogOutStages,heatingLoopOutput)
+                    doAnalogHeating(port,basicSettings.conditioningMode,analogOutStages,heatingLoopOutput)
                 } else {
                     resetPort(port)
                 }
@@ -947,7 +965,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     doAnalogFanAction(
                         port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
                         analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                        basicSettings.effectiveConditioningMode, fanLoopOutput, analogOutStages
+                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages
                     )
                 } else {
                     resetPort(port)
@@ -957,7 +975,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToOaoDamper(analogOutState)) -> {
                 if (!isCondensateTripped) {
                     doAnalogOAOAction(
-                        port,basicSettings.effectiveConditioningMode, analogOutStages, outsideAirFinalLoopOutput
+                        port,basicSettings.conditioningMode, analogOutStages, outsideAirFinalLoopOutput
                     )
                 } else {
                     resetPort(port)
@@ -969,7 +987,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     doAnalogStagedFanAction(
                         port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
                         analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                        basicSettings.effectiveConditioningMode, fanLoopOutput, analogOutStages,
+                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
                     )
                 } else {
                     resetPort(port)
@@ -1113,17 +1131,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
-    }
-
-    /*
-        effectiveConditioningMode is forced OFF if Condensate Overflow is detected.
-        Upon a return to normal, revert effectiveConditioningMode to userIntentConditioningMode.
-    */
-    private fun getEffectiveConditioningMode(equip: HyperStatSplitCpuEconEquip, userIntentConditioningMode: StandaloneConditioningMode): StandaloneConditioningMode {
-        val condensateOverflowStatus = hsSplitHaystackUtil.getCondensateOverflowStatus()
-        if (condensateOverflowStatus == 1.0) return StandaloneConditioningMode.OFF
-
-        return userIntentConditioningMode
     }
 
     override fun getEquip(): Equip? {

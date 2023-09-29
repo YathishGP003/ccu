@@ -158,11 +158,7 @@ public class HyperSplitMessageGenerator {
         controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef, mode) * 2));
         controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef, mode) * 2));
 
-        // TODO: this BasicSettings object does not accurately reflect the EffectiveConditioningMode.
-        // EffectiveConditioningMode is not sent to the HyperSplit as part of the settings message,
-        // so I think this is okay. Confirm.
         BasicSettings settings = new BasicSettings(
-                StandaloneConditioningMode.values()[(int)getConditioningMode(equipRef)],
                 StandaloneConditioningMode.values()[(int)getConditioningMode(equipRef)],
                 StandaloneFanStage.values()[(int)getFanMode(equipRef)]
         );
@@ -344,29 +340,13 @@ public class HyperSplitMessageGenerator {
         return HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_OFF;
     }
 
-
-    /*
-        Conditioning Mode written to the HyperSplit will be UserIntentConditioningMode, not EffectiveConditioningMode.
-
-        If the HyperSplit is connected to the CCU, the controls message will reflect any lockouts imposed by the Condensate Switch.
-
-        If the HyperSplit is running standalone, it will consider the status of the Condensate Switch in the profile.
-
-        Using the UserIntentConditioningMode prevents the following situation:
-        - EffectiveConditioningMode is OFF due to condensate trip
-        - ConditioningMode is communicated from CCU as OFF
-        - HyperSplit loses connection to CCU
-
-        In this case, HyperSplit would not operate even if condensate switch returns to normal (because last known
-        conditioning mode was OFF).
-     */
     private static HyperSplit.HyperSplitConditioningMode_e getConditioningMode(BasicSettings settings, int address){
         try {
-            if(settings.getUserIntentConditioningMode() == StandaloneConditioningMode.AUTO)
+            if(settings.getConditioningMode() == StandaloneConditioningMode.AUTO)
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO;
-            if(settings.getUserIntentConditioningMode() == StandaloneConditioningMode.COOL_ONLY)
+            if(settings.getConditioningMode() == StandaloneConditioningMode.COOL_ONLY)
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_COOLING;
-            if(settings.getUserIntentConditioningMode() == StandaloneConditioningMode.HEAT_ONLY)
+            if(settings.getConditioningMode() == StandaloneConditioningMode.HEAT_ONLY)
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_HEATING;
             else
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_OFF;

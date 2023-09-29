@@ -51,6 +51,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private val cpuEconDeviceMap: MutableMap<Short, HyperStatSplitCpuEconEquip> = mutableMapOf()
 
     private lateinit var lastUserIntentConditioningMode : StandaloneConditioningMode
+    private var wasCondensateTripped = false
 
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
@@ -140,7 +141,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         // At this point, Conditioning Mode will be set to OFF if Condensate Overflow is detected
         // It will revert to previous value when Condensate returns to normal
-        val basicSettings = fetchBasicSettings(equip, isCondensateTripped)
+        val basicSettings = fetchBasicSettings(equip, wasCondensateTripped, isCondensateTripped)
 
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
@@ -202,6 +203,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             economizingLoopOutput, dcvLoopOutput,
             equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
         )
+
+        wasCondensateTripped = isCondensateTripped
+
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile() complete")
 
     }
@@ -584,7 +588,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
-    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip, isCondensateTripped: Boolean): BasicSettings {
+    private fun fetchBasicSettings(equip: HyperStatSplitCpuEconEquip, wasCondensateTripped: Boolean, isCondensateTripped: Boolean): BasicSettings {
 
         /*
             When tripped, condensate sensor will force Conditioning Mode to OFF.
@@ -593,21 +597,36 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         if (!this::lastUserIntentConditioningMode.isInitialized) lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
 
-        // Condensate sensor has just tripped; save lastUserIntentConditioningMode and set Conditioning Mode to OFF
-        if (isCondensateTripped && (equip.hsSplitHaystackUtil.getCurrentConditioningMode() != 0.0)) {
-            lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+        if (isCondensateTripped) {
+
+            // If Condensate just tripped, store whatever the previous Conditioning Mode was as UserIntentConditioningMode.
+            // Conditioning Mode will return to this value once condensate returns to normal. User will not be able to change it back until this happens.
+            if (!wasCondensateTripped)  lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+
             equip.hsSplitHaystackUtil.setConditioningMode(StandaloneConditioningMode.OFF.ordinal.toDouble())
-        }
+            Log.d("CCU_COND_MODE", "isCondensateTripped " + isCondensateTripped + " | wasCondensateTripped " + wasCondensateTripped + " | lastUserIntentConditioningMode " + lastUserIntentConditioningMode + " | currentConditioningMode " + StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()])
+            return BasicSettings(
+                conditioningMode = StandaloneConditioningMode.OFF,
+                fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
+            )
 
-        // Condensate sensor has just returned to normal; set Conditioning Mode to value of lastUserIntentConditioningMode
-        else if (!isCondensateTripped && (lastUserIntentConditioningMode.ordinal != equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt())) {
+        } else {
+
+            /*
+                If condensate is not tripped, user is allowed to change the Conditioning Mode.
+                Any changes made to the Haystack point (this can be done via CCU UI or at device)
+                will be saved to lastUserIntentConditioningMode.
+             */
+            if (!wasCondensateTripped) lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
             equip.hsSplitHaystackUtil.setConditioningMode(lastUserIntentConditioningMode.ordinal.toDouble())
+            Log.d("CCU_COND_MODE", "isCondensateTripped " + isCondensateTripped + " | wasCondensateTripped " + wasCondensateTripped + " | lastUserIntentConditioningMode " + lastUserIntentConditioningMode + " | currentConditioningMode " + StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()])
+            return BasicSettings(
+                conditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()],
+                fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
+            )
+
         }
 
-        return BasicSettings(
-            conditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()],
-            fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
-        )
     }
 
     private fun fetchUserIntents(equip: HyperStatSplitCpuEconEquip): UserIntents {

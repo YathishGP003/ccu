@@ -1,24 +1,20 @@
 package a75f.io.domain
 
-import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.mock.MockCcuHsApi
-import a75f.io.api.haystack.sync.CcuRegistrationHandler
-import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.ph.core.Tags
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.projecthaystack.client.HClient
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class BuildingEquipTest {
 
@@ -113,14 +109,86 @@ class BuildingEquipTest {
 
         val equipBuilder = TunerEquipBuilder(mockHayStack)
         equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
-        println(hayStack.readEntity("tuner and equip"))
+        println(mockHayStack.readEntity("tuner and equip"))
         val diffManger = DiffManger(null)
         diffManger.processModelMigration("@TestSiteRef")
         val updatedPoint = Domain.readPoint("forcedOccupiedTime")
         println(updatedPoint)
-        println(hayStack.readPointArr(updatedPoint.getId()))
+        println(mockHayStack.readPointArr(updatedPoint.getId()))
     }
 
+    private fun doCutOverMigrationIfRequired(haystack: CCUHsApi) {
+        val buildingEquip = haystack.readEntity("equip and tuner");
+        if (buildingEquip["domainName"]?.toString()?.isNotEmpty() == true) {
+            CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration is complete.")
+        } else {
+            val equipBuilder = TunerEquipBuilder(haystack)
+            val equipId = buildingEquip["id"].toString()
+            equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, buildingEquip["dis"].toString(), haystack.site!!.id)
+        }
+    }
+
+    @Test
+    fun tunerEquipCutOverMigrationTest() {
+        val s = Site.Builder()
+            .setDisplayName("75F")
+            .addMarker("site")
+            .setGeoCity("Burnsville")
+            .setGeoState("MN")
+            .setTz("Chicago")
+            .setArea(1000).build()
+        mockHayStack.addSite(s)
+
+        val siteMap: HashMap<*, *> = mockHayStack.read(a75f.io.api.haystack.Tags.SITE)
+        val siteRef = siteMap[a75f.io.api.haystack.Tags.ID] as String?
+
+        val tunerEquip = Equip.Builder()
+            .setSiteRef(siteRef)
+            .setDisplayName("75F-BuildingTuner")
+            .addMarker("equip").addMarker("tuner")
+            .setTz(siteMap["tz"].toString())
+            .build()
+
+        val equipRef = mockHayStack.addEquip(tunerEquip)
+
+        val heatingPreconditioingRate = Point.Builder()
+            .setDisplayName(tunerEquip.displayName + "-heatingPreconditioningRate")
+            .setSiteRef(siteRef)
+            .setEquipRef(equipRef).setHisInterpolate("cov")
+            .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+            .addMarker("his")
+            .addMarker("system").addMarker("heating").addMarker("precon").addMarker("rate")
+            .addMarker("sp")
+            .setMinVal("0").setMaxVal("60").setIncrementVal("1")
+            .setTunerGroup("GENERIC")
+            .setTz(siteMap["tz"].toString())
+            .build()
+        val heatingPreconditioingRateId = mockHayStack.addPoint(heatingPreconditioingRate)
+        mockHayStack.writePointForCcuUser(
+            heatingPreconditioingRateId,
+            16,
+            15.0,
+            0
+        )
+        mockHayStack.writeHisValById(
+            heatingPreconditioingRateId,
+            15.0
+        )
+
+        val tunerEquipMap = mockHayStack.readEntity("tuner and equip")
+        println(tunerEquip)
+        val id = tunerEquipMap["id"].toString()
+        println("Tuner Equip id $id")
+        val tunerPoint = mockHayStack.readAllEntities("point and equipRef == \"$id\"")
+        tunerPoint.forEach { println(it) }
+
+        println("### Do CutOver Migration ###")
+        doCutOverMigrationIfRequired(mockHayStack)
+
+        val tunerPoints = mockHayStack.readAllEntities("point and equipRef == \"$id\"")
+        println(tunerPoints.size)
+        tunerPoints.forEach { println(it) }
+    }
     private fun Map<Any, Any>.getId() : String {
         return this[Tags.ID].toString()
     }

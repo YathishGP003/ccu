@@ -20,7 +20,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
-        val hayStackEquip = buildEquip(modelDef, configuration, siteRef, hayStack.timeZone)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
@@ -43,7 +43,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             "equip and group == \"${configuration.nodeAddress}\"")
 
         val equipId =  equip["id"].toString()
-        val hayStackEquip = buildEquip(modelDef, configuration, siteRef, hayStack.timeZone)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
@@ -59,7 +59,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         entityConfiguration.tobeAdded.forEach { point ->
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                val hayStackPoint = buildPoint(modelPointDef, profileConfiguration, equipRef, siteRef, tz)
+                val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz))
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
                 val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
@@ -80,7 +80,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                val hayStackPoint = buildPoint(modelPointDef, profileConfiguration, equipRef, siteRef, tz)
+                val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz))
                 hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
                 hayStackPoint.id = existingPoint["id"].toString()
                 val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)

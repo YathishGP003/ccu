@@ -317,6 +317,7 @@ public class Pulse
 				case PRESSURE:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val));
+					break;
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);

@@ -53,6 +53,7 @@ public class PreferenceUtil {
     private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
     private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+    private static final String TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION = "TrueCfmPressureUnitTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
@@ -485,6 +486,14 @@ public class PreferenceUtil {
     public static void setHyperStatCpuTagMigration() {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
      }
+
+    public static boolean getTrueCfmPressureUnitTagMigration() {
+        return getBooleanPreference(TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION);
+    }
+
+    public static void setTrueCfmPressureUnitTagMigration() {
+        setBooleanPreference(TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION, true);
+    }
 
     public static boolean getAutoCommissioningMigration() {
         return getBooleanPreference(AUTO_COMMISSIONING_MIGRATION);

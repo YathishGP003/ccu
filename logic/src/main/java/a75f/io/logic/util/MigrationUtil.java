@@ -48,6 +48,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -249,6 +250,11 @@ public class MigrationUtil {
         if(!PreferenceUtil.getHyperStatCpuTagMigration()){
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
+        }
+
+        if(!PreferenceUtil.getTrueCfmPressureUnitTagMigration()) {
+            doTrueCfmPressureUnitTagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCfmPressureUnitTagMigration();
         }
 
         if(!PreferenceUtil.getAutoAwayAutoForcedPointMigration()){
@@ -1719,6 +1725,19 @@ public class MigrationUtil {
 
         });
 
+    }
+
+    private static void doTrueCfmPressureUnitTagMigration(CCUHsApi haystack){
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (dab or vav) and zone");
+        equips.forEach(equip -> {
+            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
+
+            ArrayList<HashMap<Object, Object>> pressureSensors = haystack.readAllEntities("pressure and sensor and equipRef ==\""+actualEquip.getId()+"\"");
+            pressureSensors.forEach( pressureSensor -> {
+                Point pressureSensorPoint = new Point.Builder().setHashMap(pressureSensor).setUnit(Consts.PRESSURE_UNIT).build();
+                haystack.updatePoint(pressureSensorPoint, pressureSensor.get("id").toString());
+            });
+        });
     }
 
     private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){

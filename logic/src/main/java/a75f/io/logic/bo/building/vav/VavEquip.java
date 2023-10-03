@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -652,6 +653,7 @@ public class VavEquip
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker(fanMarker)
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit(Consts.PRESSURE_UNIT)
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(pressure, BacnetIdKt.PRESSUREID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);

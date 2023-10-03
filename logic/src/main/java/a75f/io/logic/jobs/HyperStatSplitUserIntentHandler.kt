@@ -7,7 +7,9 @@ import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.RxjavaUtil
 import android.util.Log
@@ -39,8 +41,11 @@ class HyperStatSplitUserIntentHandler {
             temperatureState: ZoneTempState,
             economizingLoopOutput: Int,
             dcvLoopOutput: Int,
+            outsideDamperMinOpen: Int,
+            outsideAirFinalLoopOutput: Int,
             condensateOverflow: Double,
             filterDirty: Double,
+            basicSettings: BasicSettings
         ) {
             var status: String
             status = when (temperatureState) {
@@ -181,20 +186,15 @@ class HyperStatSplitUserIntentHandler {
                         status += ", "
 
                     /**
-                     * If there is a non-zero economizingLoopOutput, status message will say
-                     * "Free Cooling ON", even if the dcvLoopOutput is larger.
-                     *
-                     * This is by design. First priority is to let user know that economizing
-                     * is enabled, even if it's DCV that's actively driving the OAO damper at the
-                     * current moment.
-                     *
-                     * User only needs to know about DCV as an explanation for why their OAO Damper
-                     * is open during non-economizer conditions.
+                     * OAO behavior is surprisingly hard to explain in a status message.
+                     * I *think* this code captures all the possible edge cases.
                       */
-                    if(economizingLoopOutput > 0) {
-                        status += "Free Cooling ON"
-                    } else if (dcvLoopOutput > 0) {
-                        status += "DCV ON"
+                    if (outsideAirFinalLoopOutput > outsideDamperMinOpen && !(condensateOverflow > 0.0)) {
+                        if(economizingLoopOutput > outsideDamperMinOpen && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
+                            status += "Free Cooling ON"
+                        } else if (dcvLoopOutput > outsideDamperMinOpen) {
+                            status += "DCV ON"
+                        }
                     }
                 }
             }

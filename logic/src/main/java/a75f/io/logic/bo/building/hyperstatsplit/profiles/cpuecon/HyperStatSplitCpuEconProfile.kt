@@ -198,10 +198,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         logIt("Equip Running : $curState")
 
+        val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState,
-            economizingLoopOutput, dcvLoopOutput,
-            equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus()
+            economizingLoopOutput, dcvLoopOutput, outsideDamperMinOpen, outsideAirFinalLoopOutput,
+            equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus(), basicSettings
         )
 
         wasCondensateTripped = isCondensateTripped
@@ -1169,14 +1170,17 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(0,0,0,false,0)
         equip.hsSplitHaystackUtil.updateOaoLoopOutput(0,0,0,0)
         resetAllLogicalPointValues()
+        val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
             equipId = equip.equipRef!!,
             portStages = HashMap(),
             analogOutStages = HashMap(),
             temperatureState = ZoneTempState.TEMP_DEAD,
             economizingLoopOutput, dcvLoopOutput,
+            outsideDamperMinOpen, outsideAirFinalLoopOutput,
             hsSplitHaystackUtil.getCondensateOverflowStatus(),
-            hsSplitHaystackUtil.getFilterStatus()
+            hsSplitHaystackUtil.getFilterStatus(),
+            fetchBasicSettings(equip, false, hsSplitHaystackUtil.getCondensateOverflowStatus() > 0.0)
         )
     }
 

@@ -628,7 +628,7 @@ public class HyperSplitMsgReceiver {
             // Write physical point value in kOhms
             hayStack.writeHisValById(rawPoint.getId(), ohmsReading/1000);
             // Write logical point value. For normally closed sensor, 10kOhm or above is "fault" (1), less than 10kOhm is "normal" (0)
-            hayStack.writeHisValById(point.getId(), (ohmsReading < 10000)? 1.0 : 0.0);
+            hayStack.writeHisValById(point.getId(), (ohmsReading < 10000)? 0.0 : 1.0);
         }
     }
 

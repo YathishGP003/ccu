@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
+import a75f.io.logic.util.PreferenceUtil
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
@@ -50,7 +51,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     // One zone can have many hyperstat devices.  Each has its own address and equip representation
     private val cpuEconDeviceMap: MutableMap<Short, HyperStatSplitCpuEconEquip> = mutableMapOf()
 
-    private lateinit var lastUserIntentConditioningMode : StandaloneConditioningMode
     private var wasCondensateTripped = false
 
     private var coolingLoopOutput = 0
@@ -596,16 +596,15 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             The last Conditioning Mode set by the user is stored in the var lastUserIntentConditioningMode.
          */
 
-        if (!this::lastUserIntentConditioningMode.isInitialized) lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+        var appWasJustRestarted: Boolean = true
 
         if (isCondensateTripped) {
 
             // If Condensate just tripped, store whatever the previous Conditioning Mode was as UserIntentConditioningMode.
             // Conditioning Mode will return to this value once condensate returns to normal. User will not be able to change it back until this happens.
-            if (!wasCondensateTripped)  lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
+            if (!wasCondensateTripped && !appWasJustRestarted)  PreferenceUtil.setLastUserIntentConditioningMode(StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]);
 
             equip.hsSplitHaystackUtil.setConditioningMode(StandaloneConditioningMode.OFF.ordinal.toDouble())
-            Log.d("CCU_COND_MODE", "isCondensateTripped " + isCondensateTripped + " | wasCondensateTripped " + wasCondensateTripped + " | lastUserIntentConditioningMode " + lastUserIntentConditioningMode + " | currentConditioningMode " + StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()])
             return BasicSettings(
                 conditioningMode = StandaloneConditioningMode.OFF,
                 fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
@@ -618,15 +617,16 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 Any changes made to the Haystack point (this can be done via CCU UI or at device)
                 will be saved to lastUserIntentConditioningMode.
              */
-            if (!wasCondensateTripped) lastUserIntentConditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()]
-            equip.hsSplitHaystackUtil.setConditioningMode(lastUserIntentConditioningMode.ordinal.toDouble())
-            Log.d("CCU_COND_MODE", "isCondensateTripped " + isCondensateTripped + " | wasCondensateTripped " + wasCondensateTripped + " | lastUserIntentConditioningMode " + lastUserIntentConditioningMode + " | currentConditioningMode " + StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()])
+            if (!wasCondensateTripped) PreferenceUtil.setLastUserIntentConditioningMode(StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()])
+            equip.hsSplitHaystackUtil.setConditioningMode(PreferenceUtil.getLastUserIntentConditioningMode().ordinal.toDouble())
             return BasicSettings(
                 conditioningMode = StandaloneConditioningMode.values()[equip.hsSplitHaystackUtil.getCurrentConditioningMode().toInt()],
                 fanMode = StandaloneFanStage.values()[equip.hsSplitHaystackUtil.getCurrentFanMode().toInt()]
             )
 
         }
+
+        appWasJustRestarted = false
 
     }
 

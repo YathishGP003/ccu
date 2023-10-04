@@ -133,6 +133,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val userIntents = fetchUserIntents(equip)
         val averageDesiredTemp = getAverageTemp(userIntents)
 
+        val exhaustFanStage1Threshold = hsSplitHaystackUtil.getExhaustFanStage1Threshold().toInt()
+        val exhaustFanStage2Threshold = hsSplitHaystackUtil.getExhaustFanStage2Threshold().toInt()
+        val exhaustFanHysteresis = hsSplitHaystackUtil.getExhaustFanHysteresis().toInt()
+
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
 
@@ -183,7 +187,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         )
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            runRelayOperations(config, hyperStatSplitTuners, userIntents, basicSettings, relayStages, isCondensateTripped)
+            runRelayOperations(config, hyperStatSplitTuners, userIntents, basicSettings, relayStages, isCondensateTripped, exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis)
             runAnalogOutOperations(equip, config, basicSettings, analogOutStages, isCondensateTripped)
         } else{
             resetAllLogicalPointValues()
@@ -269,21 +273,16 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         } else {
 
             val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "outsideDamperMinOpen: " + outsideDamperMinOpen)
-
-            doEconomizing(equip)
-            doDcv(equip, outsideDamperMinOpen)
-
-            outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
-
-            val exhaustFanStage1Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage1 and threshold", equip.equipRef)
-            val exhaustFanStage2Threshold = TunerUtil.readTunerValByQuery("exhaust and fan and stage2 and threshold", equip.equipRef)
-            val exhaustFanHysteresis = TunerUtil.readTunerValByQuery("exhaust and fan and hysteresis", equip.equipRef)
             val oaoDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",equip.equipRef)
             val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
             val economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and temp", equip.equipRef)
 
             val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
+
+            doEconomizing(equip)
+            doDcv(equip, outsideDamperMinOpen)
+
+            outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
 
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"outsideAirLoopOutput "+outsideAirLoopOutput+" oaoDamperMatTarget "+oaoDamperMatTarget+" oaoDamperMatMin "+oaoDamperMatMin
                     +" matTemp "+matTemp)
@@ -342,18 +341,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             equip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput.toDouble())
             equip.setHisVal("oao and zone and logical and damper and actuator and cmd", outsideAirFinalLoopOutput.toDouble())
-
-            if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
-                equip.setHisVal("cmd and exhaust and fan and stage1", 1.0)
-            } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)) {
-                equip.setHisVal("cmd and exhaust and fan and stage1",0.0);
-            }
-
-            if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
-                equip.setHisVal("cmd and exhaust and fan and stage2",1.0)
-            } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
-                equip.setHisVal("cmd and exhaust and fan and stage2",0.0)
-            }
 
             val matThrottleNumber = if (matThrottle) 1.0 else 0.0
             equip.setHisVal("mat and available", matThrottleNumber)
@@ -665,54 +652,65 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         config: HyperStatSplitCpuEconConfiguration, tuner: HyperStatSplitProfileTuners, userIntents: UserIntents,
         basicSettings: BasicSettings,
         relayStages: HashMap<String, Int>,
-        isCondensateTripped: Boolean
+        isCondensateTripped: Boolean,
+        exhaustFanStage1Threshold: Int,
+        exhaustFanStage2Threshold: Int,
+        exhaustFanHysteresis: Int
     ) {
         if (config.relay1State.enabled) {
             handleRelayState(
                 config.relay1State, config, Port.RELAY_ONE, 
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay2State.enabled) {
             handleRelayState(
                 config.relay2State, config, Port.RELAY_TWO, 
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay3State.enabled) {
             handleRelayState(
                 config.relay3State, config, Port.RELAY_THREE,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay4State.enabled) {
             handleRelayState(
                 config.relay4State, config, Port.RELAY_FOUR,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay5State.enabled) {
             handleRelayState(
                 config.relay5State, config, Port.RELAY_FIVE,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay6State.enabled) {
             handleRelayState(
                 config.relay6State, config, Port.RELAY_SIX,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay7State.enabled) {
             handleRelayState(
                 config.relay7State, config, Port.RELAY_SEVEN,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
         if (config.relay8State.enabled) {
             handleRelayState(
                 config.relay8State, config, Port.RELAY_EIGHT,
-                tuner, userIntents, basicSettings, relayStages, isCondensateTripped
+                tuner, userIntents, basicSettings, relayStages, isCondensateTripped,
+                exhaustFanStage1Threshold, exhaustFanStage2Threshold, exhaustFanHysteresis
             )
         }
     }
@@ -746,7 +744,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     private fun handleRelayState(
         relayState: RelayState, config: HyperStatSplitCpuEconConfiguration, port: Port, tuner: HyperStatSplitProfileTuners,
-        userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>, isCondensateTripped : Boolean
+        userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>, isCondensateTripped : Boolean,
+        exhaustFanStage1Threshold: Int, exhaustFanStage2Threshold: Int, exhaustFanHysteresis: Int
     ) {
         when {
             (HyperStatSplitAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
@@ -809,7 +808,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             (HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage1(relayState)) -> {
                 if (!isCondensateTripped) {
-                    doExhaustFanStage1(port, outsideAirFinalLoopOutput, tuner.exhaustFanStage1Threshold, tuner.exhaustFanHysteresis)
+                    doExhaustFanStage1(port, outsideAirFinalLoopOutput, exhaustFanStage1Threshold, exhaustFanHysteresis)
                 } else {
                     resetPort(port)
                 }
@@ -817,7 +816,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             (HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage2(relayState)) -> {
                 if (!isCondensateTripped) {
-                    doExhaustFanStage2(port, outsideAirFinalLoopOutput, tuner.exhaustFanStage2Threshold, tuner.exhaustFanHysteresis)
+                    doExhaustFanStage2(port, outsideAirFinalLoopOutput, exhaustFanStage2Threshold, exhaustFanHysteresis)
                 } else {
                     resetPort(port)
                 }

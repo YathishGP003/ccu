@@ -422,7 +422,7 @@ class HyperStatSplitPointsUtil(
         val economizingAvailablePointMarker = arrayOf(
             "oao", "economizing", "available", "his", "sp", "cpu"
         )
-        val economizingAvailablePoint = createHaystackPointWithOnlyEnum(
+        val economizingAvailablePoint = createHaystackPointWithEnums(
             "$equipDis-economizingAvailable",
             economizingAvailablePointMarker,
             "$OFF,$ON"
@@ -432,7 +432,7 @@ class HyperStatSplitPointsUtil(
         val dcvAvailablePointMarker = arrayOf(
             "oao", "dcv", "available", "his", "sp", "cpu"
         )
-        val dcvAvailablePoint = createHaystackPointWithOnlyEnum(
+        val dcvAvailablePoint = createHaystackPointWithEnums(
             "$equipDis-dcvAvailable",
             dcvAvailablePointMarker,
             "$OFF,$ON"
@@ -442,7 +442,7 @@ class HyperStatSplitPointsUtil(
         val matThrottlePointMarker = arrayOf(
             "oao", "mat", "available", "his", "sp", "cpu"
         )
-        val matThrottlePoint = createHaystackPointWithOnlyEnum(
+        val matThrottlePoint = createHaystackPointWithEnums(
             "$equipDis-matThrottle",
             matThrottlePointMarker,
             "$OFF,$ON"

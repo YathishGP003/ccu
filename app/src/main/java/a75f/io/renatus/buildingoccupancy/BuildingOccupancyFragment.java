@@ -49,6 +49,8 @@ import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
 
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.BuildingOccupancyListener;
+import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment.BuildingOccupancyDialogListener;
@@ -59,7 +61,7 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 
 
-public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener {
+public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener, BuildingOccupancyListener {
 
 
     private TextView addEntry;
@@ -301,26 +303,42 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                             if (buildingOccupancy.getDays().contains(removeEntry)) {
                                                 buildingOccupancy.getDays().remove(removeEntry);
                                             }
-                                            doScheduleUpdate();
+                                            doScheduleUpdate(false);
                                         });
                                 AlertDialog alert = builder.create();
                                 alert.show();
                             }
                         } else {
                             buildingOccupancy.getDays().addAll(daysList);
-                            doScheduleUpdate();
+                            doScheduleUpdate(false);
                             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
                         }
                     });
         }else{
             ProgressDialogUtils.hideProgressDialog();
             buildingOccupancy.getDays().addAll(daysList);
-            doScheduleUpdate();
+            doScheduleUpdate(false);
             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
         }
         return true;
     }
+    public void refreshScreen() {
+        if(getActivity() != null) {
+            doScheduleUpdate(true);
+        }
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        UpdateEntityHandler.setBuildingOccupancyListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        UpdateEntityHandler.setBuildingOccupancyListener(null);
+    }
     private void drawBuildingOccupancy(){
         buildingOccupancy.populateIntersections();
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -558,11 +576,13 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         }
     }
 
-    private void doScheduleUpdate() {
-        CCUHsApi.getInstance().updateBuildingOccupancy(buildingOccupancy);
-        CCUHsApi.getInstance().syncEntityTree();
-        drawBuildingOccupancy();
+    private void doScheduleUpdate(boolean isRefresh) {
+        if(!isRefresh) {
+            CCUHsApi.getInstance().updateBuildingOccupancy(buildingOccupancy);
+            CCUHsApi.getInstance().syncEntityTree();
+        }
         buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+        drawBuildingOccupancy();
     }
 
     private void showdialog(int position){

@@ -891,7 +891,6 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
     public void onResume() {
         super.onResume();
         new Handler().postDelayed(this::loadSchedule,1500);
-        UpdateScheduleHandler.setBuildingScheduleListener(this);
     }
 
     @Override

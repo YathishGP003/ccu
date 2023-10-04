@@ -447,6 +447,7 @@ public class CazEquip
             updateSensorPoints(supplyTempSensor,roomTempSensor, currentTempPoint);
 
         }
+        CCUHsApi.getInstance().scheduleSync();
     }
 
     private void updateSensorPoints(SupplyTempSensor supplyTempSensor, RoomTempSensor roomTempSensor, HashMap<Object, Object> currentTempPoint) {

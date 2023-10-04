@@ -90,6 +90,9 @@ public class PreferenceUtil {
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
+    private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
+
+
     public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
 
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
@@ -248,7 +251,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-    
+
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }
@@ -748,5 +751,11 @@ public class PreferenceUtil {
 
     public static void setCleanUpOtherCcuZoneSchedules() {
         setBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES, true);
+    }
+    public static boolean getTemperatureTIPortEnabled() {
+        return getBooleanPreference(ENABLE_TEMPERATURE_TI_PORT);
+    }
+    public static void setTemperatureTIPortEnabled() {
+        setBooleanPreference(ENABLE_TEMPERATURE_TI_PORT, true);
     }
 }

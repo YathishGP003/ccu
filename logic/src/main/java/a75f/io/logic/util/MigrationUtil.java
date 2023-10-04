@@ -403,6 +403,12 @@ public class MigrationUtil {
             removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
+
+        if (!PreferenceUtil.getTemperatureTIPortEnabled()) {
+            enableTISensorPort(CCUHsApi.getInstance());
+            PreferenceUtil.setTemperatureTIPortEnabled();
+        }
+
         CCUHsApi.getInstance().removeAllNamedSchedule();
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
@@ -2272,5 +2278,36 @@ public class MigrationUtil {
             }
 
         });
+    }
+
+    private static void enableTISensorPort(CCUHsApi haystack){
+         Log.d(TAG_CCU_MIGRATION_UTIL, "enableTISensorPort migration started");
+        HashMap<Object, Object> equipMap = haystack.readEntity("equip and ti");
+        if (!equipMap.isEmpty()) {
+                Log.d(TAG_CCU_MIGRATION_UTIL, "TI exists");
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                double roomTempTypeConfigPoint  = haystack.readDefaultVal("point and " +
+                        "config and temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
+                HashMap<Object, Object> roomTemperaturePoint = haystack.readEntity("ti and temp and space and not config" +
+                        " and equipRef == \""+equip.getId()+"\"");
+                HashMap<Object,Object> currentTemp = haystack.readEntity("point and current and " +
+                        "temp and ti and equipRef == \""+equip.getId()+"\"");
+                String nodeAddress = currentTemp.get("group").toString();
+                if (roomTempTypeConfigPoint == 1) {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
+                    ControlMote.setCMPointEnabled(Port.TH1_IN.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), roomTemperaturePoint.get("id").toString());
+                } else if (roomTempTypeConfigPoint == 2) {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
+                    ControlMote.setCMPointEnabled(Port.TH2_IN.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), roomTemperaturePoint.get("id").toString());
+                } else {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), true);
+                    ControlMote.setCMPointEnabled(Port.SENSOR_RT.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+                }
+        }
+        Log.d(TAG_CCU_MIGRATION_UTIL, "enableTISensorPort migration started");
+        CCUHsApi.getInstance().scheduleSync();
     }
 }

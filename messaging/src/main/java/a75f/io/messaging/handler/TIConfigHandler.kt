@@ -60,9 +60,11 @@ class TIConfigHandler {
                 }
                 if (roomTempSensorConfig == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
                     ControlMote.setPointEnabled(nodeAddress, Port.SENSOR_RT.name, true)
+                    ControlMote.setCMPointEnabled(Port.SENSOR_RT.name, true)
                 }
                 updateSensorPoints(supplyTempSensorConfig, roomTempSensorConfig, currentTempPoint, nodeAddress, configPoint.equipRef)
             }
+            CCUHsApi.getInstance().scheduleSync();
         }
 
         private fun updateSensorPoints(

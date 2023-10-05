@@ -208,7 +208,6 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                             .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                     CCUHsApi.getInstance().addPoint(snBand);
                     if(!Globals.getInstance().siteAlreadyCreated()) {
-                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                         DefaultSchedules.setDefaultCoolingHeatingTemp();
                     }
                 },

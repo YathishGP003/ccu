@@ -1,5 +1,6 @@
 package a75f.io.domain.migration
 
+import a75f.io.domain.api.Domain
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import android.util.Log
@@ -15,7 +16,6 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 
 class ModelValidator {
     companion object {
-    const val TAG = "DOMAIN_MODEL"
         /**
          * Validate all the domain models
          */
@@ -26,8 +26,10 @@ class ModelValidator {
             // val versionFiles = diffManger.getModelFileVersionDetails(DiffManger.VERSION)*/
             metaDetails.forEach {
                 val isValidDefinition = isValidaModel(it.modelId)
-                if (!isValidDefinition)
+                if (!isValidDefinition) {
                     inValidModels.add(it.modelId)
+                    Log.i(Domain.LOG_TAG, "Invalid Model "+it.modelId)
+                }
             }
           return inValidModels
         }
@@ -61,7 +63,7 @@ class ModelValidator {
         }
 
         private fun logIt(modelType: String, id: String){
-            CcuLog.i (TAG, " $modelType Valid Model found. Model Id : $id")
+            CcuLog.i (Domain.LOG_TAG, " $modelType Valid Model found. Model Id : $id")
         }
     }
 }

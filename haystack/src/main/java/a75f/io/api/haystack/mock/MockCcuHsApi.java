@@ -138,4 +138,9 @@ public class MockCcuHsApi extends CCUHsApi {
     public void deleteEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
     }
+
+    @Override
+    public String getTimeZone() {
+        return "Chicago";
+    }
 }

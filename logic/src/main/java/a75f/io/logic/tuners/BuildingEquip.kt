@@ -38,9 +38,11 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             }
             val equipBuilder = TunerEquipBuilder(haystack)
             equipBuilder.buildEquipAndPoints(haystack.site!!.id)
-            haystack.registerOnCcuRegistrationCompletedListener { this }
+            CcuLog.i(L.TAG_CCU_TUNER, " registerOnCcuRegistrationCompletedListener ")
+            haystack.registerOnCcuRegistrationCompletedListener(this)
         } else {
-            onRegistrationCompleted(haystack)
+            CcuLog.i(L.TAG_CCU_TUNER, "Tuner equip already exists.")
+            syncBuildingTuners(haystack)
         }
     }
 
@@ -123,12 +125,11 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
                 val id = row["id"].toString()
                 val kind = row["kind"].toString()
                 val data = row["data"]
-                CcuLog.i(L.TAG_CCU_TUNER, "Import point array $data")
+                CcuLog.i(L.TAG_CCU_TUNER, "Imported point array $data")
                 if (data is HList && data.size() > 0) {
                     for ( index in 0 until data.size()) {
                         val dataElement = data[index] as HDict
                         val level = dataElement["level"].toString()
-                        CcuLog.i(L.TAG_CCU_TUNER, "Write data:  $data")
                         if (level.toInt() == 16) {
                             CcuLog.i(L.TAG_CCU_TUNER, "Sync Level 16 to CCU")
                             val who = dataElement.getStr("who")
@@ -161,8 +162,8 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
     override fun onRegistrationCompleted(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Building Equip onRegistrationCompleted received")
-        syncBuildingTuners(haystack)
         haystack.unRegisterOnCcuRegistrationCompletedListener { this }
+        syncBuildingTuners(haystack)
     }
     fun syncBuildingTuners(haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "Sync building Tuners");

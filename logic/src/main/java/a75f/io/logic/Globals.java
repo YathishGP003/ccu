@@ -34,6 +34,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -303,17 +304,13 @@ public class Globals {
     private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
-            if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
-                        non-primary CCUs should fetch in the next app start up.*/
-                ////TODO- COMMON-DATA-FEATURE
+
+            ////TODO- Common data feature
+            /*if (CCUHsApi.getInstance().isPrimaryCcu()) {
                 BuildingTuners.getInstance().updateBuildingTuners();
             } else {
-                        /*If a non-primary tuner fails to load all the  building tuners, it should
-                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
-                        multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
-            }
+            }*/
 
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
@@ -385,6 +382,12 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
+
+                    //TODO - Find the right place..For now just doing if registered already
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        DiffManger diffManger = new DiffManger(getApplicationContext());
+                        diffManger.processModelMigration(site.get("id").toString());
+                    }
                 }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
@@ -394,6 +397,9 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    }
                 }
             }
         }.start();
@@ -740,7 +746,7 @@ public class Globals {
     public void registerOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.add(listener);
         if (isInitCompleted) {
-            CcuLog.i("UI_PROFILING","CCU Already registered");
+            CcuLog.i("UI_PROFILING","CCU Already initialized");
             listener.onInitCompleted();
         }
     }

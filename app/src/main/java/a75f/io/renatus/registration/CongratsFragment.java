@@ -67,6 +67,9 @@ public class CongratsFragment extends Fragment {
     @BindView(R.id.textComfort)
     TextView mComfortSelector;
 
+    @BindView(R.id.buildingTunerVersion)
+    TextView buildingTunerVersion;
+
     Context            mContext;
 
     private static final String TAG = CongratsFragment.class.getSimpleName();
@@ -176,6 +179,9 @@ public class CongratsFragment extends Fragment {
         mComfortSelector.setText("Maximum Comfort");
         mComfortSelector.setVisibility(View.GONE);
 
+        if (eqp.getTags().containsKey("modelVersion")) {
+            buildingTunerVersion.setText("Building tuners have created from model version "+tuner.get("modelVersion").toString());
+        }
 
         return rootView;
     }

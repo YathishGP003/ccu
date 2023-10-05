@@ -18,9 +18,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
@@ -304,7 +307,7 @@ public class HaystackExplorer extends Fragment
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
-            ArrayList tunerList = new ArrayList();
+            Set tunerList = new HashSet();
         
             for (Map t : tuners) {
                 tunerList.add(t.get("dis").toString());
@@ -324,8 +327,9 @@ public class HaystackExplorer extends Fragment
                 tunerList.add(t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
-            Collections.sort(tunerList);
+            List tunersList= new ArrayList(tunerList);
+            expandableListDetail.put(m.get("dis").toString()+" : "+m, tunersList);
+            Collections.sort(tunersList);
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
     

@@ -1,6 +1,7 @@
 package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getEquipDetailsByDomain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
@@ -22,11 +23,13 @@ class MigrationHandler(var haystack: CCUHsApi) {
 
     fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String) {
         if (newModel is SeventyFiveFTunerDirective) {
-            CcuLog.printLongMessage("CCU_TUNER",
+            CcuLog.printLongMessage(Domain.LOG_TAG,
                 "Building equip model upgrade detected : Run migration to $newModel"
             )
             val tunerEquipBuilder = TunerEquipBuilder(haystack)
             tunerEquipBuilder.updateEquipAndPoints(newModel,entityData, siteRef )
+
+            tunerEquipBuilder.updateBackendBuildingTuner(siteRef, haystack)
         } else {
             val equipDetails = getEquipDetailsByDomain(newModel.domainName)
             addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef)

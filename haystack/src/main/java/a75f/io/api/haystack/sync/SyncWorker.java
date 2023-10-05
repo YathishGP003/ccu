@@ -60,10 +60,12 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "Site sync failed");
                 return Result.retry();
             }
+
             if (!CCUHsApi.getInstance().isCCURegistered()) {
                 CcuLog.e(TAG, "Abort SyncWork : CCU Not registered");
                 return Result.failure();
             }
+
             if (!ccuSyncHandler.doSync()) {
                 CcuLog.e(TAG, "CCU sync failed");
                 return Result.retry();

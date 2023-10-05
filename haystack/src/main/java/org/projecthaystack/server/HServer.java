@@ -131,7 +131,6 @@ public abstract class HServer extends HProj
    */
   protected HGrid onReadAll(String filter, int limit)
   {
-    Log.d("HServer", "filter ->"+filter + "<--limit-->"+limit);
     HFilter f = HFilter.make(filter);
     ArrayList acc = new ArrayList();
     for (Iterator it = iterator(); it.hasNext(); )
@@ -143,7 +142,6 @@ public abstract class HServer extends HProj
         if  (acc.size() >= limit) break;
       }
     }
-    Log.d("HServer", "acc ->"+acc.toArray() + "<--acc size-->"+acc.size());
     return HGridBuilder.dictsToGrid((HDict[])acc.toArray(new HDict[acc.size()]));
   }
 

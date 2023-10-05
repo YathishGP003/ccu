@@ -87,7 +87,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private String enteredPassCode;
     private View toastFail;
     private View toastCcuRestoreSuccess;
-    private final AtomicBoolean isProcessPaused;
+    private volatile AtomicBoolean isProcessPaused;
     private CopyOnWriteArrayList<Future<?>> futures;
     private ExecutorService executorService;
     private Handler handler;
@@ -173,8 +173,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             deleteRenatusData();
         });
         pauseSync.setOnClickListener(view -> {
-            boolean currentPauseStatus = isProcessPaused.get();
-            isProcessPaused.set(!currentPauseStatus);
+            isProcessPaused.set(!isProcessPaused.get());
             if(isProcessPaused.get()) {
                 Toast.makeText(getActivity(), "Pausing Replace CCU...", Toast.LENGTH_LONG).show();
                 pauseReplaceProcess();
@@ -514,20 +513,23 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private RetryCountCallback getRetryCountCallback(){
         RetryCountCallback retryCountCallback = retryCount -> handler.post(() -> {
             if (retryCount == 0) {
-                connectivityIssue.setText("");
                 connectivityAlert.setVisibility(View.INVISIBLE);
+                connectivityIssue.setText("");
             }
             else{
                 connectivityAlert.setVisibility(View.VISIBLE);
                 connectivityIssue.setText("Connectivity issues. Retry attempt("+retryCount+")");
-                if(retryCount == 15){
-                    boolean currentPauseStatus = isProcessPaused.get();
-                    isProcessPaused.set(!currentPauseStatus);
+                if(retryCount == 15 && !isProcessPaused.get()){
+                    isProcessPaused.set(true);
                     Toast.makeText(getActivity(), "Pausing Replace CCU...", Toast.LENGTH_LONG).show();
-                    pauseReplaceProcess();
+                    pauseAlert.setVisibility(View.VISIBLE);
                     pauseStatus.setText("PAUSED");
                     pauseSync.setText("RESUME SYNCING");
                 }
+            }
+            if(isProcessPaused.get()){
+                pauseReplaceProcess();
+                return;
             }
         });
         return retryCountCallback;
@@ -556,7 +558,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                     future.get();
                 }
             } catch (CancellationException | InterruptedException | ExecutionException e ) {
-                Log.i(TAG_CCU_REPLACE,"Pausing replace process "+ e.toString());
+                Log.i(TAG_CCU_REPLACE,"Pausing replace process "+ e);
                 e.printStackTrace();
             }
         }
@@ -568,7 +570,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             future.cancel(true);
         }
         if(executorService != null) {
-            executorService.shutdown();
+            executorService.shutdownNow();
         }
         futures.clear();
     }

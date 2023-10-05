@@ -305,6 +305,7 @@ public class UsbModbusService extends Service {
                 if (!keep) {
                     break;
                 }
+                sleep(1000);
             }
             if (!keep) {
                 // There is no USB devices connected (but usb host were listed). Send an intent to MainActivity.
@@ -346,6 +347,7 @@ public class UsbModbusService extends Service {
                         Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
                     }
                 }
+                sleep(1000);
             }
         }
     }
@@ -506,6 +508,7 @@ public class UsbModbusService extends Service {
             Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
                       +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
+                Log.d(TAG,"device name: "+device.getDeviceName()+", device vendorId: "+device.getVendorId());
                 if (serialPort.open()) {
                     serialPortConnected = true;
                     serialPort.setBaudRate(getModbusBaudrate());
@@ -534,8 +537,10 @@ public class UsbModbusService extends Service {
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
+                    Log.d(TAG,"device opened: - device name: "+device.getDeviceName()+", device vendorId: "+device.getVendorId());
                 } else {
-                    Log.d(TAG,"closing USB serial device "+serialPort);
+                    Log.d(TAG,"closing USB serial device [deviceName:"+device.getDeviceName()+", vendorId"+device.getVendorId()+"]," +
+                            " because this device interface can not be claimed at this moment");
                     serialPort.close();
                     serialPort = null;
                     Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
@@ -570,6 +575,14 @@ public class UsbModbusService extends Service {
     private int readIntPref(String key, int defaultVal) {
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         return spDefaultPrefs.getInt(key, defaultVal);
+    }
+
+    public void sleep(long millis){
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 

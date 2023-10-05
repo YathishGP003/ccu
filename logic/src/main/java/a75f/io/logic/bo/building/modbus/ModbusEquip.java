@@ -107,7 +107,7 @@ public class ModbusEquip {
                 mbEquip.addMarker(equip.trim());
             }
         }
-        mbEquip.addMarker(modbusLevel);
+        mbEquip.addMarker(modbusLevel.toLowerCase().trim());
 
         if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
             mbEquip.setVendor(equipmentInfo.getVendor());
@@ -124,10 +124,6 @@ public class ModbusEquip {
         }
         String equipmentRef = hayStack.addEquip(mbEquip.build());
 
-        String zoneMarker = "";
-        if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
-            zoneMarker = "zone";
-        }
         if(!isSlaveIdSameAsParent) {
             CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
                     siteRef, roomRef, floorRef, equipmentInfo.getSlaveId(), "modbus", profileType, tz));
@@ -139,7 +135,7 @@ public class ModbusEquip {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef).setHisInterpolate("cov")
                     .addMarker(modbusEquipType.toLowerCase()).addMarker("modbus").addMarker("scheduleType").addMarker("writable").addMarker("his")
-                    .addMarker(zoneMarker)
+                    .addMarker(modbusLevel.toLowerCase().trim())
                     .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                     .setEnums("building,named")
                     .setTz(tz).build();
@@ -169,9 +165,7 @@ public class ModbusEquip {
                         .setFloorRef(floorRef).addMarker("logical").addMarker("modbus")
                         .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                         .setTz(tz);
-            if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
-                 logicalParamPoint.addMarker("zone");
-            }
+            logicalParamPoint.addMarker(modbusLevel.toLowerCase().trim());
             RawPoint.Builder physicalParamPoint = new RawPoint.Builder()
                     .setDisplayName("register"+configParam.getRegisterAddress()+"-bits-"+configParam.getStartBit()+"-"+configParam.getEndBit())
                     .setShortDis(configParam.getName())

@@ -80,9 +80,7 @@ class HyperStatSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
-                    settings3.hyperstatStagedFanVoltages = getStagedFanVoltageDetails(equipRef)
-                    settings3.hyperstatLinearFanSpeedsT = getLinearFanSpeedDetails(equipRef)
-                    settings3.hyperstatStagedFanSpeeds = getStagedFanSpeedDetails(equipRef)
+                    settings3.hyperStatConfigsCcu = getStagedFanVoltageDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                 settings3.genertiTuners = getGenericTunerDetails(equipRef)
@@ -414,8 +412,8 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatStagedFanVoltages_t
          */
-        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperstatStagedFanVoltages_t? {
-            val stagedFanVoltages = HyperStat.HyperstatStagedFanVoltages_t.newBuilder()
+        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperStatConfigsCcu_t? {
+            val stagedFanVoltages = HyperStat.HyperStatConfigsCcu_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""
 
@@ -474,7 +472,8 @@ class HyperStatSettingsUtil {
             for (fanSpeed in fanSpeedLevels) {
                 for (analog in listOf("analog3", "analog2", "analog1")) {
                     val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
-                    if (ccuHsApi.readEntity(query).isNotEmpty()) {
+                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal) {
                         val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
                         when (fanSpeed) {
                             "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
@@ -503,7 +502,8 @@ class HyperStatSettingsUtil {
             for (fanSpeed in fanSpeedLevels) {
                 for (analog in listOf("analog3", "analog2", "analog1")) {
                     val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
-                    if (ccuHsApi.readEntity(query).isNotEmpty()) {
+                    if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
                         val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
                         when (fanSpeed) {
                             "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
@@ -515,6 +515,13 @@ class HyperStatSettingsUtil {
                 }
             }
             return stagedFanSpeedBuilder.build()
+        }
+        private fun getAnalogOutMapping(
+            ccuHsApi: CCUHsApi,
+            equipRef: String,
+            analog: String
+        ): Any {
+            return readConfig(ccuHsApi, equipRef, "$analog and output and config and association").toInt()
         }
     }
 }

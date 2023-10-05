@@ -16,4 +16,8 @@ interface MessageHandler {
     val command : List<String>
     @Throws(MessageHandlingFailed::class)
     fun handleMessage(jsonObject: JsonObject, context: Context)
+
+    fun ignoreMessage(jsonObject: JsonObject, context: Context) : Boolean {
+        return false
+    }
 }

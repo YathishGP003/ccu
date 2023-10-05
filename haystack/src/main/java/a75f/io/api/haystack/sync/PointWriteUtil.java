@@ -28,8 +28,8 @@ public class PointWriteUtil {
     
     public static ArrayList<HDict> getWriteArrDict(String pointId) {
         ArrayList<HashMap> pointArr = CCUHsApi.getInstance().readPoint(pointId);
-        HDict entity = CCUHsApi.getInstance().readHDictById(pointId);
         ArrayList<HDict> dictArr = new ArrayList<>();
+        HDict entity = CCUHsApi.getInstance().readHDictById(pointId);
         for (HashMap valMap : pointArr) {
             if (valMap.get("val") != null) {
                 String value = Objects.toString(valMap.get("val"), "");
@@ -52,7 +52,8 @@ public class PointWriteUtil {
                                       .add("level", (int) Double.parseDouble(level))
                                       .add("who", who)
                                       .add("duration", duration)
-                                      .add("val", isDouble? HNum.make(numValue) : HStr.make(value));
+                                      .add("val", isDouble? HNum.make(numValue) : HStr.make(value))
+                            .add("duration", duration);
                 dictArr.add(b.toDict());
             }
         }

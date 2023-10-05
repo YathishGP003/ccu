@@ -337,9 +337,10 @@ public class HisSyncHandler
     //These points need not be synced unless there is a 'history' entry
     private boolean skipForcedHisWrites(HashMap pointToSync) {
         return pointToSync.containsKey("heartbeat")
-               || pointToSync.containsKey("rssi")
-               || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
-               || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"));
+                || pointToSync.containsKey("rssi")
+                || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
+                || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
+                || pointToSync.containsKey("sensor");
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

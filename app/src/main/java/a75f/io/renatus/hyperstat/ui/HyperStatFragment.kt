@@ -34,7 +34,7 @@ import android.widget.*
 import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-
+import a75f.io.renatus.views.CustomCCUSwitch;
 /**
  * Created by Manjunath K on 15-07-2022.
  */
@@ -60,8 +60,8 @@ class HyperStatFragment : BaseDialogFragment() {
     lateinit var th2Label: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
-    lateinit var forceOccupiedSwitch: ToggleButton
-    lateinit var autoAwaySwitch: ToggleButton
+    lateinit var forceOccupiedSwitch: CustomCCUSwitch
+    lateinit var autoAwaySwitch: CustomCCUSwitch
 
     // 6 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -69,8 +69,8 @@ class HyperStatFragment : BaseDialogFragment() {
     // 3 rows, 1 for each analog out, plus damper voltage selectors
     private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
-    lateinit var airflowSensorSwitch: ToggleButton
-    lateinit var th2Switch: ToggleButton
+    lateinit var airflowSensorSwitch: CustomCCUSwitch
+    lateinit var th2Switch: CustomCCUSwitch
 
     // 2 rows, 1 for each analog in.
     lateinit var analogInUIs: List<AnalogInWidgets>
@@ -89,10 +89,10 @@ class HyperStatFragment : BaseDialogFragment() {
     lateinit var zonePMThreshold: Spinner
     lateinit var zonePMTarget: Spinner
 
-    lateinit var displayHumidity: ToggleButton
-    lateinit var displayVOC: ToggleButton
-    lateinit var displayPp2p5: ToggleButton
-    lateinit var displayCo2: ToggleButton
+    lateinit var displayHumidity: CustomCCUSwitch
+    lateinit var displayVOC: CustomCCUSwitch
+    lateinit var displayPp2p5: CustomCCUSwitch
+    lateinit var displayCo2: CustomCCUSwitch
 
 
     /**
@@ -783,7 +783,7 @@ class HyperStatFragment : BaseDialogFragment() {
         return count
     }
 
-    private fun enableDisplay(toggle: ToggleButton): Boolean{
+    private fun enableDisplay(toggle: CustomCCUSwitch): Boolean{
         val count = getDisplayDeviceCount()
         if(count > 2) {
             Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()

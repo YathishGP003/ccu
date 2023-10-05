@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
@@ -12,6 +13,7 @@ import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -205,6 +207,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     TextView zoneLoadTextView = null;
 
     private BroadcastReceiver siteLocationChangedReceiver;
+    private boolean alertDialogShown = false;
 
     public ZoneFragmentNew() {
     }
@@ -673,6 +676,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         } catch (Exception e) {
                             CcuLog.e(LOG_TAG, "Loading Zone failed");
                             e.printStackTrace();
+                            if (!validateMigration() && !alertDialogShown) {
+                                showMigrationErrorDialog(requireContext());
+                                alertDialogShown = true;
+                            }
                         }
                     }
                     setCcuReady();
@@ -1200,10 +1207,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband+" modeType"+modeType);
 
-
-        seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax, heatLowerLimitVal,
-                heatUpperLimitVal, coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired,
-                (float)currentAverageTemp, heatingDeadBand, coolingDeadBand,modeType);
+        if(heatingDesired != 0 && coolingDesired !=0)
+            seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax, heatLowerLimitVal,
+                    heatUpperLimitVal, coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired,
+                    (float)currentAverageTemp, heatingDeadBand, coolingDeadBand,modeType);
 
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1889,9 +1896,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
-        seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
-                coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float)currentTemp,
-                heatingDeadBand, coolingDeadBand,modeType);
+
+        if(heatingDesired != 0 && coolingDesired !=0)
+            seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
+                    coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float)currentTemp,
+                    heatingDeadBand, coolingDeadBand,modeType);
 
         linearLayoutZonePoints.removeAllViews();
         for (int k = 0; k < openZoneMap.size(); k++) {

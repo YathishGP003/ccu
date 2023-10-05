@@ -169,7 +169,8 @@ public class BuildingOccupancyViewModel {
             HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
             HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteMap.get("id").toString()).toDict();
             HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-            if (schedulePoint != null) {
+
+                if (schedulePoint != null) {
                 Iterator it = schedulePoint.iterator();
                 while (it.hasNext()) {
                     HRow r = (HRow) it.next();

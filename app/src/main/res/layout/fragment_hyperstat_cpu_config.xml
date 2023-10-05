@@ -6,6 +6,7 @@
     android:background="@drawable/border_dialog"
     android:elevation="12dp">
 
+
     <!-- Title -->
     <TextView
         android:id="@+id/profile_name"
@@ -50,30 +51,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/auto_force_occupy"
+                    android:layout_marginEnd="@dimen/dp_10"
                     android:textAppearance="@style/text_label" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleForceOccupied"
                     style="@style/ToggleButton_HyperStat"
-                    android:layout_marginStart="32dp"
-                    tools:checked="true" />
+                    tools:checked="true"
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="115dp"
                     android:text="@string/auto_away"
+                    android:layout_marginEnd="@dimen/dp_10"
                     android:textAppearance="@style/text_label" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAutoAway"
                     style="@style/ToggleButton_HyperStat"
-                    android:layout_marginStart="32dp" />
+                    layout="@layout/custom_ccu_switch" />
             </LinearLayout>
 
             <!-- The main block -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
@@ -81,7 +84,7 @@
                 <ImageView
                     android:layout_width="240dp"
                     android:layout_height="850dp"
-                    android:layout_marginStart="34dp"
+                    android:layout_marginStart="20dp"
                     android:layout_marginTop="72dp"
                     android:src="@drawable/input_hyperstat_cpu"
                     tools:ignore="ContentDescription" />
@@ -117,9 +120,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay1"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -148,9 +152,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay2"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -178,9 +183,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay3"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -209,9 +215,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay4"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -241,9 +248,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay5"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -272,9 +280,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay6"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -304,9 +313,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog1"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -338,9 +348,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog2"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -373,9 +384,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog3"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -409,9 +421,10 @@
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/airflowTempToggle"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -422,13 +435,14 @@
                     <!--  Door/Window Toggle   -->
                     <TableRow
                         style="@style/TableRow_HyperStat"
-                        android:layout_marginTop="30dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout style="@style/TableToggleButtonWrapper">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/doorWindowEnableToggle"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/th2Label"
@@ -441,15 +455,16 @@
                     <!--  Analog-in1 -->
                     <TableRow
                         style="@style/TableRow_HyperStat"
-                        android:layout_marginTop="61dp">
+                        android:layout_marginTop="57dp">
 
                         <LinearLayout
                             style="@style/TableToggleButtonWrapper"
                             android:layout_weight="1.0">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggle_analog_in1"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 style="@style/ToggleLabel"
@@ -478,15 +493,16 @@
                     <!--  Analog-in2 -->
                     <TableRow
                         style="@style/TableRow_HyperStat"
-                        android:layout_marginTop="16dp">
+                        android:layout_marginTop="18dp">
 
                         <LinearLayout
                             style="@style/TableToggleButtonWrapper"
                             android:layout_weight="1.0">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggle_analog_in2"
-                                style="@style/ToggleButton_HyperStat" />
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
 
                             <!--todo: this text is a smidge too long and wraps -->
                             <TextView
@@ -1054,10 +1070,10 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
-                    <ToggleButton
+                    <include
                         android:id="@+id/humidity"
                         style="@style/ToggleButton_HyperStat"
-                        android:layout_marginStart="32dp" />
+                        layout="@layout/custom_ccu_switch" />
                 </LinearLayout>
                 <TextView
                     android:layout_width="0dp"
@@ -1070,10 +1086,10 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
-                    <ToggleButton
+                    <include
                         android:id="@+id/co2"
                         style="@style/ToggleButton_HyperStat"
-                        android:layout_marginStart="32dp" />
+                        layout="@layout/custom_ccu_switch" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -1095,10 +1111,11 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
-                    <ToggleButton
+                    <include
                         android:id="@+id/voc"
                         style="@style/ToggleButton_HyperStat"
-                        android:layout_marginStart="32dp" />
+                        layout="@layout/custom_ccu_switch"
+                        />
                 </LinearLayout>
                 <TextView
                     android:layout_width="0dp"
@@ -1111,10 +1128,10 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
-                    <ToggleButton
+                    <include
                         android:id="@+id/p2pm"
                         style="@style/ToggleButton_HyperStat"
-                        android:layout_marginStart="32dp" />
+                        layout="@layout/custom_ccu_switch"/>
                 </LinearLayout>
 
             </LinearLayout>

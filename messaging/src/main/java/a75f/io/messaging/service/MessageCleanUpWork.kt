@@ -32,12 +32,18 @@ class MessageCleanUpWork(context: Context, params: WorkerParameters) :
         }
         CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork ")
 
-        msgDbHelper.getAllMessagesList().forEach {
+        /*msgDbHelper.getAllMessagesList().forEach {
             CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork $it")
             if (it.timeToken < System.currentTimeMillis() - MESSAGE_EXPIRY_DURATION_MILLIS) {
                 deleteMessage(it, appContext)
             }
+        }*/
+
+        msgDbHelper.getAllExpiredMessages(System.currentTimeMillis() - MESSAGE_EXPIRY_DURATION_MILLIS).forEach {
+            CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork - expired Message : $it")
+            deleteMessage(it, appContext)
         }
+
         return Result.success()
     }
 

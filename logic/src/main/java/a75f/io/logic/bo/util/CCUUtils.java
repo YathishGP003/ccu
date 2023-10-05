@@ -107,7 +107,7 @@ public class CCUUtils
             Device deviceInfo = new Device.Builder().setHashMap(tiDevice).build();
             HashMap<Object, Object> firmwarePoint =
                     ccuHsApi.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-            ccuHsApi.writeDefaultValById(Objects.requireNonNull(firmwarePoint.get("id")).toString(), firmwareVersion);
+            ccuHsApi.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
     }
 

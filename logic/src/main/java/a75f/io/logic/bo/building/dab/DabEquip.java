@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -474,7 +475,7 @@ public class DabEquip
                              .setRoomRef(roomRef)
                              .setFloorRef(floorRef).setHisInterpolate("cov")
                              .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("dab")
-                             .setGroup(String.valueOf(nodeAddr))
+                             .setGroup(String.valueOf(nodeAddr)).setUnit(Consts.PRESSURE_UNIT)
                              .setTz(tz)
                              .build();
         BacnetUtilKt.addBacnetTags(pressure,BacnetIdKt.PRESSUREID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);

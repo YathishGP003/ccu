@@ -1,9 +1,6 @@
 package a75f.io.api.haystack.util
 
-import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.HayStackConstants
-import a75f.io.api.haystack.RestoreCCUHsApi
-import a75f.io.api.haystack.RetryCountCallback
+import a75f.io.api.haystack.*
 import android.util.Log
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -19,13 +16,13 @@ val hayStack = CCUHsApi.getInstance();
 fun setDiagMigrationVal() {
     val version =
         hayStack.readDefaultStrVal("point and diag and app and version")
-    if(validateMigration())
+    if(validateMigration()){
         hayStack.writeDefaultVal("point and diag and migration", version)
-
-    val pointmig = hayStack.readEntity("point and diag and migration")
-    Log.d("CCU_SCHEDULABLE", "Diag Point is =  "+pointmig.get("id"))
-    Log.d("CCU_SCHEDULABLE", "Diag Point Set")
-
+        val pointmig = hayStack.readEntity("point and diag and migration")
+        Log.d("CCU_SCHEDULABLE", "Diag Point Id is =  "+pointmig.get("id")+  " Value is set to " + version)
+    }else{
+        Log.d("CCU_SCHEDULABLE", "Diag Point is not Set")
+    }
 }
 
 fun validateMigration(): Boolean {
@@ -65,18 +62,15 @@ fun importSchedules() {
                 )
             }
 
-
         restoreCCUHsApi.importBuildingOccupancy(siteUID, hClient,retryCountCallback)
         restoreCCUHsApi.importZoneSchedule(zoneRefSet, retryCountCallback)
         CCUHsApi.getInstance().importNamedSchedule(hClient)
         restoreCCUHsApi.importZoneSpecialSchedule(zoneRefSet,retryCountCallback)
         restoreCCUHsApi.importBuildingSpecialSchedule(siteUID,hClient,true,retryCountCallback)
-
-
         Log.d("CCU_SCHEDULABLE", "Update schedule object completed")
         setZoneEnabled()
+        updateZoneScheduleWithinBuildingSchedule(CCUHsApi.getInstance())
     }
-
 }
 
 val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
@@ -114,4 +108,10 @@ fun doPointWriteForSchedulable(){
         hDicts.add(pid)
     }
     hayStack.importPointArrays(hDicts)
+}
+
+fun updateZoneScheduleWithinBuildingSchedule(ccuHsApi: CCUHsApi) {
+    val buildingOccupancyDict = ccuHsApi.readAsHdict(Queries.BUILDING_OCCUPANCY);
+    val buildingOccupancySchedule = Schedule.Builder().setHDict(HDictBuilder().add(buildingOccupancyDict).toDict()).build()
+    ccuHsApi.trimZoneSchedules(buildingOccupancySchedule);
 }

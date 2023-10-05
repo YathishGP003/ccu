@@ -9,6 +9,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -99,16 +100,13 @@
                             android:layout_height="40dp"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/sseRelay1Switch"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 android:id="@+id/textCompStage1"
@@ -170,16 +168,13 @@
                             android:layout_height="40dp"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/sseRelay2Switch"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch" />
 
                             <TextView
                                 android:id="@+id/textCompStage2"
@@ -254,16 +249,13 @@
                     android:textAppearance="@style/text_appearance" />
 
 
-                <ToggleButton
+                <include
                     android:id="@+id/sse_thermister1_switch"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
 
                 <TextView
@@ -276,16 +268,13 @@
                     android:text="TH2 - Use external 10k Temperature Sensor"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/sse_thermister2_switch"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="10dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
             </LinearLayout>
 
@@ -302,41 +291,34 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="0dp"
                     android:text="@string/autoforceoccupied"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/sse_autoforceoccupied"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textAutoAwaysse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="40dp"
+                    android:layout_marginStart="140dp"
                     android:text="@string/autoaway"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/sse_autoAway"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-
+                    layout="@layout/custom_ccu_switch" />
 
 
 
@@ -356,16 +338,13 @@
                     android:text="@string/analogin1"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/sse_analogin1"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginStart="20dp"
+                    layout="@layout/custom_ccu_switch" />
 
                 <Spinner
                     android:id="@+id/sseAnalogActuator"
@@ -373,6 +352,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
                     android:entries="@array/sse_relay1_mode"
                     tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -410,9 +390,10 @@
                 </LinearLayout>
 
 
-
-
             </LinearLayout>
+
+
+
         </LinearLayout>
 
         <Button

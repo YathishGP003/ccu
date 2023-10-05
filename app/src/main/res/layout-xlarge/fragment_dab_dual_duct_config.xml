@@ -312,19 +312,15 @@
                     android:text="@string/autoforceoccupied"
                     android:textAppearance="@style/label_values" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableAFOControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
+                    android:layout_marginTop="25dp"
                     android:layout_marginStart="16dp"
                     android:layout_toEndOf="@+id/textEnableautoforceoccupied"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-
+                    layout="@layout/custom_ccu_switch" />
                 <TextView
                     android:id="@+id/textEnableCO2"
                     android:layout_width="wrap_content"
@@ -336,17 +332,14 @@
                     android:text="@string/label_enableCO2"
                     android:textAppearance="@style/label_values" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableCO2Control"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
+                    android:layout_marginTop="25dp"
                     android:layout_alignParentRight="true"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textEnableautoAway"
@@ -359,18 +352,15 @@
                     android:text="@string/autoaway"
                     android:textAppearance="@style/label_values" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableAutoAwayControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/enableCO2Control"
                     android:layout_alignEnd="@id/enableCO2Control"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="10dp"
+                    layout="@layout/custom_ccu_switch" />
 
 
                 <TextView
@@ -384,18 +374,15 @@
                     android:text="@string/label_enableIAQ"
                     android:textAppearance="@style/label_values" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/enableIAQControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/enableAFOControl"
                     android:layout_alignEnd="@id/enableAFOControl"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="10dp"
+                    layout="@layout/custom_ccu_switch" />
 
                 <!--<TextView
                     android:id="@+id/textZonePriority"

@@ -48,6 +48,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -67,19 +68,19 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
     private SingleStageProfile mSSEProfile;
     private SingleStageConfig mProfileConfig;
 
-    ToggleButton switchCoolHeatR1;
+    CustomCCUSwitch switchCoolHeatR1;
     Spinner sseRelay1Actuator;
     Spinner sseRelay2Actuator;
     @BindView(R.id.sseRelay1ForceTestBtn)ToggleButton testCoolHeatRelay1;
-    ToggleButton switchFanR2;
+    CustomCCUSwitch switchFanR2;
     @BindView(R.id.sseRelay2ForceTestBtn)ToggleButton testFanRelay2;
-    ToggleButton switchExtTempSensor;
-    ToggleButton switchAirflowTempSensor;
-    ToggleButton autoAway;
-    ToggleButton autoForceOccupied;
+    CustomCCUSwitch switchExtTempSensor;
+    CustomCCUSwitch switchAirflowTempSensor;
+    CustomCCUSwitch autoAway;
+    CustomCCUSwitch autoForceOccupied;
     Button setButton;
     NumberPicker temperatureOffset;
-    ToggleButton analogIn1;
+    CustomCCUSwitch analogIn1;
     @BindView(R.id.sseAnalogActuator)
     Spinner sseAnalogIn1Spinner;
     public FragmentSSEConfiguration()
@@ -166,18 +167,18 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
 
         }
 
-        switchCoolHeatR1 = (ToggleButton) view.findViewById(R.id.sseRelay1Switch);
-        switchFanR2 = (ToggleButton) view.findViewById(R.id.sseRelay2Switch);
-        switchAirflowTempSensor = (ToggleButton)view.findViewById(R.id.sse_thermister1_switch);
-        switchExtTempSensor = (ToggleButton)view.findViewById(R.id.sse_thermister2_switch);
+        switchCoolHeatR1 = view.findViewById(R.id.sseRelay1Switch);
+        switchFanR2 = view.findViewById(R.id.sseRelay2Switch);
+        switchAirflowTempSensor = view.findViewById(R.id.sse_thermister1_switch);
+        switchExtTempSensor = view.findViewById(R.id.sse_thermister2_switch);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         sseRelay1Actuator = (Spinner)view.findViewById(R.id.sseRelay1Actuator);
         sseRelay2Actuator = (Spinner)view.findViewById(R.id.sseRelay2Actuator);
 
-        autoAway = (ToggleButton) view.findViewById(R.id.sse_autoAway);
-        autoForceOccupied = (ToggleButton) view.findViewById(R.id.sse_autoforceoccupied);
+        autoAway = view.findViewById(R.id.sse_autoAway);
+        autoForceOccupied = view.findViewById(R.id.sse_autoforceoccupied);
 
-        analogIn1 = (ToggleButton) view.findViewById(R.id.sse_analogin1);
+        analogIn1 = view.findViewById(R.id.sse_analogin1);
 
         CCUUiUtil.setSpinnerDropDownColor(sseAnalogIn1Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(sseRelay1Actuator,getContext());

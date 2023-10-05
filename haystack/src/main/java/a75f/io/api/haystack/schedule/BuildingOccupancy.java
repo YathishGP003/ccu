@@ -244,6 +244,9 @@ public class BuildingOccupancy {
         private List<Days> days = new ArrayList<>();
 
         public BuildingOccupancy.Builder setHDict(HDict buildingOccupancy) {
+            if (buildingOccupancy == null) {
+                return null;
+            }
             Iterator it = buildingOccupancy.iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();

@@ -74,6 +74,7 @@ import java.util.concurrent.Executors;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -97,7 +98,8 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tv1IPDeviceObjectName) TextView tvIPDeviceObjectName;
 
-    @BindView(R.id.toggleZoneToVirtualDeviceMapping) ToggleButton toggleZoneToVirtualDeviceMapping;
+    @BindView(R.id.toggleZoneToVirtualDeviceMapping)
+    CustomCCUSwitch toggleZoneToVirtualDeviceMapping;
 
     @BindView(R.id.etDescription) EditText description;
 

@@ -47,6 +47,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -60,13 +61,14 @@ import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
 
 public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
-    @BindView(R.id.toggleRelay1) ToggleButton relay1Tb;
-    @BindView(R.id.toggleRelay2) ToggleButton relay2Tb;
-    @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
-    @BindView(R.id.toggleRelay4) ToggleButton relay4Tb;
-    @BindView(R.id.toggleRelay5) ToggleButton relay5Tb;
-    @BindView(R.id.toggleRelay6) ToggleButton relay6Tb;
-    @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+    @BindView(R.id.toggleRelay1)
+    CustomCCUSwitch relay1Tb;
+    @BindView(R.id.toggleRelay2) CustomCCUSwitch relay2Tb;
+    @BindView(R.id.toggleRelay3) CustomCCUSwitch relay3Tb;
+    @BindView(R.id.toggleRelay4) CustomCCUSwitch relay4Tb;
+    @BindView(R.id.toggleRelay5) CustomCCUSwitch relay5Tb;
+    @BindView(R.id.toggleRelay6) CustomCCUSwitch relay6Tb;
+    @BindView(R.id.toggleRelay7) CustomCCUSwitch relay7Tb;
 
     @BindView(R.id.relay1Spinner) Spinner relay1Spinner;
     @BindView(R.id.relay2Spinner) Spinner relay2Spinner;
@@ -87,10 +89,10 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.ahuAnalog4MinHeating) Spinner analog4MinHeating;
     @BindView(R.id.ahuAnalog4MaxHeating) Spinner analog4MaxHeating;
 
-    @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
-    @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
-    @BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
-    @BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
+    @BindView(R.id.toggleAnalog1) CustomCCUSwitch ahuAnalog1Tb;
+    @BindView(R.id.toggleAnalog2) CustomCCUSwitch ahuAnalog2Tb;
+    @BindView(R.id.toggleAnalog3) CustomCCUSwitch ahuAnalog3Tb;
+    @BindView(R.id.toggleAnalog4) CustomCCUSwitch ahuAnalog4Tb;
 
     @BindView(R.id.ahuAnalog1Test) Spinner ahuAnalog1Test;
     @BindView(R.id.ahuAnalog2Test) Spinner ahuAnalog2Test;

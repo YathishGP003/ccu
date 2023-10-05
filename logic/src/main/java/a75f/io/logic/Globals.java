@@ -338,15 +338,6 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                MigrationUtil.doMigrationTasksIfRequired();
-                performBuildingTunerUprades(site);
-                migrateHeartbeatPointForEquips(site);
-                migrateHeartbeatDiagPointForEquips(site);
-                migrateHeartbeatwithNewtags(site);
-                OAODamperOpenReasonMigration(site);
-                migrateIduPoints(site);
-                migrateSNPoints(site);
-                loadEquipProfiles();
                 TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
                 Site siteObject = new Site.Builder().setHashMap(site).build();
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
@@ -373,6 +364,7 @@ public class Globals {
                     e.printStackTrace();
                 } finally {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
+                    loadEquipProfiles();
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                 }

@@ -47,15 +47,12 @@
                     android:text="@string/autoforceoccupied"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAFO"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textAutoAway"
@@ -65,16 +62,12 @@
                     android:layout_marginStart="80dp"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAutoAway"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-
+                    layout="@layout/custom_ccu_switch" />
 
             </LinearLayout>
 
@@ -147,116 +140,89 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 android:layout_toRightOf="@+id/imageHPInput"
                 android:orientation="vertical">
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleComStage1"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    layout="@layout/custom_ccu_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_centerVertical="true" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleComStage2"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleFanLow"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="36.5dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="20dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAuxHeat"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleFanHigh"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleHeatPump"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAirflow"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="107dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="80dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toogleExtSensor"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleOccupancy"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
             </LinearLayout>
 
             <LinearLayout

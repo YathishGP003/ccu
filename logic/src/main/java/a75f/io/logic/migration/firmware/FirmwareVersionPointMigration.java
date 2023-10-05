@@ -57,9 +57,9 @@ public class FirmwareVersionPointMigration {
             List<HashMap<Object, Object>> firmwarePointList =
                     hayStack.readAllEntities("point and physical and firmware and version and deviceRef == \"" +
                             deviceInfo.getId() + "\"");
-            if(firmwarePointList.size() > 1){ // This says there are duplicate points, hence deleting all firmware
+            if(firmwarePointList.size() > 1) { // This says there are duplicate points, hence deleting all firmware
                 // points and recreate
-                for(HashMap<Object, Object> firmwarePoint : firmwarePointList) {
+                for (HashMap<Object, Object> firmwarePoint : firmwarePointList) {
                     hayStack.deleteEntityTree(firmwarePoint.get("id").toString());
                 }
             }
@@ -78,14 +78,13 @@ public class FirmwareVersionPointMigration {
                hayStack.addPoint(FirmwareVersion.getFirmwareVersion(site.getDisplayName()+"-CM-"+"firmwareVersion",
                         deviceInfo.getId(), deviceInfo.getSiteRef(), site.getTz()));
             }
-            else{
+            else {
                 hayStack.addPoint(FirmwareVersion.getFirmwareVersion(Integer.parseInt(deviceInfo.getAddr()), deviceInfo.getId(),
                         site.getId(), deviceInfo.getFloorRef(), deviceInfo.getRoomRef(), site.getTz()));
+
             }
         }
     }
-
-
     private boolean clearRemoteDuplicateFirmwarePoints(){
         if(PreferenceUtil.isFirmwareVersionPointMigrationDone()){
             return true;
@@ -105,15 +104,13 @@ public class FirmwareVersionPointMigration {
             ArrayList<HashMap<Object, Object>> deviceList = ccuHsApi.readAllEntities("device and " + deviceType);
             for (HashMap device : deviceList) {
                 Device deviceInfo = new Device.Builder().setHashMap(device).build();
-
                 HashMap<Object, Object> firmwarePoint =
                         ccuHsApi.readEntity("point and physical and firmware and version and deviceRef == \"" +
                                 deviceInfo.getId() + "\"");
                 String firmwareVersionPointId = StringUtils.prependIfMissing(firmwarePoint.get("id").toString(), "@");
-
                 String query = "point and physical and firmware and " +
                         "deviceRef == " + StringUtils.prependIfMissing(deviceInfo.getId(), "@");
-               String response = ccuHsApi.fetchRemoteEntityByQuery(query);
+                String response = ccuHsApi.fetchRemoteEntityByQuery(query);
                 if(response == null || response.isEmpty()){
                     CcuLog.d(CCU_FIRMWARE_VERSION_MIGRATION,
                             "Failed to read remote entity for the read query : " + query);
@@ -131,7 +128,6 @@ public class FirmwareVersionPointMigration {
                                 "Duplicate firmware version point found in Silo with the ID  : "+
                                         firmwareVersionRemotePointId+ " for the device : "+ deviceInfo.getDisplayName());
                     }
-
                 }
                 if(duplicateFirmwareVersionRemotePointIds.size() > 0){
                     if(!deleteRemoteFirmwareVersionPoints(duplicateFirmwareVersionRemotePointIds, ccuHsApi)){
@@ -150,9 +146,8 @@ public class FirmwareVersionPointMigration {
         }
         return failedCount.size() == 0;
     }
-
     private boolean deleteRemoteFirmwareVersionPoints(List<String> duplicateFirmwareVersionRemotePointIds,
-                                                 CCUHsApi ccuHsApi){
+                                                      CCUHsApi ccuHsApi){
         for(String duplicateFirmwareVersionRemotePointId : duplicateFirmwareVersionRemotePointIds){
             String response = ccuHsApi.deleteRemoteEntity(duplicateFirmwareVersionRemotePointId);
             if(response == null || response.isEmpty()){
@@ -164,5 +159,4 @@ public class FirmwareVersionPointMigration {
         }
         return true;
     }
-
 }

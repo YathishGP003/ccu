@@ -315,6 +315,9 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val));
+					break;
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
@@ -377,6 +380,11 @@ public class Pulse
 			// If the 12th bit is not set to 1, no modification needed
 			return Integer.parseInt(pressureBinary, 2);
 		}
+	}
+
+	private static double convertPressureFromPaToInH2O(double Pa) {
+		double inH2O = Pa / 248.84;
+		return CCUUtils.roundToTwoDecimal(inH2O);
 	}
 
 	public static double round(double val) {

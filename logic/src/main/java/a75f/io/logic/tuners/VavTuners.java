@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.util.RxTask;
 
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
@@ -698,7 +699,26 @@ public class VavTuners {
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         hayStack.writePointForCcuUser(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
         hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
-    
+
+        Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "modeChangeoverHysteresis")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("vav")
+                .addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("his").addMarker("mode").addMarker("changeover")
+                .addMarker("hysteresis").addMarker("sp")
+                .setMinVal("0")
+                .setMaxVal("5")
+                .setIncrementVal("0.2")
+                .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz)
+                .build();
+        String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+        hayStack.writePointForCcuUser(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS, 0);
+        hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS);
+
         Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "stageUpTimerCounter")
                                                        .setSiteRef(siteRef)
                                                        .setEquipRef(equipRef)
@@ -1015,6 +1035,26 @@ public class VavTuners {
         return reheatZoneToDATMinDifferential.build();
     }
 
+    public static Point createDefaultModeChangeoverHysteresisTuner(String equipDis,
+                                                                   String equipRef, String siteRef,
+                                                                   String tz) {
+
+        Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "modeChangeoverHysteresis")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("vav")
+                .addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("his").addMarker("mode").addMarker("changeover")
+                .addMarker("hysteresis").addMarker("sp")
+                .setMinVal("0")
+                .setMaxVal("5")
+                .setIncrementVal("0.2")
+                .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz).build();
+
+        return modeChangeoverHysteresis;
+    }
 
     public static Point createMaxDischargeTempTuner(boolean defaultTuner, String equipDis,
                                                                   String equipRef, String roomRef, String siteRef,

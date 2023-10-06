@@ -21,7 +21,7 @@ import a75f.io.logic.tuners.DcwbTuners;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 public abstract class DabSystemProfile extends SystemProfile
@@ -203,11 +203,11 @@ public abstract class DabSystemProfile extends SystemProfile
             String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
         
             HashMap defaultModeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and " +
-                                                                         "changeover and hysteresis");
+                                                                         "changeover and hysteresis and dab");
         
             if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
                 hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), SYSTEM_DEFAULT_VAL_LEVEL,
-                                    HNum.make(DEFAULT_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
+                                    HNum.make(DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
             } else {
                 ArrayList<HashMap> modeChangeoverHysteresisArr =
                     hayStack.readPoint(defaultModeChangeoverHysteresisPoint.get("id").toString());

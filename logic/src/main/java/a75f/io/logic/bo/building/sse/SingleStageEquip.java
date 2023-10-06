@@ -800,10 +800,10 @@ public class SingleStageEquip {
 
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and not message and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and not message and his and group == \""+nodeAddr+"\"");
     }
     public void setStatus(String sseStatus, double status, boolean emergency) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and not message and his and group == \"" + nodeAddr + "\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and not ota and not message and his and group == \"" + nodeAddr + "\"", status);
 
 
         String message;

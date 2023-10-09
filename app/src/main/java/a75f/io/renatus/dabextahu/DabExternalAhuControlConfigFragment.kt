@@ -495,9 +495,19 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
+
+                                    .wrapContentHeight(),
+                                contentAlignment = Alignment.Center
+                            ) { HeaderTextView(text = SELECT_PROTOCOL) }
+                        }
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .wrapContentHeight(),
                                 contentAlignment = Alignment.Center
                             ) {
+
                                 val radioOptions = listOf(BACNET, MODBUS)
                                 RadioButtonCompose(
                                     radioOptions,

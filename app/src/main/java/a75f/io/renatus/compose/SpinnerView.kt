@@ -1,5 +1,6 @@
 package a75f.io.renatus.compose
 
+import a75f.io.renatus.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.magnifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Divider
@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -38,18 +39,18 @@ fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, i
         .wrapContentSize()
         .padding(
             PaddingValues(
-                start = 30.dp,
                 top = 5.dp
             )
         )) {
-        Column ( modifier = Modifier.width(100.dp).clickable(onClick = { expanded.value = true }) ) {
+        Column ( modifier = Modifier.width(150.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( fontSize = 20.sp, modifier = Modifier.padding(end = 5.dp), text = selectedItem.value)
-                Text( fontSize = 20.sp, modifier = Modifier.width(120.dp),text = unit)
+                Text( fontSize = 20.sp, modifier = Modifier.width(120.dp),text = "${selectedItem.value} $unit")
+                val drawableResource = R.drawable.ic_arrow_down
+
                 Image(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    painter = painterResource(id = drawableResource),
                     contentDescription = "Custom Icon",
-                    modifier = Modifier.size(24.dp).width(50.dp)
+                    modifier = Modifier.size(24.dp).width(30.dp)
                 )
             }
             Row {  Divider()  }

@@ -515,10 +515,9 @@ public class InstallerOptions extends Fragment {
     }
 
     public void setToggleCheck() {
-        if (toggleCelsius!=null && isCelsiusTunerAvailableStatus()) {
-            toggleCelsius.setChecked(true);
-        } else {
-            toggleCelsius.setChecked(false);
+        boolean newValue = isCelsiusTunerAvailableStatus();
+        if ( toggleCelsius != null && toggleCelsius.isChecked() != newValue) {
+            toggleCelsius.setChecked(newValue);
         }
     }
 

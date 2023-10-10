@@ -1,4 +1,4 @@
-package a75f.io.renatus.dabextahu
+package a75f.io.renatus.externalahu
 
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.service.DomainService
@@ -20,7 +20,6 @@ import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.util.ProgressDialogUtils
-import a75f.io.renatus.util.RxjavaUtil
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -35,11 +34,11 @@ import java.text.DecimalFormat
  * Created by Manjunath K on 08-08-2022.
  */
 
-class AhuControlViewModel(application: Application) : AndroidViewModel(application) {
+class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(application) {
 
     var deviceList = mutableStateOf(emptyList<String>())
     var slaveIdList = mutableStateOf(emptyList<String>())
-    var childSlaveIdList = mutableStateOf(emptyList<String>())
+    private var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
     var modelName = mutableStateOf("Select Model")

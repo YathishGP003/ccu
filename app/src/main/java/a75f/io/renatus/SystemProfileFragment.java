@@ -14,15 +14,12 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
-import a75f.io.renatus.dabextahu.DabExternalAhuControlConfigFragment;
+import a75f.io.renatus.externalahu.DabExternalAhuControlConfigFragment;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;

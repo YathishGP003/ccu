@@ -1,7 +1,8 @@
-package a75f.io.renatus.dabextahu
+package a75f.io.renatus.externalahu
 
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
@@ -16,7 +17,6 @@ import a75f.io.renatus.compose.ToggleButton
 import a75f.io.renatus.modbus.ModelSelectionFragment
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.util.CANCEL
-import a75f.io.renatus.modbus.util.EQUIP_TYPE
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS
 import a75f.io.renatus.modbus.util.OnItemSelect
@@ -60,14 +60,14 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
  */
 
 class DabExternalAhuControlConfigFragment : Fragment() {
-    private lateinit var viewModel: AhuControlViewModel
+    private lateinit var viewModel: ExternalAhuControlViewModel
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val rootView = ComposeView(requireContext())
-        viewModel = ViewModelProvider(this)[AhuControlViewModel::class.java]
+        viewModel = ViewModelProvider(this)[ExternalAhuControlViewModel::class.java]
         rootView.apply {
             setContent {
                 ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
@@ -495,10 +495,10 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-
+                                    .padding(PaddingValues(top = 10.dp))
                                     .wrapContentHeight(),
                                 contentAlignment = Alignment.Center
-                            ) { HeaderTextView(text = SELECT_PROTOCOL) }
+                            ) { HeaderCenterLeftAlignedTextView(text = SELECT_PROTOCOL) }
                         }
                         item {
                             Box(
@@ -516,19 +516,19 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     when (it) {
                                         BACNET -> {
                                             viewModel.configType.value =
-                                                AhuControlViewModel.ConfigType.BACNET
+                                                ExternalAhuControlViewModel.ConfigType.BACNET
                                         }
 
                                         MODBUS -> {
                                             viewModel.configType.value =
-                                                AhuControlViewModel.ConfigType.MODBUS
+                                                ExternalAhuControlViewModel.ConfigType.MODBUS
                                         }
                                     }
                                 }
                             }
                         }
                         item {
-                            if (viewModel.configType.value == AhuControlViewModel.ConfigType.MODBUS) {
+                            if (viewModel.configType.value == ExternalAhuControlViewModel.ConfigType.MODBUS) {
                                 ModbusConfig()
                             } else {
                                 BacnetConfig()
@@ -586,7 +586,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
         Row {
             Box(
                 modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
-            ) { HeaderTextView(EQUIP_TYPE) }
+            ) { HeaderCenterLeftAlignedTextView(SELECT_MODEL) }
         }
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {

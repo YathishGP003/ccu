@@ -53,7 +53,7 @@ fun SetPointConfig(title: String, defaultSelection:String, items: List<String>, 
                 .width(350.dp),
             style = TextStyle(
                 fontFamily = myFontFamily,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 fontSize = 22.sp,
                 color = Color.Black
             ),

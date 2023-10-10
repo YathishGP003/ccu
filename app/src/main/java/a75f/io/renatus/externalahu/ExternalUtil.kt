@@ -1,4 +1,4 @@
-package a75f.io.renatus.dabextahu
+package a75f.io.renatus.externalahu
 
 /**
  * Created by Manjunath K on 04-09-2023.
@@ -31,4 +31,5 @@ const val TARGET_DEHUMIDIFIER = "targetDehumidifier"
 const val TAG_VALUE_INC = "tagValueIncrement"
 const val BACNET = "Bacnet"
 const val MODBUS = "Modbus"
-const val SELECT_PROTOCOL = "select protocol"
+const val SELECT_PROTOCOL = "Select Protocol"
+const val SELECT_MODEL = "Select Model"

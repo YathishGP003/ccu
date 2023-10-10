@@ -497,8 +497,9 @@ public class UsbModbusService extends Service {
                 configureMbSerialPort();
             } catch (Exception e) {
                 //Unstable USB connections would result in configuration failures.
-                CcuLog.e(TAG, "Modbus: configureMbSerialPort Failed ", e);
+                CcuLog.e(TAG, "Modbus: configureMbSerialPort Failed "+e.getMessage());
                 serialPortConnected = false;
+                e.printStackTrace();
             }
         }
     
@@ -508,7 +509,7 @@ public class UsbModbusService extends Service {
             Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
                       +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
-                Log.d(TAG,"device name: "+device.getDeviceName()+", device vendorId: "+device.getVendorId());
+                Log.d(TAG,"device name: "+device);
                 if (serialPort.open()) {
                     serialPortConnected = true;
                     serialPort.setBaudRate(getModbusBaudrate());
@@ -537,9 +538,9 @@ public class UsbModbusService extends Service {
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
-                    Log.d(TAG,"device opened: - device name: "+device.getDeviceName()+", device vendorId: "+device.getVendorId());
+                    Log.d(TAG,"device opened: - device: "+device);
                 } else {
-                    Log.d(TAG,"closing USB serial device [deviceName:"+device.getDeviceName()+", vendorId"+device.getVendorId()+"]," +
+                    Log.d(TAG,"closing USB serial device "+device+"," +
                             " because this device interface can not be claimed at this moment");
                     serialPort.close();
                     serialPort = null;

@@ -181,6 +181,7 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
         if (buildingEquip["domainName"]?.toString()?.isNotEmpty() == true) {
             CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration is complete.")
         } else {
+            CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration is start.")
             val equipBuilder = TunerEquipBuilder(haystack)
             val equipId = buildingEquip["id"].toString()
             equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, buildingEquip["dis"].toString(), haystack.site!!.id)

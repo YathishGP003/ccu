@@ -1,8 +1,11 @@
 package a75f.io.renatus.views.MasterControl;
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.isHeatingOrCoolingLimitsNull;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+
+import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
@@ -10,6 +13,7 @@ import org.projecthaystack.HDict;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,11 +21,15 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.renatus.util.CCUUiUtil;
 
 public class MasterControlUtil {
 
@@ -217,20 +225,22 @@ public class MasterControlUtil {
         unoccupiedZoneSetBackval = MasterControlUtil.getAdapterFarhenheitVal(unoccupiedzoneSetback);
         buildingZoneDifferentialVal = MasterControlUtil.getAdapterFarhenheitVal(buildingZoneDifferential);
 
-        if (buildingLimMinVal > (heatingMinVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Heating limit min temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Heating user limit min temperature";
-        } else if (buildingLimMaxVal < (coolingMaxVal + (buildingZoneDifferentialVal + unoccupiedZoneSetBackval))) {
-            WarningMessage = "Please go back and edit the Cooling limit max temperature to be within the temperature limits of the building  " +
-                    "or adjust the temperature limits of the building to accommodate the required Cooling user limit max temperature";
-        } else
+        if ((buildingLimMinVal +  (buildingZoneDifferentialVal + unoccupiedZoneSetBackval)) > heatingMinVal) {
+            WarningMessage = "Please go back and edit the Heating Limit Min temperature/ Unoccupied Zone Setback to be within the temperature limits of the building " +
+                    "or adjust the temperature limits of the building to accommodate the required Heating Limit Min temperature/ Unoccupied Zone Setback as per" +
+                    " formula \n > \"Heating User Limit Min - (unoccupiedZoneSetback + buildingToZoneDifferential) > Building Limit Min\" ";
+        } else if ((buildingLimMaxVal - (buildingZoneDifferentialVal + unoccupiedZoneSetBackval) < coolingMaxVal)) {
+            WarningMessage = "Please go back and edit the Cooling Limit Max temperature/ Unoccupied Zone Setback to be within the temperature limits" +
+                    " of the building or adjust the temperature limits of the building to accommodate the required Cooling Limit Max temperature/ Unoccupied" +
+                    " Zone Setback as per formula \n > \"Cooling User Limit Max + (unoccupiedZoneSetback + buildingToZoneDifferential) < Building Limit Max \"";
+        }else
             WarningMessage = validateLimits(heatingMaxVal, heatingMinVal, heatingDeadBandVal,
                     coolingMaxVal, coolingMinVal, coolingDeadBandVal);
 
 
         if (WarningMessage == null) {
             WarningMessage = validateZoneVal(buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
-                        coolingMaxVal);
+                        coolingMaxVal,unoccupiedZoneSetBackval);
             StringBuilder globalWarning = validateGlobalSchedule(schedules,buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
                     coolingMaxVal, zones, equipList);
             if(globalWarning.length() > 1)
@@ -343,7 +353,7 @@ public class MasterControlUtil {
         return WarningMessage;
     }
 
-    public static String validateZone(double buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
+    public static String validateZone(double  buildingLimMinVal, double heatingMinVal, double buildingZoneDifferential, double unoccupiedZoneSetBackval,
                                       double buildingLimMaxVal, double coolingMaxVal) {
         String WarningMessage = null;
 
@@ -361,7 +371,7 @@ public class MasterControlUtil {
 
     public static String validateZoneVal(double buildingLimMinVal, double buildingZoneDifferential, double buildingLimMaxVal,
                                          double heatingMinVal, double heatingMaxVal, double coolingMinVal,
-                                         double coolingMaxVal) {
+                                         double coolingMaxVal,double unoccupiedZoneSetback) {
         StringBuilder WarningMessage = new StringBuilder();
         ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities("room");
 
@@ -380,7 +390,7 @@ public class MasterControlUtil {
                         unoccupiedZoneSetBackval = CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
                     }
                     if (schedule.getMarkers().contains("followBuilding")) {
-                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetback,
                                 heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), false);
                         if (val != null)
                             WarningMessage = WarningMessage.append(val);
@@ -462,6 +472,9 @@ public class MasterControlUtil {
                                             double coolingMaxVal, String zoneDis,boolean isNamed){
         StringBuilder WarningMessage = new StringBuilder();
         for (Schedule.Days day : schedule.getDays()) {
+            if(isHeatingOrCoolingLimitsNull(day)){
+                continue;
+            }
             if (buildingLimMinVal > (day.getHeatingUserLimitMin() - (buildingZoneDifferential + unoccupiedZoneSetBackval))) {
                 WarningMessage.append(ScheduleUtil.getDayString(day.getDay() + 1))
                         .append(" ")
@@ -537,7 +550,7 @@ public class MasterControlUtil {
 
     public static boolean isMigrated(){
         ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-        return (!(isSchedulableAvailable == null));
+        return ((isSchedulableAvailable != null && SchedulableMigrationKt.validateMigration()));
     }
 
     public static boolean isNonTempModule(String profileType){

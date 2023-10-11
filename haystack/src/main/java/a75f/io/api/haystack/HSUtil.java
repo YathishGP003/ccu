@@ -74,6 +74,17 @@ public class HSUtil
         }
         return equipList;
     }
+    public static ArrayList<Equip> getNonModbusEquips(String roomRef) {
+
+        ArrayList<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and not modbus and roomRef == \""+roomRef+"\"");
+        ArrayList<Equip> equipList = new ArrayList<>();
+        for (HashMap<Object, Object> m : equips)
+        {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
+        }
+        return equipList;
+    }
 
     public static List<Equip> getEquipsWithoutSubEquips(String roomRef) {
 

@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 
@@ -59,6 +58,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -94,9 +94,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     NumberPicker minCoolingDamperPos;
     NumberPicker maxHeatingDamperPos;
     NumberPicker minHeatingDamperPos;
-    ToggleButton enableOccupancyControl;
-    ToggleButton enableCO2Control;
-    ToggleButton enableIAQControl;
+    CustomCCUSwitch enableOccupancyControl;
+    CustomCCUSwitch enableCO2Control;
+    CustomCCUSwitch enableIAQControl;
     LinearLayout minCFMReheating;
     LinearLayout maxCFMReheating;
     LinearLayout maxCFMCooling;
@@ -106,7 +106,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     LinearLayout minDamperPosHeating;
     TextView textEnableCFM;
     TextView textKFactor;
-    ToggleButton enableCFMControl;
+    CustomCCUSwitch enableCFMControl;
     NumberPicker numMaxCFMCooling;
     NumberPicker numMinCFMCooling;
     NumberPicker numMinCFMReheating;
@@ -140,8 +140,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     @BindView(R.id.relay2TextView) TextView relay2TextView;
     @BindView(R.id.relay2TextVal) TextView relay2TextVal;
 
-    ToggleButton enableAutoAwayControl;
-    ToggleButton enableAutoForcceOccupiedControl;
+    CustomCCUSwitch enableAutoAwayControl;
+    CustomCCUSwitch enableAutoForcceOccupiedControl;
     
     public FragmentVAVConfiguration()
     {

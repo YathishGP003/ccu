@@ -57,7 +57,6 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
@@ -66,7 +65,6 @@ import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
 
 import a75f.io.renatus.util.FontManager;
-import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBar;
 
 
@@ -669,8 +667,8 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
 
     @Override
-    public void onClickSaveSchedule(int unOccupiedZoneSetBackVal, Schedule schedule) {
-        schedule.setUnoccupiedZoneSetback((double)unOccupiedZoneSetBackVal);
+    public void onClickSaveSchedule(double unOccupiedZoneSetBackVal, Schedule schedule) {
+        schedule.setUnoccupiedZoneSetback(unOccupiedZoneSetBackVal);
         CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
         Occupied occ = schedule.getCurrentValues();
         occ.setUnoccupiedZoneSetback(schedule.getUnoccupiedZoneSetback());
@@ -893,7 +891,6 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
     public void onResume() {
         super.onResume();
         new Handler().postDelayed(this::loadSchedule,1500);
-        UpdateScheduleHandler.setBuildingScheduleListener(this);
     }
 
     @Override

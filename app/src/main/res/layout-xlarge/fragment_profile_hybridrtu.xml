@@ -87,17 +87,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay1"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage1"
@@ -161,17 +158,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay2"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage2"
@@ -237,17 +231,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay3"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage3"
@@ -313,17 +304,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay4"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage4"
@@ -389,17 +377,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay5"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage5"
@@ -466,17 +451,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay6"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage6"
@@ -544,17 +526,14 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleRelay7"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textCompStage7"
@@ -621,18 +600,15 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog1"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_gravity="center_vertical"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textAnalog1"
@@ -699,18 +675,15 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog2"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textAnalog2"
@@ -776,18 +749,15 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog3"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textAnalog3"
@@ -853,18 +823,15 @@
                             android:layout_height="40dp"
                             android:layout_weight="1">
 
-                            <ToggleButton
+                            <include
                                 android:id="@+id/toggleAnalog4"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
                                 android:layout_gravity="center_vertical"
-                                android:background="@drawable/toggle_selector"
-                                android:checked="false"
-                                android:textOff=""
-                                android:textOn="" />
+                                layout="@layout/custom_ccu_switch"/>
 
                             <TextView
                                 android:id="@+id/textAnalog4"

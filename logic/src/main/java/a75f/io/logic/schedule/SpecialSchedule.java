@@ -271,8 +271,8 @@ public class SpecialSchedule {
                                                  double coolingDeadband,
                                                  double heatingDeadband){
 
-        double buildingLimitMax = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max");
-        double buildingLimitMin = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min");
+        double buildingLimitMax = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max and not tuner");
+        double buildingLimitMin = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min and not tuner");
         double buildingZoneDifferential = CCUHsApi.getInstance().readPointPriorityValByQuery("building and differential");
         String WarningMessage = null;
         double unoccupiedZoneSetback;

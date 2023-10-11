@@ -42,6 +42,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
+
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -62,13 +64,14 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.analog3Min) Spinner analog3Min;
     @BindView(R.id.analog3Max) Spinner analog3Max;
 
-    @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
-    @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
-    @BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
-    @BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
+    @BindView(R.id.toggleAnalog1)
+    CustomCCUSwitch ahuAnalog1Tb;
+    @BindView(R.id.toggleAnalog2) CustomCCUSwitch ahuAnalog2Tb;
+    @BindView(R.id.toggleAnalog3) CustomCCUSwitch ahuAnalog3Tb;
+    @BindView(R.id.toggleAnalog4) CustomCCUSwitch ahuAnalog4Tb;
 
-    @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
-    @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+    @BindView(R.id.toggleRelay3) CustomCCUSwitch relay3Tb;
+    @BindView(R.id.toggleRelay7) CustomCCUSwitch relay7Tb;
 
     @BindView(R.id.relay7Spinner) Spinner relay7Spinner;
 
@@ -81,7 +84,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.relay7Test) ToggleButton relay7Test;
     @BindView(R.id.imageRTUInput) ImageView imageView;
     
-    @BindView(R.id.dcwbEnableToggle) ToggleButton dcwbEnableToggle;
+    @BindView(R.id.dcwbEnableToggle) CustomCCUSwitch dcwbEnableToggle;
     @BindView(R.id.dabAnalog) ViewGroup dabLayout;
     @BindView(R.id.dcwbLayout)     ViewGroup dcwbLayout;
     @BindView(R.id.dcwbEnableText) TextView  dcwbText;
@@ -91,8 +94,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.chilledWaterTargetExitTemp) ViewGroup chilledWaterTargetExitTemp;
     @BindView(R.id.chilledWaterTargetDeltaT) ViewGroup chilledWaterTargetDeltaT;
     
-    @BindView(R.id.adaptiveDeltaEnable) ToggleButton adaptiveDeltaEnable;
-    @BindView(R.id.maxExitWaterTemp) ToggleButton maxExitWaterTemp;
+    @BindView(R.id.adaptiveDeltaEnable) CustomCCUSwitch adaptiveDeltaEnable;
+    @BindView(R.id.maxExitWaterTemp) CustomCCUSwitch maxExitWaterTemp;
     @BindView(R.id.cwTargetDeltaTSpinner) Spinner cwTargetDeltaTSpinner;
     @BindView(R.id.cwExitTempMarginSpinner) Spinner cwExitTempMarginSpinner;
     @BindView(R.id.cwMaxFlowRateSpinner) Spinner cwMaxFlowRateSpinner;

@@ -31,7 +31,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +42,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
@@ -63,7 +63,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     List<String> wifinetworks;
     WifiListAdapter wifiListAdapter;
     ImageView imageRefresh;
-    ToggleButton toggleWifi;
+    CustomCCUSwitch toggleWifi;
     ProgressBar progressbar;
     Context mContext;
     Handler mHandler;
@@ -122,7 +122,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         imageGoback = (ImageView) rootView.findViewById(R.id.imageGoback);
         layoutConnectWifi =  rootView.findViewById(R.id.layoutConnectWifi);
         imageRefresh = (ImageView) rootView.findViewById(R.id.imageRefresh);
-        toggleWifi = (ToggleButton) rootView.findViewById(R.id.toggleWifi);
+        toggleWifi =  rootView.findViewById(R.id.toggleWifi);
         recyclerWifi = (RecyclerView) rootView.findViewById(R.id.recyclerWifi);
         progressbar = (ProgressBar) rootView.findViewById(R.id.progressbar);
         mTurnonwifi = (TextView) rootView.findViewById(R.id.textView_turnon);

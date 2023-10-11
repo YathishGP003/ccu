@@ -9,11 +9,17 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 public class TrueCFMUtil {
     
     private static double getFlowVelocity(CCUHsApi hayStack, String equipRef) {
-        
+        /*
+            Prior to version ___, the Haystack logical point for pressure was given in Pa, but incorrectly
+            displayed units in inH2O.
+
+            Starting with version ___, Haystack logical points were converted to read accurately in inH20.
+            So, the unit conversion has been removed here, since it is already done when writing to the logical point.
+         */
         double kFactor = hayStack.readDefaultVal("trueCfm and kfactor and equipRef == \""+equipRef+"\"");
-        double pressureInPascals = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
-        CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInPascals " + pressureInPascals);
-        double pressureInWGUnit = Math.abs(pressureInPascals)/248.84 ;
+        double pressureInWc = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
+        CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInWc " + pressureInWc);
+        double pressureInWGUnit = Math.abs(pressureInWc);
         return 4005 * Math.sqrt(pressureInWGUnit/kFactor);
     }
     

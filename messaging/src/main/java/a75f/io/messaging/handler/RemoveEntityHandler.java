@@ -67,4 +67,9 @@ public class RemoveEntityHandler implements MessageHandler
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         handleMessage(jsonObject);
     }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        return false;
+    }
 }

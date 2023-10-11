@@ -51,6 +51,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -70,32 +71,32 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     //static boolean isRelay5Enables;
 
 
-    ToggleButton switchThermistor1;
-    ToggleButton switchCoolingY1;
+    CustomCCUSwitch switchThermistor1;
+    CustomCCUSwitch switchCoolingY1;
     @BindView(R.id.testHpuRelay1)ToggleButton testComY1;
-    ToggleButton switchCoolingY2;
+    CustomCCUSwitch switchCoolingY2;
     @BindView(R.id.testHpuRelay2)ToggleButton testComY2;
-    ToggleButton switchFanLowG;
+    CustomCCUSwitch switchFanLowG;
     @BindView(R.id.testHpuRelay3)ToggleButton testFanLowG;
-    ToggleButton switchHeatingW1;
+    CustomCCUSwitch switchHeatingW1;
     @BindView(R.id.testHpuRelay4)ToggleButton testAuxHeating;
-    ToggleButton switchFanHigh;
+    CustomCCUSwitch switchFanHigh;
     @BindView(R.id.testHpuRelay5)ToggleButton testFanHighOb;
-    ToggleButton switchHpChangeOver;
+    CustomCCUSwitch switchHpChangeOver;
     @BindView(R.id.testHpuRelay6)ToggleButton testHeatChangeOver;
     @BindView(R.id.textCompStage1)TextView textCompStage1;
     @BindView(R.id.textHeatChangeover)
     TextView textHeatChangeover;
-    ToggleButton switchOccSensor;
-    ToggleButton switchExtTempSensor;
+    CustomCCUSwitch switchOccSensor;
+    CustomCCUSwitch switchExtTempSensor;
     Button setButton;
     Button cancelButton;
     Spinner hpChangeOverTypeSpinner;
     Spinner fanHumiDSpinner;
     NumberPicker temperatureOffset;
 
-    ToggleButton toggleAutoaway;
-    ToggleButton toggleAutoForceOccupied;
+    CustomCCUSwitch toggleAutoaway;
+    CustomCCUSwitch toggleAutoForceOccupied;
 
     public FragmentHeatPumpConfiguration() {
     }
@@ -192,14 +193,14 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
 
         }
 
-        switchCoolingY1 = (ToggleButton) view.findViewById(R.id.toggleComStage1);
-        switchCoolingY2 = (ToggleButton) view.findViewById(R.id.toggleComStage2);
-        switchHeatingW1 = (ToggleButton) view.findViewById(R.id.toggleAuxHeat);
-        switchFanHigh = (ToggleButton) view.findViewById(R.id.toggleFanHigh);
-        switchFanLowG = (ToggleButton) view.findViewById(R.id.toggleFanLow);
-        switchHpChangeOver = (ToggleButton) view.findViewById(R.id.toggleHeatPump);
-        switchThermistor1 = (ToggleButton) view.findViewById(R.id.toggleAirflow);
-        switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleExtSensor);
+        switchCoolingY1 = view.findViewById(R.id.toggleComStage1);
+        switchCoolingY2 = view.findViewById(R.id.toggleComStage2);
+        switchHeatingW1 = view.findViewById(R.id.toggleAuxHeat);
+        switchFanHigh = view.findViewById(R.id.toggleFanHigh);
+        switchFanLowG = view.findViewById(R.id.toggleFanLow);
+        switchHpChangeOver = view.findViewById(R.id.toggleHeatPump);
+        switchThermistor1 = view.findViewById(R.id.toggleAirflow);
+        switchExtTempSensor = view.findViewById(R.id.toogleExtSensor);
         hpChangeOverTypeSpinner = (Spinner)view.findViewById(R.id.spinnerPumpChange);
         fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerFanHigh);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);

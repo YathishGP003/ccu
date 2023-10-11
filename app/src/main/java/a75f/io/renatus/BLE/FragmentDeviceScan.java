@@ -9,8 +9,10 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,7 +50,7 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
  */
 public class FragmentDeviceScan extends BaseDialogFragment
 {
-    
+
     public static final  String ID                = "scan_dialog";
     static final         int    REQUEST_ENABLE_BT = 1;
     private static final long SCAN_PERIOD = 180000;
@@ -62,7 +64,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
     LeDeviceListAdapter mLeDeviceListAdapter;
     BluetoothAdapter    mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
-    boolean             mScanning;
+    boolean mScanning;
+    BluetoothStateReceiver bluetoothStateReceiver;
 
     private ScanCallback mScanCallback = new ScanCallback()
     {
@@ -111,8 +114,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
     }
 
     private NodeType mNodeType;
-    
-    
+
+
     public static FragmentDeviceScan getInstance(short pairingAddress, String name,
                                                  String floorName, NodeType nodeType,
                                                  ProfileType profileType)
@@ -127,8 +130,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
         fds.setArguments(args);
         return fds;
     }
-    
-    
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -145,8 +148,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    
-    
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -161,44 +164,62 @@ public class FragmentDeviceScan extends BaseDialogFragment
         setTitle(getString(R.string.scan_dialog_title));
         return retVal;
     }
-    
+
 
     @Override
     public void onResume()
     {
         super.onResume();
-        // Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-        //Skip BLE because we can't emulate it.
+        searchDevices();
+    }
+
+    private void searchDevices() {
+        Log.d(L.TAG_CCU_BLE, "ble searching...");
+        bluetoothStateReceiver = new BluetoothStateReceiver();
         new Thread(() -> {
-            if (mBluetoothAdapter != null)
-            {
-                if (!mBluetoothAdapter.isEnabled())
-                {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                }
-                else
-                {
+            if (mBluetoothAdapter != null) {
+                if (!mBluetoothAdapter.isEnabled()) {
+                    // Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
+                    // fire an intent to display a dialog asking the user to grant permission to enable it.
+                    //Skip BLE because we can't emulate it.
+                    Log.d(L.TAG_CCU_BLE, "enabling bluetooth...");
+                    mBluetoothAdapter.enable();
+                    requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+                } else {
+
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (mBLEDeviceListListView.getCount() == 0 && getActivity() != null) {
+                                Log.d(L.TAG_CCU_BLE, "disabling bluetooth...");
+                                mBluetoothAdapter.disable();
+                                requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+                            }
+                        }
+                    }, 10000);
+
+
                     // Initializes list view adapter.
-                  getActivity().runOnUiThread(() -> {
-                      mLeDeviceListAdapter = new LeDeviceListAdapter();
-                      setListViewEmptyView();
-                      mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
-                      mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
-                          final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                          Log.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
-                          finish(device);
-                          scanLeDevice(false);
-                      });
-                      scanLeDevice(true);
-                  });
+                    getActivity().runOnUiThread(() -> {
+                        mLeDeviceListAdapter = new LeDeviceListAdapter();
+                        setListViewEmptyView();
+                        mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
+                        mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
+                            final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                            Log.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
+                            finish(device);
+                            scanLeDevice(false);
+                        });
+                        scanLeDevice(true);
+                    });
                 }
             }
         }).start();
     }
-    
-    
+
+
     private void setListViewEmptyView()
     {
         if (mBLEDeviceListListView.getEmptyView() == null) {
@@ -227,8 +248,6 @@ public class FragmentDeviceScan extends BaseDialogFragment
         if (enable)
         {
             mScanning = true;
-            new Handler(Looper.getMainLooper()).postDelayed(() -> mBluetoothLeScanner.stopScan(mScanCallback),SCAN_PERIOD);
-
 
             List<ScanFilter> filters = new ArrayList<>();
             ScanFilter smartNode = new ScanFilter.Builder()
@@ -404,6 +423,30 @@ public class FragmentDeviceScan extends BaseDialogFragment
             }
             viewHolder.deviceAddress.setText(device.getAddress());
             return view;
+        }
+    }
+
+    public class BluetoothStateReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                final BluetoothManager bluetoothManager =
+                        (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
+                mBluetoothAdapter = bluetoothManager.getAdapter();
+                mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+                if(state == BluetoothAdapter.STATE_ON){
+                    Log.d(L.TAG_CCU_BLE, "bluetooth is enabled");
+                    requireContext().unregisterReceiver(bluetoothStateReceiver);
+                    searchDevices();
+                }
+                if(state == BluetoothAdapter.STATE_OFF){
+                    Log.d(L.TAG_CCU_BLE, "bluetooth is disabled");
+                    requireContext().unregisterReceiver(bluetoothStateReceiver);
+                    searchDevices();
+                }
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ import android.widget.ToggleButton;
 
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -52,13 +53,13 @@ public class Security extends Fragment {
     @BindView(R.id.textTapSetup)
     TextView             mSetupTap;
     @BindView(R.id.toggleZonePass)
-    ToggleButton             mZonePassTb;
+    CustomCCUSwitch mZonePassTb;
     @BindView(R.id.toggleSystemPass)
-    ToggleButton             mSystemPassTb;
+    CustomCCUSwitch             mSystemPassTb;
     @BindView(R.id.toggleBuildingPass)
-    ToggleButton             mBuildingPassTb;
+    CustomCCUSwitch             mBuildingPassTb;
     @BindView(R.id.toggleSetupPass)
-    ToggleButton             mSetupPassTb;
+    CustomCCUSwitch             mSetupPassTb;
     @BindView(R.id.buttonNext)
     Button             mNext;
     Context              mContext;
@@ -319,7 +320,7 @@ public class Security extends Fragment {
         return rootView;
     }
 
-    private void showCustomDialog(String title, String key, String setKey, ToggleButton togglePassword, TextView textViewTap) {
+    private void showCustomDialog(String title, String key, String setKey, CustomCCUSwitch togglePassword, TextView textViewTap) {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         View layoutView = getLayoutInflater().inflate(R.layout.dialog_password, null);

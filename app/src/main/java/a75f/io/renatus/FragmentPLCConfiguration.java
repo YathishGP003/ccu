@@ -42,6 +42,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -91,16 +92,16 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     Spinner analogout1AtMaxSp;
 
     @BindView(R.id.analog2DynamicSp)
-    ToggleButton analog2DynamicSP;
+    CustomCCUSwitch analog2DynamicSP;
 
     @BindView(R.id.zeroErrorAtMp)
-    ToggleButton zeroErrorAtMP;
+    CustomCCUSwitch zeroErrorAtMP;
 
     @BindView(R.id.invertLoop)
-    ToggleButton invertLoop;
+    CustomCCUSwitch invertLoop;
 
     @BindView(R.id.relay1Toggle)
-    ToggleButton relay1Toggle;
+    CustomCCUSwitch relay1Toggle;
 
     @BindView(R.id.relay1OnThreshold)
     Spinner relay1OnThreshold;
@@ -109,7 +110,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     Spinner relay1OffThreshold;
 
     @BindView(R.id.relay2Toggle)
-    ToggleButton relay2Toggle;
+    CustomCCUSwitch relay2Toggle;
 
     @BindView(R.id.relay2OnThreshold)
     Spinner relay2OnThreshold;

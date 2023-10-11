@@ -88,14 +88,11 @@
                         android:text="@string/autoforceoccupied"
                         android:textAppearance="@style/title_normal" />
 
-                    <ToggleButton
+                    <include
                         android:id="@+id/toogleautoforceoccupied"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        layout="@layout/custom_ccu_switch" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -111,14 +108,11 @@
                         android:text="@string/autoaway"
                         android:textAppearance="@style/title_normal" />
 
-                    <ToggleButton
+                    <include
                         android:id="@+id/toogleautoaway"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        layout="@layout/custom_ccu_switch" />
                 </LinearLayout>
 
 

@@ -34,11 +34,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         val equipDis = hayStack.readMapById(equipRef)["dis"].toString()
         modelDef.points.forEach {
             createPoint(PointBuilderConfig(it, null, equipRef, siteRef, tz, equipDis))
-            /*val hayStackPoint = buildPoint(it, null, equipRef, siteRef)
-            val pointId = hayStack.addPoint(hayStackPoint)
-            hayStackPoint.id = pointId
-            hayStack.writeDefaultTunerValById(pointId, it.defaultValue.toString().toDouble())
-            DomainManager.addPoint(hayStackPoint)*/
             CcuLog.i(Domain.LOG_TAG," Created tuner point ${it.domainName}")
         }
     }
@@ -50,11 +45,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 createPoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis))
-                /*val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef, tz)
-                val pointId = hayStack.addPoint(hayStackPoint)
-                hayStackPoint.id = pointId
-                hayStack.writeDefaultTunerValById(pointId, modelPointDef.defaultValue.toString().toDouble())
-                DomainManager.addPoint(hayStackPoint)*/
                 CcuLog.i(Domain.LOG_TAG," Created Tuner point ${point.domainName}")
             }
         }
@@ -86,11 +76,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             modelPointDef?.run {
                 updatePoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis),
                                                                                 existingPoint)
-                /*val hayStackPoint = buildPoint(modelPointDef, null, equipRef, siteRef, tz)
-                hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
-                hayStackPoint.id = existingPoint["id"].toString()
-                hayStack.writeDefaultTunerValById(hayStackPoint.id, modelPointDef.defaultValue.toString().toDouble())
-                DomainManager.addPoint(hayStackPoint)*/
                 CcuLog.i(Domain.LOG_TAG," Updated Tuner point ${point.domainName}")
             }
         }
@@ -281,39 +266,49 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         val tz = hayStack.timeZone
 
+        var update = 0
+        var add = 0
+        var delete = 0
+        var pass = 0
+
         tunerPoints.forEach { dbPoint ->
             val modelPointName = getDomainNameFromDis(dbPoint)
 
             if (modelPointName == null) {
-                //DB point does not exist in mode. Delete it.
+                delete++
+                //DB point does not exist in model. Delete it.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Delete $dbPoint")
                 println(" Cut-Over migration : Delete $dbPoint")
-                hayStack.deleteEntityTree(dbPoint["id"].toString())
+                //hayStack.deleteEntityTree(dbPoint["id"].toString())
             } else {
+                update++
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update $dbPoint")
                 println("Cut-Over migration Update $dbPoint")
                 val modelPoint = modelDef.points.find { it.domainName == modelPointName }
-                updatePoint(PointBuilderConfig(modelPoint!!, null, equipRef, siteRef, tz, equipDis), dbPoint)
+                //updatePoint(PointBuilderConfig(modelPoint!!, null, equipRef, siteRef, tz, equipDis), dbPoint)
             }
         }
 
         modelDef.points.forEach { modelPointDef ->
 
-            if (modelPointDef.domainName == "heatingPreconditioningRate") {
-                println("Found it")
-            }
             val displayName = findDisFromDomainName(modelPointDef.domainName)
             if (displayName == null) {
+                add++
                 //Point exists model but not in mapping table or local db. create it.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
                 println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
-                createPoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis))
+                //createPoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis))
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration PASS $modelPointDef")
                 println(" Cut-Over migration PASS $modelPointDef")
+                pass++
             }
         }
+
+        CcuLog.e(Domain.LOG_TAG, " Total points DB: ${tunerPoints.size} " +
+                " Model: ${modelDef.points.size} Map: ${BuildingEquipCutOverMapping.entries.size} ")
+        CcuLog.e(Domain.LOG_TAG, " Added $add Updated $update Deleted $delete Passed $pass")
 
     }
 

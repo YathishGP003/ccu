@@ -171,6 +171,12 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-DAB-outsideTempHeatingLockout" to "dabOutsideTempHeatingLockout",
         "BuildingTuner-DAB-humidityHysteresis" to "dabHumidityHysteresis",
         "BuildingTuner-DAB-outsideTempCoolingLockout" to "dabOutsideTempCoolingLockout",
+        "BuildingTuner-DAB-reheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
+        "BuildingTuner-DAB-reheatTemperatureIntegralTime" to "dabReheatTemperatureIntegralTime",
+        "BuildingTuner-DAB-reheatTempOffset" to "dabReheatTempOffset",
+        "BuildingTuner-DAB-reheatTemperatureProportionalRange" to "dabReheatTemperatureProportionalRange",
+        "BuildingTuner-DAB-reheatIntegralKFactor" to "dabReheatIntegralKFactor",
+        "BuildingTuner-DAB-reheatProportionalKFactor" to "dabReheatProportionalKFactor",
 
         "BuildingTuner-TI-coolingDeadbandMultiplier" to "tiCoolingDeadbandMultiplier",
         "BuildingTuner-TI-integralKFactor" to "tiIntegralKFactor",

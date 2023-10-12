@@ -91,7 +91,7 @@ class HSSplitHaystackUtil(
                 if (fanLevel == 15) return PossibleFanMode.MED_HIGH
                 if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+                Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
             }
             return PossibleFanMode.OFF
         }

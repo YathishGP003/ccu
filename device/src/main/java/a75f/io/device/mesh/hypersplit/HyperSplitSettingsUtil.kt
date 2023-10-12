@@ -113,11 +113,7 @@ class HyperSplitSettingsUtil {
             ecoTunersBuilder.setEconomizingMinHumidity(getEconomizingMinHumidity(hsApi, equipRef))
             ecoTunersBuilder.setEconomizingMaxHumidity(getEconomizingMaxHumidity(hsApi, equipRef))
             ecoTunersBuilder.setEconomizingDryBulbThreshold(getEconomizingDryBulbThreshold(hsApi, equipRef))
-            ecoTunersBuilder.setEnthalpyDuctCompensationOffset(getEnthalpyDuctCompensationOffset(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanStage1Threshold(getExhaustFanStage1Threshold(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanStage2Threshold(getExhaustFanStage2Threshold(hsApi, equipRef))
-            ecoTunersBuilder.setExhaustFanHysteresis(getExhaustFanHysteresis(hsApi, equipRef))
-            ecoTunersBuilder.setOaoDamperMatTarget(getOaoDamperMatTarget(hsApi, equipRef))
+            ecoTunersBuilder.setEnthalpyDuctCompensationOffset((10*getEnthalpyDuctCompensationOffset(hsApi, equipRef)).toInt())
             ecoTunersBuilder.setOaoDamperMatMin(getOaoDamperMatMin(hsApi, equipRef))
             ecoTunersBuilder.setOutsideDamperMinOpen(getOutsideDamperMinOpen(hsApi, equipRef))
             
@@ -195,9 +191,9 @@ class HyperSplitSettingsUtil {
 
         }
 
-        private fun getEnthalpyDuctCompensationOffset(hsApi: CCUHsApi, equipRef: String): Int {
+        private fun getEnthalpyDuctCompensationOffset(hsApi: CCUHsApi, equipRef: String): Double {
 
-            return readTuner(hsApi, equipRef, "enthalpy and duct and compensation offset").toInt()
+            return readTuner(hsApi, equipRef, "enthalpy and duct and compensation and offset")
 
         }
 
@@ -233,7 +229,7 @@ class HyperSplitSettingsUtil {
 
         private fun getOutsideDamperMinOpen(hsApi: CCUHsApi, equipRef: String): Int {
 
-            return readTuner(hsApi, equipRef, "outside and damper and min and open").toInt()
+            return readConfig(hsApi, equipRef, "outside and damper and min and open").toInt()
 
         }
 

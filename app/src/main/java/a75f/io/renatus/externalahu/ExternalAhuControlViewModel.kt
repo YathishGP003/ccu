@@ -1,12 +1,14 @@
 package a75f.io.renatus.externalahu
 
-import a75f.io.domain.config.ExternalAhuConfiguration
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.domain.util.ModelNames
 import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
-import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
@@ -19,7 +21,9 @@ import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
+import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.RxjavaUtil
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -38,7 +42,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     var deviceList = mutableStateOf(emptyList<String>())
     var slaveIdList = mutableStateOf(emptyList<String>())
-    private var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
     var modelName = mutableStateOf("Select Model")
@@ -48,17 +51,17 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     lateinit var profileModelDefinition: SeventyFiveFProfileDirective
 
     var configModel = mutableStateOf(ExternalAhuConfigModel())
+    var systemProfile: DabExternalAhu? = null
 
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
 
-    //private val domainModeler = DomainModeler(application.baseContext)
     private var domainService = DomainService()
     val onItemSelect = object : OnItemSelect {
         override fun onItemSelected(index: Int, item: String) {
             selectedModbusType.value = index
             modelName.value = item
-            ProgressDialogUtils.showProgressDialog( context, "Fetching $item details")
+            ProgressDialogUtils.showProgressDialog(context, "Fetching $item details")
             fetchModelDetails(item)
         }
     }
@@ -68,38 +71,14 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         readDeviceModels()
     }
 
-    private fun readDeviceModels() {
-        domainService.readModbusModelsList("external", object : ResponseCallback {
-            override fun onSuccessResponse(response: String?) {
-                try {
-                    if (!response.isNullOrEmpty()) {
-                        val itemList = mutableListOf<String>()
-                        deviceModelList = getModelListFromJson(response)
-                        deviceModelList.forEach {
-                            itemList.add(it.name)
-                        }
-                        deviceList.value = itemList
-                    } else {
-                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND)
-                    }
-                } catch (e: Exception) {
-                    showErrorDialog(context, NO_INTERNET)
-                }
-                ProgressDialogUtils.hideProgressDialog()
-            }
-
-            override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET)
-                ProgressDialogUtils.hideProgressDialog()
-            }
-        })
-    }
-
-
-    fun configModelDefinition(nodeType: NodeType, profile: ProfileType, context: Context) {
+    fun configModelDefinition(context: Context) {
         try {
             this.context = context
-            childSlaveIdList.value = getSlaveIds(false)
+
+            if (L.ccu().systemProfile.profileType == ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
+                systemProfile = L.ccu().systemProfile as DabExternalAhu
+                var config = systemProfile!!.getConfiguration()
+            }
             slaveIdList.value = getSlaveIds(true)
             if (!equipModel.value.isDevicePaired)
                 equipModel.value.slaveId.value = 1
@@ -111,7 +90,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
-
     private fun loadModel() {
         val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (def != null) {
@@ -120,16 +98,46 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
-
     fun saveConfiguration() {
-        val profile = ExternalAhuConfiguration(1000, "HS", 0, "", "")
-        //domainModeler.addEquip(profileConfiguration = profile)
-        //Log.i("Domain", "save configuration: ${getValues()}")
+
+        RxjavaUtil.executeBackgroundTask(
+            { ProgressDialogUtils.showProgressDialog(context, "Saving Profile Configuration...") },
+            {
+                if (L.ccu().systemProfile != null) {
+                    if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
+                        L.ccu().systemProfile!!.deleteSystemEquip()
+                        L.ccu().systemProfile = null
+                        addEquip()
+                    } else {
+                        updateSystemProfile()
+                    }
+                } else {
+                    addEquip()
+                }
+            },
+
+            {
+                ProgressDialogUtils.hideProgressDialog()
+                CCUHsApi.getInstance().saveTagsData()
+                CCUHsApi.getInstance().syncEntityTree()
+                showToast("Configuration saved successfully", context)
+            }
+        )
+    }
+
+    fun updateSystemProfile() {
 
     }
 
+    private fun addEquip() {
+        systemProfile = DabExternalAhu()
+        systemProfile!!.addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition)
+        L.ccu().systemProfile = systemProfile
+        DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance())
+    }
 
-    fun itemsFromMinMax(min: Double,max: Double, increment: Double): List<String> {
+
+    fun itemsFromMinMax(min: Double, max: Double, increment: Double): List<String> {
         require(min <= max) { "Minimum value must be less than or equal to the maximum value" }
         require(increment > 0.0) { "Increment value must be greater than zero" }
         val decimalFormat = DecimalFormat("#." + "#".repeat(2))
@@ -144,8 +152,52 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         return result
     }
 
+    private fun getModelIdByName(name: String): String {
+        return deviceModelList.find { it.name == name }!!.id
+    }
+
+    private fun getVersionByID(id: String): String {
+        return deviceModelList.find { it.id == id }!!.version
+    }
+
+    fun onSelectAll(isSelected: Boolean) {
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEach {
+                it.displayInUi.value = isSelected
+            }
+            if (equipModel.value.subEquips.isNotEmpty()) {
+                equipModel.value.subEquips.forEach { subEquip ->
+                    subEquip.value.selectAllParameters.value = isSelected
+                    subEquip.value.parameters.forEach {
+                        it.displayInUi.value = isSelected
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateSelectAll() {
+        var isAllSelected = true
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEach {
+                if (!it.displayInUi.value)
+                    isAllSelected = false
+            }
+        }
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach { subEquip ->
+                subEquip.value.parameters.forEach {
+                    if (!it.displayInUi.value)
+                        isAllSelected = false
+                }
+            }
+        }
+        equipModel.value.selectAllParameters.value = isAllSelected
+    }
+
+
     enum class ConfigType {
-        BACNET,MODBUS
+        BACNET, MODBUS
     }
 
     fun fetchModelDetails(selectedDevice: String) {
@@ -195,48 +247,31 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         })
     }
 
-    private fun getModelIdByName(name: String): String {
-        return deviceModelList.find { it.name == name }!!.id
-    }
-
-    private fun getVersionByID(id: String): String {
-        return deviceModelList.find { it.id == id }!!.version
-    }
-
-    fun onSelectAll(isSelected: Boolean) {
-        if (equipModel.value.parameters.isNotEmpty()) {
-            equipModel.value.parameters.forEach {
-                it.displayInUi.value = isSelected
-            }
-            if (equipModel.value.subEquips.isNotEmpty()) {
-                equipModel.value.subEquips.forEach { subEquip ->
-                    subEquip.value.selectAllParameters.value = isSelected
-                    subEquip.value.parameters.forEach {
-                        it.displayInUi.value = isSelected
+    private fun readDeviceModels() {
+        domainService.readModbusModelsList("external", object : ResponseCallback {
+            override fun onSuccessResponse(response: String?) {
+                try {
+                    if (!response.isNullOrEmpty()) {
+                        val itemList = mutableListOf<String>()
+                        deviceModelList = getModelListFromJson(response)
+                        deviceModelList.forEach {
+                            itemList.add(it.name)
+                        }
+                        deviceList.value = itemList
+                    } else {
+                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND)
                     }
+                } catch (e: Exception) {
+                    showErrorDialog(context, NO_INTERNET)
                 }
+                ProgressDialogUtils.hideProgressDialog()
             }
-        }
-    }
 
-    fun updateSelectAll() {
-        var isAllSelected = true
-        if (equipModel.value.parameters.isNotEmpty()) {
-            equipModel.value.parameters.forEach {
-                if (!it.displayInUi.value)
-                    isAllSelected = false
+            override fun onErrorResponse(response: String?) {
+                showErrorDialog(context, NO_INTERNET)
+                ProgressDialogUtils.hideProgressDialog()
             }
-        }
-        if (equipModel.value.subEquips.isNotEmpty()) {
-            equipModel.value.subEquips.forEach { subEquip ->
-                subEquip.value.parameters.forEach {
-                    if (!it.displayInUi.value)
-                        isAllSelected = false
-                }
-            }
-        }
-        equipModel.value.selectAllParameters.value = isAllSelected
+        })
     }
-
 
 }

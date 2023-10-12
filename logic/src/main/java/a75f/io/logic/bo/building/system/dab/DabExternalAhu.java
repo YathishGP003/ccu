@@ -1,0 +1,533 @@
+package a75f.io.logic.bo.building.system.dab;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainNameKt;
+import a75f.io.domain.config.EnableConfig;
+import a75f.io.domain.config.ExternalAhuConfiguration;
+import a75f.io.domain.config.ProfileConfiguration;
+import a75f.io.domain.logic.ProfileEquipBuilder;
+import a75f.io.domain.util.ModelNames;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.haystack.device.ControlMote;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
+
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+
+public class DabExternalAhu extends DabStagedRtu
+{
+    private static final int ANALOG_SCALE = 10;
+
+    @Override
+    public String getProfileName()
+    {
+        return "DAB External AHU Controller";
+    }
+
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_DAB_EXTERNAL_AHU;
+    }
+
+    public void addSystemEquip(ProfileConfiguration config, SeventyFiveFProfileDirective definition){
+        ProfileEquipBuilder  profileEquipBuilder = new  ProfileEquipBuilder(CCUHsApi.getInstance());
+        String equipId =  profileEquipBuilder.buildEquipAndPoints(config,definition, Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getId());
+        updateAhuRef(equipId);
+        new ControlMote(equipId);
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
+    }
+    @Override
+    public void addSystemEquip() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap equip = hayStack.read("equip and system and not modbus");
+        if (equip != null && equip.size() > 0) {
+            if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name())) {
+                hayStack.deleteEntityTree(equip.get("id").toString());
+            } else {
+                addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
+                updateStagesSelected();
+                return;
+            }
+        }
+
+
+
+        CcuLog.d(L.TAG_CCU_SYSTEM,"System Equip does not exist. Create Now");
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        Equip systemEquip= new Equip.Builder()
+                .setSiteRef(siteRef)
+                .setDisplayName(siteDis+"-SystemEquip")
+                .setProfile(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())
+                .addMarker("equip").addMarker("system").addMarker("dab")
+                .setTz(siteMap.get("tz").toString())
+                .build();
+        String equipRef = hayStack.addEquip(systemEquip);
+
+
+        addSystemLoopOpPoints(equipRef);
+        addUserIntentPoints(equipRef);
+        addCmdPoints(equipRef);
+        addConfigPoints(equipRef);
+        addDabSystemTuners(equipRef);
+
+        addAnalogConfigPoints(equipRef);
+        addAnalogCmdPoints(equipRef);
+        updateAhuRef(equipRef);
+        new ControlMote(equipRef);
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
+
+    }
+
+    @Override
+    public void doSystemControl() {
+        if (trSystem != null) {
+            trSystem.processResetResponse();
+        }
+        DabSystemController.getInstance().runDabSystemControlAlgo();
+        updateSystemPoints();
+    }
+
+    @Override
+    public boolean isCoolingAvailable() {
+        return (coolingStages > 0 || getConfigVal("analog1 and output and enabled") > 0
+                || getConfigVal("analog4 and output and enabled") > 0);
+    }
+
+    @Override
+    public boolean isHeatingAvailable() {
+        return (heatingStages > 0 || getConfigVal("analog3 and output and enabled") > 0
+                || getConfigVal("analog4 and output and enabled") > 0);
+    }
+
+    @Override
+    public boolean isCoolingActive(){
+        return stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COOLING_3.ordinal()] > 0
+                || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0;
+    }
+
+    @Override
+    public boolean isHeatingActive(){
+        return stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[HEATING_3.ordinal()] > 0
+                || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0;
+    }
+
+    public synchronized void updateSystemPoints() {
+        super.updateSystemPoints();
+        //updateOutsideWeatherParams();
+
+        int signal;
+        double analogMin = 0, analogMax = 0;
+        if (getConfigEnabled("analog1") > 0)
+        {
+            analogMin = getConfigVal("analog1 and cooling and min");
+            analogMax = getConfigVal("analog1 and cooling and max");
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: " + analogMin + " analog1Max: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
+
+            if (isCoolingLockoutActive()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp / 100)));
+                }
+            }
+        } else {
+            signal = 0;
+        }
+        if (signal != getCmdSignal("cooling and modulating")) {
+            setCmdSignal("cooling and modulating", signal);
+        }
+        ControlMote.setAnalogOut("analog1", signal);
+
+        if (getConfigEnabled("analog2") > 0)
+        {
+            analogMin = getConfigVal("analog2 and fan and min");
+            analogMax = getConfigVal("analog2 and fan and max");
+
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog2Min: "+analogMin+" analog2Max: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
+
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+            }
+        } else {
+            signal = 0;
+        }
+        if (signal != getCmdSignal("fan and modulating")) {
+            setCmdSignal("fan and modulating", signal);
+        }
+        ControlMote.setAnalogOut("analog2", signal);
+
+        if (getConfigEnabled("analog3") > 0)
+        {
+            analogMin = getConfigVal("analog3 and heating and min");
+            analogMax = getConfigVal("analog3 and heating and max");
+
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
+
+            if (isHeatingLockoutActive()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+                }
+            }
+        } else  {
+            signal = 0;
+        }
+        if (signal != getCmdSignal("heating and modulating")) {
+            setCmdSignal("heating and modulating", signal);
+        }
+        ControlMote.setAnalogOut("analog3", signal);
+
+        if (getConfigEnabled("analog4") > 0)
+        {
+            if (getSystemController().getSystemState() == COOLING)
+            {
+                analogMin = getConfigVal("analog4 and cooling and min");
+                analogMax = getConfigVal("analog4 and cooling and max");
+                if (analogMax > analogMin)
+                {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCoolingLoopOp/100));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCoolingLoopOp/100));
+                }
+            } else if (getSystemController().getSystemState() == HEATING)
+            {
+                analogMin = getConfigVal("analog4 and heating and min");
+                analogMax = getConfigVal("analog4 and heating and max");
+                if (analogMax > analogMin)
+                {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemHeatingLoopOp/100));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
+                }
+            } else {
+                double coolingMin = getConfigVal("analog4 and cooling and min");
+                double heatingMin = getConfigVal("analog4 and heating and min");
+
+                signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
+            }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
+        } else {
+            signal = 0;
+
+        }
+        if (signal != getCmdSignal("composite")) {
+            setCmdSignal("composite", signal);
+        }
+        ControlMote.setAnalogOut("analog4", signal);
+    }
+
+    @Override
+    public String getStatusMessage(){
+        StringBuilder status = new StringBuilder();
+        if (getConfigEnabled("analog2") > 0)
+        {
+            status.append(systemFanLoopOp > 0 ? " Fan ON " : "");
+        }
+        if (getConfigEnabled("analog1") > 0)
+        {
+            status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? "| Cooling ON " : "");
+        }
+        if (getConfigEnabled("analog3") > 0)
+        {
+            status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? "| Heating ON " : "");
+        }
+
+        if (!status.toString().equals("")) {
+            status.insert(0, super.getStatusMessage()+" ; Analog ");
+        } else {
+            status.append(super.getStatusMessage());
+        }
+
+        return status.toString().equals("")? "OFF" : status.toString();
+    }
+
+    @Override
+    public synchronized void deleteSystemEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name())) {
+            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        }
+    }
+
+    private void addAnalogConfigPoints(String equipref)
+    {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Point analog1OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog1OutputEnabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog1").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                .setEnums("false,true").setTz(tz).build();
+        String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
+        hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0);
+        Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
+                .setSiteRef(siteRef).setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                .setEnums("false,true").setTz(tz).build();
+        String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
+        hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
+        Point analog3OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog3OutputEnabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog3").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                .setEnums("false,true").setTz(tz).build();
+        String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
+        hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0);
+        Point analog4OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog4OutputEnabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog4").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                .setEnums("false,true").setTz(tz).build();
+        String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
+        hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0);
+
+        Point analog1AtMinCooling = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog1")
+                .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog1AtMinCoolingId = hayStack.addPoint(analog1AtMinCooling);
+        hayStack.writeDefaultValById(analog1AtMinCoolingId, 2.0 );
+
+        Point analog1AtMaxCooling = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog1")
+                .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog1AtMaxCoolingId = hayStack.addPoint(analog1AtMaxCooling);
+        hayStack.writeDefaultValById(analog1AtMaxCoolingId, 10.0 );
+
+        Point analog2AtMinFan = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog2")
+                .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog2AtMinFanId = hayStack.addPoint(analog2AtMinFan);
+        hayStack.writeDefaultValById(analog2AtMinFanId, 2.0 );
+
+        Point analog2AtMaxFan = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog2AtMaxFan")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog2")
+                .addMarker("max").addMarker("fan").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog2AtMaxFanId = hayStack.addPoint(analog2AtMaxFan);
+        hayStack.writeDefaultValById(analog2AtMaxFanId, 10.0 );
+
+        Point analog3AtMinHeating = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog3AtMinHeating")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog3")
+                .addMarker("min").addMarker("heating").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog3AtMinHeatingId = hayStack.addPoint(analog3AtMinHeating);
+        hayStack.writeDefaultValById(analog3AtMinHeatingId, 2.0 );
+
+        Point analog3AtMaxHeating = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog3AtMaxHeating")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog3")
+                .addMarker("max").addMarker("heating").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog3AtMaxHeatingId = hayStack.addPoint(analog3AtMaxHeating);
+        hayStack.writeDefaultValById(analog3AtMaxHeatingId, 10.0 );
+
+        Point analog4AtMinCooling = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog4AtMinCooling")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog4")
+                .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog4AtMinCoolingId = hayStack.addPoint(analog4AtMinCooling);
+        hayStack.writeDefaultValById(analog4AtMinCoolingId, 7.0 );
+
+        Point analog4AtMaxCooling = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog4AtMaxCooling")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog4")
+                .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog4AtMaxCoolingId = hayStack.addPoint(analog4AtMaxCooling);
+        hayStack.writeDefaultValById(analog4AtMaxCoolingId, 10.0 );
+
+        Point analog4AtMinHeating = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog4AtMinHeating")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog4")
+                .addMarker("min").addMarker("heating").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog4AtMinHeatingId = hayStack.addPoint(analog4AtMinHeating);
+        hayStack.writeDefaultValById(analog4AtMinHeatingId, 5.0 );
+
+        Point analog4AtMaxHeating = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"analog4AtMaxHeating")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker("analog4")
+                .addMarker("max").addMarker("heating").addMarker("writable").addMarker("sp")
+                .setUnit("V")
+                .setTz(tz)
+                .build();
+        String analog4AtMaxHeatingId = hayStack.addPoint(analog4AtMaxHeating);
+        hayStack.writeDefaultValById(analog4AtMaxHeatingId, 2.0 );
+    }
+
+    public double getConfigVal(String tags) {
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            return 0;
+        }
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+    }
+
+    public void setConfigVal(String tags, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
+    }
+
+    private void addAnalogCmdPoints(String equipref)
+    {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "coolingSignal")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.COOLINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
+                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his")
+                .setUnit("%").setTz(tz).build();
+        String coolingSignalId = CCUHsApi.getInstance().addPoint(coolingSignal);
+        CCUHsApi.getInstance().writeHisValById(coolingSignalId, 0.0);
+
+        Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.HEATINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
+                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his")
+                .setUnit("%").setTz(tz).build();
+        String heatingSignalId = CCUHsApi.getInstance().addPoint(heatingSignal);
+        CCUHsApi.getInstance().writeHisValById(heatingSignalId, 0.0);
+
+        Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.FANSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
+                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his")
+                .setUnit("%").setTz(tz).build();
+        String fanSignalId = CCUHsApi.getInstance().addPoint(fanSignal);
+        CCUHsApi.getInstance().writeHisValById(fanSignalId, 0.0);
+
+        Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
+                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his")
+                .setBacnetId(BacnetIdKt.COMPOSITESIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
+                .setUnit("%").setTz(tz).build();
+        String compositeSignalId = CCUHsApi.getInstance().addPoint(compositeSignal);
+        CCUHsApi.getInstance().writeHisValById(compositeSignalId, 0.0);
+    }
+
+    public double getCmdSignal(String cmd) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
+    }
+
+    public void setCmdSignal(String cmd, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
+    }
+
+    public void getConfiguration() {
+        List<a75f.io.domain.api.Equip> systemEquip =  Domain.INSTANCE.getEquipDetailsByDomain(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER);
+        ExternalAhuConfiguration config = new ExternalAhuConfiguration();
+        /* config.getSetPointControl().setEnabled();
+
+        config.setPointControl.enabled = this.setPointControl
+        config.dualSetPointControl.enabled = this.dualSetPointControl
+        config.fanStaticSetPointControl.enabled = this.fanStaticSetPointControl
+        config.dcvControl.enabled = this.dcvControl
+        config.occupancyMode.enabled = this.occupancyMode
+        config.humidifierControl.enabled = this.humidifierControl
+        config.dehumidifierControl.enabled = this.dehumidifierControl
+
+        config.satMin.currentVal = this.satMin.toDouble()
+        config.satMax.currentVal = this.satMax.toDouble()
+        config.heatingMinSp.currentVal = this.heatingMinSp.toDouble()
+        config.heatingMaxSp.currentVal = this.heatingMaxSp.toDouble()
+        config.coolingMinSp.currentVal = this.coolingMinSp.toDouble()
+        config.coolingMaxSp.currentVal = this.coolingMaxSp.toDouble()
+        config.fanMinSp.currentVal = this.fanMinSp.toDouble()
+        config.fanMaxSp.currentVal = this.fanMaxSp.toDouble()
+        config.dcvMin.currentVal = this.dcvMin.toDouble()
+        config.dcvMax.currentVal = this.dcvMax.toDouble()
+        config.targetHumidity.currentVal = this.targetHumidity.toDouble()
+        config.targetDeHumidity.currentVal = this.targetDeHumidity.toDouble()*/
+    }
+
+}

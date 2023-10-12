@@ -60,10 +60,8 @@ object Domain {
     fun getEquipDetailsByDomain(domainName: String): List<Equip> {
         DomainManager.buildDomain(CCUHsApi.getInstance())
         val equips = mutableListOf<Equip>()
-        assert(Domain.site?.floors?.size  == 1)
-        Domain.site?.floors?.entries?.forEach{
+        site?.floors?.entries?.forEach{
             val floor = it.value
-            assert(floor.rooms.size == 1)
             floor.rooms.entries.forEach { r ->
                 val room =  r.value
                 room.equips.forEach { (_, equip) ->

@@ -1,7 +1,25 @@
 package a75f.io.renatus.externalahu
 
-import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.domain.api.dcvDamperControlEnable
+import a75f.io.domain.api.systemDCVDamperPosMaximum
+import a75f.io.domain.api.systemDCVDamperPosMinimum
+import a75f.io.domain.api.dehumidifierOperationEnable
+import a75f.io.domain.api.dualSetpointControlEnable
+import a75f.io.domain.api.staticPressureSetpointControlEnable
+import a75f.io.domain.api.systemStaticPressureMaximum
+import a75f.io.domain.api.systemStaticPressureMinimum
+import a75f.io.domain.api.humidifierOperationEnable
+import a75f.io.domain.api.systemOccupancyMode
+import a75f.io.domain.api.systemCoolingSATMaximum
+import a75f.io.domain.api.systemCoolingSATMinimum
+import a75f.io.domain.api.systemHeatingSATMaximum
+import a75f.io.domain.api.systemHeatingSATMinimum
+import a75f.io.domain.api.systemSATMaximum
+import a75f.io.domain.api.systemSATMinimum
+import a75f.io.domain.api.satSetpointControlEnable
+import a75f.io.domain.api.tagValueIncrement
+import a75f.io.domain.api.targetDehumidifier
+import a75f.io.domain.api.targetHumidifier
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
@@ -72,7 +90,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
             setContent {
                 ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
                 viewModel.configModelDefinition(
-                    NodeType.SMART_NODE, ProfileType.DAB_EXTERNAL_AHU, requireContext()
+                    requireContext()
                 )
                 if (viewModel.profileModelDefinition != null) {
                     LazyColumn(
@@ -86,7 +104,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 SetPointControlCompose(
                                     viewModel.configModel.value.controlName(
                                         viewModel.profileModelDefinition,
-                                        SET_POINT_CONTROL
+                                        satSetpointControlEnable
                                     ), state = viewModel.configModel.value.setPointControl
                                 ) {
                                     viewModel.configModel.value.setPointControl = it
@@ -97,7 +115,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     SetPointControlCompose(
                                         viewModel.configModel.value.controlName(
                                             viewModel.profileModelDefinition,
-                                            DUAL_SET_POINT_CONTROL
+                                            dualSetpointControlEnable
                                         ),
                                         state = viewModel.configModel.value.dualSetPointControl
                                     ) {
@@ -117,18 +135,18 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val satMin =
                                                     viewModel.configModel.value.getPointByDomainName(
                                                         viewModel.profileModelDefinition,
-                                                        SAT_SP_MIN
+                                                        systemSATMinimum
                                                     )
                                                 val satMax =
                                                     viewModel.configModel.value.getPointByDomainName(
                                                         viewModel.profileModelDefinition,
-                                                        SAT_SP_MAX
+                                                        systemSATMaximum
                                                     )
                                                 if (satMin != null) {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satMin.valueConstraint as NumericConstraint).minValue,
                                                         (satMin.valueConstraint as NumericConstraint).maxValue,
-                                                        (satMin.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satMin.presentationData?.get(tagValueIncrement) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satMin.name,
@@ -142,7 +160,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     val items = viewModel.itemsFromMinMax(
                                                         (satMax.valueConstraint as NumericConstraint).minValue,
                                                         (satMax.valueConstraint as NumericConstraint).maxValue,
-                                                        (satMax.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                        (satMax.presentationData?.get(tagValueIncrement) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
                                                         satMax.name,
@@ -164,22 +182,22 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                             val satHeatingMin =
                                                 viewModel.configModel.value.getPointByDomainName(
                                                     viewModel.profileModelDefinition,
-                                                    SAT_HEATING_SP_MIN
+                                                    systemHeatingSATMinimum
                                                 )
                                             val satHeatingMax =
                                                 viewModel.configModel.value.getPointByDomainName(
                                                     viewModel.profileModelDefinition,
-                                                    SAT_HEATING_SP_MAX
+                                                    systemHeatingSATMaximum
                                                 )
                                             val satCoolingMin =
                                                 viewModel.configModel.value.getPointByDomainName(
                                                     viewModel.profileModelDefinition,
-                                                    SAT_COOLING_SP_MIN
+                                                    systemCoolingSATMinimum
                                                 )
                                             val satCoolingMax =
                                                 viewModel.configModel.value.getPointByDomainName(
                                                     viewModel.profileModelDefinition,
-                                                    SAT_COOLING_SP_MAX
+                                                    systemCoolingSATMaximum
                                                 )
 
                                             Row(
@@ -193,7 +211,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satHeatingMin.valueConstraint as NumericConstraint).minValue,
                                                         (satHeatingMin.valueConstraint as NumericConstraint).maxValue,
                                                         (satHeatingMin.presentationData?.get(
-                                                            TAG_VALUE_INC
+                                                            tagValueIncrement
                                                         ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
@@ -210,7 +228,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satHeatingMax.valueConstraint as NumericConstraint).minValue,
                                                         (satHeatingMax.valueConstraint as NumericConstraint).maxValue,
                                                         (satHeatingMax.presentationData?.get(
-                                                            TAG_VALUE_INC
+                                                            tagValueIncrement
                                                         ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
@@ -233,7 +251,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satCoolingMin.valueConstraint as NumericConstraint).minValue,
                                                         (satCoolingMin.valueConstraint as NumericConstraint).maxValue,
                                                         (satCoolingMin.presentationData?.get(
-                                                            TAG_VALUE_INC
+                                                            tagValueIncrement
                                                         ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
@@ -250,7 +268,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                         (satCoolingMax.valueConstraint as NumericConstraint).minValue,
                                                         (satCoolingMax.valueConstraint as NumericConstraint).maxValue,
                                                         (satCoolingMax.presentationData?.get(
-                                                            TAG_VALUE_INC
+                                                            tagValueIncrement
                                                         ) as Int).toDouble()
                                                     )
                                                     SetPointConfig(
@@ -272,7 +290,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    FAN_SP_CONTROL
+                                    staticPressureSetpointControlEnable
                                 ),
                                 state = viewModel.configModel.value.fanStaticSetPointControl
                             ) {
@@ -285,11 +303,11 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
                                     val fanSpMin = viewModel.configModel.value.getPointByDomainName(
                                         viewModel.profileModelDefinition,
-                                        FAN_SP_MIN
+                                        systemStaticPressureMinimum
                                     )
                                     val fanSpMax = viewModel.configModel.value.getPointByDomainName(
                                         viewModel.profileModelDefinition,
-                                        FAN_SP_MAX
+                                        systemStaticPressureMaximum
                                     )
 
                                     Column {
@@ -302,7 +320,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (fanSpMin.valueConstraint as NumericConstraint).minValue,
                                                     (fanSpMin.valueConstraint as NumericConstraint).maxValue,
-                                                    (fanSpMin.presentationData?.get(TAG_VALUE_INC)
+                                                    (fanSpMin.presentationData?.get(tagValueIncrement)
                                                         .toString().toDouble())
                                                 )
                                                 SetPointConfig(
@@ -317,7 +335,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (fanSpMax.valueConstraint as NumericConstraint).minValue,
                                                     (fanSpMax.valueConstraint as NumericConstraint).maxValue,
-                                                    (fanSpMax.presentationData?.get(TAG_VALUE_INC)
+                                                    (fanSpMax.presentationData?.get(tagValueIncrement)
                                                         .toString().toDouble())
                                                 )
                                                 SetPointConfig(
@@ -337,7 +355,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    DCV_CONTROL_LABEL
+                                    dcvDamperControlEnable
                                 ), state = viewModel.configModel.value.dcvControl
                             ) {
                                 viewModel.configModel.value.dcvControl = it
@@ -348,11 +366,11 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
                                 val dcvMin = viewModel.configModel.value.getPointByDomainName(
                                     viewModel.profileModelDefinition,
-                                    DCV_CONTROL_MIN
+                                    systemDCVDamperPosMinimum
                                 )
                                 val dcvMax = viewModel.configModel.value.getPointByDomainName(
                                     viewModel.profileModelDefinition,
-                                    DCV_CONTROL_MAX
+                                    systemDCVDamperPosMaximum
                                 )
 
                                 Row {
@@ -366,7 +384,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (dcvMin.valueConstraint as NumericConstraint).minValue,
                                                     (dcvMin.valueConstraint as NumericConstraint).maxValue,
-                                                    (dcvMin.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                    (dcvMin.presentationData?.get(tagValueIncrement) as Int).toDouble()
                                                 )
                                                 SetPointConfig(
                                                     dcvMin.name,
@@ -378,7 +396,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                 val items = viewModel.itemsFromMinMax(
                                                     (dcvMax.valueConstraint as NumericConstraint).minValue,
                                                     (dcvMax.valueConstraint as NumericConstraint).maxValue,
-                                                    (dcvMax.presentationData?.get(TAG_VALUE_INC) as Int).toDouble()
+                                                    (dcvMax.presentationData?.get(tagValueIncrement) as Int).toDouble()
                                                 )
                                                 SetPointConfig(
                                                     dcvMax.name,
@@ -395,7 +413,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    OCCUPANCY_CONTROL_LABEL
+                                    systemOccupancyMode
                                 ),
                                 state = viewModel.configModel.value.occupancyMode
                             ) {
@@ -406,7 +424,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    HUMIDIFIER_CONTROL_LABEL
+                                    humidifierOperationEnable
                                 ),
                                 state = viewModel.configModel.value.humidifierControl
                             ) {
@@ -419,7 +437,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     val humidityControl =
                                         viewModel.configModel.value.getPointByDomainName(
                                             viewModel.profileModelDefinition,
-                                            TARGET_HUMIDIFIER
+                                            targetHumidifier
                                         )
                                     Column {
                                         Row(
@@ -432,7 +450,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     (humidityControl.valueConstraint as NumericConstraint).minValue,
                                                     (humidityControl.valueConstraint as NumericConstraint).maxValue,
                                                     (humidityControl.presentationData?.get(
-                                                        TAG_VALUE_INC
+                                                        tagValueIncrement
                                                     ) as Int).toDouble()
                                                 )
                                                 SetPointConfig(
@@ -450,7 +468,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    DEHUMIDIFIER_CONTROL_LABEL
+                                    dehumidifierOperationEnable
                                 ),
                                 state = viewModel.configModel.value.dehumidifierControl
                             ) {
@@ -463,7 +481,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     val dehumidityControl =
                                         viewModel.configModel.value.getPointByDomainName(
                                             viewModel.profileModelDefinition,
-                                            TARGET_DEHUMIDIFIER
+                                            targetDehumidifier
                                         )
                                     Column {
                                         Row(
@@ -476,7 +494,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     (dehumidityControl.valueConstraint as NumericConstraint).minValue,
                                                     (dehumidityControl.valueConstraint as NumericConstraint).maxValue,
                                                     (dehumidityControl.presentationData?.get(
-                                                        TAG_VALUE_INC
+                                                        tagValueIncrement
                                                     ) as Int).toDouble()
                                                 )
                                                 SetPointConfig(

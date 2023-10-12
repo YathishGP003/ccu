@@ -16,7 +16,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef : String) : String{
+    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef : String) : String {
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 

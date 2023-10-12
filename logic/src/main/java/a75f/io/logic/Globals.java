@@ -59,6 +59,7 @@ import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -463,6 +464,9 @@ public class Globals {
                     break;
                 case SYSTEM_DAB_HYBRID_RTU:
                     L.ccu().systemProfile = new DabAdvancedHybridRtu();
+                    break;
+                case SYSTEM_DAB_EXTERNAL_AHU:
+                    L.ccu().systemProfile = new DabExternalAhu();
                     break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();

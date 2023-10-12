@@ -1,5 +1,6 @@
 package a75f.io.renatus.externalahu
 
+import a75f.io.domain.config.ExternalAhuConfiguration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,7 +37,7 @@ class ExternalAhuConfigModel {
 
 
     fun render(modelDefinition: SeventyFiveFProfileDirective) {
-        var pointDef = getPointByDomainName(modelDefinition,SET_POINT_CONTROL)
+       // var pointDef = getPointByDomainName(modelDefinition,SET_POINT_CONTROL)
 
     }
 
@@ -50,6 +51,32 @@ class ExternalAhuConfigModel {
 
     fun getPointByDomainName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): SeventyFiveFProfilePointDef? {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
+    }
+
+    fun getConfiguration(): ExternalAhuConfiguration {
+        val config =  ExternalAhuConfiguration()
+        config.setPointControl.enabled = this.setPointControl
+        config.dualSetPointControl.enabled = this.dualSetPointControl
+        config.fanStaticSetPointControl.enabled = this.fanStaticSetPointControl
+        config.dcvControl.enabled = this.dcvControl
+        config.occupancyMode.enabled = this.occupancyMode
+        config.humidifierControl.enabled = this.humidifierControl
+        config.dehumidifierControl.enabled = this.dehumidifierControl
+
+        config.satMin.currentVal = this.satMin.toDouble()
+        config.satMax.currentVal = this.satMax.toDouble()
+        config.heatingMinSp.currentVal = this.heatingMinSp.toDouble()
+        config.heatingMaxSp.currentVal = this.heatingMaxSp.toDouble()
+        config.coolingMinSp.currentVal = this.coolingMinSp.toDouble()
+        config.coolingMaxSp.currentVal = this.coolingMaxSp.toDouble()
+        config.fanMinSp.currentVal = this.fanMinSp.toDouble()
+        config.fanMaxSp.currentVal = this.fanMaxSp.toDouble()
+        config.dcvMin.currentVal = this.dcvMin.toDouble()
+        config.dcvMax.currentVal = this.dcvMax.toDouble()
+        config.targetHumidity.currentVal = this.targetHumidity.toDouble()
+        config.targetDeHumidity.currentVal = this.targetDeHumidity.toDouble()
+
+        return config
     }
 
 }

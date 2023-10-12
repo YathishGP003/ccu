@@ -1226,6 +1226,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             hsSplitHaystackUtil.readPointValue("fan and cooling and stage2")
         } else if (stageActive("cooling and runtime and stage1")) {
             hsSplitHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else if (isEconomizerActive()) {
+          // default to Cooling Stage 1 Fan speed if economizer is running
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage1")
         } else {
             defaultFanLoopOutput
         }
@@ -1246,6 +1249,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     private fun stageActive(fanStage: String): Boolean {
         return hsSplitHaystackUtil.readHisVal(fanStage) == 1.0
+    }
+
+    private fun isEconomizerActive(): Boolean {
+        return hsSplitHaystackUtil.readHisVal("economizing and loop and output") > 0.0
     }
 
     private fun getPercentageFromVoltageSelected(voltageSelected: Int): Int {

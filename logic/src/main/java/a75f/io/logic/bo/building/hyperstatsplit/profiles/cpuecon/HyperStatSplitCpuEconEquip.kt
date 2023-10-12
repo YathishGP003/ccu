@@ -49,8 +49,8 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     val haystack: CCUHsApi = CCUHsApi.getInstance()
     private val profileTag = CPUECON
 
-    private val analogOutVoltageMax = 0
-    private val analogOutVoltageMin = 10
+    private val analogOutVoltageMin = 0
+    private val analogOutVoltageMax = 10
     private val stageFan1DefaultVal = 10
     private val stageFan2And3DefaultVal = 10
 
@@ -1291,10 +1291,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             } else {
                 val pointData: Triple<Point, Any?, Any?> = hyperStatSplitPointsUtil.analogOutConfiguration()
                 val pointId = hyperStatSplitPointsUtil.addPointToHaystack(pointData.first)
+                val pointType =
+                    "${analogOutVoltageMin}-${analogOutVoltageMax}v"
                 if ((pointData.first).markers.contains("his")) {
                     hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                    DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
                 }
+                DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+                DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
             }
 
             // check if the new state of analog is mapped to Fan Speed

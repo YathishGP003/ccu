@@ -92,14 +92,20 @@ class HyperStatSplitReconfigureUtil {
                     else -> null
                 }
                 if (analogOutTag != null) {
-                    val minPointValue = haystack.readDefaultVal(
-                        "point and config and " +
-                                "$analogOutTag and output and min and equipRef == \"${equip.id}\""
-                    ).toInt()
-                    val maxPointValue = haystack.readDefaultVal(
-                        "point and config and " +
-                                "$analogOutTag and output and max and equipRef == \"${equip.id}\""
-                    ).toInt()
+                    val minPointValQuery = "point and config and " +
+                            "$analogOutTag and output and min and equipRef == \"${equip.id}\""
+
+                    val maxPointValQuery = "point and config and " +
+                            "$analogOutTag and output and max and equipRef == \"${equip.id}\""
+                    var minPointValue = 0
+                    var maxPointValue = 10
+
+                    if (haystack.readEntity(minPointValQuery).isNotEmpty()) {
+                        minPointValue = haystack.readDefaultVal(minPointValQuery).toInt()
+                    }
+                    if (haystack.readEntity(maxPointValQuery).isNotEmpty()) {
+                        maxPointValue = haystack.readDefaultVal(maxPointValQuery).toInt()
+                    }
 
                     val pointType = "${minPointValue}-${maxPointValue}v"
                     Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateAnalogActuatorType: $pointType")

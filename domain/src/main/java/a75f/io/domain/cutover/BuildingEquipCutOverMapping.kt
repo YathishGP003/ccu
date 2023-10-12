@@ -39,7 +39,6 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-cmResetCommandTimer" to "cmResetCommandTimer",
         "BuildingTuner-forcedOccupiedTime" to "forcedOccupiedTime",
         "BuildingTuner-zoneDeadTime" to "zoneDeadTime",
-
         "BuildingTuner-displayUnit" to "displayUnit",
         "BuildingTuner-coolingPreconditioningRate" to "coolingPreconditioningRate",
         "BuildingTuner-coolingUserLimitMin" to "coolingUserLimitMin",
@@ -50,6 +49,12 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-cmTempPercentDeadZonesAllowed" to "cmTempPercentDeadZonesAllowed",
         "BuildingTuner-buildingToZoneDifferential" to "buildingToZoneDifferential",
         "BuildingTuner-ccuNetworkWatchdogTimeout" to "ccuNetworkWatchdogTimeout",
+        "BuildingTuner-auxHeating1Activate" to "auxHeating1Activate",
+        "BuildingTuner-auxHeating2Activate" to "auxHeating2Activate",
+        "BuildingTuner-waterValveSamplingWaitTime" to "waterValveSamplingWaitTime",
+        "BuildingTuner-waterValveSamplingOnTime" to "waterValveSamplingOnTime",
+        "BuildingTuner-waterValveSamplingLoopDeadbandOnTime" to "waterValveSamplingLoopDeadbandOnTime",
+        "BuildingTuner-waterValveSamplingLoopDeadbandWaitTime" to "waterValveSamplingLoopDeadbandWaitTime",
 
         "BuildingTuner-VAV-zonePrioritySpread" to "vavZonePrioritySpread",
         "BuildingTuner-VAV-zonePriorityMultiplier" to "vavZonePriorityMultiplier",
@@ -79,7 +84,6 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-VAV-reheatZoneDischargeTempOffset" to "reheatZoneDischargeTempOffset",
         "BuildingTuner-VAV-modeChangeOverHysteresis" to "vavModeChangeOverHysteresis",
         "BuildingTuner-VAV-temperatureIntegralTime" to "vavTemperatureIntegralTime",
-
 
         "BuildingTuner-co2SPTrim" to "co2SPTrim",
         "BuildingTuner-co2SPMax" to "co2SPMax",
@@ -114,10 +118,10 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-staticPressureIgnoreRequest" to "staticPressureIgnoreRequest",
         "BuildingTuner-co2SPResMax" to "co2SPResMax",
 
-        "BuildingTuner-airflowCFMIntegralKFactor" to "airflowCFMIntegralKFactor",
-        "BuildingTuner-airflowCFMProportionalKFactor" to "airflowCFMProportionalKFactor",
-        "BuildingTuner-airflowCFMIntegralTime" to "airflowCFMIntegralTime",
-        "BuildingTuner-airflowCFMProportionalRange" to "airflowCFMProportionalRange",
+        "BuildingTuner-airflowCFMIntegralKFactor" to "vavAirflowCFMIntegralKFactor",
+        "BuildingTuner-airflowCFMProportionalKFactor" to "vavAirflowCFMProportionalKFactor",
+        "BuildingTuner-airflowCFMIntegralTime" to "vavAirflowCFMIntegralTime",
+        "BuildingTuner-airflowCFMProportionalRange" to "vavAirflowCFMProportionalRange",
 
         "BuildingTuner-standaloneCoolingDeadband" to "standaloneCoolingDeadband",
         "BuildingTuner-standaloneStage2CoolingLowerOffset" to "standaloneStage2CoolingLowerOffset",
@@ -173,7 +177,7 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-DAB-outsideTempCoolingLockout" to "dabOutsideTempCoolingLockout",
         "BuildingTuner-DAB-reheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
         "BuildingTuner-DAB-reheatTemperatureIntegralTime" to "dabReheatTemperatureIntegralTime",
-        "BuildingTuner-DAB-reheatTempOffset" to "dabReheatTempOffset",
+        "BuildingTuner-DAB-reheatTempOffset" to "reheatTempOffset",
         "BuildingTuner-DAB-reheatTemperatureProportionalRange" to "dabReheatTemperatureProportionalRange",
         "BuildingTuner-DAB-reheatIntegralKFactor" to "dabReheatIntegralKFactor",
         "BuildingTuner-DAB-reheatProportionalKFactor" to "dabReheatProportionalKFactor",
@@ -211,6 +215,21 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-OAO-systemPurgeDabMinFanLoopOutput" to "systemPurgeDabMinFanLoopOutput",
         "BuildingTuner-OAO-systemPurgeVavDamperMinOpenMultiplier" to "systemPurgeVavDamperMinOpenMultiplier",
         "BuildingTuner-OAO-economizingDryBulbThreshold" to "economizingDryBulbThreshold",
+
+        "BuildingTuner-OAO-standaloneEnthalpyDuctCompensationOffset" to "standaloneEnthalpyDuctCompensationOffset",
+        "BuildingTuner-OAO-standaloneEconomizingToMainCoolingLoopMap" to "standaloneEconomizingToMainCoolingLoopMap",
+        "BuildingTuner-OAO-standaloneEconomizingMinTemperature" to "standaloneEconomizingMinTemperature",
+        "BuildingTuner-OAO-standaloneEconomizingMaxTemperature" to "standaloneEconomizingMaxTemperature",
+        "BuildingTuner-OAO-standaloneEconomizingMinHumidity" to "standaloneEconomizingMinHumidity",
+        "BuildingTuner-OAO-standaloneEconomizingMaxHumidity" to "standaloneEconomizingMaxHumidity",
+        "BuildingTuner-OAO-standaloneEconomizingDryBulbThreshold" to "standaloneEconomizingDryBulbThreshold",
+        "BuildingTuner-OAO-standaloneOutsideDamperMixedAirTarget" to "standaloneOutsideDamperMixedAirTarget",
+        "BuildingTuner-OAO-standaloneOutsideDamperMixedAirMinimum" to "standaloneOutsideDamperMixedAirMinimum",
+        "BuildingTuner-OAO-standaloneDuctTemperatureOffset" to "standaloneDuctTemperatureOffset",
+        "BuildingTuner-OAO-standaloneCoolingAirflowTempLowerOffset" to "standaloneCoolingAirflowTempLowerOffset",
+        "BuildingTuner-OAO-standaloneCoolingAirflowTempUpperOffset" to "standaloneCoolingAirflowTempUpperOffset",
+        "BuildingTuner-OAO-standaloneHeatingAirflowTempUpperOffset" to "standaloneHeatingAirflowTempUpperOffset",
+        "BuildingTuner-OAO-standaloneHeatingAirflowTempLowerOffset" to "standaloneHeatingAirflowTempLowerOffset",
 
         //TODO - stand alone OAO tuners?
 
@@ -278,6 +297,11 @@ object BuildingEquipCutOverMapping {
         "BuildingSchedulable-heatingDeadband" to "heatingDeadband",
         "BuildingSchedulable-unoccupiedZoneSetback" to "unoccupiedZoneSetback",
         "BuildingSchedulable-coolingDeadband" to "coolingDeadband",
+
+        "BuildingTuner-VRV-heatingDeadbandMultiplier" to "vavHeatingDeadbandMultiplier",
+        "BuildingTuner-VRV-heatingDeadband" to "vrvHeatingDeadband",
+        "BuildingTuner-VRV-coolingDeadbandMultiplier" to "vrvCoolingDeadbandMultiplier",
+        "BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",
 
     )
 }

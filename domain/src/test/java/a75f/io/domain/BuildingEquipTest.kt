@@ -124,7 +124,7 @@ class BuildingEquipTest {
         } else {
             val equipBuilder = TunerEquipBuilder(haystack)
             val equipId = buildingEquip["id"].toString()
-            equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, buildingEquip["dis"].toString(), haystack.site!!.id)
+            equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, haystack.site!!)
         }
     }
 

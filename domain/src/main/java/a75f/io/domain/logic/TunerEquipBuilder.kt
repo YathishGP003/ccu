@@ -2,6 +2,7 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.sync.CcuRegistrationHandler
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
@@ -255,7 +256,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return newEntityConfig
     }
 
-    fun migrateBuildingTunerPointsForCutOver(equipRef: String, equipDis : String, siteRef: String){
+    fun migrateBuildingTunerPointsForCutOver(equipRef: String, site: Site){
         val modelDef = ModelLoader.getBuildingEquipModelDef(hayStack.context)
         if (modelDef == null) {
             CcuLog.e(Domain.LOG_TAG, " Cut-Over migration aborted. ModelDef does not exist")
@@ -264,44 +265,54 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         var tunerPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
 
-        val tz = hayStack.timeZone
-
+        //TODO-To be removed after testing is complete.
         var update = 0
         var add = 0
         var delete = 0
         var pass = 0
 
-        tunerPoints.forEach { dbPoint ->
-            val modelPointName = getDomainNameFromDis(dbPoint)
+        val equipDis = site.displayName+"-"+modelDef.domainName
 
-            if (modelPointName == null) {
-                delete++
-                //DB point does not exist in model. Delete it.
-                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Delete $dbPoint")
-                println(" Cut-Over migration : Delete $dbPoint")
-                //hayStack.deleteEntityTree(dbPoint["id"].toString())
-            } else {
-                update++
-                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update $dbPoint")
-                println("Cut-Over migration Update $dbPoint")
-                val modelPoint = modelDef.points.find { it.domainName == modelPointName }
-                //updatePoint(PointBuilderConfig(modelPoint!!, null, equipRef, siteRef, tz, equipDis), dbPoint)
-            }
+        tunerPoints.filter { it["domainName"] == null}
+            .forEach { dbPoint ->
+                val modelPointName = getDomainNameFromDis(dbPoint)
+
+                if (modelPointName == null) {
+                    delete++
+                    //DB point does not exist in model. Delete it.
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Delete $dbPoint")
+                    hayStack.deleteEntityTree(dbPoint["id"].toString())
+                } else {
+                    update++
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update with domainName $modelPointName : $dbPoint")
+                    //println("Cut-Over migration Update $dbPoint")
+                    val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
+                    if (modelPoint != null) {
+                        updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site.id, site.tz, equipDis), dbPoint)
+                    } else {
+                        CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
+                    }
+                }
         }
+
+        tunerPoints = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
 
         modelDef.points.forEach { modelPointDef ->
 
             val displayName = findDisFromDomainName(modelPointDef.domainName)
             if (displayName == null) {
                 add++
-                //Point exists model but not in mapping table or local db. create it.
+                //Point exists in model but not in mapping table or local db. create it.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
-                println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
-                //createPoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis))
+                //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
+                if (!pointWithDomainNameExists(tunerPoints, modelPointDef.domainName)) {
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
+                    createPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
+                }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration PASS $modelPointDef")
-                println(" Cut-Over migration PASS $modelPointDef")
+                //println(" Cut-Over migration PASS $modelPointDef")
                 pass++
             }
         }
@@ -310,6 +321,12 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 " Model: ${modelDef.points.size} Map: ${BuildingEquipCutOverMapping.entries.size} ")
         CcuLog.e(Domain.LOG_TAG, " Added $add Updated $update Deleted $delete Passed $pass")
 
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, site.id,
+                                        hayStack.timeZone, site.displayName))
+        hayStack.updateEquip(hayStackEquip, equipRef)
+        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
+        //Required to update backend points since local building tuners are no longer synced.
+        updateBackendBuildingTuner(site.id, hayStack)
     }
 
     fun updateBackendBuildingTuner(siteRef: String, hayStack: CCUHsApi) {
@@ -322,19 +339,9 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         }
     }
 
-    private fun areMarkersMatch(point : Map<Any, Any>, pointDef: ModelPointDef) : Boolean {
-        var defMarkers = pointDef.tags.filter { it.kind == TagType.MARKER}
-            .filter { it.name != "cur" }//TODO - Temp hack since tuners does not have 'cur' tag
-            .map { it.name }
-
-        return point.entries.filter { it.value == "marker" }
-            .filter { defMarkers.contains(it.toString()) }
-            .size == defMarkers.size
-    }
-
     private fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
         val displayNme = point["dis"].toString()
-        return BuildingEquipCutOverMapping.entries.filterKeys { displayNme.contains(it, true) }
+        return BuildingEquipCutOverMapping.entries.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
                                         .map { it.value }
                                         .firstOrNull()
     }
@@ -343,6 +350,10 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return BuildingEquipCutOverMapping.entries.filterValues { it.equals(domainName,true) }
             .map { it.key }
             .firstOrNull()
+    }
+
+    private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{
+        return dbPoints.any { it["domainName"]?.toString().equals(domainName, true) }
     }
 
 }

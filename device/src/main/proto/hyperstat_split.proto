@@ -69,12 +69,13 @@ message HyperSplitTunersEco_t {
   uint32 economizingMaxHumidity = 5;
   uint32 economizingDryBulbThreshold = 6;
   uint32 enthalpyDuctCompensationOffset = 7;
-  uint32 exhaustFanStage1Threshold = 8;
-  uint32 exhaustFanStage2Threshold = 9;
-  uint32 exhaustFanHysteresis = 10;
-  uint32 oaoDamperMatTarget = 11;
-  uint32 oaoDamperMatMin = 12;
-  uint32 outsideDamperMinOpen = 13;
+  uint32 ductCompensationOffset = 8;
+  uint32 exhaustFanStage1Threshold = 9;
+  uint32 exhaustFanStage2Threshold = 10;
+  uint32 exhaustFanHysteresis = 11;
+  uint32 oaoDamperMatTarget = 12;
+  uint32 oaoDamperMatMin = 13;
+  uint32 outsideDamperMinOpen = 14;
 }
 
 message HyperSplitSettingsMessage_t {

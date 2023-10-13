@@ -1,14 +1,19 @@
 package a75f.io.renatus.externalahu
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.modbus.EquipmentDevice
+import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.domain.util.ModelNames
 import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
@@ -17,7 +22,10 @@ import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.NO_INTERNET
 import a75f.io.renatus.modbus.util.NO_MODEL_DATA_FOUND
 import a75f.io.renatus.modbus.util.OnItemSelect
+import a75f.io.renatus.modbus.util.SAVED
+import a75f.io.renatus.modbus.util.SAVING
 import a75f.io.renatus.modbus.util.getParameters
+import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
@@ -27,6 +35,7 @@ import a75f.io.renatus.util.RxjavaUtil
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -52,7 +61,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     var configModel = mutableStateOf(ExternalAhuConfigModel())
     var systemProfile: DabExternalAhu? = null
-
+    private lateinit var modbusProfile: ModbusProfile
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
 
@@ -74,10 +83,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     fun configModelDefinition(context: Context) {
         try {
             this.context = context
-
             if (L.ccu().systemProfile.profileType == ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
                 systemProfile = L.ccu().systemProfile as DabExternalAhu
-                var config = systemProfile!!.getConfiguration()
+                setCurrentConfig(systemProfile!!.getConfiguration())
             }
             slaveIdList.value = getSlaveIds(true)
             if (!equipModel.value.isDevicePaired)
@@ -96,6 +104,29 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             profileModelDefinition = def as SeventyFiveFProfileDirective
             configModel.value.render(profileModelDefinition)
         }
+    }
+
+    private fun setCurrentConfig(config: ExternalAhuConfiguration) {
+        configModel.value.setPointControl = config.setPointControl.enabled
+        configModel.value.dualSetPointControl = config.dualSetPointControl.enabled
+        configModel.value.fanStaticSetPointControl = config.fanStaticSetPointControl.enabled
+        configModel.value.dcvControl = config.dcvControl.enabled
+        configModel.value.occupancyMode = config.occupancyMode.enabled
+        configModel.value.humidifierControl = config.humidifierControl.enabled
+        configModel.value.dehumidifierControl = config.dehumidifierControl.enabled
+
+        configModel.value.satMin = config.satMin.currentVal.toString()
+        configModel.value.satMax = config.satMax.currentVal.toString()
+        configModel.value.heatingMinSp = config.heatingMinSp.currentVal.toString()
+        configModel.value.heatingMaxSp = config.heatingMaxSp.currentVal.toString()
+        configModel.value.coolingMinSp = config.coolingMinSp.currentVal.toString()
+        configModel.value.coolingMaxSp = config.coolingMaxSp.currentVal.toString()
+        configModel.value.fanMinSp = config.fanMinSp.currentVal.toString()
+        configModel.value.fanMaxSp = config.fanMaxSp.currentVal.toString()
+        configModel.value.dcvMin = config.dcvMin.currentVal.toString()
+        configModel.value.dcvMax = config.dcvMax.currentVal.toString()
+        configModel.value.targetHumidity = config.targetHumidity.currentVal.toString()
+        configModel.value.targetDeHumidity = config.targetDeHumidity.currentVal.toString()
     }
 
     fun saveConfiguration() {
@@ -123,6 +154,102 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 showToast("Configuration saved successfully", context)
             }
         )
+    }
+
+    fun saveModbusConfiguration() {
+        if (isValidConfiguration()) {
+            populateSlaveId()
+            RxjavaUtil.executeBackgroundTask({
+                ProgressDialogUtils.showProgressDialog(context, SAVING)
+            }, {
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpsModbusProfile()
+                L.saveCCUState()
+                CCUHsApi.getInstance().setCcuReady()
+            }, {
+                ProgressDialogUtils.hideProgressDialog()
+                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                showToast(SAVED, context)
+            })
+        }
+    }
+
+
+
+    private fun setUpsModbusProfile() {
+        equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
+
+        if (parentMap.isNullOrEmpty()) {
+            val subEquipmentDevices = mutableListOf<EquipmentDevice>()
+            if (equipModel.value.subEquips.isNotEmpty()) {
+                equipModel.value.subEquips.forEach {
+                    subEquipmentDevices.add(it.value.equipDevice.value)
+                }
+            }
+            modbusProfile = ModbusProfile()
+            modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
+                equipModel.value.equipDevice.value, getParametersList(equipModel.value.equipDevice.value),
+                profileType, subEquipmentDevices,moduleLevel,equipModel.value.version.value)
+
+            L.ccu().zoneProfiles.add(modbusProfile)
+            L.saveCCUState()
+        } else {
+            updateModbusProfile()
+        }
+    }
+
+    private fun isValidConfiguration(): Boolean {
+        // do all the validations
+        return false
+      /*  if (equipModel.value.parameters.isEmpty()) {
+            showToast("Please select modbus device", context)
+            return false
+        }
+        if (equipModel.value.isDevicePaired)
+            return true // If it is paired then will not allow the use to to edit slave id
+
+        if (zoneRef.contentEquals("SYSTEM")) {
+            if (equipModel.value.subEquips.isNotEmpty() && isModbusExist()) {
+                showToast("Modbus device already paired", context)
+                return false
+            }
+        } else {
+            if (equipModel.value.subEquips.isNotEmpty() && HSUtil.getEquips(zoneRef).isNotEmpty()) {
+                showToast("Zone should have no equips to pair modbus with sub equips", context)
+                return false
+            }
+        }
+
+        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
+            showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
+                    "another slave id to proceed",context)
+            return false
+        }
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach {
+                if  (it.value.slaveId.value != 0) {
+                    if (L.isModbusSlaveIdExists(it.value.slaveId.value.toShort())
+                        || it.value.slaveId.value == equipModel.value.slaveId.value ) {
+                        showToast("Make sure all sub equips have unique slave Id, if it is not same as Parent",context)
+                        return false
+                    }
+                }
+            }
+        }
+        return true*/
+    }
+    private fun populateSlaveId() {
+        equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
+        equipModel.value.parameters.forEach {
+            it.param.value.isDisplayInUI = it.displayInUi.value
+        }
+        equipModel.value.subEquips.forEach {
+            it.value.equipDevice.value.slaveId = it.value.slaveId.value
+            it.value.parameters.forEach { register ->
+                register.param.value.isDisplayInUI = register.displayInUi.value
+            }
+        }
     }
 
     fun updateSystemProfile() {

@@ -13,16 +13,17 @@ open class EntityConfig(val domainName: String)
 
 class Site(domainName : String, id : String) : Entity(domainName, id) {
     val floors = mutableMapOf<String, Floor>()
-    val ccus = mutableMapOf<String, Device>()
+    val ccus = mutableMapOf<String, Ccu>()
     fun addFloor(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         floors[id] = Floor(domainName, id)
     }
     fun addCcu(entityMap : HashMap<Any, Any>) {
-        val domainName = entityMap["domainName"].toString()
+        // Revisit CCU don't have domain name
+        val domainName = entityMap["dis"].toString()
         val id = entityMap["id"].toString()
-        ccus[id] = Device(domainName, id)
+        ccus[id] = Ccu(domainName, id)
     }
 }
 class Floor(domainName : String, id : String) : Entity(domainName, id) {
@@ -70,6 +71,22 @@ class Device(domainName : String, id : String) : Entity(domainName, id) {
     }
     fun getPoint(domainName: String) : Point? {
         return points[domainName]
+    }
+}
+class Ccu(domainName : String, id : String) : Entity(domainName, id) {
+    val equips = mutableMapOf<String, Equip>()
+    val devices = mutableMapOf<String, Device>()
+
+    fun addEquip(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        equips[id] = Equip(domainName, id)
+    }
+
+    fun addDevice(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        devices[id] = Device(domainName, id)
     }
 }
 class Point(domainName : String, id : String) : Entity(domainName, id) {

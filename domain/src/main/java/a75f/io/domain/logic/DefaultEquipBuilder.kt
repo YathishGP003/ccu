@@ -17,7 +17,7 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String, tz : String?) : Equip {
+    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String, tz : String?, profileName: String?) : Equip {
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -27,6 +27,10 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         if (profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(profileConfiguration.roomRef)
+        }
+
+        if (profileName != null) {
+            equipBuilder.setProfile(profileName)
         }
 
         modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}

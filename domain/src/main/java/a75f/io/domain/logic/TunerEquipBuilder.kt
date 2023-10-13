@@ -18,7 +18,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef(hayStack.context), siteRef)
     }
     fun buildTunerEquipAndPoints(modelDef: ModelDirective, siteRef : String): String {
-        val hayStackEquip = buildEquip(modelDef, null, siteRef)
+        val hayStackEquip = buildEquip(modelDef, null, siteRef, profileName = null)
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
@@ -86,7 +86,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
     private fun updateEquipAndPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, equipId: String, siteRef: String) : String{
 
-        val hayStackEquip = buildEquip(modelDef, null, siteRef)
+        val hayStackEquip = buildEquip(modelDef, null, siteRef, profileName = null)
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)

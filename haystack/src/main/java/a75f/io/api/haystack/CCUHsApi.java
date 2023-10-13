@@ -1805,6 +1805,14 @@ public class CCUHsApi
         return null;
     }
 
+    public @Nullable HashMap getCcu() {
+        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        if (ccu.size() > 0) {
+            return ccu;
+        } else {
+            return null;
+        }
+    }
     public @Nullable String getCcuName() {
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         if (ccu.size() > 0) {

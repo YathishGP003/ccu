@@ -74,6 +74,19 @@ object Domain {
         return equips
     }
 
+    fun getSystemEquipByDomainName(domainName: String): Equip? {
+        DomainManager.buildDomain(CCUHsApi.getInstance())
+        site?.ccus?.entries?.forEach {
+            it.value.equips.forEach { (_,equip)->
+                if (equip.domainName == domainName){
+                    return equip
+                }
+            }
+        }
+        return null
+    }
+
+
     @JvmStatic
     fun readPoint(domainName: String) : Map<Any,Any> {
         return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\"")

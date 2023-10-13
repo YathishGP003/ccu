@@ -1,5 +1,6 @@
 package a75f.io.device.mesh.hyperstat;
 
+import static a75f.io.api.haystack.Tags.HYPERSTAT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
 import android.util.Log;
@@ -76,7 +77,7 @@ public class HyperStatMsgReceiver {
             *
             * Actual Serialized data starts at index 17.
             */
-            CcuLog.e(L.TAG_CCU_DEVICE, "processMessage processMessage :"+ Arrays.toString(data));
+            CcuLog.e(L.TAG_CCU_DEVICE, "HyperStatMsgReceiver processMessage processMessage :"+ Arrays.toString(data));
     
             byte[] addrArray = Arrays.copyOfRange(data, HYPERSTAT_MESSAGE_ADDR_START_INDEX,
                                                   HYPERSTAT_MESSAGE_ADDR_END_INDEX);
@@ -96,8 +97,7 @@ public class HyperStatMsgReceiver {
 
                 So, skip evaluation here if the message contents are actually a HyperSplit message.
             */
-            if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE
-                    || messageType == MessageType.HYPERSPLIT_LOCAL_CONTROLS_OVERRIDE_MESSAGE) {
+            if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE) {
                 return;
             } else if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
@@ -139,19 +139,26 @@ public class HyperStatMsgReceiver {
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
 
-        CcuLog.i(L.TAG_CCU_DEVICE, "OverrideMessage: "+message.toString());
-
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
-        writeDesiredTemp(message, hsEquip, hayStack);
-        updateFanConditioningMode(hsEquip.getId(),message.getFanSpeed().ordinal(),message.getConditioningModeValue(),hsEquip,nodeAddress);
-        ZoneProfile profile = L.getProfile((short) nodeAddress);
-        runProfileAlgo(profile,(short) nodeAddress);
+        // HyperSplit and HyperStat local controls override messages share an index.
+        // So, handler method has to be called for both types.
+        // The HyperStat message processing is only done if the equip has a "hyperstat" tag.
+        if (hsEquip.getMarkers().contains(HYPERSTAT)) {
 
-        /** send the updated control  message*/
-        HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
-        sendAcknowledge(nodeAddress);
+            CcuLog.i(L.TAG_CCU_DEVICE, "OverrideMessage: "+message.toString());
+
+            writeDesiredTemp(message, hsEquip, hayStack);
+            updateFanConditioningMode(hsEquip.getId(), message.getFanSpeed().ordinal(), message.getConditioningModeValue(), hsEquip, nodeAddress);
+            ZoneProfile profile = L.getProfile((short) nodeAddress);
+            runProfileAlgo(profile, (short) nodeAddress);
+
+            /** send the updated control  message*/
+            HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
+            sendAcknowledge(nodeAddress);
+
+        }
     }
 
     private static void runProfileAlgo(ZoneProfile profile, short nodeAddress){

@@ -114,7 +114,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            
+
             if (messageType == MessageType.CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
@@ -509,7 +509,7 @@ public class LSerial
 
     private static boolean isHyperSplitMessage(MessageType messageType) {
         return messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
-                messageType == MessageType.HYPERSPLIT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
+                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 
 }

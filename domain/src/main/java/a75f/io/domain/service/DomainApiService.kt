@@ -5,6 +5,7 @@ import a75f.io.domain.BuildConfig
 import a75f.io.logger.CcuLog
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -19,15 +20,28 @@ import java.util.concurrent.TimeUnit
 
 interface DomainModelerService {
 
-    @GET("/models/modbus/list")
+    @GET("/models/external/list")
     fun getModbusModelsList(
         @retrofit2.http.Query("tag-names") tagNames: String?
     ): retrofit2.Call<ResponseBody>
 
-    @GET("/models/modbus/{modelId}/modbus-json")
+    @GET("/models/external/{modelId}/modbus-json")
     fun getModelById(
         @retrofit2.http.Path("modelId") modelId: String?
     ): retrofit2.Call<ResponseBody>
+
+
+
+    @GET("/hayloft/models/modbus/list")
+    fun getExternalModbusModelsList(
+        @retrofit2.http.Query("tag-names") tagNames: String?
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/hayloft/models/modbus/{modelId}/modbus-json")
+    fun getExternalModelById(
+        @retrofit2.http.Path("modelId") modelId: String?
+    ): retrofit2.Call<ResponseBody>
+
 
 }
 
@@ -42,11 +56,7 @@ class ServiceGenerator {
             .addInterceptor(Interceptor { chain: Interceptor.Chain ->
                 val bearerToken = CCUHsApi.getInstance().jwt
                 val originalRequest = chain.request()
-                val newRequest = originalRequest.newBuilder()
-                    .header("Authorization", "Bearer $bearerToken")
-                    .header("Accept","application/json")
-                    .addHeader("Content-Type", "text/json")
-                    .build()
+                val newRequest = addHeader(originalRequest)
                 CcuLog.d(
                     "CCU_HTTP_REQUEST",
                     "DomainService: [" + chain.request().method + "] " + chain.request().url + " - Token: " + bearerToken
@@ -72,5 +82,23 @@ class ServiceGenerator {
             .client(getOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    private fun addHeader(originalRequest: Request): Request {
+        val newRequest = originalRequest.newBuilder()
+        when (BuildConfig.BUILD_TYPE) {
+            "daikin_prod"  -> {
+                newRequest.header("Ocp-Apim-Subscription-Key", BuildConfig.DOMAIN_API_KEY)
+            }
+            "carrier_prod" -> {
+                newRequest.header("Ocp-Apim-Subscription-Key", BuildConfig.DOMAIN_API_KEY)
+            }
+            else -> {
+                newRequest.header("Authorization", "Bearer ${ CCUHsApi.getInstance().jwt}")
+                newRequest.header("Accept","application/json")
+                newRequest.addHeader("Content-Type", "text/json")
+            }
+        }
+        return newRequest.build()
     }
 }

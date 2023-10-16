@@ -1,5 +1,6 @@
 package a75f.io.domain.service
 
+import a75f.io.domain.BuildConfig
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,7 +15,12 @@ class DomainService {
     private val apiService = ServiceGenerator().provideDomainModelerService()
 
     fun readModbusModelsList(query: String, callback: ResponseCallback) {
-        val call: Call<ResponseBody> = apiService.getModbusModelsList(query)
+        val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")) {
+            apiService.getExternalModbusModelsList(query)
+        } else {
+            apiService.getModbusModelsList(query)
+        }
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful)
@@ -30,7 +36,12 @@ class DomainService {
 
 
     fun readModelById(modelId: String,callback: ResponseCallback){
-        val call: Call<ResponseBody> = apiService.getModelById(modelId)
+        val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")) {
+            apiService.getExternalModelById(modelId)
+        } else {
+            apiService.getModelById(modelId)
+        }
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful)

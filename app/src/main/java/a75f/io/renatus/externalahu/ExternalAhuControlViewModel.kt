@@ -188,9 +188,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 }
             }
             modbusProfile = ModbusProfile()
-            modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), floorRef, zoneRef,
+            modbusProfile.addMbEquip(equipModel.value.slaveId.value.toShort(), "SYSTEM", "SYSTEM",
                 equipModel.value.equipDevice.value, getParametersList(equipModel.value.equipDevice.value),
-                profileType, subEquipmentDevices,moduleLevel,equipModel.value.version.value)
+                 ProfileType.SYSTEM_DAB_EXTERNAL_AHU , subEquipmentDevices,"system",equipModel.value.version.value)
 
             L.ccu().zoneProfiles.add(modbusProfile)
             L.saveCCUState()
@@ -399,6 +399,30 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
+    }
+    private fun getModbusEquipMap(slaveId: Short): HashMap<Any, Any>? {
+        return CCUHsApi.getInstance()
+            .readEntity("equip and modbus and not equipRef and group == \"$slaveId\"")
+    }
+
+    private fun updateModbusProfile() {
+        modbusProfile.updateModbusEquip(
+            equipModel.value.equipDevice.value.deviceEquipRef,
+            equipModel.value.equipDevice.value.slaveId.toShort(),
+            equipModel.value.equipDevice.value,
+            getParametersList(equipModel.value)
+        )
+
+        equipModel.value.subEquips.forEach {
+            modbusProfile.updateModbusEquip(
+                it.value.equipDevice.value.deviceEquipRef,
+                it.value.equipDevice.value.slaveId.toShort(),
+                it.value.equipDevice.value,
+                getParametersList(it.value)
+            )
+        }
+        L.ccu().zoneProfiles.add(modbusProfile)
+        L.saveCCUState()
     }
 
 }

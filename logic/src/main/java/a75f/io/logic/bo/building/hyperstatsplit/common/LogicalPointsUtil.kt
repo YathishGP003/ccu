@@ -3,9 +3,13 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Kind
+import a75f.io.logic.ANALOG_VALUE
+import a75f.io.logic.BINARY_VALUE
 import a75f.io.logic.L
+import a75f.io.logic.addBacnetTags
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.common.LogicalPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusPressAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
@@ -41,7 +45,7 @@ class LogicalPointsUtil {
 
         fun createFanLowPoint(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readFanLowRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -55,14 +59,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val fanStage1Point = point.build();
+                addBacnetTags(fanStage1Point, 24, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(fanStage1Point)
             }
             return Point.Builder().setHashMap(readFanLowRelayLogicalPoint(equipRef)).build()
         }
 
         fun createFanMediumPoint(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readFanMediumRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -76,14 +82,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val fanStage2Point = point.build();
+                addBacnetTags(fanStage2Point, 25, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(fanStage2Point)
             }
             return Point.Builder().setHashMap(readFanMediumRelayLogicalPoint(equipRef)).build()
         }
 
         fun createFanHighPoint(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readFanHighRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -97,7 +105,9 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val fanStage3Point = point.build();
+                addBacnetTags(fanStage3Point, 26, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(fanStage3Point)
             }
             return Point.Builder().setHashMap(readFanHighRelayLogicalPoint(equipRef)).build()
         }
@@ -126,7 +136,7 @@ class LogicalPointsUtil {
 
         fun createPointForOccupiedEnabled(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readOccupiedEnabledRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -140,14 +150,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val occupiedEnabledPoint = point.build()
+                addBacnetTags(occupiedEnabledPoint, 41, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(occupiedEnabledPoint)
             }
             return Point.Builder().setHashMap(readOccupiedEnabledRelayLogicalPoint(equipRef)).build()
         }
 
         fun createPointForHumidifier(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -161,14 +173,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val humidifierPoint = point.build()
+                addBacnetTags(humidifierPoint, 37, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(humidifierPoint)
             }
             return Point.Builder().setHashMap(readHumidifierRelayLogicalPoint(equipRef)).build()
         }
 
         fun createPointForDeHumidifier(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readDeHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -182,7 +196,9 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val deHumidifierPoint = point.build()
+                addBacnetTags(deHumidifierPoint, 16, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(deHumidifierPoint)
             }
             return Point.Builder().setHashMap(readDeHumidifierRelayLogicalPoint(equipRef)).build()
         }
@@ -191,7 +207,7 @@ class LogicalPointsUtil {
         // CPU specific points
         fun createCoolingStage1Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point {
             val existingPoint = readCoolingStage1RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -205,14 +221,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val coolingStage1Point = point.build();
+                addBacnetTags(coolingStage1Point, 9, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(coolingStage1Point)
             }
             return Point.Builder().setHashMap(readCoolingStage1RelayLogicalPoint(equipRef)).build()
         }
 
          fun createCoolingStage2Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point{
             val existingPoint = readCoolingStage2RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -226,14 +244,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val coolingStage2Point = point.build()
+                addBacnetTags(coolingStage2Point, 10, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(coolingStage2Point)
             }
              return Point.Builder().setHashMap(readCoolingStage2RelayLogicalPoint(equipRef)).build()
          }
 
          fun createCoolingStage3Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point{
             val existingPoint = readCoolingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -247,15 +267,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-
-                addPointToHaystack(point.build())
+                val coolingStage3Point = point.build();
+                addBacnetTags(coolingStage3Point, 11, BINARY_VALUE, nodeAddress)
+                addPointToHaystack(coolingStage3Point)
             }
              return Point.Builder().setHashMap(readCoolingStage3RelayLogicalPoint(equipRef)).build()
          }
 
          fun createHeatingStage1Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point{
             val existingPoint = readHeatingStage1RelayLogicalPoint(equipRef)
 
@@ -270,15 +291,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-
-                addPointToHaystack(point.build())
+                val heatingStage1Point = point.build();
+                addBacnetTags(heatingStage1Point, 32, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(heatingStage1Point);
             }
              return Point.Builder().setHashMap(readHeatingStage1RelayLogicalPoint(equipRef)).build()
          }
 
          fun createHeatingStage2Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point{
             val existingPoint = readHeatingStage2RelayLogicalPoint(equipRef)
 
@@ -293,14 +315,16 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val heatingStage2Point = point.build();
+                addBacnetTags(heatingStage2Point, 33, BINARY_VALUE,  nodeAddress)
+                addPointToHaystack(heatingStage2Point)
             }
              return Point.Builder().setHashMap(readHeatingStage2RelayLogicalPoint(equipRef)).build()
          }
 
          fun createHeatingStage3Point(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
         ): Point{
             val existingPoint = readHeatingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
@@ -314,7 +338,9 @@ class LogicalPointsUtil {
                     .setEnums("off,on")
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val heatingStage3Point = point.build();
+                addBacnetTags(heatingStage3Point, 34, BINARY_VALUE,  nodeAddress)
+                addPointToHaystack(heatingStage3Point)
             }
              return Point.Builder().setHashMap(readHeatingStage3RelayLogicalPoint(equipRef)).build()
          }
@@ -452,7 +478,9 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val modulatingHeating = point.build();
+                addBacnetTags(modulatingHeating, 30, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(modulatingHeating)
             }
             return Point.Builder().setHashMap(readAnalogHeatingLogicalPoint(equipRef)).build()
         }
@@ -473,7 +501,9 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val modulatingCoolingPoint = point.build();
+                addBacnetTags(modulatingCoolingPoint, 7, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(modulatingCoolingPoint)
                 return Point.Builder().setHashMap(readAnalogCoolingLogicalPoint(equipRef)).build()
             }
              return Point.Builder().setHashMap(readAnalogCoolingLogicalPoint(equipRef)).build()
@@ -496,7 +526,9 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val fanSpeedPoint = point.build()
+                addBacnetTags(fanSpeedPoint, 23, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(fanSpeedPoint)
             }
              return Point.Builder().setHashMap(readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
          }

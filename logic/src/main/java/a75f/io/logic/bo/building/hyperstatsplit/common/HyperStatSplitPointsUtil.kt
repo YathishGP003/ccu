@@ -1,7 +1,11 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.*
+import a75f.io.logic.ANALOG_VALUE
+import a75f.io.logic.BINARY_VALUE
 import a75f.io.logic.L
+import a75f.io.logic.MULTI_STATE_VALUE
+import a75f.io.logic.addBacnetTags
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -364,6 +368,9 @@ class HyperStatSplitPointsUtil(
             "%"
         )
 
+        addBacnetTags(coolingLoopOutputPoint, 8, ANALOG_VALUE, nodeAddress.toInt())
+        addBacnetTags(heatingLoopOutputPoint, 31, ANALOG_VALUE, nodeAddress.toInt())
+        addBacnetTags(fanLoopOutputPoint, 22, ANALOG_VALUE, nodeAddress.toInt())
 
         loopOutputPointsList.add(Pair(coolingLoopOutputPoint, 0.0))
         loopOutputPointsList.add(Pair(heatingLoopOutputPoint, 0.0))
@@ -1211,12 +1218,14 @@ class HyperStatSplitPointsUtil(
             zoneCO2ThresholdPointMarkers,
             "cov","ppm"
         )
+        addBacnetTags(zoneCO2ThresholdPointPoint, 49, ANALOG_VALUE, nodeAddress.toInt())
 
         val zoneCO2TargetPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Target",
             zoneCO2TargetPointMarkers,
             "cov","ppm"
         )
+        addBacnetTags(zoneCO2TargetPointPoint, 48, ANALOG_VALUE, nodeAddress.toInt())
 
         co2ConfigPointsList.add(
             Pair(zoneCO2DamperOpeningRatePointPoint, zoneCO2DamperOpeningRate)
@@ -1309,12 +1318,14 @@ class HyperStatSplitPointsUtil(
             fanOperationsModePointMarkers,
             fanOperationsModePointEnums
         )
+        addBacnetTags(fanOperationsModePoint, 21, MULTI_STATE_VALUE, nodeAddress.toInt())
 
         val conditioningModePointPoint = createHaystackPointWithEnums(
             displayName = "$equipDis-ConditioningMode",
             conditioningModePointMarkers,
             conditioningModePointEnums
         )
+        addBacnetTags(conditioningModePointPoint, 46, MULTI_STATE_VALUE, nodeAddress.toInt())
 
         val targetDehumidifierPointPoint = createHaystackPointWithUnit(
             displayName = "$equipDis-targetDehumidifier",
@@ -1322,12 +1333,15 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
+        addBacnetTags(targetDehumidifierPointPoint, 50, ANALOG_VALUE, nodeAddress.toInt())
+
         val targetHumidifierPointPoint = createHaystackPointWithUnit(
             displayName = "$equipDis-targetHumidifier",
             humidifierPointMarkers,
             "cov",
             "%"
         )
+        addBacnetTags(targetHumidifierPointPoint, 51, ANALOG_VALUE, nodeAddress.toInt())
 
         userIntentPointList.add(Pair(fanOperationsModePoint, defaultFanMode.ordinal.toDouble()))
         userIntentPointList.add(Pair(conditioningModePointPoint, defaultConditioningMode.ordinal.toDouble()))
@@ -1439,11 +1453,11 @@ class HyperStatSplitPointsUtil(
             HyperStatSplitAssociationUtil.isRelayAssociatedToFanEnabled(relayState = relayState) ->
                 LogicalPointsUtil.createPointForFanEnable(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             HyperStatSplitAssociationUtil.isRelayAssociatedToOccupiedEnabled(relayState = relayState) ->
-                LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForOccupiedEnabled(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             HyperStatSplitAssociationUtil.isRelayAssociatedToHumidifier(relayState = relayState) ->
-                LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             HyperStatSplitAssociationUtil.isRelayAssociatedToDeHumidifier(relayState = relayState) ->
-                LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                LogicalPointsUtil.createPointForDeHumidifier(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage1(relayState = relayState) ->
                 LogicalPointsUtil.createPointForExhaustFanStage1(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage2(relayState = relayState) ->
@@ -1462,13 +1476,13 @@ class HyperStatSplitPointsUtil(
     private fun createCoolingStagesPoint(relayState: RelayState): Point {
         when (relayState.association) {
             CpuEconRelayAssociation.COOLING_STAGE_1 -> {
-                return LogicalPointsUtil.createCoolingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             CpuEconRelayAssociation.COOLING_STAGE_2 -> {
-                return LogicalPointsUtil.createCoolingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             CpuEconRelayAssociation.COOLING_STAGE_3 -> {
-                return LogicalPointsUtil.createCoolingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createCoolingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             else -> {}
         }
@@ -1478,13 +1492,13 @@ class HyperStatSplitPointsUtil(
     private fun createHeatingStagesPoint(relayState: RelayState): Point {
         when (relayState.association) {
             CpuEconRelayAssociation.HEATING_STAGE_1 -> {
-                return  LogicalPointsUtil.createHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return  LogicalPointsUtil.createHeatingStage1Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             CpuEconRelayAssociation.HEATING_STAGE_2 -> {
-                return LogicalPointsUtil.createHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createHeatingStage2Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             CpuEconRelayAssociation.HEATING_STAGE_3 -> {
-                return LogicalPointsUtil.createHeatingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
+                return LogicalPointsUtil.createHeatingStage3Point(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt())
             }
             else -> {}
         }
@@ -1493,9 +1507,9 @@ class HyperStatSplitPointsUtil(
 
     private fun createFanStagesPoint(fanStage: Int): Point {
         when (fanStage) {
-            1-> return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // Low
-            2-> return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // Medium
-            3-> return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz) // High
+            1-> return LogicalPointsUtil.createFanLowPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt()) // Low
+            2-> return LogicalPointsUtil.createFanMediumPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt()) // Medium
+            3-> return LogicalPointsUtil.createFanHighPoint(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress.toInt()) // High
         }
         throw NullPointerException("Fan stage can not be null")
     }
@@ -2213,29 +2227,36 @@ class HyperStatSplitPointsUtil(
             "cov",
             "%"
         )
+        addBacnetTags(humidityPoint, 38, ANALOG_VALUE, nodeAddress.toInt())
+
         val vocPoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_VOC.portSensor,
             vocPointMarkers,
             "cov",
             "ppb"
         )
+
         val illuminancePoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_ILLUMINANCE.portSensor,
             illuminanceSensorPointMarkers,
             "cov",
             "lux"
         )
+        addBacnetTags(illuminancePoint, 39, ANALOG_VALUE, nodeAddress.toInt())
+
         val soundPoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_SOUND.portSensor,
             soundSensorPointMarkers,
             "cov",
             "dB"
         )
+
         val occupancyPoint = createHaystackPointWithEnums(
             "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor,
             occupancySensorPointMarkers,
             "off,on"
         )
+        addBacnetTags(occupancyPoint, 40, BINARY_VALUE, nodeAddress.toInt())
 
         logicalPointsList.add(Triple(co2Point, Port.SENSOR_CO2, 0.0))
         logicalPointsList.add(Triple(occupancyPoint, Port.SENSOR_OCCUPANCY, 0.0))
@@ -2259,6 +2280,7 @@ class HyperStatSplitPointsUtil(
             displayName = "$equipDis-temperatureOffset",
             markers = temperatureOffsetMarkers
         )
+        addBacnetTags(temperatureOffsetPoint, 17, ANALOG_VALUE, nodeAddress.toInt())
         val temperatureOffsetPointId = addPointToHaystack(point = temperatureOffsetPoint)
 
         addDefaultValueForPoint(
@@ -2340,7 +2362,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "\u00B0F"
         )
-
+        addBacnetTags(desiredTempPoint, 18, ANALOG_VALUE, nodeAddress.toInt())
 
         val desiredTempCoolingPoint = createHaystackPointWithUnit(
             "$equipDis-desiredTempCooling",
@@ -2348,12 +2370,15 @@ class HyperStatSplitPointsUtil(
             "cov",
             "\u00B0F"
         )
+        addBacnetTags(desiredTempCoolingPoint, 20, ANALOG_VALUE, nodeAddress.toInt())
+
         val desiredTempHeatingPoint = createHaystackPointWithUnit(
             "$equipDis-desiredTempHeating",
             desiredTempHeatingPointMarkers,
             "cov",
             "\u00B0F"
         )
+        addBacnetTags(desiredTempHeatingPoint, 19, ANALOG_VALUE, nodeAddress.toInt())
 
         val currentTempPoint = createHaystackPointWithUnit(
             "$equipDis-currentTemp",
@@ -2361,7 +2386,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "\u00B0F"
         )
-
+        addBacnetTags(currentTempPoint, 14, ANALOG_VALUE, nodeAddress.toInt())
 
         val equipStatusPoint = createHaystackPointWithEnums(
             "$equipDis-equipStatus",
@@ -2431,7 +2456,7 @@ class HyperStatSplitPointsUtil(
             markers = operatingModeMarkers,
             enums = operatingModePointEnums
         )
-
+        addBacnetTags(operatingModeModePoint, 47, MULTI_STATE_VALUE, nodeAddress.toInt())
          addPointToHaystack(point = occupancyModePoint)
         val occupancyDetectionPointId = addPointToHaystack(point = occupancyDetection)
         val operatingModeModePointId = addPointToHaystack(point = operatingModeModePoint)

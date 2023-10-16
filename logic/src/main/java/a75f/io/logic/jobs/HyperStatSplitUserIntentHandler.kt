@@ -192,6 +192,9 @@ class HyperStatSplitUserIntentHandler {
                     if (outsideAirFinalLoopOutput > outsideDamperMinOpen && !(condensateOverflow > 0.0)) {
                         if(economizingLoopOutput > outsideDamperMinOpen && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
                             status += "Free Cooling ON"
+                            if (dcvLoopOutput > outsideDamperMinOpen) {
+                                status += ", DCV ON"
+                            }
                         } else if (dcvLoopOutput > outsideDamperMinOpen) {
                             status += "DCV ON"
                         }

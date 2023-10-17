@@ -1524,7 +1524,7 @@ public class CCUHsApi
         importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import building tuners
-        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient, false);
 
         //import Named schedule
         importNamedSchedule(hClient);
@@ -1681,7 +1681,7 @@ public class CCUHsApi
         }
     }
 
-    private void importBuildingTuners(String siteId, HClient hClient) {
+    private void importBuildingTuners(String siteId, HClient hClient, boolean isImportNeeded) {
         CcuLog.i(TAG, " importBuildingTuners");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
@@ -1774,6 +1774,11 @@ public class CCUHsApi
                     }
                 }
 
+                if(isImportNeeded){
+                    importPointArrays(hDicts);
+                }
+
+                ArrayList<HDict> scheduleDicts = new ArrayList<>();
                 //schedulable points
                 for (Point p : schedulablePoints)
                 {
@@ -1789,14 +1794,14 @@ public class CCUHsApi
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
                             HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
-                            hDicts.add(pid);
+                            scheduleDicts.add(pid);
                         } else {
                             CcuLog.i(TAG, "Schedulable default Point already imported "+p.getId());
                         }
 
                     }
                 }
-                importPointArrays(hDicts);
+                importPointArrays(scheduleDicts);
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
@@ -1810,7 +1815,7 @@ public class CCUHsApi
             return;
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient, true);
     }
 
     public HGrid getRemoteSiteDetails(String siteId)

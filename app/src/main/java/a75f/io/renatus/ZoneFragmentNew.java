@@ -14,6 +14,7 @@ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationPendingDialog;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -330,6 +331,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
+        if(!validateMigration()) {
+            showMigrationPendingDialog(requireContext());
+        }
     }
 
     @Override

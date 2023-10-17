@@ -150,7 +150,7 @@ public class HttpUtil {
                         responsee.append(linee);
                         responsee.append('\n');
                     }
-                    CcuLog.e("CCU_HS", "Response error stream: " + responsee.toString());
+                    CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream: " + responsee.toString());
                 }
 
                 //Get Response
@@ -165,7 +165,7 @@ public class HttpUtil {
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
-                CcuLog.e("CCU_HS", "Exception reading stream: " + e.getLocalizedMessage());
+                CcuLog.e("CCU_HTTP_RESPONSE", "Exception reading stream: " + e.getLocalizedMessage());
 
                 if (connection != null) {
                     connection.disconnect();

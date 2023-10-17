@@ -233,7 +233,7 @@ public class SyncStatusService {
         //HRef before sending them. This is should bs removed to use above code once it is done.
         
         ArrayList<HDict> unsyncedDictList = new ArrayList<>();
-        CcuLog.d("CCU_HS_Sync", " Unsynced Data : " + unsyncedIdList.size());
+        CcuLog.d("CCU_HS_SYNC", " Unsynced Data : " + unsyncedIdList.size());
         ListIterator<String> unSyncItr = unsyncedIdList.listIterator();
         while(unSyncItr.hasNext()) {
             String id = unSyncItr.next();
@@ -250,7 +250,7 @@ public class SyncStatusService {
             unsyncedDictList.add(builder.toDict());
         }
         HGrid unsyncedGridData = HGridBuilder.dictsToGrid(unsyncedDictList.toArray(new HDict[0]));
-        
+
         return new HGridIterator(unsyncedGridData);
     }
     
@@ -274,9 +274,13 @@ public class SyncStatusService {
                 continue;
             }
             HDictBuilder builder = new HDictBuilder();
+            CcuLog.d("CCU_HS_SYNC", "made new HDictBuilder()");
             builder.add(entity);
+            CcuLog.d("CCU_HS_SYNC", "added entity");
             updateRefs(entity, builder);
+            CcuLog.d("CCU_HS_SYNC", "updated refs");
             updatedDictList.add(builder.toDict());
+            CcuLog.d("CCU_HS_SYNC", "updated dict refs");
         }
         HGrid updatedGridData = HGridBuilder.dictsToGrid(updatedDictList.toArray(new HDict[0]));
         CcuLog.d("CCU_HS", "updated data : "+HZincWriter.gridToString(updatedGridData));

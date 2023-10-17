@@ -2,6 +2,7 @@ package a75f.io.constants;
 
 public class WhoFiledConstants {
     public static final String HYPERSTAT_WHO = "HyperStat";
+    public static final String HYPERSTAT_SPLIT_WHO = "HyperStat Split";
     public static final String SMARTNODE_WHO = "SmartNode";
     public static final String HELIONODE_WHO = "HelioNode";
     public static final String SMARTSTAT_WHO = "SmartStat";

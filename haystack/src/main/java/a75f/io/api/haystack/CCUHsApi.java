@@ -489,6 +489,7 @@ public class CCUHsApi
         d.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String deviceId = tagsDb.addDevice(d);
         syncStatusService.addUnSyncedEntity(deviceId);
+        Log.d("CCU_HS_SYNC", "deviceId for created HSS = " + deviceId);
         return deviceId;
     }
 
@@ -772,7 +773,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            CcuLog.e("CCU_HS","Entity does not exist "+id);
+            CcuLog.d("CCU_HS_SYNC","Entity does not exist "+id);
         }
         return null;
     }
@@ -781,7 +782,7 @@ public class CCUHsApi
         try {
             return hsClient.readByIds(ids);
         } catch (UnknownRecException e) {
-            CcuLog.e("CCU_HS", "Entity does not exist ");
+            CcuLog.d("CCU_HS", "Entity does not exist ");
         }
         return null;
     }

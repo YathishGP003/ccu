@@ -265,7 +265,9 @@ class HyperStatPointsUtil(
             hayStackAPI.updatePoint(point, point.id)
             point.id
         }else {
-            hayStackAPI.addPoint(point)
+            val id: String = hayStackAPI.addPoint(point)
+            //Log.d("CCU_HS_SYNC", id + ", " + point.displayName.toString())
+            id
         }
     }
 

@@ -8,6 +8,8 @@
 //
 package org.projecthaystack;
 
+import android.util.Log;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;

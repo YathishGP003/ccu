@@ -125,6 +125,15 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
+        if (HSUtil.isHyperStatSplitConfig(pointUid, CCUHsApi.getInstance())
+                && !localPoint.getMarkers().contains(Tags.DESIRED)
+                && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
+                && !localPoint.getMarkers().contains(Tags.TUNER)) {
+            HyperstatSplitReconfigurationHandler.Companion.handleHyperStatSplitConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
+            return;
+        }
+
         /* Only the config changes require profile specific handling.
          * DesiredTemp or Schedule type updates are handled using generic implementation below.
          */

@@ -350,6 +350,12 @@ public class HSUtil
                 ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
                 || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU) || equip.containsKey(Tags.VRV));
     }
+
+    public static boolean isHyperStatSplitConfig(String id, CCUHsApi hayStack) {
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
+        return equip.containsKey(Tags.HYPERSTATSPLIT) && equip.containsKey(Tags.CPU);
+    }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);

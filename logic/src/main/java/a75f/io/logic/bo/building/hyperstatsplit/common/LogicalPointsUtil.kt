@@ -550,7 +550,9 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 88, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
              return Point.Builder().setHashMap(readAnalogOutOaoLogicalPoint(equipRef)).build()
          }
@@ -572,7 +574,10 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val fanSpeedPoint = point.build()
+                addBacnetTags(fanSpeedPoint, 93, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(fanSpeedPoint)
+
             }
             return Point.Builder().setHashMap(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
         }
@@ -618,7 +623,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("\u00B0F")
                 supplyAirTempMarkers.forEach { supplyAirTempPoint.addMarker(it) }
-                addPointToHaystack(supplyAirTempPoint.build())
+                val supplyAirTemp = supplyAirTempPoint.build()
+                addBacnetTags(supplyAirTemp, 1, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(supplyAirTemp)
             }
             return Point.Builder().setHashMap(readSupplyAirTempSensor(equipRef)).build()
         }
@@ -639,7 +646,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("%")
                 supplyAirHumidityMarkers.forEach { supplyAirHumidityPoint.addMarker(it) }
-                addPointToHaystack(supplyAirHumidityPoint.build())
+                val supplyAirHumidity = supplyAirHumidityPoint.build()
+                addBacnetTags(supplyAirHumidity, 85, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(supplyAirHumidity)
             }
             return Point.Builder().setHashMap(readSupplyAirHumiditySensor(equipRef)).build()
         }
@@ -661,7 +670,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("\u00B0F")
                 mixedAirTempMarkers.forEach { mixedAirTempPoint.addMarker(it) }
-                addPointToHaystack(mixedAirTempPoint.build())
+                val mixedAirTemp = mixedAirTempPoint.build()
+                addBacnetTags(mixedAirTemp, 84, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(mixedAirTemp)
             }
             return Point.Builder().setHashMap(readMixedAirTempSensor(equipRef)).build()
         }
@@ -682,7 +693,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("%")
                 mixedAirHumidityMarkers.forEach { mixedAirHumidityPoint.addMarker(it) }
-                addPointToHaystack(mixedAirHumidityPoint.build())
+                val mixedAirHumidity = mixedAirHumidityPoint.build()
+                addBacnetTags(mixedAirHumidity, 86, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(mixedAirHumidity)
             }
             return Point.Builder().setHashMap(readMixedAirHumiditySensor(equipRef)).build()
         }
@@ -694,17 +707,19 @@ class LogicalPointsUtil {
 
             val existingPoint = readOutsideAirTempSensor(equipRef)
             if(existingPoint.isEmpty()) {
-                val supplyAirTempMarkers = arrayOf("outside", "air", "temp", "sensor", "cur", "his", "logical", "standalone", "zone")
+                val outsideAirTempMarkers = arrayOf("outside", "air", "temp", "sensor", "cur", "his", "logical", "standalone", "zone")
 
-                val supplyAirTempPoint = Point.Builder()
+                val outsideAirTempPoint = Point.Builder()
                     .setDisplayName("$equipDis-outsideAirTempSensor")
                     .setGroup(nodeAddress)
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("\u00B0F")
-                supplyAirTempMarkers.forEach { supplyAirTempPoint.addMarker(it) }
-                addPointToHaystack(supplyAirTempPoint.build())
+                outsideAirTempMarkers.forEach { outsideAirTempPoint.addMarker(it) }
+                val outsideAirTemp = outsideAirTempPoint.build()
+                addBacnetTags(outsideAirTemp, 43, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(outsideAirTemp)
             }
             return Point.Builder().setHashMap(readOutsideAirTempSensor(equipRef)).build()
         }
@@ -725,9 +740,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setUnit("%")
                 outsideAirHumidityMarkers.forEach { outsideAirHumidityPoint.addMarker(it) }
-                addPointToHaystack(outsideAirHumidityPoint.build())
-            } else {
-                Log.d("CCU_HS_SYNC","OUTSIDE AIR HUMIDITY IS NOT EMPTY")
+                val outsideAirHumidity = outsideAirHumidityPoint.build()
+                addBacnetTags(outsideAirHumidity, 42, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(outsideAirHumidity)
             }
             return Point.Builder().setHashMap(readOutsideAirHumiditySensor(equipRef)).build()
         }
@@ -751,7 +766,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setEnums("normal,fault")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 92, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readCondensateNC(equipRef)).build()
         }
@@ -774,7 +791,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setEnums("normal,fault")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 92, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readCondensateNO(equipRef)).build()
         }
@@ -845,7 +864,9 @@ class LogicalPointsUtil {
                     // TODO: min, max, inc (verify with firmware once we get there)
                     .setUnit("inH₂O")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val ductStaticPressure = point.build()
+                addBacnetTags(ductStaticPressure, 87, ANALOG_VALUE, nodeAddress.toInt())
+                addPointToHaystack(ductStaticPressure)
             }
             return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,"static")).build()
         }
@@ -859,9 +880,11 @@ class LogicalPointsUtil {
 
             var pressureTag = "pressure1in"
             var name = "pressure1"
+            var bacnetId = 89
             if(sensorType == DuctPressureSensorType.DUCT_PRESSURE_0_2) {
                 pressureTag = "pressure2in"
                 name = "pressure2"
+                bacnetId = 90
             }
             val existingPoint = readDuctPressureSensor(equipRef,pressureTag)
             if(existingPoint.isEmpty()) {
@@ -878,7 +901,9 @@ class LogicalPointsUtil {
                     .setMinVal(min).setMaxVal(max).setIncrementVal(inc)
                     .setUnit(unit)
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, bacnetId, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readDuctPressureSensor(equipRef,pressureTag)).build()
         }
@@ -903,7 +928,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setEnums("normal,fault")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readFilterNC(equipRef)).build()
         }
@@ -927,7 +954,9 @@ class LogicalPointsUtil {
                     .setTz(tz).setHisInterpolate("cov")
                     .setEnums("normal,fault")
                 markers.forEach { point.addMarker(it) }
-                addPointToHaystack(point.build())
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readFilterNO(equipRef)).build()
         }

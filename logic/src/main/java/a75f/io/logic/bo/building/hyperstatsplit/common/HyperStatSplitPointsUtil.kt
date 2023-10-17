@@ -2221,6 +2221,8 @@ class HyperStatSplitPointsUtil(
             "cov",
             "ppm"
         )
+        addBacnetTags(co2Point, 4, ANALOG_VALUE, nodeAddress.toInt())
+
         val humidityPoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_RH.portSensor,
             humidityPointMarkers,
@@ -2235,6 +2237,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "ppb"
         )
+        addBacnetTags(vocPoint, 45, ANALOG_VALUE, nodeAddress.toInt())
 
         val illuminancePoint = createHaystackPointWithUnit(
             "$equipDis-zone" + Port.SENSOR_ILLUMINANCE.portSensor,
@@ -2250,6 +2253,7 @@ class HyperStatSplitPointsUtil(
             "cov",
             "dB"
         )
+        addBacnetTags(soundPoint, 44, ANALOG_VALUE, nodeAddress.toInt())
 
         val occupancyPoint = createHaystackPointWithEnums(
             "$equipDis-"+ Port.SENSOR_OCCUPANCY.portSensor,

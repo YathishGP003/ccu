@@ -35,12 +35,12 @@ class DomainService {
     }
 
 
-    fun readModelById(modelId: String,callback: ResponseCallback){
+    fun readModelById(modelId: String,version: String, callback: ResponseCallback){
         val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
             || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")) {
-            apiService.getExternalModelById(modelId)
+            apiService.getExternalModelById(modelId,version)
         } else {
-            apiService.getModelById(modelId)
+            apiService.getModelById(modelId,version)
         }
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {

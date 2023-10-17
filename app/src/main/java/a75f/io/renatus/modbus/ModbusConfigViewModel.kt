@@ -168,7 +168,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     fun fetchModelDetails(selectedDevice: String) {
         val modelId = getModelIdByName(selectedDevice)
-        domainService.readModelById(modelId, object : ResponseCallback {
+        val version = getVersionByID(modelId)
+        domainService.readModelById(modelId, version, object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 if (!response.isNullOrEmpty()) {
                     try {
@@ -178,7 +179,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                             model.jsonContent = response
                             model.equipDevice.value = equipmentDevice
                             model.parameters = getParameters(equipmentDevice)
-                            model.version.value = getVersionByID(modelId)
+                            model.version.value = version
                             val subDeviceList = mutableListOf<MutableState<EquipModel>>()
                             equipModel.value = model
                             if (equipmentDevice.equips != null && equipmentDevice.equips.isNotEmpty()) {

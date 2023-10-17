@@ -27,7 +27,8 @@ interface DomainModelerService {
 
     @GET("/models/external/{modelId}/modbus-json")
     fun getModelById(
-        @retrofit2.http.Path("modelId") modelId: String?
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?
     ): retrofit2.Call<ResponseBody>
 
 
@@ -39,7 +40,8 @@ interface DomainModelerService {
 
     @GET("/hayloft/models/modbus/{modelId}/modbus-json")
     fun getExternalModelById(
-        @retrofit2.http.Path("modelId") modelId: String?
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?
     ): retrofit2.Call<ResponseBody>
 
 

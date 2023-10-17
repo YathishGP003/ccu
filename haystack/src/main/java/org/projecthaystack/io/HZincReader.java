@@ -20,6 +20,7 @@ import org.projecthaystack.*;
  */
 public class HZincReader extends HGridReader
 {
+  private boolean isReadChanges = false;
 
 //////////////////////////////////////////////////////////////////////////
 // Construction
@@ -92,6 +93,11 @@ public class HZincReader extends HGridReader
     return (HGrid)readVal(true);
   }
 
+  @Override
+  public HGrid readGridForReadChanges() {
+    isReadChanges = true;
+    return (HGrid)readVal(true);
+  }
   /** Read a list of grids separated by blank line from stream */
   public HGrid[] readGrids()
   {
@@ -149,7 +155,7 @@ public class HZincReader extends HGridReader
       if ("R".equals(id))   return HRemove.VAL;
       if ("NaN".equals(id)) return HNum.NaN;
       if ("INF".equals(id)) return HNum.POS_INF;
-
+      if ("duration".equals(id)) return null;
       throw err("Unexpected identifier: " + id);
     }
 
@@ -381,10 +387,24 @@ public class HZincReader extends HGridReader
     cur = peek;
     curVal = peekVal;
     curLine = peekLine;
+    if(isReadChanges && isCurrentSymbolIdentifierAndValueIsDuration()){
+      peek = HaystackToken.id;
+      isSkipped = false;
+    }else {
+      peek = tokenizer.next();
+      peekVal = tokenizer.val;
+      peekLine = tokenizer.line;
+      isSkipped = true;
+    }
+  }
 
-    peek = tokenizer.next();
-    peekVal = tokenizer.val;
-    peekLine = tokenizer.line;
+  /*While parsing readChanges response if there is null value for a level then identifier becomes "duration"
+  *[{level:8 val: duration:0 who:"web_Kumar " lastModifiedDateTime:2023-10-04T11:22:27.392Z}
+  * In above case val field became empty while converting response into zinc format to resolve this
+  * issue in this function we hardcoded that if identifier is duration skip reading next token
+  * This case happens when there is a user-intent change where level-10 gets cleared val becomes null.*/
+  private boolean isCurrentSymbolIdentifierAndValueIsDuration() {
+    return isSkipped && cur !=null && curVal!= null && cur.symbol.equals("identifier") && curVal.equals("duration");
   }
 
   private ParseException err(String msg) { return err(msg, null); }
@@ -399,6 +419,7 @@ public class HZincReader extends HGridReader
   private HaystackToken cur;
   private Object curVal;
   private int curLine;
+  private boolean isSkipped = false;
 
   private HaystackToken peek;
   private Object peekVal;

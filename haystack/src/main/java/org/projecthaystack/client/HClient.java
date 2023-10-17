@@ -705,7 +705,11 @@ public class HClient extends HProj
     CcuLog.d("CCU_HCLIENT", "reqStr: " + reqStr);
     uri = getUri(uri, op);
     String resStr = postString(uri + op, reqStr);
-    return (resStr == null ? null : new HZincReader(resStr).readGrid());
+    if(op.equals("readChanges")){
+      return (resStr == null ? null : new HZincReader(resStr).readGridForReadChanges());
+    }else {
+      return (resStr == null ? null : new HZincReader(resStr).readGrid());
+    }
   }
 
   private String postString(String uriStr, String req) {

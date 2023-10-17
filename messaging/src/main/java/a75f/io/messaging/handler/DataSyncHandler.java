@@ -433,36 +433,41 @@ public class DataSyncHandler {
     }
 
     private boolean isMapValid(MapImpl priorityArrayMap, String id, CCUHsApi ccuHsApi) {
-        return priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_LEVEL) && priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_VAL) &&
+        return priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_LEVEL) &&
                 priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_WHO)&& ccuHsApi.isEntityExisting(id);
     }
     private void setVal(MapImpl priorityArrayMap, HashMap<Object, Object> pointHash, CCUHsApi ccuHsApi) {
         int level = Integer.parseInt(priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).toString());
-        String value = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString();
-        String who = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString();
-        String localValue = HSUtil.getLevelEntityOfPoint(Objects.requireNonNull(
-                pointHash.get(Tags.ID)).toString(), level, HayStackConstants.WRITABLE_ARRAY_VAL, ccuHsApi);
-        String pointRef = Objects.requireNonNull(pointHash.get(Tags.ID)).toString();
-        logIt("LEVEL " + level + " VALUE FROM READ_CHANGES CALL " + value + " WHO " + who + " PointRef " +
-                pointRef + " LOCAL_VALUE " + localValue);
-        if (!value.equals(localValue)) {
-            HashMap<Object, Object> localPointHash = ccuHsApi.readMapById(pointHash.get(Tags.ID).toString());
-            if (pointHash.containsKey("scheduleType") && !pointHash.containsKey("modbus")) {
-                if(isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)){
-                    updateScheduleType(pointRef, level, value, pointHash, who, ccuHsApi);
+        if(priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_VAL)) {
+            String value = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString();
+            String who = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString();
+            String localValue = HSUtil.getLevelEntityOfPoint(Objects.requireNonNull(
+                    pointHash.get(Tags.ID)).toString(), level, HayStackConstants.WRITABLE_ARRAY_VAL, ccuHsApi);
+            String pointRef = Objects.requireNonNull(pointHash.get(Tags.ID)).toString();
+            logIt("LEVEL " + level + " VALUE FROM READ_CHANGES CALL " + value + " WHO " + who + " PointRef " +
+                    pointRef + " LOCAL_VALUE " + localValue);
+            if (!value.equals(localValue)) {
+                HashMap<Object, Object> localPointHash = ccuHsApi.readMapById(pointHash.get(Tags.ID).toString());
+                if (pointHash.containsKey("scheduleType") && !pointHash.containsKey("modbus")) {
+                    if (isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)) {
+                        updateScheduleType(pointRef, level, value, pointHash, who, ccuHsApi);
+                    }
+                    return;
                 }
-                return;
-            }
-            if (pointHash.containsKey("desired") && !pointHash.containsKey("modbus")) {
-                if(isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)) {
-                    updateDesiredTemperature(pointRef, level, value, pointHash, who, ccuHsApi);
+                if (pointHash.containsKey("desired") && !pointHash.containsKey("modbus")) {
+                    if (isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)) {
+                        updateDesiredTemperature(pointRef, level, value, pointHash, who, ccuHsApi);
+                    }
+                    return;
                 }
-                return;
+                if (isCloudPointHasLatestValue(pointHash, level, priorityArrayMap, ccuHsApi)) {
+                    updatePoint(pointRef, pointHash, ccuHsApi, priorityArrayMap);
+                    CcuLog.i("CCU_READ_CHANGES", " Synced Point " + pointRef);
+                }
             }
-            if (isCloudPointHasLatestValue(pointHash, level, priorityArrayMap, ccuHsApi)) {
-                updatePoint(pointRef, pointHash, ccuHsApi, priorityArrayMap);
-                CcuLog.i("CCU_READ_CHANGES", " Synced Point " + pointRef);
-            }
+        } else {
+            logIt("Removing level - "+level+" of  point ID "+pointHash.get("id"));
+            ccuHsApi.clearPointArrayLevel(pointHash.get("id").toString(), level, true);
         }
     }
 
@@ -550,6 +555,7 @@ public class DataSyncHandler {
                 } catch (Exception e){
                     e.printStackTrace();
                     Log.e(L.TAG_CCU_READ_CHANGES, " Data sync failed ");
+                    // If Data sync failed retry when App is restarted
                 }
             }
         }, DELAY_FOR_DATA_SYNC);

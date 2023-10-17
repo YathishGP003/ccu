@@ -20,4 +20,7 @@ public abstract class HGridReader
   /** Read a grid */
   public abstract HGrid readGrid();
 
+  /** Read a grid For readChanges API response only */
+  public abstract HGrid readGridForReadChanges();
+
 }

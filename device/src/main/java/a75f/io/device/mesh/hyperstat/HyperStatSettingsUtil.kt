@@ -2,6 +2,7 @@ package a75f.io.device.mesh.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
@@ -391,19 +392,19 @@ class HyperStatSettingsUtil {
 
         }
         // Below method returns query based on DesiredTempMode
-        fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+        fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
             return if (mode == TemperatureMode.COOLING) {
-                "cooling and user and limit and $query"
+                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             } else {
-                "heating and user and limit and $query"
+                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }
         }
 
-        fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+        fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
             return if(mode == TemperatureMode.HEATING){
-                "heating and user and limit and $query"
+                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }else{
-                "cooling and user and limit and $query"
+                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }
         }
 

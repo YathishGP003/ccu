@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 class ComposeUtil {
     companion object {
         val  primaryColor = getThemeColor()
-        var greyColor = Color(android.graphics.Color.parseColor("#A1A1A1"))
+        var greyColor = Color(android.graphics.Color.parseColor("#666666"))
         val myFontFamily = FontFamily(
             Font(R.font.lato_light, FontWeight.Light),
             Font(R.font.lato_regular, FontWeight.Normal),

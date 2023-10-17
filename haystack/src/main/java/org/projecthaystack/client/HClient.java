@@ -38,6 +38,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -962,7 +963,10 @@ public class HClient extends HProj
           return s.toString();
         }
         }catch (Exception e){
-          if(e instanceof InterruptedIOException){
+          if(e instanceof SocketTimeoutException){
+            // don't throw exception. Do retry
+          }
+          else if(e instanceof InterruptedIOException){
             throw new NullHGridException(e.getMessage());
           }
           Log.i("CCU_REPLACE","Exception occurred while hitting "+uriStr);
@@ -974,7 +978,7 @@ public class HClient extends HProj
         retryCountCallback.onRetry(retry);
         isOKResponse = false;
 
-      }while(retry <= maxRetryCount);
+      }while(retry < maxRetryCount);
     }
     return null;
   }

@@ -535,7 +535,7 @@ public abstract class UtilityApplication extends Application {
         messageHandlerSubscriber.subscribeAllHandlers();
     }
 
-    private void scheduleMessagingAckJob() {
+    public static void scheduleMessagingAckJob() {
         if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
             String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();

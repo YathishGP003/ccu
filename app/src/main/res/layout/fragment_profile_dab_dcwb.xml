@@ -68,16 +68,13 @@
                     android:text="@string/label_adaptive_delta_t"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/adaptiveDeltaEnable"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_toRightOf="@+id/texAdaptiveDelta"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                layout="@layout/custom_ccu_switch"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -97,17 +94,14 @@
                     android:text="@string/label_max_exit_water_temp"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/maxExitWaterTemp"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="120dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch"/>
             </RelativeLayout>
 
         </TableRow>

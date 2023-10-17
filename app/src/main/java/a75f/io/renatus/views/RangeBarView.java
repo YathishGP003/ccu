@@ -107,22 +107,46 @@ public class RangeBarView extends LinearLayout {
     }
     public void setHeatingLimitMin(double heatingLimitMin) {
         if (rangeBar != null){
-            rangeBar.setHeatingLimitMin((float) heatingLimitMin);
+            rangeBar.setHeatingLimitMin((float) heatingLimitMin, false);
         }
     }
     public void setCoolingLimitMax(double coolingLimitMax) {
         if (rangeBar != null){
-            rangeBar.setCoolingLimitMax((float) coolingLimitMax);
+            rangeBar.setCoolingLimitMax((float) coolingLimitMax, false);
         }
     }
     public void setHeatingLimitMax(double heatingLimitMax) {
         if (rangeBar != null){
-            rangeBar.setHeatingLimitMax((float) heatingLimitMax);
+            rangeBar.setHeatingLimitMax((float) heatingLimitMax, false);
         }
     }
     public void setCoolingLimitMin(double coolingLimitMin) {
         if (rangeBar != null){
-            rangeBar.setCoolingLimitMin((float) coolingLimitMin);
+            rangeBar.setCoolingLimitMin((float) coolingLimitMin, false);
+        }
+    }
+
+    public void setHeatingLimitMinForced(double heatingLimitMin) {
+        if (rangeBar != null){
+            rangeBar.setHeatingLimitMin((float) heatingLimitMin, true);
+        }
+    }
+
+    public void setHeatingLimitMaxForced(double heatingLimitMax) {
+        if (rangeBar != null){
+            rangeBar.setHeatingLimitMax((float) heatingLimitMax, true);
+        }
+    }
+
+    public void setCoolingLimitMinForced(double coolingLimitMin) {
+        if (rangeBar != null){
+            rangeBar.setCoolingLimitMin((float) coolingLimitMin, true);
+        }
+    }
+
+    public void setCoolingLimitMaxForced(double coolingLimitMax) {
+        if (rangeBar != null){
+            rangeBar.setCoolingLimitMax((float) coolingLimitMax, true);
         }
     }
     public float getHeatValue() {
@@ -214,6 +238,12 @@ public class RangeBarView extends LinearLayout {
         }
         rangeBar.setLowerHeatingTemp((float) heatValue);
         rangeBar.setLowerCoolingTemp((float) coolValue);
+    }
+
+    public void setUnOccupiedSetBack( int setBack) {
+        if (rangeBar != null){
+            rangeBar.setUnOccupiedSetBack( setBack);
+        }
     }
 }
 

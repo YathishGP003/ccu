@@ -25,29 +25,29 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-         }
+        }
         dev {
             minifyEnabled false
-         }
+        }
         dev_qa {
             minifyEnabled false
-         }
+        }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-         }
+        }
         qa {
             minifyEnabled false
-         }
+        }
         carrier_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-         }
+        }
         staging {
             minifyEnabled false
-         }
+        }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
@@ -82,11 +82,11 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20230830.2"
+def domainLibVersion = "20231012.1"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion+'-qa')  {
+    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion+'-prod')  {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -130,7 +130,7 @@ task getExternalLibraryPaths {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-'+domainLibVersion+'-qa.jar')) {
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-'+domainLibVersion+'-prod.jar')) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

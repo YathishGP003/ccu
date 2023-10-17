@@ -162,4 +162,9 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
             }
         }, NOT_STARTED_TIMER);
     }
+
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        return false;
+    }
 }

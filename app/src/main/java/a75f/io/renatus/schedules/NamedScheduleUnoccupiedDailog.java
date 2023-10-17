@@ -61,7 +61,7 @@ public class NamedScheduleUnoccupiedDailog extends DialogFragment {
 
         title.setText(DAYS.get(getArguments().getInt(PARAM_DAY))+" | ");
         if(isCelsiusTunerAvailableStatus()){
-            unOccupied.setText(UnitUtils.fahrenheitToCelsiusRelative(schedule.getUnoccupiedZoneSetback()) + "\u00B0C");
+            unOccupied.setText((int)UnitUtils.fahrenheitToCelsiusRelative(schedule.getUnoccupiedZoneSetback()) + "\u00B0C");
         }else {
             unOccupied.setText(schedule.getUnoccupiedZoneSetback().toString() + "\u00B0F");
         }

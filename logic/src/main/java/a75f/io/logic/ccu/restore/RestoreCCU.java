@@ -95,7 +95,7 @@ public class RestoreCCU {
                     Date lastUpdatedDatetime = new Date(HDateTime.make(lastUpdatedDatetimeString).millis());
                     lastUpdatedDatetimeString =
                             new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime);
-                    isCCUOnline = false;// isCCUOnline(lastUpdatedDatetime);
+                    isCCUOnline = isCCUOnline(lastUpdatedDatetime);
 
                 }else{
                     lastUpdatedDatetimeString = "n/a";

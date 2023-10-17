@@ -85,7 +85,7 @@ public class SingleStageProfile extends ZoneProfile
             reset((short) sseEquip.nodeAddr);
             CcuLog.d(L.TAG_CCU_UI,"sse Zone Temp Dead: "+sseEquip.nodeAddr+" roomTemp : "+sseEquip.getCurrentTemp());
             state = TEMPDEAD;
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and not message and his and group == \"" + sseEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and not ota and not message and his and group == \"" + sseEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+sseEquip.nodeAddr+"\"");
             if (!curStatus.equals("Zone Temp Dead"))
             {

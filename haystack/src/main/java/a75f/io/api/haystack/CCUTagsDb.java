@@ -1471,7 +1471,6 @@ public class CCUTagsDb extends HServer {
 
         a75f.io.data.WriteArray writeArray = fillValuesFromArray(array);
         String data = new Gson().toJson(writeArray);
-        Log.d("SpooTag", "onPointWrite@@3 id->" + rec.id().toString() + "<-data->"+data);
 
         String key = rec.id().toString().replace("@", "");
         WritableArray writableArray = new WritableArray(key, data);
@@ -1528,7 +1527,7 @@ public class CCUTagsDb extends HServer {
         writeArray.setDuration(0, level - 1);
 
         String data = new Gson().toJson(writeArray);
-        Log.d("SpooTag", "onPointWrite@@4 id->" + id + "<-data->"+data);
+
 
         String key = id.toString().replace("@", "");
         WritableArray writableArray = new WritableArray(key, data);
@@ -1823,5 +1822,9 @@ public class CCUTagsDb extends HServer {
 
     private HayStackEntity getEntityFromDict() {
         return null;
+    }
+
+    public boolean isEntityExisting(HRef id) {
+        return tagsMap.keySet().contains(id.val);
     }
 }

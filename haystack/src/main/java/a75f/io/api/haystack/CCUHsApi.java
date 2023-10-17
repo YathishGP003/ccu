@@ -18,7 +18,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -248,6 +250,97 @@ public class CCUHsApi
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
+    }
+    public void trimZoneSchedules(Schedule buildingSchedule) {
+        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
+        for (HashMap m : zones) {
+            if(m.containsKey("scheduleRef")) {
+                ArrayList<Interval> intervalSpills = new ArrayList<>();
+                Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
+                if(zoneSchedule == null) {
+                    // Handling Crash here.
+                    zoneSchedule = CCUHsApi.getInstance().getRemoteSchedule(m.get("scheduleRef").toString());
+                    CcuLog.d("CCU_MESSAGING", "Fetching the schedule from remote " + zoneSchedule);
+                    if(zoneSchedule == null) {
+                        CcuLog.d("CCU_MESSAGING", "The schedule retrieved from the remote source is also null.");
+                        continue;
+                    }
+                }
+                if (zoneSchedule.getMarkers().contains("disabled")) {
+                    continue;
+                }
+                ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+                for (Interval v : zoneIntervals) {
+                    CcuLog.d("CCU_MESSAGING", "Zone interval " + v);
+                }
+                ArrayList<Interval> systemIntervals = buildingSchedule.getMergedIntervals();
+                ArrayList<Interval> splitSchedules = new ArrayList<>();
+                for (Interval v : systemIntervals) {
+                    //Multiday schedule starting on sunday has monday segment falling in the next week.Split and realign that.
+                    if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
+                        long now = MockTime.getInstance().getMockTime();
+                        DateTime startTime = new DateTime(now).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
+                        DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay()).withMinuteOfHour(v.getEnd().getMinuteOfHour()).withSecondOfMinute(v.getEnd().getSecondOfMinute()).withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
+                        splitSchedules.add(new Interval(startTime, endTime));
+                    }
+                }
+                systemIntervals.addAll(splitSchedules);
+                for (Interval v : systemIntervals) {
+                    CcuLog.d("CCU_MESSAGING", "Merged System interval " + v);
+                }
+                for (Interval z : zoneIntervals) {
+                    boolean contains = false;
+                    for (Interval s : systemIntervals) {
+                        if (s.contains(z)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        for (Interval s : systemIntervals) {
+                            if (s.overlaps(z)) {
+                                if (z.getStartMillis() < s.getStartMillis()) {
+                                    intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                                } else if (z.getEndMillis() > s.getEndMillis()) {
+                                    intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                                }
+                                contains = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!contains) {
+                        intervalSpills.add(z);
+                        CcuLog.d("CCU_MESSAGING", " Zone Interval not contained " + z);
+                    }
+                }
+                Iterator daysIterator = zoneSchedule.getDays().iterator();
+                while (daysIterator.hasNext()) {
+                    Schedule.Days d = (Schedule.Days) daysIterator.next();
+                    Interval i = zoneSchedule.getScheduledInterval(d);
+                    for (Interval spill : intervalSpills) {
+                        if (!i.contains(spill)) {
+                            continue;
+                        }
+                        if (spill.getStartMillis() <= i.getStartMillis() && spill.getEndMillis() >= i.getEndMillis()) {
+                            daysIterator.remove();
+                            continue;
+                        }
+                        if (spill.getStartMillis() <= i.getStartMillis()) {
+                            d.setSthh(spill.getEnd().getHourOfDay());
+                            d.setStmm(spill.getEnd().getMinuteOfHour());
+                        } else if (i.getEndMillis() >= spill.getStartMillis()) {
+                            d.setEthh(spill.getStart().getHourOfDay());
+                            d.setEtmm(spill.getStart().getMinuteOfHour());
+                        }
+                    }
+                }
+                if (zoneSchedule.getRoomRef()!= null && intervalSpills.size() > 0) {
+                    Log.d("CCU_MESSAGING", "Trimmed Zone Schedule " + zoneSchedule.toString());
+                    CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+                }
+            }
+        }
     }
 
     public String getGatewayServiceUrl() {
@@ -1861,6 +1954,7 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
+        addCCURefForDiagAndSystemEntities();
         return localId;
     }
 
@@ -1921,6 +2015,14 @@ public class CCUHsApi
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
         CCUHsApi.getInstance().syncEntityTree();
+    }
+    public void addCCURefForDiagAndSystemEntities(){
+        List<HashMap<Object, Object>> equipMapList = readAllEntities("equip and (diag or (system and not modbus))");
+        for(HashMap<Object, Object> equipMap : equipMapList) {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            CCUHsApi.getInstance().updateEquip(equip, equip.getId());
+            updateCcuRefForDiagPoints(equip);
+        }
     }
     public void updateDiagGatewayRef(String systemEquipRef){
         HashMap diag = read("equip and diag");
@@ -2033,8 +2135,13 @@ public class CCUHsApi
     }
 
     public BuildingOccupancy getBuildingOccupancy(){
-        return new BuildingOccupancy.Builder().setHDict(
-                tagsDb.read(Queries.BUILDING_OCCUPANCY)).build();
+        BuildingOccupancy.Builder builder = new BuildingOccupancy.Builder().setHDict(
+                tagsDb.read(Queries.BUILDING_OCCUPANCY, false));
+        if (builder == null) {
+            return null;
+        } else {
+            return builder.build();
+        }
     }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
@@ -2667,8 +2774,7 @@ public class CCUHsApi
     }
 
     public boolean isEntityExisting(String id) {
-        HashMap<Object, Object> entity = readMapById(id);
-        return !entity.isEmpty();
+        return tagsDb.isEntityExisting(HRef.copy(id));
     }
 
     public void setEntitySynced(String id) {
@@ -2838,6 +2944,14 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
+    public String deleteRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
 
     }
@@ -3014,7 +3128,7 @@ public class CCUHsApi
     public String fetchRemoteEntityByQuery(String query) {
         HDictBuilder b = new HDictBuilder().add("filter", query);
         HDict[] dictArr = {b.toDict()};
-        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+        return HttpUtil.executePost(getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
 
@@ -3179,5 +3293,15 @@ public class CCUHsApi
         }
         CcuLog.e("CCU_HS", "Failed to fetch BuildingTuner equip");
         return null;
+    }
+
+    public void updatePointWithoutUpdatingLastModifiedTime(Point point, String id) {
+        if(!isBuildingTunerPoint(point)){
+            point.setCcuRef(getCcuId());
+        }
+        tagsDb.updatePoint(point, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
+        }
     }
 }

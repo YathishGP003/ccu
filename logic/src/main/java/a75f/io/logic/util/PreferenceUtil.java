@@ -2,7 +2,6 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.Preference;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -54,6 +53,7 @@ public class PreferenceUtil {
     private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
     private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+    private static final String TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION = "TrueCfmPressureUnitTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
@@ -78,6 +78,7 @@ public class PreferenceUtil {
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
     private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
+    private static final String CCUREF_TAG_MIGRATION_DIAG = "ccuRefTagMigrationDiag";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
     private static final String SCHEDULES_MIGRATION = "schedulesMigration";
 
@@ -90,6 +91,13 @@ public class PreferenceUtil {
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
+    private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
+
+
+    public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
+
+    private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -132,13 +140,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
+        return sharedPreferences.getBoolean(FIRMWARE_VERSION_POINT_MIGRATION,false);
     }
 
-    public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
+    public static void updateMigrationStatus(String migrationName, boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
+        editor.putBoolean(migrationName, isMigrated);
         editor.apply();
     }
 
@@ -244,7 +252,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-    
+
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }
@@ -482,6 +490,14 @@ public class PreferenceUtil {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
      }
 
+    public static boolean getTrueCfmPressureUnitTagMigration() {
+        return getBooleanPreference(TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION);
+    }
+
+    public static void setTrueCfmPressureUnitTagMigration() {
+        setBooleanPreference(TRUE_CFM_PRESSURE_UNIT_TAG_MIGRATION, true);
+    }
+
     public static boolean getAutoCommissioningMigration() {
         return getBooleanPreference(AUTO_COMMISSIONING_MIGRATION);
     }
@@ -661,6 +677,14 @@ public class PreferenceUtil {
         setBooleanPreference(CCUREF_TAG_MIGRATION, status);
     }
 
+    public static boolean getCcuRefTagMigrationForDiag() {
+        return getBooleanPreference(CCUREF_TAG_MIGRATION_DIAG);
+    }
+
+    public static void setCcuRefTagMigrationForDiag(boolean status) {
+        setBooleanPreference(CCUREF_TAG_MIGRATION_DIAG, status);
+    }
+
     private static void setLongPreference(String key, long value) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putLong(key, value);
@@ -728,5 +752,19 @@ public class PreferenceUtil {
     }
     public static void installationCompleted() {
         setBooleanPreference(INSTALL_CCU_IN_PROGRESS, false);
+    }
+
+    public static boolean getCleanUpOtherCcuZoneSchedules() {
+       return getBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES);
+    }
+
+    public static void setCleanUpOtherCcuZoneSchedules() {
+        setBooleanPreference(CLEAN_OTHER_CCU_ZONE_SCHEDULES, true);
+    }
+    public static boolean getTemperatureTIPortEnabled() {
+        return getBooleanPreference(ENABLE_TEMPERATURE_TI_PORT);
+    }
+    public static void setTemperatureTIPortEnabled() {
+        setBooleanPreference(ENABLE_TEMPERATURE_TI_PORT, true);
     }
 }

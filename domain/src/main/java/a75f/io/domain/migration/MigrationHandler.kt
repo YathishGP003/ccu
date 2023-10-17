@@ -8,6 +8,8 @@ import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.HyperStat2pfcuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.EquipBuilderConfig
+import a75f.io.domain.logic.PointBuilderConfig
 
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
@@ -44,7 +46,8 @@ class MigrationHandler(var haystack: CCUHsApi) {
         tobeAdded.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
-                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration, siteRef, profileName = null) // revisit profileName can not be null
+                val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
+                    haystack.timeZone, haystack.siteName!!))
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)
@@ -56,7 +59,8 @@ class MigrationHandler(var haystack: CCUHsApi) {
                 profileConfiguration.floorRef = equipDetails["floorRef"].toString()
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id, siteRef)
+                    val hayStackPoint = equipBuilder.buildPoint(PointBuilderConfig( modelPointDef,
+                                        profileConfiguration, equip.id, siteRef, haystack.timeZone, equipDetails["dis"].toString()))
                     val pointId = haystack.addPoint(hayStackPoint)
                     hayStackPoint.id = pointId
                     DomainManager.addPoint(hayStackPoint)
@@ -76,16 +80,19 @@ class MigrationHandler(var haystack: CCUHsApi) {
         tobeUpdate.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
-                val hayStackEquip = equipBuilder.buildEquip(newModel, profileConfiguration, siteRef, profileName = null) // revisit profileName can not be null
+                val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
+                    haystack.timeZone, haystack.siteName!!))
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)
                 }
             }
             equips.forEach {equip ->
+                val equipDetails = haystack.readMapById(equip.id)
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(modelPointDef, profileConfiguration, equip.id, siteRef)
+                    val hayStackPoint = equipBuilder.buildPoint(PointBuilderConfig( modelPointDef,
+                        profileConfiguration, equip.id, siteRef, haystack.timeZone, equipDetails["dis"].toString()))
                     val currentPoint = equip.points.filter { it.value.domainName == diffDomain.domainName }
                     val existingId = currentPoint[diffDomain.domainName]?.id
                     hayStackPoint.id = existingId

@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
@@ -19,15 +20,16 @@ import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.ModbusLevel
 import a75f.io.renatus.modbus.util.NO_INTERNET
 import a75f.io.renatus.modbus.util.NO_MODEL_DATA_FOUND
+import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.modbus.util.OnItemSelect
+import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.SAVING
+import a75f.io.renatus.modbus.util.WARNING
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
-import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.isAllParamsSelected
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
-import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -36,6 +38,8 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -147,16 +151,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         }
                         deviceList.value = itemList
                     } else {
-                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND)
+                        showErrorDialog(context, MODBUS_DEVICE_LIST_NOT_FOUND, true)
                     }
                 } catch (e: Exception) {
-                    showErrorDialog(context, NO_INTERNET)
+                    showErrorDialog(context, NO_INTERNET, true)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET)
+                showErrorDialog(context, NO_INTERNET, true)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
@@ -191,22 +195,29 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                                 equipModel.value.subEquips = mutableListOf()
                             }
                         } else {
-                            showErrorDialog(context, NO_MODEL_DATA_FOUND)
+                            showErrorDialog(context, NO_MODEL_DATA_FOUND, false)
                         }
                     } catch (e: JsonParseException) {
-                        showErrorDialog(context, NO_INTERNET)
+                        showErrorDialog(context, NO_INTERNET, true)
                     }
                 } else {
-                    showErrorDialog(context, NO_INTERNET)
+                    showErrorDialog(context, NO_INTERNET, true)
                 }
                 ProgressDialogUtils.hideProgressDialog()
             }
 
             override fun onErrorResponse(response: String?) {
-                showErrorDialog(context, NO_INTERNET)
+                showErrorDialog(context, NO_INTERNET, true)
                 ProgressDialogUtils.hideProgressDialog()
             }
         })
+    }
+
+    private fun getSlaveIds(isParent: Boolean): List<String> {
+        val slaveAddress: ArrayList<String> = ArrayList()
+        if (!isParent) slaveAddress.add(SAME_AS_PARENT)
+        for (i in 1..247) slaveAddress.add(i.toString())
+        return slaveAddress
     }
 
     private fun getModelIdByName(name: String): String {
@@ -252,8 +263,22 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
         }
+        val zoneEquips = HSUtil.getEquips(zoneRef)
+        if (!zoneRef.contentEquals("SYSTEM") && zoneEquips.size > 0) {
+            if (equipModel.value.equipDevice.value.equipType.contains("EMR",true)) {
+                showToast("Unpair all Modbus Modules and try to pair Energy meter",context)
+                return false
+            }
+            zoneEquips.forEach {
+                if (it.equipType.contains("EMR",true)) {
+                    showToast("Zone should have no equips to pair Energy meter",context)
+                    return false
+                }
+            }
+        }
         return true
     }
+
 
     fun saveConfiguration() {
         if (isValidConfiguration()) {
@@ -369,6 +394,21 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         equipModel.value.selectAllParameters.value = isAllSelected
     }
+
+    fun showErrorDialog(context: Context, message: String, wantToDismiss: Boolean) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(WARNING)
+        builder.setIcon(R.drawable.ic_warning)
+        builder.setMessage(message)
+        builder.setCancelable(false)
+        builder.setPositiveButton(OK) { dialog, _ ->
+            if (wantToDismiss)
+                _isDialogOpen.value = false
+            dialog.dismiss()
+        }
+        builder.create().show()
+    }
+
 
     private fun isModbusExist(): Boolean {
         return (CCUHsApi.getInstance().readAllEntities(

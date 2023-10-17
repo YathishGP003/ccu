@@ -42,7 +42,12 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             haystack.registerOnCcuRegistrationCompletedListener(this)
         } else {
             CcuLog.i(L.TAG_CCU_TUNER, "Tuner equip already exists.")
-            syncBuildingTuners(haystack)
+            if (!doCutOverMigrationIfRequired(haystack)) {
+                syncBuildingTuners(haystack)
+            }
+            //TODO- Test backend migration.
+            //val equipBuilder = TunerEquipBuilder(haystack)
+            //equipBuilder.updateBackendBuildingTuner(haystack.site!!.id, haystack)
         }
     }
 
@@ -173,5 +178,19 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             syncBuildingTuners(siteId, hClient, haystack)
             //TODO- Propagate level 16 to system and zone tuner copies
         }
+    }
+
+    private fun doCutOverMigrationIfRequired(haystack: CCUHsApi) : Boolean {
+        val buildingEquip = haystack.readEntity("equip and tuner");
+        if (buildingEquip["domainName"]?.toString()?.isNotEmpty() == true) {
+            CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration complete.")
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration start.")
+            val equipBuilder = TunerEquipBuilder(haystack)
+            val equipId = buildingEquip["id"].toString()
+            equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, haystack.site!!)
+            return true
+        }
+        return false
     }
 }

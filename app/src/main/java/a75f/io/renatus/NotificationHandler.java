@@ -70,8 +70,8 @@ public class NotificationHandler {
     }
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", bIsConnected ? 1.0 :0.0);
         if (bIsConnected) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
             CcuLog.i(L.TAG_CCU_READ_CHANGES, "CCU IS CONNECTED TO WIFI " + new Date(System.currentTimeMillis()));
             long lastCCUUpdateTime = PreferenceUtil.getLastCCUUpdatedTime();
             CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is message expired "+isMessageTimeExpired(lastCCUUpdateTime) +

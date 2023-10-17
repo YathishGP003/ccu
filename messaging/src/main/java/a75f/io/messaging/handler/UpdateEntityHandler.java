@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -30,12 +31,14 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.messaging.MessageHandler;
 
 public class UpdateEntityHandler implements MessageHandler {
     public static final String CMD = "updateEntity";
     private static ZoneDataInterface zoneDataInterface = null;
+    private static BuildingOccupancyListener buildingOccupancyListener = null;
     public static void updateEntity(JsonObject msgObject, long timeToken){
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
@@ -192,6 +195,27 @@ public class UpdateEntityHandler implements MessageHandler {
         updateEntity(jsonObject, timeToken);
     }
 
+    @Override
+    public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        AtomicBoolean validMessage = new AtomicBoolean(true);
+        jsonObject.get("ids").getAsJsonArray().forEach( msgJson -> {
+            CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
+            String uid = msgJson.toString().replaceAll("\"", "");
+            HashMap<Object,Object> entity = ccuHsApi.readEntity("id == " + HRef.make(uid));
+            if((entity.get(Tags.MODBUS) != null && entity.get(Tags.EQUIP) != null)
+                    || entity.get("room") != null
+                    || entity.get("floor") != null
+            || (entity.containsKey("building") && entity.containsKey("occupancy"))){
+                CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler handle updated "+entity);
+                validMessage.set(false);
+            }
+
+        });
+        return validMessage.get();
+    }
+
     private static void updateBuildingOccupancy(String uid){
         String response = getResponseString(uid);
         if (response != null) {
@@ -205,8 +229,16 @@ public class UpdateEntityHandler implements MessageHandler {
                 UpdateScheduleHandler.trimZoneSchedules(s);
             }
         }
+        refreshBuildingOccupancyScreen();
     }
-
+    public static void setBuildingOccupancyListener(BuildingOccupancyListener listener) {
+        buildingOccupancyListener = listener;
+    }
+    public static void refreshBuildingOccupancyScreen() {
+        if (buildingOccupancyListener != null) {
+            buildingOccupancyListener.refreshScreen();
+        }
+    }
     private static String getResponseString(String uid) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};

@@ -321,6 +321,7 @@ public class UsbService extends Service
 				if (!keep) {
 					break;
 				}
+				sleep(100);
 			}
 			if (!keep) {
 				// There is no USB devices connected (but usb host were listed). Send an intent to MainActivity.
@@ -356,6 +357,7 @@ public class UsbService extends Service
 						Log.d(TAG, "Failed to open Serial CM device "+device.toString());
 					}
 				}
+				sleep(100);
 			}
 		}
 	}
@@ -581,11 +583,7 @@ public class UsbService extends Service
 				//
 				// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
 				// to be uploaded or not
-				try {
-					sleep(2000); // sleep some. YMMV with different chips.
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				sleep(2000); // sleep some. YMMV with different chips.
 				// Everything went as expected. Send an intent to MainActivity
 				Intent intent = new Intent(ACTION_USB_READY);
 				context.sendBroadcast(intent);
@@ -604,6 +602,14 @@ public class UsbService extends Service
 			// No driver for given device, even generic CDC driver could not be loaded
 			Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
 			context.sendBroadcast(intent);
+		}
+	}
+
+	public void sleep(long millis){
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }

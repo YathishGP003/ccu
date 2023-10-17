@@ -67,6 +67,7 @@ public class RangeBar extends View {
     double hdb = 2.0;
 
     private static boolean isUnoccupiedSetBackFragment;
+    int unOccupiedSetBack = 0;
 
     private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
     boolean isZoneSchedule;
@@ -77,6 +78,10 @@ public class RangeBar extends View {
     }
 
     private static final boolean DEBUG = true;
+
+    public void setUnOccupiedSetBack(int setBack) {
+        unOccupiedSetBack = setBack;
+    }
 
     enum RangeBarState {
         NONE,
@@ -121,21 +126,29 @@ public class RangeBar extends View {
         }
         //force push the text if overlap
         int dbWidth = 0;
-        Log.d("TAG", "drawSliderIcon: coolband " + cdb);
-        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + 2.5)){
-            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 20;
-        }
+            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 30;
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
         } else {
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
         }
 
-        if( isCelsiusTunerAvailableStatus()) {
-            canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
-                    xPos, (yPos - 10f), mTempIconPaint);
+        if(isCelsiusTunerAvailableStatus()) {
+            if(isUnoccupiedSetBackFragment){
+                if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT) {
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] + unOccupiedSetBack)))) - unOccupiedSetBack) + "\u00B0C",
+                            xPos, (yPos - 10f), mTempIconPaint);
+                } else {
+                    canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()] - unOccupiedSetBack)))) + unOccupiedSetBack) + "\u00B0C",
+                            xPos, (yPos - 10f), mTempIconPaint);
+                }
+            }else {
+                canvas.drawText((fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
+                        xPos, (yPos - 10f), mTempIconPaint);
+            }
+
         } else {
-            canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
+            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
                     xPos, (yPos - 10f), mTempIconPaint);
         }
     }
@@ -373,8 +386,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setHeatingLimitMin(float heatingLimitMin) {
-      if(heatingLimitMin <= lowerHeatingTemp) {
+    public void setHeatingLimitMin(float heatingLimitMin, boolean forced) {
+      if(heatingLimitMin <= lowerHeatingTemp || forced) {
           this.upperHeatingTemp = heatingLimitMin;
             if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] <= heatingLimitMin) {
                 temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMin;
@@ -383,8 +396,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setCoolingLimitMax(float coolingLimitMax) {
-        if(coolingLimitMax >= lowerCoolingTemp) {
+    public void setCoolingLimitMax(float coolingLimitMax, boolean forced) {
+        if(coolingLimitMax >= lowerCoolingTemp || forced) {
             this.upperCoolingTemp = coolingLimitMax;
             if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] >= coolingLimitMax){
                 temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMax;
@@ -393,9 +406,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setHeatingLimitMax(float heatingLimitMax) {
-        Log.i("amardebug","hee "+heatingLimitMax+upperHeatingTemp+lowerHeatingTemp+temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]);
-        if(heatingLimitMax <= lowerHeatingTemp) {
+    public void setHeatingLimitMax(float heatingLimitMax, boolean forced) {
+        if(heatingLimitMax <= lowerHeatingTemp || forced) {
             this.lowerHeatingTemp = heatingLimitMax;
             if (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] >= heatingLimitMax) {
                 temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = heatingLimitMax;
@@ -404,9 +416,8 @@ public class RangeBar extends View {
         invalidate();
     }
 
-    public void setCoolingLimitMin(float coolingLimitMin) {
-        Log.i("amardebug","coo "+coolingLimitMin+upperCoolingTemp+temps[RangeBarState.UPPER_COOLING_LIMIT.ordinal()]+temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()]);
-        if(coolingLimitMin <= upperCoolingTemp) {
+    public void setCoolingLimitMin(float coolingLimitMin, boolean forced) {
+        if(coolingLimitMin <= upperCoolingTemp || forced) {
             this.lowerCoolingTemp = coolingLimitMin;
             if(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] <= coolingLimitMin){
                 temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = coolingLimitMin;

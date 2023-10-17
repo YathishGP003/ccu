@@ -18,6 +18,7 @@ import org.projecthaystack.HList;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HVal;
 import org.projecthaystack.MapImpl;
+import org.projecthaystack.ParseException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
@@ -204,12 +205,17 @@ public class DataSyncHandler {
     }
     private boolean isCloudScheduleHasLatestValue(HDict localSchedule, HDict lastModifiedTimeInCloud) {
         if (localSchedule.has(Tags.LAST_MODIFIED_TIME) && lastModifiedTimeInCloud.has(Tags.LAST_MODIFIED_TIME)) {
-            HDateTime lastModifiedDateTimeInCCU = HDateTime.make(localSchedule.get(Tags.LAST_MODIFIED_TIME).toString());
-            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud.get(Tags.LAST_MODIFIED_TIME).toString());
-            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU+
-                    "lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud);
-            logIt("Is CCU has latest value ? schedule " + (lastModifiedDateTimeInCCU.millis() > lastModifiedDateTimeInCloud.millis()));
-            return lastModifiedDateTimeInCloud.millis() > lastModifiedDateTimeInCCU.millis();
+            try {
+                HDateTime lastModifiedDateTimeInCCU = HDateTime.make(localSchedule.get(Tags.LAST_MODIFIED_TIME).toString());
+                HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud.get(Tags.LAST_MODIFIED_TIME).toString());
+                logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU +
+                        "lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud);
+                return lastModifiedDateTimeInCloud.millis() > lastModifiedDateTimeInCCU.millis();
+            } catch (ParseException e) {
+            //This could result of past migration issue. Return true to attempt reading proper entity by DB.
+            CcuLog.e(L.TAG_CCU_READ_CHANGES,"Failed to read lastModifiedTime",e);
+            return true;
+        }
         }
         logIt("lastModifiedDateTimeInCCU is null");
         return true;

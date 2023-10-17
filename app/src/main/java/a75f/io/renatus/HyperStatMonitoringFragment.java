@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.NonNull;
@@ -34,6 +33,7 @@ import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -62,16 +62,16 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
     NumberPicker mTemperatureOffset;
 
     @BindView(R.id.th1)
-    ToggleButton mTherm1toggle;
+    CustomCCUSwitch mTherm1toggle;
 
     @BindView(R.id.th2)
-    ToggleButton mTherm2toggle;
+    CustomCCUSwitch mTherm2toggle;
 
     @BindView(R.id.anlg1)
-    ToggleButton mAnalog1toggle;
+    CustomCCUSwitch mAnalog1toggle;
 
     @BindView(R.id.anlg2)
-    ToggleButton mAnalog2toggle;
+    CustomCCUSwitch mAnalog2toggle;
 
     @BindView(R.id.th1select)
     Spinner mThermostat1Sp;

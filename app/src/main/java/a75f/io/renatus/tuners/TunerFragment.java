@@ -198,11 +198,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 editTunerSearch.clearFocus();
                 editTunerSearch.getText().clear();
                 ArrayList<Equip> equips = new ArrayList<>();
+
                 for (Floor f : HSUtil.getFloors()) {
                     for (Zone z : HSUtil.getZones(f.getId())) {
-                        equips.addAll(HSUtil.getEquips(z.getId()));
+                        equips.addAll(HSUtil.getNonModbusEquips(z.getId()));
                     }
                 }
+
                 ArrayList<Equip> UpdatedEquips = new ArrayList<>();
                 for(Equip p: equips){
                     HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(p.getId());

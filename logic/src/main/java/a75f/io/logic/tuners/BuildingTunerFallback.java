@@ -48,6 +48,8 @@ class BuildingTunerFallback {
         tagsValMap.put("sn,heating,airflow",TunerConstants.SN_HEATING_AIRFLOW_TEMP);
         tagsValMap.put("constant,temp,alert,time",TunerConstants.ZONE_PRIORITY_SPREAD);
         tagsValMap.put("abnormal,cur,temp,rise",TunerConstants.ZONE_PRIORITY_SPREAD);
+        tagsValMap.put("heating and precon and rate",TunerConstants.SYSTEM_PRECONDITION_RATE);
+        tagsValMap.put("cooling and precon and rate",TunerConstants.SYSTEM_PRECONDITION_RATE);
         
         tagsValMap.put("priority,spread",TunerConstants.ZONE_PRIORITY_SPREAD);
         tagsValMap.put("priority,multiplier",TunerConstants.ZONE_PRIORITY_MULTIPLIER);

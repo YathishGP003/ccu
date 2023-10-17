@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="12dp"
@@ -12,11 +14,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="30dp"
         android:fontFamily="@font/lato_bold"
         android:text="@string/_2_pipe_fancoil_unit"
         android:textAllCaps="true"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
         android:textColor="?orange_75f"
         android:textSize="33.5dp"
         android:textStyle="bold" />
@@ -48,15 +50,12 @@
                     android:text="@string/autoforceoccupied"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAFO"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
                 <TextView
                     android:id="@+id/textAutoAway"
@@ -66,31 +65,29 @@
                     android:layout_marginStart="80dp"
                     android:textAppearance="@style/text_appearance" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAutoAway"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
 
             </LinearLayout>
+
 
 
             <TextView
                 android:id="@+id/textEnable"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
+                android:text="@string/title_enable"
+                android:textSize="19.5dp"
+                android:textColor="@color/black"
                 android:layout_below="@+id/occupancy"
-                android:layout_marginLeft="282dp"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:text="@string/title_enable"
-                android:textColor="@color/black"
-                android:textSize="19.5dp" />
+                android:layout_marginLeft="282dp"/>
 
 
             <TextView
@@ -100,11 +97,11 @@
                 android:text="@string/title_testsignal"
                 android:textSize="19.5dp"
                 android:textColor="@color/black"
+                android:layout_below="@+id/occupancy"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
                 android:layout_toRightOf="@+id/textEnable"
-                android:layout_marginLeft="284dp"
-                android:layout_below="@+id/occupancy"/>
+                android:layout_marginLeft="284dp"/>
 
             <TextView
                 android:id="@+id/textTempOffset"
@@ -135,7 +132,7 @@
 
             <ImageView
                 android:id="@+id/imageHPInput"
-                android:layout_width="250dp"
+                android:layout_width="260dp"
                 android:layout_height="535dp"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginTop="32dp"
@@ -145,113 +142,89 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="18dp"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/imageHPInput"
                 android:layout_below="@+id/textEnable">
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleFanMed2pfcu"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleFanHigh2pfcu"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="20dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleFanLow"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="36.5dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAuxHeat2pfcu"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="15dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleWaterValve2pfcu"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="20dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleAirflow"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="72dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="60dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toogleExtSensor"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="20dp"
+                    layout="@layout/custom_ccu_switch" />
 
-                <ToggleButton
+                <include
                     android:id="@+id/toggleOccupancy"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+                    android:layout_marginTop="10dp"
+                    layout="@layout/custom_ccu_switch" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/lt_enableLabel"
-                android:layout_width="291dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 android:layout_marginLeft="15dp"
                 android:layout_toRightOf="@+id/lt_toggles"
                 android:layout_below="@+id/textEnable">
@@ -259,62 +232,62 @@
                 <TextView
                     android:id="@+id/textFanMed2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
+                    android:layout_height="40dp"
                     android:text="@string/label_fanmedium"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanHigh2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="25dp"
                     android:text="@string/label_fanhigh"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanLow2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="33.5dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_fanlow"
                     android:textAppearance="@style/text_appearance" />
                 <TextView
                     android:id="@+id/textAuxHeat"
-                    android:layout_width="195dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:textAppearance="@style/text_appearance"
                     android:text="@string/label_auxheat"/>
 
                 <TextView
                     android:id="@+id/text2pfcuWaterValve"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="38dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="25dp"
                     android:text="@string/label_watervalve"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textAirflow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="69dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="60dp"
                     android:textAppearance="@style/text_appearance"
                     android:text="@string/label_airflowtemp"/>
 
                 <TextView
                     android:id="@+id/textOccupancy"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="Supply Water Sensor"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textExtSensor"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_enableoccup"
                     android:textAppearance="@style/text_appearance" />
 

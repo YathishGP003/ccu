@@ -40,6 +40,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -59,13 +60,14 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	@BindView(R.id.analog4Min) Spinner analog4Min;
 	@BindView(R.id.analog4Max) Spinner analog4Max;
 
-	@BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
-	@BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
-	@BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
-	@BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
+	@BindView(R.id.toggleAnalog1)
+	CustomCCUSwitch ahuAnalog1Tb;
+	@BindView(R.id.toggleAnalog2) CustomCCUSwitch ahuAnalog2Tb;
+	@BindView(R.id.toggleAnalog3) CustomCCUSwitch ahuAnalog3Tb;
+	@BindView(R.id.toggleAnalog4) CustomCCUSwitch ahuAnalog4Tb;
 
-	@BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
-	@BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+	@BindView(R.id.toggleRelay3) CustomCCUSwitch relay3Tb;
+	@BindView(R.id.toggleRelay7) CustomCCUSwitch relay7Tb;
 
 	@BindView(R.id.relay7Spinner) Spinner relay7Spinner;
 

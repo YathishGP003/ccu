@@ -28,7 +28,6 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -54,6 +53,7 @@ import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SystemFragment;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.VavAnalogRtuProfile;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
@@ -63,6 +63,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
@@ -75,7 +76,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     ImageView imageView_Goback;
     Spinner spinnerSystemProile;
     ImageView imageRefresh;
-    ToggleButton toggleWifi;
+    CustomCCUSwitch toggleWifi;
     Button buttonNext;
     Prefs prefs;
     WifiManager mainWifiObj;
@@ -107,7 +108,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
 
         imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
-        toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
+        toggleWifi = findViewById(R.id.toggleWifi);
 
         showIcons(false);
         verticalTabAdapter = new VerticalTabAdapter(this, menu_icons, listView_icons, this, 0);
@@ -1296,6 +1297,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                         if (Globals.getInstance().isAckdMessagingEnabled()) {
                             MessagingClient.getInstance().init();
                         }
+                        UtilityApplication.scheduleMessagingAckJob();
                         CCUHsApi.getInstance().syncEntityWithPointWrite();
                     },  // ignore success
                     error -> {

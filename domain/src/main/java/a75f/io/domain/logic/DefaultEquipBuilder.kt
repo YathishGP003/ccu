@@ -17,78 +17,74 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(modelDef: ModelDirective, profileConfiguration: ProfileConfiguration?, siteRef : String, tz : String?, profileName: String?) : Equip {
+    override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
 
-        val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
-            .setDomainName(modelDef.domainName)
-            .setFloorRef(profileConfiguration?.floorRef)
-            .setGroup(profileConfiguration?.nodeAddress.toString())
-            .setSiteRef(siteRef)
+        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
+            .setDomainName(equipConfig.modelDef.domainName)
+            .setFloorRef(equipConfig.profileConfiguration?.floorRef)
+            .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+            .setSiteRef(equipConfig.siteRef)
 
-        if (profileConfiguration?.roomRef != null) {
-            equipBuilder.setRoomRef(profileConfiguration.roomRef)
+        if (equipConfig.profileConfiguration?.roomRef != null) {
+            equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
 
-        if (profileName != null) {
-            equipBuilder.setProfile(profileName)
-        }
-
-        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
-        modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
+        equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
             tag.defaultValue?.let {
                 equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }
         }
-        modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
             TagsUtil.getTagDefHVal(tag)?.let { equipBuilder.addTag(tag.name, it) }
         }
-        modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
             tag.defaultValue?.let {
                 equipBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
 
-        equipBuilder.addTag("modelId", HStr.make(modelDef.id))
-        equipBuilder.addTag("modelVersion", HStr.make("${modelDef.version?.major}" +
-                ".${modelDef.version?.minor}.${modelDef.version?.patch}"))
-        equipBuilder.setTz(tz)
+        equipBuilder.addTag("modelId", HStr.make(equipConfig.modelDef.id))
+        equipBuilder.addTag("modelVersion", HStr.make("${equipConfig.modelDef.version?.major}" +
+                ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"))
+        equipBuilder.setTz(equipConfig.tz)
         return equipBuilder.build()
     }
 
-    override fun buildPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration?, equipRef : String, siteRef: String, tz : String?) : Point {
+    override fun buildPoint(pointConfig : PointBuilderConfig) : Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
-            .setDomainName(modelDef.domainName)
-            .setEquipRef(equipRef)
-            .setFloorRef(configuration?.floorRef)
-            .setKind(Kind.parsePointType(modelDef.kind.name))
-            .setUnit(modelDef.defaultUnit)
-            .setGroup(configuration?.nodeAddress.toString())
-            .setSiteRef(siteRef)
+        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
+            .setDomainName(pointConfig.modelDef.domainName)
+            .setEquipRef(pointConfig.equipRef)
+            .setFloorRef(pointConfig.configuration?.floorRef)
+            .setKind(Kind.parsePointType(pointConfig.modelDef.kind.name))
+            .setUnit(pointConfig.modelDef.defaultUnit)
+            .setGroup(pointConfig.configuration?.nodeAddress.toString())
+            .setSiteRef(pointConfig.siteRef)
 
-        if (configuration?.roomRef != null) {
-            pointBuilder.setRoomRef(configuration.roomRef)
+        if (pointConfig.configuration?.roomRef != null) {
+            pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.
-        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
-        modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
-        modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }
         }
-        modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
-        if (modelDef.tags.find { it.name == Tags.HIS } != null && modelDef.tags.find { it.name == Tags.TZ } == null) {
-           tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(tz)) }
+        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null && pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null) {
+            pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
         }
 
         return pointBuilder.build()

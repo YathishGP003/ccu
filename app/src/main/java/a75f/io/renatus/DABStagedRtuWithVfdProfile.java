@@ -46,6 +46,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -55,14 +56,15 @@ import butterknife.ButterKnife;
 
 public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
-    @BindView(R.id.toggleRelay1) ToggleButton relay1Tb;
-    @BindView(R.id.toggleRelay2) ToggleButton relay2Tb;
-    @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
-    @BindView(R.id.toggleRelay4) ToggleButton relay4Tb;
-    @BindView(R.id.toggleRelay5) ToggleButton relay5Tb;
-    @BindView(R.id.toggleRelay6) ToggleButton relay6Tb;
-    @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
-    @BindView(R.id.toggleAnalog2) ToggleButton analog2Tb;
+    @BindView(R.id.toggleRelay1)
+    CustomCCUSwitch relay1Tb;
+    @BindView(R.id.toggleRelay2) CustomCCUSwitch relay2Tb;
+    @BindView(R.id.toggleRelay3) CustomCCUSwitch relay3Tb;
+    @BindView(R.id.toggleRelay4) CustomCCUSwitch relay4Tb;
+    @BindView(R.id.toggleRelay5) CustomCCUSwitch relay5Tb;
+    @BindView(R.id.toggleRelay6) CustomCCUSwitch relay6Tb;
+    @BindView(R.id.toggleRelay7) CustomCCUSwitch relay7Tb;
+    @BindView(R.id.toggleAnalog2) CustomCCUSwitch analog2Tb;
 
 
     @BindView(R.id.relay1Spinner) Spinner relay1Spinner;

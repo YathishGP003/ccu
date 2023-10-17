@@ -139,7 +139,9 @@ class ModbusConfigView : BaseDialogFragment() {
                                 },
                                 enableClick = true, isCompress = false
                             )
-                            HeaderTextView(viewModel.equipModel.value.version.value)
+                            if (viewModel.equipModel.value.version.value.isNotEmpty()) {
+                                HeaderTextView("V${viewModel.equipModel.value.version.value}")
+                            }
                         }
                     }
                 }

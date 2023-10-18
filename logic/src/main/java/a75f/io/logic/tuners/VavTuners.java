@@ -710,7 +710,7 @@ public class VavTuners {
                 .addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0")
                 .setMaxVal("5")
-                .setIncrementVal("0.2")
+                .setIncrementVal("0.5")
                 .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz)
                 .build();
@@ -1049,7 +1049,7 @@ public class VavTuners {
                 .addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0")
                 .setMaxVal("5")
-                .setIncrementVal("0.2")
+                .setIncrementVal("0.5")
                 .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
 

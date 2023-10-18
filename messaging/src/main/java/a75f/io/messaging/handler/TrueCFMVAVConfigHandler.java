@@ -55,7 +55,7 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and cooling and group == \""+equip.getGroup()+"\"");
         String maxValForMinCFM = String.valueOf(maxCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(maxValForMinCFM).build();
-        CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
             CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
         }
@@ -70,7 +70,7 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and heating and group == \""+equip.getGroup()+"\"");
         String minHeatingCFMValue = String.valueOf(maxHeatingCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(minHeatingCFMValue).build();
-        CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
             CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and heating and group == \""+equip.getGroup()+"\"", maxHeatingCfmValue);
         }

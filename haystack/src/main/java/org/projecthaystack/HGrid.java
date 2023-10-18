@@ -12,6 +12,8 @@ import java.util.*;
 
 import org.projecthaystack.io.*;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * HGrid is an immutable two dimension data structure of cols and rows.
  * Use HGridBuilder to construct a HGrid instance.
@@ -36,10 +38,9 @@ public class HGrid extends HVal
   {
     this.meta = meta;
     this.cols = cols;
-
-    if (meta == null)
-        throw new IllegalStateException("metadata cannot be null");
-
+    if (meta == null) {
+      throw new IllegalStateException("metadata cannot be null");
+    }
     this.rows = new HRow[rowList.size()];
     for (int i=0; i<rows.length; ++i)
     {
@@ -48,7 +49,6 @@ public class HGrid extends HVal
         throw new IllegalStateException("Row cells size != cols size");
       this.rows[i] = new HRow(this, cells);
     }
-
     this.colsByName = new HashMap();
     for (int i=0; i<cols.length; ++i)
     {

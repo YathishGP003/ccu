@@ -48,6 +48,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -251,6 +252,11 @@ public class MigrationUtil {
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
 
+        if(!PreferenceUtil.getTrueCfmPressureUnitTagMigration()) {
+            doTrueCfmPressureUnitTagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCfmPressureUnitTagMigration();
+        }
+
         if(!PreferenceUtil.getAutoAwayAutoForcedPointMigration()){
             autoAwayAutoForcedMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAutoAwayAutoForcedPointMigration();
@@ -288,6 +294,13 @@ public class MigrationUtil {
             CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
             PreferenceUtil.setCcuRefTagMigration(true);
             Log.i(TAG, "ccuRef migration completed");
+        }
+
+        if(!PreferenceUtil.getCcuRefTagMigrationForDiag()){
+            Log.i(TAG, "ccuRef migration for diag and system equip started");
+            ccuHsApi.addCCURefForDiagAndSystemEntities();
+            PreferenceUtil.setCcuRefTagMigrationForDiag(true);
+            Log.i(TAG, "ccuRef migration for diag and system equip completed");
         }
 
         if(!PreferenceUtil.getNewOccupancyMode()) {
@@ -396,6 +409,12 @@ public class MigrationUtil {
             removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
             PreferenceUtil.setRemoveDupCoolingLockoutTuner();
         }
+
+        if (!PreferenceUtil.getTemperatureTIPortEnabled()) {
+            enableTISensorPort(CCUHsApi.getInstance());
+            PreferenceUtil.setTemperatureTIPortEnabled();
+        }
+
         CCUHsApi.getInstance().removeAllNamedSchedule();
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
@@ -1714,6 +1733,19 @@ public class MigrationUtil {
 
     }
 
+    private static void doTrueCfmPressureUnitTagMigration(CCUHsApi haystack){
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (dab or vav) and zone");
+        equips.forEach(equip -> {
+            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
+
+            ArrayList<HashMap<Object, Object>> pressureSensors = haystack.readAllEntities("pressure and sensor and equipRef ==\""+actualEquip.getId()+"\"");
+            pressureSensors.forEach( pressureSensor -> {
+                Point pressureSensorPoint = new Point.Builder().setHashMap(pressureSensor).setUnit(Consts.PRESSURE_UNIT).build();
+                haystack.updatePoint(pressureSensorPoint, pressureSensor.get("id").toString());
+            });
+        });
+    }
+
     private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
 
         ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (vav or dab) and group");
@@ -2265,5 +2297,36 @@ public class MigrationUtil {
             }
 
         });
+    }
+
+    private static void enableTISensorPort(CCUHsApi haystack){
+         Log.d(TAG_CCU_MIGRATION_UTIL, "enableTISensorPort migration started");
+        HashMap<Object, Object> equipMap = haystack.readEntity("equip and ti");
+        if (!equipMap.isEmpty()) {
+                Log.d(TAG_CCU_MIGRATION_UTIL, "TI exists");
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                double roomTempTypeConfigPoint  = haystack.readDefaultVal("point and " +
+                        "config and temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
+                HashMap<Object, Object> roomTemperaturePoint = haystack.readEntity("ti and temp and space and not config" +
+                        " and equipRef == \""+equip.getId()+"\"");
+                HashMap<Object,Object> currentTemp = haystack.readEntity("point and current and " +
+                        "temp and ti and equipRef == \""+equip.getId()+"\"");
+                String nodeAddress = currentTemp.get("group").toString();
+                if (roomTempTypeConfigPoint == 1) {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
+                    ControlMote.setCMPointEnabled(Port.TH1_IN.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), roomTemperaturePoint.get("id").toString());
+                } else if (roomTempTypeConfigPoint == 2) {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
+                    ControlMote.setCMPointEnabled(Port.TH2_IN.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), roomTemperaturePoint.get("id").toString());
+                } else {
+                    ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), true);
+                    ControlMote.setCMPointEnabled(Port.SENSOR_RT.name(), true);
+                    ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+                }
+        }
+        Log.d(TAG_CCU_MIGRATION_UTIL, "enableTISensorPort migration started");
+        CCUHsApi.getInstance().scheduleSync();
     }
 }

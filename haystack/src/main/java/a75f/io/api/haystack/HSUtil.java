@@ -74,6 +74,17 @@ public class HSUtil
         }
         return equipList;
     }
+    public static ArrayList<Equip> getNonModbusEquips(String roomRef) {
+
+        ArrayList<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and not modbus and roomRef == \""+roomRef+"\"");
+        ArrayList<Equip> equipList = new ArrayList<>();
+        for (HashMap<Object, Object> m : equips)
+        {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
+        }
+        return equipList;
+    }
 
     public static List<Equip> getEquipsWithoutSubEquips(String roomRef) {
 
@@ -338,6 +349,12 @@ public class HSUtil
         return equip.containsKey(Tags.HYPERSTAT) &&
                 ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
                 || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU) || equip.containsKey(Tags.VRV));
+    }
+
+    public static boolean isHyperStatSplitConfig(String id, CCUHsApi hayStack) {
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
+        return equip.containsKey(Tags.HYPERSTATSPLIT) && equip.containsKey(Tags.CPU);
     }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {

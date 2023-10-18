@@ -120,6 +120,7 @@ public class RawPoint extends Entity
     {
         return unit;
     }
+    public void setUnit(String unit) { this.unit = unit; }
     public String getTz()
     {
         return tz;

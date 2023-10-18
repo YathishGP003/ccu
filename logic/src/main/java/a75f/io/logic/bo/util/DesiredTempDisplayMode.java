@@ -2,6 +2,9 @@ package a75f.io.logic.bo.util;
 
 import static a75f.io.logic.bo.building.definitions.ProfileType.SMARTSTAT_FOUR_PIPE_FCU;
 import static a75f.io.logic.bo.building.definitions.ProfileType.SSE;
+
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +18,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitConfigurationUtil;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitEquip;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitLogicalMap;
@@ -48,6 +54,9 @@ public class DesiredTempDisplayMode {
                 return TemperatureMode.DUAL;
             } else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForHSCPU(mEquip);
+                temperatureModes.add(temperatureMode);
+            }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTATSPLIT_CPU.name())) {
+                TemperatureMode temperatureMode = getTemperatureModeForHSSplitCPUEcon(mEquip);
                 temperatureModes.add(temperatureMode);
             }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForSSCPU(mEquip);
@@ -220,6 +229,25 @@ public class DesiredTempDisplayMode {
             heating = true;
         }
        return getTemperatureMode(heating, cooling);
+    }
+
+    private static TemperatureMode getTemperatureModeForHSSplitCPUEcon(Equip mEquip) {
+        boolean heating = false;
+        boolean cooling = false;
+        HyperStatSplitCpuEconEquip hyperStatSplitCpuEconEquip = HyperStatSplitCpuEconEquip.Companion.getHyperStatSplitEquipRef(
+                Short.parseShort(mEquip.getGroup()));
+        HyperStatSplitCpuEconConfiguration config = new HyperStatSplitCpuEconConfiguration();
+        HyperStatSplitCpuEconConfiguration relayConfigurations = hyperStatSplitCpuEconEquip.getRelayConfigurations(config);
+        HyperStatSplitCpuEconConfiguration analogConfigurations = hyperStatSplitCpuEconEquip.getAnalogOutConfigurations(config);
+        if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(relayConfigurations) ||
+                HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(analogConfigurations)) {
+            cooling = true;
+        }
+        if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(relayConfigurations) ||
+                HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(analogConfigurations)) {
+            heating = true;
+        }
+        return getTemperatureMode(heating, cooling);
     }
 
     public static void setSystemModeForVav(CCUHsApi ccuHsApi) {

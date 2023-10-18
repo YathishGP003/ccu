@@ -315,6 +315,9 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val));
+					break;
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
@@ -377,6 +380,11 @@ public class Pulse
 			// If the 12th bit is not set to 1, no modification needed
 			return Integer.parseInt(pressureBinary, 2);
 		}
+	}
+
+	private static double convertPressureFromPaToInH2O(double Pa) {
+		double inH2O = Pa / 248.84;
+		return CCUUtils.roundToTwoDecimal(inH2O);
 	}
 
 	public static double round(double val) {
@@ -669,12 +677,11 @@ public class Pulse
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(oldTh2TempVal != curTh2TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
+							CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempvalth2 " + hayStack.readHisValById(logPoint.get("id").toString()));
 
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
-
-						CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
 						break;
 					case ANALOG_IN_ONE:
 						val = cmRegularUpdateMessage_t.analogSense1.get();
@@ -711,6 +718,7 @@ public class Pulse
 							}
 							if(oldTh1TempVal != curTh1TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
+							CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th1TempVal);
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempval " + hayStack.readHisValById(logPoint.get("id").toString()));
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
 						}
@@ -1328,29 +1336,33 @@ public class Pulse
 	//Occupancy has a physical and logical points, which are COV based. In addition to that an occupancyDetection
 	//point is used to track occupancy events without COV filtering.
 	private static void updateOTNOccupancyStatus(RawPoint sp, double val, Device device){
-		if((val == 1) ) {
-			HashMap<Object, Object> occDetPoint = CCUHsApi.getInstance().readEntity("point and occupancy and " +
-					"detection and his and equipRef==" +
-					" \"" + device.getEquipRef() + "\"");
-			if (!occDetPoint.isEmpty()){
-				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
+		if(val == 0 || val == 1){
+			if((val == 1) ) {
+				HashMap<Object, Object> occDetPoint = CCUHsApi.getInstance().readEntity("point and occupancy and " +
+						"detection and his and equipRef==" +
+						" \"" + device.getEquipRef() + "\"");
+				if (!occDetPoint.isEmpty()){
+					CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
+				}
 			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 		}
-		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
-		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 	}
 
 
 	private static void updateOccupancyStatus(RawPoint sp, double val,Device device, short addr){
-		CcuLog.i(L.TAG_CCU_SCHEDULER, " updateOccupancyStatus for "+device.getAddr()+" : "+val);
-		double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and enable and occupancy and group == \""+addr+"\"");
-		if(occuEnabled > 0 && val > 0) { //only if occupancy enabled
-			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef== \"" + device.getEquipRef() + "\"");
-			if ((occDetPoint != null) && (occDetPoint.size() > 0))
-				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
+		if(val == 0 || val == 1) {
+			CcuLog.i(L.TAG_CCU_SCHEDULER, " updateOccupancyStatus for " + device.getAddr() + " : " + val);
+			double occuEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and enable and occupancy and group == \"" + addr + "\"");
+			if (occuEnabled > 0 && val > 0) { //only if occupancy enabled
+				HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef== \"" + device.getEquipRef() + "\"");
+				if ((occDetPoint != null) && (occDetPoint.size() > 0))
+					CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(), val);
+			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 		}
-		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
-		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 	}
 
 	public static double getDesiredTemp(short node, String tag)

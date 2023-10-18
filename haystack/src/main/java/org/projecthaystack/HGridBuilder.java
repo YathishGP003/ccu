@@ -10,6 +10,8 @@ package org.projecthaystack;
 import java.io.*;
 import java.util.*;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * HGridBuilder is used to construct an immutable HGrid instance.
  *
@@ -51,6 +53,7 @@ public class HGridBuilder
       Any null entry will be row of all null cells. */
   public static HGrid dictsToGrid(HDict meta, HDict[] dicts)
   {
+
     if (dicts.length == 0) return new HGrid(
         meta,
         new HCol[] { new HCol(0, "empty", HDict.EMPTY) },
@@ -102,6 +105,7 @@ public class HGridBuilder
       b.rows.add(cells);
     }
 
+    //CcuLog.d("CCU_HS_SYNC", "gridBuilder: "+ b);
     return b.toGrid();
   }
 

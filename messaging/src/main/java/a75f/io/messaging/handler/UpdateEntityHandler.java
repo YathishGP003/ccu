@@ -31,12 +31,14 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.messaging.MessageHandler;
 
 public class UpdateEntityHandler implements MessageHandler {
     public static final String CMD = "updateEntity";
     private static ZoneDataInterface zoneDataInterface = null;
+    private static BuildingOccupancyListener buildingOccupancyListener = null;
     public static void updateEntity(JsonObject msgObject, long timeToken){
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
@@ -227,8 +229,16 @@ public class UpdateEntityHandler implements MessageHandler {
                 UpdateScheduleHandler.trimZoneSchedules(s);
             }
         }
+        refreshBuildingOccupancyScreen();
     }
-
+    public static void setBuildingOccupancyListener(BuildingOccupancyListener listener) {
+        buildingOccupancyListener = listener;
+    }
+    public static void refreshBuildingOccupancyScreen() {
+        if (buildingOccupancyListener != null) {
+            buildingOccupancyListener.refreshScreen();
+        }
+    }
     private static String getResponseString(String uid) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};

@@ -258,9 +258,10 @@ public class UpdateScheduleHandler implements MessageHandler
                         }
                     }
                 }
-                Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
-                if (zoneSchedule.getRoomRef()!= null)
+                if (zoneSchedule.getRoomRef()!= null && intervalSpills.size() > 0) {
+                    Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
                     CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+                }
             }
         }
     }

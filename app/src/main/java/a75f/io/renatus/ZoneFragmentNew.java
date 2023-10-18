@@ -14,8 +14,6 @@ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
-import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationPendingDialog;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -77,6 +75,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -332,7 +332,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         });
         if(!validateMigration()) {
-            showMigrationPendingDialog(requireContext());
+            showMigrationPendingDialog(getActivity());
         }
     }
 
@@ -4336,5 +4336,41 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
 
+    }
+
+    /* If schedule revamp migration is still pending show migration pending alert*/
+    private void showMigrationPendingDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Data Migration Pending")
+                .setIcon(R.drawable.ic_alert)
+                .setMessage("Data Migration is in progress, please wait for some time")
+                .setCancelable(false);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (validateMigration()) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadGrid();
+                            dialog.dismiss();
+                            timer.cancel();
+                        }
+                    });
+                }
+            }
+        }, 0, 3000);
+    }
+
+    public void loadGrid() {
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                loadGrid(parentRootView);
+            });
+        }
     }
 }

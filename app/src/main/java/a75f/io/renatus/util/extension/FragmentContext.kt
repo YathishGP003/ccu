@@ -29,23 +29,3 @@ fun Fragment.showErrorDialog(msg: String) {
          dialog.dismiss()
       }.show()
 }
-/* If schedule revamp migration is still pending show migration pending alert*/
-fun showMigrationPendingDialog(context: Context) {
-   val dialog = AlertDialog.Builder(context)
-      .setTitle("Data Migration Pending")
-      .setIcon(R.drawable.ic_alert)
-      .setMessage("Data Migration is in progress, please wait for some time")
-      .setCancelable(false)
-      .create()
-   dialog.show()
-
-   val timer = Timer()
-   timer.scheduleAtFixedRate(object : TimerTask() {
-      override fun run() {
-         if(validateMigration()){
-            dialog.dismiss()
-            timer.cancel()
-         }
-      }
-   }, 0, 3000)
-}

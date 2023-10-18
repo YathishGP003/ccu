@@ -705,7 +705,7 @@ public class VavTuners {
                 .setEquipRef(equipRef)
                 .setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("vav")
-                .addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("default").addMarker("writable").addMarker("cur")
                 .addMarker("his").addMarker("mode").addMarker("changeover")
                 .addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0")

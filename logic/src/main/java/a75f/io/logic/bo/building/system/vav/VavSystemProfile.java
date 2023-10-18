@@ -300,7 +300,7 @@ public abstract class VavSystemProfile extends SystemProfile
                     .setSiteRef(siteRef)
                     .setEquipRef(equipRef)
                     .setHisInterpolate("cov")
-                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cur")
                     .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp").addMarker("system")
                     .setMinVal("0").setMaxVal("5").setIncrementVal("0.5")
                     .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)

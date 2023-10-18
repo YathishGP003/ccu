@@ -118,7 +118,9 @@ public class CCUUtils
     public static String getSupportMsgContent(Context context){
         if(isDaikinEnvironment(context))
             return "please contact SiteLine\u2122 Customer Support.";
-        else
+        else if (isCarrierEnvironment(context)) {
+            return "please contact ClimaVision Customer Support.";
+        } else
             return "please contact 75F Customer Support.";
     }
 
@@ -219,4 +221,7 @@ public class CCUUtils
 
     }
 
+    public static boolean isCarrierEnvironment(Context context){
+        return BuildConfig.BUILD_TYPE.equalsIgnoreCase(context.getString(R.string.Carrier_Environment));
+    }
 }

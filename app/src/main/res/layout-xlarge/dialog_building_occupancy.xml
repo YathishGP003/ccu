@@ -208,11 +208,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
-                app:srcCompat="@drawable/ic_baseline_delete_24"
+                app:srcCompat="@android:drawable/ic_menu_delete"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/radioGrp"
                 android:layout_marginTop="24dp"
-                android:visibility="visible"/>
+                android:visibility="visible"
+                app:tint="?orange_75f" />
 
             <Button
                 android:id="@+id/buttonSave"

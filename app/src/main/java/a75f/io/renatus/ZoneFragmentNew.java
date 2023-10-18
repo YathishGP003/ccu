@@ -3934,7 +3934,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
                     .setCancelable(false)
                     .setTitle("Schedule Errors")
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             scheduleSpinner.setSelection(0);

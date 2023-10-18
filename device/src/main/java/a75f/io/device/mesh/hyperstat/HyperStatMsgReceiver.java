@@ -354,9 +354,14 @@ public class HyperStatMsgReceiver {
                 case UVI:
                 case PM2P5:
                 case PM10:
-                case OCCUPANCY:
                     CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
                     CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+                    break;
+                case OCCUPANCY:
+                    if(val == 0 || val == 1) {
+                        CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+                        CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
+                    }
                     break;
                 case ENERGY_METER_HIGH:
                     emVal = emVal > 0 ?  (emVal | (sensorReading.getSensorData() << 12)) : sensorReading.getSensorData();

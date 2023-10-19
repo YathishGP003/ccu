@@ -126,6 +126,7 @@ public class RangeBar extends View {
         }
         //force push the text if overlap
         int dbWidth = 0;
+        Log.d("TAG", "drawSliderIcon: coolband " + cdb);
             dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 30;
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;

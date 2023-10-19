@@ -421,7 +421,7 @@ public class MigrationUtil {
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+//        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();

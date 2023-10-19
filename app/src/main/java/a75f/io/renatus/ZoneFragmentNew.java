@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
@@ -220,6 +219,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
      * setUserVisibleHint to make sure the view is ready before we start listening to updates.
      */
     private boolean isZoneViewReady = false;
+
+    private boolean isItemSelectedEvent = false;
     public static ZoneFragmentNew newInstance() {
         return new ZoneFragmentNew();
     }
@@ -529,6 +530,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         }
+        isItemSelectedEvent = false;
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperature Done");
     }
 
@@ -698,6 +700,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setCcuReady() {
+        CcuLog.i("UI_PROFILING","zoneViewready set");
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
         setListeners();
@@ -797,6 +800,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewTemperatureBasedZone");
+        isItemSelectedEvent = false;
 
         Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -1008,6 +1012,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         specialScheduleImageButton.setOnClickListener(v ->
                 imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
 
+
         if(mScheduleType >= 2){
             int spinnerposition = 2;
             for (HashMap<Object, Object> a:namedScheds) {
@@ -1016,15 +1021,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     spinnerposition = namedScheds.indexOf(a)+2;
                 }
             }
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            isItemSelectedEvent = false;
         }else{
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(mScheduleType -1, false);
+            isItemSelectedEvent = false;
         }
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
+                if(isItemSelectedEvent)
+                    return;
 
 //                if (position == 0 && (mScheduleType != -1)) {
 //                    if (mSchedule.isZoneSchedule()) {
@@ -1537,7 +1548,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen,
                                              LayoutInflater inflater, boolean isRemoteChange) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones");
-
+        isItemSelectedEvent = false;
         Equip p = equipOpen;
         int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + p.getRoomRef() + "\"").intValue();
@@ -1716,9 +1727,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
 
             }
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            isItemSelectedEvent = false;
+
+
         }else{
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(mScheduleType -1, false);
+            isItemSelectedEvent = false;
         }
         if (mSchedule.isZoneSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
@@ -1729,6 +1746,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isItemSelectedEvent)
+                    return;
+
 //                if (position == 0 && (mScheduleType != -1)) {
 //                    if (mSchedule.isZoneSchedule()) {
 //                        mSchedule.setDisabled(true);
@@ -2442,6 +2462,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         });
+        isItemSelectedEvent = false;
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone Done");
 
     }

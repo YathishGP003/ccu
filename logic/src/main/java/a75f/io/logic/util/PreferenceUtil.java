@@ -255,7 +255,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-
+    
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }

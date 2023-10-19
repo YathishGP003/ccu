@@ -578,8 +578,7 @@ public class HSUtil
         CCUHsApi hsApi = CCUHsApi.getInstance();
         String pointId = point.get("id").toString();
         double level16Val = getPriorityLevelVal(pointId,16);
-        if((level16Val == 0 && getPriorityLevelVal(pointId,17) == val)
-               || (level16Val > 0 && level16Val == val))
+        if(level16Val == val)
                 return;
 
         hsApi.writePointForCcuUser(pointId, 16, (double) val, 0);

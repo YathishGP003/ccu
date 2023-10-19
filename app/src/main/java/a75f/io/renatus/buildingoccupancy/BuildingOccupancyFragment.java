@@ -225,6 +225,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             return false;
         }
 
+        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
 
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
@@ -270,8 +271,9 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                 buildingOccupancyViewModel.getScheduleSpills(daysList,buildingOccupancy);
 
         if (spillsMap != null && spillsMap.size() > 0 && position != ManualSchedulerDialogFragment.NO_REPLACE) {
-            RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-                            "Fetching Zone Schedules..."),
+            ProgressDialogUtils.showProgressDialog(getActivity(),
+                    "Fetching Zone Schedules...");
+            RxjavaUtil.executeBackgroundTask(
                     () -> {
                         errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap);},
                     ()-> {

@@ -29,10 +29,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -44,6 +46,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.api.Room;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment;
@@ -161,30 +164,85 @@ public class BuildingOccupancyViewModel {
         LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ArrayList<Schedule> scheduleList = new ArrayList<>();
+        ArrayList<Schedule> activeScheduleList = new ArrayList<>();
+        ArrayList<Zone> zoneList = new ArrayList<>();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = siteMap.get("id").toString();
 
 
         LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
         Future<LinkedHashMap<String, ArrayList<Interval>>> future = executor.submit(() -> {
             HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-            HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteMap.get("id").toString()).toDict();
+            HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
             HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
 
-                if (schedulePoint != null) {
+            HDict queryDictionary = new HDictBuilder().add("filter",
+                    "named and schedule and organization == \""+
+                            Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization()+"\"").toDict();
+            HGrid namedschedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
+
+
+            HDict roomDict = new HDictBuilder().add("filter", "room and siteRef == " + siteRef).toDict();
+            HGrid roomPoint = hClient.call("read", HGridBuilder.dictToGrid(roomDict));
+
+            CcuLog.d("BO_Log", "org ="+CCUHsApi.getInstance().getSite().getOrganization());
+
+            if (roomPoint != null) {
+                Iterator hZincReaderIterator = roomPoint.iterator();
+                while (hZincReaderIterator.hasNext()) {
+                    HDict dict = (HDict) hZincReaderIterator.next();
+                    HashMap<Object, Object> map = new HashMap<>();
+                    Iterator it = dict.iterator();
+                    while (it.hasNext()) {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        map.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
+                    zoneList.add(new Zone.Builder().setHashMap(map).build());
+                }
+            }
+
+
+
+            if (schedulePoint != null) {
                 Iterator it = schedulePoint.iterator();
                 while (it.hasNext()) {
                     HRow r = (HRow) it.next();
                     scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                 }
             }
-            for (Schedule sec: scheduleList) {
-                ArrayList<Interval> zoneIntervals = sec.getScheduledIntervals();
-                for (Interval v : zoneIntervals) {
+            if (namedschedules != null) {
+                Iterator it = namedschedules.iterator();
+                while (it.hasNext()) {
+                    HRow r = (HRow) it.next();
+                    Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                    if(schedule.getMarkers().contains("default")
+                            && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
+                        continue;
+                    }
+                    scheduleList.add(schedule);
+                }
+            }else{
+                CcuLog.d("BO_Log", "Named sched is null");
+            }
+
+            CcuLog.i("BO_Log", "Retrieved schedule list of size " + scheduleList.size() + " for site " + siteRef);
+
+
+            for (Zone zone:zoneList) {
+                for (Schedule schedule: scheduleList) {
+                    if((schedule.getId().replace("@","")).equals(zone.getScheduleRef().replace("@",""))){
+                        if(activeScheduleList.size() == 0)
+                            activeScheduleList.add(schedule);
+                        else if(!activeScheduleList.contains((schedule)))
+                            activeScheduleList.add(schedule);
+                    }
                 }
             }
 
 
-               for (Schedule schedule : scheduleList) {
+
+
+               for (Schedule schedule : activeScheduleList) {
                     ArrayList<Interval> intervalSpills = new ArrayList<>();
                     ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
 
@@ -249,7 +307,14 @@ public class BuildingOccupancyViewModel {
                     }
 
                     if (intervalSpills.size() > 0) {
-                        if(schedule.getRoomRef() != null) {
+                        if(schedule.isNamedSchedule()){
+                            for (Zone zone:zoneList) {
+                                if(schedule.getId().replace("@","").equals(zone.getScheduleRef().replace("@",""))){
+                                    finalSpillsMap.put(StringUtils.prependIfMissing(zone.getId(),"@"),intervalSpills);
+                                }
+                            }
+                        }
+                        else if(schedule.getRoomRef() != null) {
                             finalSpillsMap.put(schedule.getRoomRef(), intervalSpills);
                         }
                     }
@@ -331,7 +396,11 @@ public class BuildingOccupancyViewModel {
                     }
 
                     if(equipList.size() > 0 && !MasterControlUtil.isNonTempModule(equipList.get(0).getProfile())) {
-                        if ((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isNamedSchedule()) {
+                        Schedule schedule = CCUHsApi.getInstance().getScheduleById(z.getScheduleRef());
+                        if(schedule == null){
+                             schedule = CCUHsApi.getInstance().getRemoteSchedule(z.getScheduleRef());
+                        }
+                        if (schedule.isNamedSchedule()) {
                             schedules = schedules.concat("named");
                             if (!namedheaders.contains(f.getDisplayName())) {
                                 spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
@@ -380,16 +449,20 @@ public class BuildingOccupancyViewModel {
             return returnVal;
         });
 
+
         try {
-           Warning  =  result.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            Warning  =  result.get();
+            executor.shutdown();
+            return Warning;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Preserve the interrupted status
+        } catch (ExecutionException e) {
+           e.printStackTrace();
+        } finally {
+            executor.shutdown();
         }
+      return null;
 
-        executor.shutdown();
-
-
-        return Warning;
     }
 
     public HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(BuildingOccupancy buildingOccupancy) {

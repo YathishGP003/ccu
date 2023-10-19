@@ -500,7 +500,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
             for (Schedule.Days eachOccupied : daysInSchedule) {
 
-                if (validateDesiredTemp(eachOccupied.getCoolingVal(), eachOccupied.getHeatingVal(), HSUtil.getLevelValueFrom16(coolLL.get("id").toString()),
+                if (validateDesiredTemp(coolingTemp, heatingTemp, HSUtil.getLevelValueFrom16(coolLL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), HSUtil.getLevelValueFrom16(heatLL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(heatUL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(heatDB.get("id").toString()),

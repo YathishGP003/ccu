@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_75f">Renatus</string>
+    <string name="app_75f">CCU</string>
     <string name="app_daikin">Daikin</string>
     <string name="app_carrier">ClimaVision</string>
     <string name="title_home">Home</string>
@@ -533,7 +533,7 @@
     <string name="mandatory">\u002A</string>
     <string name="notmandatory"> </string>
     <string name="input_sitename">Site Name</string>
-    <string name="hint_sitename">A user friendly name (e.g., Renatus Tower)</string>
+    <string name="hint_sitename">A user friendly name (e.g., CCU Tower)</string>
     <string name="error_invalid_site_name">Special characters are not allowed for site name </string>
     <string name="error_invalid_ccu_name">Special characters are not allowed for ccu name </string>
     <string name="input_timezone">Time Zone</string>

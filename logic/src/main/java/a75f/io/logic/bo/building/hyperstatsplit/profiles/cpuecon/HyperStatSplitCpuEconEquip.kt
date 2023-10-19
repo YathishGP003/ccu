@@ -501,7 +501,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuEconRelayAssociation) {
-            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration)) {
+            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && !HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration)) {
                 if (HyperStatSplitAssociationUtil.isStagedFanEnabled(newConfiguration,stage)) {
                     val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createStagedFanPoint(newConfiguration, stage)
                     hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(

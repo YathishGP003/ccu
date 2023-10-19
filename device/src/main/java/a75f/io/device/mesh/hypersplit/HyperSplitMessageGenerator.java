@@ -98,7 +98,9 @@ public class HyperSplitMessageGenerator {
                 .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
                 .setVocAlertTarget((int)readVocThresholdValue(equipRef))
                 .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
-                        : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB);
+                        : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
+                .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
+                .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef));
 
         Log.i(L.TAG_CCU_SERIAL,
                 "--------------HyperStat Split CPU & Economiser Settings Message: ------------------\n" +
@@ -123,7 +125,9 @@ public class HyperSplitMessageGenerator {
                         "BeaconingEnabled " + msg.getBeaconingEnabled() + "\n" +
                         "HumidityMinSetpoint " + msg.getHumidityMinSetpoint() + "\n" +
                         "HumidityMaxSetpoint " + msg.getHumidityMaxSetpoint() + "\n" +
-                        "OccupancySensorSensitivityLevel " + msg.getOccupancySensorSensitivityLevel() + "\n");
+                        "OccupancySensorSensitivityLevel " + msg.getOccupancySensorSensitivityLevel() + "\n" +
+                        "LinearFanSpeeds " + msg.getHyperstatLinearFanSpeeds() + "\n" +
+                        "StagedFanSpeeds " + msg.getHyperstatStagedFanSpeeds());
 
         return msg.build();
 

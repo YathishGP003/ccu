@@ -52,49 +52,6 @@ class HyperSplitSettingsUtil {
                 }
             }
 
-            Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Settings2 Message: ------------------\n" +
-                        "Node address " + nodeAddress + "\n" +
-                        "enableForceOccupied " + settings2.enableForceOccupied + "\n" +
-                        "enableAutoAway " + settings2.enableAutoAway + "\n" +
-                        "hyperSplitRelayConfig:\n" +
-                        "\trelay1: "+ settings2.hyperSplitRelayConfig.relay1Mapping + "\n" +
-                        "\trelay2: "+ settings2.hyperSplitRelayConfig.relay2Mapping + "\n" +
-                        "\trelay3: "+ settings2.hyperSplitRelayConfig.relay3Mapping + "\n" +
-                        "\trelay4: "+ settings2.hyperSplitRelayConfig.relay4Mapping + "\n" +
-                        "\trelay5: "+ settings2.hyperSplitRelayConfig.relay5Mapping + "\n" +
-                        "\trelay6: "+ settings2.hyperSplitRelayConfig.relay6Mapping + "\n" +
-                        "\trelay7: "+ settings2.hyperSplitRelayConfig.relay7Mapping + "\n" +
-                        "\trelay8: "+ settings2.hyperSplitRelayConfig.relay8Mapping + "\n" +
-                        "hyperSplitAnalogOutConfig:\n" +
-                        "\tanalogOut1: "+ settings2.hyperSplitAnalogOutConfig.analogOut1Mapping + "\n" +
-                        "\tanalogOut2: "+ settings2.hyperSplitAnalogOutConfig.analogOut2Mapping + "\n" +
-                        "\tanalogOut3: "+ settings2.hyperSplitAnalogOutConfig.analogOut3Mapping + "\n" +
-                        "\tanalogOut4: "+ settings2.hyperSplitAnalogOutConfig.analogOut4Mapping + "\n" +
-                        "hyperSplitUniversalInConfig:\n " +
-                        "\tuniversalIn1: "+ settings2.hyperSplitUniversalInConfig.universalIn1Mapping + "\n" +
-                        "\tuniversalIn2: "+ settings2.hyperSplitUniversalInConfig.universalIn2Mapping + "\n" +
-                        "\tuniversalIn3: "+ settings2.hyperSplitUniversalInConfig.universalIn3Mapping + "\n" +
-                        "\tuniversalIn4: "+ settings2.hyperSplitUniversalInConfig.universalIn4Mapping + "\n" +
-                        "\tuniversalIn5: "+ settings2.hyperSplitUniversalInConfig.universalIn5Mapping + "\n" +
-                        "\tuniversalIn6: "+ settings2.hyperSplitUniversalInConfig.universalIn6Mapping + "\n" +
-                        "\tuniversalIn7: "+ settings2.hyperSplitUniversalInConfig.universalIn7Mapping + "\n" +
-                        "\tuniversalIn8: "+ settings2.hyperSplitUniversalInConfig.universalIn8Mapping + "\n" +
-                        "hyperSplitSensorBusConfig:\n" +
-                        "\taddress0: "+ settings2.hyperSplitSensorBusConfig.sensorBus1Mapping + "\n" +
-                        "\taddress1: "+ settings2.hyperSplitSensorBusConfig.sensorBus2Mapping + "\n" +
-                        "\taddress2: "+ settings2.hyperSplitSensorBusConfig.sensorBus3Mapping + "\n" +
-                        "\taddress3: "+ settings2.hyperSplitSensorBusConfig.sensorBus4Mapping + "\n" +
-                        "zoneCO2Target " + settings2.zoneCO2Target + "\n" +
-                        "zoneCO2Threshold " + settings2.zoneCO2Threshold + "\n" +
-                        "zoneCO2DamperOpeningRate " + settings2.zoneCO2DamperOpeningRate + "\n" +
-                        "proportionalConstant " + settings2.proportionalConstant + "\n" +
-                        "integralConstant " + settings2.integralConstant + "\n" +
-                        "proportionalTemperatureRange " + settings2.proportionalTemperatureRange + "\n" +
-                        "integrationTime " + settings2.integrationTime + "\n" +
-                        "profile " + settings2.profile + "\n" +
-                        "-------------------------------------------------------------");
-
             return settings2.build()
         }
 
@@ -132,40 +89,6 @@ class HyperSplitSettingsUtil {
                     settings3.hyperStatConfigsCpu = getStagedFanVoltageDetails(equipRef)
                 }
             }
-
-            Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Settings3 Message: ------------------\n" +
-                        "Node address " + nodeAddress + "\n" +
-                        "unoccupiedSetback " + settings3.genertiTuners.unoccupiedSetback + "\n" +
-                        "heatingDeadbandMultiplier " + settings3.genertiTuners.heatingDeadbandMultiplier + "\n" +
-                        "relayActivationHysteresis " + settings3.genertiTuners.relayActivationHysteresis + "\n" +
-                        "analogFanSpeedMultiplier " + settings3.genertiTuners.analogFanSpeedMultiplier + "\n" +
-                        "humidityHysteresis " + settings3.genertiTuners.humidityHysteresis + "\n" +
-                        "forcedOccupiedTime " + settings3.genertiTuners.forcedOccupiedTime + "\n" +
-                        "autoAwayTime " + settings3.genertiTuners.autoAwayTime + "\n" +
-                        "autoAwayZoneSetbackTemp " + settings3.genertiTuners.autoAwayZoneSetbackTemp + "\n" +
-                        "-------------------------------------------------------------\n" +
-                        "economizingToMainCoolingLoopMap " + settings3.ecoTuners.economizingToMainCoolingLoopMap + "\n" +
-                        "economizingMinTemp " + settings3.ecoTuners.economizingMinTemp + "\n" +
-                        "economizingMaxTemp " + settings3.ecoTuners.economizingMaxTemp + "\n" +
-                        "economizingMinHumidity " + settings3.ecoTuners.economizingMinHumidity + "\n" +
-                        "economizingMaxHumidity " + settings3.ecoTuners.economizingMaxHumidity + "\n" +
-                        "economizingDryBulbThreshold " + settings3.ecoTuners.economizingDryBulbThreshold + "\n" +
-                        "enthalpyDuctCompensationOffset " + settings3.ecoTuners.enthalpyDuctCompensationOffset + "\n" +
-                        "ductCompensationOffset " + settings3.ecoTuners.ductCompensationOffset + "\n" +
-                        "exhaustFanStage1Threshold " + settings3.ecoTuners.exhaustFanStage1Threshold + "\n" +
-                        "exhaustFanStage2Threshold " + settings3.ecoTuners.exhaustFanStage2Threshold + "\n" +
-                        "exhaustFanHysteresis " + settings3.ecoTuners.exhaustFanHysteresis + "\n" +
-                        "oaoDamperMatTarget " + settings3.ecoTuners.oaoDamperMatTarget + "\n" +
-                        "oaoDamperMatMin " + settings3.ecoTuners.oaoDamperMatMin + "\n" +
-                        "outsideDamperMinOpen " + settings3.ecoTuners.outsideDamperMinOpen + "\n" +
-                        "-------------------------------------------------------------\n" +
-                        "heatingStage1Speed " + settings3.hyperStatConfigsCpu.heatingStage1FanAnalogVoltage + "\n" +
-                        "heatingStage2Speed " + settings3.hyperStatConfigsCpu.heatingStage2FanAnalogVoltage + "\n" +
-                        "coolingStage3Speed " + settings3.hyperStatConfigsCpu.coolingStage3FanAnalogVoltage + "\n" +
-                        "coolingStage1Speed " + settings3.hyperStatConfigsCpu.coolingStage1FanAnalogVoltage + "\n" +
-                        "coolingStage2Speed " + settings3.hyperStatConfigsCpu.coolingStage2FanAnalogVoltage + "\n" +
-                        "coolingStage3Speed " + settings3.hyperStatConfigsCpu.coolingStage3FanAnalogVoltage + "\n");
 
             return settings3.build()
         }

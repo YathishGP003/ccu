@@ -965,14 +965,21 @@ public class OAOTuners
                     .build();
             String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
             HashMap enthalpyDuctCompensationOffsetPoint = hayStack.read("point and tuner and default and standalone and oao and enthalpy and duct and compensation and offset");
-            ArrayList<HashMap> enthalpyDuctCompensationOffsetPointArr = hayStack.readPoint(enthalpyDuctCompensationOffsetPoint.get("id").toString());
-            for (HashMap valMap : enthalpyDuctCompensationOffsetPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(enthalpyDuctCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (enthalpyDuctCompensationOffsetPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(enthalpyDuctCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET, 0);
+                hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET);
+            } else {
+                ArrayList<HashMap> enthalpyDuctCompensationOffsetPointArr = hayStack.readPoint(enthalpyDuctCompensationOffsetPoint.get("id").toString());
+                for (HashMap valMap : enthalpyDuctCompensationOffsetPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(enthalpyDuctCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
             }
-            hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
         }
 
         if (!verifyPointsAvailability("not default","standalone and duct and temperature and offset",equipref)) {
@@ -991,14 +998,21 @@ public class OAOTuners
                     .build();
             String ductTemperatureOffsetId = hayStack.addPoint(ductTemperatureOffset);
             HashMap ductTemperatureOffsetPoint = hayStack.read("point and tuner and default and standalone and oao and duct and temperature and offset");
-            ArrayList<HashMap> ductTemperatureOffsetPointArr = hayStack.readPoint(ductTemperatureOffsetPoint.get("id").toString());
-            for (HashMap valMap : ductTemperatureOffsetPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(ductTemperatureOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (ductTemperatureOffsetPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(ductTemperatureOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_STANDALONE_DUCT_TEMPERATURE_OFFSET, 0);
+                hayStack.writeHisValById(ductTemperatureOffsetId, TunerConstants.OAO_STANDALONE_DUCT_TEMPERATURE_OFFSET);
+            } else {
+                ArrayList<HashMap> ductTemperatureOffsetPointArr = hayStack.readPoint(ductTemperatureOffsetPoint.get("id").toString());
+                for (HashMap valMap : ductTemperatureOffsetPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(ductTemperatureOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(ductTemperatureOffsetId, HSUtil.getPriorityVal(ductTemperatureOffsetId));
             }
-            hayStack.writeHisValById(ductTemperatureOffsetId, HSUtil.getPriorityVal(ductTemperatureOffsetId));
         }
 
         if (!verifyPointsAvailability("not default","standalone and economizing and min and temp",equipref)) {
@@ -1017,14 +1031,21 @@ public class OAOTuners
                     .build();
             String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
             HashMap economizingMinTemperaturePoint = hayStack.read("point and tuner and default and standalone and oao and economizing and min and temp");
-            ArrayList<HashMap> economizingMinTemperaturePointArr = hayStack.readPoint(economizingMinTemperaturePoint.get("id").toString());
-            for (HashMap valMap : economizingMinTemperaturePointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(economizingMinTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingMinTemperaturePoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingMinTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_TEMP, 0);
+                hayStack.writeHisValById(economizingMinTemperatureId, TunerConstants.OAO_ECONOMIZING_MIN_TEMP);
+            } else {
+                ArrayList<HashMap> economizingMinTemperaturePointArr = hayStack.readPoint(economizingMinTemperaturePoint.get("id").toString());
+                for (HashMap valMap : economizingMinTemperaturePointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(economizingMinTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingMinTemperatureId, HSUtil.getPriorityVal(economizingMinTemperatureId));
             }
-            hayStack.writeHisValById(economizingMinTemperatureId, HSUtil.getPriorityVal(economizingMinTemperatureId));
         }
 
         if(!verifyPointsAvailability("not default","standalone and economizing and max and temp",equipref)) {
@@ -1043,14 +1064,21 @@ public class OAOTuners
                     .build();
             String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
             HashMap economizingMaxTemperaturePoint = hayStack.read("point and tuner and default and standalone and oao and economizing and max and temp");
-            ArrayList<HashMap> economizingMaxTemperaturePointArr = hayStack.readPoint(economizingMaxTemperaturePoint.get("id").toString());
-            for (HashMap valMap : economizingMaxTemperaturePointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(economizingMaxTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingMaxTemperaturePoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingMaxTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_TEMP, 0);
+                hayStack.writeHisValById(economizingMaxTemperatureId, TunerConstants.OAO_ECONOMIZING_MAX_TEMP);
+            } else {
+                ArrayList<HashMap> economizingMaxTemperaturePointArr = hayStack.readPoint(economizingMaxTemperaturePoint.get("id").toString());
+                for (HashMap valMap : economizingMaxTemperaturePointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(economizingMaxTemperatureId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingMaxTemperatureId, HSUtil.getPriorityVal(economizingMaxTemperatureId));
             }
-            hayStack.writeHisValById(economizingMaxTemperatureId, HSUtil.getPriorityVal(economizingMaxTemperatureId));
         }
 
         if(!verifyPointsAvailability("not default","standalone and economizing and min and humidity",equipref)) {
@@ -1069,14 +1097,22 @@ public class OAOTuners
                     .build();
             String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
             HashMap economizingMinHumidityPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and min and humidity");
-            ArrayList<HashMap> economizingMinHumidityPointArr = hayStack.readPoint(economizingMinHumidityPoint.get("id").toString());
-            for (HashMap valMap : economizingMinHumidityPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(economizingMinHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingMinHumidityPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingMinHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY, 0);
+                hayStack.writeHisValById(economizingMinHumidityId, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY);
+            } else {
+                ArrayList<HashMap> economizingMinHumidityPointArr = hayStack.readPoint(economizingMinHumidityPoint.get("id").toString());
+                for (HashMap valMap : economizingMinHumidityPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(economizingMinHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingMinHumidityId, HSUtil.getPriorityVal(economizingMinHumidityId));
             }
-            hayStack.writeHisValById(economizingMinHumidityId, HSUtil.getPriorityVal(economizingMinHumidityId));
+
         }
 
         if(!verifyPointsAvailability("not default","standalone and economizing and max and humidity",equipref)) {
@@ -1095,14 +1131,21 @@ public class OAOTuners
                     .build();
             String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
             HashMap economizingMaxHumidityPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and max and humidity");
-            ArrayList<HashMap> economizingMaxHumidityPointArr = hayStack.readPoint(economizingMaxHumidityPoint.get("id").toString());
-            for (HashMap valMap : economizingMaxHumidityPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(economizingMaxHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingMaxHumidityPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingMaxHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY, 0);
+                hayStack.writeHisValById(economizingMaxHumidityId, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY);
+            } else {
+                ArrayList<HashMap> economizingMaxHumidityPointArr = hayStack.readPoint(economizingMaxHumidityPoint.get("id").toString());
+                for (HashMap valMap : economizingMaxHumidityPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(economizingMaxHumidityId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingMaxHumidityId, HSUtil.getPriorityVal(economizingMaxHumidityId));
             }
-            hayStack.writeHisValById(economizingMaxHumidityId, HSUtil.getPriorityVal(economizingMaxHumidityId));
         }
 
         if(!verifyPointsAvailability("not default","standalone and outside and damper and mat and target",equipref)) {
@@ -1121,14 +1164,21 @@ public class OAOTuners
                     .build();
             String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
             HashMap outsideDamperMixedAirTargetPoint = hayStack.read("point and tuner and default and standalone and oao and outside and damper and mat and target");
-            ArrayList<HashMap> outsideDamperMixedAirTargetPointArr = hayStack.readPoint(outsideDamperMixedAirTargetPoint.get("id").toString());
-            for (HashMap valMap : outsideDamperMixedAirTargetPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(outsideDamperMixedAirTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (outsideDamperMixedAirTargetPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(outsideDamperMixedAirTargetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_TARGET, 0);
+                hayStack.writeHisValById(outsideDamperMixedAirTargetId, TunerConstants.OAO_OA_DAMPER_MAT_TARGET);
+            } else {
+                ArrayList<HashMap> outsideDamperMixedAirTargetPointArr = hayStack.readPoint(outsideDamperMixedAirTargetPoint.get("id").toString());
+                for (HashMap valMap : outsideDamperMixedAirTargetPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(outsideDamperMixedAirTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(outsideDamperMixedAirTargetId, HSUtil.getPriorityVal(outsideDamperMixedAirTargetId));
             }
-            hayStack.writeHisValById(outsideDamperMixedAirTargetId, HSUtil.getPriorityVal(outsideDamperMixedAirTargetId));
         }
 
         if(!verifyPointsAvailability("not default","standalone and outside and damper and mat and min",equipref)) {
@@ -1147,14 +1197,22 @@ public class OAOTuners
                     .build();
             String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
             HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and standalone and oao and outside and damper and mat and min");
-            ArrayList<HashMap> outsideDamperMixedAirMinimumPointArr = hayStack.readPoint(outsideDamperMixedAirMinimumPoint.get("id").toString());
-            for (HashMap valMap : outsideDamperMixedAirMinimumPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(outsideDamperMixedAirMinimumId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (outsideDamperMixedAirMinimumPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(outsideDamperMixedAirMinimumId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_MIN, 0);
+                hayStack.writeHisValById(outsideDamperMixedAirMinimumId, TunerConstants.OAO_OA_DAMPER_MAT_MIN);
+            } else {
+                ArrayList<HashMap> outsideDamperMixedAirMinimumPointArr = hayStack.readPoint(outsideDamperMixedAirMinimumPoint.get("id").toString());
+                for (HashMap valMap : outsideDamperMixedAirMinimumPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(outsideDamperMixedAirMinimumId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(outsideDamperMixedAirMinimumId, HSUtil.getPriorityVal(outsideDamperMixedAirMinimumId));
             }
-            hayStack.writeHisValById(outsideDamperMixedAirMinimumId, HSUtil.getPriorityVal(outsideDamperMixedAirMinimumId));
+
         }
 
         if(!verifyPointsAvailability("not default","standalone and economizing and main and cooling and loop and map",equipref)) {
@@ -1173,14 +1231,21 @@ public class OAOTuners
                     .build();
             String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
             HashMap economizingToMainCoolingLoopMapPoint = hayStack.read("point and tuner and default and standalone and oao and economizing and main and cooling and loop and map");
-            ArrayList<HashMap> economizingToMainCoolingLoopMapPointArr = hayStack.readPoint(economizingToMainCoolingLoopMapPoint.get("id").toString());
-            for (HashMap valMap : economizingToMainCoolingLoopMapPointArr) {
-                if (valMap.get("val") != null) {
-                    System.out.println(valMap);
-                    hayStack.pointWrite(HRef.copy(economizingToMainCoolingLoopMapId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingToMainCoolingLoopMapPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
+                hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
+            } else {
+                ArrayList<HashMap> economizingToMainCoolingLoopMapPointArr = hayStack.readPoint(economizingToMainCoolingLoopMapPoint.get("id").toString());
+                for (HashMap valMap : economizingToMainCoolingLoopMapPointArr) {
+                    if (valMap.get("val") != null) {
+                        System.out.println(valMap);
+                        hayStack.pointWrite(HRef.copy(economizingToMainCoolingLoopMapId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
             }
-            hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
         }
 
         if (!verifyPointsAvailability("not default","standalone and economizing and dry and bulb and threshold",equipref)) {

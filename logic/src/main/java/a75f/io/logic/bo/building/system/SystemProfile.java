@@ -777,7 +777,7 @@ public abstract class SystemProfile
 
     public void removeSystemEquipModbus() {
         // TODO if it has modbus Equip Revisit when we add Bacnet support
-        HashMap modbusEquip = CCUHsApi.getInstance().read("system and equip and modbus and not emr and not btu");
+        HashMap modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
         if (modbusEquip != null && !modbusEquip.isEmpty()) {
             CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusEquip.get("id")).toString());
         }

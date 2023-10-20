@@ -36,28 +36,29 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * modelDef - Model instance for profile.
      */
     fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String,profileName: String?) : String{
+        CcuLog.i("DEV_DEBUG", "Updated configuration is started")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
-        val equip = getEquip(configuration)
-        val entityConfiguration = ReconfigHandler
-            .getEntityReconfiguration(configuration.nodeAddress, hayStack, entityMapper.getEntityConfiguration(configuration))
-        CcuLog.i("DEV_DEBUG", entityConfiguration.toString())
-
+        val equip = getEquip(configuration,modelDef.domainName)
+        CcuLog.i("DEV_DEBUG", "Equip Details :  ${equip.toString()}")
         val equipId =  equip?.get("id").toString()
+        val updatedConfiguration = ReconfigHandler
+            .getEntityReconfiguration(equipId, hayStack, entityMapper.getEntityConfiguration(configuration))
+
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone),profileName)
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
-        createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef)
-        updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef)
-        deletePoints(entityConfiguration, equipId)
+        createPoints(modelDef, configuration, updatedConfiguration, equipId, siteRef)
+        updatePoints(modelDef, configuration, updatedConfiguration, equipId, siteRef)
+        deletePoints(updatedConfiguration, equipId)
         return equipId
     }
 
-    fun getEquip(configuration: ProfileConfiguration): HashMap<Any, Any>? {
+    fun getEquip(configuration: ProfileConfiguration, domainName: String): HashMap<Any, Any>? {
         return if (configuration.roomRef.contentEquals("SYSTEM")) {
             hayStack.readEntity("equip and system and not modbus")
         } else {
-            hayStack.readEntity("equip and group == \"${configuration.nodeAddress}\"")
+            hayStack.readEntity("equip and domainName == \"$domainName\"")
         }
     }
 

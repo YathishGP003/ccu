@@ -98,7 +98,7 @@ class ProfileEquipBuilderTest {
         }
 
         val profile = HyperStat2PfcuUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef",)
 
         val dcwbValveLoopOp = mockHayStack.readEntity("domainName == \"dcwbValveLoopOutput\"")
         assert(dcwbValveLoopOp.isEmpty())

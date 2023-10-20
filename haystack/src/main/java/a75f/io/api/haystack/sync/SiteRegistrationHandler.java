@@ -88,7 +88,7 @@ public class SiteRegistrationHandler {
             siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
             siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF, false));
 
-            HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
+        /*    HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
             if (!tunerEquip.isEmpty()) {
                 JSONObject tunerFiled = new JSONObject();
                 tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
@@ -96,7 +96,7 @@ public class SiteRegistrationHandler {
                 //tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
                 siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
             }
-
+*/
         } catch (JSONException e) {
             e.printStackTrace();
             CcuLog.d(TAG, "Unable to sync site due to JSON exception. This is likely unrecoverable.");

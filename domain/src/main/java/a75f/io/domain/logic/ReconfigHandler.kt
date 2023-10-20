@@ -12,9 +12,11 @@ object ReconfigHandler {
      * Map contains in domainName of config and rhw value in 8th level of point array.
      */
     private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
+        CcuLog.i("DEV_DEBUG","Reading Existing configuration.. EquipRef = $equipRef")
         val domainNameMap = mutableMapOf<String, Double>()
-        val configPoints = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+        val configPoints = hayStack.readAllEntities("point and domainName and equipRef == \"$equipRef\"")
         configPoints.forEach {
+
             val pointVal = hayStack.readDefaultValById(it["id"].toString())
             //TODO - handle string type val if there is any.
             if (pointVal is Number) {
@@ -29,15 +31,9 @@ object ReconfigHandler {
         return domainNameMap
     }
 
-    private fun getAllConfig(equipGroup : Int, hayStack : CCUHsApi) : Map<String, Any> {
-        val equip = hayStack.readEntity(
-            "equip and group == \"$equipGroup\"")
-        return getAllConfig(equip["id"].toString(), hayStack)
-    }
-
-    fun getEntityReconfiguration(equipGroup: Int, hayStack: CCUHsApi, config : EntityConfiguration) :
+    fun getEntityReconfiguration(equipRef: String, hayStack: CCUHsApi, config : EntityConfiguration) :
                                                                         EntityConfiguration {
-        val existingEntityMap = getAllConfig(equipGroup, hayStack)
+        val existingEntityMap = getAllConfig(equipRef, hayStack)
         val newEntityConfig = EntityConfiguration()
 
         existingEntityMap.keys.forEach{ entityName ->
@@ -47,6 +43,7 @@ object ReconfigHandler {
         }
         config.tobeAdded.forEach{
             if (existingEntityMap.keys.contains(it.domainName)) {
+                // TODO check if there is any change in point
                 newEntityConfig.tobeUpdated.add(it)
             } else {
                 newEntityConfig.tobeAdded.add(it)

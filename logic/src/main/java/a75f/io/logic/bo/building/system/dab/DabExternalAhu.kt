@@ -84,17 +84,6 @@ class DabExternalAhu : DabSystemProfile() {
         if (equip["profile"] == ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
             CCUHsApi.getInstance().deleteEntityTree(equip["id"].toString())
         }
-
-        removeSystemEquipModbus()
-
-    }
-
-    private fun loadModel(): SeventyFiveFProfileDirective? {
-        val def = ModelSource.getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-        if (def != null) {
-           return def as SeventyFiveFProfileDirective
-        }
-        return null
     }
 
     override fun isCoolingAvailable(): Boolean {

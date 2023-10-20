@@ -81,13 +81,15 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun configModbusDetails() {
-        CcuLog.i(TAG,"configModbusDetails")
+        CcuLog.i(TAG, "configModbusDetails")
+        if (!equipModel.value.isDevicePaired) {
         ProgressDialogUtils.showProgressDialog(context, LOADING)
-        readDeviceModels()
+            readDeviceModels()
+        }
     }
 
     fun configModelDefinition(context: Context) {
-        CcuLog.i(TAG,"configModelDefinition")
+        CcuLog.i(TAG, "configModelDefinition")
         try {
             this.context = context
             if (L.ccu().systemProfile.profileType == ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
@@ -107,7 +109,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun getModbusConfiguration() {
-        CcuLog.i(TAG,"getModbusConfiguration")
+        CcuLog.i(TAG, "getModbusConfiguration")
         val modbusEquip =
             CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
 
@@ -144,7 +146,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun loadModel() {
-        CcuLog.i(TAG,"loadModel")
+        CcuLog.i(TAG, "loadModel")
         val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (def != null) {
             profileModelDefinition = def as SeventyFiveFProfileDirective
@@ -153,7 +155,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun setCurrentConfig(config: ExternalAhuConfiguration) {
-        CcuLog.i(TAG,"setCurrentConfig")
+        CcuLog.i(TAG, "setCurrentConfig")
         configModel.value.setPointControl = config.setPointControl.enabled
         configModel.value.dualSetPointControl = config.dualSetPointControl.enabled
         configModel.value.fanStaticSetPointControl = config.fanStaticSetPointControl.enabled
@@ -177,7 +179,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun saveConfiguration() {
-        CcuLog.i(TAG,"saveConfiguration")
+        CcuLog.i(TAG, "saveConfiguration")
         RxjavaUtil.executeBackgroundTask(
             { ProgressDialogUtils.showProgressDialog(context, "Saving Profile Configuration...") },
             {
@@ -186,7 +188,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                         L.ccu().systemProfile!!.deleteSystemEquip()
                         L.ccu().systemProfile = null
                         addEquip()
-                        saveModbusConfiguration()
+                        if (configType.value == ConfigType.MODBUS) {
+                            saveModbusConfiguration()
+                        }
                     } else {
                         updateSystemProfile()
                     }
@@ -209,7 +213,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun saveModbusConfiguration() {
-        CcuLog.i(TAG,"saveModbusConfiguration")
+        CcuLog.i(TAG, "saveModbusConfiguration")
         if (isValidConfiguration()) {
             populateSlaveId()
             CCUHsApi.getInstance().resetCcuReady()
@@ -218,7 +222,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun setUpsModbusProfile() {
-        CcuLog.i(TAG,"setUpsModbusProfile")
+        CcuLog.i(TAG, "setUpsModbusProfile")
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
 
@@ -247,7 +251,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun isValidConfiguration(): Boolean {
-        CcuLog.i(TAG,"isValidConfiguration")
+        CcuLog.i(TAG, "isValidConfiguration")
         // do all the validations
         return true
         /*  if (equipModel.value.parameters.isEmpty()) {
@@ -289,7 +293,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun populateSlaveId() {
-        CcuLog.i(TAG,"populateSlaveId")
+        CcuLog.i(TAG, "populateSlaveId")
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         equipModel.value.parameters.forEach {
             it.param.value.isDisplayInUI = it.displayInUi.value
@@ -303,8 +307,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun updateSystemProfile() {
-        CcuLog.i(TAG,"updateSystemProfile")
-        val systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus")
+        CcuLog.i(TAG, "updateSystemProfile")
         val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
         profileEquipBuilder.updateEquipAndPoints(
             configModel.value.getConfiguration(), profileModelDefinition,
@@ -314,7 +317,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun addEquip() {
-        CcuLog.i(TAG,"addEquip")
+        CcuLog.i(TAG, "addEquip")
         systemProfile = DabExternalAhu()
         systemProfile!!.addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition)
         L.ccu().systemProfile = systemProfile
@@ -323,7 +326,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
 
     fun itemsFromMinMax(min: Double, max: Double, increment: Double): List<String> {
-        CcuLog.i(TAG,"itemsFromMinMax")
+        CcuLog.i(TAG, "itemsFromMinMax")
         require(min <= max) { "Minimum value must be less than or equal to the maximum value" }
         require(increment > 0.0) { "Increment value must be greater than zero" }
         val decimalFormat = DecimalFormat("#." + "#".repeat(2))
@@ -339,17 +342,17 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun getModelIdByName(name: String): String {
-        CcuLog.i(TAG,"getModelIdByName $name")
+        CcuLog.i(TAG, "getModelIdByName $name")
         return deviceModelList.find { it.name == name }!!.id
     }
 
     private fun getVersionByID(id: String): String {
-        CcuLog.i(TAG,"getVersionByID $id")
+        CcuLog.i(TAG, "getVersionByID $id")
         return deviceModelList.find { it.id == id }!!.version
     }
 
     fun onSelectAll(isSelected: Boolean) {
-        CcuLog.i(TAG,"onSelectAll $isSelected")
+        CcuLog.i(TAG, "onSelectAll $isSelected")
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEach {
                 it.displayInUi.value = isSelected
@@ -366,7 +369,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun updateSelectAll() {
-        CcuLog.i(TAG,"updateSelectAll")
+        CcuLog.i(TAG, "updateSelectAll")
         var isAllSelected = true
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEach {
@@ -391,7 +394,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun fetchModelDetails(selectedDevice: String) {
-        CcuLog.i(TAG,"fetchModelDetails")
+        CcuLog.i(TAG, "fetchModelDetails")
         val modelId = getModelIdByName(selectedDevice)
         domainService.readModelById(modelId, object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
@@ -439,7 +442,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun readDeviceModels() {
-        CcuLog.i(TAG,"readDeviceModels")
+        CcuLog.i(TAG, "readDeviceModels")
         domainService.readModbusModelsList("external", object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 try {
@@ -472,7 +475,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun updateModbusProfile() {
-        CcuLog.i(TAG,"updateModbusProfile")
+        CcuLog.i(TAG, "updateModbusProfile")
         modbusProfile.updateModbusEquip(
             equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),

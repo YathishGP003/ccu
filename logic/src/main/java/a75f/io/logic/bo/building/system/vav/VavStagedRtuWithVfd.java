@@ -190,6 +190,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)

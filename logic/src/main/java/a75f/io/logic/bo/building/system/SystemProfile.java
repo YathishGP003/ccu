@@ -8,6 +8,7 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
@@ -772,5 +773,14 @@ public abstract class SystemProfile
     public void writeSystemLoopOutputValue(String state, double value){
         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
+    }
+
+    public void removeSystemEquipModbus() {
+        // TODO if it has modbus Equip Revisit when we add Bacnet support
+        HashMap modbusEquip = CCUHsApi.getInstance().read("system and equip and modbus and not emr and not btu");
+        if (modbusEquip != null && !modbusEquip.isEmpty()) {
+            CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusEquip.get("id")).toString());
+        }
+
     }
 }

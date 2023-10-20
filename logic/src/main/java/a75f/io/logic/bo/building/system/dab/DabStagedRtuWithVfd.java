@@ -164,6 +164,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)

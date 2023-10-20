@@ -263,6 +263,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)

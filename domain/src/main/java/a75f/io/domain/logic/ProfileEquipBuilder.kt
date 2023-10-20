@@ -6,6 +6,7 @@ import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
 import a75f.io.domain.util.TunerUtil
+import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
@@ -16,11 +17,11 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef : String) : String{
+    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef : String, profileName: String?) : String{
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone),profileName)
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
@@ -34,16 +35,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String) : String{
+    fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String,profileName: String?) : String{
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
+        val equip = getEquip(configuration)
         val entityConfiguration = ReconfigHandler
             .getEntityReconfiguration(configuration.nodeAddress, hayStack, entityMapper.getEntityConfiguration(configuration))
+        CcuLog.i("DEV_DEBUG", entityConfiguration.toString())
 
-        val equip = hayStack.readEntity(
-            "equip and group == \"${configuration.nodeAddress}\"")
-
-        val equipId =  equip["id"].toString()
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
+        val equipId =  equip?.get("id").toString()
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone),profileName)
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
@@ -51,6 +51,14 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef)
         deletePoints(entityConfiguration, equipId)
         return equipId
+    }
+
+    fun getEquip(configuration: ProfileConfiguration): HashMap<Any, Any>? {
+        return if (configuration.roomRef.contentEquals("SYSTEM")) {
+            hayStack.readEntity("equip and system and not modbus")
+        } else {
+            hayStack.readEntity("equip and group == \"${configuration.nodeAddress}\"")
+        }
     }
 
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,

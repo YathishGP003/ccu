@@ -654,6 +654,7 @@ public class DabStagedRtu extends DabSystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     public void addCmdPoints(String equipref) {

@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -449,10 +450,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
             L.ccu().systemProfile = new DefaultSystem();
             isDefaultSystem = true;
-
         }
-        Log.i("DEV_DEBUG", "loadEquipProfiles: "+isDefaultSystem);
-        Log.i("DEV_DEBUG", "loadEquipProfiles: profile type "+L.ccu().systemProfile.getProfileType());
         if(!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();
 

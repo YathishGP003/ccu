@@ -78,13 +78,22 @@ class DiffManger(var context: Context?) {
                     val entityConfiguration =
                         originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
                     if (entityConfiguration != null && newModel != null) {
-                        handler.migrateModel(entityConfiguration,newModel, siteRef)
+                        handler.migrateModel(entityConfiguration,newModel, siteRef,
+                            getProfileNameByDomainName()
+                        )
                     }
                 }
             } else {
                 // This version model is not found we need to add to current model
             }
         }
+    }
+
+    private fun getProfileNameByDomainName(): String {
+        /**
+         * TODO implementation function to fund the profile name by domain name using existing equip details
+         */
+        return ""
     }
 
 

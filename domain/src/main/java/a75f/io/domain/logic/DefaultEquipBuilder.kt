@@ -17,17 +17,21 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
+    override fun buildEquip(equipConfig : EquipBuilderConfig, profileName: String?) : Equip {
 
         val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
-            .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
             .setSiteRef(equipConfig.siteRef)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
+        if (equipConfig.profileConfiguration?.nodeAddress != -1)
+            equipBuilder.setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+
+        if (profileName != null)
+            equipBuilder.setProfile(profileName)
 
         equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
         equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->

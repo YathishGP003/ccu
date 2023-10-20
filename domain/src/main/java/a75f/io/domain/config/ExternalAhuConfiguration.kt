@@ -4,6 +4,7 @@ import a75f.io.domain.api.dcvDamperControlEnable
 import a75f.io.domain.api.dehumidifierOperationEnable
 import a75f.io.domain.api.dualSetpointControlEnable
 import a75f.io.domain.api.humidifierOperationEnable
+import a75f.io.domain.api.occupancyModeControl
 import a75f.io.domain.api.satSetpointControlEnable
 import a75f.io.domain.api.staticPressureSetpointControlEnable
 import a75f.io.domain.api.systemCoolingSATMaximum
@@ -12,7 +13,6 @@ import a75f.io.domain.api.systemDCVDamperPosMaximum
 import a75f.io.domain.api.systemDCVDamperPosMinimum
 import a75f.io.domain.api.systemHeatingSATMaximum
 import a75f.io.domain.api.systemHeatingSATMinimum
-import a75f.io.domain.api.systemOccupancyMode
 import a75f.io.domain.api.systemSATMaximum
 import a75f.io.domain.api.systemSATMinimum
 import a75f.io.domain.api.systemStaticPressureMaximum
@@ -30,7 +30,7 @@ class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM",
     var dualSetPointControl = EnableConfig(dualSetpointControlEnable)
     var fanStaticSetPointControl = EnableConfig(staticPressureSetpointControlEnable)
     var dcvControl = EnableConfig(dcvDamperControlEnable)
-    var occupancyMode = EnableConfig(systemOccupancyMode)
+    var occupancyMode = EnableConfig(occupancyModeControl)
     var humidifierControl = EnableConfig(humidifierOperationEnable)
     var dehumidifierControl = EnableConfig(dehumidifierOperationEnable)
 

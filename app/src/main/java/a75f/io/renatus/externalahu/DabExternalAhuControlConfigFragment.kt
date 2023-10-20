@@ -1,25 +1,26 @@
 package a75f.io.renatus.externalahu
 
 import a75f.io.domain.api.dcvDamperControlEnable
-import a75f.io.domain.api.systemDCVDamperPosMaximum
-import a75f.io.domain.api.systemDCVDamperPosMinimum
 import a75f.io.domain.api.dehumidifierOperationEnable
 import a75f.io.domain.api.dualSetpointControlEnable
-import a75f.io.domain.api.staticPressureSetpointControlEnable
-import a75f.io.domain.api.systemStaticPressureMaximum
-import a75f.io.domain.api.systemStaticPressureMinimum
 import a75f.io.domain.api.humidifierOperationEnable
-import a75f.io.domain.api.systemOccupancyMode
+import a75f.io.domain.api.occupancyModeControl
+import a75f.io.domain.api.satSetpointControlEnable
+import a75f.io.domain.api.staticPressureSetpointControlEnable
 import a75f.io.domain.api.systemCoolingSATMaximum
 import a75f.io.domain.api.systemCoolingSATMinimum
+import a75f.io.domain.api.systemDCVDamperPosMaximum
+import a75f.io.domain.api.systemDCVDamperPosMinimum
 import a75f.io.domain.api.systemHeatingSATMaximum
 import a75f.io.domain.api.systemHeatingSATMinimum
 import a75f.io.domain.api.systemSATMaximum
 import a75f.io.domain.api.systemSATMinimum
-import a75f.io.domain.api.satSetpointControlEnable
+import a75f.io.domain.api.systemStaticPressureMaximum
+import a75f.io.domain.api.systemStaticPressureMinimum
 import a75f.io.domain.api.tagValueIncrement
 import a75f.io.domain.api.targetDehumidifier
 import a75f.io.domain.api.targetHumidifier
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
@@ -71,6 +72,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
+import java.lang.Exception
 
 
 /**
@@ -88,10 +90,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
         viewModel = ViewModelProvider(this)[ExternalAhuControlViewModel::class.java]
         rootView.apply {
             setContent {
-                ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
-                viewModel.configModelDefinition(
-                    requireContext()
-                )
                 if (viewModel.profileModelDefinition != null) {
                     LazyColumn(
                         modifier = Modifier
@@ -413,7 +411,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
-                                    systemOccupancyMode
+                                    occupancyModeControl
                                 ),
                                 state = viewModel.configModel.value.occupancyMode
                             ) {
@@ -562,6 +560,11 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                 }
             }
         }
+        CcuLog.i("DEV_DEBUG","onCreateView")
+        ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
+        viewModel.configModelDefinition(
+            requireContext()
+        )
         return rootView
     }
 
@@ -593,6 +596,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun BacnetConfig() {
+        CcuLog.i("DEV_DEBUG","BacnetConfig")
         /**
          * Add Bacnet configuration here
          */
@@ -600,6 +604,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun ModbusConfig() {
+        CcuLog.i("DEV_DEBUG","ModbusConfig")
         viewModel.configModbusDetails()
         Row {
             Box(
@@ -689,6 +694,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun ParametersListView(data: MutableState<EquipModel>) {
+        CcuLog.i("DEV_DEBUG","ParametersListView")
         if (data.value.parameters.isNotEmpty()) {
             var index = 0
             while (index < data.value.parameters.size) {
@@ -724,6 +730,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
     }
 
     fun getName(name: String): String {
+        CcuLog.i("DEV_DEBUG","getName")
         return if (name.length > 30) name.substring(0, 30) else name
     }
 

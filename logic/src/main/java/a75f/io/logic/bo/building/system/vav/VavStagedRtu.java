@@ -722,6 +722,7 @@ public class VavStagedRtu extends VavSystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     public void addCmdPoints(String equipref) {

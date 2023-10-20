@@ -3,6 +3,7 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
+import a75f.io.logger.CcuLog
 
 object ReconfigHandler {
 
@@ -12,15 +13,19 @@ object ReconfigHandler {
      */
     private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
         val domainNameMap = mutableMapOf<String, Double>()
-        val configPoints =
-            hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+        val configPoints = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         configPoints.forEach {
             val pointVal = hayStack.readDefaultValById(it["id"].toString())
             //TODO - handle string type val if there is any.
             if (pointVal is Number) {
                 domainNameMap[it["domainName"].toString()] = pointVal
             }
+            if (pointVal is Double) {
+                domainNameMap[it["domainName"].toString()] = pointVal
+            }
         }
+        domainNameMap.forEach { CcuLog.i("DEV_DEBUG","${it.key} : ${it.value}") }
+
         return domainNameMap
     }
 

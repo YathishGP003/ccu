@@ -117,6 +117,7 @@ public class DefaultSystem extends SystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_DEFAULT.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     @Override

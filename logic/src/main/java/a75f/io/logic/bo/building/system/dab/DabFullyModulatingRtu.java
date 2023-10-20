@@ -200,6 +200,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addCmdPoints(String equipref) {

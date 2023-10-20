@@ -8,6 +8,7 @@ import a75f.io.domain.api.dcvDamperControlEnable
 import a75f.io.domain.api.dehumidifierOperationEnable
 import a75f.io.domain.api.dualSetpointControlEnable
 import a75f.io.domain.api.humidifierOperationEnable
+import a75f.io.domain.api.occupancyModeControl
 import a75f.io.domain.api.satSetpointControlEnable
 import a75f.io.domain.api.staticPressureSetpointControlEnable
 import a75f.io.domain.api.systemCoolingSATMaximum
@@ -16,7 +17,6 @@ import a75f.io.domain.api.systemDCVDamperPosMaximum
 import a75f.io.domain.api.systemDCVDamperPosMinimum
 import a75f.io.domain.api.systemHeatingSATMaximum
 import a75f.io.domain.api.systemHeatingSATMinimum
-import a75f.io.domain.api.systemOccupancyMode
 import a75f.io.domain.api.systemSATMaximum
 import a75f.io.domain.api.systemSATMinimum
 import a75f.io.domain.api.systemStaticPressureMaximum
@@ -61,8 +61,6 @@ class DabExternalAhu : DabSystemProfile() {
         )
         updateAhuRef(equipId)
         ControlMote(equipId)
-        L.saveCCUState()
-        CCUHsApi.getInstance().syncEntityTree()
     }
 
     override fun doSystemControl() {
@@ -73,24 +71,8 @@ class DabExternalAhu : DabSystemProfile() {
         val hayStack = CCUHsApi.getInstance()
         val equip = hayStack.read("equip and system and not modbus")
         if (equip != null && equip.size > 0) {
-
             if (equip["profile"] != ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
-                Log.i("DEV_DEBUG", "deleteSystemEquip: ")
                 hayStack.deleteEntityTree(equip["id"].toString())
-            } else {
-
-                Log.i("DEV_DEBUG", "asking to create new profile: ")
-               /* val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
-                val equipId = profileEquipBuilder.buildEquipAndPoints(
-                    getConfiguration(),
-                    loadModel()!!,
-                    CCUHsApi.getInstance().site!!.id,
-                    ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name
-                )
-                updateAhuRef(equipId)
-                ControlMote(equipId)
-                L.saveCCUState()
-                CCUHsApi.getInstance().syncEntityTree()*/
             }
         }
 
@@ -98,11 +80,13 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     override fun deleteSystemEquip() {
-        Log.i("DEV_DEBUG", "deleteSystemEquip: ")
         val equip = CCUHsApi.getInstance().read("equip and system and not modbus")
         if (equip["profile"] == ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
             CCUHsApi.getInstance().deleteEntityTree(equip["id"].toString())
         }
+
+        removeSystemEquipModbus()
+
     }
 
     private fun loadModel(): SeventyFiveFProfileDirective? {
@@ -155,7 +139,7 @@ class DabExternalAhu : DabSystemProfile() {
         config.dualSetPointControl.enabled = getConfigByDomainName(systemEquip, dualSetpointControlEnable)
         config.fanStaticSetPointControl.enabled = getConfigByDomainName(systemEquip, staticPressureSetpointControlEnable)
         config.dcvControl.enabled = getConfigByDomainName(systemEquip, dcvDamperControlEnable)
-        config.occupancyMode.enabled = getConfigByDomainName(systemEquip, systemOccupancyMode)
+        config.occupancyMode.enabled = getConfigByDomainName(systemEquip, occupancyModeControl)
         config.humidifierControl.enabled = getConfigByDomainName(systemEquip, humidifierOperationEnable)
         config.dehumidifierControl.enabled = getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 

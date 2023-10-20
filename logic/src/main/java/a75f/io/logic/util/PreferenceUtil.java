@@ -93,6 +93,7 @@ public class PreferenceUtil {
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
     private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
+    private static final String HSS_OUTSIDE_DAMPER_MIN_OPEN = "hssOutsideDamperMinOpenMigration";
 
 
     private static final String LAST_USERINTENT_CONDITIONING_MODE = "lastUserIntentConditioningMode";
@@ -795,5 +796,12 @@ public class PreferenceUtil {
     }
     public static void setTemperatureTIPortEnabled() {
         setBooleanPreference(ENABLE_TEMPERATURE_TI_PORT, true);
+    }
+
+    public static boolean isHSSOutsideDamperMinOpenMigrationDone() {
+        return getBooleanPreference(HSS_OUTSIDE_DAMPER_MIN_OPEN);
+    }
+    public static void setHSSOutsideDamperMinOpenMigrationDone() {
+        setBooleanPreference(HSS_OUTSIDE_DAMPER_MIN_OPEN, true);
     }
 }

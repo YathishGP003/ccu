@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
@@ -4356,9 +4355,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            loadGrid();
-                            dialog.dismiss();
-                            timer.cancel();
+                            loadGrid(dialog, timer);
                         }
                     });
                 }
@@ -4366,10 +4363,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }, 0, 3000);
     }
 
-    public void loadGrid() {
+    public void loadGrid(AlertDialog dialog, Timer timer) {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 loadGrid(parentRootView);
+                dialog.dismiss();
+                timer.cancel();
             });
         }
     }

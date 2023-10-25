@@ -1,6 +1,8 @@
 package a75f.io.domain.config
 
 import a75f.io.domain.api.EntityConfig
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 
 /**
  * A profile configuration is a sort of DTO object that stores all the configuration values required to
@@ -32,5 +34,24 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      *
      */
     //abstract fun getDependencies() : List<ProfileConfig>
+
+    fun getDefaultValConfig(domainName : String, model : SeventyFiveFProfileDirective) :ValueConfig {
+        val point = model.points.find { it.domainName == domainName }
+        val config = ValueConfig(domainName, point?.defaultValue?.toString()?.toDouble() ?: 0.0)
+        config.disName = point?.name ?:""
+        if (point?.valueConstraint is NumericConstraint) {
+            config.minVal = (point?.valueConstraint as NumericConstraint).minValue
+            config.maxVal = (point?.valueConstraint as NumericConstraint).maxValue
+        }
+        point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
+        return config
+    }
+
+    fun getDefaultEnableConfig(domainName : String, model : SeventyFiveFProfileDirective) : EnableConfig {
+        val point = model.points.find { it.domainName == domainName }
+        val config = EnableConfig(domainName, point?.defaultValue?.toString()?.toBoolean() ?: false)
+        config.disName = point?.name ?:""
+        return config
+    }
 
 }

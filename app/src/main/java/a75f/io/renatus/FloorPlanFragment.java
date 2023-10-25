@@ -70,11 +70,10 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
-import a75f.io.renatus.util.BackFillViewModel;
+import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -1433,8 +1432,8 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
                     VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
-                    showDialogFragment(FragmentVAVConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+                    showDialogFragment(VavProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

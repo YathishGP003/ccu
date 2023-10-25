@@ -1,5 +1,7 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import java.io.FileNotFoundException
@@ -14,6 +16,7 @@ class ModelSource {
         private const val MODEL_PATH = "assets/assets/75f/models/"
 
         fun getModelByProfileName(profileName: String): ModelDirective? {
+            CcuLog.i(Domain.LOG_TAG, " getModelByProfileName $profileName")
             try {
                 val modelId = getModelId(profileName)
                 return ResourceHelper.loadModelDefinition("${MODEL_PATH}${modelId}.json")
@@ -22,6 +25,7 @@ class ModelSource {
             } catch (e: JsonParseException) {
                 e.printStackTrace()
             }
+            CcuLog.i(Domain.LOG_TAG, "Model load failed")
             return null
         }
 

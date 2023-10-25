@@ -1053,7 +1053,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private EquipmentDevice getModbusEquip(String filter){
-		HashMap<Object, Object> equipListMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and "+filter+" and system");
+		HashMap<Object, Object> equipListMap = CCUHsApi.getInstance().readEntity("equip and modbus and not equipRef and "+filter+" and roomRef==\"@SYSTEM\"");
 		if (equipListMap.isEmpty())
 			return null;
 		return buildModbusModelByEquipRef(Objects.requireNonNull(equipListMap.get("id")).toString());

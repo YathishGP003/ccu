@@ -103,3 +103,27 @@ const val co2IgnoreRequest = "co2IgnoreRequest"
 const val co2SPTrim = "co2SPTrim"
 const val co2SPRes = "co2SpRes"
 const val co2SPResMax = "co2SpResMax"
+
+//VAV-Zone
+const val damperType = "damperType"
+const val damperSize = "damperSize"
+const val damperShape = "damperShape"
+const val reheatType = "reheatType"
+const val zonePriority = "zonePriority"
+const val autoForceOccupied = "autoForceOccupied"
+const val autoAway = "autoAway"
+const val enableIAQControl = "enableIAQControl"
+const val enableCo2Control = "enableCo2Control"
+const val enableCFMControl = "enableCFMControl"
+const val temperatureOffset = "temperatureOffset"
+const val minHeatingDamperPos = "minHeatingDamperPos"
+const val maxHeatingDamperPos = "maxHeatingDamperPos"
+const val minCoolingDamperPos = "minCoolingDamperPos"
+const val maxCoolingDamperPos = "maxCoolingDamperPos"
+const val minCFMCooling = "minCFMCooling"
+const val maxCFMCooling = "maxCFMCooling"
+const val minCFMReheating = "minCFMReheating"
+const val maxCFMReheating = "maxCFMReheating"
+
+
+

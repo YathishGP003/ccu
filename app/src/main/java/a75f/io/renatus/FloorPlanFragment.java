@@ -74,6 +74,7 @@ import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.vav.VavProfileConfig;
 import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -1433,8 +1434,8 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
                     VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
-                    showDialogFragment(FragmentVAVConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+                    showDialogFragment(VavProfileConfig.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), VavProfileConfig.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

@@ -23,6 +23,7 @@ import a75f.io.renatus.hyperstatsplit.viewModels.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
+import a75f.io.renatus.views.CustomCCUSwitch
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -62,8 +63,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     private lateinit var profileName: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
-    lateinit var forceOccupiedSwitch: ToggleButton
-    lateinit var autoAwaySwitch: ToggleButton
+    lateinit var forceOccupiedSwitch: CustomCCUSwitch
+    lateinit var autoAwaySwitch: CustomCCUSwitch
 
     // 8 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -100,15 +101,16 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var exhaustFanHysteresis: Spinner
     lateinit var tvExhaustFanHysteresis: TextView
 
+    lateinit var vocConfig: LinearLayout
     lateinit var zoneVOCThreshold: Spinner
     lateinit var zoneVOCTarget: Spinner
 
     lateinit var zonePMTarget: Spinner
 
-    lateinit var displayHumidity: ToggleButton
-    lateinit var displayVOC: ToggleButton
-    lateinit var displayPp2p5: ToggleButton
-    lateinit var displayCo2: ToggleButton
+    lateinit var displayHumidity: CustomCCUSwitch
+    lateinit var displayVOC: CustomCCUSwitch
+    lateinit var displayPp2p5: CustomCCUSwitch
+    lateinit var displayCo2: CustomCCUSwitch
 
 
     /**
@@ -324,6 +326,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             tvZoneCO2Threshold = findViewById(R.id.zoneCO2Threshold)
             tvZoneCO2Target = findViewById(R.id.zoneCO2Target)
+            vocConfig = findViewById(R.id.vocConfig)
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
@@ -825,6 +828,16 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
 
+        var vocLayoutParams = vocConfig.layoutParams as ViewGroup.MarginLayoutParams
+
+        if (isDampSelected) {
+            vocLayoutParams.setMargins(0,24,0,10)
+            vocConfig.layoutParams = vocLayoutParams
+        } else {
+            vocLayoutParams.setMargins(0,0,0,10)
+            vocConfig.layoutParams = vocLayoutParams
+        }
+
         outsideDamperMinOpen.setSelection(viewState.outsideDamperMinOpenPos)
         exhaustFanStage1Threshold.setSelection(viewState.exhaustFanStage1ThresholdPos)
         exhaustFanStage2Threshold.setSelection(viewState.exhaustFanStage2ThresholdPos)
@@ -917,7 +930,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         return count
     }
 
-    private fun enableDisplay(toggle: ToggleButton): Boolean{
+    private fun enableDisplay(toggle: CustomCCUSwitch): Boolean{
         val count = getDisplayDeviceCount()
         if(count > 2) {
             Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()

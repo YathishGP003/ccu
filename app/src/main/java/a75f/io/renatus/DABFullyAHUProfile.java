@@ -242,7 +242,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                                                                       HtmlCompat.FROM_HTML_MODE_LEGACY), (dialog, which) -> {
                     dcwbEnableToggle.setChecked(false);
                 });
-                btuConfigDialog.setIcon(android.R.drawable.ic_dialog_alert);
+                btuConfigDialog.setIcon(R.drawable.ic_dialog_alert);
                 btuConfigDialog.setCancelable(false);
                 btuConfigDialog.show();
             } else {

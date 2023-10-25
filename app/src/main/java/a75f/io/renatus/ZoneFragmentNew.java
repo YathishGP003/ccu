@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.logic.bo.building.ZoneTempState.TEMP_DEAD;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
@@ -14,6 +13,7 @@ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationPendingDialog;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -87,6 +87,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.device.mesh.Pulse;
+import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -105,6 +106,7 @@ import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
@@ -114,6 +116,7 @@ import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
+import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
@@ -216,6 +219,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
      * setUserVisibleHint to make sure the view is ready before we start listening to updates.
      */
     private boolean isZoneViewReady = false;
+
+    private boolean isItemSelectedEvent = false;
     public static ZoneFragmentNew newInstance() {
         return new ZoneFragmentNew();
     }
@@ -330,6 +335,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
+        if(!validateMigration()) {
+            showMigrationPendingDialog(requireContext());
+        }
     }
 
     @Override
@@ -522,6 +530,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         }
+        isItemSelectedEvent = false;
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperature Done");
     }
 
@@ -691,6 +700,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setCcuReady() {
+        CcuLog.i("UI_PROFILING","zoneViewready set");
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
         setListeners();
@@ -753,7 +763,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
                             profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
-                            profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())
+                            profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
+                            profileType.contains(ProfileType.HYPERSTATSPLIT_CPU.name())
                     ) {
                         tempModule = true;
                     }
@@ -789,6 +800,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
     {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewTemperatureBasedZone");
+        isItemSelectedEvent = false;
 
         Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -1000,6 +1012,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         specialScheduleImageButton.setOnClickListener(v ->
                 imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
 
+
         if(mScheduleType >= 2){
             int spinnerposition = 2;
             for (HashMap<Object, Object> a:namedScheds) {
@@ -1008,15 +1021,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     spinnerposition = namedScheds.indexOf(a)+2;
                 }
             }
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            isItemSelectedEvent = false;
         }else{
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(mScheduleType -1, false);
+            isItemSelectedEvent = false;
         }
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
+                if(isItemSelectedEvent)
+                    return;
 
 //                if (position == 0 && (mScheduleType != -1)) {
 //                    if (mSchedule.isZoneSchedule()) {
@@ -1484,6 +1503,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
+
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
+                                HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(p);
+                                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                            }
                         }
                     }
                 }
@@ -1524,7 +1548,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen,
                                              LayoutInflater inflater, boolean isRemoteChange) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones");
-
+        isItemSelectedEvent = false;
         Equip p = equipOpen;
         int temperatureMode = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + p.getRoomRef() + "\"").intValue();
@@ -1703,9 +1727,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
 
             }
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            isItemSelectedEvent = false;
+
+
         }else{
+            isItemSelectedEvent = true;
             scheduleSpinner.setSelection(mScheduleType -1, false);
+            isItemSelectedEvent = false;
         }
         if (mSchedule.isZoneSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
@@ -1716,6 +1746,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isItemSelectedEvent)
+                    return;
+
 //                if (position == 0 && (mScheduleType != -1)) {
 //                    if (mSchedule.isZoneSchedule()) {
 //                        mSchedule.setDisabled(true);
@@ -1970,6 +2003,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+            }
+
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
+                HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(updatedEquip);
+                Log.i("PointsValue", "CPU & Econ Points:" + cpuEconEquipPoints.toString());
+                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
             }
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");
@@ -2423,6 +2462,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         });
+        isItemSelectedEvent = false;
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewNonTemperatureBasedZone Done");
 
     }
@@ -3736,7 +3776,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
+            HyperSplitMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
             UpdatePointHandler.setZoneDataInterface(this);
             UpdateEntityHandler.setZoneDataInterface(this);
         }
@@ -3751,7 +3793,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ScheduleManager.getInstance().setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+        HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(null);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        HyperSplitMsgReceiver.setCurrentTempInterface(null);
         UpdatePointHandler.setZoneDataInterface(null);
         UpdateEntityHandler.setZoneDataInterface(null);
     }
@@ -3767,7 +3811,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
+            HyperSplitMsgReceiver.setCurrentTempInterface(this);
         } else {
 
             ScheduleManager.getInstance().setZoneDataInterface(null);
@@ -3776,7 +3822,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleManager.getInstance().setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(null);
+            HyperStatSplitUserIntentHandler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
+            HyperSplitMsgReceiver.setCurrentTempInterface(null);
         }
     }
 
@@ -3907,7 +3955,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
                     .setCancelable(false)
                     .setTitle("Schedule Errors")
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             scheduleSpinner.setSelection(0);

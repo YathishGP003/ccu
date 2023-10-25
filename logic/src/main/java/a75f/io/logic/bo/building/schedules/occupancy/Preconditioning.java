@@ -36,7 +36,7 @@ public class Preconditioning implements OccupancyTrigger {
         
         boolean isStandaloneEquip = (equip.getMarkers().contains("smartstat") ||
                                      equip.getMarkers().contains("sse") ||
-                                     equip.getMarkers().contains("hyperstat"));
+                                     equip.getMarkers().contains("hyperstat") || equip.getMarkers().contains("hyperstatsplit"));
 
         if (isStandaloneEquip && isZoneRequiresPreconditioning(equipRef, occupiedSchedule)) {
             return true;

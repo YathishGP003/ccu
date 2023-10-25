@@ -133,7 +133,8 @@ public class CongratsFragment extends Fragment {
         PackageInfo pi;
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
-            String str = pi.versionName + "." + String.valueOf(pi.versionCode);
+            String versionName = pi.versionName.toString().replace("RENATUS_CCU","CCU");
+            String str = versionName + "." + String.valueOf(pi.versionCode);
             mCCUVersion.setText(str);
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block

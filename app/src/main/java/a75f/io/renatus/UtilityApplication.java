@@ -208,7 +208,7 @@ public abstract class UtilityApplication extends Application {
         setCcuDbReady(false);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate");
     
-        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Started");
+        CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Started");
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         context = getApplicationContext();
@@ -297,7 +297,7 @@ public abstract class UtilityApplication extends Application {
                 handleSafeMode(paramThrowable);
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
-                CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
+                CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Crash");
                 RenatusApp.closeApp();
             });
         }
@@ -457,7 +457,7 @@ public abstract class UtilityApplication extends Application {
         EventBus.getDefault().unregister(this);
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
-        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Terminated");
+        CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Terminated");
         UtilityApplication.stopRestServer();
         super.onTerminate();
     }

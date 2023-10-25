@@ -28,7 +28,7 @@ public class ModbusHandler {
         JsonElement durHVal = msgObject.get("duration");
         Object lastModifiedTimeTag = msgObject.get("lastModifiedDateTime");
         if (lastModifiedTimeTag != null) {
-            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+            lastModifiedDateTime = HDateTime.make(msgObject.get("lastModifiedDateTime").getAsString());
         } else {
             lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
         }

@@ -82,7 +82,7 @@ import a75f.io.usbserial.UsbServiceActions;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
-    private static final String TAG = "RenatusLandingActivityLog";
+    private static final String TAG = "LandingActivityLog";
     private static CountDownTimer countDownTimer;
     private static final long DISCONNECT_TIMEOUT = 3000;
     private static final long INTERVAL = 1000;
@@ -123,7 +123,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         super.onCreate(savedInstanceState);
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         executorService = Executors.newFixedThreadPool(1);
-        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate");
+        CcuLog.i("UI_PROFILING","LandingActivity.onCreate");
         prefs = new Prefs(this);
         CCUUiUtil.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
@@ -250,12 +250,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 }
             });
         }
-        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate Completed");
+        CcuLog.i("UI_PROFILING","LandingActivity.onCreate Completed");
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbEventReceiver, filter);
-        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Created");
+        CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Created");
         populateBACnetConfiguration();
         intializeBACnet();
     }
@@ -471,7 +471,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         } catch (Exception e) {
             // already unregistered
         }
-        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
+        CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Destroyed");
     }
 
     private void appRestarted() {
@@ -616,7 +616,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
-        CcuLog.d("RemoteCommand","RenatusLandingActivity="+commands+","+cmdLevel);
+        CcuLog.d("RemoteCommand","LandingActivity="+commands+","+cmdLevel);
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
     }
 

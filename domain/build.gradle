@@ -21,38 +21,44 @@ android {
         }
         dev {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.dev.service.75f.io/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.dev.service.75f.io\"'
         }
         dev_qa {
             minifyEnabled false
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.prod.service.75f.io/\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.prod.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"\"'
         }
         qa {
             minifyEnabled false
             buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.qa.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"\"'
 
         }
         staging {
             minifyEnabled false
             buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.staging.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"\"'
         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.daikin_prod.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://api.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"e9bf2133524d4161a735122eb9d38831\"'
         }
         carrier_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://domain-modeler.carrier_prod.service.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://api.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"44d7e68ba6e141e19b78a0c1c62b5076\"'
         }
     }
     compileOptions {

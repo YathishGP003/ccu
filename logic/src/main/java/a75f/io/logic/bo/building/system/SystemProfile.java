@@ -672,6 +672,16 @@ public abstract class SystemProfile
             ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and humidity", externalHumidity);
         }
 
+        // Update weather points on all HyperStat Split equips
+        ArrayList<HashMap<Object, Object>> hssEquips = CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit");
+        if (!hssEquips.isEmpty()) {
+            for(HashMap<Object, Object> hssEquip : hssEquips) {
+                String equipId = hssEquip.get(Tags.ID).toString();
+                CCUHsApi.getInstance().writeHisValByQuery("outsideWeather and air and temp and equipRef == \"" + equipId + "\"", externalTemp);
+                CCUHsApi.getInstance().writeHisValByQuery("outsideWeather and air and humidity and equipRef == \"" + equipId + "\"", externalHumidity);
+            }
+        }
+
         if (externalTemp != 0) {
             CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
             CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);

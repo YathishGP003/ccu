@@ -20,7 +20,7 @@ fun getModelListFromJson(response: String): List<ModelMetaData> {
                     item.getString(NAME),
                     item.getString(DESCRIPTION),
                     arrayToList(item.getJSONArray(TAG_NAMES)),
-                    "V${versionObj.getString(MAJOR)}.${versionObj.getString(MINOR)}.${versionObj.getString(PATCH)}"
+                    "${versionObj.getString(MAJOR)}.${versionObj.getString(MINOR)}.${versionObj.getString(PATCH)}"
                 )
             )
         }

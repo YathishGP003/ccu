@@ -9,6 +9,7 @@ import android.util.Log;
 import java.util.Date;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
@@ -93,6 +94,8 @@ public class PreferenceUtil {
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
     private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
 
+
+    private static final String LAST_USERINTENT_CONDITIONING_MODE = "lastUserIntentConditioningMode";
 
     public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
 
@@ -252,7 +255,7 @@ public class PreferenceUtil {
         editor.putString(key, value);
         editor.apply();
     }
-
+    
     public static boolean getEnableZoneScheduleMigration() {
         return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
     }
@@ -313,6 +316,32 @@ public class PreferenceUtil {
     }
     public static void setTrueCFMDABMigrationDone() {
         setBooleanPreference(TRUE_CFM_DAB_MIGRATION, true);
+    }
+
+    public static StandaloneConditioningMode getLastUserIntentConditioningMode() {
+        switch (getStringPreference(LAST_USERINTENT_CONDITIONING_MODE)) {
+            case "OFF": return StandaloneConditioningMode.OFF;
+            case "HEAT_ONLY": return StandaloneConditioningMode.HEAT_ONLY;
+            case "COOL_ONLY": return StandaloneConditioningMode.COOL_ONLY;
+            default: return StandaloneConditioningMode.AUTO;
+        }
+    }
+    public static void setLastUserIntentConditioningMode(StandaloneConditioningMode mode) {
+        String lastUserIntentConditioningModeValue;
+        if (mode == StandaloneConditioningMode.OFF) {
+            lastUserIntentConditioningModeValue = "OFF";
+        } else if (mode == StandaloneConditioningMode.HEAT_ONLY) {
+            lastUserIntentConditioningModeValue = "HEAT_ONLY";
+        } else if (mode == StandaloneConditioningMode.COOL_ONLY) {
+            lastUserIntentConditioningModeValue = "COOL_ONLY";
+        } else {
+            lastUserIntentConditioningModeValue = "AUTO";
+        }
+
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString(LAST_USERINTENT_CONDITIONING_MODE, lastUserIntentConditioningModeValue);
+        editor.apply();
+
     }
 
     public static boolean isIduPointsMigrationDone() {

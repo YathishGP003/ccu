@@ -95,7 +95,12 @@ public class FragmentDeviceScan extends BaseDialogFragment
                 }
                 break;
             case SerialConsts.HYPERSTAT_NAME :
-                if(mNodeType == NodeType.HYPER_STAT){
+                if(mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.HYPERSTATSPLIT){
+                    return true;
+                }
+                break;
+            case SerialConsts.HYPERSTATSPLIT_NAME :
+                if(mNodeType == NodeType.HYPERSTATSPLIT){
                     return true;
                 }
                 break;

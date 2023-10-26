@@ -282,10 +282,12 @@
     <string name="generic_voltage"> Generic 0-10V</string>
     <string name="generic_resistance"> Generic 1-100kOhm</string>
 
+    <string name="sensorbus">SENSOR BUS</string>
     <string name="sensorbusaddress0"> Address 0</string>
     <string name="sensorbusaddress1"> Address 1</string>
     <string name="sensorbusaddress2"> Address 2</string>
     <string name="sensorbusaddress3"> Address 3</string>
+    <string name="hs_connect">HS CONNECT</string>
 
     <string-array name="hyperstatsplit_universal_in_selector">
         <item>  @string/current_tx_0_10 </item>

@@ -27,8 +27,6 @@ import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelNames
-import a75f.io.domain.util.ModelSource
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.haystack.device.ControlMote
 import android.util.Log
@@ -64,7 +62,60 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun doSystemControl() {
+        DabSystemController.getInstance().runDabSystemControlAlgo()
+        updateSystemPoints()
+    }
 
+
+    @Synchronized
+    private fun updateSystemPoints() {
+
+        Log.i("DEV_DEBUG", "Cooling Loop : $coolingLoopOp")
+        Log.i("DEV_DEBUG", "Heating Loop : $heatingLoopOp")
+
+        /*
+        updateOutsideWeatherParams()
+        updateMechanicalConditioning(CCUHsApi.getInstance())
+        val dabSystem = DabSystemController.getInstance()
+        if (isDcwbEnabled()) {
+            if (dcwbAlgoHandler == null) {
+                val isAdaptiveDelta: Boolean = getConfigVal("adaptive and delta") > 0
+                dcwbAlgoHandler =
+                    DcwbAlgoHandler(isAdaptiveDelta, systemEquipRef, CCUHsApi.getInstance())
+            }
+
+            //Analog1 controls water valve when the DCWB enabled.
+            updateAnalog1DcwbOutput(dabSystem)
+
+            //Could be mapped to cooling or co2 based on configuration.
+            updateAnalog4Output(dabSystem)
+        } else {
+            //Analog1 controls cooling when the DCWB is disabled
+            updateAnalog1DabOutput(dabSystem)
+        }
+
+        //Analog2 controls Central Fan
+        updateAnalog2Output(dabSystem)
+
+        //Analog3 controls heating.
+        updateAnalog3Output(dabSystem)
+        updateRelayOutputs(dabSystem)
+        setSystemPoint("operating and mode", dabSystem.systemState.ordinal.toDouble())
+        val systemStatus = statusMessage
+        val scheduleStatus = ScheduleManager.getInstance().systemStatusString
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $systemStatus")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: $scheduleStatus")
+        if (CCUHsApi.getInstance()
+                .readDefaultStrVal("system and status and message") != systemStatus
+        ) {
+            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus)
+            Globals.getInstance().applicationContext.sendBroadcast(Intent(ScheduleUtil.ACTION_STATUS_CHANGE))
+        }
+        if (CCUHsApi.getInstance()
+                .readDefaultStrVal("system and scheduleStatus") != scheduleStatus
+        ) {
+            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus)
+        }*/
     }
 
     override fun addSystemEquip() {
@@ -75,7 +126,6 @@ class DabExternalAhu : DabSystemProfile() {
                 hayStack.deleteEntityTree(equip["id"].toString())
             }
         }
-
     }
 
     @Synchronized
@@ -87,23 +137,23 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun isCoolingAvailable(): Boolean {
-        return false
+        return true
     }
 
     override fun isHeatingAvailable(): Boolean {
-        return false
+        return true
     }
 
     override fun isCoolingActive(): Boolean {
-        return false
+        return true
     }
 
     override fun isHeatingActive(): Boolean {
-        return false
+        return true
     }
 
     private fun getConfigByDomainName(equip: Equip, domainName: String): Boolean {
-        val config = getPointByDomain(equip,domainName)
+        val config = getPointByDomain(equip, domainName)
         config?.let { return config.readDefaultVal() == 1.0 }
         return false
     }
@@ -113,7 +163,7 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun getDefaultValueByDomain(equip: Equip, domainName: String): Double {
-        val config = getPointByDomain(equip,domainName)
+        val config = getPointByDomain(equip, domainName)
         config?.let { return config.readDefaultVal() }
         return 0.0
     }
@@ -124,31 +174,47 @@ class DabExternalAhu : DabSystemProfile() {
         if (systemEquip == null)
             return config
 
-        config.setPointControl.enabled = getConfigByDomainName(systemEquip, satSetpointControlEnable)
-        config.dualSetPointControl.enabled = getConfigByDomainName(systemEquip, dualSetpointControlEnable)
-        config.fanStaticSetPointControl.enabled = getConfigByDomainName(systemEquip, staticPressureSetpointControlEnable)
+        config.setPointControl.enabled =
+            getConfigByDomainName(systemEquip, satSetpointControlEnable)
+        config.dualSetPointControl.enabled =
+            getConfigByDomainName(systemEquip, dualSetpointControlEnable)
+        config.fanStaticSetPointControl.enabled =
+            getConfigByDomainName(systemEquip, staticPressureSetpointControlEnable)
         config.dcvControl.enabled = getConfigByDomainName(systemEquip, dcvDamperControlEnable)
         config.occupancyMode.enabled = getConfigByDomainName(systemEquip, occupancyModeControl)
-        config.humidifierControl.enabled = getConfigByDomainName(systemEquip, humidifierOperationEnable)
-        config.dehumidifierControl.enabled = getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
+        config.humidifierControl.enabled =
+            getConfigByDomainName(systemEquip, humidifierOperationEnable)
+        config.dehumidifierControl.enabled =
+            getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 
-        config.satMin.currentVal = getConfigValue( modelDef,systemSATMinimum, systemEquip)
+        config.satMin.currentVal = getConfigValue(modelDef, systemSATMinimum, systemEquip)
         config.satMax.currentVal = getConfigValue(modelDef, systemSATMaximum, systemEquip)
-        config.heatingMinSp.currentVal = getConfigValue(modelDef, systemHeatingSATMinimum, systemEquip)
-        config.heatingMaxSp.currentVal = getConfigValue(modelDef, systemHeatingSATMaximum, systemEquip)
-        config.coolingMinSp.currentVal = getConfigValue(modelDef, systemCoolingSATMinimum, systemEquip)
-        config.coolingMaxSp.currentVal = getConfigValue(modelDef, systemCoolingSATMaximum, systemEquip)
-        config.fanMinSp.currentVal = getConfigValue(modelDef, systemStaticPressureMinimum, systemEquip)
-        config.fanMaxSp.currentVal = getConfigValue(modelDef, systemStaticPressureMaximum, systemEquip)
+        config.heatingMinSp.currentVal =
+            getConfigValue(modelDef, systemHeatingSATMinimum, systemEquip)
+        config.heatingMaxSp.currentVal =
+            getConfigValue(modelDef, systemHeatingSATMaximum, systemEquip)
+        config.coolingMinSp.currentVal =
+            getConfigValue(modelDef, systemCoolingSATMinimum, systemEquip)
+        config.coolingMaxSp.currentVal =
+            getConfigValue(modelDef, systemCoolingSATMaximum, systemEquip)
+        config.fanMinSp.currentVal =
+            getConfigValue(modelDef, systemStaticPressureMinimum, systemEquip)
+        config.fanMaxSp.currentVal =
+            getConfigValue(modelDef, systemStaticPressureMaximum, systemEquip)
         config.dcvMin.currentVal = getConfigValue(modelDef, systemDCVDamperPosMinimum, systemEquip)
         config.dcvMax.currentVal = getConfigValue(modelDef, systemDCVDamperPosMaximum, systemEquip)
         config.targetHumidity.currentVal = getConfigValue(modelDef, targetHumidifier, systemEquip)
-        config.targetDeHumidity.currentVal = getConfigValue(modelDef, targetDehumidifier, systemEquip)
+        config.targetDeHumidity.currentVal =
+            getConfigValue(modelDef, targetDehumidifier, systemEquip)
         return config
     }
 
-    private fun getConfigValue(modelDefinition: SeventyFiveFProfileDirective, domainName: String, equip: Equip): Double{
-      val currentValue = getDefaultValueByDomain(equip, domainName)
+    private fun getConfigValue(
+        modelDefinition: SeventyFiveFProfileDirective,
+        domainName: String,
+        equip: Equip
+    ): Double {
+        val currentValue = getDefaultValueByDomain(equip, domainName)
         if (currentValue != 0.0)
             return currentValue
         val point = modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
@@ -156,6 +222,6 @@ class DabExternalAhu : DabSystemProfile() {
             return (point.defaultValue ?: 0).toString().toDouble()
         }
         return 0.0
-     }
+    }
 
 }

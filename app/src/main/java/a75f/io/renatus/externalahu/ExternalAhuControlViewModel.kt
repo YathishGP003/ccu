@@ -377,7 +377,8 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     fun fetchModelDetails(selectedDevice: String) {
         CcuLog.i(TAG, "fetchModelDetails")
         val modelId = getModelIdByName(selectedDevice)
-        domainService.readModelById(modelId, object : ResponseCallback {
+        val version = getVersionByID(modelId)
+        domainService.readModelById(modelId, version, object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 if (!response.isNullOrEmpty()) {
                     try {

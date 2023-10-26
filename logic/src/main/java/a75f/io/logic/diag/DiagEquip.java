@@ -325,14 +325,16 @@ public class DiagEquip
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
+            String migVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and migration");
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
-                if(SchedulableMigrationKt.validateMigration())
-                    CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
             }
+            if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion)))
+                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
+
 
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block

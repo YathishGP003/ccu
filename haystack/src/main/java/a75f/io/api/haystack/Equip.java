@@ -382,7 +382,7 @@ public class Equip extends Entity
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                //System.out.println(pair.getKey() + " = " + pair.getValue());
+
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -480,7 +480,8 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("capacity")) {
                     this.capacity = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("version")) {
+                else if (pair.getKey().equals("version") || pair.getKey().equals("modelVersion")
+                        || pair.getKey().equals("modelId")) {
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
                 else {

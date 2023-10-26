@@ -70,9 +70,13 @@ class HyperStat2pfcuConfiguration(nodeAddress: Int,
     var dcwbEnabled = EnableConfig( "dcwbEnabled",true)
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
-        var associations = mutableListOf<AssociationConfig>()
+        val associations = mutableListOf<AssociationConfig>()
         associations.add(AssociationConfig("relay1Association", 0))
         return associations
+    }
+
+    override fun getDependencies(): List<ValueConfig> {
+        return mutableListOf()
     }
 
     override fun getEnableConfigs() : List<EnableConfig> {

@@ -43,7 +43,6 @@ object ReconfigHandler {
         }
         config.tobeAdded.forEach{
             if (existingEntityMap.keys.contains(it.domainName)) {
-                // TODO check if there is any change in point
                 newEntityConfig.tobeUpdated.add(it)
             } else {
                 newEntityConfig.tobeAdded.add(it)

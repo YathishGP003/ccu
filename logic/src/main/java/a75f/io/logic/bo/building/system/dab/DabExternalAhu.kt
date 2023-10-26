@@ -118,7 +118,7 @@ class DabExternalAhu : DabSystemProfile() {
         return 0.0
     }
 
-    public fun getConfiguration(): ExternalAhuConfiguration {
+    fun getConfiguration(modelDef: SeventyFiveFProfileDirective): ExternalAhuConfiguration {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         val config = ExternalAhuConfiguration()
         if (systemEquip == null)
@@ -132,20 +132,30 @@ class DabExternalAhu : DabSystemProfile() {
         config.humidifierControl.enabled = getConfigByDomainName(systemEquip, humidifierOperationEnable)
         config.dehumidifierControl.enabled = getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 
-
-        config.satMin.currentVal = getDefaultValueByDomain(systemEquip, systemSATMinimum)
-        config.satMax.currentVal = getDefaultValueByDomain(systemEquip, systemSATMaximum)
-        config.heatingMinSp.currentVal = getDefaultValueByDomain(systemEquip, systemHeatingSATMinimum)
-        config.heatingMaxSp.currentVal = getDefaultValueByDomain(systemEquip, systemHeatingSATMaximum)
-        config.coolingMinSp.currentVal = getDefaultValueByDomain(systemEquip, systemCoolingSATMinimum)
-        config.coolingMaxSp.currentVal = getDefaultValueByDomain(systemEquip, systemCoolingSATMaximum)
-        config.fanMinSp.currentVal = getDefaultValueByDomain(systemEquip, systemStaticPressureMinimum)
-        config.fanMaxSp.currentVal = getDefaultValueByDomain(systemEquip, systemStaticPressureMaximum)
-        config.dcvMin.currentVal = getDefaultValueByDomain(systemEquip, systemDCVDamperPosMinimum)
-        config.dcvMax.currentVal = getDefaultValueByDomain(systemEquip, systemDCVDamperPosMaximum)
-        config.targetHumidity.currentVal = getDefaultValueByDomain(systemEquip, targetHumidifier)
-        config.targetDeHumidity.currentVal = getDefaultValueByDomain(systemEquip, targetDehumidifier)
+        config.satMin.currentVal = getConfigValue( modelDef,systemSATMinimum, systemEquip)
+        config.satMax.currentVal = getConfigValue(modelDef, systemSATMaximum, systemEquip)
+        config.heatingMinSp.currentVal = getConfigValue(modelDef, systemHeatingSATMinimum, systemEquip)
+        config.heatingMaxSp.currentVal = getConfigValue(modelDef, systemHeatingSATMaximum, systemEquip)
+        config.coolingMinSp.currentVal = getConfigValue(modelDef, systemCoolingSATMinimum, systemEquip)
+        config.coolingMaxSp.currentVal = getConfigValue(modelDef, systemCoolingSATMaximum, systemEquip)
+        config.fanMinSp.currentVal = getConfigValue(modelDef, systemStaticPressureMinimum, systemEquip)
+        config.fanMaxSp.currentVal = getConfigValue(modelDef, systemStaticPressureMaximum, systemEquip)
+        config.dcvMin.currentVal = getConfigValue(modelDef, systemDCVDamperPosMinimum, systemEquip)
+        config.dcvMax.currentVal = getConfigValue(modelDef, systemDCVDamperPosMaximum, systemEquip)
+        config.targetHumidity.currentVal = getConfigValue(modelDef, targetHumidifier, systemEquip)
+        config.targetDeHumidity.currentVal = getConfigValue(modelDef, targetDehumidifier, systemEquip)
         return config
     }
+
+    private fun getConfigValue(modelDefinition: SeventyFiveFProfileDirective, domainName: String, equip: Equip): Double{
+      val currentValue = getDefaultValueByDomain(equip, domainName)
+        if (currentValue != 0.0)
+            return currentValue
+        val point = modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
+        if (point != null) {
+            return (point.defaultValue ?: 0).toString().toDouble()
+        }
+        return 0.0
+     }
 
 }

@@ -53,6 +53,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     var deviceList = mutableStateOf(emptyList<String>())
     var slaveIdList = mutableStateOf(emptyList<String>())
+    var childSlaveIdList = mutableStateOf(emptyList<String>())
     var equipModel = mutableStateOf(EquipModel())
     var selectedModbusType = mutableStateOf(0)
     var modelName = mutableStateOf("Select Model")
@@ -92,14 +93,18 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         CcuLog.i(TAG, "configModelDefinition")
         try {
             this.context = context
+            loadModel()
             if (L.ccu().systemProfile.profileType == ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
                 systemProfile = L.ccu().systemProfile as DabExternalAhu
-                setCurrentConfig(systemProfile!!.getConfiguration())
+                setCurrentConfig(systemProfile!!.getConfiguration(profileModelDefinition))
+            } else {
+                configModel.value.toConfig(profileModelDefinition)
             }
             slaveIdList.value = getSlaveIds(true)
+            childSlaveIdList.value = getSlaveIds(false)
             if (!equipModel.value.isDevicePaired)
                 equipModel.value.slaveId.value = 1
-            loadModel()
+
             getModbusConfiguration()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -107,7 +112,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             ProgressDialogUtils.hideProgressDialog()
         }
     }
-
     private fun getModbusConfiguration() {
         CcuLog.i(TAG, "getModbusConfiguration")
         val modbusEquip =
@@ -150,7 +154,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (def != null) {
             profileModelDefinition = def as SeventyFiveFProfileDirective
-            configModel.value.render(profileModelDefinition)
         }
     }
 
@@ -196,7 +199,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                     }
                 } else {
                     addEquip()
-                    saveModbusConfiguration()
+                    if (configType.value == ConfigType.MODBUS) {
+                        saveModbusConfiguration()
+                    }
                 }
             },
 
@@ -252,44 +257,19 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     private fun isValidConfiguration(): Boolean {
         CcuLog.i(TAG, "isValidConfiguration")
-        // do all the validations
+        if (equipModel.value.parameters.isEmpty()) {
+            showToast("Please select modbus device", context)
+            return false
+        }
+        if (equipModel.value.isDevicePaired)
+            return true // If it is paired then will not allow the use to to edit slave id
+
+        if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
+            showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
+                    "another slave id to proceed",context)
+            return false
+        }
         return true
-        /*  if (equipModel.value.parameters.isEmpty()) {
-              showToast("Please select modbus device", context)
-              return false
-          }
-          if (equipModel.value.isDevicePaired)
-              return true // If it is paired then will not allow the use to to edit slave id
-
-          if (zoneRef.contentEquals("SYSTEM")) {
-              if (equipModel.value.subEquips.isNotEmpty() && isModbusExist()) {
-                  showToast("Modbus device already paired", context)
-                  return false
-              }
-          } else {
-              if (equipModel.value.subEquips.isNotEmpty() && HSUtil.getEquips(zoneRef).isNotEmpty()) {
-                  showToast("Zone should have no equips to pair modbus with sub equips", context)
-                  return false
-              }
-          }
-
-          if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
-              showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
-                      "another slave id to proceed",context)
-              return false
-          }
-          if (equipModel.value.subEquips.isNotEmpty()) {
-              equipModel.value.subEquips.forEach {
-                  if  (it.value.slaveId.value != 0) {
-                      if (L.isModbusSlaveIdExists(it.value.slaveId.value.toShort())
-                          || it.value.slaveId.value == equipModel.value.slaveId.value ) {
-                          showToast("Make sure all sub equips have unique slave Id, if it is not same as Parent",context)
-                          return false
-                      }
-                  }
-              }
-          }
-          return true*/
     }
 
     private fun populateSlaveId() {
@@ -314,6 +294,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             CCUHsApi.getInstance().site!!.id,
             ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name
         )
+        saveModbusConfiguration()
     }
 
     private fun addEquip() {
@@ -403,6 +384,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                         val equipmentDevice = parseModbusDataFromString(response)
                         if (equipmentDevice != null) {
                             val model = EquipModel()
+                            model.slaveId.value = 1
                             model.jsonContent = response
                             model.equipDevice.value = equipmentDevice
                             model.parameters = getParameters(equipmentDevice)

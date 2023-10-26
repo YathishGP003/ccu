@@ -31,6 +31,6 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      * Get a list of domainNames of all dependencies
      *
      */
-    //abstract fun getDependencies() : List<ProfileConfig>
+    abstract fun getDependencies() : List<ValueConfig>
 
 }

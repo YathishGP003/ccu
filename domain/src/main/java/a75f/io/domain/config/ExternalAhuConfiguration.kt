@@ -53,6 +53,23 @@ class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM",
         return associations
     }
 
+    override fun getDependencies(): List<ValueConfig> {
+        val valueConfiguration = mutableListOf<ValueConfig>()
+        valueConfiguration.add(satMin)
+        valueConfiguration.add(satMax)
+        valueConfiguration.add(heatingMinSp)
+        valueConfiguration.add(heatingMaxSp)
+        valueConfiguration.add(coolingMinSp)
+        valueConfiguration.add(coolingMaxSp)
+        valueConfiguration.add(fanMinSp)
+        valueConfiguration.add(fanMaxSp)
+        valueConfiguration.add(dcvMin)
+        valueConfiguration.add(dcvMax)
+        valueConfiguration.add(targetHumidity)
+        valueConfiguration.add(targetDeHumidity)
+        return valueConfiguration
+    }
+
     override fun getEnableConfigs() : List<EnableConfig> {
         val enabled = mutableListOf<EnableConfig>()
         enabled.add(setPointControl)

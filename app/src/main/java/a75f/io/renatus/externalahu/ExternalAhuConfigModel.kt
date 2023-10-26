@@ -1,5 +1,17 @@
 package a75f.io.renatus.externalahu
 
+import a75f.io.domain.api.systemCoolingSATMaximum
+import a75f.io.domain.api.systemCoolingSATMinimum
+import a75f.io.domain.api.systemDCVDamperPosMinimum
+import a75f.io.domain.api.systemHeatingSATMaximum
+import a75f.io.domain.api.systemHeatingSATMinimum
+import a75f.io.domain.api.systemSATMaximum
+import a75f.io.domain.api.systemSATMinimum
+import a75f.io.domain.api.systemStaticPressureMaximum
+import a75f.io.domain.api.systemStaticPressureMinimum
+import a75f.io.domain.api.targetDehumidifier
+import a75f.io.domain.api.targetHumidifier
+import a75f.io.domain.api.systemDCVDamperPosMaximum
 import a75f.io.domain.config.ExternalAhuConfiguration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,12 +46,6 @@ class ExternalAhuConfigModel {
     var targetHumidity: String by mutableStateOf("0")
     var targetDeHumidity: String by mutableStateOf("0")
 
-
-
-    fun render(modelDefinition: SeventyFiveFProfileDirective) {
-       // var pointDef = getPointByDomainName(modelDefinition,SET_POINT_CONTROL)
-
-    }
 
     fun controlName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): String {
         val pointDef = getPointByDomainName(modelDefinition,domainName)
@@ -79,4 +85,18 @@ class ExternalAhuConfigModel {
         return config
     }
 
+    fun toConfig(modelDef: SeventyFiveFProfileDirective){
+        satMin = getPointByDomainName(modelDef,systemSATMinimum)?.defaultValue.toString()
+        satMax = getPointByDomainName(modelDef,systemSATMaximum)?.defaultValue.toString()
+        heatingMinSp = getPointByDomainName(modelDef,systemHeatingSATMinimum)?.defaultValue.toString()
+        heatingMaxSp = getPointByDomainName(modelDef,systemHeatingSATMaximum)?.defaultValue.toString()
+        coolingMinSp = getPointByDomainName(modelDef,systemCoolingSATMinimum)?.defaultValue.toString()
+        coolingMaxSp = getPointByDomainName(modelDef,systemCoolingSATMaximum)?.defaultValue.toString()
+        fanMinSp = getPointByDomainName(modelDef,systemStaticPressureMinimum)?.defaultValue.toString()
+        fanMaxSp = getPointByDomainName(modelDef,systemStaticPressureMaximum)?.defaultValue.toString()
+        dcvMin = getPointByDomainName(modelDef,systemDCVDamperPosMinimum)?.defaultValue.toString()
+        dcvMax = getPointByDomainName(modelDef,systemDCVDamperPosMaximum)?.defaultValue.toString()
+        targetHumidity = getPointByDomainName(modelDef,targetHumidifier)?.defaultValue.toString()
+        targetDeHumidity = getPointByDomainName(modelDef,targetDehumidifier)?.defaultValue.toString()
+    }
 }

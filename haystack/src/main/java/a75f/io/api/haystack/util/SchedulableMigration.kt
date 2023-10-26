@@ -33,10 +33,17 @@ fun validateMigration(): Boolean {
     val numberOfBuildingLimits = 3
     val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllSchedulable()
     val rooms = hayStack.readAllEntities("room")
-    val buildinglimits =
+    var roomsWithZoneScheduleSize = 0
+    for(room in rooms){
+        val roomsWithZoneSchedule = hayStack.readEntity("zone and schedule and not special and not vacation and roomRef"+"=="+ room["id"])
+        if(roomsWithZoneSchedule.isNotEmpty()) {
+            roomsWithZoneScheduleSize++
+        }
+    }
+    val buildingLimits =
         hayStack.readAllEntities("building and (limit or differential) and not tuner")
-    return (((rooms.size * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints + numberOfBuildingLimits)
-            == (schedulabaledata.size + buildinglimits.size))
+    return (((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints + numberOfBuildingLimits)
+            == (schedulabaledata.size + buildingLimits.size))
 }
 
 fun importSchedules() {

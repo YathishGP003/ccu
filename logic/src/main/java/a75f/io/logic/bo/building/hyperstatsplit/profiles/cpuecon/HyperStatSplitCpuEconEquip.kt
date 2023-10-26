@@ -235,7 +235,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     private fun getCpuEconAnalogOutVoltageAtMin(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMax
+            analogOutVoltageMin
         } else {
             analogOutState.voltageAtMin.toInt()
         }
@@ -243,7 +243,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     private fun getCpuEconAnalogOutVoltageAtMax(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMin
+            analogOutVoltageMax
         } else {
             analogOutState.voltageAtMax.toInt()
         }

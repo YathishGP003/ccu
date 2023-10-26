@@ -318,19 +318,29 @@ class HyperSplitSettingsUtil {
          */
         private fun getAnalogOutConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitAnalogOutConfig_t {
             val analogOutConfiguration = HyperSplit.HyperSplitAnalogOutConfig_t.newBuilder()
+            val defaultAnalogOutMinSetting = 0
+            val defaultAnalogOutMaxSetting = 10
+
 
             if (readConfig(hsApi, equipRef, "analog1 and output and config and enabled") == 0.0) {
                 analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(0)
             } else {
+
                 analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog1 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut1Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut1AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog2 and output and config and enabled") == 0.0) {
@@ -339,12 +349,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut2Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog2 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut2Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut2AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog3 and output and config and enabled") == 0.0) {
@@ -353,12 +369,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut3Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog3 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut3Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut3AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog4 and output and config and enabled") == 0.0) {
@@ -367,12 +389,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut4Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog4 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut4AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog4 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut4AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog4 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut4Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut4AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog4 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut4AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog4 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut4AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut4AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             return analogOutConfiguration.build()

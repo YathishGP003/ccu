@@ -335,9 +335,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-        if(!validateMigration()) {
+
+        if(isSRMigrationRequired() && !validateMigration()) {
             showMigrationPendingDialog(requireContext());
         }
+    }
+
+    private boolean isSRMigrationRequired() {
+        return CCUHsApi.getInstance().readDefaultStrVal("diag and migration and version").equals("");
     }
 
     @Override

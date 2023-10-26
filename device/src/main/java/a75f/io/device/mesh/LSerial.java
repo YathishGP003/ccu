@@ -17,6 +17,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
+import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
@@ -112,7 +114,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            
+
             if (messageType == MessageType.CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
@@ -154,9 +156,20 @@ public class LSerial
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+            }
 
-            } else if (isHyperStatMessage(messageType) ) {
+            // HyperStat and HyperSplit message are both sent to CCU through HyperStatCmToCcuSerializedMessage.
+            // If a HyperStatCmToCcuSerializedMessage is received, call both the HyperStat and HyperSplit handler methods.
+            // The handler methods then inspect the message contents and filter out messages of the incorrect type.
+            else if (messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+                HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+            }
+
+            else if (isHyperStatMessage(messageType) ) {
+                HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
+            } else if (isHyperSplitMessage(messageType)) {
+                HyperSplitMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
             else if (messageType == MessageType.CM_TO_CCU_OTA_STATUS) {
                 CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
@@ -471,10 +484,32 @@ public class LSerial
             LSerial.getInstance().setNodeSeeding(false);
         }
     }
+
+    public void sendHyperSplitSeedMessage(Short addr, String roomRef, String floorRef) {
+        if (isConnected()) {
+            isNodeSeeding = true;
+            CcuLog.d(L.TAG_CCU_DEVICE,
+                    "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
+            Device d = HSUtil.getDevice(addr);
+            Zone zone = HSUtil.getZone(roomRef, floorRef);
+            int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef " +
+                    "== \"" + roomRef + "\"").intValue();
+
+            HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                    d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+
+            LSerial.getInstance().setNodeSeeding(false);
+        }
+    }
     
     private static boolean isHyperStatMessage(MessageType messageType) {
-        return messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE ||
-               messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
+        return messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
+
+    private static boolean isHyperSplitMessage(MessageType messageType) {
+        return messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
+                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
+    }
+
 }

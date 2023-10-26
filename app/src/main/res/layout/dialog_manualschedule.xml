@@ -23,7 +23,8 @@
 				android:background="@android:color/transparent"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintTop_toTopOf="parent"
-				app:srcCompat="@android:drawable/ic_menu_delete" />
+				app:srcCompat="@android:drawable/ic_menu_delete"
+				app:tint="?orange_75f"/>
 
 			<TextView
 				android:id="@+id/textViewDesiredTemp"

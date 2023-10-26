@@ -172,7 +172,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
             // Set an EditText view to get user input
             final EditText input = new EditText(getActivity());
-            input.setText("Renatus_Logs_"+date);
+            input.setText("Logs_"+date);
             input.setTextSize(20);
             alert.setView(input);
 

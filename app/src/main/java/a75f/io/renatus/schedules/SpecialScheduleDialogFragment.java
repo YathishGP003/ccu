@@ -547,7 +547,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
                     "the below special schedules." +"\n\n"+overlapMessage.toString())
                     .setCancelable(false)
                     .setTitle("Special Schedule Overlaps")
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setPositiveButton("OK", (dialogInterface, i) -> alert.dismiss());
             alert = builder.create();
             alert.show();

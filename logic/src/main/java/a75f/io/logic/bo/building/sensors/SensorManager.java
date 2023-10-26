@@ -167,7 +167,7 @@ public class SensorManager {
         externalSensors.add(new Sensor("Door Window Sensor","ohms",0,10,0,10000,100));
         return externalSensors;
     }
-    
+
     public List<Sensor> getExternalSensorList() {
         if (externalSensors != null) {
             return externalSensors;

@@ -2,6 +2,7 @@ package a75f.io.renatus.util;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,8 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
     public void onBindViewHolder(@NonNull CCUView holder, int position) {
         holder.name.setText(ccuList.get(position).getName());
         holder.lastUpdated.setText("Last Updated On "+ ccuList.get(position).getLastUpdated());
-        holder.version.setText("CCU Version "+ ccuList.get(position).getVersion());
+        String versionStr = ccuList.get(position).getVersion().toString().replace("RENATUS_CCU","CCU");
+        holder.version.setText("CCU Version "+versionStr );
         holder.itemView.setEnabled(false);
 
         holder.status.setText("ONLINE");

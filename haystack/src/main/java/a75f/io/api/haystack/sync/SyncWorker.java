@@ -60,29 +60,32 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "Site sync failed");
                 return Result.retry();
             }
+            CcuLog.d(TAG, "Site sync succeeded");
             if (!CCUHsApi.getInstance().isCCURegistered()) {
                 CcuLog.e(TAG, "Abort SyncWork : CCU Not registered");
                 return Result.failure();
             }
+            CcuLog.d(TAG, "CCU is registered");
             if (!ccuSyncHandler.doSync()) {
                 CcuLog.e(TAG, "CCU sync failed");
                 return Result.retry();
             }
-
+            CcuLog.d(TAG, "CCU sync succeeded");
             if (!syncDeletedEntities()) {
                 CcuLog.e(TAG, "Deleted entity sync failed");
                 return Result.retry();
             }
-
+            CcuLog.d(TAG, "Deleted entity sync succeeded");
             if (!syncUnSyncedEntities()) {
                 CcuLog.e(TAG, "Unsynced entity sync failed");
                 return Result.retry();
             }
+            CcuLog.d(TAG, "Unsynced sync succeeded");
             if (!syncUpdatedEntities()) {
                 CcuLog.e(TAG, "Updated entity sync failed");
                 return Result.retry();
             }
-            
+            CcuLog.d(TAG, "Updated entity sync succeeded");
             CcuLog.i(TAG, " doSyncWork success");
             syncStatusService.saveSyncStatus();
         } catch (Exception e) {
@@ -98,17 +101,17 @@ public class SyncWorker extends Worker {
         return isSyncWorkInProgress;
     }
     private boolean syncUnSyncedEntities() {
-        
+
         if (!syncStatusService.hasUnSyncedData()) {
             return true;
         }
         HGridIterator unsyncedEntities = syncStatusService.getUnSyncedData();
-        
         while (unsyncedEntities.hasNext()) {
             HGrid gridData = unsyncedEntities.next(ENTITY_SYNC_BATCH_SIZE);
+            //CcuLog.d(TAG, "gridData: " + gridData);
             String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
-            CcuLog.d(TAG, "AddEntity Response : "+response);
+
             if (response != null) {
                 updateSyncStatus(response, true);
             } else {
@@ -122,7 +125,7 @@ public class SyncWorker extends Worker {
     }
     
     private boolean syncUpdatedEntities() {
-        
+
         if (!syncStatusService.hasUpdatedData()) {
             return true;
         }

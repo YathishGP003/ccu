@@ -225,6 +225,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             return false;
         }
 
+        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
 
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
@@ -254,7 +255,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                             "Building Occupancy are overlapping \n"+
                             buildingOccupancyViewModel.getScheduleOverlapMessage(daysList,buildingOccupancy))
                     .setCancelable(false)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setPositiveButton("OK", (dialog, id) -> {
                         if (removeEntry != null)
                             buildingOccupancy.getDays().add(position, removeEntry);
@@ -270,8 +271,9 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                 buildingOccupancyViewModel.getScheduleSpills(daysList,buildingOccupancy);
 
         if (spillsMap != null && spillsMap.size() > 0 && position != ManualSchedulerDialogFragment.NO_REPLACE) {
-            RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-                            "Fetching Zone Schedules..."),
+            ProgressDialogUtils.showProgressDialog(getActivity(),
+                    "Fetching Zone Schedules...");
+            RxjavaUtil.executeBackgroundTask(
                     () -> {
                         errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap);},
                     ()-> {
@@ -282,7 +284,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 builder.setMessage(errorMessage)
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(R.drawable.ic_dialog_alert)
                                         .setNegativeButton("Re-Edit", (dialog, id) -> {
                                             showdialog(position);
                                         });
@@ -293,7 +295,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 builder.setMessage(errorMessage)
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(R.drawable.ic_dialog_alert)
                                         .setNegativeButton("Re-Edit", (dialog, id) -> {
                                             showdialog(position);
                                         })

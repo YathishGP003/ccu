@@ -306,6 +306,9 @@ public class SpecialSchedule {
             WarningMessage = "Heating Desired temp is violating the limits, it should be within Heating Min and Max";
         }else if(coolVal > coolingUserLimitMax || coolVal < coolingUserLimitMin){
             WarningMessage = "Cooling Desired temp is violating the limits, it should be within Cooling Min and Max";
+        } else if((coolVal-heatVal) < (heatingDeadband + coolingDeadband)){
+            WarningMessage = "Cooling Desired temp/Heating Desired temp is violating below validation: " +
+                    "\n (coolVal-heatVal) < (heatingDeadband + coolingDeadband)";
         }
 
         return WarningMessage;

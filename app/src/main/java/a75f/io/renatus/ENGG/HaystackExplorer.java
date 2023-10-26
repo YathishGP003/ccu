@@ -205,7 +205,7 @@ public class HaystackExplorer extends Fragment
                                }
                            })
                        .setNegativeButton(android.R.string.no, null)
-                       .setIcon(android.R.drawable.ic_dialog_alert)
+                       .setIcon(R.drawable.ic_dialog_alert)
                        .show();
                     return true;
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
@@ -243,7 +243,7 @@ public class HaystackExplorer extends Fragment
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setIcon(R.drawable.ic_dialog_alert)
                         .show();
                 }
                 return true;

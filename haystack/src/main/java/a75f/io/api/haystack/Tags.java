@@ -47,6 +47,7 @@ public class Tags
     public static final String PIPE2 = "pipe2";
     public static final String CPU = "cpu";
     public static final String HPU = "hpu";
+    public static final String CPUECON = "cpuecon";
 
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";
@@ -59,12 +60,22 @@ public class Tags
     public static final String RELAY5 = "relay5";
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
+    public static final String RELAY8 = "relay8";
     
     public static final String ANALOG1 = "analog1";
     public static final String ANALOG2 = "analog2";
     public static final String ANALOG3 = "analog3";
     public static final String ANALOG4 = "analog4";
-    
+
+    public static final String UNIVERSAL1 = "universal1";
+    public static final String UNIVERSAL2 = "universal2";
+    public static final String UNIVERSAL3 = "universal3";
+    public static final String UNIVERSAL4 = "universal4";
+    public static final String UNIVERSAL5 = "universal5";
+    public static final String UNIVERSAL6 = "universal6";
+    public static final String UNIVERSAL7 = "universal7";
+    public static final String UNIVERSAL8 = "universal8";
+
     public static final String TH1 = "th1";
     public static final String TH2 = "th2";
     
@@ -105,6 +116,7 @@ public class Tags
     public static final String SCHEDULE_TYPE = "scheduleType";
     public static final String HUMIDIFICATION = "humidification";
     public static final String HYPERSTAT = "hyperstat";
+    public static final String HYPERSTATSPLIT = "hyperstatsplit";
     public static final String SENSE = "sense";
     public static final String OTN = "otn";
     public static final String PLC = "pid";

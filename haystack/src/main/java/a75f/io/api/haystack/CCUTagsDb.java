@@ -813,6 +813,8 @@ public class CCUTagsDb extends HServer {
             b.add(m);
         }
 
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
+
         HRef ref = (HRef) b.get("id");
         if(p.getBacnetType() != null)
         {
@@ -871,6 +873,8 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
+
         if(p.getBacnetType() != null)
         {
             b.add(Tags.BACNET_ID, p.getBacnetId());

@@ -276,7 +276,7 @@ public class RemoteCommandHandlerUtil {
         }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         if (id.startsWith("75f") || id.startsWith("75F"))
             AppInstaller.getHandle().downloadHomeInstall(id);
-        else if (id.startsWith("RENATUS_CCU") || id.startsWith("DAIKIN_CCU")) {
+        else if (id.startsWith("RENATUS_CCU") || id.startsWith("CCU") || id.startsWith("DAIKIN_CCU")) {
             if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
                 Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
                 AppInstaller.getHandle().downloadCCUInstall(id, currentFragment, activity);

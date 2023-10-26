@@ -92,8 +92,8 @@ public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialSchedule
         private TextView specialScheduleName;
         private TextView startDate;
         private TextView endDate;
-        private TextView specialScheduleEdit;
-        private TextView specialScheduleDelete;
+        private ImageButton specialScheduleEdit;
+        private ImageButton specialScheduleDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -105,9 +105,7 @@ public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialSchedule
             endDate = itemView.findViewById(R.id.specialScheduleEndDate);
             specialScheduleEdit = itemView.findViewById(R.id.specialScheduleEditButton);
             specialScheduleEdit.setOnClickListener(this);
-            specialScheduleEdit.setTypeface(iconFont);
             specialScheduleDelete = itemView.findViewById(R.id.specialScheduleDeleteButton);
-            specialScheduleDelete.setTypeface(iconFont);
             specialScheduleDelete.setOnClickListener(this);
         }
 

@@ -32,6 +32,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -358,6 +359,16 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.HYPERSTATSPLIT_CPU) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        HyperStatSplitFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
+                        HyperStatSplitFragment.ID);
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
 
     }
     
@@ -423,6 +434,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
             else
+            pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
+        }
+        else if (mNodeType == NodeType.HYPERSTATSPLIT) {
+            title.setText(R.string.title_pairhssplit);
             pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }
     }

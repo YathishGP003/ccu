@@ -73,6 +73,7 @@ import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -1280,6 +1281,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isPaired = false;
         boolean isMonitoringPaired = false;
         boolean isOTNPaired = false;
+        boolean isHSSplitPaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1299,6 +1301,9 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("HYPERSTATSPLIT_CPU")) {
+                    isHSSplitPaired = true;
+                }
             }
             if(HSUtil.isZoneHasSubEquips(selectedZone.getId())){
                 Toast.makeText(getActivity(), "No module can be paired as modbus with sub equips is paired",
@@ -1307,7 +1312,7 @@ public class FloorPlanFragment extends Fragment {
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired && !isHSSplitPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1343,8 +1348,14 @@ public class FloorPlanFragment extends Fragment {
             if (isMonitoringPaired) {
                 Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
             }
+            if (isHSSplitPaired) {
+                Toast.makeText(getActivity(), "HyperStat Split is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isHSSplitPaired) {
+                Toast.makeText(getActivity(), "HyperStat Split is already paired in this zone; cannot pair additional modules.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1486,6 +1497,11 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
                             HyperStatFragment.ID);
+                    break;
+                case HYPERSTATSPLIT_CPU:
+                    showDialogFragment(HyperStatSplitFragment.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
+                            HyperStatSplitFragment.ID);
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

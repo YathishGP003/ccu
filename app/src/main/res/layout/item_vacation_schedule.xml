@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -47,7 +48,8 @@
             android:layout_marginRight="24dp"
             android:src="@android:drawable/ic_menu_edit"
             android:text="vacation"
-            android:textSize="10sp" />
+            android:textSize="10sp"
+            app:tint="?orange_75f" />
 
         <ImageButton
             android:id="@+id/vacationDeleteButton"
@@ -56,6 +58,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:src="@android:drawable/ic_menu_delete"
             android:text="vacation"
-            android:textSize="10sp" />
+            android:textSize="10sp"
+            app:tint="?orange_75f"/>
     </LinearLayout>
 </LinearLayout>

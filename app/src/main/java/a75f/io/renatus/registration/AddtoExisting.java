@@ -605,6 +605,7 @@ public class AddtoExisting extends Fragment {
                     }
                     navigateToCCUScreen();
                 } else {
+                    Log.d("ADD_CCU_EXISTING", "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.");
                     if(getActivity() != null) {
                         Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
                     }

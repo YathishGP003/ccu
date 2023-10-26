@@ -500,7 +500,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
             for (Schedule.Days eachOccupied : daysInSchedule) {
 
-                if (validateDesiredTemp(eachOccupied.getCoolingVal(), eachOccupied.getHeatingVal(), HSUtil.getLevelValueFrom16(coolLL.get("id").toString()),
+                if (validateDesiredTemp(coolingTemp, heatingTemp, HSUtil.getLevelValueFrom16(coolLL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), HSUtil.getLevelValueFrom16(heatLL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(heatUL.get("id").toString()),
                         HSUtil.getLevelValueFrom16(heatDB.get("id").toString()),
@@ -601,7 +601,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n" + overlapDays.toString())
                     .setCancelable(false)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_dialog_alert)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             if (removeEntry != null)
@@ -633,7 +633,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                         "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
                         .setCancelable(false)
                         .setTitle("Schedule Errors")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setIcon(R.drawable.ic_dialog_alert)
                         .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 showDialog(position, daysArrayList);

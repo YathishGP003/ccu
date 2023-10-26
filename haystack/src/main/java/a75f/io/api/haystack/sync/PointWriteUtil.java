@@ -35,7 +35,8 @@ public class PointWriteUtil {
                 String value = Objects.toString(valMap.get("val"), "");
                 String level = Objects.toString(valMap.get("level"), "");
                 String who = Objects.toString(valMap.get("who"), "");
-                HNum duration = HNum.make(Double.parseDouble(valMap.get("duration").toString()), "ms");
+                double dur = Double.parseDouble(valMap.get("duration").toString());
+                HNum duration = HNum.make(dur > 0 ? dur - System.currentTimeMillis() : 0, "ms");
                 boolean isDouble = entity.get("kind").toString().equalsIgnoreCase("Number");
                 double numValue = 0.0;
                 

@@ -91,14 +91,14 @@ public class HyperStatMessageGenerator {
             .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
-                .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min")))
-                .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max")))
-                .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min")))
-                .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery(
-                        HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max")))
+                .setMinCoolingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
+                        HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue())
+                .setMaxCoolingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
+                        HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue())
+                .setMinHeatingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
+                        HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue())
+                .setMaxHeatingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
+                        HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue())
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
@@ -320,7 +320,7 @@ public class HyperStatMessageGenerator {
 
     private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap collingDeadband = hayStack.read("point and deadband and cooling and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
+        HashMap collingDeadband = hayStack.read("point and deadband and cooling and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
         } catch (NullPointerException e) {
@@ -333,7 +333,7 @@ public class HyperStatMessageGenerator {
     public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
-                hayStack.read("point and deadband and heating and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
+                hayStack.read("point and deadband and heating and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
                 "\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());

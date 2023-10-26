@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,7 @@ import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
 import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -84,6 +86,18 @@ public class AlertsFragment extends Fragment
 				Alert a = alertList.get(position);
 				String message = a.getmMessage();
 
+				if (message.contains("75F")) {
+					String replacement = "75F";
+
+					if (CCUUiUtil.isDaikinThemeEnabled(getContext())) {
+						replacement = "SiteLine™";
+					} else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+						replacement = "ClimaVision";
+					}
+
+					message = message.replace("75F", replacement);
+				}
+
 				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 				if (message.contains("\u00B0")) {
@@ -95,7 +109,7 @@ public class AlertsFragment extends Fragment
 				                   + "\n Alert Generated at " + getFormattedDate(a.getStartTime())
 				                   + "\n Alert Fixed at "+getFormattedDate(a.getEndTime()))
 				       .setCancelable(false)
-				       .setIcon(android.R.drawable.ic_dialog_alert)
+				       .setIcon(R.drawable.ic_dialog_alert)
 				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					       public void onClick(DialogInterface dialog, int id) {
 						       //do things
@@ -122,7 +136,7 @@ public class AlertsFragment extends Fragment
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setMessage("Delete ?")
 				   .setCancelable(true)
-				   .setIcon(android.R.drawable.ic_dialog_alert)
+				   .setIcon(R.drawable.ic_dialog_alert)
 				   .setPositiveButton("OK", (dialog, id) -> {
 						Alert alert = alertList.get(position);
 						// Remove item from local list regardless of server response.  Just log failure.

@@ -129,6 +129,7 @@ public class TunerConstants
     public static final double OAO_OA_DAMPER_MAT_MIN = 44 ;
     public static final double OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP = 30 ;
     public static final double OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET = 0 ;
+    public static final double OAO_STANDALONE_DUCT_TEMPERATURE_OFFSET = 0 ;
     public static final double OAO_SMART_PURGE_RUNTIME_DEFAULT = 120 ;
     public static final double OAO_SMART_PRE_PURGE_START_TIME_OFFSET = 180 ;
     public static final double OAO_SMART_POST_PURGE_START_TIME_OFFSET = 20 ;

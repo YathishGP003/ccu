@@ -678,33 +678,27 @@ class HyperSplitSettingsUtil {
 
             if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage1FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(coolingStage1Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(coolingStage1Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage1Query)).toInt()
             }
             if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage2FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(coolingStage2Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(coolingStage2Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage2Query)).toInt()
             }
             if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage3FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(coolingStage3Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(coolingStage3Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage3Query)).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage1FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(heatingStage1Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(heatingStage1Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage1Query)).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage2FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(heatingStage2Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(heatingStage2Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage2Query)).toInt()
             }
             if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage3FanAnalogVoltage =
-                    ccuHsApi.readPointPriorityValByQuery(heatingStage3Query).toInt()
-                (ccuHsApi.readPointPriorityValByQuery(heatingStage3Query) * 10).toInt()
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage3Query)).toInt()
             }
             return stagedFanVoltages.build()
         }

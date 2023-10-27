@@ -98,6 +98,21 @@
                     android:layout_margin="10dp"
                     android:text="Reset" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Cache Sync Frequency"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Spinner
+                    android:id="@+id/cacheSyncFrequency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp" />
+
             </LinearLayout>
 
             <LinearLayout

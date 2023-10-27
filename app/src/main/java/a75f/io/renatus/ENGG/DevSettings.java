@@ -136,6 +136,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.saveRegisterRequestCount) Button btnregisterRequestCount;
 
+    public @BindView(R.id.cacheSyncFrequency) Spinner cacheSyncFrequency;
     SharedPreferences spDefaultPrefs = null;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
@@ -311,7 +312,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                                       : android.R.drawable.checkbox_off_background);
         mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
                                       : android.R.drawable.checkbox_off_background);
-    
         reconnectSerial.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -385,6 +385,19 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     .create();
             dialog.show();
         });
+
+        ArrayList<Integer> oneToFifteen = new ArrayList<>();
+        for (int val = 1;  val <= 15; val++)
+        {
+            oneToFifteen.add(val);
+        }
+        ArrayAdapter<Integer> oneToFifteenAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, oneToFifteen);
+        oneToFifteenAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        cacheSyncFrequency.setAdapter(oneToFifteenAdapter);
+        cacheSyncFrequency.setOnItemSelectedListener(this);
+        cacheSyncFrequency.setSelection(oneToFifteenAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("cacheSyncFrequency", 1)));
+
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
             Log.d("CCU"," ResetAppState ");
@@ -471,7 +484,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.cwFlowRate:
                 writePref("cw_FlowRate", Integer.parseInt(cwFlowRate.getSelectedItem().toString()));
                 break;
-            
+            case R.id.cacheSyncFrequency:
+                writePref("cacheSyncFrequency", Integer.parseInt(cacheSyncFrequency.getSelectedItem().toString()));
+                break;
         }
     }
     

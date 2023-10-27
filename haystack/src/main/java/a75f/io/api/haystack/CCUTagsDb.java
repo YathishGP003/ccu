@@ -14,6 +14,7 @@ import com.google.gson.InstanceCreator;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.joda.time.DateTime;
@@ -1628,34 +1629,37 @@ public class CCUTagsDb extends HServer {
         return entity != null && entity.has("diag");
     }
     public void saveHisItems(HDict rec, HHisItem[] items, boolean syncStatus) {
-        DateTime now = new DateTime();
+        //DateTime now = new DateTime();
         for (HHisItem item : items) {
             HisItem hisItem = new HisItem();
             hisItem.setDate(new Date(item.ts.millis()));
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(syncStatus);
-            CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
 
-            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
-            boolean shouldPersist = now.getMinuteOfDay() % 5 == 0;
-            if (shouldPersist || isDiagPoint(rec.id().toString())) {
-                hisBox.put(hisItem);
+            if (isDiagPoint(rec.id().toString())) {
+                HisItem curCacheItem = HisItemCache.getInstance().get(rec.id().toString());
+                if (curCacheItem != null && curCacheItem.syncStatus == false) {
+                    CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString());
+                    hisBox.put(curCacheItem);
+                }
             }
+            CcuLog.d(TAG_CCU_HS,"Write historized value to local Cache for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
+            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
     }
 
     public void updateHisItemCache(List<HisItem> syncedHisItems) {
         syncedHisItems.forEach( syncedHisItem -> {
-            HisItem cachedHiItem = HisItemCache.getInstance().get(syncedHisItem.rec);
-            if (cachedHiItem.val == syncedHisItem.val) {
-                cachedHiItem.syncStatus = true;
-                HisItemCache.getInstance().add(cachedHiItem.rec, cachedHiItem);
-                if (isDiagPoint(cachedHiItem.rec)) {
-                    hisBox.put(cachedHiItem);
-                }
-            }
+            syncedHisItem.syncStatus = true;
+            HisItemCache.getInstance().add(syncedHisItem.rec, syncedHisItem);
         });
+
+        List<HisItem> diagPointItems = syncedHisItems.stream()
+                        .filter(item -> isDiagPoint(item.rec))
+                                .collect(Collectors.toList());
+        CcuLog.i("CCU_HS_SYNC"," UpdateDiagPointHisItems "+diagPointItems.size()+" All "+syncedHisItems.size());
+        hisBox.put(diagPointItems);
     }
 
 
@@ -1707,13 +1711,22 @@ public class CCUTagsDb extends HServer {
         hisItem.setDate(new Date(System.currentTimeMillis()));
         hisItem.setRec(id);
         hisItem.setVal(val);
-        HisItemCache.getInstance().add(id, hisItem);
-        DateTime now = new DateTime();
-        boolean shouldPersist = now.getMinuteOfDay() % 5 == 0;
-        if (shouldPersist || isDiagPoint(id)) {
-            hisBox.put(hisItem);
+        if (isDiagPoint(id)) {
+            HisItem curCacheItem = HisItemCache.getInstance().get(id);
+            if (curCacheItem != null && curCacheItem.syncStatus == false) {
+                CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val);
+                hisBox.put(curCacheItem);
+            }
         }
-        CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val);
+        CcuLog.d(TAG_CCU_HS, "Write historized value to local Cache for point ID " + id + "; value "  + val);
+        HisItemCache.getInstance().add(id, hisItem);
+    }
+
+    public void persistUnsyncedCachedItems() {
+        List<HisItem> unsyncedItems = getUnSyncedCachedHisData();
+        CcuLog.i("CCU_HS_SYNC"," persistUnsyncedCachedItems "+unsyncedItems.size());
+        List<List<HisItem>> hisItemBatches = ListUtils.partition(unsyncedItems, 500);
+        hisItemBatches.forEach( batch -> hisBox.put(batch));
     }
     
     public void addHisItemToCache(String id) {
@@ -1743,10 +1756,8 @@ public class CCUTagsDb extends HServer {
     }
     
     public void updateHisItemSynced(List<HisItem> hisItems) {
-        for (HisItem item : hisItems) {
-            item.setSyncStatus(true);
-            hisBox.put(item);
-        }
+        hisItems.forEach(item -> item.syncStatus = true);
+        hisBox.put(hisItems);
     }
 
     public void updateHisItems(List<HisItem> hisItems) {

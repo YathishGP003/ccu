@@ -3233,4 +3233,9 @@ public class CCUHsApi
             syncStatusService.addUpdatedEntity(id);
         }
     }
+
+    public int getCacheSyncFrequency() {
+        return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("cacheSyncFrequency", 1);
+    }
 }

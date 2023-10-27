@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import android.content.Context;
 import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -85,14 +86,14 @@ public class HisSyncHandler
     }
     
     private void doSync(boolean syncAllData) {
-        CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData);
+        int cacheSyncFrequency = Math.max(ccuHsApi.getCacheSyncFrequency(), 1);
+        CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData+" cacheSyncFrequency "+cacheSyncFrequency);
         if (syncAllData) {
             nonCovSyncPending = false;
         }
         syncCachedHisData();
 
-
-        if (ccuHsApi.getAppAliveMinutes() % 5 == 0) {
+        if (ccuHsApi.getAppAliveMinutes() % cacheSyncFrequency == 0) {
             CcuLog.d(TAG,"syncDBHisData");
             //Device sync is initiated concurrently on Rx thread
             Observable.fromCallable(() -> {
@@ -106,6 +107,9 @@ public class HisSyncHandler
             syncHistorizedEquipPoints(syncAllData);
 
             syncHistorizedZonePoints(syncAllData);
+
+            ccuHsApi.tagsDb.persistUnsyncedCachedItems();
+
         }
     }
     
@@ -144,7 +148,7 @@ public class HisSyncHandler
                     hDictList.add(hDict);
                     hisItemList.add(hisItem);
                     CcuLog.d(TAG, "syncCachedHisData: Adding historized value point ID " + hisItem.getRec() +
-                            "value of " + pointValue + " for syncing.");
+                            " value of " + pointValue + " for syncing.");
                 } else {
                     CcuLog.e(TAG, "syncCachedHisData: Historized point value for point ID " + hisItem.getRec()
                             + " is null. Skipping.");

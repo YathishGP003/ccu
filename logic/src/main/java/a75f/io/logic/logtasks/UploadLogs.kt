@@ -52,13 +52,15 @@ class UploadLogs(
 
       val messageFile = fileSystemTools.writeMessages("Renatus_Messages_$dateStr.txt")
 
+      val entityFile = fileSystemTools.writeHayStackEntities("Renatus_Entity_Writable_$dateStr.txt")
+
       val bacAppLogFile = fileSystemTools.getBacAppLogs( "ccu/bacnet", "logs.txt")
 
       val listOfFiles: List<File> = if (bacAppLogFile != null) {
-         listOf(logFile, prefsFile, messageFile, bacAppLogFile)
+         listOf(logFile, prefsFile, messageFile, bacAppLogFile , entityFile )
 
       } else {
-         listOf(logFile, prefsFile, messageFile)
+         listOf(logFile, prefsFile, messageFile, entityFile)
       }
 
       // This specific file id format is a requirement (Earth(CCU)-4726)

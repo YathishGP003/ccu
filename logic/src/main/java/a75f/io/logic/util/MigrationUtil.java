@@ -415,13 +415,18 @@ public class MigrationUtil {
             PreferenceUtil.setTemperatureTIPortEnabled();
         }
 
+        if (!PreferenceUtil.isHSSOutsideDamperMinOpenMigrationDone()) {
+            doHSSOutsideDamperMinOpenMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHSSOutsideDamperMinOpenMigrationDone();
+        }
+
         CCUHsApi.getInstance().removeAllNamedSchedule();
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-//        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
@@ -2328,5 +2333,22 @@ public class MigrationUtil {
         }
         Log.d(TAG_CCU_MIGRATION_UTIL, "enableTISensorPort migration started");
         CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void doHSSOutsideDamperMinOpenMigration(CCUHsApi haystack) {
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and hyperstatsplit");
+
+        equips.forEach(equip -> {
+            Equip hssEquip = new Equip.Builder().setHashMap(equip).build();
+            HashMap<Object, Object> outsideDamperMinOpen = haystack.readEntity("outside and damper and min and open and equipRef ==\""+hssEquip.getId()+"\"");
+
+            if (!outsideDamperMinOpen.isEmpty()) {
+                Point modifiedPoint  = new Point.Builder().setHashMap(outsideDamperMinOpen).addMarker("his").build();
+                haystack.updatePoint(modifiedPoint, modifiedPoint.getId());
+            }
+
+        });
+
+
     }
 }

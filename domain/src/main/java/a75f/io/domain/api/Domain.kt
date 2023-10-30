@@ -101,4 +101,7 @@ object Domain {
     fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
         return CCUHsApi.getInstance().readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
+    fun readPointValueByDomainName(domainName: String, equipRef : String): Double {
+        return CCUHsApi.getInstance().readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
 }

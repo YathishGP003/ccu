@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
+import a75f.io.domain.api.dabAnalogFanSpeedMultiplier
 import a75f.io.domain.api.dcvDamperControlEnable
 import a75f.io.domain.api.dehumidifierOperationEnable
 import a75f.io.domain.api.dualSetpointControlEnable
@@ -27,8 +28,14 @@ import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelNames
+import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.schedules.ScheduleManager
+import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.bo.haystack.device.ControlMote
+import android.content.Intent
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
@@ -69,37 +76,19 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        Log.i("DEV_DEBUG", "Cooling Loop : ${DabSystemController.getInstance().coolingSignal}")
+        Log.i("DEV_DEBUG", "Heating Loop : ${DabSystemController.getInstance().heatingSignal}")
 
-        Log.i("DEV_DEBUG", "Cooling Loop : $coolingLoopOp")
-        Log.i("DEV_DEBUG", "Heating Loop : $heatingLoopOp")
 
-        /*
+        val analogFanMultiplier = Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier,systemEquip!!.id)
+        Log.i("DEV_DEBUG","analogFanMultiplier : $analogFanMultiplier")
+
+
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
+
         val dabSystem = DabSystemController.getInstance()
-        if (isDcwbEnabled()) {
-            if (dcwbAlgoHandler == null) {
-                val isAdaptiveDelta: Boolean = getConfigVal("adaptive and delta") > 0
-                dcwbAlgoHandler =
-                    DcwbAlgoHandler(isAdaptiveDelta, systemEquipRef, CCUHsApi.getInstance())
-            }
-
-            //Analog1 controls water valve when the DCWB enabled.
-            updateAnalog1DcwbOutput(dabSystem)
-
-            //Could be mapped to cooling or co2 based on configuration.
-            updateAnalog4Output(dabSystem)
-        } else {
-            //Analog1 controls cooling when the DCWB is disabled
-            updateAnalog1DabOutput(dabSystem)
-        }
-
-        //Analog2 controls Central Fan
-        updateAnalog2Output(dabSystem)
-
-        //Analog3 controls heating.
-        updateAnalog3Output(dabSystem)
-        updateRelayOutputs(dabSystem)
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal.toDouble())
         val systemStatus = statusMessage
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
@@ -115,12 +104,12 @@ class DabExternalAhu : DabSystemProfile() {
                 .readDefaultStrVal("system and scheduleStatus") != scheduleStatus
         ) {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus)
-        }*/
+        }
     }
 
     override fun addSystemEquip() {
         val hayStack = CCUHsApi.getInstance()
-        val equip = hayStack.read("equip and system and not modbus")
+        val equip = hayStack.readEntity("equip and system and not modbus")
         if (equip != null && equip.size > 0) {
             if (equip["profile"] != ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
                 hayStack.deleteEntityTree(equip["id"].toString())

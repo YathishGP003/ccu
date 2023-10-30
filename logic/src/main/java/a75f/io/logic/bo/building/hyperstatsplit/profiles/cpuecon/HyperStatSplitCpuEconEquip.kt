@@ -235,7 +235,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     private fun getCpuEconAnalogOutVoltageAtMin(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMax
+            analogOutVoltageMin
         } else {
             analogOutState.voltageAtMin.toInt()
         }
@@ -243,7 +243,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
     private fun getCpuEconAnalogOutVoltageAtMax(analogOutState: AnalogOutState): Int {
         return if (analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
-            analogOutVoltageMin
+            analogOutVoltageMax
         } else {
             analogOutState.voltageAtMax.toInt()
         }
@@ -501,7 +501,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuEconRelayAssociation) {
-            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration)) {
+            if (HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && !HyperStatSplitAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration)) {
                 if (HyperStatSplitAssociationUtil.isStagedFanEnabled(newConfiguration,stage)) {
                     val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createStagedFanPoint(newConfiguration, stage)
                     hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(

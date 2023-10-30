@@ -809,7 +809,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
     }
 
     fun getName(name: String): String {
-        CcuLog.i("DEV_DEBUG", "getName")
         return if (name.length > 30) name.substring(0, 30) else name
     }
 

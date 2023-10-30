@@ -81,8 +81,9 @@ class DabExternalAhu : DabSystemProfile() {
         Log.i("DEV_DEBUG", "Heating Loop : ${DabSystemController.getInstance().heatingSignal}")
 
 
-        val analogFanMultiplier = Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier,systemEquip!!.id)
-        Log.i("DEV_DEBUG","analogFanMultiplier : $analogFanMultiplier")
+        val analogFanMultiplier =
+            Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier, systemEquip!!.id)
+        Log.i("DEV_DEBUG", "analogFanMultiplier : $analogFanMultiplier")
 
 
         updateOutsideWeatherParams()
@@ -111,7 +112,9 @@ class DabExternalAhu : DabSystemProfile() {
         val hayStack = CCUHsApi.getInstance()
         val equip = hayStack.readEntity("equip and system and not modbus")
         if (equip != null && equip.size > 0) {
-            if (equip["profile"] != ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
+            if (!equip["profile"]?.toString()
+                    .contentEquals(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name)
+            ) {
                 hayStack.deleteEntityTree(equip["id"].toString())
             }
         }
@@ -120,7 +123,7 @@ class DabExternalAhu : DabSystemProfile() {
     @Synchronized
     override fun deleteSystemEquip() {
         val equip = CCUHsApi.getInstance().read("equip and system and not modbus")
-        if (equip["profile"] == ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name) {
+        if (equip["profile"]?.toString().contentEquals(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name)) {
             CCUHsApi.getInstance().deleteEntityTree(equip["id"].toString())
         }
     }

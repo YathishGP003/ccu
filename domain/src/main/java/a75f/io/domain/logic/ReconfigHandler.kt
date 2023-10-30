@@ -1,9 +1,12 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Kind
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.logger.CcuLog
+import org.projecthaystack.HNum
+import org.projecthaystack.HStr
 
 object ReconfigHandler {
 
@@ -16,14 +19,17 @@ object ReconfigHandler {
         val domainNameMap = mutableMapOf<String, Double>()
         val configPoints = hayStack.readAllEntities("point and domainName and equipRef == \"$equipRef\"")
         configPoints.forEach {
+            try {
+                val kindVal = it["kind"] as HStr
+                if (kindVal.toString().contentEquals("Number")) {
+                    val pointVal = hayStack.readDefaultValById(it["id"].toString())
+                    domainNameMap[it["domainName"].toString()] = pointVal
+                } else  if (kindVal.toString().contentEquals("Str")) {
+                    // TODO NEED TO HANDLE IF REQUIRED
+                }
 
-            val pointVal = hayStack.readDefaultValById(it["id"].toString())
-            //TODO - handle string type val if there is any.
-            if (pointVal is Number) {
-                domainNameMap[it["domainName"].toString()] = pointVal
-            }
-            if (pointVal is Double) {
-                domainNameMap[it["domainName"].toString()] = pointVal
+            } catch (e: Exception) {
+                CcuLog.e("DEV_DEBUG","Error ${e.message}",e)
             }
         }
         domainNameMap.forEach { CcuLog.i("DEV_DEBUG","${it.key} : ${it.value}") }

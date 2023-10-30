@@ -7,6 +7,8 @@ import a75f.io.renatus.R
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +88,10 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
 }
 
  fun showToast(text: String, context: Context){
-    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+     Handler(Looper.getMainLooper()).post(kotlinx.coroutines.Runnable {
+         Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+     })
+
 }
 fun log(msg: String) {
     CcuLog.i("DMModbus",msg)

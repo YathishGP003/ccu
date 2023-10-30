@@ -790,7 +790,13 @@ public abstract class SystemProfile
         HashMap modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
         if (modbusEquip != null && !modbusEquip.isEmpty()) {
             CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusEquip.get("id")).toString());
+            HashMap modbusDevice = CCUHsApi.getInstance().readEntity("modbus and device and equipRef == \"" + Objects.requireNonNull(modbusEquip.get("id")) + "\"");
+            if (modbusDevice != null && !modbusEquip.isEmpty()) {
+                CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusDevice.get("id")).toString());
+            }
+
         }
+
 
     }
 }

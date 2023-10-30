@@ -253,7 +253,7 @@ public abstract class DabSystemProfile extends SystemProfile
     public double getUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and " + tags);
+        HashMap cdb = hayStack.read("point and system and userIntent and " + tags);
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {

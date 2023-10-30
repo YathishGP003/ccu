@@ -191,17 +191,13 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                         L.ccu().systemProfile!!.deleteSystemEquip()
                         L.ccu().systemProfile = null
                         addEquip()
-                        if (configType.value == ConfigType.MODBUS) {
-                            saveModbusConfiguration()
-                        }
+                        saveModbusConfiguration()
                     } else {
                         updateSystemProfile()
                     }
                 } else {
                     addEquip()
-                    if (configType.value == ConfigType.MODBUS) {
-                        saveModbusConfiguration()
-                    }
+                    saveModbusConfiguration()
                 }
             },
 
@@ -212,17 +208,18 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                 ProgressDialogUtils.hideProgressDialog()
                 showToast("Configuration saved successfully", context)
-
             }
         )
     }
 
     private fun saveModbusConfiguration() {
-        CcuLog.i(TAG, "saveModbusConfiguration")
-        if (isValidConfiguration()) {
-            populateSlaveId()
-            CCUHsApi.getInstance().resetCcuReady()
-            setUpsModbusProfile()
+        if (configType.value == ConfigType.MODBUS) {
+            CcuLog.i(TAG, "saveModbusConfiguration")
+            if (isValidConfiguration()) {
+                populateSlaveId()
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpsModbusProfile()
+            }
         }
     }
 
@@ -307,7 +304,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
 
     fun itemsFromMinMax(min: Double, max: Double, increment: Double): List<String> {
-        CcuLog.i(TAG, "itemsFromMinMax")
         require(min <= max) { "Minimum value must be less than or equal to the maximum value" }
         require(increment > 0.0) { "Increment value must be greater than zero" }
         val decimalFormat = DecimalFormat("#." + "#".repeat(2))
@@ -350,7 +346,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun updateSelectAll() {
-        CcuLog.i(TAG, "updateSelectAll")
         var isAllSelected = true
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEach {

@@ -543,7 +543,8 @@ public class ScheduleManager {
             return;
         }
         
-        if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)) {
+        if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)
+                && L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
             systemOccupancy = EMERGENCY_CONDITIONING;
             postSystemOccupancy(CCUHsApi.getInstance());
             return;

@@ -667,13 +667,13 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output",
-                    "fan", "speed","run","his"
+                    "cmd","zone","logical","cur",
+                    "fan", "speed","his","modulating","cpu","standalone"
                 )
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-fanSpeed")
-                    .setSiteRef(siteRef).setEquipRef(equipRef)
-                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setDisplayName("$equipDis-modulatingFanSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress.toString())
+                    .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
                 val fanSpeedPoint = point.build()
@@ -792,7 +792,7 @@ class LogicalPointsUtil {
         }
         fun readAnalogOutFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "analog and logical and output and fan and speed and equipRef == \"$equipRef\"")
+                "point and logical and fan and modulating and speed and equipRef == \"$equipRef\"")
         }
         fun readAnalogOutDcvLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(

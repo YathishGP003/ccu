@@ -160,9 +160,21 @@ message HyperStatSettingsMessage2_t {
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
 }
 
+message HyperStatConfigsCcu_t {
+  uint32 coolingStage1FanAnalogVoltage  = 1; // 1/10 of the volts
+  uint32 coolingStage2FanAnalogVoltage  = 2; // 1/10 of the volts
+  uint32 coolingStage3FanAnalogVoltage  = 3; // 1/10 of the volts
+  uint32 heatingStage1FanAnalogVoltage  = 4; // 1/10 of the volts
+  uint32 heatingStage2FanAnalogVoltage  = 5; // 1/10 of the volts
+  uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
+}
+
 message HyperStatSettingsMessage3_t {
   HyperStatTunersGeneric_t genertiTuners = 1; // Generic tuner
+  oneof profileSpecificTuners {
     HyperStatTunersFcu_t  fcuTuners = 2;
+    HyperStatConfigsCcu_t hyperStatConfigsCcu = 3; // When staged fan is enabled these voltages provide the fan speed control
+  }
 }
 
 

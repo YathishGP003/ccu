@@ -25,11 +25,7 @@ class HyperStatSettingsUtil {
          * @param nodeAddress
          * return HyperStatSettingsMessage2_t
          */
-        fun getSetting2Message(
-            nodeAddress: Int,
-            equipRef: String,
-            hsApi: CCUHsApi
-        ): HyperStatSettingsMessage2_t {
+        fun getSetting2Message(nodeAddress: Int, equipRef: String, hsApi: CCUHsApi): HyperStatSettingsMessage2_t {
             val settings2 = HyperStatSettingsMessage2_t.newBuilder()
             val equip = getEquipDetails(nodeAddress)
 
@@ -40,41 +36,31 @@ class HyperStatSettingsUtil {
             settings2.hyperstatAnalogOutConfig = getAnalogOutConfigDetails(hsApi, equipRef)
             settings2.hyperstatAnalogInConfig = getAnalogInConfigDetails(hsApi, equipRef)
             settings2.thermistor1Enable = getTh1Enabled(hsApi, equipRef)
-            settings2.zoneCO2Target =
-                readConfig(hsApi, equipRef, "co2 and target and config").toInt()
-            settings2.zoneCO2Threshold =
-                readConfig(hsApi, equipRef, "co2 and threshold and config").toInt()
-            settings2.zoneCO2DamperOpeningRate =
-                readConfig(hsApi, equipRef, "co2 and damper and config").toInt()
+            settings2.zoneCO2Target = readConfig(hsApi, equipRef, "co2 and target and config").toInt()
+            settings2.zoneCO2Threshold = readConfig(hsApi, equipRef, "co2 and threshold and config").toInt()
+            settings2.zoneCO2DamperOpeningRate = readConfig(hsApi, equipRef, "co2 and damper and config").toInt()
             settings2.proportionalConstant = (TunerUtil.getProportionalGain(equipRef) * 100).toInt()
             settings2.integralConstant = (TunerUtil.getIntegralGain(equipRef) * 100).toInt()
-            settings2.proportionalTemperatureRange =
-                (TunerUtil.getProportionalSpread(equipRef) * 10).toInt()
+            settings2.proportionalTemperatureRange = (TunerUtil.getProportionalSpread(equipRef) * 10).toInt()
             settings2.integrationTime = TunerUtil.getIntegralTimeout(equipRef).toInt()
 
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
-                    settings2.profile =
-                        HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
                     settings2.thermistor2Enable = getTh2DoorWindow(hsApi, equipRef)
                 }
-
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
-                    settings2.profile =
-                        HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_HEAT_PUMP_UNIT
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_HEAT_PUMP_UNIT
                     settings2.thermistor2Enable = getTh2DoorWindow(hsApi, equipRef)
                 }
-
                 ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
-                    settings2.profile =
-                        HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
                     settings2.thermistor2Enable = getTh2SupplyWaterTempEnabled(hsApi, equipRef)
                 }
 
                 ProfileType.HYPERSTAT_MONITORING.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_MONITORING
                 }
-
                 ProfileType.HYPERSTAT_VRV.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_VRV
                 }
@@ -95,22 +81,19 @@ class HyperStatSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                    settings3.hyperStatConfigsCcu = getStagedFanVoltageDetails(equipRef)
                 }
-
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                     settings3.fcuTuners = getHpuTunerDetails(equipRef)
                 }
-
                 ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                     settings3.fcuTuners = getFcuTunerDetails(equipRef)
                 }
-
                 ProfileType.HYPERSTAT_MONITORING.name -> {
                     /** Do nothing */
                 }
-
                 ProfileType.HYPERSTAT_VRV.name -> {
                     /** Do nothing */
                 }
@@ -125,8 +108,7 @@ class HyperStatSettingsUtil {
          */
         private fun getEquipDetails(nodeAddress: Int): Equip {
             return Equip.Builder()
-                .setHashMap(CCUHsApi.getInstance().read("equip and group == \"$nodeAddress\""))
-                .build()
+                .setHashMap(CCUHsApi.getInstance().read("equip and group == \"$nodeAddress\"")).build()
         }
 
         /**
@@ -176,11 +158,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh2SupplyWaterTempEnabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(
-                hsApi,
-                equipRef,
-                "supply and water and temp and config and enabled"
-            ) == 1.0)
+            return (readConfig(hsApi, equipRef, "supply and water and temp and config and enabled") == 1.0)
         }
 
 
@@ -190,23 +168,14 @@ class HyperStatSettingsUtil {
          * @param hsApi
          * @return HyperstatRelay_t
          */
-        private fun getRelayConfigDetails(
-            hsApi: CCUHsApi,
-            equipRef: String
-        ): HyperStat.HyperstatRelay_t {
+        private fun getRelayConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperStat.HyperstatRelay_t {
             val relayConfiguration = HyperStat.HyperstatRelay_t.newBuilder()
-            relayConfiguration.relay1Enable =
-                readConfig(hsApi, equipRef, "relay1 and config and enabled") == 1.0
-            relayConfiguration.relay2Enable =
-                readConfig(hsApi, equipRef, "relay2 and config and enabled") == 1.0
-            relayConfiguration.relay3Enable =
-                readConfig(hsApi, equipRef, "relay3 and config and enabled") == 1.0
-            relayConfiguration.relay4Enable =
-                readConfig(hsApi, equipRef, "relay4 and config and enabled") == 1.0
-            relayConfiguration.relay5Enable =
-                readConfig(hsApi, equipRef, "relay5 and config and enabled") == 1.0
-            relayConfiguration.relay6Enable =
-                readConfig(hsApi, equipRef, "relay6 and config and enabled") == 1.0
+            relayConfiguration.relay1Enable = readConfig(hsApi, equipRef, "relay1 and config and enabled") == 1.0
+            relayConfiguration.relay2Enable = readConfig(hsApi, equipRef, "relay2 and config and enabled") == 1.0
+            relayConfiguration.relay3Enable = readConfig(hsApi, equipRef, "relay3 and config and enabled") == 1.0
+            relayConfiguration.relay4Enable = readConfig(hsApi, equipRef, "relay4 and config and enabled") == 1.0
+            relayConfiguration.relay5Enable = readConfig(hsApi, equipRef, "relay5 and config and enabled") == 1.0
+            relayConfiguration.relay6Enable = readConfig(hsApi, equipRef, "relay6 and config and enabled") == 1.0
 
             /**
              * Firmware mapping enum has "none" at 0 position but ccu will will not use none.
@@ -214,34 +183,28 @@ class HyperStatSettingsUtil {
              */
 
             if (relayConfiguration.relay1Enable)
-                relayConfiguration.relay1Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay1 and config and association ")
-                        .toInt()
+                relayConfiguration.relay1Mapping = 1 + readConfig(hsApi, equipRef, "relay1 and config and association ")
+                    .toInt()
 
             if (relayConfiguration.relay2Enable)
-                relayConfiguration.relay2Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay2 and config and association ")
-                        .toInt()
+                relayConfiguration.relay2Mapping = 1 + readConfig(hsApi, equipRef, "relay2 and config and association ")
+                    .toInt()
 
             if (relayConfiguration.relay3Enable)
-                relayConfiguration.relay3Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay3 and config and association ")
-                        .toInt()
+                relayConfiguration.relay3Mapping = 1 + readConfig(hsApi, equipRef, "relay3 and config and association ")
+                    .toInt()
 
             if (relayConfiguration.relay4Enable)
-                relayConfiguration.relay4Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay4 and config and association ")
-                        .toInt()
+                relayConfiguration.relay4Mapping = 1 + readConfig(hsApi, equipRef, "relay4 and config and association ")
+                    .toInt()
 
             if (relayConfiguration.relay5Enable)
-                relayConfiguration.relay5Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay5 and config and association ")
-                        .toInt()
+                relayConfiguration.relay5Mapping = 1 + readConfig(hsApi, equipRef, "relay5 and config and association ")
+                    .toInt()
 
             if (relayConfiguration.relay6Enable)
-                relayConfiguration.relay6Mapping =
-                    1 + readConfig(hsApi, equipRef, "relay6 and config and association ")
-                        .toInt()
+                relayConfiguration.relay6Mapping = 1 + readConfig(hsApi, equipRef, "relay6 and config and association ")
+                    .toInt()
 
             return relayConfiguration.build()
         }
@@ -252,10 +215,7 @@ class HyperStatSettingsUtil {
          * @param hsApi
          * @return HyperstatAnalogOut_t
          */
-        private fun getAnalogOutConfigDetails(
-            hsApi: CCUHsApi,
-            equipRef: String
-        ): HyperStat.HyperstatAnalogOut_t {
+        private fun getAnalogOutConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperStat.HyperstatAnalogOut_t {
             val analogOutConfiguration = HyperStat.HyperstatAnalogOut_t.newBuilder()
             val defaultAnalogOutMinSetting = 0
             val defaultAnalogOutMaxSetting = 10
@@ -335,10 +295,7 @@ class HyperStatSettingsUtil {
          * @param hsApi
          * @return HyperstatAnalogIn_t
          */
-        private fun getAnalogInConfigDetails(
-            hsApi: CCUHsApi,
-            equipRef: String
-        ): HyperStat.HyperstatAnalogIn_t {
+        private fun getAnalogInConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperStat.HyperstatAnalogIn_t {
             val analogIn = HyperStat.HyperstatAnalogIn_t.newBuilder()
 
             analogIn.analogIn1Enable = readConfig(
@@ -350,19 +307,11 @@ class HyperStatSettingsUtil {
             ) == 1.0
 
             if (analogIn.analogIn1Enable) {
-                val mapping = readConfig(
-                    hsApi,
-                    equipRef,
-                    "analog1 and input and config and association "
-                ).toInt()
+                val mapping = readConfig(hsApi, equipRef, "analog1 and input and config and association ").toInt()
                 analogIn.analogIn1Mapping = HyperStat.HyperstatAnalogInMapping_t.values()[mapping]
             }
             if (analogIn.analogIn2Enable) {
-                val mapping = readConfig(
-                    hsApi,
-                    equipRef,
-                    "analog2 and input and config and association "
-                ).toInt()
+                val mapping = readConfig(hsApi, equipRef, "analog2 and input and config and association ").toInt()
                 analogIn.analogIn2Mapping = HyperStat.HyperstatAnalogInMapping_t.values()[mapping]
             }
 
@@ -378,23 +327,15 @@ class HyperStatSettingsUtil {
             val genericTuners = HyperStat.HyperStatTunersGeneric_t.newBuilder()
             val equip = CCUHsApi.getInstance().readHDictById(equipRef)
             genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery
-                (
-                "zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef")
-                    .toString() + "\""
-            )).toInt()
+                ("zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
             genericTuners.relayActivationHysteresis =
                 TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =
-                (TunerUtil.readTunerValByQuery(
-                    "analog and fan and speed and multiplier",
-                    equipRef
-                ) * 10).toInt()
-            genericTuners.humidityHysteresis =
-                TunerUtil.getHysteresisPoint("humidity", equipRef).toInt()
+                (TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equipRef) * 10 ).toInt()
+            genericTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equipRef).toInt()
             genericTuners.autoAwayZoneSetbackTemp =
                 (TunerUtil.readTunerValByQuery("auto and away and setback") * 10).toInt()
-            genericTuners.autoAwayTime =
-                TunerUtil.readTunerValByQuery("auto and away and time", equipRef).toInt()
+            genericTuners.autoAwayTime = TunerUtil.readTunerValByQuery("auto and away and time", equipRef).toInt()
             genericTuners.forcedOccupiedTime =
                 TunerUtil.readTunerValByQuery("forced and occupied and time", equipRef).toInt()
             return genericTuners.build()
@@ -420,30 +361,14 @@ class HyperStatSettingsUtil {
          */
         private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
             val fcuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
-            fcuTuners.twoPipeHeatingThreshold =
-                TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.twoPipeCoolingThreshold =
-                TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.auxHeating1Activate =
-                TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.auxHeating2Activate =
-                TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.waterValueSamplingOnTime =
-                TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.watreValueSamplingWaitTime =
-                TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOnTime =
-                TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"")
-                    .toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOffTime =
-                TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"")
-                    .toInt()
+            fcuTuners.twoPipeHeatingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.twoPipeCoolingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.watreValueSamplingWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingDuringNoOperationOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingDuringNoOperationOffTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
             return fcuTuners.build()
         }
 
@@ -454,158 +379,150 @@ class HyperStatSettingsUtil {
          */
         private fun getHpuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
             val hpuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
-            hpuTuners.auxHeating1Activate =
-                TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"")
-                    .toInt()
-            hpuTuners.auxHeating2Activate =
-                TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"")
-                    .toInt()
+            hpuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
+            hpuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
             return hpuTuners.build()
         }
 
-        var ccuControlMessageTimer: Long = 0
+        var  ccuControlMessageTimer :Long = 0
             get() {
-                if (field == 0L) {
-                    ccuControlMessageTimer = System.currentTimeMillis()
-                }
+                if (field == 0L){
+                    ccuControlMessageTimer = System.currentTimeMillis()}
                 return field
 
             }
-
         // Below method returns query based on DesiredTempMode
         fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
             return if (mode == TemperatureMode.COOLING) {
-                "schedulable and cooling and user and limit and $query and roomRef == \""+ HSUtil.getZoneIdFromEquipId(equipRef)+"\""
+                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             } else {
-                "schedulable and heating and user and limit and $query and roomRef == \""+ HSUtil.getZoneIdFromEquipId(equipRef)+"\""
+                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }
         }
 
         fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
             return if(mode == TemperatureMode.HEATING){
-                "schedulable and heating and user and limit and $query and roomRef == \""+ HSUtil.getZoneIdFromEquipId(equipRef)+"\""
+                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }else{
-                "schedulable and cooling and user and limit and $query and roomRef == \""+ HSUtil.getZoneIdFromEquipId(equipRef)+"\""
+                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }
         }
 
-//        /**
-//         * Function to read all the staged fan voltages which are required for Hyperstat to run
-//         * @param equipRef
-//         * @return HyperstatStagedFanVoltages_t
-//         */
-//        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperStatConfigsCcu_t? {
-//            val stagedFanVoltages = HyperStat.HyperStatConfigsCcu_t.newBuilder()
-//            val ccuHsApi = CCUHsApi.getInstance()
-//            val equipRefQuery = "equipRef == \"$equipRef\""
-//
-//            val coolingStage1Query = "cooling and stage1 and fan and $equipRefQuery"
-//            val coolingStage2Query = "cooling and stage2 and fan and $equipRefQuery"
-//            val coolingStage3Query = "cooling and stage3 and fan and $equipRefQuery"
-//            val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
-//            val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
-//            val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
-//
-//            if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
-//                stagedFanVoltages.coolingStage1FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(coolingStage1Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(coolingStage1Query) * 10).toInt()
-//            }
-//            if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
-//                stagedFanVoltages.coolingStage2FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(coolingStage2Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(coolingStage2Query) * 10).toInt()
-//            }
-//            if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
-//                stagedFanVoltages.coolingStage3FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(coolingStage3Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(coolingStage3Query) * 10).toInt()
-//            }
-//            if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
-//                stagedFanVoltages.heatingStage1FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(heatingStage1Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(heatingStage1Query) * 10).toInt()
-//            }
-//            if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
-//                stagedFanVoltages.heatingStage2FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(heatingStage2Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(heatingStage2Query) * 10).toInt()
-//            }
-//            if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
-//                stagedFanVoltages.heatingStage3FanAnalogVoltage =
-//                    ccuHsApi.readPointPriorityValByQuery(heatingStage3Query).toInt()
-//                (ccuHsApi.readPointPriorityValByQuery(heatingStage3Query) * 10).toInt()
-//            }
-//            return stagedFanVoltages.build()
-//        }
-//
-//        /**
-//         * Function to read all the linear fan speeds which are required for Hyperstat to run
-//         * @param equipRef
-//         * @return HyperstatLinearFanSpeeds_t
-//         */
-//        private fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
-//            val linearFanSpeedBuilder = HyperStat.HyperstatLinearFanSpeeds_t.newBuilder()
-//            val ccuHsApi = CCUHsApi.getInstance()
-//            val equipRefQuery = "equipRef == \"$equipRef\""
-//
-//            val fanSpeedLevels = listOf("low", "medium", "high")
-//
-//            for (fanSpeed in fanSpeedLevels) {
-//                for (analog in listOf("analog3", "analog2", "analog1")) {
-//                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
-//                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equipRef,analog)
-//                        == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal) {
-//                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
-//                        when (fanSpeed) {
-//                            "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
-//                            "medium" -> linearFanSpeedBuilder.linearFanMediumSpeedLevel = fanLevel
-//                            "high" -> linearFanSpeedBuilder.linearFanHighSpeedLevel = fanLevel
-//                        }
-//                        break
-//                    }
-//                }
-//            }
-//            return linearFanSpeedBuilder.build()
-//        }
-//
-//        /**
-//         * Function to read all the staged fan speed which are required for Hyperstat to run
-//         * @param equipRef
-//         * @return HyperstatStagedFanSpeeds_t
-//         */
-//        private fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
-//            val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
-//            val ccuHsApi = CCUHsApi.getInstance()
-//            val equipRefQuery = "equipRef == \"$equipRef\""
-//
-//            val fanSpeedLevels = listOf("low", "medium", "high")
-//
-//            for (fanSpeed in fanSpeedLevels) {
-//                for (analog in listOf("analog3", "analog2", "analog1")) {
-//                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
-//                    if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(ccuHsApi,equipRef,analog)
-//                        == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
-//                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
-//                        when (fanSpeed) {
-//                            "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
-//                            "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = fanLevel
-//                            "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
-//                        }
-//                        break
-//                    }
-//                }
-//            }
-//            return stagedFanSpeedBuilder.build()
-//        }
-//        private fun getAnalogOutMapping(
-//            ccuHsApi: CCUHsApi,
-//            equipRef: String,
-//            analog: String
-//        ): Any {
-//            return readConfig(ccuHsApi, equipRef, "$analog and output and config and association").toInt()
-//        }
-//    }
-//}
+        /**
+         * Function to read all the staged fan voltages which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatStagedFanVoltages_t
+         */
+        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperStatConfigsCcu_t? {
+            val stagedFanVoltages = HyperStat.HyperStatConfigsCcu_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val coolingStage1Query = "cooling and stage1 and fan and $equipRefQuery"
+            val coolingStage2Query = "cooling and stage2 and fan and $equipRefQuery"
+            val coolingStage3Query = "cooling and stage3 and fan and $equipRefQuery"
+            val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
+            val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
+            val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
+
+            if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage1FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage1Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage1Query) * 10).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage2FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage2Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage2Query) * 10).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage3FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(coolingStage3Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(coolingStage3Query) * 10).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage1FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage1Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage1Query) * 10).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage2FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage2Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage2Query) * 10).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage3FanAnalogVoltage =
+                    ccuHsApi.readPointPriorityValByQuery(heatingStage3Query).toInt()
+                (ccuHsApi.readPointPriorityValByQuery(heatingStage3Query) * 10).toInt()
+            }
+            return stagedFanVoltages.build()
+        }
+
+        /**
+         * Function to read all the linear fan speeds which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatLinearFanSpeeds_t
+         */
+        private fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
+            val linearFanSpeedBuilder = HyperStat.HyperstatLinearFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
+                            "medium" -> linearFanSpeedBuilder.linearFanMediumSpeedLevel = fanLevel
+                            "high" -> linearFanSpeedBuilder.linearFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return linearFanSpeedBuilder.build()
+        }
+
+        /**
+         * Function to read all the staged fan speed which are required for Hyperstat to run
+         * @param equipRef
+         * @return HyperstatStagedFanSpeeds_t
+         */
+        private fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
+            val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
+                            "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = fanLevel
+                            "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return stagedFanSpeedBuilder.build()
+        }
+        private fun getAnalogOutMapping(
+            ccuHsApi: CCUHsApi,
+            equipRef: String,
+            analog: String
+        ): Any {
+            return readConfig(ccuHsApi, equipRef, "$analog and output and config and association").toInt()
+        }
     }
 }

@@ -512,7 +512,7 @@ class HyperStatSplitPointsUtil(
         zoneOAOPointsList.add(Pair(weatherOutsideHumidityPoint, 0.0))
 
         val outsideDamperMinOpenPointMarker = arrayOf(
-            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpu"
+            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpu", "his"
         )
         val outsideDamperMinOpenPoint = createHaystackPointWithUnit(
             "$equipDis-outsideDamperMinOpen",

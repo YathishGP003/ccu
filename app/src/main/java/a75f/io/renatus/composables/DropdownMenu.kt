@@ -34,21 +34,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun DropDownWithLabel(label : String, list : List<String>,
-                      previewWidth : Int = 80, expandedWidth : Int = 100 ) {
+fun DropDownWithLabel(label : String, list : List<String>, previewWidth : Int = 80, expandedWidth : Int = 100,
+                      onSelected: (Int) -> Unit, defaultSelection : Int = 0) {
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
             HeaderTextView(text = label, padding = 0)
         }
         Spacer(modifier = Modifier.width(20.0.dp))
         var expanded by remember { mutableStateOf(false) }
-        var selectedIndex by remember { mutableStateOf(0) }
+        var selectedIndex by remember { mutableStateOf(defaultSelection) }
         Box(modifier = Modifier
             .width(previewWidth.dp)
             .wrapContentSize(Alignment.TopStart)) {
             Row {
                 Text(
-                    list[selectedIndex], modifier = Modifier.width((previewWidth-20).dp).height(30.dp)
+                    list[defaultSelection], modifier = Modifier.width((previewWidth-20).dp).height(30.dp)
                         .clickable(onClick = { expanded = true }),
                         fontSize = 18.sp,
                 )
@@ -65,14 +65,15 @@ fun DropDownWithLabel(label : String, list : List<String>,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .width(expandedWidth.dp)
-                    .background(
+                    /*.background(
                         Color.Gray
-                    )
+                    )*/
             ) {
                 list.forEachIndexed { index, s ->
                     DropdownMenuItem(onClick = {
                         selectedIndex = index
                         expanded = false
+                        onSelected(selectedIndex)
                     }, text = { Text(text = s) })
                 }
             }

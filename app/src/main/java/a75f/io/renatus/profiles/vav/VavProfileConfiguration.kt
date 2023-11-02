@@ -34,6 +34,7 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         enableIAQControl = getDefaultEnableConfig(a75f.io.domain.api.enableIAQControl, model)
         enableCo2Control = getDefaultEnableConfig(a75f.io.domain.api.enableCo2Control, model)
         enableCFMControl = getDefaultEnableConfig(a75f.io.domain.api.enableCFMControl, model)
+        isDefault = true
         return this
     }
 

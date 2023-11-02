@@ -14,7 +14,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
  */
 abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : String, var priority : Int, var roomRef : String, var floorRef : String) {
 
-
+    var isDefault = false
     /**
      * Get a list of domainNames of all base-configs
      * This need not have all base points.

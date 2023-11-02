@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.vav
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -62,7 +63,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val rootView = ComposeView(requireContext())
-        viewModel.init(requireArguments())
+        viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
         rootView.apply {
             setContent { RootView() }
             return rootView
@@ -92,16 +93,24 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    DropDownWithLabel(viewModel.profileConfiguration.damperType.disName, viewModel.damperTypes, 100, 120)
-                    DropDownWithLabel(viewModel.profileConfiguration.damperSize.disName, viewModel.damperSizes, 60, 120)
-                    DropDownWithLabel(viewModel.profileConfiguration.damperShape.disName, viewModel.damperShape, 100, 120 )
+                    DropDownWithLabel(viewModel.profileConfiguration.damperType.disName,
+                        viewModel.damperTypes, 160, 160,
+                        { selectedIndex -> viewModel.viewState.damperType = selectedIndex}, viewModel.viewState.damperType)
+                    DropDownWithLabel(viewModel.profileConfiguration.damperSize.disName,
+                        viewModel.damperSizes, 60, 120,
+                        {selectedIndex -> viewModel.viewState.damperSize = selectedIndex},
+                        viewModel.viewState.damperSize)
+                    DropDownWithLabel(viewModel.profileConfiguration.damperShape.disName,
+                        viewModel.damperShapes, 100, 120,
+                        {selectedIndex -> viewModel.viewState.damperShape = selectedIndex},
+                        viewModel.viewState.damperShape)
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    DropDownWithLabel(viewModel.profileConfiguration.reheatType.disName, viewModel.reheatTypes, 160, 160)
-                    DropDownWithLabel(viewModel.profileConfiguration.zonePriority.disName, viewModel.zonePriority, 100,120)
+                    DropDownWithLabel(viewModel.profileConfiguration.reheatType.disName, viewModel.reheatTypes, 160, 160,{})
+                    DropDownWithLabel(viewModel.profileConfiguration.zonePriority.disName, viewModel.zonePriorities, 100,120,{})
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -218,7 +227,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     SaveTextView(SET) {
-                        //viewModel.saveConfiguration()
+                        viewModel.saveConfiguration()
                     }
                 }
             }

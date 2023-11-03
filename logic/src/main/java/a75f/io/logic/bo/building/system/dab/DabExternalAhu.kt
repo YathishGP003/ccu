@@ -2,16 +2,19 @@ package a75f.io.logic.bo.building.system.dab
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.writePointByDomainName
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.dabAnalogFanSpeedMultiplier
 import a75f.io.domain.api.dcvDamperControlEnable
 import a75f.io.domain.api.dehumidifierOperationEnable
 import a75f.io.domain.api.dualSetpointControlEnable
+import a75f.io.domain.api.ductStaticPressureSetpoint
 import a75f.io.domain.api.humidifierOperationEnable
 import a75f.io.domain.api.occupancyModeControl
 import a75f.io.domain.api.satSetpointControlEnable
 import a75f.io.domain.api.staticPressureSetpointControlEnable
+import a75f.io.domain.api.supplyAirflowTemperatureSetpoint
 import a75f.io.domain.api.systemCoolingSATMaximum
 import a75f.io.domain.api.systemCoolingSATMinimum
 import a75f.io.domain.api.systemDCVDamperPosMaximum
@@ -34,6 +37,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
+import a75f.io.logic.bo.building.system.mapToSetPoint
 import a75f.io.logic.bo.haystack.device.ControlMote
 import android.content.Intent
 import android.util.Log
@@ -76,16 +80,8 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
-        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-        Log.i("DEV_DEBUG", "Cooling Loop : ${DabSystemController.getInstance().coolingSignal}")
-        Log.i("DEV_DEBUG", "Heating Loop : ${DabSystemController.getInstance().heatingSignal}")
 
-
-        val analogFanMultiplier =
-            Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier, systemEquip!!.id)
-        Log.i("DEV_DEBUG", "analogFanMultiplier : $analogFanMultiplier")
-
-
+        calculateSetpoints()
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
 
@@ -106,6 +102,86 @@ class DabExternalAhu : DabSystemProfile() {
         ) {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus)
         }
+    }
+
+    private fun calculateSetpoints() {
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        val coolingLoop = DabSystemController.getInstance().coolingSignal
+        val heatingLoop = DabSystemController.getInstance().heatingSignal
+        val loopOutput = if (coolingLoop > 0) coolingLoop.toDouble() else heatingLoop.toDouble()
+        val satSetPointLimits = getSetPointMinMax(systemEquip!!, heatingLoop)
+        val satSetPointValue = mapToSetPoint(satSetPointLimits.first,satSetPointLimits.second,loopOutput)
+        updateSetPoint(systemEquip,supplyAirflowTemperatureSetpoint,satSetPointValue)
+
+        val analogFanMultiplier = Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier, systemEquip.id)
+        val fanLoopOutput = loopOutput * analogFanMultiplier
+        val ductStaticPressureLimits = getDuctStaticPressureLimits(systemEquip)
+        val ductStaticPressureSetPoint = mapToSetPoint(ductStaticPressureLimits.first,ductStaticPressureLimits.second,fanLoopOutput)
+        updateSetPoint(systemEquip,ductStaticPressureSetpoint,ductStaticPressureSetPoint)
+
+
+
+        logIt( "satSetPointLimits min: ${satSetPointLimits.first} max: ${satSetPointLimits.second}"+
+        "\n Cooling Loop : $coolingLoop Heating Loop : $heatingLoop"+
+        "\n satSetPointValue: $satSetPointValue"+
+        "\n ductStaticPressureSetPoint: $ductStaticPressureSetPoint"
+        )
+
+    }
+
+    private fun updateSetPoint(equip: Equip,domainName: String, setPointValue: Double){
+        writePointByDomainName(equip,domainName,setPointValue)
+    }
+
+    private fun getDuctStaticPressureLimits(equip: Equip): Pair<Double, Double> {
+        return Pair(
+            Domain.getPointFromDomain(equip, systemStaticPressureMinimum),
+            Domain.getPointFromDomain(equip, systemStaticPressureMaximum),
+        )
+    }
+
+    private fun damperPositionLimits(equip: Equip): Pair<Double, Double> {
+        return Pair(
+            Domain.getPointFromDomain(equip, systemDCVDamperPosMinimum),
+            Domain.getPointFromDomain(equip, systemDCVDamperPosMaximum),
+        )
+    }
+    private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
+
+        val isDualSetPointEnabled = Domain.getPointFromDomain(equip, satSetpointControlEnable) == 1.0
+        return if (isDualSetPointEnabled) {
+            if (getTempDirection(heatingLoop) == TempDirection.COOLING) {
+                Pair(
+                    Domain.getPointFromDomain(equip, systemCoolingSATMinimum),
+                    Domain.getPointFromDomain(equip, systemCoolingSATMaximum),
+                )
+            } else {
+                Pair(
+                    Domain.getPointFromDomain(equip, systemHeatingSATMinimum),
+                    Domain.getPointFromDomain(equip, systemHeatingSATMaximum),
+                )
+            }
+        } else {
+            Pair(
+                Domain.getPointFromDomain(equip, systemSATMinimum),
+                Domain.getPointFromDomain(equip, systemSATMinimum),
+            )
+        }
+    }
+
+    private fun getTempDirection(heatingLoop: Int): TempDirection {
+        return if (heatingLoop > 0)
+            TempDirection.HEATING
+        else
+            TempDirection.COOLING
+    }
+
+    enum class TempDirection  {
+        COOLING,HEATING
+    }
+
+    fun logIt(msg:String){
+        Log.i("DEV_DEBUG", msg)
     }
 
     override fun addSystemEquip() {

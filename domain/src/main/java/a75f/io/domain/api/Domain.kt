@@ -1,7 +1,9 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.logic.DomainManager
+import a75f.io.logger.CcuLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -86,6 +88,31 @@ object Domain {
         return null
     }
 
+
+    fun getPointFromDomain(equip: Equip, domainName: String): Double {
+        val pointId = getPointIdFromDomain(equip,domainName)
+        if (pointId != null) {
+            return hayStack.readDefaultValById(pointId)
+        }
+        return 0.0
+    }
+
+    private fun getPointIdFromDomain(equip: Equip, domainName: String): String? {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        return point?.id
+    }
+
+    fun writePointByDomainName(equip: Equip, domainName: String, value: Any){
+        val pointId = getPointIdFromDomain(equip,domainName)
+        if (pointId != null) {
+            if (value is String)
+                hayStack.writeDefaultValById(pointId, value)
+            if (value is Double) {
+                hayStack.writeHisValById(pointId, value)
+            }
+        }
+        CcuLog.i("DEV_DEBUG","$domainName : $pointId")
+    }
 
     @JvmStatic
     fun readPoint(domainName: String) : Map<Any,Any> {

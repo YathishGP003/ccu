@@ -47,6 +47,12 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         return config
     }
 
+    fun getDefaultAssociationConfig(domainName : String, model : SeventyFiveFProfileDirective) : AssociationConfig {
+        val point = model.points.find { it.domainName == domainName }
+        val config = AssociationConfig(domainName, point?.defaultValue?.toString()?.toInt() ?: 0)
+        return config
+    }
+
     fun getDefaultEnableConfig(domainName : String, model : SeventyFiveFProfileDirective) : EnableConfig {
         val point = model.points.find { it.domainName == domainName }
         val config = EnableConfig(domainName, point?.defaultValue?.toString()?.toBoolean() ?: false)

@@ -11,30 +11,60 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     : ProfileConfiguration (nodeAddress, nodeType, priority, roomRef, floorRef) {
 
     lateinit var temperatureOffset: ValueConfig
-    lateinit var damperType: ValueConfig
-    lateinit var damperSize: ValueConfig
-    lateinit var damperShape: ValueConfig
-    lateinit var reheatType: ValueConfig
-    lateinit var zonePriority: ValueConfig
+
+    lateinit var damperType: AssociationConfig
+    lateinit var damperSize: AssociationConfig
+    lateinit var damperShape: AssociationConfig
+    lateinit var reheatType: AssociationConfig
+    lateinit var zonePriority: AssociationConfig
+
     lateinit var autoForceOccupied: EnableConfig
     lateinit var autoAway: EnableConfig
-    lateinit var enableIAQControl: EnableConfig
     lateinit var enableCo2Control: EnableConfig
+    lateinit var enableIAQControl: EnableConfig
     lateinit var enableCFMControl: EnableConfig
+
+    lateinit var maxCoolingDamperPos: ValueConfig
+    lateinit var minCoolingDamperPos: ValueConfig
+    lateinit var maxHeatingDamperPos: ValueConfig
+    lateinit var minHeatingDamperPos: ValueConfig
+
+    lateinit var kFactor: ValueConfig
+
+    lateinit var maxCFMCooling: ValueConfig
+    lateinit var minCFMCooling: ValueConfig
+    lateinit var maxCFMReheating: ValueConfig
+    lateinit var minCFMReheating: ValueConfig
+
     fun getDefaultConfiguration() : VavProfileConfiguration {
-        CcuLog.i("CCU_DOMAIN"," getConfig for "+model.domainName+" count "+model.points.size)
-        temperatureOffset = getDefaultValConfig(a75f.io.domain.api.temperatureOffset, model)
-        damperType = getDefaultValConfig(a75f.io.domain.api.damperType, model)
-        damperSize = getDefaultValConfig(a75f.io.domain.api.damperSize, model)
-        damperShape = getDefaultValConfig(a75f.io.domain.api.damperShape, model)
-        zonePriority = getDefaultValConfig(a75f.io.domain.api.zonePriority, model)
-        reheatType = getDefaultValConfig(a75f.io.domain.api.reheatType, model)
-        autoForceOccupied = getDefaultEnableConfig(a75f.io.domain.api.autoForceOccupied, model)
+        damperType = getDefaultAssociationConfig(a75f.io.domain.api.damperType, model)
+        damperSize = getDefaultAssociationConfig(a75f.io.domain.api.damperSize, model)
+        damperShape = getDefaultAssociationConfig(a75f.io.domain.api.damperShape, model)
+        reheatType = getDefaultAssociationConfig(a75f.io.domain.api.reheatType, model)
+        zonePriority = getDefaultAssociationConfig(a75f.io.domain.api.zonePriority, model)
+
         autoAway = getDefaultEnableConfig(a75f.io.domain.api.autoAway, model)
-        enableIAQControl = getDefaultEnableConfig(a75f.io.domain.api.enableIAQControl, model)
+        autoForceOccupied = getDefaultEnableConfig(a75f.io.domain.api.autoForceOccupied, model)
         enableCo2Control = getDefaultEnableConfig(a75f.io.domain.api.enableCo2Control, model)
+        enableIAQControl = getDefaultEnableConfig(a75f.io.domain.api.enableIAQControl, model)
         enableCFMControl = getDefaultEnableConfig(a75f.io.domain.api.enableCFMControl, model)
+
+        temperatureOffset = getDefaultValConfig(a75f.io.domain.api.temperatureOffset, model)
+
+        maxCoolingDamperPos = getDefaultValConfig(a75f.io.domain.api.maxCoolingDamperPos, model)
+        minCoolingDamperPos = getDefaultValConfig(a75f.io.domain.api.minCoolingDamperPos, model)
+        maxHeatingDamperPos = getDefaultValConfig(a75f.io.domain.api.maxHeatingDamperPos, model)
+        minHeatingDamperPos = getDefaultValConfig(a75f.io.domain.api.minHeatingDamperPos, model)
+
+        kFactor = getDefaultValConfig(a75f.io.domain.api.kFactor, model)
+
+        maxCFMCooling = getDefaultValConfig(a75f.io.domain.api.maxCFMCooling, model)
+        minCFMCooling = getDefaultValConfig(a75f.io.domain.api.minCFMCooling, model)
+        maxCFMReheating = getDefaultValConfig(a75f.io.domain.api.maxCFMReheating, model)
+        minCFMReheating = getDefaultValConfig(a75f.io.domain.api.minCFMReheating, model)
+
         isDefault = true
+
         return this
     }
 

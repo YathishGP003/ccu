@@ -109,8 +109,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    DropDownWithLabel("Reheat Type", viewModel.reheatTypesList, 160, 160,{})
-                    DropDownWithLabel("Zone Priority", viewModel.zonePrioritiesList, 100,120,{})
+                    DropDownWithLabel("Reheat Type", viewModel.reheatTypesList, 160, 160,{}, viewModel.viewState.reheatType)
+                    DropDownWithLabel("Zone Priority", viewModel.zonePrioritiesList, 100,120,{}, viewModel.viewState.zonePriority)
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -132,12 +132,12 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName)
                         Spacer(modifier = Modifier.width(10.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.profileConfiguration.autoForceOccupied.enabled, onEnabled = {})
+                        ToggleButtonStateful(defaultSelection = viewModel.viewState.autoForceOccupied, onEnabled = {})
                     }
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName)
                         Spacer(modifier = Modifier.width(10.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.profileConfiguration.autoAway.enabled, onEnabled = {})
+                        ToggleButtonStateful(defaultSelection = viewModel.viewState.autoAway, onEnabled = {})
                     }
                 }
 
@@ -146,12 +146,12 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName)
                         Spacer(modifier = Modifier.width(60.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.profileConfiguration.enableIAQControl.enabled, onEnabled = {})
+                        ToggleButtonStateful(defaultSelection = viewModel.viewState.enableIAQControl, onEnabled = {})
                     }
                     Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName)
                         Spacer(modifier = Modifier.width(20.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.profileConfiguration.enableCo2Control.enabled, onEnabled = {})
+                        ToggleButtonStateful(defaultSelection = viewModel.viewState.enableCo2Control, onEnabled = {})
                     }
                 }
 
@@ -159,7 +159,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 Row {
                     HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName)
                     Spacer(modifier = Modifier.width(60.dp))
-                    ToggleButtonStateful(defaultSelection = viewModel.profileConfiguration.enableCFMControl.enabled, onEnabled = {})
+                    ToggleButtonStateful(defaultSelection = viewModel.viewState.enableCFMControl, onEnabled = {})
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -172,6 +172,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         header = "Temperature\n    Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,
+                        startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()),
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
                         textModifier = Modifier.padding(8.dp),
@@ -183,7 +184,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Picker(
                         header = "Max Damper Pos\n    Cooling",
                         state = valuesPickerState,
-                        // TODO: update to use model once this point is added to it
+                        // TODO: this point isn't in the current version of the model
+                        //items = viewModel.maxCoolingDamperPosList,
+                        //startIndex = viewModel.maxCoolingDamperPosList.indexOf(viewModel.viewState.maxCoolingDamperPos.toInt().toString()),
                         items = values,
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
@@ -194,7 +197,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Picker(
                         header = "Min Damper Pos\n    Cooling",
                         state = valuesPickerState,
-                        // TODO: update to use model once this point is added to it
+                        // TODO: this point isn't in the current version of the model
+                        //items = viewModel.minCoolingDamperPosList,
+                        //startIndex = viewModel.minCoolingDamperPosList.indexOf(viewModel.viewState.minCoolingDamperPos.toInt().toString()),
                         items = values,
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
@@ -206,6 +211,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         header = "Max Damper Pos\n    Heating",
                         state = valuesPickerState,
                         items = viewModel.maxHeatingDamperPosList,
+                        startIndex = viewModel.maxHeatingDamperPosList.indexOf(viewModel.viewState.maxHeatingDamperPos.toInt().toString()),
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
                         textModifier = Modifier.padding(8.dp),
@@ -215,7 +221,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Picker(
                         header = "Min Damper Pos\n    Heating",
                         state = valuesPickerState,
-                        // TODO: update to use model once this point is added to it
+                        // TODO: this point isn't in the current version of the model
+                        //items = viewModel.minHeatingDamperPosList,
+                        //startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
                         items = values,
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),

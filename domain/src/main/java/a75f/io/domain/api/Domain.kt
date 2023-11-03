@@ -136,7 +136,8 @@ object Domain {
             i *= 10
             decimalPlaces += 1
         }
-        return ("%." + decimalPlaces.toString() + "f").format(itVal)
+        val formattedString = ("%." + decimalPlaces.toString() + "f").format(itVal)
+        return if (formattedString.toDouble() != 0.0) formattedString else ("%." + decimalPlaces.toString() + "f").format(0.0)
     }
 
 }

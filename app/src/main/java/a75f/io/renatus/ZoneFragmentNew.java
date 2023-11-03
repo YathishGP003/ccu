@@ -336,7 +336,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         });
         if(!validateMigration()) {
-            showMigrationPendingDialog(requireContext());
+            //showMigrationPendingDialog(requireContext());
         }
     }
 

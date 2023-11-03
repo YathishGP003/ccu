@@ -643,8 +643,8 @@ public class InstallerOptions extends Fragment {
     // initial master control values
     private void getTempValues() {
 
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
+        HDict tuner = CCUHsApi.getInstance().readHDict("equip and tuner");
+        Equip p = new Equip.Builder().setHDict(tuner).build();
         if(MasterControlUtil.isMigrated()) {
             HashMap<Object, Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
             HashMap<Object, Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");

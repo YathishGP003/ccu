@@ -93,24 +93,51 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    DropDownWithLabel("Damper Type",
-                        viewModel.damperTypesList, 160, 160,
-                        { selectedIndex -> viewModel.viewState.damperType = selectedIndex}, viewModel.viewState.damperType)
-                    DropDownWithLabel("Damper Size",
-                        viewModel.damperSizesList, 60, 120,
-                        {selectedIndex -> viewModel.viewState.damperSize = selectedIndex},
-                        viewModel.viewState.damperSize)
-                    DropDownWithLabel("Damper Shape",
-                        viewModel.damperShapesList, 100, 120,
-                        {selectedIndex -> viewModel.viewState.damperShape = selectedIndex},
-                        viewModel.viewState.damperShape)
+                    DropDownWithLabel(
+                        label = "Damper Type",
+                        list = viewModel.damperTypesList,
+                        previewWidth = 160,
+                        expandedWidth = 160,
+                        onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex },
+                        defaultSelection = viewModel.viewState.damperType
+                    )
+                    DropDownWithLabel(
+                        label = "Damper Size",
+                        list = viewModel.damperSizesList,
+                        previewWidth = 60,
+                        expandedWidth = 120,
+                        onSelected = {selectedIndex -> viewModel.viewState.damperSize = selectedIndex },
+                        defaultSelection = viewModel.viewState.damperSize
+                    )
+                    DropDownWithLabel(
+                        label = "Damper Shape",
+                        list = viewModel.damperShapesList,
+                        previewWidth = 100,
+                        expandedWidth = 120,
+                        onSelected = {selectedIndex -> viewModel.viewState.damperShape = selectedIndex},
+                        defaultSelection = viewModel.viewState.damperShape
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    DropDownWithLabel("Reheat Type", viewModel.reheatTypesList, 160, 160,{}, viewModel.viewState.reheatType)
-                    DropDownWithLabel("Zone Priority", viewModel.zonePrioritiesList, 100,120,{}, viewModel.viewState.zonePriority)
+                    DropDownWithLabel(
+                        label = "Reheat Type",
+                        list = viewModel.reheatTypesList,
+                        previewWidth = 160,
+                        expandedWidth = 160,
+                        onSelected = {selectedIndex -> viewModel.viewState.reheatType = selectedIndex},
+                        defaultSelection = viewModel.viewState.reheatType
+                    )
+                    DropDownWithLabel(
+                        label = "Zone Priority",
+                        list = viewModel.zonePrioritiesList,
+                        previewWidth = 100,
+                        expandedWidth = 120,
+                        onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex},
+                        defaultSelection = viewModel.viewState.zonePriority
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -131,13 +158,19 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.viewState.autoForceOccupied, onEnabled = {})
+                        Spacer(modifier = Modifier.width(20.dp))
+                        ToggleButtonStateful(
+                            defaultSelection = viewModel.viewState.autoForceOccupied,
+                            onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
+                        )
                     }
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.viewState.autoAway, onEnabled = {})
+                        Spacer(modifier = Modifier.width(20.dp))
+                        ToggleButtonStateful(
+                            defaultSelection = viewModel.viewState.autoAway,
+                            onEnabled = { it -> viewModel.viewState.autoAway = it }
+                        )
                     }
                 }
 
@@ -145,21 +178,44 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName)
-                        Spacer(modifier = Modifier.width(60.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.viewState.enableIAQControl, onEnabled = {})
+                        Spacer(modifier = Modifier.width(20.dp))
+                        ToggleButtonStateful(
+                            defaultSelection = viewModel.viewState.enableIAQControl,
+                            onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
+                        )
                     }
                     Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName)
                         Spacer(modifier = Modifier.width(20.dp))
-                        ToggleButtonStateful(defaultSelection = viewModel.viewState.enableCo2Control, onEnabled = {})
+                        ToggleButtonStateful(
+                            defaultSelection = viewModel.viewState.enableCo2Control,
+                            onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
+                        )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Row {
-                    HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName)
-                    Spacer(modifier = Modifier.width(60.dp))
-                    ToggleButtonStateful(defaultSelection = viewModel.viewState.enableCFMControl, onEnabled = {})
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row {
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName)
+                        Spacer(modifier = Modifier.width(20.dp))
+                        ToggleButtonStateful(
+                            defaultSelection = viewModel.viewState.enableCFMControl,
+                            onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
+                        )
+                    }
+                    Row {
+                        if (viewModel.viewState.enableCFMControl) {
+                            DropDownWithLabel(
+                                label = "K-Factor",
+                                list = viewModel.kFactorsList,
+                                previewWidth = 100,
+                                expandedWidth = 120,
+                                onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.3f").format(viewModel.viewState.kFactor))
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -172,6 +228,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         header = "Temperature\n    Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,
+                        onChanged = { it: String -> viewModel.viewState.temperatureOffset = it.toDouble() },
                         startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()),
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
@@ -179,57 +236,117 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     )
 
+                    if (!viewModel.viewState.enableCFMControl) {
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Max Damper Pos\n    Cooling",
+                            state = valuesPickerState,
+                            // TODO: this point isn't in v0.0.1 of the model
+                            //items = viewModel.maxCoolingDamperPosList,
+                            onChanged = { it: String -> viewModel.viewState.maxCoolingDamperPos = it.toDouble() },
+                            //startIndex = viewModel.maxCoolingDamperPosList.indexOf(viewModel.viewState.maxCoolingDamperPos.toInt().toString()),
+                            items = values,
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Min Damper Pos\n    Cooling",
+                            state = valuesPickerState,
+                            // TODO: this point isn't in v0.0.1 of the model
+                            //items = viewModel.minCoolingDamperPosList,
+                            onChanged = { it: String -> viewModel.viewState.minCoolingDamperPos = it.toDouble() },
+                            //startIndex = viewModel.minCoolingDamperPosList.indexOf(viewModel.viewState.minCoolingDamperPos.toInt().toString()),
+                            items = values,
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
 
-                    Spacer(modifier = Modifier.width(60.dp))
-                    Picker(
-                        header = "Max Damper Pos\n    Cooling",
-                        state = valuesPickerState,
-                        // TODO: this point isn't in the current version of the model
-                        //items = viewModel.maxCoolingDamperPosList,
-                        //startIndex = viewModel.maxCoolingDamperPosList.indexOf(viewModel.viewState.maxCoolingDamperPos.toInt().toString()),
-                        items = values,
-                        visibleItemsCount = 3,
-                        modifier = Modifier.weight(0.3f),
-                        textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    )
-                    Spacer(modifier = Modifier.width(60.dp))
-                    Picker(
-                        header = "Min Damper Pos\n    Cooling",
-                        state = valuesPickerState,
-                        // TODO: this point isn't in the current version of the model
-                        //items = viewModel.minCoolingDamperPosList,
-                        //startIndex = viewModel.minCoolingDamperPosList.indexOf(viewModel.viewState.minCoolingDamperPos.toInt().toString()),
-                        items = values,
-                        visibleItemsCount = 3,
-                        modifier = Modifier.weight(0.3f),
-                        textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    )
+                    } else {
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Max CFM\n    Cooling",
+                            state = valuesPickerState,
+                            items = viewModel.maxCFMCoolingList,
+                            onChanged = { it: String -> viewModel.viewState.maxCFMCooling = it.toDouble() },
+                            startIndex = viewModel.maxCFMCoolingList.indexOf(viewModel.viewState.maxCFMCooling.toInt().toString()),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Min CFM\n    Cooling",
+                            state = valuesPickerState,
+                            items = viewModel.minCFMCoolingList,
+                            onChanged = { it: String -> viewModel.viewState.minCFMCooling = it.toDouble() },
+                            startIndex = viewModel.minCFMCoolingList.indexOf(viewModel.viewState.minCFMCooling.toInt().toString()),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Max CFM\n    Reheating",
+                            state = valuesPickerState,
+                            items = viewModel.maxCFMReheatingList,
+                            onChanged = { it: String -> viewModel.viewState.maxCFMReheating = it.toDouble() },
+                            startIndex = viewModel.maxCFMReheatingList.indexOf(viewModel.viewState.maxCFMReheating.toInt().toString()),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Min CFM\n    Reheating",
+                            state = valuesPickerState,
+                            items = viewModel.minCFMReheatingList,
+                            onChanged = { it: String -> viewModel.viewState.minCFMReheating = it.toDouble() },
+                            startIndex = viewModel.minCFMReheatingList.indexOf(viewModel.viewState.minCFMReheating.toInt().toString()),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.width(60.dp))
                     Picker(
                         header = "Max Damper Pos\n    Heating",
                         state = valuesPickerState,
                         items = viewModel.maxHeatingDamperPosList,
+                        onChanged = { it: String -> viewModel.viewState.maxHeatingDamperPos = it.toDouble() },
                         startIndex = viewModel.maxHeatingDamperPosList.indexOf(viewModel.viewState.maxHeatingDamperPos.toInt().toString()),
                         visibleItemsCount = 3,
                         modifier = Modifier.weight(0.3f),
                         textModifier = Modifier.padding(8.dp),
                         textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     )
-                    Spacer(modifier = Modifier.width(60.dp))
-                    Picker(
-                        header = "Min Damper Pos\n    Heating",
-                        state = valuesPickerState,
-                        // TODO: this point isn't in the current version of the model
-                        //items = viewModel.minHeatingDamperPosList,
-                        //startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
-                        items = values,
-                        visibleItemsCount = 3,
-                        modifier = Modifier.weight(0.3f),
-                        textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    )
+
+                    if (!viewModel.viewState.enableCFMControl) {
+                        Spacer(modifier = Modifier.width(60.dp))
+                        Picker(
+                            header = "Min Damper Pos\n    Heating",
+                            state = valuesPickerState,
+                            // TODO: this point isn't in v0.0.1 of the model
+                            //items = viewModel.minHeatingDamperPosList,
+                            onChanged = { it: String -> viewModel.viewState.minHeatingDamperPos = it.toDouble() },
+                            //startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
+                            items = values,
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                    }
+
                 }
                 Box(
                     modifier = Modifier
@@ -239,6 +356,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 ) {
                     SaveTextView(SET) {
                         viewModel.saveConfiguration()
+                        closeAllBaseDialogFragments()
                     }
                 }
             }

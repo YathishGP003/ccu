@@ -91,6 +91,7 @@ class VavProfileViewModel : ViewModel() {
         maxHeatingDamperPosList = getListByDomainName(a75f.io.domain.api.maxHeatingDamperPos, model)
         minHeatingDamperPosList = getListByDomainName(a75f.io.domain.api.minHeatingDamperPos, model)
 
+        // TODO: In v0.0.1 of the model, this is a 2000-item dropdown. Very slow, but it doesn't crash the CCU.
         kFactorsList = getListByDomainName(a75f.io.domain.api.kFactor, model)
 
         maxCFMCoolingList = getListByDomainName(a75f.io.domain.api.maxCFMCooling, model)
@@ -121,6 +122,5 @@ class VavProfileViewModel : ViewModel() {
                 }
             }
         }
-
     }
 }

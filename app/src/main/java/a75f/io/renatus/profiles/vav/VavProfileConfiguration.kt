@@ -57,7 +57,7 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         minHeatingDamperPos = getDefaultValConfig(a75f.io.domain.api.minHeatingDamperPos, model)
 
         kFactor = getDefaultValConfig(a75f.io.domain.api.kFactor, model)
-
+        kFactor.currentVal = 2.000 // TODO: remove this once model is updated with a defaultVal for kFactor
         maxCFMCooling = getDefaultValConfig(a75f.io.domain.api.maxCFMCooling, model)
         minCFMCooling = getDefaultValConfig(a75f.io.domain.api.minCFMCooling, model)
         maxCFMReheating = getDefaultValConfig(a75f.io.domain.api.maxCFMReheating, model)
@@ -78,9 +78,13 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     }
 
     override fun toString(): String {
-        return " temperatureOffset $temperatureOffset damperType $damperType damperSize $damperSize"+
-        "damperShape $damperShape reheatType $reheatType autoForceOccupied $autoForceOccupied"+
-                "autoAway $autoAway enableIAQControl $enableIAQControl enableCo2Control $enableCo2Control"+
-                        " enableCFMControl $enableCFMControl"
+        return " temperatureOffset ${temperatureOffset.currentVal} damperType ${damperType.associationVal} damperSize ${damperSize.associationVal}"+
+            "damperShape ${damperShape.associationVal} reheatType ${reheatType.associationVal} autoForceOccupied ${autoForceOccupied.enabled}"+
+                "autoAway ${autoAway.enabled} enableIAQControl ${enableIAQControl.enabled} enableCo2Control ${enableCo2Control.enabled}"+
+                " enableCFMControl ${enableCFMControl.enabled} maxCoolingDamperPos ${maxCoolingDamperPos.currentVal}" +
+                " minCoolingDamperPos ${minCoolingDamperPos.currentVal} maxHeatingDamperPos ${maxHeatingDamperPos.currentVal}" +
+                "minHeatingDamperPos ${minHeatingDamperPos.currentVal} kFactor ${kFactor.currentVal} maxCFMCooling ${maxCFMCooling.currentVal}" +
+                "minCFMCooling ${minCFMCooling.currentVal} maxCFMReheating ${maxCFMReheating.currentVal} minCFMReheating ${minCFMReheating.currentVal}"
+
     }
 }

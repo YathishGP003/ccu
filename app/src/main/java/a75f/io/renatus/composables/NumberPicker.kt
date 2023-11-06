@@ -54,6 +54,7 @@ fun Picker(
     header : String,
     state: PickerState = rememberPickerState(),
     modifier: Modifier = Modifier,
+    onChanged: (String) -> Unit = {},
     startIndex: Int = 0,
     visibleItemsCount: Int = 3,
     textModifier: Modifier = Modifier,
@@ -86,7 +87,10 @@ fun Picker(
         snapshotFlow { listState.firstVisibleItemIndex }
             .map { index -> getItem(index + visibleItemsMiddle) }
             .distinctUntilChanged()
-            .collect { item -> state.selectedItem = item }
+            .collect { item ->
+                state.selectedItem = item
+                onChanged(item)
+            }
     }
 
     Box(modifier = modifier) {

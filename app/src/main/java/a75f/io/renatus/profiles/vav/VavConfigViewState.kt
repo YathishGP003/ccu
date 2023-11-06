@@ -54,7 +54,8 @@ class VavConfigViewState {
                 this.maxHeatingDamperPos = config.maxHeatingDamperPos.currentVal
                 this.minHeatingDamperPos = config.minHeatingDamperPos.currentVal
 
-                this.kFactor = config.kFactor.currentVal
+                // TODO: v0.0.1 of the model doesn't have a defaultVal for kFactor. This will crash the app if one isn't hard-coded in
+                this.kFactor = 2.000 // config.kFactor.currentVal
 
                 this.maxCFMCooling = config.maxCFMCooling.currentVal
                 this.minCFMCooling = config.minCFMCooling.currentVal

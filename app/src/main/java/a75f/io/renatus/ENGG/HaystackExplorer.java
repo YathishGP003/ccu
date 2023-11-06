@@ -306,27 +306,15 @@ public class HaystackExplorer extends Fragment
 
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \""+m.get("id")+"\"");
             Set tunerList = new HashSet();
         
-            for (Map t : tuners) {
-                tunerList.add(t.get("dis").toString());
+            for (Map t : points) {
+
+                tunerList.add(t.get("domainName") != null ? t.get("domainName").toString() : t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
-        
-            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-        
-            for (Map t : userIntents) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
-    
-            ArrayList<HashMap> configs = CCUHsApi.getInstance().readAll("config and equipRef == \""+m.get("id")+"\"");
-    
-            for (Map t : configs) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
+
             List tunersList= new ArrayList(tunerList);
             expandableListDetail.put(m.get("dis").toString()+" : "+m, tunersList);
             Collections.sort(tunersList);

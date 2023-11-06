@@ -32,7 +32,7 @@ class EntitySyncErrorHandler {
                     CcuLog.d("CCU_HS", "Invalid 400 error response item "+itemRow.toString());
                     continue;
                 }
-                if (itemErrorType.equals("NOT_FOUND")) {
+                if (itemErrorType.equals("NOT_FOUND") && !hsApi.isBuildingTunerPoint(itemId)) {
                     hsApi.getSyncStatusService().addUnSyncedEntity(itemId);
                 }
             }
@@ -45,4 +45,5 @@ class EntitySyncErrorHandler {
         }
         
     }
+
 }

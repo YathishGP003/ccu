@@ -932,6 +932,7 @@ public class DabSystemController extends SystemController
                 if (adjustedWeightedDamperOpening == weightedDamperOpening) {
                     break;
                 }
+                weightedDamperOpening = adjustedWeightedDamperOpening;
             } while (adjustedWeightedDamperOpening < cumulativeDamperTarget);
 
             return adjustedDamperPosMap;
@@ -977,7 +978,7 @@ public class DabSystemController extends SystemController
             damperSizeSum += damperSizeVal;
             
         }
-        return damperSizeSum == 0 ? 0 : (double) weightedDamperOpeningSum / damperSizeSum;
+        return damperSizeSum == 0 ? 0 : CCUUtils.roundToTwoDecimal((double) weightedDamperOpeningSum / damperSizeSum);
     }
     
     public HashMap<String, Double> adjustDamperOpening(ArrayList<HashMap<Object, Object>> dabEquips,

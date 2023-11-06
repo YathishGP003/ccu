@@ -93,8 +93,8 @@ public class SiteRegistrationHandler {
                 JSONObject tunerFiled = new JSONObject();
                 tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
                 tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
-                //tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
-                siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
+                tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
+                //siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
             }
         */
         } catch (JSONException e) {

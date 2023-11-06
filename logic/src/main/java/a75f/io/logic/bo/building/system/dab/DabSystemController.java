@@ -6,7 +6,9 @@ import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -914,9 +916,14 @@ public class DabSystemController extends SystemController
         double cumulativeDamperTarget =
             TunerUtil.readTunerValByQuery("target and cumulative and damper", systemEquipRef);
         double weightedDamperOpening = getWeightedDamperOpening(dabEquips,normalizedDamperPosMap);
+
+        boolean anyZoneAlive = dabEquips.stream()
+                                    .filter(equip -> !deadZones.contains(equip.get("id").toString()))
+                                    .collect(Collectors.toList()).size() > 0;
+
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening + " cumulativeDamperTarget : " +
-                                   cumulativeDamperTarget);
-        if (weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
+                                   cumulativeDamperTarget+" anyZoneAlive "+anyZoneAlive);
+        if (weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget && anyZoneAlive) {
             HashMap<String, Double> adjustedDamperPosMap = normalizedDamperPosMap;
             double adjustedWeightedDamperOpening;
             do {

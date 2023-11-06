@@ -96,7 +96,7 @@ public class SiteRegistrationHandler {
                 //tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
                 siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
             }
-*/
+        */
         } catch (JSONException e) {
             e.printStackTrace();
             CcuLog.d(TAG, "Unable to sync site due to JSON exception. This is likely unrecoverable.");

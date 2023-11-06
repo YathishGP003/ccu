@@ -466,7 +466,7 @@ public abstract class UtilityApplication extends Application {
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event) {
-        if (CCUHsApi.getInstance().isCcuReady() && !Globals.getInstance().isRecoveryMode() ||
+        if (CCUHsApi.getInstance().isCcuReady() && !Globals.getInstance().isRecoveryMode() &&
                 !Globals.getInstance().isSafeMode() && isRoomDbReady()) {
             LSerial.handleSerialEvent(this, event);
         }

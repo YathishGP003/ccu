@@ -31,6 +31,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.instabug.crash.CrashReporting;
+import com.instabug.library.Feature;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;
@@ -136,6 +139,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     SharedPreferences spDefaultPrefs = null;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
+
+    public @BindView(R.id.anrReportBtn) ToggleButton anrReporting;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -318,7 +323,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
         if (BuildConfig.BUILD_TYPE.equals("local")
             || BuildConfig.BUILD_TYPE.equals("dev")
-            || BuildConfig.BUILD_TYPE.equals("qa")) {
+            || BuildConfig.BUILD_TYPE.equals("qa")
+            || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
 
             crashButton.setVisibility(View.VISIBLE);
             crashButton.setOnClickListener(view1 -> {
@@ -431,6 +437,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        anrReporting.setChecked(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
+                , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
+        anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
+
+            CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                    .edit().putBoolean("anr_reporting_enabled", b).apply();
+        });
     }
 
     @Override
@@ -529,4 +545,5 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             e.printStackTrace();
         }
     }
+
 }

@@ -1797,7 +1797,12 @@ public class CCUHsApi
                             HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
                             scheduleDicts.add(pid);
                         } else {
-                            CcuLog.i(TAG, "Schedulable default Point already imported "+p.getId());
+                            double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                            if (defaultVal == 0) {
+                                HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                                scheduleDicts.add(pid);
+                                Log.d(TAG, "No default value for point: " + pid.dis());
+                            }
                         }
 
                     }

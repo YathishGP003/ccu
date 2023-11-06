@@ -3302,4 +3302,12 @@ public class CCUHsApi
             syncStatusService.addUpdatedEntity(id);
         }
     }
+
+    public boolean isBuildingTunerPoint(String id) {
+        HashMap<Object, Object> point = readMapById(id);
+        if (point.isEmpty()) {
+            return false;
+        }
+        return isBuildingTunerPoint(new Point.Builder().setHashMap(point).build());
+    }
 }

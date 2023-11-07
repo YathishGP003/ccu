@@ -310,9 +310,9 @@ public class HaystackExplorer extends Fragment
             Set tunerList = new HashSet();
         
             for (Map t : points) {
-
-                tunerList.add(t.get("domainName") != null ? t.get("domainName").toString() : t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+                String name = t.get("domainName") != null ? t.get("domainName").toString() : t.get("dis").toString();
+                tunerList.add(name);
+                tunerMap.put(name, t.get("id").toString());
             }
 
             List tunersList= new ArrayList(tunerList);

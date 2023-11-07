@@ -47,6 +47,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.LSmartNode;
 import a75f.io.device.mesh.LSmartStat;
 import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -121,6 +122,8 @@ public class RemoteCommandHandlerUtil {
                                         sendSmarNodeResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("hyperstat")) {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                                    } else if (d.getMarkers().contains("hyperstatsplit")) {
+                                        HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                     }
                                 }
                             }
@@ -135,6 +138,8 @@ public class RemoteCommandHandlerUtil {
                                 sendSmarNodeResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("hyperstat")) {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                            } else if (d.getMarkers().contains("hyperstatsplit")) {
+                                HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                             }
                         }
                         break;
@@ -147,6 +152,8 @@ public class RemoteCommandHandlerUtil {
                             sendSmarNodeResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
+                        } else if (equip.getMarkers().contains("hyperstatsplit")) {
+                            HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         }
                         break;
                         default:

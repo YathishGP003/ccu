@@ -9,8 +9,6 @@ import a75f.io.domain.api.systemSATMaximum
 import a75f.io.domain.api.systemSATMinimum
 import a75f.io.domain.api.systemStaticPressureMaximum
 import a75f.io.domain.api.systemStaticPressureMinimum
-import a75f.io.domain.api.targetDehumidifier
-import a75f.io.domain.api.targetHumidifier
 import a75f.io.domain.api.systemDCVDamperPosMaximum
 import a75f.io.domain.config.ExternalAhuConfiguration
 import androidx.compose.runtime.getValue
@@ -79,8 +77,6 @@ class ExternalAhuConfigModel {
         config.fanMaxSp.currentVal = this.fanMaxSp.toDouble()
         config.dcvMin.currentVal = this.dcvMin.toDouble()
         config.dcvMax.currentVal = this.dcvMax.toDouble()
-        config.targetHumidity.currentVal = this.targetHumidity.toDouble()
-        config.targetDeHumidity.currentVal = this.targetDeHumidity.toDouble()
 
         return config
     }
@@ -96,7 +92,5 @@ class ExternalAhuConfigModel {
         fanMaxSp = getPointByDomainName(modelDef,systemStaticPressureMaximum)?.defaultValue.toString()
         dcvMin = getPointByDomainName(modelDef,systemDCVDamperPosMinimum)?.defaultValue.toString()
         dcvMax = getPointByDomainName(modelDef,systemDCVDamperPosMaximum)?.defaultValue.toString()
-        targetHumidity = getPointByDomainName(modelDef,targetHumidifier)?.defaultValue.toString()
-        targetDeHumidity = getPointByDomainName(modelDef,targetDehumidifier)?.defaultValue.toString()
     }
 }

@@ -177,8 +177,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         configModel.value.fanMaxSp = config.fanMaxSp.currentVal.toString()
         configModel.value.dcvMin = config.dcvMin.currentVal.toString()
         configModel.value.dcvMax = config.dcvMax.currentVal.toString()
-        configModel.value.targetHumidity = config.targetHumidity.currentVal.toString()
-        configModel.value.targetDeHumidity = config.targetDeHumidity.currentVal.toString()
     }
 
     fun saveConfiguration() {

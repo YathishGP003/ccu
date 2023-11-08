@@ -97,6 +97,14 @@ object Domain {
         return 0.0
     }
 
+    fun getPointHisFromDomain(equip: Equip, domainName: String): Double {
+        val pointId = getPointIdFromDomain(equip,domainName)
+        if (pointId != null) {
+            return hayStack.readDefaultValById(pointId)
+        }
+        return 0.0
+    }
+
     private fun getPointIdFromDomain(equip: Equip, domainName: String): String? {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         return point?.id
@@ -111,7 +119,6 @@ object Domain {
                 hayStack.writeHisValById(pointId, value)
             }
         }
-        CcuLog.i("DEV_DEBUG","$domainName : $pointId")
     }
 
     @JvmStatic

@@ -4,11 +4,8 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
-import android.util.Log
-import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
@@ -68,7 +65,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setUnit(pointConfig.modelDef.defaultUnit)
             .setGroup(pointConfig.configuration?.nodeAddress.toString())
             .setSiteRef(pointConfig.siteRef)
-
+            .setHisInterpolate("cov")
         if (pointConfig.configuration?.roomRef != null) {
             pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
         }
@@ -89,16 +86,28 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
-        // TODO Check
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-        
-
         /* Log.i("DEV_DEBUG", "buildPoint: Domain Name : ${pointConfig.modelDef.domainName} received ${HStr.make(pointConfig.tz)} ")
         if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null && pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null) {
             pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
             Log.i("DEV_DEBUG", "buildPoint: TZ added ${HStr.make(pointConfig.tz)} ")
         }*/
 
+        var enums = ""
+        if (pointConfig.modelDef.valueConstraint.constraintType.name.contentEquals("MULTI_STATE")) {
+            (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value->
+                enums = if (enums.isNotEmpty()) {
+                    "$enums$index=${value.value},"
+                } else {
+                    "$index=${value.value},"
+                }
+            }
+        }
+        if (enums.isNotEmpty()) {
+            if (enums.endsWith(","))
+                enums = enums.substring(0, enums.length - 1)
+            pointBuilder.setEnums(enums)
+        }
         return pointBuilder.build()
     }
 }

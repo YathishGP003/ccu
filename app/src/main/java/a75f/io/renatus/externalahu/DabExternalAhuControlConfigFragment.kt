@@ -18,8 +18,6 @@ import a75f.io.domain.api.systemSATMinimum
 import a75f.io.domain.api.systemStaticPressureMaximum
 import a75f.io.domain.api.systemStaticPressureMinimum
 import a75f.io.domain.api.tagValueIncrement
-import a75f.io.domain.api.targetDehumidifier
-import a75f.io.domain.api.targetHumidifier
 import a75f.io.logger.CcuLog
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
@@ -445,42 +443,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                             }
                         }
                         item {
-                            if (viewModel.configModel.value.humidifierControl) {
-                                Row {
-                                    val humidityControl =
-                                        viewModel.configModel.value.getPointByDomainName(
-                                            viewModel.profileModelDefinition,
-                                            targetHumidifier
-                                        )
-                                    Column {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
-                                        ) {
-                                            if (humidityControl != null) {
-                                                val items = viewModel.itemsFromMinMax(
-                                                    (humidityControl.valueConstraint as NumericConstraint).minValue,
-                                                    (humidityControl.valueConstraint as NumericConstraint).maxValue,
-                                                    (humidityControl.presentationData?.get(
-                                                        tagValueIncrement
-                                                    ) as Int).toDouble()
-                                                )
-                                                SetPointConfig(
-                                                    humidityControl.name,
-                                                    viewModel.configModel.value.targetHumidity,
-                                                    items, humidityControl.defaultUnit ?: EMPTY,
-                                                ) { selected ->
-                                                    viewModel.configModel.value.targetHumidity =
-                                                        selected
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        item {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
                                     viewModel.profileModelDefinition,
@@ -491,42 +453,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 viewModel.configModel.value.dehumidifierControl = it
                             }
                         }
-                        item {
-                            if (viewModel.configModel.value.dehumidifierControl) {
-                                Row {
-                                    val dehumidityControl =
-                                        viewModel.configModel.value.getPointByDomainName(
-                                            viewModel.profileModelDefinition,
-                                            targetDehumidifier
-                                        )
-                                    Column {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
-                                        ) {
-                                            if (dehumidityControl != null) {
-                                                val items = viewModel.itemsFromMinMax(
-                                                    (dehumidityControl.valueConstraint as NumericConstraint).minValue,
-                                                    (dehumidityControl.valueConstraint as NumericConstraint).maxValue,
-                                                    (dehumidityControl.presentationData?.get(
-                                                        tagValueIncrement
-                                                    ) as Int).toDouble()
-                                                )
-                                                SetPointConfig(
-                                                    dehumidityControl.name,
-                                                    viewModel.configModel.value.targetDeHumidity,
-                                                    items, dehumidityControl.defaultUnit ?: EMPTY,
-                                                ) { selected ->
-                                                    viewModel.configModel.value.targetDeHumidity =
-                                                        selected
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+
                         item {
                             Box(
                                 modifier = Modifier

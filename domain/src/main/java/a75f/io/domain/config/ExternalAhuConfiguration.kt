@@ -17,9 +17,6 @@ import a75f.io.domain.api.systemSATMaximum
 import a75f.io.domain.api.systemSATMinimum
 import a75f.io.domain.api.systemStaticPressureMaximum
 import a75f.io.domain.api.systemStaticPressureMinimum
-import a75f.io.domain.api.targetDehumidifier
-import a75f.io.domain.api.targetHumidifier
-
 /**
  * Created by Manjunath K on 13-06-2023.
  */
@@ -44,8 +41,6 @@ class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM",
     var fanMaxSp = ValueConfig(systemStaticPressureMaximum)
     var dcvMin = ValueConfig(systemDCVDamperPosMinimum)
     var dcvMax = ValueConfig(systemDCVDamperPosMaximum)
-    var targetHumidity = ValueConfig(targetHumidifier)
-    var targetDeHumidity = ValueConfig(targetDehumidifier)
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
         val associations = mutableListOf<AssociationConfig>()
@@ -65,8 +60,6 @@ class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM",
         valueConfiguration.add(fanMaxSp)
         valueConfiguration.add(dcvMin)
         valueConfiguration.add(dcvMax)
-        valueConfiguration.add(targetHumidity)
-        valueConfiguration.add(targetDeHumidity)
         return valueConfiguration
     }
 

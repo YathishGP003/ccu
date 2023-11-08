@@ -2,17 +2,28 @@ package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain.getListByDomainName
+import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.vav.VavParallelFanProfile
+import a75f.io.logic.bo.building.vav.VavProfile
+import a75f.io.logic.bo.building.vav.VavReheatProfile
+import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.modbus.util.SAVED
+import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.RxjavaUtil
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -28,6 +39,7 @@ class VavProfileViewModel : ViewModel() {
     lateinit var profileType: ProfileType
     private var deviceAddress by Delegates.notNull<Short>()
 
+    private lateinit var vavProfile: VavProfile
     lateinit var profileConfiguration: VavProfileConfiguration
 
     private lateinit var model : SeventyFiveFProfileDirective
@@ -56,12 +68,26 @@ class VavProfileViewModel : ViewModel() {
     lateinit var maxCFMReheatingList: List<String>
     lateinit var minCFMReheatingList: List<String>
 
+    private val _isDialogOpen = MutableLiveData<Boolean>()
+    val isDialogOpen: LiveData<Boolean>
+        get() = _isDialogOpen
+
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
+
+        if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
+            vavProfile = L.getProfile(deviceAddress) as VavProfile
+        } else {
+            vavProfile = when (profileType) {
+                ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
+                ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
+                else -> VavReheatProfile()
+            }
+        }
 
         model = ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
 
@@ -104,6 +130,24 @@ class VavProfileViewModel : ViewModel() {
         CcuLog.i("CCU_DOMAIN", " Save Profile : damperType ${viewState.damperType}")
         CcuLog.i("CCU_DOMAIN", " Save Profile : damperSize ${viewState.damperSize}")
 
+        RxjavaUtil.executeBackgroundTask({
+            ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
+        }, {
+            CCUHsApi.getInstance().resetCcuReady()
+
+            setUpVavProfile()
+
+            L.saveCCUState()
+            CCUHsApi.getInstance().setCcuReady()
+        }, {
+            ProgressDialogUtils.hideProgressDialog()
+            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+            showToast("VAV Configuration saved successfully", context)
+            _isDialogOpen.value = false
+        })
+
+        // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
+        /*
         viewModelScope.launch {
             ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
             withContext(Dispatchers.IO) {
@@ -122,5 +166,27 @@ class VavProfileViewModel : ViewModel() {
                 }
             }
         }
+         */
     }
+
+    private fun setUpVavProfile() {
+        DomainManager.buildDomain(CCUHsApi.getInstance())
+        viewState.updateConfigFromViewState(profileConfiguration)
+
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val equipDis = hayStack.siteName + "-VAV-" + profileConfiguration.nodeAddress
+
+        if (profileConfiguration.isDefault) {
+
+            equipBuilder.buildEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+            //vavProfile.addLogicalMapAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model)
+
+            L.ccu().zoneProfiles.add(vavProfile)
+            L.saveCCUState()
+        } else {
+            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+        }
+
+    }
+
 }

@@ -72,11 +72,11 @@ class VavProfileConfigFragment : BaseDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        /*viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
+        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
             if (!isDialogOpen) {
                 this@VavProfileConfigFragment.closeAllBaseDialogFragments()
             }
-        }*/
+        }
     }
 
     //@Preview
@@ -356,7 +356,6 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 ) {
                     SaveTextView(SET) {
                         viewModel.saveConfiguration()
-                        closeAllBaseDialogFragments()
                     }
                 }
             }

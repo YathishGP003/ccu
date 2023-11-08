@@ -67,7 +67,7 @@ class DeviceBuilderTest {
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
 
-        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef", "TestEquip")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
         deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
@@ -121,7 +121,7 @@ class DeviceBuilderTest {
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
 
-        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef", "TestEquip")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
         deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
@@ -132,7 +132,7 @@ class DeviceBuilderTest {
         println(relay1)
 
         val updatedConfig = HyperStat2PfcuDeviceUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel, "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel, "@TestSiteRef", "TestEquip")
         deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId, "@TestSiteRef")
 
         val relay1Op = mockHayStack.readEntity("point and domainName == \"relay1Output\"")

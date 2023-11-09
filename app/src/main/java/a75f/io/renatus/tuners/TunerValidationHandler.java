@@ -59,7 +59,7 @@ public class TunerValidationHandler {
 
         if (zoneSetback > 0 || zoneDifferential > 0) {
             double updatedZoneSetback = zoneSetback == 0?
-                    TunerUtil.readBuildingTunerValByQuery("unoccupied and setback") : zoneSetback;
+                    TunerUtil.readBuildingTunerValByQuery("unocc and setback") : zoneSetback;
             double updatedZoneDifferential = zoneDifferential == 0 ?
                     TunerUtil.readBuildingTunerValByQuery("building and zone and differential") : zoneDifferential;
             CcuLog.d(L.TAG_CCU_TUNER, "checkLimitsSetbackAndZoneDifferential setback " +updatedZoneSetback+

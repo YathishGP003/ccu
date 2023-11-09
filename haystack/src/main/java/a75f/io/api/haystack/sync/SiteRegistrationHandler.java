@@ -70,6 +70,11 @@ public class SiteRegistrationHandler {
     }
     
     private JSONObject getSiteJsonRequest(HDict siteDict) {
+        HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
+        if(tunerEquip.isEmpty()) {
+            CcuLog.d(TAG, " Tuner equip does not exist. Cant complete site registration");
+            return null;
+        }
         JSONObject siteCreationRequestJson = new JSONObject();
         
         try {
@@ -88,14 +93,11 @@ public class SiteRegistrationHandler {
             siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
             siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF, false));
 
-            HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
-            if (!tunerEquip.isEmpty()) {
-                JSONObject tunerFiled = new JSONObject();
-                tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
-                tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
-                tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
-                //siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
-            }
+            JSONObject tunerFiled = new JSONObject();
+            tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
+            tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+            //tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, tunerEquip.get("id").toString());
+            siteCreationRequestJson.put(CcuFieldConstants.TUNER, tunerFiled);
 
         } catch (JSONException e) {
             e.printStackTrace();

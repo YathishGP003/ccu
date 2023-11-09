@@ -68,7 +68,7 @@ public class TunerUtil
         if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
             if (values != null && values.size() > 0) {
-                for (int l = 1; l <= values.size(); l++) {
+                for (int l = 16; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
                         return Double.parseDouble(valMap.get("val").toString());

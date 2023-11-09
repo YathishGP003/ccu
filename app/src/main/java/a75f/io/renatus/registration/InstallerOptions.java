@@ -654,7 +654,7 @@ public class InstallerOptions extends Fragment {
             HashMap<Object, Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
             HashMap<Object, Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
             HashMap<Object, Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
-            HashMap<Object, Object> setbackMap = CCUHsApi.getInstance().readEntity("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+            HashMap<Object, Object> setbackMap = CCUHsApi.getInstance().readEntity("unocc and setback and equipRef == \"" + p.getId() + "\"");
             HashMap<Object, Object> zoneDiffMap = CCUHsApi.getInstance().readEntity("building and zone and differential");
 
             hdb = (float) HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
@@ -678,7 +678,7 @@ public class InstallerOptions extends Fragment {
             HashMap heatLL = CCUHsApi.getInstance().read("point and limit and max and heating and user and tuner");
             HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
             HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-            HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+            HashMap setbackMap = CCUHsApi.getInstance().read("unocc and setback and equipRef == \"" + p.getId() + "\"");
             HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
             upperCoolingTemp = (float) getTuner(coolUL.get("id").toString());

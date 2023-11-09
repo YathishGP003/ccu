@@ -25,7 +25,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
-        CcuLog.i(Domain.LOG_TAG," Created tuner point ${hayStackEquip.domainName}")
+        CcuLog.i(Domain.LOG_TAG," Created tuner equip ${hayStackEquip.domainName}")
         createPoints(modelDef, equipId, siteRef)
         return equipId
     }

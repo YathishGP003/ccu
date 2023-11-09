@@ -20,15 +20,13 @@ open class DefaultEquipBuilder : EquipBuilder {
         val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
+            .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
             .setSiteRef(equipConfig.siteRef)
             .setDomainName(equipConfig.modelDef.domainName)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
-        if (equipConfig.profileConfiguration?.nodeAddress != -1)
-            equipBuilder.setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
-
         if (profileName != null)
             equipBuilder.setProfile(profileName)
 
@@ -71,7 +69,7 @@ open class DefaultEquipBuilder : EquipBuilder {
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.
-        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
         pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }

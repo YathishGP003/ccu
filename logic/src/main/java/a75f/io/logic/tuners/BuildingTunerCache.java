@@ -36,22 +36,12 @@ public class BuildingTunerCache {
     }
     
     public void updateTuners() {
-        boolean isMigrated  = !(CCUHsApi.getInstance().readDefaultStrVal("diag and migration and version").equals("0")) ;
-        if(isMigrated) {
-            tunerValMap.put(BUILDING_LIMIT_MIN, SchedulabeLimits.Companion.getBuildingLimitMin());
-            tunerValMap.put(BUILDING_LIMIT_MAX, SchedulabeLimits.Companion.getBuildingLimitMax());
-            tunerValMap.put(MIN_COOLING_USER_LIMIT, SchedulabeLimits.Companion.getCoolingLimitMin());
-            tunerValMap.put(MAX_COOLING_USER_LIMIT, SchedulabeLimits.Companion.getCoolingLimitMax());
-            tunerValMap.put(MIN_HEATING_USER_LIMIT, SchedulabeLimits.Companion.getHeatingLimitMin());
-            tunerValMap.put(MAX_HEATING_USER_LIMIT, SchedulabeLimits.Companion.getHeatingLimitMax());
-        }else{
-            tunerValMap.put(BUILDING_LIMIT_MIN, TunerUtil.readBuildingTunerValByQuery("building and limit and min"));
-            tunerValMap.put(BUILDING_LIMIT_MAX, TunerUtil.readBuildingTunerValByQuery("building and limit and max"));
-            tunerValMap.put(MIN_COOLING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and min and cooling and user"));
-            tunerValMap.put(MAX_COOLING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and max and cooling and user"));
-            tunerValMap.put(MIN_HEATING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and min and heating and user"));
-            tunerValMap.put(MAX_HEATING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and max and heating and user"));
-        }
+        tunerValMap.put(BUILDING_LIMIT_MIN, TunerUtil.readBuildingTunerValByQuery("building and limit and min"));
+        tunerValMap.put(BUILDING_LIMIT_MAX, TunerUtil.readBuildingTunerValByQuery("building and limit and max"));
+        tunerValMap.put(MIN_COOLING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and min and cooling and user"));
+        tunerValMap.put(MAX_COOLING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and max and cooling and user"));
+        tunerValMap.put(MIN_HEATING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and min and heating and user"));
+        tunerValMap.put(MAX_HEATING_USER_LIMIT, TunerUtil.readBuildingTunerValByQuery("limit and max and heating and user"));
         tunerValMap.put(TEMP_DEAD_LEEWAY, TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway"));
        /* tunerValMap.put(COOLING_DEADBAND, SchedulabeLimits.Companion.getCoolingDeadBand());
         tunerValMap.put(HEATING_DEADBAND, SchedulabeLimits.Companion.getHeatingDeadBand());*/

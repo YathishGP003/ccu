@@ -990,7 +990,7 @@ public class ScheduleManager {
     }
     
     public double getSystemCoolingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getCoolingVal() + setback : currentOccupiedInfo.getCoolingVal();
@@ -1001,7 +1001,7 @@ public class ScheduleManager {
     }
     
     public double getSystemHeatingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getHeatingVal() - setback : currentOccupiedInfo.getHeatingVal();

@@ -178,7 +178,7 @@ public class MasterControlView extends LinearLayout {
 */
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-        setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and default");
+        setbackMap = CCUHsApi.getInstance().read("unocc and setback and default");
         zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
     }

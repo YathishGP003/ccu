@@ -244,6 +244,27 @@ class HyperStatSplitUserIntentHandler {
             }
         }
 
+        fun isFanModeChangeUnnecessary(equipRef: String, userIntentFanMode: Int): Boolean {
+            val haystack: CCUHsApi = CCUHsApi.getInstance()
+            val currentFanMode = haystack.readPointPriorityValByQuery("zone and fan and mode and operation and equipRef == \"$equipRef\"").toInt()
+            // Ignore a change to OFF if current Fan Mode is OFF
+            val isAlreadyFanOff = userIntentFanMode == 0 && currentFanMode == 0
+
+            // Ignore a change to AUTO if current Fan Mode is AUTO
+            val isAlreadyFanAuto = userIntentFanMode == 1 && currentFanMode == 1
+
+            // Ignore a change to LOW_CUR_OCC if current Fan Mode is LOW_CUR_OCC, LOW_OCC, or LOW_ALL_TIMES
+            val isAlreadyFanLow = userIntentFanMode == 2 && (currentFanMode == 2 || currentFanMode == 3 || currentFanMode == 4)
+
+            // Ignore a change to MEDIUM_CUR_OCC if current Fan Mode is MEDIUM_CUR_OCC, MEDIUM_OCC, or MEDIUM_ALL_TIMES
+            val isAlreadyFanMedium = userIntentFanMode == 5 && (currentFanMode == 5 || currentFanMode == 6 || currentFanMode == 7)
+
+            // Ignore a change to HIGH_CUR_OCC if current Fan Mode is HIGH_CUR_OCC, HIGH_OCC, or HIGH_ALL_TIMES
+            val isAlreadyFanHigh = userIntentFanMode == 8 && (currentFanMode == 8 || currentFanMode == 9 || currentFanMode == 10)
+
+            return (isAlreadyFanOff || isAlreadyFanAuto || isAlreadyFanLow || isAlreadyFanMedium || isAlreadyFanHigh)
+        }
+
         fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {
 
             val haystack: CCUHsApi = CCUHsApi.getInstance()

@@ -1,6 +1,7 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -8,10 +9,11 @@ import kotlin.reflect.KClass
  * domainName - domainName of the entity defined in model
  * id - uuid of the entity instance in haystack
  */
-open class Entity (var domainName : String, val id : String)
+open class Entity (var domainName : String)
 open class EntityConfig(val domainName: String)
 
-class Site(domainName : String, id : String) : Entity(domainName, id) {
+class Site(domainName : String, val id : String) : Entity(domainName) {
+
     val floors = mutableMapOf<String, Floor>()
     val ccus = mutableMapOf<String, Device>()
     fun addFloor(entityMap : HashMap<Any, Any>) {
@@ -25,7 +27,7 @@ class Site(domainName : String, id : String) : Entity(domainName, id) {
         ccus[id] = Device(domainName, id)
     }
 }
-class Floor(domainName : String, id : String) : Entity(domainName, id) {
+class Floor(domainName : String, val id : String) : Entity(domainName) {
     val rooms = mutableMapOf<String, Room>()
     fun addRoom(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
@@ -33,7 +35,7 @@ class Floor(domainName : String, id : String) : Entity(domainName, id) {
         rooms[id] = Room(domainName, id)
     }
 }
-class Room(domainName : String, id : String) : Entity(domainName, id) {
+class Room(domainName : String, val id : String) : Entity(domainName) {
     val equips = mutableMapOf<String, Equip>()
     val devices = mutableMapOf<String, Device>()
 
@@ -49,7 +51,7 @@ class Room(domainName : String, id : String) : Entity(domainName, id) {
         devices[id] = Device(domainName, id)
     }
 }
-class Equip(domainName : String, id : String) : Entity(domainName, id) {
+class Equip(domainName : String, val id : String) : Entity(domainName) {
     val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
@@ -61,7 +63,7 @@ class Equip(domainName : String, id : String) : Entity(domainName, id) {
         return points[domainName]
     }
 }
-class Device(domainName : String, id : String) : Entity(domainName, id) {
+class Device(domainName : String, val id : String) : Entity(domainName) {
     val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
@@ -72,17 +74,35 @@ class Device(domainName : String, id : String) : Entity(domainName, id) {
         return points[domainName]
     }
 }
-class Point(domainName : String, id : String) : Entity(domainName, id) {
+class Point(domainName : String, var id : String) : Entity(domainName) {
+
+    var equipRef = ""
+    constructor(domainName: String, equipRef : String, id: String = "") : this(domainName, id) {
+        this.equipRef = equipRef
+    }
+
+    private fun requireId() {
+        if (id.isEmpty()) {
+            id = domainName.readPoint(equipRef)["id"].toString()
+        }
+        if (id.isEmpty()) {
+            throw IllegalStateException("Invalid point domain name")
+        }
+    }
     fun readHisVal() : Double {
+        requireId()
         return CCUHsApi.getInstance().readHisValById(id)
     }
     fun writeHisVal(hisVal : Double) {
+        requireId()
         CCUHsApi.getInstance().writeHisValById(id, hisVal)
     }
     fun readPriorityVal() : Double {
+        requireId()
         return CCUHsApi.getInstance().readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {
+        requireId()
         if (defaultVal is String) {
             CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
         } else if (defaultVal is Double) {
@@ -90,12 +110,15 @@ class Point(domainName : String, id : String) : Entity(domainName, id) {
         }
     }
     fun readDefaultVal() : Double {
+        requireId()
         return CCUHsApi.getInstance().readDefaultValById(id)
     }
     fun readDefaultStrVal() : String {
+        requireId()
         return CCUHsApi.getInstance().readDefaultStrVal(id)
     }
-    fun writeVal(id: String?, level: Int, who: String?, writableVal: Double?, duration: Int) {
+    fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
+        requireId()
         CCUHsApi.getInstance().writePoint(id, level, who, writableVal, duration )
     }
 
@@ -114,3 +137,7 @@ private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass
 }
 
 fun Boolean.toInt() = if (this) 1 else 0
+
+fun String.readPoint(equipRef: String) : Map <Any, Any>{
+    return CCUHsApi.getInstance().readEntity("point and $this and equipRef == \"$equipRef\"")
+}

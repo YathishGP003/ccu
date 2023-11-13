@@ -1,10 +1,9 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-import android.webkit.HttpAuthHandler;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.api.DomainNameKt;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -23,9 +22,6 @@ import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 1/10/19.
@@ -96,25 +92,25 @@ public abstract class VavSystemProfile extends SystemProfile
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.vavTargetCumulativeDamper, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavTargetCumulativeDamper, hayStack);
         
         Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.vavAnalogFanSpeedMultiplier, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavAnalogFanSpeedMultiplier, hayStack);
 
         Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.vavHumidityHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavHumidityHysteresis, hayStack);
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.vavRelayDeactivationHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavRelayDeactivationHysteresis, hayStack);
         
         addNewTunerPoints(equipref);
         SystemTuners.addPITuners(equipref, TunerConstants.VAV_TUNER_GROUP, Tags.VAV, CCUHsApi.getInstance());
@@ -189,7 +185,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                             .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
 
-            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainNameKt.vavStageUpTimerCounter, hayStack);
+            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainName.vavStageUpTimerCounter, hayStack);
         }
     }
     
@@ -217,7 +213,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                               .setTz(tz)
                                               .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainNameKt.vavStageDownTimerCounter, hayStack);
+            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainName.vavStageDownTimerCounter, hayStack);
         }
     }
     

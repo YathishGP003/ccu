@@ -295,9 +295,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                         outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin || matTemp > economizingMaxTemp) outsideDamperMinOpen else outsideAirLoopOutput
+                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else outsideAirLoopOutput
                     }
-                    if (matTemp < oaoDamperMatTarget || matTemp > economizingMaxTemp) matThrottle = true
+                    if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = outsideDamperMinOpen
                 }
@@ -322,9 +322,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                         outsideAirFinalLoopOutput = (dcvOnlyOutsideAirLoopOutput - dcvOnlyOutsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin || matTemp > economizingMaxTemp) outsideDamperMinOpen else dcvOnlyOutsideAirLoopOutput
+                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else dcvOnlyOutsideAirLoopOutput
                     }
-                    if (matTemp < oaoDamperMatTarget || matTemp > economizingMaxTemp) matThrottle = true
+                    if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
                     outsideAirFinalLoopOutput = outsideDamperMinOpen
                 }

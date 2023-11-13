@@ -1,7 +1,9 @@
 package a75f.io.logic.filesystem
 
 import a75f.io.data.RenatusDatabaseBuilder
+import a75f.io.data.entities.EntityDatabaseHelper
 import a75f.io.data.message.MessageDatabaseHelper
+import a75f.io.data.writablearray.WritableArrayDatabaseHelper
 import a75f.io.logic.Globals
 import android.content.Context
 import android.content.SharedPreferences
@@ -89,6 +91,7 @@ class FileSystemTools(private val appContext: Context) {
       return if (prefsDir.exists() && prefsDir.isDirectory) {
          prefsDir.list()                                    // all the filenames in dir
             .filter { it.endsWith(".xml") }                 // take just .xml filesnames
+            .filterNot { it.startsWith("ccu_tags") }        // donot add ccutags file
             .map { it.substring(0, it.length-4) }           // shave off suffix to get pref key
             .map { Pair(it, appContext.getSharedPreferences(it, Context.MODE_PRIVATE)) }   // get SharedPrefs for each name and make a Pair
             .toMap()                                        // convert List<Pair> to Map<Key, Value>
@@ -171,4 +174,35 @@ class FileSystemTools(private val appContext: Context) {
          }
       }
    }
+
+   fun writeHayStackEntities(fileName: String): File {
+
+      val log = StringBuilder("\n\n *** Entities ***\n")
+
+      val entityDatabaseHelper = EntityDatabaseHelper(RenatusDatabaseBuilder
+         .getInstance(Globals.getInstance().applicationContext))
+
+      val entityList = entityDatabaseHelper.getAllEntities()
+      if (entityList.size < 15000) {
+         entityList.forEach {
+               entity -> log.append("$entity \n")
+         }
+      }
+
+      log.append("\n\n *** Writable Arrays ***\n")
+
+      val writableDatabaseHelper = WritableArrayDatabaseHelper(RenatusDatabaseBuilder
+         .getInstance(Globals.getInstance().applicationContext))
+
+      val writableArrayList = writableDatabaseHelper.getAllwritableArrays()
+      if (writableArrayList.size < 15000) {
+         writableArrayList.forEach {
+               entity -> log.append("$entity \n")
+         }
+      }
+
+      return writeStringToFileInLogsDir(log.toString(), fileName)
+   }
+
+
 }

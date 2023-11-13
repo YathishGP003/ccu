@@ -133,7 +133,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
             if (relayState == 1.0) {
-                relayStages[Stage.COOLING_2.displayName] = 1
+                relayStages[Stage.COOLING_3.displayName] = 1
             }
             logIt( "$port = CoolingStage3:  $relayState")
         }

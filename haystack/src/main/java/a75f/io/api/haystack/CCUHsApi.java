@@ -1686,7 +1686,7 @@ public class CCUHsApi
         CcuLog.i(TAG, " importBuildingTuners");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
-        ArrayList<Point> schedulablePoints = new ArrayList<>();
+
         try {
             HDict tunerEquipDict = new HDictBuilder().add("filter",
                     "tuner and equip and siteRef == " + siteId).toDict();
@@ -1704,26 +1704,6 @@ public class CCUHsApi
                 tunerPointsGrid.dump();
             }
 
-            HDict schedulablePointsDict = new HDictBuilder().add("filter",
-                    "schedulable and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid schedulablePointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(schedulablePointsDict));
-            if (schedulablePointsGrid == null) {
-                throw new NullHGridException("Null occurred while importing building schedulable");
-            }
-
-            List<HashMap> schedpointMaps = HGridToList(schedulablePointsGrid);
-            schedpointMaps.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
-
-            HDict buildinglimitDict = new HDictBuilder().add("filter",
-                    "building and (limit or differential) and not tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid buildinglimitGrid =invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildinglimitDict));
-            if (buildinglimitGrid == null) {
-                throw new NullHGridException("Null occurred while importing building limits");
-            }
-
-            List<HashMap> buildingLimits = HGridToList(buildinglimitGrid);
-            buildingLimits.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
-
             List<HashMap> pointMaps = HGridToList(tunerPointsGrid);
             pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
 
@@ -1731,6 +1711,7 @@ public class CCUHsApi
             e.printStackTrace();
         }
 
+        CcuLog.i(TAG, " importBuildingTuners : import points");
 
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Equip q : equips) {
@@ -1774,38 +1755,84 @@ public class CCUHsApi
                         }
                     }
                 }
-
                 if(isImportNeeded){
                     importPointArrays(hDicts);
                 }
-
-                ArrayList<HDict> scheduleDicts = new ArrayList<>();
-                //schedulable points
-                for (Point p : schedulablePoints)
-                {
-                    if (p.getEquipRef().equals(q.getId()))
-                    {
-                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
-                        HashMap<Object, Object> point = readMapById(pointId);
-                        if (point.isEmpty()) {
-                            p.setSiteRef(hsApi.getSiteIdRef().toString());
-                            p.setFloorRef("@SYSTEM");
-                            p.setRoomRef("@SYSTEM");
-                            p.setEquipRef(equiUuid);
-                            String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
-                            hsApi.setSynced(pointLuid);
-                            HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
-                            scheduleDicts.add(pid);
-                        } else {
-                            CcuLog.i(TAG, "Schedulable default Point already imported "+p.getId());
-                        }
-
-                    }
-                }
-                importPointArrays(scheduleDicts);
             }
         }
+        Observable.fromCallable(() -> {
+                    try {
+                        HashMap<Object, Object> buildingEquip = readEntity("tuner and equip");
+                        if (!buildingEquip.isEmpty()) {
+                            importSchedulables(hClient, siteId, hsApi, buildingEquip.get("id").toString());
+                        } else {
+                            CcuLog.i(TAG, "Schedulables not imported "+buildingEquip);
+                        }
+                    } catch (Exception e) {
+                        //A failure here is ignored since we will retry doing next restart.
+                        CcuLog.i(TAG, "Import building schedulable failed ");
+                    }
+                    return true;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
         CcuLog.i(TAG," importBuildingTuners Completed");
+    }
+
+    private void importSchedulables(HClient hClient, String siteId, CCUHsApi hsApi, String buildEquipId) {
+
+        CcuLog.i(TAG, "Import Schedulables");
+        List<Point> schedulablePoints = new ArrayList<>();
+
+        HDict schedulablePointsDict = new HDictBuilder().add("filter",
+                "schedulable and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        HGrid schedulablePointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(schedulablePointsDict));
+        if (schedulablePointsGrid == null) {
+            throw new NullHGridException("Null occurred while importing building schedulable");
+        }
+
+        List<HashMap> schedpointMaps = HGridToList(schedulablePointsGrid);
+        schedpointMaps.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
+
+        HDict buildinglimitDict = new HDictBuilder().add("filter",
+                "building and (limit or differential) and not tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        HGrid buildinglimitGrid =invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildinglimitDict));
+        if (buildinglimitGrid == null) {
+            throw new NullHGridException("Null occurred while importing building limits");
+        }
+
+        List<HashMap> buildingLimits = HGridToList(buildinglimitGrid);
+        buildingLimits.forEach(m -> schedulablePoints.add(new Point.Builder().setHashMap(m).build()));
+
+        ArrayList<HDict> scheduleDicts = new ArrayList<>();
+
+        schedulablePoints.forEach( p -> {
+            if (p.getEquipRef().equals(buildEquipId)) {
+                String pointId = StringUtils.prependIfMissing(p.getId(), "@");
+                HashMap<Object, Object> point = readMapById(pointId);
+                if (point.isEmpty()) {
+                    p.setSiteRef(hsApi.getSiteIdRef().toString());
+                    p.setFloorRef("@SYSTEM");
+                    p.setRoomRef("@SYSTEM");
+                    p.setEquipRef(buildEquipId);
+                    String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
+                    hsApi.setSynced(pointLuid);
+                    HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                    scheduleDicts.add(pid);
+                } else {
+                    double defaultVal = CCUHsApi.getInstance().readDefaultValByLevel(p.getId().toString(), HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+                    if (defaultVal == 0) {
+                        HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
+                        scheduleDicts.add(pid);
+                        Log.d(TAG, "No default value for point: " + pid.dis());
+                    }
+                }
+            }
+        });
+        CcuLog.i(TAG, "Import Schedulable pointArrays "+scheduleDicts.size());
+        importPointArrays(scheduleDicts);
+
+        CcuLog.i(TAG, "Import Schedulable Completed");
     }
 
     public void importBuildingTuners() {

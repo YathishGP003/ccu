@@ -21,6 +21,9 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.logic.DeviceBuilder;
+import a75f.io.domain.logic.EntityMapper;
+import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -37,6 +40,9 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -127,6 +133,35 @@ public abstract class VavProfile extends ZoneProfile {
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.init();
+    }
+
+    /**
+     * When the profile is created first time , either via UI or from existing tagsMap
+     * this method has to be called on the profile instance.
+     * @param addr
+     * @param config
+     * @param floorRef
+     * @param roomRef
+     */
+    public void addLogicalMapAndPoints(short addr, a75f.io.domain.config.ProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType, CCUHsApi hayStack, SeventyFiveFProfileDirective equipModel, SeventyFiveFDeviceDirective deviceModel) {
+        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
+
+        ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+        String equipDis = hayStack.getSiteName() + "-VAV-" + config.getNodeAddress();
+        String equipId = equipBuilder.buildEquipAndPoints(config, equipModel, hayStack.getSite().getId(), equipDis);
+
+        EntityMapper entityMapper = new EntityMapper(equipModel);
+        DeviceBuilder deviceBuilder = new DeviceBuilder(hayStack, entityMapper);
+        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.getSite().getId());
+
+        vavDeviceMap.put(addr, deviceMap);
+
+        deviceMap.satResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        deviceMap.co2ResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        deviceMap.spResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        deviceMap.hwstResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+
         deviceMap.init();
     }
     

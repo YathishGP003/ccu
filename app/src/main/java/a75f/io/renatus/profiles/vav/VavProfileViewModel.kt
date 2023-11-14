@@ -26,6 +26,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +44,7 @@ class VavProfileViewModel : ViewModel() {
     lateinit var profileConfiguration: VavProfileConfiguration
 
     private lateinit var model : SeventyFiveFProfileDirective
+    private lateinit var deviceModel : SeventyFiveFDeviceDirective
     lateinit var viewState: VavConfigViewState
 
     private lateinit var context : Context
@@ -90,7 +92,7 @@ class VavProfileViewModel : ViewModel() {
         }
 
         model = ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
-
+        deviceModel = ModelSource.getModelByProfileName("nickTestSmartNodeDevice") as SeventyFiveFDeviceDirective
         profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
                                         zoneRef, floorRef , model ).getDefaultConfiguration()
 
@@ -178,9 +180,7 @@ class VavProfileViewModel : ViewModel() {
 
         if (profileConfiguration.isDefault) {
 
-            equipBuilder.buildEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
-            //vavProfile.addLogicalMapAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model)
-
+            vavProfile.addLogicalMapAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
             L.ccu().zoneProfiles.add(vavProfile)
             L.saveCCUState()
         } else {

@@ -13,8 +13,6 @@ class SchedulabeLimits {
 
 
     companion object {
-
-
         fun addSchedulableLimits(isBuilding: Boolean, roomRef: String?, zoneDis: String?) {
             val hayStack = CCUHsApi.getInstance()
             val schedulablePoint: HashMap<Any, Any> = hayStack.readEntity("schedulable and default")
@@ -269,37 +267,5 @@ class SchedulabeLimits {
                 point.addMarker("zone").setRoomRef(reference)
             }
         }
-
-        fun getCoolingLimitMin(): Double {
-            val retVal = HSUtil.getLevelValueFrom16ByQuery("point and default and user and cooling and limit and min and schedulable")
-            return  if(retVal.equals(0.0) ) TunerConstants.ZONE_COOLING_USERLIMIT_MIN else retVal
-        }
-
-        fun getCoolingLimitMax(): Double {
-            val retVal = HSUtil.getLevelValueFrom16ByQuery("point and default and user and cooling and limit and max and schedulable")
-            return  if(retVal.equals(0.0) ) TunerConstants.ZONE_COOLING_USERLIMIT_MAX else retVal
-        }
-
-        fun getHeatingLimitMin(): Double {
-            val retVal = HSUtil.getLevelValueFrom16ByQuery("point and default and user and heating and limit and min and schedulable")
-            return  if(retVal.equals(0.0) ) TunerConstants.ZONE_HEATING_USERLIMIT_MIN else retVal
-        }
-
-        fun getHeatingLimitMax(): Double {
-            val retVal = CCUHsApi.getInstance().readPointPriorityValByQuery("point and default and user and heating and limit and max and schedulable")
-            return  if(retVal == null ) TunerConstants.ZONE_HEATING_USERLIMIT_MAX else retVal
-
-        }
-
-        fun getBuildingLimitMin(): Double {
-             val buildingLimMin = CCUHsApi.getInstance().readPointPriorityValByQuery("point and default and building and limit and min and not tuner")
-            return buildingLimMin  ?: 50.0
-        }
-
-        fun getBuildingLimitMax(): Double {
-            val buildingLimMax = CCUHsApi.getInstance().readPointPriorityValByQuery("point and default and building and limit and max and not tuner")
-            return buildingLimMax  ?: 110.0
-        }
-
     }
 }

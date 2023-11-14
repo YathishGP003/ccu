@@ -41,6 +41,7 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.Domain;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -643,7 +646,7 @@ public class InstallerOptions extends Fragment {
     // initial master control values
     private void getTempValues() {
 
-        HDict tuner = CCUHsApi.getInstance().readHDict("equip and tuner");
+        /*HDict tuner = CCUHsApi.getInstance().readHDict("equip and tuner");
         Equip p = new Equip.Builder().setHDict(tuner).build();
         if(MasterControlUtil.isMigrated()) {
             HashMap<Object, Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
@@ -690,7 +693,22 @@ public class InstallerOptions extends Fragment {
             mSetBack = (float) getTuner(setbackMap.get("id").toString());
             zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
 
-        }
+        }*/
+
+        hdb = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
+        cdb = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+        upperCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
+        lowerCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
+        upperHeatingTemp = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
+        lowerHeatingTemp = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+
+        lowerBuildingTemp = (float) Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+        upperBuildingTemp = (float) Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+        mSetBack = (float) Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
+        zoneDiff = (float) Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+        CcuLog.i(Domain.LOG_TAG,hdb+" "+cdb+" "+upperBuildingTemp+" "+lowerCoolingTemp+
+                " "+upperHeatingTemp+" "+lowerHeatingTemp+" "+lowerBuildingTemp+" "+upperBuildingTemp+
+                " "+mSetBack+" "+zoneDiff);
 
     }
 
@@ -706,30 +724,32 @@ public class InstallerOptions extends Fragment {
 
             //12950- New User limits UI
 
-            HashMap<Object,Object> buildingCoolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-            HashMap<Object,Object> buildingHeatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-            HashMap<Object,Object> buildingCoolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-            HashMap<Object,Object> buildingHeatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-            HashMap<Object,Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
-            HashMap<Object,Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
+            double heatDBVal;
+            double coolDBVal;
+            double coolMaxVal;
+            double coolMinVal;
+            double heatMinVal;
+            double heatMaxVal;
+            double setBack;
+            double buildingMinLimit;
+            double buildingMaxLimit;
+            double zoneDiff;
 
-            HashMap<Object,Object> coolingDeadbandObj = CCUHsApi.getInstance().readEntity("schedulable and cooling and deadband and default");
-            HashMap<Object,Object> heatingDeadbandObj = CCUHsApi.getInstance().readEntity("schedulable and heating and deadband and default");
-            HashMap<Object,Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("schedulable and unoccupied and default and setback");
-            HashMap<Object,Object> buildingToZoneDiffObj = CCUHsApi.getInstance().readEntity("building and zone and differential and cur");
-
-            if (buildingCoolingUpperLimit.isEmpty() ||
-                    buildingHeatingUpperLimit.isEmpty() ||
-                    buildingCoolingLowerLimit.isEmpty() ||
-                    buildingHeatingLowerLimit.isEmpty() ||
-                    buildingMin.isEmpty() ||
-                    buildingMax.isEmpty() ||
-                    coolingDeadbandObj.isEmpty() ||
-                    heatingDeadbandObj.isEmpty() ||
-                    unoccupiedZoneObj.isEmpty() ||
-                    buildingToZoneDiffObj.isEmpty()) {
+            try {
+                heatDBVal = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
+                coolDBVal = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+                coolMaxVal = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
+                coolMinVal = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
+                heatMinVal = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
+                heatMaxVal = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+                setBack = (float) Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
+                buildingMinLimit = (float) Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+                buildingMaxLimit = (float) Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+                zoneDiff = (float) Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+            } catch (UnknownRecException e) {
                 throw new ScheduleMigrationNotComplete("Schedule revamp migration is not completed");
             }
+
             buildingLimitMin = dialog.findViewById(R.id.buildinglimmin);
             buildingLimitMax =  dialog.findViewById(R.id.buildinglimitmax);
             unoccupiedZoneSetback =  dialog.findViewById(R.id.unoccupiedzonesetback);
@@ -854,17 +874,8 @@ public class InstallerOptions extends Fragment {
             coolingDeadBand.setAdapter(deadBandAdapter);
             heatingDeadBand.setAdapter(deadBandAdapter);
 
-
-            double coolDBVal = HSUtil.getLevelValueFrom16(coolingDeadbandObj.get("id").toString());
-            double heatDBVal = HSUtil.getLevelValueFrom16(heatingDeadbandObj.get("id").toString());
-            double heatMinVal = HSUtil.getLevelValueFrom16(buildingHeatingUpperLimit.get("id").toString());
-            double coolMinVal = HSUtil.getLevelValueFrom16(buildingCoolingLowerLimit.get("id").toString());
-            double heatMaxVal = HSUtil.getLevelValueFrom16(buildingHeatingLowerLimit.get("id").toString());
-            double coolMaxVal = HSUtil.getLevelValueFrom16(buildingCoolingUpperLimit.get("id").toString());
-            double setBack = HSUtil.getLevelValueFrom16(unoccupiedZoneObj.get("id").toString());
-
             buildingToZoneDiff.setSelection(zoneDiffadapter.getPosition(
-                    getAdapterValDiff(HSUtil.getLevelValueFrom16(buildingToZoneDiffObj.get("id").toString()))));
+                    getAdapterValDiff(zoneDiff)));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
                     getAdapterValDeadBand(//coolDBVal == 0.0 ? 2:
                             coolDBVal, false)));
@@ -883,9 +894,9 @@ public class InstallerOptions extends Fragment {
                     getAdapterValDeadBand(//setBack == 0.0 ? 5:
                             setBack, false)));
             buildingLimitMin.setSelection(adapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(buildingMin.get("id").toString()), false)));
+                    getAdapterVal(buildingMinLimit, false)));
             buildingLimitMax.setSelection(adapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(buildingMax.get("id").toString()), false)));
+                    getAdapterVal(buildingMaxLimit, false)));
 
 
             dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
@@ -989,22 +1000,6 @@ public class InstallerOptions extends Fragment {
                     });
                 });
 
-
-
-
-
-
-/*                         String warning = MasterControlUtil.isValidData(zones, heatingLimitMax.getSelectedItem().toString(),
-                                 heatingLimitMin.getSelectedItem().toString(),
-                                 coolingLimitMax.getSelectedItem().toString(),
-                                 coolingLimitMin.getSelectedItem().toString(),
-                                 coolingDeadBand.getSelectedItem().toString(),
-                                 heatingDeadBand.getSelectedItem().toString(),
-                                 buildingLimitMin.getSelectedItem().toString(),
-                                 buildingLimitMax.getSelectedItem().toString(),
-                                 unoccupiedZoneSetback.getSelectedItem().toString(),
-                                 buildingToZoneDiff.getSelectedItem().toString());*/
-
             });
 
 
@@ -1022,7 +1017,7 @@ public class InstallerOptions extends Fragment {
                     masterControlView.setMasterControl((float) MasterControlUtil.zoneMaxHeatingVal()
                             , (float) MasterControlUtil.zoneMinHeatingVal(),(float) MasterControlUtil.zoneMinCoolingVal(),
                             (float)MasterControlUtil.zoneMaxCoolingVal(), lowerBuildingTemp, upperBuildingTemp,
-                            mSetBack, zoneDiff, hdb, cdb);
+                            mSetBack, (float) zoneDiff, hdb, cdb);
                 }
             }.start();
 

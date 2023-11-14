@@ -26,6 +26,8 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.RangeBarView;
 
@@ -66,9 +68,9 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         rangeSeekBarView.setZoneSchedule(mSchedule);
         buttonSave = view.findViewById(R.id.buttonSave);
         buttonCancel = view.findViewById(R.id.buttonCancel);
-        Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
-        Double buildingLimitMax =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max");
-        Double buildingLimitMin =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min");
+        Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+        Double buildingLimitMax =  Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+        Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
 
         zoneScheduleViewModel = new ZoneScheduleViewModel();
         buttonSave.setOnClickListener(v ->{

@@ -289,7 +289,4 @@ class BuildingEquip (equipRef : String) {
     val heatingDeadband = Point(DomainName.heatingDeadband, equipRef)
     val unoccupiedZoneSetback = Point(DomainName.unoccupiedZoneSetback, equipRef)
     val coolingDeadband = Point(DomainName.coolingDeadband, equipRef)
-
-
-
 }

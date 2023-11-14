@@ -27,6 +27,8 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -245,6 +247,7 @@ public class Globals {
 
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
 
         updateCCUAhuRef();
         setRecoveryMode();

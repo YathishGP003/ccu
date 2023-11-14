@@ -74,12 +74,12 @@ class Device(domainName : String, val id : String) : Entity(domainName) {
         return points[domainName]
     }
 }
-class Point(domainName : String, var id : String) : Entity(domainName) {
+open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
 
-    var equipRef = ""
-    constructor(domainName: String, equipRef : String, id: String = "") : this(domainName, id) {
+    var id = ""
+   /* constructor(domainName: String, equipRef : String, id: String = "") : this(domainName, id) {
         this.equipRef = equipRef
-    }
+    }*/
 
     private fun requireId() {
         if (id.isEmpty()) {
@@ -91,39 +91,59 @@ class Point(domainName : String, var id : String) : Entity(domainName) {
     }
     fun readHisVal() : Double {
         requireId()
-        return CCUHsApi.getInstance().readHisValById(id)
+        return Domain.hayStack.readHisValById(id)
     }
     fun writeHisVal(hisVal : Double) {
         requireId()
-        CCUHsApi.getInstance().writeHisValById(id, hisVal)
+        Domain.hayStack.writeHisValById(id, hisVal)
     }
     fun readPriorityVal() : Double {
         requireId()
-        return CCUHsApi.getInstance().readPointPriorityVal(id)
+        return Domain.hayStack.readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {
         requireId()
         if (defaultVal is String) {
-            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+            Domain.hayStack.writeDefaultValById(id, defaultVal)
         } else if (defaultVal is Double) {
-            CCUHsApi.getInstance().writeDefaultValById(id, defaultVal)
+            Domain.hayStack.writeDefaultValById(id, defaultVal)
         }
     }
     fun readDefaultVal() : Double {
         requireId()
-        return CCUHsApi.getInstance().readDefaultValById(id)
+        return Domain.hayStack.readDefaultValById(id)
     }
     fun readDefaultStrVal() : String {
         requireId()
-        return CCUHsApi.getInstance().readDefaultStrVal(id)
+        return Domain.hayStack.readDefaultStrVal(id)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()
-        CCUHsApi.getInstance().writePoint(id, level, who, writableVal, duration )
+        Domain.hayStack.writePoint(id, level, who, writableVal, duration )
     }
 
 }
-private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
+
+open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (domainName) {
+    var id = ""
+    private fun requireId() {
+        if (id.isEmpty()) {
+            id = domainName.readPhysicalPoint(deviceRef)["id"].toString()
+        }
+        if (id.isEmpty()) {
+            throw IllegalStateException("Invalid point domain name")
+        }
+    }
+    fun readHisVal() : Double {
+        requireId()
+        return Domain.hayStack.readHisValById(id)
+    }
+    fun writeHisVal(hisVal : Double) {
+        requireId()
+        Domain.hayStack.writeHisValById(id, hisVal)
+    }
+}
+/*private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
     val domainName = entityMap["domainName"].toString()
     val id = entityMap["id"].toString()
     return when(clazz) {
@@ -134,10 +154,14 @@ private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass
         Point::class -> Point(domainName, id)
         else -> null
     }
-}
+}*/
 
 fun Boolean.toInt() = if (this) 1 else 0
 
 fun String.readPoint(equipRef: String) : Map <Any, Any>{
-    return CCUHsApi.getInstance().readEntity("point and $this and equipRef == \"$equipRef\"")
+    return Domain.hayStack.readEntity("point and domainName == \"$this\" and equipRef == \"$equipRef\"")
+}
+
+fun String.readPhysicalPoint(deviceRef: String) : Map <Any, Any>{
+    return Domain.hayStack.readEntity("point and domainName == \"$this\" and deviceRef == \"$deviceRef\"")
 }

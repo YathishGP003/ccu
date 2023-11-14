@@ -71,6 +71,7 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -497,7 +498,6 @@ public class CCUHsApi
         d.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String deviceId = tagsDb.addDevice(d);
         syncStatusService.addUnSyncedEntity(deviceId);
-        Log.d("CCU_HS_SYNC", "deviceId for created HSS = " + deviceId);
         return deviceId;
     }
 
@@ -784,7 +784,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            CcuLog.d("CCU_HS_SYNC","Entity does not exist "+id);
+            CcuLog.e("CCU_HS","Entity does not exist "+id);
         }
         return null;
     }
@@ -793,7 +793,7 @@ public class CCUHsApi
         try {
             return hsClient.readByIds(ids);
         } catch (UnknownRecException e) {
-            CcuLog.d("CCU_HS", "Entity does not exist ");
+            CcuLog.e("CCU_HS", "Entity does not exist ");
         }
         return null;
     }
@@ -1536,7 +1536,7 @@ public class CCUHsApi
         importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import building tuners TODO - Common data feature.
-        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient, false);
+        //importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient, false);
 
         //import Named schedule
         importNamedSchedule(hClient);
@@ -3301,5 +3301,13 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public boolean isBuildingTunerPoint(String id) {
+        HashMap<Object, Object> point = readMapById(id);
+        if (point.isEmpty()) {
+            return false;
+        }
+        return isBuildingTunerPoint(new Point.Builder().setHashMap(point).build());
     }
 }

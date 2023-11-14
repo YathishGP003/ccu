@@ -98,32 +98,9 @@ public class HyperSplitMessageGenerator {
                 .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
                 .setVocAlertTarget((int)readVocThresholdValue(equipRef))
                 .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
-                        : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB);
-
-        Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Settings Message: ------------------\n" +
-                        "Node address " + address + "\n" +
-                        "roomName " + msg.getRoomName() + "\n" +
-                        "maxHeatingUserTemp " + msg.getMaxHeatingUserTemp() + "\n" +
-                        "minHeatingUserTemp " + msg.getMinHeatingUserTemp() + "\n" +
-                        "maxCoolingUserTemp " + msg.getMaxCoolingUserTemp() + "\n" +
-                        "minCoolingUserTemp " + msg.getMinCoolingUserTemp() + "\n" +
-                        "TemperatureOffset " + msg.getTemperatureOffset() + "\n" +
-                        "HeatingDeadBand " + msg.getHeatingDeadBand() + "\n" +
-                        "CoolingDeadBand " + msg.getCoolingDeadBand() + "\n" +
-                        "TemperatureMode " + msg.getTemperatureModeValue() + "\n" +
-                        "Co2AlertTarget " + msg.getCo2AlertTarget() + "\n" +
-                        "VocAlertTarget " + msg.getVocAlertTarget() + "\n" +
-                        "Pm25AlertTarget " + msg.getPm25AlertTarget() + "\n" +
-                        "DisplayCO2 " + msg.getDisplayCO2() + "\n" +
-                        "DisplayPM25 " + msg.getDisplayPM25() + "\n" +
-                        "DisplayVOC " + msg.getDisplayVOC() + "\n" +
-                        "DisplayHumidity " + msg.getDisplayHumidity() + "\n" +
-                        "ShowCentigrade " + msg.getShowCentigrade() + "\n" +
-                        "BeaconingEnabled " + msg.getBeaconingEnabled() + "\n" +
-                        "HumidityMinSetpoint " + msg.getHumidityMinSetpoint() + "\n" +
-                        "HumidityMaxSetpoint " + msg.getHumidityMaxSetpoint() + "\n" +
-                        "OccupancySensorSensitivityLevel " + msg.getOccupancySensorSensitivityLevel() + "\n");
+                        : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
+                .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
+                .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef));
 
         return msg.build();
 
@@ -162,16 +139,6 @@ public class HyperSplitMessageGenerator {
         controls.setConditioningMode(getConditioningMode(settings,address));
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
         controls.setOperatingMode(getOperatingMode(equipRef));
-
-        Log.i(L.TAG_CCU_SERIAL,
-                "Desired Heat temp "+((int)getDesiredTempHeating(equipRef, mode) * 2)+
-                        "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef, mode) * 2)+
-                        "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
-                        "\n ConditioningMode"+getConditioningMode(settings,address).name()+
-                        "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
-                        "\n operatingMode :"+controls.getOperatingMode()+
-                        "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
-                        "\n TemperatureMode :"+mode);
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
@@ -205,27 +172,6 @@ public class HyperSplitMessageGenerator {
                     });
             Log.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
-
-        Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Controls Message: ------------------\n" +
-                        "Node address " + address + "\n" +
-                        "setTemp Heating " +  controls.getSetTempHeating() + "\n" +
-                        "setTemp Cooling " +  controls.getSetTempCooling() + "\n" +
-                        "conditioningMode " +  controls.getConditioningMode() + "\n" +
-                        "Fan Mode " +  controls.getFanSpeed() + "\n" +
-                        "Relay1 " +  controls.getRelay1() + "\n" +
-                        "Relay2 " +  controls.getRelay2() + "\n" +
-                        "Relay3 " +  controls.getRelay3() + "\n" +
-                        "Relay4 " +  controls.getRelay4() + "\n" +
-                        "Relay5 " +  controls.getRelay5() + "\n" +
-                        "Relay6 " +  controls.getRelay6() + "\n" +
-                        "Relay7 " +  controls.getRelay7() + "\n" +
-                        "Relay8 " +  controls.getRelay8() + "\n" +
-                        "Analog Out1 " +  controls.getAnalogOut1().getPercent() + "\n" +
-                        "Analog Out2 " +  controls.getAnalogOut2().getPercent() + "\n" +
-                        "Analog Out3 " +  controls.getAnalogOut3().getPercent() + "\n" +
-                        "Analog Out4 " +  controls.getAnalogOut4().getPercent() + "\n" +
-                        "-------------------------------------------------------------");
 
         return controls;
     }

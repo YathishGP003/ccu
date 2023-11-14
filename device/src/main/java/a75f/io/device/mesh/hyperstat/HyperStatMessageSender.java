@@ -137,9 +137,9 @@ public class HyperStatMessageSender {
         } else if (checkDuplicate) {
             Integer messageHash = Arrays.hashCode(message.toByteArray());
             if (HyperStatMessageCache.getInstance().checkAndInsert(address,
-                    HyperStatSettingsMessage_t.class.getSimpleName(),
+                    HyperStatControlsMessage_t.class.getSimpleName(),
                     messageHash)) {
-                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatSettingsMessage_t.class.getSimpleName() +
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatControlsMessage_t.class.getSimpleName() +
                         " was already sent, returning , type " + msgType);
                 return;
             }

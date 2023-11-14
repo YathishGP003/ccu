@@ -37,9 +37,9 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         }
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointId, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.FAN_1.displayName] = 1
-            }
+        }
+        if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
+            relayStages[Stage.FAN_1.displayName] = 1
         }
 
     }
@@ -72,9 +72,9 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointId, relayState)
             Log.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanMediumSpeed:  $relayState")
-            if (relayState == 1.0) {
-                relayStages[Stage.FAN_2.displayName] = 1
-            }
+        }
+        if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
+            relayStages[Stage.FAN_2.displayName] = 1
         }
 
     }
@@ -101,9 +101,9 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointId, relayState)
             Log.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanHighSpeed:  $relayState")
-            if (relayState == 1.0) {
-                relayStages[Stage.FAN_3.displayName] = 1
-            }
+        }
+        if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
+            relayStages[Stage.FAN_3.displayName] = 1
         }
     }
 

@@ -6,6 +6,7 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperSplit
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
@@ -51,49 +52,6 @@ class HyperSplitSettingsUtil {
                 }
             }
 
-            Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Settings2 Message: ------------------\n" +
-                        "Node address " + nodeAddress + "\n" +
-                        "enableForceOccupied " + settings2.enableForceOccupied + "\n" +
-                        "enableAutoAway " + settings2.enableAutoAway + "\n" +
-                        "hyperSplitRelayConfig:\n" +
-                        "\trelay1: "+ settings2.hyperSplitRelayConfig.relay1Mapping + "\n" +
-                        "\trelay2: "+ settings2.hyperSplitRelayConfig.relay2Mapping + "\n" +
-                        "\trelay3: "+ settings2.hyperSplitRelayConfig.relay3Mapping + "\n" +
-                        "\trelay4: "+ settings2.hyperSplitRelayConfig.relay4Mapping + "\n" +
-                        "\trelay5: "+ settings2.hyperSplitRelayConfig.relay5Mapping + "\n" +
-                        "\trelay6: "+ settings2.hyperSplitRelayConfig.relay6Mapping + "\n" +
-                        "\trelay7: "+ settings2.hyperSplitRelayConfig.relay7Mapping + "\n" +
-                        "\trelay8: "+ settings2.hyperSplitRelayConfig.relay8Mapping + "\n" +
-                        "hyperSplitAnalogOutConfig:\n" +
-                        "\tanalogOut1: "+ settings2.hyperSplitAnalogOutConfig.analogOut1Mapping + "\n" +
-                        "\tanalogOut2: "+ settings2.hyperSplitAnalogOutConfig.analogOut2Mapping + "\n" +
-                        "\tanalogOut3: "+ settings2.hyperSplitAnalogOutConfig.analogOut3Mapping + "\n" +
-                        "\tanalogOut4: "+ settings2.hyperSplitAnalogOutConfig.analogOut4Mapping + "\n" +
-                        "hyperSplitUniversalInConfig:\n " +
-                        "\tuniversalIn1: "+ settings2.hyperSplitUniversalInConfig.universalIn1Mapping + "\n" +
-                        "\tuniversalIn2: "+ settings2.hyperSplitUniversalInConfig.universalIn2Mapping + "\n" +
-                        "\tuniversalIn3: "+ settings2.hyperSplitUniversalInConfig.universalIn3Mapping + "\n" +
-                        "\tuniversalIn4: "+ settings2.hyperSplitUniversalInConfig.universalIn4Mapping + "\n" +
-                        "\tuniversalIn5: "+ settings2.hyperSplitUniversalInConfig.universalIn5Mapping + "\n" +
-                        "\tuniversalIn6: "+ settings2.hyperSplitUniversalInConfig.universalIn6Mapping + "\n" +
-                        "\tuniversalIn7: "+ settings2.hyperSplitUniversalInConfig.universalIn7Mapping + "\n" +
-                        "\tuniversalIn8: "+ settings2.hyperSplitUniversalInConfig.universalIn8Mapping + "\n" +
-                        "hyperSplitSensorBusConfig:\n" +
-                        "\taddress0: "+ settings2.hyperSplitSensorBusConfig.sensorBus1Mapping + "\n" +
-                        "\taddress1: "+ settings2.hyperSplitSensorBusConfig.sensorBus2Mapping + "\n" +
-                        "\taddress2: "+ settings2.hyperSplitSensorBusConfig.sensorBus3Mapping + "\n" +
-                        "\taddress3: "+ settings2.hyperSplitSensorBusConfig.sensorBus4Mapping + "\n" +
-                        "zoneCO2Target " + settings2.zoneCO2Target + "\n" +
-                        "zoneCO2Threshold " + settings2.zoneCO2Threshold + "\n" +
-                        "zoneCO2DamperOpeningRate " + settings2.zoneCO2DamperOpeningRate + "\n" +
-                        "proportionalConstant " + settings2.proportionalConstant + "\n" +
-                        "integralConstant " + settings2.integralConstant + "\n" +
-                        "proportionalTemperatureRange " + settings2.proportionalTemperatureRange + "\n" +
-                        "integrationTime " + settings2.integrationTime + "\n" +
-                        "profile " + settings2.profile + "\n" +
-                        "-------------------------------------------------------------");
-
             return settings2.build()
         }
 
@@ -128,36 +86,9 @@ class HyperSplitSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTATSPLIT_CPU.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                    settings3.hyperStatConfigsCpu = getStagedFanVoltageDetails(equipRef)
                 }
             }
-
-            Log.i(L.TAG_CCU_SERIAL,
-                "--------------HyperStat Split CPU & Economiser Settings3 Message: ------------------\n" +
-                        "Node address " + nodeAddress + "\n" +
-                        "unoccupiedSetback " + settings3.genertiTuners.unoccupiedSetback + "\n" +
-                        "heatingDeadbandMultiplier " + settings3.genertiTuners.heatingDeadbandMultiplier + "\n" +
-                        "relayActivationHysteresis " + settings3.genertiTuners.relayActivationHysteresis + "\n" +
-                        "analogFanSpeedMultiplier " + settings3.genertiTuners.analogFanSpeedMultiplier + "\n" +
-                        "humidityHysteresis " + settings3.genertiTuners.humidityHysteresis + "\n" +
-                        "forcedOccupiedTime " + settings3.genertiTuners.forcedOccupiedTime + "\n" +
-                        "autoAwayTime " + settings3.genertiTuners.autoAwayTime + "\n" +
-                        "autoAwayZoneSetbackTemp " + settings3.genertiTuners.autoAwayZoneSetbackTemp + "\n" +
-                        "-------------------------------------------------------------\n" +
-                        "economizingToMainCoolingLoopMap " + settings3.ecoTuners.economizingToMainCoolingLoopMap + "\n" +
-                        "economizingMinTemp " + settings3.ecoTuners.economizingMinTemp + "\n" +
-                        "economizingMaxTemp " + settings3.ecoTuners.economizingMaxTemp + "\n" +
-                        "economizingMinHumidity " + settings3.ecoTuners.economizingMinHumidity + "\n" +
-                        "economizingMaxHumidity " + settings3.ecoTuners.economizingMaxHumidity + "\n" +
-                        "economizingDryBulbThreshold " + settings3.ecoTuners.economizingDryBulbThreshold + "\n" +
-                        "enthalpyDuctCompensationOffset " + settings3.ecoTuners.enthalpyDuctCompensationOffset + "\n" +
-                        "ductCompensationOffset " + settings3.ecoTuners.ductCompensationOffset + "\n" +
-                        "exhaustFanStage1Threshold " + settings3.ecoTuners.exhaustFanStage1Threshold + "\n" +
-                        "exhaustFanStage2Threshold " + settings3.ecoTuners.exhaustFanStage2Threshold + "\n" +
-                        "exhaustFanHysteresis " + settings3.ecoTuners.exhaustFanHysteresis + "\n" +
-                        "oaoDamperMatTarget " + settings3.ecoTuners.oaoDamperMatTarget + "\n" +
-                        "oaoDamperMatMin " + settings3.ecoTuners.oaoDamperMatMin + "\n" +
-                        "outsideDamperMinOpen " + settings3.ecoTuners.outsideDamperMinOpen + "\n" +
-                        "-------------------------------------------------------------");
 
             return settings3.build()
         }
@@ -387,19 +318,29 @@ class HyperSplitSettingsUtil {
          */
         private fun getAnalogOutConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitAnalogOutConfig_t {
             val analogOutConfiguration = HyperSplit.HyperSplitAnalogOutConfig_t.newBuilder()
+            val defaultAnalogOutMinSetting = 0
+            val defaultAnalogOutMaxSetting = 10
+
 
             if (readConfig(hsApi, equipRef, "analog1 and output and config and enabled") == 0.0) {
                 analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(0)
             } else {
+
                 analogOutConfiguration.analogOut1Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog1 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut1Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog1 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut1AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog2 and output and config and enabled") == 0.0) {
@@ -408,12 +349,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut2Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog2 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut2Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog2 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut2AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog3 and output and config and enabled") == 0.0) {
@@ -422,12 +369,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut3Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog3 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut3Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog3 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut3AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             if (readConfig(hsApi, equipRef, "analog4 and output and config and enabled") == 0.0) {
@@ -436,12 +389,18 @@ class HyperSplitSettingsUtil {
                 analogOutConfiguration.analogOut4Mapping = getHyperSplitAnalogOutMapping(
                     readConfig(hsApi, equipRef, "analog4 and output and config and association").toInt() + 1
                 )
-                analogOutConfiguration.analogOut4AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog4 and output and config and min"
-                ) * 10).toInt()
-                analogOutConfiguration.analogOut4AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog4 and output and config and max "
-                ) * 10).toInt()
+
+                if ((analogOutConfiguration.analogOut4Mapping.ordinal - 1) != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutConfiguration.analogOut4AtMinSetting = (readConfig(
+                        hsApi, equipRef, "analog4 and output and config and min"
+                    ) * 10).toInt()
+                    analogOutConfiguration.analogOut4AtMaxSetting = (readConfig(
+                        hsApi, equipRef, "analog4 and output and config and max "
+                    ) * 10).toInt()
+                } else {
+                    analogOutConfiguration.analogOut4AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut4AtMaxSetting = defaultAnalogOutMaxSetting * 10
+                }
             }
 
             return analogOutConfiguration.build()
@@ -699,7 +658,123 @@ class HyperSplitSettingsUtil {
                 "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
             }
         }
-        
+
+        /**
+         * Function to read all the staged fan voltages which are required for Hyperstat Split to run
+         * @param equipRef
+         * @return HyperSplitStagedFanVoltages_t
+         */
+        private fun getStagedFanVoltageDetails(equipRef: String): HyperSplit.HyperSplitConfigsCcu_t? {
+            val stagedFanVoltages = HyperSplit.HyperSplitConfigsCcu_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val coolingStage1Query = "cooling and stage1 and fan and $equipRefQuery"
+            val coolingStage2Query = "cooling and stage2 and fan and $equipRefQuery"
+            val coolingStage3Query = "cooling and stage3 and fan and $equipRefQuery"
+            val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
+            val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
+            val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
+
+            if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage1FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage1Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage2FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage2Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(coolingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.coolingStage3FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(coolingStage3Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage1Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage1FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage1Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage2Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage2FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage2Query)).toInt()
+            }
+            if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
+                stagedFanVoltages.heatingStage3FanAnalogVoltage =
+                    (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage3Query)).toInt()
+            }
+            return stagedFanVoltages.build()
+        }
+
+        /**
+         * Function to read all the linear fan speeds which are required for Hyperstat Split to run
+         * @param equipRef
+         * @return HyperSplitLinearFanSpeeds_t
+         */
+        public fun getLinearFanSpeedDetails(equipRef: String): HyperSplit.HypersplitLinearFanSpeeds_t? {
+            val linearFanSpeedBuilder = HyperSplit.HypersplitLinearFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog4", "analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty()&& getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> linearFanSpeedBuilder.linearFanLowSpeedLevel = fanLevel
+                            "medium" -> linearFanSpeedBuilder.linearFanMediumSpeedLevel = fanLevel
+                            "high" -> linearFanSpeedBuilder.linearFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return linearFanSpeedBuilder.build()
+        }
+
+        /**
+         * Function to read all the staged fan speed which are required for Hyperstat to run
+         * @param equipRef
+         * @return HypersplitStagedFanSpeeds_t
+         */
+        public fun getStagedFanSpeedDetails(equipRef: String): HyperSplit.HypersplitStagedFanSpeeds_t? {
+            val stagedFanSpeedBuilder = HyperSplit.HypersplitStagedFanSpeeds_t.newBuilder()
+            val ccuHsApi = CCUHsApi.getInstance()
+            val equipRefQuery = "equipRef == \"$equipRef\""
+
+            val fanSpeedLevels = listOf("low", "medium", "high")
+
+            for (fanSpeed in fanSpeedLevels) {
+                for (analog in listOf("analog4", "analog3", "analog2", "analog1")) {
+                    val query = "$analog and $fanSpeed and config and fan and $equipRefQuery"
+                    if (ccuHsApi.readEntity(query).isNotEmpty() && getAnalogOutMapping(ccuHsApi,equipRef,analog)
+                        == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        val fanLevel = ccuHsApi.readPointPriorityValByQuery(query).toInt()
+                        when (fanSpeed) {
+                            "low" -> stagedFanSpeedBuilder.stagedFanLowSpeedLevel = fanLevel
+                            "medium" -> stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = fanLevel
+                            "high" -> stagedFanSpeedBuilder.stagedFanHighSpeedLevel = fanLevel
+                        }
+                        break
+                    }
+                }
+            }
+            return stagedFanSpeedBuilder.build()
+        }
+
+        private fun getAnalogOutMapping(
+            ccuHsApi: CCUHsApi,
+            equipRef: String,
+            analog: String
+        ): Any {
+            return readConfig(
+                ccuHsApi,
+                equipRef,
+                "$analog and output and config and association"
+            ).toInt()
+        }
+
     }
     
 }

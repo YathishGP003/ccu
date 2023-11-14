@@ -812,9 +812,6 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 

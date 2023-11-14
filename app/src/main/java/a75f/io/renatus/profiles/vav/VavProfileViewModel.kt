@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain.getListByDomainName
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelSource
@@ -106,26 +107,26 @@ class VavProfileViewModel : ViewModel() {
     }
 
     private fun initializeLists() {
-        damperTypesList = getListByDomainName(a75f.io.domain.api.damperType, model)
-        damperSizesList = getListByDomainName(a75f.io.domain.api.damperSize, model)
-        damperShapesList = getListByDomainName(a75f.io.domain.api.damperShape, model)
-        reheatTypesList = getListByDomainName(a75f.io.domain.api.reheatType, model)
-        zonePrioritiesList = getListByDomainName(a75f.io.domain.api.zonePriority, model)
+        damperTypesList = getListByDomainName(DomainName.damperType, model)
+        damperSizesList = getListByDomainName(DomainName.damperSize, model)
+        damperShapesList = getListByDomainName(DomainName.damperShape, model)
+        reheatTypesList = getListByDomainName(DomainName.reheatType, model)
+        zonePrioritiesList = getListByDomainName(DomainName.zonePriority, model)
 
-        temperatureOffsetsList = getListByDomainName(a75f.io.domain.api.temperatureOffset, model)
+        temperatureOffsetsList = getListByDomainName(DomainName.temperatureOffset, model)
 
-        maxCoolingDamperPosList = getListByDomainName(a75f.io.domain.api.maxCoolingDamperPos, model)
-        minCoolingDamperPosList = getListByDomainName(a75f.io.domain.api.minCoolingDamperPos, model)
-        maxHeatingDamperPosList = getListByDomainName(a75f.io.domain.api.maxHeatingDamperPos, model)
-        minHeatingDamperPosList = getListByDomainName(a75f.io.domain.api.minHeatingDamperPos, model)
+        maxCoolingDamperPosList = getListByDomainName(DomainName.maxCoolingDamperPos, model)
+        minCoolingDamperPosList = getListByDomainName(DomainName.minCoolingDamperPos, model)
+        maxHeatingDamperPosList = getListByDomainName(DomainName.maxHeatingDamperPos, model)
+        minHeatingDamperPosList = getListByDomainName(DomainName.minHeatingDamperPos, model)
 
         // TODO: In v0.0.1 of the model, this is a 2000-item dropdown. Very slow, but it doesn't crash the CCU.
-        kFactorsList = getListByDomainName(a75f.io.domain.api.kFactor, model)
+        kFactorsList = getListByDomainName(DomainName.kFactor, model)
 
-        maxCFMCoolingList = getListByDomainName(a75f.io.domain.api.maxCFMCooling, model)
-        minCFMCoolingList = getListByDomainName(a75f.io.domain.api.minCFMCooling, model)
-        maxCFMReheatingList = getListByDomainName(a75f.io.domain.api.maxCFMReheating, model)
-        minCFMReheatingList = getListByDomainName(a75f.io.domain.api.minCFMReheating, model)
+        maxCFMCoolingList = getListByDomainName(DomainName.maxCFMCooling, model)
+        minCFMCoolingList = getListByDomainName(DomainName.minCFMCooling, model)
+        maxCFMReheatingList = getListByDomainName(DomainName.maxCFMReheating, model)
+        minCFMReheatingList = getListByDomainName(DomainName.minCFMReheating, model)
     }
 
     fun saveConfiguration() {

@@ -46,6 +46,7 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -522,8 +523,8 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 return;
             }
 
-            Double buildingLimitMax =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max");
-            Double buildingLimitMin =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min");
+            Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+            Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
             Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
             double coolingTemp = rangeSeekBarView.getCoolValue();

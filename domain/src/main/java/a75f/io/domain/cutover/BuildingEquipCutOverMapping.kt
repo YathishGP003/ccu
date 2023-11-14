@@ -105,7 +105,6 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-satSPResMax" to "satSPResMax",
         "BuildingTuner-satTimeInterval" to "satTimeInterval",
         "BuildingTuner-satSPRes" to "satSPRes",
-        "BuildingTuner-co2SPResMax" to "co2SPResMax",
 
         "BuildingTuner-staticPressureSPMin" to "staticPressureSPMin",
         "BuildingTuner-staticPressureSPRes" to "staticPressureSPRes",
@@ -116,7 +115,6 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-staticPressureSPResMax" to "staticPressureSPResMax",
         "BuildingTuner-staticPressureSPTrim" to "staticPressureSPTrim",
         "BuildingTuner-staticPressureIgnoreRequest" to "staticPressureIgnoreRequest",
-        "BuildingTuner-co2SPResMax" to "co2SPResMax",
 
         "BuildingTuner-airflowCFMIntegralKFactor" to "vavAirflowCFMIntegralKFactor",
         "BuildingTuner-airflowCFMProportionalKFactor" to "vavAirflowCFMProportionalKFactor",
@@ -189,7 +187,6 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-TI-temperatureIntegralTime" to "tiTemperatureIntegralTime",
         "BuildingTuner-TI-heatingDeadbandMultiplier" to "tiHeatingDeadbandMultiplier",
         "BuildingTuner-TI-zonePrioritySpread" to "tiZonePrioritySpread",
-        "BuildingTuner-TI-zonePriorityMultiplier" to "tiZonePriorityMultiplier",
         "BuildingTuner-TI-proportionalKFactor" to "tiProportionalKFactor",
         "BuildingTuner-TI-coolingDeadband" to "tiCoolingDeadband",
         "BuildingTuner-TI-zonePriorityMultiplier" to "tiZonePriorityMultiplier",
@@ -298,7 +295,7 @@ object BuildingEquipCutOverMapping {
         "BuildingSchedulable-unoccupiedZoneSetback" to "unoccupiedZoneSetback",
         "BuildingSchedulable-coolingDeadband" to "coolingDeadband",
 
-        "BuildingTuner-VRV-heatingDeadbandMultiplier" to "vavHeatingDeadbandMultiplier",
+        "BuildingTuner-VRV-heatingDeadbandMultiplier" to "vrvHeatingDeadbandMultiplier",
         "BuildingTuner-VRV-heatingDeadband" to "vrvHeatingDeadband",
         "BuildingTuner-VRV-coolingDeadbandMultiplier" to "vrvCoolingDeadbandMultiplier",
         "BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",

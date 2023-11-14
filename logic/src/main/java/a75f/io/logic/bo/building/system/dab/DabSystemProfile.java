@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
+import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.api.DomainNameKt;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -22,9 +21,6 @@ import a75f.io.logic.tuners.DcwbTuners;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
-import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 public abstract class DabSystemProfile extends SystemProfile
 {
@@ -86,22 +82,22 @@ public abstract class DabSystemProfile extends SystemProfile
         Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainNameKt.dabTargetCumulativeDamper, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.dabTargetCumulativeDamper, hayStack);
         
         Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        TunerUtil.copyDefaultBuildingTunerVal(analogFanSpeedMultiplierId, DomainNameKt.dabAnalogFanSpeedMultiplier, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(analogFanSpeedMultiplierId, DomainName.dabAnalogFanSpeedMultiplier, hayStack);
         
         Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(humidityHysteresisId, DomainNameKt.dabHumidityHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(humidityHysteresisId, DomainName.dabHumidityHysteresis, hayStack);
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(relayDeactivationHysteresisId, DomainNameKt.dabRelayDeactivationHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(relayDeactivationHysteresisId, DomainName.dabRelayDeactivationHysteresis, hayStack);
     
         Point rebalanceHoldTime = new Point.Builder()
                 .setDisplayName(HSUtil.getDis(equipref)+"-DAB-"+"rebalanceHoldTime")
@@ -114,7 +110,7 @@ public abstract class DabSystemProfile extends SystemProfile
                 .setTz(tz)
                 .build();
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-        TunerUtil.copyDefaultBuildingTunerVal(rebalanceHoldTimeId, DomainNameKt.dabRebalanceHoldTime, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(rebalanceHoldTimeId, DomainName.dabRebalanceHoldTime, hayStack);
     
         
         addNewTunerPoints(equipref);
@@ -155,7 +151,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .build();
             String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
 
-            TunerUtil.copyDefaultBuildingTunerVal(modeChangeoverHysteresisId, DomainNameKt.dabModeChangeoverHysteresis, hayStack);
+            TunerUtil.copyDefaultBuildingTunerVal(modeChangeoverHysteresisId, DomainName.dabModeChangeoverHysteresis, hayStack);
         }
     }
     
@@ -183,7 +179,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .setTz(tz)
                                                  .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
-            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainNameKt.dabStageUpTimerCounter, hayStack);
+            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainName.dabStageUpTimerCounter, hayStack);
         }
     }
     
@@ -211,7 +207,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .setTz(tz)
                                             .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainNameKt.dabStageDownTimerCounter, hayStack);
+            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainName.dabStageDownTimerCounter, hayStack);
         }
     }
     

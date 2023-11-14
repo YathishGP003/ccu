@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.vav
 
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
@@ -37,31 +38,31 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var minCFMReheating: ValueConfig
 
     fun getDefaultConfiguration() : VavProfileConfiguration {
-        damperType = getDefaultAssociationConfig(a75f.io.domain.api.damperType, model)
-        damperSize = getDefaultAssociationConfig(a75f.io.domain.api.damperSize, model)
-        damperShape = getDefaultAssociationConfig(a75f.io.domain.api.damperShape, model)
-        reheatType = getDefaultAssociationConfig(a75f.io.domain.api.reheatType, model)
-        zonePriority = getDefaultAssociationConfig(a75f.io.domain.api.zonePriority, model)
+        damperType = getDefaultAssociationConfig(DomainName.damperType, model)
+        damperSize = getDefaultAssociationConfig(DomainName.damperSize, model)
+        damperShape = getDefaultAssociationConfig(DomainName.damperShape, model)
+        reheatType = getDefaultAssociationConfig(DomainName.reheatType, model)
+        zonePriority = getDefaultAssociationConfig(DomainName.zonePriority, model)
 
-        autoAway = getDefaultEnableConfig(a75f.io.domain.api.autoAway, model)
-        autoForceOccupied = getDefaultEnableConfig(a75f.io.domain.api.autoForceOccupied, model)
-        enableCo2Control = getDefaultEnableConfig(a75f.io.domain.api.enableCo2Control, model)
-        enableIAQControl = getDefaultEnableConfig(a75f.io.domain.api.enableIAQControl, model)
-        enableCFMControl = getDefaultEnableConfig(a75f.io.domain.api.enableCFMControl, model)
+        autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
+        autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
+        enableCo2Control = getDefaultEnableConfig(DomainName.enableCo2Control, model)
+        enableIAQControl = getDefaultEnableConfig(DomainName.enableIAQControl, model)
+        enableCFMControl = getDefaultEnableConfig(DomainName.enableCFMControl, model)
 
-        temperatureOffset = getDefaultValConfig(a75f.io.domain.api.temperatureOffset, model)
+        temperatureOffset = getDefaultValConfig(DomainName.temperatureOffset, model)
 
-        maxCoolingDamperPos = getDefaultValConfig(a75f.io.domain.api.maxCoolingDamperPos, model)
-        minCoolingDamperPos = getDefaultValConfig(a75f.io.domain.api.minCoolingDamperPos, model)
-        maxHeatingDamperPos = getDefaultValConfig(a75f.io.domain.api.maxHeatingDamperPos, model)
-        minHeatingDamperPos = getDefaultValConfig(a75f.io.domain.api.minHeatingDamperPos, model)
+        maxCoolingDamperPos = getDefaultValConfig(DomainName.maxCoolingDamperPos, model)
+        minCoolingDamperPos = getDefaultValConfig(DomainName.minCoolingDamperPos, model)
+        maxHeatingDamperPos = getDefaultValConfig(DomainName.maxHeatingDamperPos, model)
+        minHeatingDamperPos = getDefaultValConfig(DomainName.minHeatingDamperPos, model)
 
-        kFactor = getDefaultValConfig(a75f.io.domain.api.kFactor, model)
+        kFactor = getDefaultValConfig(DomainName.kFactor, model)
         kFactor.currentVal = 2.000 // TODO: remove this once model is updated with a defaultVal for kFactor
-        maxCFMCooling = getDefaultValConfig(a75f.io.domain.api.maxCFMCooling, model)
-        minCFMCooling = getDefaultValConfig(a75f.io.domain.api.minCFMCooling, model)
-        maxCFMReheating = getDefaultValConfig(a75f.io.domain.api.maxCFMReheating, model)
-        minCFMReheating = getDefaultValConfig(a75f.io.domain.api.minCFMReheating, model)
+        maxCFMCooling = getDefaultValConfig(DomainName.maxCFMCooling, model)
+        minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)
+        maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
+        minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
 
         isDefault = true
 

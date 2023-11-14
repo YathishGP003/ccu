@@ -432,6 +432,8 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                 List<UnOccupiedDays> unoccupiedDays = zoneScheduleViewModel.getUnoccupiedDays(days);
                 unOccupiedDays = unoccupiedDays.get(position);
                 int occupiedSlotsSize = schedule.getDays().size();
+                if(schedule.getDays().size() == 0)
+                    break;
                 Schedule.Days nextDay = getNextOccupiedSlot(position, unOccupiedDays, occupiedSlotsSize);
                 UnOccupiedZoneSetBackDialogFragment unOccupiedZoneSetBackDialogFragment = new UnOccupiedZoneSetBackDialogFragment(this, nextDay, schedule);
                 unOccupiedZoneSetBackDialogFragment.show(ft, "popup");

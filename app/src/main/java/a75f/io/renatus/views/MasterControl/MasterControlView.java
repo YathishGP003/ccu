@@ -46,6 +46,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -64,12 +65,6 @@ public class MasterControlView extends LinearLayout {
     private static final String LOG_PREFIX = MasterControlView.class.getSimpleName();
     HorizontalScrollView mHorizontalScrollView;
     MasterControl masterControl;
-    HashMap coolingUpperLimit;
-    HashMap heatingUpperLimit;
-    HashMap coolingLowerLimit;
-    HashMap heatingLowerLimit;
-    HashMap buildingMin;
-    HashMap buildingMax;
     HashMap setbackMap;
     HashMap zoneDiffMap;
     double hdb = 2.0;
@@ -169,15 +164,9 @@ public class MasterControlView extends LinearLayout {
         HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
         HashMap<Object,Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
 
-        hdb = HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
-        cdb = HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
-       /* coolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-        heatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-        coolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-        heatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-*/
-        buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-        buildingMax = CCUHsApi.getInstance().read("building and limit and max");
+        hdb = Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
+        cdb = Domain.buildingEquip.getCoolingDeadband().readPriorityVal();
+
         setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and default");
         zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
@@ -203,12 +192,12 @@ public class MasterControlView extends LinearLayout {
         Set<String> namedSchedulesIds = new HashSet<String>();
 
 
-        coolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-        heatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-        coolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-        heatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-        buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-        buildingMax = CCUHsApi.getInstance().read("building and limit and max");
+        //coolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
+        //heatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
+        //coolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
+        //heatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
+        //buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+        //buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
         for (Schedule s : schedulesList) {
             if (s.isBuildingSchedule() && !s.isZoneSchedule()) {
@@ -655,48 +644,6 @@ public class MasterControlView extends LinearLayout {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-              /*  HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                String ccuName = ccu.get("dis").toString();
-
-                HashMap<Object,Object> buildingCoolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-                HashMap<Object,Object> buildingHeatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-                HashMap<Object,Object> buildingCoolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-                HashMap<Object,Object> buildingHeatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-                HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-                HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-
-                //Building level tuners points are only written on Level 16. Generally writes made from CCU are
-                // written to level 8 , but BuildingTuners are considered to be at "Site level".
-                if (buildingCoolingUpperLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolingUpperLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureUpperLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingCoolingUpperLimit.get("id").toString(), (double) coolingTemperatureUpperLimit);
-                }
-
-                if (buildingCoolingLowerLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolingLowerLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureLowerLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingCoolingLowerLimit.get("id").toString(), (double) coolingTemperatureLowerLimit);
-                }
-
-                if (buildingHeatingUpperLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatingUpperLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureUpperLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingHeatingUpperLimit.get("id").toString(), (double) heatingTemperatureUpperLimit);
-                }
-
-                if (buildingHeatingLowerLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatingLowerLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureLowerLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingHeatingLowerLimit.get("id").toString(), (double) heatingTemperatureLowerLimit);
-                }
-
-                if (buildingMax.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureUpperLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTemperatureUpperLimit);
-                }
-
-                if (buildingMin.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTemperatureLowerLimit);
-                }
-                BuildingTunerCache.getInstance().updateTuners();*/
                 return null;
             }
 

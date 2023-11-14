@@ -68,7 +68,7 @@ open class DefaultEquipBuilder : EquipBuilder {
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.
-        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
         pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
@@ -83,7 +83,7 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
-        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null && pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null) {
+        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null /*&& pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null*/) {
             pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
         }
 

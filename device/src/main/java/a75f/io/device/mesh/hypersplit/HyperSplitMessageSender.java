@@ -132,9 +132,9 @@ public class HyperSplitMessageSender {
         } else if (checkDuplicate) {
             Integer messageHash = Arrays.hashCode(message.toByteArray());
             if (HyperSplitMessageCache.getInstance().checkAndInsert(address,
-                    HyperSplit.HyperSplitSettingsMessage_t.class.getSimpleName(),
+                    HyperSplit.HyperSplitControlsMessage_t.class.getSimpleName(),
                     messageHash)) {
-                CcuLog.d(L.TAG_CCU_SERIAL, HyperSplit.HyperSplitSettingsMessage_t.class.getSimpleName() +
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperSplit.HyperSplitControlsMessage_t.class.getSimpleName() +
                         " was already sent, returning , type " + msgType);
                 return;
             }

@@ -107,7 +107,7 @@ public class HaystackExplorer extends Fragment
                 Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
                 
                 final EditText taskEditText = new EditText(getActivity());
-                String tunerVal = String.valueOf(getPointVal(tunerMap.get(tunerName)));
+                String tunerVal = getPointVal(tunerMap.get(tunerName));
                 KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
                 taskEditText.setKeyListener(keyListener);
 
@@ -306,27 +306,15 @@ public class HaystackExplorer extends Fragment
 
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \""+m.get("id")+"\"");
             Set tunerList = new HashSet();
         
-            for (Map t : tuners) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            for (Map t : points) {
+                String name = t.get("domainName") != null ? t.get("domainName").toString() : t.get("dis").toString();
+                tunerList.add(name);
+                tunerMap.put(name, t.get("id").toString());
             }
-        
-            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-        
-            for (Map t : userIntents) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
-    
-            ArrayList<HashMap> configs = CCUHsApi.getInstance().readAll("config and equipRef == \""+m.get("id")+"\"");
-    
-            for (Map t : configs) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
+
             List tunersList= new ArrayList(tunerList);
             expandableListDetail.put(m.get("dis").toString()+" : "+m, tunersList);
             Collections.sort(tunersList);
@@ -348,8 +336,9 @@ public class HaystackExplorer extends Fragment
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
     }
     
-    public static double getPointVal(String id) {
+    public static String getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
+        StringBuilder val = new StringBuilder();
         try {
             Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
             for (String marker : p.getMarkers()) {
@@ -360,7 +349,7 @@ public class HaystackExplorer extends Fragment
                             HashMap valMap = ((HashMap) values.get(l - 1));
                             System.out.println(valMap);
                             if (valMap.get("val") != null) {
-                                return Double.parseDouble(valMap.get("val").toString());
+                                val.append("level : "+l+" val : "+valMap.get("val")+"\n");
                             }
                         }
                     }
@@ -370,17 +359,17 @@ public class HaystackExplorer extends Fragment
             {
                 if (marker.equals("his"))
                 {
-                    return hayStack.readHisValById(p.getId());
+                    val.append("hisVal : "+hayStack.readHisValById(p.getId()));
                 }
             }
 
         } catch (Exception e) {
-            return 0;
+            e.printStackTrace();
         }
 
     
 
-        return 0;
+        return val.toString();
     }
     
     public static boolean isNumeric(String strNum) {

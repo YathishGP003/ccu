@@ -32,6 +32,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
+import a75f.io.logic.util.MigrationUtil;
+import a75f.io.logic.util.PreferenceUtil;
 
 public class DiagEquip
 {
@@ -332,8 +334,13 @@ public class DiagEquip
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
             }
-            if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion)))
+            if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion))) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
+            }
+            if(!PreferenceUtil.isSRMigrationPointUpdated() && SchedulableMigrationKt.validateMigration()) {
+                MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());
+                PreferenceUtil.setSRMigrationPointUpdated();
+            }
 
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block

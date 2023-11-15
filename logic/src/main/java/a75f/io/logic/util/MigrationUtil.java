@@ -41,6 +41,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -71,6 +72,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
@@ -2346,9 +2348,27 @@ public class MigrationUtil {
                 Point modifiedPoint  = new Point.Builder().setHashMap(outsideDamperMinOpen).addMarker("his").build();
                 haystack.updatePoint(modifiedPoint, modifiedPoint.getId());
             }
-
         });
+    }
 
-
+    public static void createZoneSchedulesIfMissing(CCUHsApi ccuHsApi) {
+        List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        for(HashMap<Object, Object> room : rooms) {
+            HashMap<Object, Object> scheduleHashmap = ccuHsApi.readEntity(
+                    "schedule and " +
+                            "not special and not vacation and roomRef " + "== " + room.get("id"));
+            if (scheduleHashmap.size() == 0) {
+                SchedulabeLimits.Companion.addSchedulableLimits(
+                        false,room.get("id").toString(), room.get("dis").toString());
+                String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
+                if(ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
+                        + room.get("id") +"\"") == ScheduleType.ZONE.ordinal()){
+                    HashMap<Object, Object> roomToUpdate = ccuHsApi.readMapById(room.get("id").toString());
+                    Zone zone = new Zone.Builder().setHashMap(roomToUpdate).build();
+                    zone.setScheduleRef(scheduleRef);
+                    ccuHsApi.updateZone(zone, zone.getId());
+                }
+            }
+        }
     }
 }

@@ -47,15 +47,12 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Objects;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
@@ -69,12 +66,9 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -104,7 +98,6 @@ import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
@@ -113,7 +106,6 @@ import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErro
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDiff;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class InstallerOptions extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -1047,7 +1039,7 @@ public class InstallerOptions extends Fragment {
             protected Void doInBackground(Void... voids) {
 
                 if (!Globals.getInstance().siteAlreadyCreated()) {
-                    BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     //BuildingTuners.getInstance();
                     //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();

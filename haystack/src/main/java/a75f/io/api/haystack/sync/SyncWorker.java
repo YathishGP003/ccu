@@ -53,7 +53,10 @@ public class SyncWorker extends Worker {
     public Result doWork() {
     
         CcuLog.i(TAG, " doSyncWork ");
-    
+        if (isSyncWorkInProgress()) {
+            CcuLog.i(TAG, " doSyncWork Called : Previous session running ");
+            return Result.retry();
+        }
         isSyncWorkInProgress = true;
         try {
             if (!siteHandler.doSync()) {

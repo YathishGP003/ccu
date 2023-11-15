@@ -1277,7 +1277,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .show();
                 }
             }
-        }, 1000);
+        }, 5000);
     }
 
     private void registerCcuInBackground() {
@@ -1298,7 +1298,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             MessagingClient.getInstance().init();
                         }
                         UtilityApplication.scheduleMessagingAckJob();
-                        CCUHsApi.getInstance().syncEntityWithPointWrite();
+                        CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(15);
                     },  // ignore success
                     error -> {
                         // A Toast rather than a dialog is necessary since the interface does not wait

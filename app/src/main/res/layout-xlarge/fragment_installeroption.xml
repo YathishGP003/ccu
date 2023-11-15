@@ -452,21 +452,6 @@
                 android:textOn=""
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/textNetworkError"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/errorNetwork"
-                android:textColor="?orange_75f"
-                android:textSize="26dp"
-                android:layout_marginTop="5sp"
-                android:layout_marginLeft="96sp"
-                android:layout_below="@+id/imageTemp"
-                android:visibility="gone"
-                />
-
-
-
             <Button
                 android:layout_below="@+id/imageTemp"
                 android:id="@+id/buttonNext"

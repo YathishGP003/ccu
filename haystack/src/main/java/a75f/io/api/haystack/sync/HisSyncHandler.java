@@ -234,8 +234,12 @@ public class HisSyncHandler
             String pointID = pointToSync.get("id").toString();
             List<HisItem> unsyncedHisItems;
             String pointDescription = pointToSync.get("dis").toString();
-
-            String pointTimezone = pointToSync.get("tz").toString();
+            String pointTimezone;
+            if (pointToSync.get("tz") != null) {
+                pointTimezone = pointToSync.get("tz").toString();
+            } else {
+                pointTimezone = "Chicago";
+            }
     
             String kind = pointToSync.get("kind").toString();
             if (kind.equals(Kind.STRING.getValue())) {

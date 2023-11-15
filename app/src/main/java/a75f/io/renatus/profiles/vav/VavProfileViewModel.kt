@@ -151,7 +151,7 @@ class VavProfileViewModel : ViewModel() {
             hayStack.syncEntityTree()
             CCUHsApi.getInstance().setCcuReady()
             LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
-            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
+
         }, {
             ProgressDialogUtils.hideProgressDialog()
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))

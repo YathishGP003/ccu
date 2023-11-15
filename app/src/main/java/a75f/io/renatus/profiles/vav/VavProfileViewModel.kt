@@ -1,11 +1,13 @@
 package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelSource
+import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -14,6 +16,7 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavReheatProfile
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.SAVED
@@ -92,8 +95,11 @@ class VavProfileViewModel : ViewModel() {
             }
         }
 
-        model = ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
-        deviceModel = ModelSource.getModelByProfileName("nickTestSmartNodeDevice") as SeventyFiveFDeviceDirective
+        // Models are temporarily loaded from local files to allow quick model revisions during development.
+        // In the released CCU build, these will draw from the Hayloft API.
+        model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
+        deviceModel = ModelSource.getDeviceModelByFileName("nickTestSmartNodeDevice_v0.0.0") as SeventyFiveFDeviceDirective //deviceModel = ModelSource.getModelByProfileName("nickTestSmartNodeDevice") as SeventyFiveFDeviceDirective
+
         profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
                                         zoneRef, floorRef , model ).getDefaultConfiguration()
 
@@ -141,7 +147,11 @@ class VavProfileViewModel : ViewModel() {
             setUpVavProfile()
 
             L.saveCCUState()
+
+            hayStack.syncEntityTree()
             CCUHsApi.getInstance().setCcuReady()
+            LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
+            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
         }, {
             ProgressDialogUtils.hideProgressDialog()
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
@@ -183,7 +193,7 @@ class VavProfileViewModel : ViewModel() {
 
             vavProfile.addLogicalMapAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
             L.ccu().zoneProfiles.add(vavProfile)
-            L.saveCCUState()
+
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
         }

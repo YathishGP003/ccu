@@ -1,38 +1,38 @@
 package a75f.io.domain.smartNode.vavNoFan
 
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 open class VavNoFanTestConfiguration (nodeAddress: Int, nodeType: String, priority: Int, roomRef : String, floorRef : String)
     : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef) {
 
-    var damperType = AssociationConfig(a75f.io.domain.api.damperType)
-    var damperSize = AssociationConfig(a75f.io.domain.api.damperSize)
-    var damperShape = AssociationConfig(a75f.io.domain.api.damperShape)
-    var reheatType = AssociationConfig(a75f.io.domain.api.reheatType)
-    var zonePriority = AssociationConfig(a75f.io.domain.api.zonePriority)
+    var damperType = AssociationConfig(DomainName.damperType)
+    var damperSize = AssociationConfig(DomainName.damperSize)
+    var damperShape = AssociationConfig(DomainName.damperShape)
+    var reheatType = AssociationConfig(DomainName.reheatType)
+    var zonePriority = AssociationConfig(DomainName.zonePriority)
 
-    var autoAway = EnableConfig(a75f.io.domain.api.autoAway)
-    var autoForceOccupied = EnableConfig(a75f.io.domain.api.autoForceOccupied)
-    var enableCo2Control = EnableConfig(a75f.io.domain.api.enableCo2Control)
-    var enableIAQControl = EnableConfig(a75f.io.domain.api.enableIAQControl)
-    var enableCFMControl = EnableConfig(a75f.io.domain.api.enableCFMControl)
+    var autoAway = EnableConfig(DomainName.autoAway)
+    var autoForceOccupied = EnableConfig(DomainName.autoForceOccupied)
+    var enableCo2Control = EnableConfig(DomainName.enableCo2Control)
+    var enableIAQControl = EnableConfig(DomainName.enableIAQControl)
+    var enableCFMControl = EnableConfig(DomainName.enableCFMControl)
 
-    var temperatureOffset = ValueConfig(a75f.io.domain.api.temperatureOffset)
+    var temperatureOffset = ValueConfig(DomainName.temperatureOffset)
 
-    var maxCoolingDamperPos = ValueConfig(a75f.io.domain.api.maxCoolingDamperPos)
-    var minCoolingDamperPos = ValueConfig(a75f.io.domain.api.minCoolingDamperPos)
-    var maxHeatingDamperPos = ValueConfig(a75f.io.domain.api.maxHeatingDamperPos)
-    var minHeatingDamperPos = ValueConfig(a75f.io.domain.api.minHeatingDamperPos)
+    var maxCoolingDamperPos = ValueConfig(DomainName.maxCoolingDamperPos)
+    var minCoolingDamperPos = ValueConfig(DomainName.minCoolingDamperPos)
+    var maxHeatingDamperPos = ValueConfig(DomainName.maxHeatingDamperPos)
+    var minHeatingDamperPos = ValueConfig(DomainName.minHeatingDamperPos)
 
-    var kFactor = ValueConfig(a75f.io.domain.api.kFactor)
-    var maxCFMCooling = ValueConfig(a75f.io.domain.api.maxCFMCooling)
-    var minCFMCooling = ValueConfig(a75f.io.domain.api.minCFMCooling)
-    var maxCFMReheating = ValueConfig(a75f.io.domain.api.maxCFMReheating)
-    var minCFMReheating = ValueConfig(a75f.io.domain.api.minCFMReheating)
+    var kFactor = ValueConfig(DomainName.kFactor)
+    var maxCFMCooling = ValueConfig(DomainName.maxCFMCooling)
+    var minCFMCooling = ValueConfig(DomainName.minCFMCooling)
+    var maxCFMReheating = ValueConfig(DomainName.maxCFMReheating)
+    var minCFMReheating = ValueConfig(DomainName.minCFMReheating)
 
     init {
         damperType.associationVal = 1

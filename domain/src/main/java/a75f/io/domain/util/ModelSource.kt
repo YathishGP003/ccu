@@ -4,6 +4,8 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import java.io.FileNotFoundException
 
 /**
@@ -44,5 +46,30 @@ class ModelSource {
             }
             return modelId
         }
+
+        fun getDeviceModelByFileName(modelName: String) : SeventyFiveFDeviceDirective? {
+            try {
+                return ResourceHelper.loadDeviceModelDefinition("${MODEL_PATH}${modelName}.json")
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            } catch (e: JsonParseException) {
+                e.printStackTrace()
+            }
+            CcuLog.i(Domain.LOG_TAG, "Can't load device model")
+            return null
+        }
+
+        fun getProfileModelByFileName(modelName: String) : SeventyFiveFProfileDirective? {
+            try {
+                return ResourceHelper.loadProfileModelDefinition("${MODEL_PATH}${modelName}.json")
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            } catch (e: JsonParseException) {
+                e.printStackTrace()
+            }
+            CcuLog.i(Domain.LOG_TAG, "Can't load profile model")
+            return null
+        }
+
     }
 }

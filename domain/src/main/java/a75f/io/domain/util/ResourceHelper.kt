@@ -15,6 +15,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.common.ConstraintDeserializer
 import io.seventyfivef.domainmodeler.common.ModelDirectiveDeserializer
 import io.seventyfivef.domainmodeler.common.PointConfigurationDeserializer
@@ -89,6 +90,13 @@ object ResourceHelper {
         //val objectMapper = ObjectMapperConfig().objectMapper()
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFProfileDirective
+    }
+
+    fun loadDeviceModelDefinition(fileName: String) : SeventyFiveFDeviceDirective {
+        @Nullable val modelData: String? = loadString(fileName)
+
+        val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
+        return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFDeviceDirective
     }
 
     fun getModelVersion(fileName: String): JSONObject {

@@ -1,6 +1,7 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
@@ -99,6 +100,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readPriorityVal() : Double {
         requireId()
+        CcuLog.i(Domain.LOG_TAG, "Point "+Domain.hayStack.readMapById(id))
         return Domain.hayStack.readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {

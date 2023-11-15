@@ -27,7 +27,6 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
-import a75f.io.domain.api.Domain;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
@@ -80,7 +79,7 @@ import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.migration.smartnode.SmartNodeMigration;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
@@ -374,7 +373,7 @@ public class Globals {
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     if (CCUHsApi.getInstance().isCCURegistered()) {
-                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     }
                 }
             }

@@ -158,6 +158,7 @@ class SchedulabeLimits {
                     .setTz(tz)
             addTagsBasedOnCondition(isBuilding, heatingUserLimitMin, ref)
             val heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin.build())
+            //
             hayStack.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0)
             hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN)
             if(!isBuilding){

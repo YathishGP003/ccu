@@ -1348,7 +1348,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
+                    LogicalPointsUtil.createAnalogOutPointForModulatingFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt()),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -1922,7 +1922,7 @@ class HyperStatPointsUtil(
     fun getCpuAnalogOutLogicalPoint(association: CpuAnalogOutAssociation): Point {
         return when(association){
             CpuAnalogOutAssociation.COOLING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogCoolingLogicalPoint(equipRef)).build()
-            CpuAnalogOutAssociation.MODULATING_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.MODULATING_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutModulatingFanSpeedLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.HEATING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogHeatingLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.DCV_DAMPER-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutDcvLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()

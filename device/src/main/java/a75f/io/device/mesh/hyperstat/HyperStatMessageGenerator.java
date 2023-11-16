@@ -110,6 +110,8 @@ public class HyperStatMessageGenerator {
             .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
             .setPm25AlertThreshold((int)readPm2p5ThresholdValue(equipRef))
             .setVocAlertThreshold((int)readVocThresholdValue(equipRef))
+            .setHyperstatLinearFanSpeedsT(HyperStatSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
+            .setHyperstatStagedFanSpeeds(HyperStatSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
             .setTemperatureMode(singleMode ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_SINGLE
                     : HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();

@@ -11,15 +11,23 @@ import org.projecthaystack.HRef;
 import java.io.File;
 import java.io.IOException;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.FileBackupManager;
+import a75f.io.logic.util.ConnectionUtil;
+import a75f.io.logic.util.RxTask;
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
 
 public class FileBackupJobReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        performConfigFileBackup();
-        performModbusSideLoadedJsonsBackup();
+        if (ConnectionUtil.isNetworkConnected()) {
+            RxTask.executeAsync (() -> {
+                performConfigFileBackup();
+                performModbusSideLoadedJsonsBackup();
+            });
+
+        }
     }
     public static void performConfigFileBackup(){
         try {

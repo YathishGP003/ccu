@@ -451,7 +451,7 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatLinearFanSpeeds_t
          */
-        private fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
+        public fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
             val linearFanSpeedBuilder = HyperStat.HyperstatLinearFanSpeeds_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""
@@ -481,7 +481,7 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatStagedFanSpeeds_t
          */
-        private fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
+        public fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
             val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""
@@ -505,7 +505,7 @@ class HyperStatSettingsUtil {
             }
             return stagedFanSpeedBuilder.build()
         }
-        private fun getAnalogOutMapping(
+        fun getAnalogOutMapping(
             ccuHsApi: CCUHsApi,
             equipRef: String,
             analog: String

@@ -31,29 +31,21 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.domain.service.DomainService;
-import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -220,7 +212,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                         Site site = CCUHsApi.getInstance().getSite();
                         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                         CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
-                        BuildingEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
+                        TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
                         /*CCUHsApi.getInstance().importBuildingTuners();
 
                         ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()

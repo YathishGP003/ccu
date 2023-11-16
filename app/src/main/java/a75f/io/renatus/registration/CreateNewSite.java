@@ -1,5 +1,6 @@
 package a75f.io.renatus.registration;
 
+import static java.lang.Thread.sleep;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
@@ -67,7 +68,6 @@ import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
-import a75f.io.api.haystack.sync.SiteRegistrationHandler;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -77,7 +77,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -936,7 +936,7 @@ public class CreateNewSite extends Fragment {
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
 
-        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
 
         CCUHsApi.getInstance().syncEntityTree();
         //TODO- COMMON-DATA-FEATURE
@@ -1005,7 +1005,7 @@ public class CreateNewSite extends Fragment {
             }
         }
 
-        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
 
         //BuildingTuners.getInstance();
         //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);

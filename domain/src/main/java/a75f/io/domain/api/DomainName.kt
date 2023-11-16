@@ -320,5 +320,46 @@ object DomainName {
     const val coolingDeadband = "coolingDeadband"
     const val unoccupiedZoneSetback = "unoccupiedZoneSetback"
     const val buildingToZoneDifferential = "buildingToZoneDifferential"
+
+    const val heartBeat = "heartBeat"
+    const val currentTemp = "currentTemp"
+    const val zoneHumidity = "zoneHumidity"
+    const val desiredTemp = "desiredTemp"
+    const val desiredTempCooling = "desiredTempCooling"
+    const val desiredTempHeating = "desiredTempHeating"
+    const val coolingLoopOutput = "coolingLoopOutput"
+    const val heatingLoopOutput = "heatingLoopOutput"
+    const val scheduleType = "scheduleType"
+    const val equipStatus = "equipStatus"
+    const val equipStatusMessage = "equipStatusMessage"
+    const val equipScheduleStatus = "equipScheduleStatus"
+    const val zoneCO2 = "zoneCO2"
+    const val dischargeAirTemp = "dischargeAirTemp"
+    const val enteringAirTemp = "enteringAirTemp"
+    const val pressureSensor = "pressureSensor"
+    const val zoneVoc = "zoneVoc"
+    const val occupancyMode = "occupancyMode"
+    const val occupancyDetection = "occupancyDetection"
+
+    const val dischargeAirTempSetpoint = "dischargeAirTempSetpoint"
+    const val otaStatus = "otaStatus"
+    const val reheatCmd = "reheatCmd"
+    const val damperCmd = "damperCmd"
+    const val damperFeedback = "damperFeedback"
+    const val normalizedDamperCmd = "normalizedDamperCmd"
+    const val airVelocity = "airVelocity"
+    const val airFlowSensor = "airFlowSensor"
+    const val zoneDynamicPriority = "zoneDynamicPriority"
+    const val co2RequestPercentage = "co2RequestPercentage"
+    const val satRequestPercentage = "satRequestPercentage"
+    const val satCurrentRequest = "satCurrentRequest"
+    const val co2CurrentRequest = "co2CurrentRequest"
+    const val pressureRequestPercentage = "pressureRequestPercentage"
+    const val pressureCurrentRequest = "pressureCurrentRequest"
+    const val vavZoneVocThreshold = "vavZoneVocThreshold"
+
+
+
+
 }
 

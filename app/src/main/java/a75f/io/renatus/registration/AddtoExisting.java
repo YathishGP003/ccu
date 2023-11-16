@@ -42,7 +42,7 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusLandingActivity;
@@ -586,7 +586,7 @@ public class AddtoExisting extends Fragment {
                 boolean retVal = false;
                 if (StringUtils.isNotBlank(siteId)) {
                     retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-                    BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     Globals.getInstance().setSiteAlreadyCreated(true);
                     CCUHsApi.getInstance().setPrimaryCcu(false);
                     CCUHsApi.getInstance().updateLocalTimeZone();

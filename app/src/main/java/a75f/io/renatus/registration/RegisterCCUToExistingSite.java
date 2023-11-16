@@ -2,7 +2,7 @@ package a75f.io.renatus.registration;
 import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 import static a75f.io.logic.L.ccu;
-import android.app.AlertDialog;
+
 import android.os.Bundle;
 
 import androidx.fragment.app.DialogFragment;
@@ -37,7 +37,6 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
@@ -48,9 +47,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
-import a75f.io.logic.tuners.BuildingEquip;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;

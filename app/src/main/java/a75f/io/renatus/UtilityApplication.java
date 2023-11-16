@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.instabug.library.Instabug;
 import com.raygun.raygun4android.RaygunClient;
 
 import org.greenrobot.eventbus.EventBus;
@@ -61,6 +62,7 @@ import javax.inject.Inject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
@@ -232,6 +234,16 @@ public abstract class UtilityApplication extends Application {
         //Remove this Equip Manager once all modbus models are migrated from Domain modeler
         EquipsManager.getInstance(this).setApplicationContext(this);
 
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> site = hayStack.readEntity("site");
+        if (!site.isEmpty()) {
+            Instabug.setUserAttribute("Site",site.get(Tags.DIS).toString());
+        }
+        HashMap<Object, Object> ccu = hayStack.readEntity("device and ccu");
+        if (!ccu.isEmpty()) {
+            Instabug.setUserAttribute("CCU",ccu.get(Tags.ID).toString()+":"+ccu.get(Tags.DIS));
+        }
+
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
@@ -306,6 +318,7 @@ public abstract class UtilityApplication extends Application {
     }
 
     private void handleSafeMode(Throwable paramThrowable) {
+        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent handleSafeMode");
         StringWriter sw = new StringWriter();
         paramThrowable.printStackTrace(new PrintWriter(sw));
         String stackTrace = sw.toString();

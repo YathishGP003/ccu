@@ -121,9 +121,9 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void rebootTablet() {
+		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);
-
 		setIntentToRestartCCU();
 		try {
 			Log.d("CCU_DEBUG", "************Houston, May Day, May Day, May Day, Bailing Out!!!************");
@@ -135,6 +135,7 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void closeApp() {
+		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);
 		setIntentToRestartCCU();

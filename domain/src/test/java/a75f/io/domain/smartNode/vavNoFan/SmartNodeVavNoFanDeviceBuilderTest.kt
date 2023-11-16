@@ -72,7 +72,7 @@ class SmartNodeVavNoFanDeviceBuilderTest {
         val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef", "TestEquip")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
-        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef", "TestSite-SN-1000")
         //TestUtil.dumpDomain()
         val device = mockHayStack.readAllEntities("device and node and addr == \"1000\"")
         println("DEVICE: " + device)

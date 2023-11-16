@@ -48,7 +48,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": null,
+      "defaultValue": "VAV_REHEAT",
       "valueEnum": []
     },
     {

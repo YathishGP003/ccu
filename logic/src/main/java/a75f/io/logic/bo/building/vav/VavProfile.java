@@ -153,7 +153,9 @@ public abstract class VavProfile extends ZoneProfile {
 
         EntityMapper entityMapper = new EntityMapper(equipModel);
         DeviceBuilder deviceBuilder = new DeviceBuilder(hayStack, entityMapper);
-        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.getSite().getId());
+
+        String deviceDis = hayStack.getSiteName() + "-SN-" + config.getNodeAddress();
+        deviceBuilder.buildDeviceAndPoints(config, deviceModel, equipId, hayStack.getSite().getId(), deviceDis);
 
         vavDeviceMap.put(addr, deviceMap);
 

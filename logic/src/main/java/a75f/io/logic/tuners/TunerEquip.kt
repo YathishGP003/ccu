@@ -202,6 +202,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             val equipBuilder = TunerEquipBuilder(haystack)
             val equipId = buildingEquip["id"].toString()
             equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, haystack.site!!)
+            Domain.buildingEquip = BuildingEquip(equipId)
             return true
         }
         return false

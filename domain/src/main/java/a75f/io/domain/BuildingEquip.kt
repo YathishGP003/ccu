@@ -4,6 +4,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 
 class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
+
     val zoneTemperatureDeadLeeway = Point(DomainName.zoneTemperatureDeadLeeway, equipRef)
     val heartBeatsToSkip = Point(DomainName.heartBeatsToSkip, equipRef)
     val humidityCompensationOffset = Point(DomainName.humidityCompensationOffset, equipRef)

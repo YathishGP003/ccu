@@ -9,7 +9,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
@@ -30,8 +29,8 @@ import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
@@ -130,21 +129,21 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 switch (opMode){
                     case AUTO:
                         if(supplyWaterTempTh2 > coolingThreshold){
-                            twoPipeFCUHeatOnlyMode(twoPfcuEquip,node,roomTemp,occuStatus,fanSpeed);
+                            twoPipeFCUHeatOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
                         } else {
-                            twoPipeFCUCoolOnlyMode(twoPfcuEquip,node,roomTemp,occuStatus,fanSpeed, opMode);
+                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed, opMode);
                         }
                         break;
                     case COOL_ONLY:
                         if((supplyWaterTempTh2 < coolingThreshold) && (roomTemp > 0)){
-                            twoPipeFCUCoolOnlyMode(twoPfcuEquip,node,roomTemp,occuStatus,fanSpeed, opMode);
+                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed, opMode);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied,opMode,roomTemp);
                         }
                         break;
                     case HEAT_ONLY:
                         if((supplyWaterTempTh2 > coolingThreshold) && (roomTemp > 0)){
-                            twoPipeFCUHeatOnlyMode(twoPfcuEquip,node,roomTemp,occuStatus,fanSpeed);
+                            twoPipeFCUHeatOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied,opMode, roomTemp);
                         }
@@ -451,9 +450,9 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         twoPfcuDeviceMap.get(node).setStatus(DEADBAND.ordinal());
     }
 
-    private void twoPipeFCUCoolOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed, StandaloneOperationalMode opMode){
+    private void twoPipeFCUCoolOnlyMode(String equipId, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed, StandaloneOperationalMode opMode){
 
-        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
+        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
         boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
@@ -463,15 +462,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-            HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
-            if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
-                heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
-                coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
-            }else{
-                heatingDeadband = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
-                coolingDeadband = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
-            }
+            coolingDeadband = occuStatus.getCoolingDeadBand();
+            heatingDeadband = occuStatus.getHeatingDeadBand();
             occupied = occuStatus.isOccupied();
         }
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
@@ -629,13 +621,13 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equip.getId(), COOLING,relayStates,ZoneTempState.NONE);
+        StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
         //if(twoPfcuDeviceMap.get(addr).getStatus() != curstate.ordinal())
             twoPfcuDeviceMap.get(addr).setStatus(COOLING.ordinal());
     }
 
-    private void twoPipeFCUHeatOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){
-        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
+    private void twoPipeFCUHeatOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
+        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
         boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
@@ -816,7 +808,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equip.getId(), HEATING,relayStates ,ZoneTempState.NONE);
+        StandaloneScheduler.updateSmartStatStatus(equipId, HEATING,relayStates ,ZoneTempState.NONE);
        //if(twoPipeFanCoilUnitEquip.getStatus() != curstate.ordinal())
             twoPfcuDeviceMap.get(addr).setStatus(HEATING.ordinal());
     }

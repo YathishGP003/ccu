@@ -34,8 +34,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             return
         }
         if (schedulerRevamp.isMigrationRequired()) {
-            createMigrationVersionPoint(CCUHsApi.getInstance())
-            syncZoneSchedulesToCloud(CCUHsApi.getInstance())
+            val ccuHsApi = CCUHsApi.getInstance()
+            createMigrationVersionPoint(ccuHsApi)
+            val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery("schedulable and" +
+                    " heating and limit and max and default")
+            if(remoteScheduleAblePoint.isEmpty()) {
+                syncZoneSchedulesToCloud(ccuHsApi)
+            }
             /*Initiate scheduler revamp migration after 10 seconds so that all new zone schedules
             will be synced to backend */
             Timer().schedule(object : TimerTask() {

@@ -1,6 +1,7 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -9,6 +10,11 @@ import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import org.projecthaystack.HDict
+import org.projecthaystack.HDictBuilder
+import org.projecthaystack.HGridBuilder
+import org.projecthaystack.io.HZincReader
+import org.projecthaystack.io.HZincWriter
 import java.util.*
 
 
@@ -38,29 +44,32 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             createMigrationVersionPoint(ccuHsApi)
             val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery("schedulable and" +
                     " heating and limit and max and default")
-            if(remoteScheduleAblePoint.isEmpty()) {
+            val sGrid = HZincReader(remoteScheduleAblePoint).readGrid()
+            val it = sGrid.iterator();
+            if(!it.hasNext()) {
                 syncZoneSchedulesToCloud(ccuHsApi)
             }
-            /*Initiate scheduler revamp migration after 10 seconds so that all new zone schedules
-            will be synced to backend */
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    schedulerRevamp.doMigration()
-                }
-            }, 10 * 1000)
+            schedulerRevamp.doMigration()
         }
     }
 
     private fun syncZoneSchedulesToCloud(hayStack: CCUHsApi?) {
-        val zoneSchedules = hayStack?.readAllEntities("zone and schedule and not special and not vacation")
+        val zoneSchedules =
+            hayStack?.readAllEntities("zone and schedule and not special and not vacation")
         if (zoneSchedules != null) {
-            for(zoneSchedule in zoneSchedules){
-                val s = hayStack.getScheduleById(zoneSchedule["id"].toString())
-                if(CCUHsApi.getInstance().isEntityExisting(s.roomRef)) {
-                    CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
-                }
+            val zoneScheduleDictList = ArrayList<HDict>()
+            for (zoneSchedule in zoneSchedules) {
+                val entity = CCUHsApi.getInstance().readHDictById(zoneSchedule["id"].toString())
+                val builder = HDictBuilder()
+                builder.add(entity)
+                zoneScheduleDictList.add(builder.toDict())
             }
-            hayStack.syncEntityTree()
+            val zoneScheduleGridData = HGridBuilder.dictsToGrid(zoneScheduleDictList.toTypedArray())
+            val response = HttpUtil.executePost(
+                CCUHsApi.getInstance().hsUrl +
+                        "addEntity", HZincWriter.gridToString(zoneScheduleGridData)
+            )
+            Log.i(L.TAG_CCU_SCHEDULER, "All zone schedules are synced to cloud$response")
         }
     }
 

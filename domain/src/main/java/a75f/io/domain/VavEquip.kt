@@ -45,6 +45,9 @@ class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val maxCFMCooling = Point(DomainName.maxCFMCooling, equipRef)
     val maxCFMReheating = Point(DomainName.maxCFMReheating, equipRef)
     val maxHeatingDamperPos = Point(DomainName.maxHeatingDamperPos, equipRef)
+    val minHeatingDamperPos = Point(DomainName.minHeatingDamperPos, equipRef)
+    val maxCoolingDamperPos = Point(DomainName.maxCoolingDamperPos, equipRef)
+    val minCoolingDamperPos = Point(DomainName.minCoolingDamperPos, equipRef)
     val occupancyMode = Point(DomainName.occupancyMode, equipRef)
     val occupancyDetection = Point(DomainName.occupancyDetection, equipRef)
 

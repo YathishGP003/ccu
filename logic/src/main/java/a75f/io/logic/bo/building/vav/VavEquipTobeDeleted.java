@@ -72,7 +72,7 @@ import a75f.io.logic.util.RxTask;
  * Current design requires only one equip/map per profile, but map/list of LogicalMap
  * per profile is maintained to support any requirement of adding multiple equips/devices per profile.
  */
-public class VavEquip
+public class VavEquipTobeDeleted
 {
     //TODO - Tuners
     int    integralMaxTimeout = 30;
@@ -115,7 +115,7 @@ public class VavEquip
     CCUHsApi hayStack= CCUHsApi.getInstance();
     String equipRef = null;
 
-    public VavEquip(ProfileType T, int node) {
+    public VavEquipTobeDeleted(ProfileType T, int node) {
         
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
@@ -207,552 +207,6 @@ public class VavEquip
         cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
         cfmController.reset();
     }
-    
-    public void createHaystackPoints(VavProfileConfiguration config, String floor, String room, NodeType nodeType) {
-        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
-        Schedule roomSchedule = UtilKt.getSchedule(room,floor);
-    
-        //Create Logical points
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis+"-VAV-"+nodeAddr;
-        String ahuRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (systemEquip != null && systemEquip.size() > 0) {
-            ahuRef = systemEquip.get("id").toString();
-        }
-        boolean isElectric = config.reheatType == ReheatType.Pulse.ordinal() ||
-                             config.reheatType == ReheatType.OneStage.ordinal() ||
-                             config.reheatType == ReheatType.TwoStage.ordinal();
-        
-        Equip.Builder b = new Equip.Builder()
-                          .setSiteRef(siteRef)
-                          .setDisplayName(equipDis)
-                          .setRoomRef(room)
-                          .setFloorRef(floor)
-                          .setProfile(profileType.name())
-                          .setPriority(config.getPriority().name())
-                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("singleDuct")
-                          .addMarker("pressureDependent").addMarker(isSmartNode ? "smartnode":"helionode")
-                          .addMarker(isElectric ? "elecReheat" : "hotWaterReheat")
-                          .setAhuRef(ahuRef)
-                          .setTz(tz)
-                          .setGroup(String.valueOf(nodeAddr));
-        String fanMarker = "";
-        if (profileType == ProfileType.VAV_SERIES_FAN) {
-            b.addMarker("fanPowered").addMarker("series");
-            fanMarker = "series";
-        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
-            b.addMarker("fanPowered").addMarker("parallel");
-            fanMarker = "parallel";
-        }
-        String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-    
-        RxTask.executeAsync(() -> VavTuners.addVavEquipTuners( CCUHsApi.getInstance(),
-                                                               siteRef,
-                                                               equipDis,
-                                                               equipRef,
-                                                               room,
-                                                               floor,
-                                                               tz));
-        
-        createVavConfigPoints(config, equipRef, floor, room);
-        
-        List<HisItem> hisItems = new ArrayList<>();
-        Point datPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeAirTemp")
-                                .setEquipRef(equipRef)
-                                .setSiteRef(siteRef)
-                                .setRoomRef(room)
-                                .setFloorRef(floor).setHisInterpolate("cov")
-                                .addMarker("discharge").addMarker("vav").addMarker(fanMarker)
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setUnit("\u00B0F")
-                                .setTz(tz)
-                                .build();
-        BacnetUtilKt.addBacnetTags(datPoint, BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String datID = CCUHsApi.getInstance().addPoint(datPoint);
-        hisItems.add(new HisItem(datID, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point eatPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-enteringAirTemp")
-                                .setEquipRef(equipRef)
-                                .setSiteRef(siteRef)
-                                .setRoomRef(room)
-                                .setFloorRef(floor).setHisInterpolate("cov")
-                                .addMarker("entering").addMarker("vav").addMarker(fanMarker)
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setUnit("\u00B0F")
-                                .setTz(tz)
-                                .build();
-        BacnetUtilKt.addBacnetTags(eatPoint, BacnetIdKt.ENTERINGAIRTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        hisItems.add(new HisItem(eatID, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point damperPos = new Point.Builder()
-                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperPos")
-                                .setEquipRef(equipRef)
-                                .setSiteRef(siteRef)
-                                .setRoomRef(room)
-                                .setFloorRef(floor).setHisInterpolate("cov")
-                                .addMarker("damper").addMarker("vav").addMarker(fanMarker)
-                                .addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setUnit("%")
-                                .setTz(tz)
-                                .build();
-        BacnetUtilKt.addBacnetTags(damperPos, BacnetIdKt.DAMPER1POSID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String dpID = CCUHsApi.getInstance().addPoint(damperPos);
-        hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point normalizedDamperPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-normalizedDamperPos")
-                                  .setEquipRef(equipRef)
-                                  .setSiteRef(siteRef)
-                                  .setRoomRef(room)
-                                  .setFloorRef(floor).setHisInterpolate("cov")
-                                  .addMarker("damper").addMarker("vav").addMarker(fanMarker)
-                                  .addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
-                                  .setGroup(String.valueOf(nodeAddr))
-                                  .setUnit("%")
-                                  .setTz(tz)
-                                  .build();
-        String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
-        
-        Point currentTemp = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-currentTemp")
-                                  .setEquipRef(equipRef)
-                                  .setSiteRef(siteRef)
-                                  .setRoomRef(room)
-                                  .setFloorRef(floor).setHisInterpolate("cov")
-                                  .addMarker("zone").addMarker("vav").addMarker(fanMarker)
-                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
-                                  .setGroup(String.valueOf(nodeAddr))
-                                  .setUnit("\u00B0F")
-                                  .setTz(tz)
-                                  .build();
-        BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-        hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point humidity = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-humidity")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("zone").addMarker("vav").addMarker(fanMarker)
-                                    .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("%")
-                                    .setTz(tz)
-                                    .build();
-        BacnetUtilKt.addBacnetTags(humidity, BacnetIdKt.HUMIDITYID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String humidityId = CCUHsApi.getInstance().addPoint(humidity);
-
-        hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
-    
-        Point co2 = new Point.Builder()
-                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2")
-                                 .setEquipRef(equipRef)
-                                 .setSiteRef(siteRef)
-                                 .setRoomRef(room)
-                                 .setFloorRef(floor).setHisInterpolate("cov")
-                                 .addMarker("zone").addMarker("vav").addMarker(fanMarker)
-                                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
-                                 .setGroup(String.valueOf(nodeAddr))
-                                 .setUnit("ppm")
-                                 .setTz(tz)
-                                 .build();
-        BacnetUtilKt.addBacnetTags(co2, BacnetIdKt.CO2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String co2Id = CCUHsApi.getInstance().addPoint(co2);
-        hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point voc = new Point.Builder()
-                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-voc")
-                                 .setEquipRef(equipRef)
-                                 .setSiteRef(siteRef)
-                                 .setRoomRef(room)
-                                 .setFloorRef(floor).setHisInterpolate("cov")
-                                 .addMarker("zone").addMarker("vav").addMarker(fanMarker)
-                                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
-                                 .setGroup(String.valueOf(nodeAddr))
-                                 .setUnit("ppb")
-                                 .setTz(tz)
-                                 .build();
-        BacnetUtilKt.addBacnetTags(voc, BacnetIdKt.VOCID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String vocId = CCUHsApi.getInstance().addPoint(voc);
-        hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point desiredTemp = new Point.Builder()
-                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
-                                           .setEquipRef(equipRef)
-                                           .setSiteRef(siteRef)
-                                           .setRoomRef(room)
-                                           .setFloorRef(floor).setHisInterpolate("cov")
-                                           .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker(fanMarker)
-                                           .addMarker("average").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
-                                           .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
-                                           .setTz(tz)
-                                           .build();
-        BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
-        
-        Point desiredTempCooling = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempCooling")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker(fanMarker)
-                                    .addMarker("cooling").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("\u00B0F")
-                                    .setTz(tz)
-                                    .build();
-        BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String dtCoolingId = CCUHsApi.getInstance().addPoint(desiredTempCooling);
-        
-        Point desiredTempHeating = new Point.Builder()
-                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempHeating")
-                                           .setEquipRef(equipRef)
-                                           .setSiteRef(siteRef)
-                                           .setRoomRef(room)
-                                           .setFloorRef(floor).setHisInterpolate("cov")
-                                           .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker(fanMarker)
-                                           .addMarker("heating").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
-                                           .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
-                                           .setTz(tz)
-                                           .build();
-        BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String dtHeatingId = CCUHsApi.getInstance().addPoint(desiredTempHeating);
-        
-        Point heatingLoopOp = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-heatingLoopOp")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker(fanMarker)
-                                    .addMarker("zone")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("%")
-                                    .setTz(tz)
-                                    .build();
-        BacnetUtilKt.addBacnetTags(heatingLoopOp, BacnetIdKt.HEATINGLOOPOUTPUTID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        CCUHsApi.getInstance().addPoint(heatingLoopOp);
-    
-        Point coolingLoopOp = new Point.Builder()
-                                      .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-coolingLoopOp")
-                                      .setEquipRef(equipRef)
-                                      .setSiteRef(siteRef)
-                                      .setRoomRef(room)
-                                      .setFloorRef(floor).setHisInterpolate("cov")
-                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker(fanMarker)
-                                      .addMarker("zone")
-                                      .setGroup(String.valueOf(nodeAddr))
-                                      .setUnit("%")
-                                      .setTz(tz)
-                                      .build();
-        BacnetUtilKt.addBacnetTags(coolingLoopOp, BacnetIdKt.COOLINGLOOPOUTPUTID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        CCUHsApi.getInstance().addPoint(coolingLoopOp);
-    
-        Point dischargeSp = new Point.Builder()
-                                      .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeSp")
-                                      .setEquipRef(equipRef)
-                                      .setSiteRef(siteRef)
-                                      .setRoomRef(room)
-                                      .setFloorRef(floor).setHisInterpolate("cov")
-                                      .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone")
-                                      .addMarker("sp").addMarker("his").addMarker("vav").addMarker(fanMarker)
-                                      .setGroup(String.valueOf(nodeAddr))
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
-        BacnetUtilKt.addBacnetTags(dischargeSp, BacnetIdKt.DISCHARGESPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        CCUHsApi.getInstance().addPoint(dischargeSp);
-    
-        Point satRequestPercentage = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-satRequestPercentage")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav").addMarker(fanMarker)
-                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("%")
-                                    .setTz(tz)
-                                    .build();
-        CCUHsApi.getInstance().addPoint(satRequestPercentage);
-    
-        Point co2RequestPercentage = new Point.Builder()
-                                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2RequestPercentage")
-                                             .setEquipRef(equipRef)
-                                             .setSiteRef(siteRef)
-                                             .setRoomRef(room)
-                                             .setFloorRef(floor).setHisInterpolate("cov")
-                                             .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav").addMarker(fanMarker)
-                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone")
-                                             .setGroup(String.valueOf(nodeAddr))
-                                             .setUnit("%")
-                                             .setTz(tz)
-                                             .build();
-        CCUHsApi.getInstance().addPoint(co2RequestPercentage);
-    
-        Point pressureRequestPercentage = new Point.Builder()
-                                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-staticRequestPercentage")
-                                             .setEquipRef(equipRef)
-                                             .setSiteRef(siteRef)
-                                             .setRoomRef(room)
-                                             .setFloorRef(floor).setHisInterpolate("cov")
-                                             .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav").addMarker(fanMarker)
-                                             .addMarker("tr").addMarker("staticPressure").addMarker("his").addMarker("zone")
-                                             .setGroup(String.valueOf(nodeAddr))
-                                             .setUnit("%")
-                                             .setTz(tz)
-                                             .build();
-        CCUHsApi.getInstance().addPoint(pressureRequestPercentage);
-    
-        Point satCurrentRequest = new Point.Builder()
-                                          .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-satCurrentRequest")
-                                          .setEquipRef(equipRef)
-                                          .setSiteRef(siteRef)
-                                          .setRoomRef(room)
-                                          .setFloorRef(floor).setHisInterpolate("cov")
-                                          .addMarker("sat").addMarker("current").addMarker("request").addMarker("tr").addMarker("sp").addMarker("his")
-                                          .addMarker("vav").addMarker(fanMarker).addMarker("zone")
-                                          .setGroup(String.valueOf(nodeAddr))
-                                          .setTz(tz)
-                                          .build();
-        CCUHsApi.getInstance().addPoint(satCurrentRequest);
-    
-        Point co2CurrentRequest = new Point.Builder()
-                                          .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2CurrentRequest")
-                                          .setEquipRef(equipRef)
-                                          .setSiteRef(siteRef)
-                                          .setRoomRef(room)
-                                          .setFloorRef(floor).setHisInterpolate("cov")
-                                          .addMarker("co2").addMarker("current").addMarker("request").addMarker("tr").addMarker("sp").addMarker("his")
-                                          .addMarker("vav").addMarker(fanMarker).addMarker("zone")
-                                          .setGroup(String.valueOf(nodeAddr))
-                                          .setTz(tz)
-                                          .build();
-        CCUHsApi.getInstance().addPoint(co2CurrentRequest);
-    
-        Point spCurrentRequest = new Point.Builder()
-                                         .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-spCurrentRequest")
-                                         .setEquipRef(equipRef)
-                                         .setSiteRef(siteRef)
-                                         .setRoomRef(room)
-                                         .setFloorRef(floor).setHisInterpolate("cov")
-                                         .addMarker("staticPressure").addMarker("current").addMarker("request").addMarker("tr").addMarker("sp")
-                                         .addMarker("his").addMarker("vav").addMarker(fanMarker).addMarker("zone")
-                                         .setGroup(String.valueOf(nodeAddr))
-                                         .setTz(tz)
-                                         .build();
-        CCUHsApi.getInstance().addPoint(spCurrentRequest);
-    
-        Point equipStatus = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatus")
-                                  .setEquipRef(equipRef)
-                                  .setSiteRef(siteRef)
-                                  .setRoomRef(room)
-                                  .setFloorRef(floor).setHisInterpolate("cov")
-                                  .addMarker("status").addMarker("vav").addMarker(fanMarker).addMarker("his").addMarker("zone")
-                                  .setGroup(String.valueOf(nodeAddr))
-                                  .setEnums("deadband,cooling,heating,tempdead")
-                                  .setTz(tz)
-                                  .build();
-        String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point equipStatusMessage = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor)
-                                    .addMarker("status").addMarker("message").addMarker("vav").addMarker(fanMarker)
-                                    .addMarker("writable").addMarker("zone")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setTz(tz)
-                                    .setKind(Kind.STRING)
-                                    .build();
-        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
-        Point equipScheduleStatus = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("vav").addMarker(fanMarker).addMarker("scheduleStatus")
-                                    .addMarker("zone").addMarker("writable").addMarker("his")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setTz(tz)
-                                    .setKind(Kind.STRING)
-                                    .build();
-        String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
-    
-        Point occupancy = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-occupancy")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor).setHisInterpolate("cov")
-                                    .addMarker("vav").addMarker(fanMarker).addMarker("occupancy").addMarker("mode")
-                                    .addMarker("zone").addMarker("his")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums(Occupancy.getEnumStringDefinition())
-                                    .setTz(tz)
-                                    .build();
-        String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
-        hisItems.add(new HisItem(occupancyId, new Date(System.currentTimeMillis()), 0.0));
-        
-        Point equipScheduleType = new Point.Builder()
-                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-scheduleType")
-                                           .setEquipRef(equipRef)
-                                           .setSiteRef(siteRef)
-                                           .setRoomRef(room)
-                                           .setFloorRef(floor).setHisInterpolate("cov")
-                                           .addMarker("zone").addMarker("vav").addMarker(fanMarker)
-                                           .addMarker("scheduleType").addMarker("writable").addMarker("his")
-                                           .setGroup(String.valueOf(nodeAddr))
-                                           .setTz(tz)
-                                           .setEnums("building,zone,named")
-                                           .build();
-        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, roomSchedule.isZoneSchedule() ? 1.0 : 2.0);
-        hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), roomSchedule.isZoneSchedule() ? 1.0 : 2.0));
-
-        Point zoneDynamicPriorityPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-zoneDynamicPriority")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("vav").addMarker(fanMarker).addMarker("zone").addMarker("dynamic")
-                .addMarker("priority").addMarker("writable").addMarker("sp").addMarker("his").addMarker("logical")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 10.0));
-        
-        Point pressure = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker(fanMarker)
-                .setGroup(String.valueOf(nodeAddr))
-                .setUnit(Consts.PRESSURE_UNIT)
-                .setTz(tz)
-                .build();
-        BacnetUtilKt.addBacnetTags(pressure, BacnetIdKt.PRESSUREID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
-        String pressureId = CCUHsApi.getInstance().addPoint(pressure);
-        
-        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, room, floor, nodeAddr, "vav", tz, false));
-
-        String damperFeedbackID = createFeedbackPoint(CCUHsApi.getInstance(),nodeAddr,equipDis,equipRef,siteRef,room,
-                floor,fanMarker,tz);
-        hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
-
-        Equip vavEquip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build();
-        String rhID = null;
-        if (config.reheatType != -1) {
-            rhID = createReheatPosPointVav(vavEquip, hayStack, getFanMarker(), nodeAddr);
-            hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
-        }
-
-        //Create Physical points and map
-        SmartNode device;
-        String nodeName;
-        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
-             device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
-            nodeName = Tags.SN;
-        }else  {
-             device = new HelioNode(nodeAddr, siteRef, floor, room, equipRef);
-            nodeName = Tags.HN;
-        }
-        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, hayStack);
-
-        device.th1In.setPointRef(datID);
-        device.th1In.setEnabled(true);
-        device.th2In.setPointRef(eatID);
-        device.th2In.setEnabled(true);
-        device.analog1Out.setPointRef(normalizedDPId);
-        //device.analog1Out.setEnabled(true);
-        if (rhID != null && !rhID.isEmpty()) {
-            device.analog2Out.setPointRef(rhID);
-        }
-        device.relay1.setPointRef(rhID);
-        device.rssi.setPointRef(heartBeatId);
-        device.rssi.setEnabled(true);
-        device.analog1In.setEnabled(true);
-        device.analog1In.setPointRef(damperFeedbackID);
-        ConfigUtil.Companion.addOccupancyPointsSN(device,fanMarker,siteRef,room,floor,equipRef,tz,String.valueOf(nodeAddr),equipDis);
-
-        if (profileType != ProfileType.VAV_REHEAT) {
-            createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);
-            String fanPointId = createFanOutPoint(siteDis, equipRef, siteRef, floor, room, tz, fanMarker);
-            device.relay2.setPointRef(fanPointId);
-        } else {
-            device.relay2.setPointRef(rhID);
-        }
-        //device.analog2Out.setEnabled(true);
-        device.currentTemp.setPointRef(ctID);
-        device.currentTemp.setEnabled(true);
-        device.desiredTemp.setPointRef(dtId);
-        device.desiredTemp.setEnabled(true);
-        
-        for (Output op : config.getOutputs()) {
-            switch (op.getPort()) {
-                case ANALOG_OUT_ONE:
-                    device.analog1Out.setType(op.getAnalogActuatorType());
-                    device.analog1In.setType(op.getAnalogActuatorType());
-                    break;
-                case ANALOG_OUT_TWO:
-                    device.analog2Out.setType(op.getAnalogActuatorType());
-                    break;
-                case RELAY_ONE:
-                    device.relay1.setType(op.getRelayActuatorType());
-                    break;
-                case RELAY_TWO:
-                    device.relay2.setType(op.getRelayActuatorType());
-                    break;
-            }
-        }
-        device.analog1Out.setEnabled(config.isOpConfigured(ANALOG_OUT_ONE));
-        if (rhID != null && !rhID.isEmpty()) {
-            device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
-        } else {
-            device.analog2Out.setEnabled(false);
-
-        }
-        device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
-        device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
-        device.addPointsToDb();
-        
-        device.addSensor(Port.SENSOR_RH, humidityId);
-        device.addSensor(Port.SENSOR_CO2, co2Id);
-        device.addSensor(Port.SENSOR_VOC, vocId);
-        device.addSensor(Port.SENSOR_PRESSURE, pressureId);
-        //Initialize write array for points, otherwise a read before write will throw exception
-        setDesiredTempCooling(74.0);
-        setDesiredTemp(72.0);
-        setDesiredTempHeating(70.0);
-        setScheduleStatus("");
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
-    }
 
     private static String createReheatPosPointVav(Equip vavEquip, CCUHsApi hayStack, String fanMarker,
                                                   int nodeAddr) {
@@ -798,9 +252,9 @@ public class VavEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanId, 0.0);
         return fanId;
     }
-    
+
     private String getFanMarker() {
-    
+
         if (profileType == ProfileType.VAV_SERIES_FAN) {
             return Tags.SERIES;
         } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
@@ -843,7 +297,7 @@ public class VavEquip
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis+"-VAV-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-    
+
         String fanMarker = "";
         if (profileType == ProfileType.VAV_SERIES_FAN) {
             fanMarker = "series";
@@ -864,7 +318,7 @@ public class VavEquip
                                          .build();
         String damperTypeId = CCUHsApi.getInstance().addPoint(damperType);
         CCUHsApi.getInstance().writeDefaultValById(damperTypeId, (double)config.damperType);
-    
+
         Point damperSize = new Point.Builder()
                                    .setDisplayName(equipDis+"-damperSize")
                                    .setEquipRef(equipRef)
@@ -878,7 +332,7 @@ public class VavEquip
                                    .build();
         String damperSizeId = CCUHsApi.getInstance().addPoint(damperSize);
         CCUHsApi.getInstance().writeDefaultValById(damperSizeId, (double)config.damperSize);
-    
+
         Point damperShape = new Point.Builder()
                                    .setDisplayName(equipDis+"-damperShape")
                                    .setEquipRef(equipRef)
@@ -893,7 +347,7 @@ public class VavEquip
                                    .build();
         String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
         CCUHsApi.getInstance().writeDefaultValById(damperShapeId, (double)config.damperShape);
-    
+
         Point.Builder reheatTypeBuilder = new Point.Builder()
                                    .setDisplayName(equipDis+"-reheatType")
                                    .setEquipRef(equipRef)
@@ -911,7 +365,7 @@ public class VavEquip
         }
         String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatTypeBuilder.build());
         CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, (double)config.reheatType);
-    
+
         Point enableCO2Control = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableCO2Control")
                                                .setEquipRef(equipRef)
@@ -927,7 +381,7 @@ public class VavEquip
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
         CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
-    
+
         Point enableIAQControl = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableIAQControl")
                                                .setEquipRef(equipRef)
@@ -943,7 +397,7 @@ public class VavEquip
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
-    
+
         Point zonePriority = new Point.Builder()
                                          .setDisplayName(equipDis+"-zonePriority")
                                          .setEquipRef(equipRef)
@@ -959,7 +413,7 @@ public class VavEquip
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
         CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)config.getPriority().ordinal());
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double)config.getPriority().ordinal());
-    
+
         Point temperatureOffset = new Point.Builder()
                                      .setDisplayName(equipDis+"-temperatureOffset")
                                      .setEquipRef(equipRef)
@@ -976,7 +430,7 @@ public class VavEquip
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, config.temperaturOffset);
-    
+
         //Damper max heating is required irrespective of trueCfm is enabled or not.
         Point damperMaxHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
@@ -994,11 +448,11 @@ public class VavEquip
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
-    
+
         Equip equip = HSUtil.getEquipInfo(equipRef);
         TrueCFMPointsHandler.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
                                                        config.enableCFMControl ? 1.0 : 0, fanMarker);
-    
+
         if (config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equipRef, config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
@@ -1009,7 +463,7 @@ public class VavEquip
         ConfigUtil.Companion.addConfigPoints("vav",siteRef,room,floor,equipRef,tz,
                 String.valueOf(nodeAddr),equipDis,fanMarker,config.enableAutoAwayControl ?1:0,
                 config.enableAutoForceoccupied ? 1:0);
-        
+
     }
 
     /**
@@ -1072,27 +526,27 @@ public class VavEquip
         hayStack.writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
         hayStack.writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
     }
-    
+
     public void deleteNonCfmDamperPoints(CCUHsApi hayStack, String equipRef) {
         HashMap<Object, Object> damperMinCooling = hayStack.readEntity("config and min and damper and pos and " +
                                                                        "cooling and equipRef == \""+equipRef+"\"");
         if (!damperMinCooling.isEmpty()) {
             hayStack.deleteWritablePoint(damperMinCooling.get("id").toString());
         }
-    
+
         HashMap<Object, Object> damperMaxCooling = hayStack.readEntity("config and max and damper and pos and " +
                                                                        "cooling and equipRef == \""+equipRef+"\"");
         if (!damperMaxCooling.isEmpty()) {
             hayStack.deleteWritablePoint(damperMaxCooling.get("id").toString());
         }
-    
+
         HashMap<Object, Object> damperMinHeating = hayStack.readEntity("config and min and damper and pos and " +
                                                                        "heating and equipRef == \""+equipRef+"\"");
         if (!damperMinHeating.isEmpty()) {
             hayStack.deleteWritablePoint(damperMinHeating.get("id").toString());
         }
     }
-    
+
     
     
     public void setConfigNumVal(String tags,double val) {
@@ -1110,7 +564,7 @@ public class VavEquip
     public String getConfigStrVal(String tags) {
         return CCUHsApi.getInstance().readDefaultStrVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
     }
-    
+
     public void updateHaystackPoints(VavProfileConfiguration config) {
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
@@ -1137,7 +591,7 @@ public class VavEquip
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
-    
+
         handleTrueCfmConfiguration(config);
         CcuLog.d(L.TAG_CCU_UI, "sent config update:  - "
                 +config.enableAutoForceoccupied+"----------"+config.enableAutoAwayControl);
@@ -1161,8 +615,8 @@ public class VavEquip
 
         CcuLog.d(L.TAG_CCU_UI, "sent config update after :  - "
                 +getConfigNumVal("auto and away")+"----------"+getConfigNumVal("auto and forced and occupied"));
-        
-        
+
+
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
 
@@ -1203,12 +657,12 @@ public class VavEquip
             hayStack.deleteEntity(reheatPos.get("id").toString());
         }
     }
-    
+
     private void handleTrueCfmConfiguration(VavProfileConfiguration config) {
-    
+
         HashMap<Object, Object> equipMap = hayStack.readEntity("equip and group== \"" + nodeAddr + "\"");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-    
+
         String fanMarker = getFanMarker();
         boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable") > 0;
         if (curTrueCfmEnabled && !config.enableCFMControl) {
@@ -1577,12 +1031,12 @@ public class VavEquip
     }
     
     public void setStatus(double status, boolean emergency) {
-        
+
         if (getStatus() != status )
         {
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
         }
-        
+
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
@@ -1623,36 +1077,36 @@ public class VavEquip
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);
     }
-    
+
     public void updateLoopParams() {
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and heating and loop and sp and his and group == \""+nodeAddr+"\"", heatingLoop.getLoopOutput());
-    
-    
+
+
         CCUHsApi.getInstance().writeHisValByQuery("point and cooling and loop and sp and his and group == \""+nodeAddr+"\"", coolingLoop.getLoopOutput());
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and discharge and air and temp and sp and his and group == \""+nodeAddr+"\"", dischargeSp);
-    
-    
+
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "supply and air and temp and his and group == \""+nodeAddr+"\"", satResetRequest.cumulativeRequestHoursPercent);
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "co2 and his and group == \""+nodeAddr+"\"", co2ResetRequest.cumulativeRequestHoursPercent);
         /*CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "hwst and his and group == \""+nodeAddr+"\"", hwstResetRequest.cumulativeRequestHoursPercent);*/
         CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "staticPressure and his and group == \""+nodeAddr+"\"", spResetRequest.cumulativeRequestHoursPercent);
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
                                                   "sat and his and group == \""+nodeAddr+"\"", (double)satResetRequest.currentRequests);
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
                                                   "co2 and his and group == \""+nodeAddr+"\"", (double)co2ResetRequest.currentRequests);
-    
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
                                                   "staticPressure and his and group == \""+nodeAddr+"\"", (double)spResetRequest.currentRequests);
-    
+
     }
 
     public double getZonePriorityValue(){

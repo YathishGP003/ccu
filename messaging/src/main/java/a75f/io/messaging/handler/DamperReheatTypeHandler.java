@@ -17,7 +17,7 @@ import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ReheatType;
-import a75f.io.logic.bo.building.vav.VavEquip;
+import a75f.io.logic.bo.building.vav.VavEquipTobeDeleted;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
@@ -124,7 +124,7 @@ public class DamperReheatTypeHandler {
                 } else if (configPoint.getMarkers().contains(Tags.PARALLEL)) {
                     fanMarker = Tags.PARALLEL;
                 }
-                VavEquip.updateReheatTypeVav(typeVal, configPoint.getEquipRef(), hayStack, fanMarker,
+                VavEquipTobeDeleted.updateReheatTypeVav(typeVal, configPoint.getEquipRef(), hayStack, fanMarker,
                         Integer.parseInt(configPoint.getGroup()));
             }
             DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), hayStack);

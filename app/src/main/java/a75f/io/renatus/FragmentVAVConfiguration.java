@@ -680,10 +680,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "
                 +vavConfig.enableAutoForceoccupied+"----------"+vavConfig.enableAutoAwayControl);
         if (mProfileConfig == null) {
-            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef, mNodeType);
+            //mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef, mNodeType);
         } else
         {
-            mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
+            //mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
         }
         L.ccu().zoneProfiles.add(mVavProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Vav Config: Profiles - "+L.ccu().zoneProfiles.size());

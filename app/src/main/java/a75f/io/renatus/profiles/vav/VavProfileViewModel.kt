@@ -2,12 +2,15 @@ package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
+import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelSource
-import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -16,10 +19,8 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavReheatProfile
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
-import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -29,12 +30,8 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 
 class VavProfileViewModel : ViewModel() {
@@ -87,13 +84,13 @@ class VavProfileViewModel : ViewModel() {
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
-        } else {
+        } /*else {
             vavProfile = when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
                 ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
                 else -> VavReheatProfile()
             }
-        }
+        }*/
 
         // Models are temporarily loaded from local files to allow quick model revisions during development.
         // In the released CCU build, these will draw from the Hayloft API.
@@ -191,7 +188,7 @@ class VavProfileViewModel : ViewModel() {
 
         if (profileConfiguration.isDefault) {
 
-            vavProfile.addLogicalMapAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
+            addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
             L.ccu().zoneProfiles.add(vavProfile)
 
         } else {
@@ -200,4 +197,39 @@ class VavProfileViewModel : ViewModel() {
 
     }
 
+    private fun addEquipAndPoints(
+        addr: Short,
+        config: ProfileConfiguration,
+        floorRef: String?,
+        roomRef: String?,
+        nodeType: NodeType?,
+        hayStack: CCUHsApi,
+        equipModel: SeventyFiveFProfileDirective?,
+        deviceModel: SeventyFiveFDeviceDirective?
+    ) {
+        //val deviceMap = VavEquip(getProfileType(), addr)
+        requireNotNull(equipModel)
+        requireNotNull(deviceModel)
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val equipDis = hayStack.siteName + "-VAV-" + config.nodeAddress
+        val equipId = equipBuilder.buildEquipAndPoints(
+            config, equipModel, hayStack.site!!
+                .id, equipDis
+        )
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        deviceBuilder.buildDeviceAndPoints(
+            config,
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+        L.ccu().zoneProfiles.add(VavReheatProfile(equipId, addr))
+        //vavDeviceMap.put(addr, deviceMap)
+        //vavEquip = VavEquip(equipId)
+
+        //deviceMap.init();
+    }
 }

@@ -459,18 +459,15 @@ public class Globals {
                     CcuLog.d(L.TAG_CCU, "Load Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
-                            VavReheatProfile vr = new VavReheatProfile();
-                            vr.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavReheatProfile vr = new VavReheatProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vr);
                             break;
                         case VAV_SERIES_FAN:
-                            VavSeriesFanProfile vsf = new VavSeriesFanProfile();
-                            vsf.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavSeriesFanProfile vsf = new VavSeriesFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vsf);
                             break;
                         case VAV_PARALLEL_FAN:
-                            VavParallelFanProfile vpf = new VavParallelFanProfile();
-                            vpf.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavParallelFanProfile vpf = new VavParallelFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
                             break;
                         case DAB:

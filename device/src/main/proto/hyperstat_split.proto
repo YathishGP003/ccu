@@ -26,6 +26,7 @@ enum HyperSplitTemperatureMode_e {
   HYPERSPLIT_TEMP_MODE_SINGLE = 0;
   HYPERSPLIT_TEMP_MODE_DUAL_FIXED_DB = 1;
   HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
+  HYPERSPLIT_TEMP_MODE_NUM_OF = 3;
 }
 
 enum HyperSplitProfiles_t {
@@ -37,6 +38,7 @@ enum HyperSplitProfiles_t {
   HYPERSPLIT_PROFILE_VRV = 5;
   HYPERSPLIT_PROFILE_SENSE = 6;
   HYPERSPLIT_PROFILE_CONVENTIONAL_PACKAGE_UNIT_ECONOMIZER = 7;
+  HYPERSPLIT_PROFILE_NUM_OF = 8;
 }
 
 message HyperSplitTunersGeneric_t {
@@ -59,6 +61,18 @@ message HyperSplitTunersFcu_t {
   uint32 watreValueSamplingWaitTime = 6; // Typical value 5-300
   uint32 waterValveSamplingDuringLoopDeadbandOnTime = 7; // Typical value 0-30
   uint32 waterValveSamplingDuringLoopDeadbandWaitTime = 8; // Typical value 5-300
+}
+
+message HypersplitLinearFanSpeeds_t {
+  uint32 linearFanLowSpeedLevel  = 1; // in percentage
+  uint32 linearFanMediumSpeedLevel  = 2; // in percentage
+  uint32 linearFanHighSpeedLevel  = 3; // in percentage
+}
+
+message HypersplitStagedFanSpeeds_t {
+  uint32 stagedFanLowSpeedLevel  = 1; // in percentage
+  uint32 stagedFanMediumSpeedLevel  = 2; // in percentage
+  uint32 stagedFanHighSpeedLevel  = 3; // in percentage
 }
 
 message HyperSplitTunersEco_t {
@@ -105,14 +119,27 @@ message HyperSplitSettingsMessage_t {
   uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
   uint32 humidityMaxSetpoint = 21; // Maximum humidity setpont 0-100% in which Hyperstat will set system to Dehumidity/Dry if humidity level is greater than
   uint32 occupancySensorSensitivityLevel = 22; // Sensitivity level setting for the motion sensor 1-10, one being the most sensitive
+  HypersplitLinearFanSpeeds_t hyperstatLinearFanSpeeds = 23; // When linear fan is enabled these voltages provide user intent
+  HypersplitStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;   // When staged fan is enabled these voltages provide user intent
+}
+
+message HyperSplitConfigsCcu_t {
+  uint32 coolingStage1FanAnalogVoltage  = 1; // 1/10 of the volts
+  uint32 coolingStage2FanAnalogVoltage  = 2; // 1/10 of the volts
+  uint32 coolingStage3FanAnalogVoltage  = 3; // 1/10 of the volts
+  uint32 heatingStage1FanAnalogVoltage  = 4; // 1/10 of the volts
+  uint32 heatingStage2FanAnalogVoltage  = 5; // 1/10 of the volts
+  uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
 }
 
 message HyperSplitSettingsMessage3_t {
   HyperSplitTunersGeneric_t genertiTuners = 1; // Generic tuner
-  HyperSplitTunersFcu_t  fcuTuners = 2;
-  HyperSplitTunersEco_t  ecoTuners = 3;
+  oneof profileSpecificTuners {
+    HyperSplitTunersFcu_t  fcuTuners = 2;
+    HyperSplitConfigsCcu_t hyperStatConfigsCpu = 3; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
+  }
+  HyperSplitTunersEco_t  ecoTuners = 4;
 }
-
 
 enum HyperSplitFanSpeed_e {
   HYPERSPLIT_FAN_SPEED_OFF = 0;
@@ -120,6 +147,7 @@ enum HyperSplitFanSpeed_e {
   HYPERSPLIT_FAN_SPEED_LOW = 2;
   HYPERSPLIT_FAN_SPEED_MED = 3;
   HYPERSPLIT_FAN_SPEED_HIGH = 4;
+  HYPERSPLIT_FAN_SPEED_NUM_OF = 5;
 }
 
 enum HyperSplitConditioningMode_e {
@@ -127,12 +155,14 @@ enum HyperSplitConditioningMode_e {
   HYPERSPLIT_CONDITIONING_MODE_AUTO = 1;
   HYPERSPLIT_CONDITIONING_MODE_HEATING = 2;
   HYPERSPLIT_CONDITIONING_MODE_COOLING = 3;
+  HYPERSPLIT_CONDITIONING_MODE_NUM_OF = 4;
 }
 
 enum HyperSplitOperatingMode_e {
   HYPERSPLIT_OPERATING_MODE_OFF = 0;
   HYPERSPLIT_OPERATING_MODE_HEATING = 1;
   HYPERSPLIT_OPERATING_MODE_COOLING = 2;
+  HYPERSPLIT_OPERATING_MODE_NUM_OF = 3;
 }
 
 message HyperSplitSystemTimePb_t {
@@ -195,6 +225,7 @@ enum HyperSplitRelayMapping_t {
   HYPERSPLIT_RELAY_DEHUMIDIFIER = 13;
   HYPERSPLIT_RELAY_EXAUST_1 = 14;
   HYPERSPLIT_RELAY_EXAUST_2 = 15;
+  HYPERSPLIT_RELAY_EXAUST_NUM_OF = 16;
 }
 
 enum HyperSplitUniversalInMapping_t {
@@ -215,6 +246,7 @@ enum HyperSplitUniversalInMapping_t {
   HYPERSPLIT_UIN_CONDENSATE_NC = 14;
   HYPERSPLIT_UIN_PRESSURE_0_1 = 15;
   HYPERSPLIT_UIN_PRESSURE_0_2 = 16;
+  HYPERSPLIT_UIN_NUM_OF = 17;
 }
 
 enum HyperSplitSenorBusMapping_t {
@@ -223,6 +255,7 @@ enum HyperSplitSenorBusMapping_t {
   HYPERSPLIT_SBUS_MAT = 2;
   HYPERSPLIT_SBUS_OAT = 3;
   HYPERSPLIT_SBUS_PRESSURE = 4;
+  HYPERSPLIT_SBUS_NUM_OF = 5;
 }
 
 enum SensorBusConnectedTypes_t {
@@ -231,6 +264,7 @@ enum SensorBusConnectedTypes_t {
   SENSOR_BUS_SENSOR_TYPE_PRESSURE = 2;
   SENSOR_BUS_SENSOR_TYPE_CO2 = 3;
   SENSOR_BUS_SENSOR_TYPE_OCCUPANCY = 4;
+  SENSOR_BUS_SENSOR_TYPE_NUM_OF = 5;
 }
 
 message HyperSplitRelayConfig_t {
@@ -251,6 +285,7 @@ enum HyperSplitAnalogOutMapping_t {
   HYPERSPLIT_AOUT_HEATING = 3;
   HYPERSPLIT_AOUT_OAO_DAMPER = 4;
   HYPERSPLIT_AOUT_STAGED_FAN = 5;
+  HYPERSPLIT_AOUT_NUM_OF = 6;
 }
 
 message HyperSplitAnalogOutConfig_t {

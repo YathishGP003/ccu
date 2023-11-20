@@ -51,10 +51,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.COOLING_1.displayName] = 1
-            }
             logIt("$port = CoolingStage1:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.COOLING_1.displayName] = 1
         }
     }
 
@@ -72,10 +72,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.COOLING_2.displayName] = 1
-            }
             logIt( "$port = CoolingStage2:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.COOLING_2.displayName] = 1
         }
     }
 
@@ -92,10 +92,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.COOLING_3.displayName] = 1
-            }
             logIt("$port = CoolingStage3:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.COOLING_3.displayName] = 1
         }
     }
 
@@ -114,13 +114,13 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                if(zoneMode == ZoneState.COOLING)
-                    relayStages[Stage.COOLING_1.displayName] = 1
-                if(zoneMode == ZoneState.HEATING)
-                    relayStages[Stage.HEATING_1.displayName] = 1
-            }
             logIt("$port = COMPRESSOR_STAGE1:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            if(zoneMode == ZoneState.COOLING)
+                relayStages[Stage.COOLING_1.displayName] = 1
+            if(zoneMode == ZoneState.HEATING)
+                relayStages[Stage.HEATING_1.displayName] = 1
         }
     }
 
@@ -139,13 +139,13 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                if(zoneMode == ZoneState.COOLING)
-                    relayStages[Stage.COOLING_2.displayName] = 1
-                if(zoneMode == ZoneState.HEATING)
-                    relayStages[Stage.HEATING_2.displayName] = 1
-            }
             logIt( "$port = COMPRESSOR_STAGE2:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            if(zoneMode == ZoneState.COOLING)
+                relayStages[Stage.COOLING_2.displayName] = 1
+            if(zoneMode == ZoneState.HEATING)
+                relayStages[Stage.HEATING_2.displayName] = 1
         }
     }
 
@@ -163,13 +163,13 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                if(zoneMode == ZoneState.COOLING)
-                    relayStages[Stage.COOLING_3.displayName] = 1
-                if(zoneMode == ZoneState.HEATING)
-                    relayStages[Stage.HEATING_3.displayName] = 1
-            }
             logIt("$port = COMPRESSOR_STAGE3:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            if(zoneMode == ZoneState.COOLING)
+                relayStages[Stage.COOLING_3.displayName] = 1
+            if(zoneMode == ZoneState.HEATING)
+                relayStages[Stage.HEATING_3.displayName] = 1
         }
     }
 
@@ -189,10 +189,11 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.HEATING_1.displayName] = 1
-            }
             logIt("$port = HeatingStage1: $relayState")
+        }
+
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.HEATING_1.displayName] = 1
         }
 
     }
@@ -211,10 +212,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.HEATING_2.displayName] = 1
-            }
             logIt("$port = HeatingStage2:  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.HEATING_2.displayName] = 1
         }
     }
 
@@ -231,10 +232,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             relayState = 0.0
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
-            if (relayState == 1.0) {
-                relayStages[Stage.HEATING_3.displayName] = 1
-            }
             logIt("$port = HeatingStage3  $relayState")
+        }
+        if ( getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[Stage.HEATING_3.displayName] = 1
         }
     }
 

@@ -30,7 +30,7 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.logic.L;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.tuners.TunerEquip;
 
 public class RestoreCCU {
 
@@ -406,8 +406,8 @@ public class RestoreCCU {
         Log.i(TAG, "Saving site details started");
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.RUNNING.toString());
         restoreCCUHsApi.syncExistingSite(siteCode, retryCountCallback);
-        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
-        BuildingEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

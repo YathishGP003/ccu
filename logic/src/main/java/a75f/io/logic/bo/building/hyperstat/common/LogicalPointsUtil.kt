@@ -726,7 +726,28 @@ class LogicalPointsUtil {
             }
             return Point.Builder().setHashMap(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
         }
-
+        fun createAnalogOutPointForModulatingFanSpeed(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: Int
+        ): Point {
+            val existingPoint = readAnalogOutModulatingFanSpeedLogicalPoint(equipRef)
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd","zone","logical","cur",
+                    "fan", "speed","his","modulating","cpu","standalone"
+                )
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-modulatingFanSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress.toString())
+                    .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
+                    .setTz(tz).setHisInterpolate("cov").setUnit("%")
+                markers.forEach { point.addMarker(it) }
+                val fanSpeedPoint = point.build()
+                addBacnetTags(fanSpeedPoint, 23, ANALOG_VALUE, nodeAddress)
+                addPointToHaystack(fanSpeedPoint)
+            }
+            return Point.Builder().setHashMap(readAnalogOutModulatingFanSpeedLogicalPoint(equipRef)).build()
+        }
          fun createAnalogOutPointForWaterValve(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String, nodeAddress: Int
@@ -798,9 +819,9 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "analog and logical and output and dcv and damper and equipRef == \"$equipRef\"")
         }
-        fun readAnalogOutStagedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
+        fun readAnalogOutModulatingFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "analog and logical and output and fan and modulating and speed and equipRef == \"$equipRef\"")
+                "point and logical and fan and modulating and speed and equipRef == \"$equipRef\"")
         }
 
         fun readAnalogOutCompressorSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
@@ -1011,7 +1032,7 @@ class LogicalPointsUtil {
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToHeating(config))
                 removePoint(readAnalogHeatingLogicalPoint(equipRef))
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToFan(config))
-                removePoint(readAnalogOutFanSpeedLogicalPoint(equipRef))
+                removePoint(readAnalogOutModulatingFanSpeedLogicalPoint(equipRef))
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToDCV(config))
                 removePoint(readAnalogOutDcvLogicalPoint(equipRef))
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToStaged(config))

@@ -23,6 +23,7 @@ import a75f.io.renatus.hyperstatsplit.viewModels.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
+import a75f.io.renatus.views.CustomCCUSwitch
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -62,8 +63,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     private lateinit var profileName: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
-    lateinit var forceOccupiedSwitch: ToggleButton
-    lateinit var autoAwaySwitch: ToggleButton
+    lateinit var forceOccupiedSwitch: CustomCCUSwitch
+    lateinit var autoAwaySwitch: CustomCCUSwitch
 
     // 8 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -100,15 +101,16 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var exhaustFanHysteresis: Spinner
     lateinit var tvExhaustFanHysteresis: TextView
 
+    lateinit var vocConfig: LinearLayout
     lateinit var zoneVOCThreshold: Spinner
     lateinit var zoneVOCTarget: Spinner
 
     lateinit var zonePMTarget: Spinner
 
-    lateinit var displayHumidity: ToggleButton
-    lateinit var displayVOC: ToggleButton
-    lateinit var displayPp2p5: ToggleButton
-    lateinit var displayCo2: ToggleButton
+    lateinit var displayHumidity: CustomCCUSwitch
+    lateinit var displayVOC: CustomCCUSwitch
+    lateinit var displayPp2p5: CustomCCUSwitch
+    lateinit var displayCo2: CustomCCUSwitch
 
 
     /**
@@ -324,6 +326,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             tvZoneCO2Threshold = findViewById(R.id.zoneCO2Threshold)
             tvZoneCO2Target = findViewById(R.id.zoneCO2Target)
+            vocConfig = findViewById(R.id.vocConfig)
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
@@ -454,7 +457,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
-
         zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
         zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
         analogOutUIs.forEach {
@@ -480,39 +482,62 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
     }
 
+    private var pendingTempOffsetChange : Boolean = true
+    private var pendingForceOccupiedChange : Boolean = true
+    private var pendingAutoAwayChange : Boolean = true
+    private var pendingRelayChange : Boolean = true
+    private var pendingAnalogOutChange : Boolean = true
+    private var pendingSensorBusTempChange : Boolean = true
+    private var pendingSensorBusPressChange = true
+    private var pendingUniversalInChange = true
+    private var pendingOaoConfigChange : Boolean = true
+    private var pendingCo2ConfigChange : Boolean = true
+    private var pendingVocConfigChange : Boolean = true
+    private var pendingPmConfigChange : Boolean = true
+    private var pendingDisplayChange : Boolean = true
+
     private fun setUpViewListeners() {
         tempOffsetSelector.setOnValueChangedListener { _, _, newVal ->
             viewModel.tempOffsetSelected(newVal)
+            pendingTempOffsetChange = true
         }
 
         forceOccupiedSwitch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableForceOccupiedSwitchChanged(isChecked)
+            pendingForceOccupiedChange = true
         }
         autoAwaySwitch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAutoAwaySwitchChanged(isChecked)
+            pendingAutoAwayChange = true
         }
 
         relayUIs.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.relaySwitchChanged(index, isChecked)
+                pendingRelayChange = true
             }
-            widgets.selector.setOnItemSelected { position -> viewModel.relayMappingSelected(index, position) }
+            widgets.selector.setOnItemSelected { position ->
+                viewModel.relayMappingSelected(index, position)
+                pendingRelayChange = true
+            }
         }
         analogOutUIs.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogOutSwitchChanged(index, isChecked)
+                pendingAnalogOutChange = true
             }
-            widgets.selector.setOnItemSelected { position -> viewModel.analogOutMappingSelected(index, position) }
+            widgets.selector.setOnItemSelected { position ->
+                viewModel.analogOutMappingSelected(index, position)
+                pendingAnalogOutChange = true
+            }
 
             widgets.vAtMinDamperSelector.setOnItemSelected { position ->
-                viewModel.voltageAtDamperSelected(
-                    true, index, position
-                )
+                viewModel.voltageAtDamperSelected(true, index, position)
+                pendingAnalogOutChange = true
             }
             widgets.vAtMaxDamperSelector.setOnItemSelected { position ->
-                viewModel.voltageAtDamperSelected(
-                    false, index, position
-                )
+                viewModel.voltageAtDamperSelected(false, index, position)
+                pendingAnalogOutChange = true
             }
             widgets.analogOutAtFanLow.setOnItemSelected { position ->
                 viewModel.updateFanConfigSelected(1, index, position)
@@ -531,40 +556,79 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         sensorBusTemps.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.sensorBusTempSwitchChanged(index, isChecked)
+                pendingSensorBusTempChange = true
             }
             widgets.selector.setOnItemSelected { position ->
                 viewModel.sensorBusTempMappingSelected(index, position)
+                pendingSensorBusTempChange = true
             }
         }
 
         sensorBusPress.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.sensorBusPressSwitchChanged(index, isChecked)
+                pendingSensorBusPressChange = true
             }
             widgets.selector.setOnItemSelected { position ->
                 viewModel.sensorBusPressMappingSelected(index, position)
+                pendingSensorBusPressChange = true
             }
         }
 
         universalInUIs.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.universalInSwitchChanged(index, isChecked)
+                pendingUniversalInChange = true
             }
-            widgets.selector.setOnItemSelected { position -> viewModel.universalInMappingSelected(index, position) }
+            widgets.selector.setOnItemSelected {
+                position -> viewModel.universalInMappingSelected(index, position)
+                pendingUniversalInChange = true
+            }
         }
 
-        outsideDamperMinOpen.setOnItemSelected { position -> viewModel.outsideDamperMinOpenSelect(position) }
-        exhaustFanStage1Threshold.setOnItemSelected { position -> viewModel.exhaustFanStage1ThresholdSelect(position) }
-        exhaustFanStage2Threshold.setOnItemSelected { position -> viewModel.exhaustFanStage2ThresholdSelect(position) }
-        exhaustFanHysteresis.setOnItemSelected { position -> viewModel.exhaustFanHysteresisSelect(position) }
+        outsideDamperMinOpen.setOnItemSelected {
+            position -> viewModel.outsideDamperMinOpenSelect(position)
+            pendingOaoConfigChange = true
+        }
+        exhaustFanStage1Threshold.setOnItemSelected {
+            position -> viewModel.exhaustFanStage1ThresholdSelect(position)
+            pendingOaoConfigChange = true
+        }
+        exhaustFanStage2Threshold.setOnItemSelected {
+            position -> viewModel.exhaustFanStage2ThresholdSelect(position)
+            pendingOaoConfigChange = true
+        }
+        exhaustFanHysteresis.setOnItemSelected {
+            position -> viewModel.exhaustFanHysteresisSelect(position)
+            pendingOaoConfigChange = true
+        }
 
-        zoneCO2DamperOpeningRate.setOnItemSelected { position -> viewModel.zoneCO2DamperOpeningRateSelect(position) }
-        zoneCO2Threshold.setOnItemSelected { position -> viewModel.zoneCO2ThresholdSelect(position) }
-        zoneCO2Target.setOnItemSelected { position -> viewModel.zoneCO2TargetSelect(position) }
+        zoneCO2DamperOpeningRate.setOnItemSelected {
+            position -> viewModel.zoneCO2DamperOpeningRateSelect(position)
+            pendingCo2ConfigChange = true
+        }
+        zoneCO2Threshold.setOnItemSelected {
+            position -> viewModel.zoneCO2ThresholdSelect(position)
+            pendingCo2ConfigChange = true
+        }
+        zoneCO2Target.setOnItemSelected {
+            position -> viewModel.zoneCO2TargetSelect(position)
+            pendingCo2ConfigChange = true
+        }
 
-        zoneVOCThreshold.setOnItemSelected { position ->viewModel.zoneVOCThresholdSelect(position)  }
-        zoneVOCTarget.setOnItemSelected { position ->viewModel.zoneVOCTargetSelect(position)  }
-        zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
+        zoneVOCThreshold.setOnItemSelected {
+            position ->viewModel.zoneVOCThresholdSelect(position)
+            pendingVocConfigChange = true
+        }
+        zoneVOCTarget.setOnItemSelected {
+            position ->viewModel.zoneVOCTargetSelect(position)
+            pendingVocConfigChange = true
+        }
+
+        zonePMTarget.setOnItemSelected {
+            position ->viewModel.zonePmTargetSelect(position)
+            pendingPmConfigChange = true
+        }
 
         stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
             stagedFanWidgets.selector.setOnItemSelected {
@@ -573,21 +637,28 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
-            if(enableDisplay(displayHumidity))
+            if(enableDisplay(displayHumidity)) {
                 viewModel.onDisplayHumiditySelected(isChecked)
+                pendingDisplayChange = true
+            }
         }
         displayCo2.setOnCheckedChangeListener { _, isChecked ->
-            if(enableDisplay(displayCo2))
+            if(enableDisplay(displayCo2)) {
                 viewModel.onDisplayCo2Selected(isChecked)
-
+                pendingDisplayChange = true
+            }
         }
         displayVOC.setOnCheckedChangeListener { _, isChecked ->
-            if(enableDisplay(displayVOC))
+            if(enableDisplay(displayVOC)) {
                 viewModel.onDisplayVocSelected(isChecked)
+                pendingDisplayChange = true
+            }
         }
         displayPp2p5.setOnCheckedChangeListener { _, isChecked ->
-            if(enableDisplay(displayPp2p5))
+            if(enableDisplay(displayPp2p5)) {
                 viewModel.onDisplayP2pmSelected(isChecked)
+                pendingDisplayChange = true
+            }
         }
 
         // On click, close out of the modal and return to the floor plan fragment
@@ -630,15 +701,97 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         showErrorDialog(error::class.java.simpleName + " : " + error.localizedMessage)
     }
 
-    /**
-     * This rendor method will be called in UI change
-     */
-    private fun render(viewState: ViewState) {
-
+    private fun renderTempOffset(viewState: ViewState) {
         tempOffsetSelector.value = viewState.tempOffsetPosition
+        pendingTempOffsetChange = false
+    }
 
+    private fun renderForceOccupiedSwitch(viewState: ViewState) {
         forceOccupiedSwitch.isChecked = viewState.forceOccupiedEnabled
+        pendingForceOccupiedChange = false
+    }
+
+    private fun renderAutoAwaySwitch(viewState: ViewState) {
         autoAwaySwitch.isChecked = viewState.autoAwayEnabled
+        pendingAutoAwayChange = false
+    }
+
+    private fun renderSensorBusTemp(viewState: ViewState) {
+        viewState.sensorBusTemps.forEachIndexed { index, sensorBusState ->
+            with(sensorBusTemps[index]) {
+                switch.isChecked = sensorBusState.enabled
+                selector.isEnabled = sensorBusState.enabled
+                selector.setSelection(sensorBusState.association)
+            }
+        }
+
+        pendingSensorBusTempChange = false
+    }
+
+    private fun renderSensorBusPress(viewState: ViewState) {
+        viewState.sensorBusPress.forEachIndexed { index, sensorBusState ->
+            with(sensorBusPress[index]) {
+                switch.isChecked = sensorBusState.enabled
+                selector.isEnabled = sensorBusState.enabled
+                selector.setSelection(sensorBusState.association)
+            }
+        }
+
+        pendingSensorBusPressChange = false
+    }
+
+    private fun renderUniversalIn(viewState: ViewState) {
+        viewState.universalIns.forEachIndexed { index, universalInState ->
+            with(universalInUIs[index]) {
+                switch.isChecked = universalInState.enabled
+                selector.isEnabled = universalInState.enabled
+                selector.setSelection(universalInState.association)
+            }
+        }
+
+        pendingUniversalInChange = false
+    }
+
+    private fun renderOaoConfig(viewState: ViewState) {
+        outsideDamperMinOpen.setSelection(viewState.outsideDamperMinOpenPos)
+        exhaustFanStage1Threshold.setSelection(viewState.exhaustFanStage1ThresholdPos)
+        exhaustFanStage2Threshold.setSelection(viewState.exhaustFanStage2ThresholdPos)
+        exhaustFanHysteresis.setSelection(viewState.exhaustFanHysteresisPos)
+
+        pendingOaoConfigChange = false
+    }
+
+    private fun renderCo2Config(viewState: ViewState) {
+        zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
+        zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
+        zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)
+
+        pendingCo2ConfigChange = false
+    }
+
+    private fun renderVocConfig(viewState: ViewState) {
+        zoneVOCThreshold.setSelection(viewState.zoneVocThresholdPos)
+        zoneVOCTarget.setSelection(viewState.zoneVocTargetPos)
+
+        pendingVocConfigChange = false
+    }
+
+    private fun renderPmConfig(viewState: ViewState) {
+        zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
+
+        pendingPmConfigChange = false
+    }
+
+    private fun renderDisplayEnabled(viewState: ViewState) {
+        displayHumidity.isChecked = viewState.isDisplayHumidityEnabled
+        displayCo2.isChecked = viewState.isDisplayCo2Enabled
+        displayVOC.isChecked = viewState.isDisplayVOCEnabled
+        displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
+
+        pendingDisplayChange = false
+    }
+
+    private fun renderRelays(viewState: ViewState) {
 
         var isCoolingStage1Enabled = false
         var isCoolingStage2Enabled = false
@@ -653,6 +806,86 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 selector.isEnabled = relayState.enabled
                 selector.setSelection(relayState.association)
 
+                if (relayState.enabled) {
+                    when (relayState.association) {
+                        CpuEconRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
+                        CpuEconRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
+                        CpuEconRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
+                        CpuEconRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
+                        CpuEconRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
+                        CpuEconRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
+                    }
+                }
+            }
+        }
+
+        var isStagedFanEnabled = false
+
+        viewState.analogOutUis.forEachIndexed { index, analogOutState ->
+            with(analogOutUIs[index]) {
+
+                if (viewModel is CpuEconViewModel) {
+                    if (analogOutState.enabled && analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        isStagedFanEnabled = true
+                    }
+                }
+
+            }
+        }
+
+        if (viewModel is CpuEconViewModel) {
+            makeStagedFanVisible(
+                isCoolingStage1Enabled,
+                isCoolingStage2Enabled,
+                isCoolingStage3Enabled,
+                isHeatingStage1Enabled,
+                isHeatingStage2Enabled,
+                isHeatingStage3Enabled,
+                isStagedFanEnabled
+            )
+        } else {
+            makeStagedFanVisible(
+                isCoolingStage1Enabled = false,
+                isCoolingStage2Enabled = false,
+                isCoolingStage3Enabled = false,
+                isHeatingStage1Enabled = false,
+                isHeatingStage2Enabled = false,
+                isHeatingStage3Enabled = false,
+                false
+            )
+        }
+
+        if (viewModel is CpuEconViewModel) {
+            stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+                with(stagedFanWidgets) {
+                    selector.setSelection(viewState.stagedFanUis[index])
+                }
+            }
+
+            if (isNoFanStageEnabled()) {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,false)
+                analogOutUIs.forEach {
+                    if (it.selector.selectedItemPosition == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) it.selector.setSelection(1)
+                }
+            } else {
+                (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,true)
+            }
+        }
+
+        pendingRelayChange = false
+    }
+
+    private fun renderAnalogOuts(viewState: ViewState) {
+
+        var isCoolingStage1Enabled = false
+        var isCoolingStage2Enabled = false
+        var isCoolingStage3Enabled = false
+        var isHeatingStage1Enabled = false
+        var isHeatingStage2Enabled = false
+        var isHeatingStage3Enabled = false
+
+        viewState.relays.forEachIndexed { index, relayState ->
+            with(relayUIs[index]) {
                 if (relayState.enabled) {
                     when (relayState.association) {
                         CpuEconRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
@@ -753,30 +986,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             )
         }
 
-        viewState.sensorBusTemps.forEachIndexed { index, sensorBusState ->
-            with(sensorBusTemps[index]) {
-                switch.isChecked = sensorBusState.enabled
-                selector.isEnabled = sensorBusState.enabled
-                selector.setSelection(sensorBusState.association)
-            }
-        }
-
-        viewState.sensorBusPress.forEachIndexed { index, sensorBusState ->
-            with(sensorBusPress[index]) {
-                switch.isChecked = sensorBusState.enabled
-                selector.isEnabled = sensorBusState.enabled
-                selector.setSelection(sensorBusState.association)
-            }
-        }
-
-        viewState.universalIns.forEachIndexed { index, universalInState ->
-            with(universalInUIs[index]) {
-                switch.isChecked = universalInState.enabled
-                selector.isEnabled = universalInState.enabled
-                selector.setSelection(universalInState.association)
-            }
-        }
-
         val co2ThresholdParams = zoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
         val co2TargetParams = zoneCO2Target.layoutParams as LinearLayout.LayoutParams
         val tvCo2ThresholdParams = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
@@ -785,14 +994,14 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
             tvCo2ThresholdParams.weight = 1f
             tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
-            
+
             co2ThresholdParams.marginEnd = 0
             co2ThresholdParams.weight = 1f
             zoneCO2Threshold.layoutParams = co2ThresholdParams
 
             tvCo2TargetParams.weight = 1f
             tvZoneCO2Target.layoutParams = tvCo2TargetParams
-            
+
             co2TargetParams.weight = 1f
             zoneCO2Target.layoutParams = co2TargetParams
 
@@ -825,23 +1034,15 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
 
-        outsideDamperMinOpen.setSelection(viewState.outsideDamperMinOpenPos)
-        exhaustFanStage1Threshold.setSelection(viewState.exhaustFanStage1ThresholdPos)
-        exhaustFanStage2Threshold.setSelection(viewState.exhaustFanStage2ThresholdPos)
-        exhaustFanHysteresis.setSelection(viewState.exhaustFanHysteresisPos)
+        var vocLayoutParams = vocConfig.layoutParams as ViewGroup.MarginLayoutParams
 
-        zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
-        zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
-        zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)
-
-        zoneVOCThreshold.setSelection(viewState.zoneVocThresholdPos)
-        zoneVOCTarget.setSelection(viewState.zoneVocTargetPos)
-
-        zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
-        displayHumidity.isChecked = viewState.isDisplayHumidityEnabled
-        displayCo2.isChecked = viewState.isDisplayCo2Enabled
-        displayVOC.isChecked = viewState.isDisplayVOCEnabled
-        displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
+        if (isDampSelected) {
+            vocLayoutParams.setMargins(0,24,0,10)
+            vocConfig.layoutParams = vocLayoutParams
+        } else {
+            vocLayoutParams.setMargins(0,0,0,10)
+            vocConfig.layoutParams = vocLayoutParams
+        }
 
         if (viewModel is CpuEconViewModel) {
             stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
@@ -859,6 +1060,55 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 (adapterAnalogOutMapping as AnalogOutAdapter).setItemEnabled(4,true)
             }
         }
+
+        pendingAnalogOutChange = false
+    }
+
+    /**
+     * This rendor method will be called in UI change
+     */
+    private fun render(viewState: ViewState) {
+
+        if (pendingTempOffsetChange) {
+            renderTempOffset(viewState)
+        }
+        if (pendingForceOccupiedChange) {
+            renderForceOccupiedSwitch(viewState)
+        }
+        if (pendingAutoAwayChange) {
+            renderAutoAwaySwitch(viewState)
+        }
+        if (pendingRelayChange) {
+            renderRelays(viewState)
+        }
+        if (pendingAnalogOutChange) {
+            renderAnalogOuts(viewState)
+        }
+        if (pendingSensorBusTempChange) {
+            renderSensorBusTemp(viewState)
+        }
+        if (pendingSensorBusPressChange) {
+            renderSensorBusPress(viewState)
+        }
+        if (pendingUniversalInChange) {
+            renderUniversalIn(viewState)
+        }
+        if (pendingOaoConfigChange) {
+            renderOaoConfig(viewState)
+        }
+        if (pendingCo2ConfigChange) {
+            renderCo2Config(viewState)
+        }
+        if (pendingVocConfigChange) {
+            renderVocConfig(viewState)
+        }
+        if (pendingPmConfigChange) {
+            renderPmConfig(viewState)
+        }
+         if (pendingDisplayChange) {
+            renderDisplayEnabled(viewState)
+        }
+
     }
 
     private fun isNoFanStageEnabled(): Boolean {
@@ -917,7 +1167,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         return count
     }
 
-    private fun enableDisplay(toggle: ToggleButton): Boolean{
+    private fun enableDisplay(toggle: CustomCCUSwitch): Boolean{
         val count = getDisplayDeviceCount()
         if(count > 2) {
             Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()

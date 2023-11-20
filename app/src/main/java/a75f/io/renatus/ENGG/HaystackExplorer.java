@@ -107,7 +107,7 @@ public class HaystackExplorer extends Fragment
                 Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
                 
                 final EditText taskEditText = new EditText(getActivity());
-                String tunerVal = String.valueOf(getPointVal(tunerMap.get(tunerName)));
+                String tunerVal = getPointVal(tunerMap.get(tunerName));
                 KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
                 taskEditText.setKeyListener(keyListener);
 
@@ -336,8 +336,9 @@ public class HaystackExplorer extends Fragment
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
     }
     
-    public static double getPointVal(String id) {
+    public static String getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
+        StringBuilder val = new StringBuilder();
         try {
             Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
             for (String marker : p.getMarkers()) {
@@ -348,7 +349,7 @@ public class HaystackExplorer extends Fragment
                             HashMap valMap = ((HashMap) values.get(l - 1));
                             System.out.println(valMap);
                             if (valMap.get("val") != null) {
-                                return Double.parseDouble(valMap.get("val").toString());
+                                val.append("level : "+l+" val : "+valMap.get("val")+"\n");
                             }
                         }
                     }
@@ -358,17 +359,17 @@ public class HaystackExplorer extends Fragment
             {
                 if (marker.equals("his"))
                 {
-                    return hayStack.readHisValById(p.getId());
+                    val.append("hisVal : "+hayStack.readHisValById(p.getId()));
                 }
             }
 
         } catch (Exception e) {
-            return 0;
+            e.printStackTrace();
         }
 
     
 
-        return 0;
+        return val.toString();
     }
     
     public static boolean isNumeric(String strNum) {

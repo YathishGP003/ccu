@@ -1,11 +1,13 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.BuildingEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
+import io.seventyfivef.ph.core.Tags
 
 
 /**
@@ -15,6 +17,10 @@ object DomainManager {
 
     fun buildDomain(hayStack : CCUHsApi) {
         val site = hayStack.site
+        val tunerEquip = hayStack.readEntity("tuner and equip")
+        if (tunerEquip.isNotEmpty()) {
+            Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
+        }
         site?.let { Domain.site = Site(site.displayName, site.id) }
 
         val ccu =  hayStack.ccu
@@ -133,7 +139,7 @@ object DomainManager {
         }
         Domain.site?.floors?.get(hayStackPoint.floorRef)?.
                 rooms?.get(hayStackPoint.roomRef)?.equips?.get(hayStackPoint.equipRef)?.
-                points?.put(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.id))
+                points?.put(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.equipRef))
     }
 
     fun addDevice(hayStackDevice : a75f.io.api.haystack.Device) {

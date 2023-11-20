@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.sync.CcuRegistrationHandler
+import a75f.io.domain.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
@@ -24,7 +25,8 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone, hayStack.site?.displayName!!),null)
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
-        DomainManager.addEquip(hayStackEquip)
+        Domain.buildingEquip = BuildingEquip(equipId)
+        //DomainManager.addEquip(hayStackEquip)
         CcuLog.i(Domain.LOG_TAG," Created tuner equip ${hayStackEquip.domainName}")
         createPoints(modelDef, equipId, siteRef)
         return equipId

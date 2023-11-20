@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -53,7 +54,6 @@ import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
-import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -69,8 +69,6 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
@@ -80,7 +78,8 @@ import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.tuners.BuildingEquip;
+import a75f.io.logic.migration.smartnode.SmartNodeMigration;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
@@ -247,6 +246,7 @@ public class Globals {
 
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
 
         updateCCUAhuRef();
         setRecoveryMode();
@@ -373,7 +373,7 @@ public class Globals {
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     if (CCUHsApi.getInstance().isCCURegistered()) {
-                        BuildingEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     }
                 }
             }
@@ -439,9 +439,6 @@ public class Globals {
                 case SYSTEM_DAB_HYBRID_RTU:
                     L.ccu().systemProfile = new DabAdvancedHybridRtu();
                     break;
-                case SYSTEM_DAB_EXTERNAL_AHU:
-                    L.ccu().systemProfile = new DabExternalAhu();
-                    break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
                     isDefaultSystem = true;
@@ -451,6 +448,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
             L.ccu().systemProfile = new DefaultSystem();
             isDefaultSystem = true;
+
         }
         if(!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();

@@ -29,6 +29,7 @@ import java.util.UUID;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 
 public class SpecialSchedule {
 
@@ -271,16 +272,12 @@ public class SpecialSchedule {
                                                  double coolingDeadband,
                                                  double heatingDeadband){
 
-        double buildingLimitMax = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max and not tuner");
-        double buildingLimitMin = CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min and not tuner");
-        double buildingZoneDifferential = CCUHsApi.getInstance().readPointPriorityValByQuery("building and differential");
-        String WarningMessage = null;
-        double unoccupiedZoneSetback;
-        if(CCUHsApi.getInstance().readEntity("unoccupied and zone and setback").size() == 0){
-            unoccupiedZoneSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("unoccupied and setback");
-        }else
-           unoccupiedZoneSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("unoccupied and zone and setback");
+        double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+        double buildingLimitMin = Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+        double buildingZoneDifferential = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();;
+        double unoccupiedZoneSetback = Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
 
+        String WarningMessage = null;
         if (buildingLimitMin > (heatingUserLimitMin - (buildingZoneDifferential + unoccupiedZoneSetback))) {
             WarningMessage = "Please go back and edit the Heating limit min temperature to be within the temperature limits of the building  " +
                     "or adjust the temperature limits of the building to accommodate the required Heating user limit min temperature";

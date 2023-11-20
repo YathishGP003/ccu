@@ -3,11 +3,13 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
+import a75f.io.domain.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.TunerSyncFailed
+import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.launch
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -19,11 +21,11 @@ import org.projecthaystack.HRow
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.client.HClient
 
-object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
+object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
     /**
      * Must be called during every app restart.
-     * It creates/updates BuildingEquip and then syncs during first time registration.
+     * It creates/updates TunerEquip and then syncs during first time registration.
      * Subsequent restart, this just triggers a tuner sync for level 16.
      */
     fun initialize(haystack : CCUHsApi) {
@@ -73,13 +75,17 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             if (it.domainName.isNullOrEmpty()) {
                 CcuLog.e(L.TAG_CCU_TUNER, "Invalid domain name for $it")
             } else {
+                CcuLog.i(
+                    L.TAG_CCU_TUNER,
+                    "Copy UUID of Building equip remote point ${it}"
+                )
                 val localPointDict = Domain.readDict(it.domainName)
                 if (!localPointDict.isEmpty) {
                     val localPoint = Point.Builder().setHDict(localPointDict).build()
                     if (localPoint.id != it.id) {
                         CcuLog.i(
                             L.TAG_CCU_TUNER,
-                            "Update UUID of Building equip point ${localPoint.domainName}"
+                            "Update UUID of local Building equip point ${localPoint.domainName}"
                         )
                         haystack.removeEntity(localPoint.id)
                         localPoint.id = it.id
@@ -97,6 +103,13 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             .filter { Domain.readPoint(it.domainName).isNotEmpty() }
             .map { HDictBuilder().add("id", HRef.copy(it.id)).toDict() }
         syncPointArrays(pointDictTobeSynced, hClient, haystack)
+
+        //Re-initialize cached Ids in building equip singleton.
+        val tunerEquip = haystack.readEntity("equip and tuner")
+        if (tunerEquip.isNotEmpty()) {
+            Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
+        }
+
         CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Completed")
     }
 
@@ -189,6 +202,7 @@ object BuildingEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             val equipBuilder = TunerEquipBuilder(haystack)
             val equipId = buildingEquip["id"].toString()
             equipBuilder.migrateBuildingTunerPointsForCutOver(equipId, haystack.site!!)
+            Domain.buildingEquip = BuildingEquip(equipId)
             return true
         }
         return false

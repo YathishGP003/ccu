@@ -335,7 +335,6 @@ public class DiagEquip
             if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion)))
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
 
-
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

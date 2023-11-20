@@ -1,15 +1,12 @@
 package a75f.io.logic.tuners;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.api.DomainNameKt;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.bo.building.definitions.Consts;
 
 /**
@@ -35,7 +32,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String satSPInitId = hayStack.addPoint(satSPInit);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPInitId, DomainNameKt.satSPInit, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPInitId, DomainName.satSPInit, hayStack);
     
         Point satSPMin = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPMin")
@@ -48,7 +45,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPMinId = hayStack.addPoint(satSPMin);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPMinId, DomainNameKt.satSPMin, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPMinId, DomainName.satSPMin, hayStack);
     
         Point satSPMax = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"satSPMax")
@@ -61,7 +58,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String satSPMaxId = hayStack.addPoint(satSPMax);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPMaxId, DomainNameKt.satSPMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPMaxId, DomainName.satSPMax, hayStack);
     
         Point satTimeDelay = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"satTimeDelay")
@@ -74,7 +71,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String satTimeDelayId = hayStack.addPoint(satTimeDelay);
-        TunerUtil.copyDefaultBuildingTunerVal(satTimeDelayId, DomainNameKt.satTimeDelay, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satTimeDelayId, DomainName.satTimeDelay, hayStack);
     
         Point satTimeInterval = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"satTimeInterval")
@@ -87,7 +84,7 @@ public class VavTRTuners
                                      .setTz(tz)
                                      .build();
         String satTimeIntervalId = hayStack.addPoint(satTimeInterval);
-        TunerUtil.copyDefaultBuildingTunerVal(satTimeIntervalId, DomainNameKt.satTimeInterval, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satTimeIntervalId, DomainName.satTimeInterval, hayStack);
     
         Point satIgnoreRequest = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"satIgnoreRequest")
@@ -99,7 +96,7 @@ public class VavTRTuners
                                         .setTz(tz)
                                         .build();
         String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
-        TunerUtil.copyDefaultBuildingTunerVal(satIgnoreRequestId, DomainNameKt.satIgnoreRequest, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satIgnoreRequestId, DomainName.satIgnoreRequest, hayStack);
     
         Point satSPTrim = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"satSPTrim")
@@ -112,7 +109,7 @@ public class VavTRTuners
                                          .setTz(tz)
                                          .build();
         String satSPTrimId = hayStack.addPoint(satSPTrim);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPTrimId, DomainNameKt.satSPTrim, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPTrimId, DomainName.satSPTrim, hayStack);
     
         Point satSPRes = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPRes")
@@ -125,7 +122,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPResId = hayStack.addPoint(satSPRes);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPResId, DomainNameKt.satSPRes, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPResId, DomainName.satSPRes, hayStack);
     
         Point satSPResMax = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPResMax")
@@ -138,7 +135,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPResMaxId = hayStack.addPoint(satSPResMax);
-        TunerUtil.copyDefaultBuildingTunerVal(satSPResMaxId, DomainNameKt.satSPResMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(satSPResMaxId, DomainName.satSPResMax, hayStack);
     }
     
     public static double getSatTRTunerVal(String trParam) {
@@ -178,7 +175,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPInitId, DomainNameKt.staticPressureSPInit, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPInitId, DomainName.staticPressureSPInit, hayStack);
         
         Point staticPressureSPMin = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMin")
@@ -191,7 +188,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMinId, DomainNameKt.staticPressureSPMin, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMinId, DomainName.staticPressureSPMin, hayStack);
         
         Point staticPressureSPMax = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMax")
@@ -204,7 +201,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMaxId, DomainNameKt.staticPressureSPMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMaxId, DomainName.staticPressureSPMax, hayStack);
         
         Point staticPressureTimeDelay = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"staticPressureTimeDelay")
@@ -217,7 +214,7 @@ public class VavTRTuners
                                      .setTz(tz)
                                      .build();
         String staticPressureTimeDelayId = hayStack.addPoint(staticPressureTimeDelay);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeDelayId, DomainNameKt.staticPressureTimeDelay, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeDelayId, DomainName.staticPressureTimeDelay, hayStack);
         
         Point staticPressureTimeInterval = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"staticPressureTimeInterval")
@@ -230,7 +227,7 @@ public class VavTRTuners
                                         .setTz(tz)
                                         .build();
         String staticPressureTimeIntervalId = hayStack.addPoint(staticPressureTimeInterval);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeIntervalId, DomainNameKt.staticPressureTimeInterval, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeIntervalId, DomainName.staticPressureTimeInterval, hayStack);
         
         Point staticPressureIgnoreRequest = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"staticPressureIgnoreRequest")
@@ -242,7 +239,7 @@ public class VavTRTuners
                                          .setTz(tz)
                                          .build();
         String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureIgnoreRequestId, DomainNameKt.staticPressureIgnoreRequest, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureIgnoreRequestId, DomainName.staticPressureIgnoreRequest, hayStack);
         
         Point staticPressureSPTrim = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"staticPressureSPTrim")
@@ -255,7 +252,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPTrimId, DomainNameKt.staticPressureSPTrim, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPTrimId, DomainName.staticPressureSPTrim, hayStack);
         
         Point staticPressureSPRes = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPRes")
@@ -268,7 +265,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResId, DomainNameKt.staticPressureSPRes, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResId, DomainName.staticPressureSPRes, hayStack);
         
         Point staticPressureSPResMax = new Point.Builder()
                                     .setDisplayName(equipDis+"-"+"staticPressureSPResMax")
@@ -281,7 +278,7 @@ public class VavTRTuners
                                     .setTz(tz)
                                     .build();
         String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);
-        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResMaxId, DomainNameKt.staticPressureSPResMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResMaxId, DomainName.staticPressureSPResMax, hayStack);
     }
     
     public static double getStaticPressureTRTunerVal(String trParam) {
@@ -322,7 +319,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String co2SPInitId = hayStack.addPoint(co2SPInit);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPInitId, DomainNameKt.co2SPInit, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPInitId, DomainName.co2SPInit, hayStack);
         
         Point co2SPMin = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPMin")
@@ -335,7 +332,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPMinId = hayStack.addPoint(co2SPMin);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPMinId, DomainNameKt.co2SPMin, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPMinId, DomainName.co2SPMin, hayStack);
         
         Point co2SPMax = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPMax")
@@ -348,7 +345,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPMaxId = hayStack.addPoint(co2SPMax);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPMaxId, DomainNameKt.co2SPMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPMaxId, DomainName.co2SPMax, hayStack);
         
         Point co2TimeDelay = new Point.Builder()
                                                 .setDisplayName(equipDis+"-"+"co2TimeDelay")
@@ -361,7 +358,7 @@ public class VavTRTuners
                                                 .setTz(tz)
                                                 .build();
         String co2TimeDelayId = hayStack.addPoint(co2TimeDelay);
-        TunerUtil.copyDefaultBuildingTunerVal(co2TimeDelayId, DomainNameKt.co2TimeDelay, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2TimeDelayId, DomainName.co2TimeDelay, hayStack);
         
         Point co2TimeInterval = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"co2TimeInterval")
@@ -374,7 +371,7 @@ public class VavTRTuners
                                                    .setTz(tz)
                                                    .build();
         String co2TimeIntervalId = hayStack.addPoint(co2TimeInterval);
-        TunerUtil.copyDefaultBuildingTunerVal(co2TimeIntervalId, DomainNameKt.co2TimeInterval, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2TimeIntervalId, DomainName.co2TimeInterval, hayStack);
         
         Point co2IgnoreRequest = new Point.Builder()
                                                     .setDisplayName(equipDis+"-"+"co2IgnoreRequest")
@@ -386,7 +383,7 @@ public class VavTRTuners
                                                     .setTz(tz)
                                                     .build();
         String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
-        TunerUtil.copyDefaultBuildingTunerVal(co2IgnoreRequestId, DomainNameKt.co2IgnoreRequest, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2IgnoreRequestId, DomainName.co2IgnoreRequest, hayStack);
         
         Point co2SPTrim = new Point.Builder()
                                              .setDisplayName(equipDis+"-"+"co2SPTrim")
@@ -399,7 +396,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String co2SPTrimId = hayStack.addPoint(co2SPTrim);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPTrimId, DomainNameKt.co2SPTrim, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPTrimId, DomainName.co2SPTrim, hayStack);
         
         Point co2SPRes = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPRes")
@@ -412,7 +409,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPResId = hayStack.addPoint(co2SPRes);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPResId, DomainNameKt.co2SPRes, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPResId, DomainName.co2SPRes, hayStack);
         
         Point co2SPResMax = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"co2SPResMax")
@@ -425,6 +422,6 @@ public class VavTRTuners
                                                .setTz(tz)
                                                .build();
         String co2SPResMaxId = hayStack.addPoint(co2SPResMax);
-        TunerUtil.copyDefaultBuildingTunerVal(co2SPResMaxId, DomainNameKt.co2SPResMax, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPResMaxId, DomainName.co2SPResMax, hayStack);
     }
 }

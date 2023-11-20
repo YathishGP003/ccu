@@ -5,6 +5,7 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
+import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -1044,18 +1045,7 @@ public class CreateNewSite extends Fragment {
                 + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(resource) + "</font></big>");
     }
 
-    private void updateMigrationDiagWithAppVersion(){
-        PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
-        try {
-            PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
-            String appVersion = info.versionName + "." + info.versionCode;
-            CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", appVersion);
-            CcuLog.d(TAG, "Update Migration Diag Point for NewSite");
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
 
-    }
 
     private void updateBacnetConfig(String siteName, String ccuName) {
 

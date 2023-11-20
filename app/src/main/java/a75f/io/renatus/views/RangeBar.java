@@ -244,9 +244,7 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
-        Log.d("amardebug"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
-                             +" lowerCoolingTemp "+lowerCoolingTemp+" upperCoolingTemp "+upperCoolingTemp+" cdb "+cdb+" hdb "+hdb);
-              mDataSet = true;
+        mDataSet = true;
         invalidate();
     }
 

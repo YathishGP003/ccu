@@ -384,9 +384,10 @@ public class VavSystemController extends SystemController
     private void handleEmergencyCooling() {
 
         CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
-        emergencyMode = true;
         if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
         {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " handleEmergencyCooling ");
+            emergencyMode = true;
             if (systemState != COOLING)
             {
                 systemState = COOLING;
@@ -403,11 +404,12 @@ public class VavSystemController extends SystemController
 
     private void handleEmergencyHeating() {
 
-        CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
-        emergencyMode = true;
+        CcuLog.d(L.TAG_CCU_SYSTEM, " handleEmergencyHeating ");
         if ((conditioningMode == HEATONLY || conditioningMode == AUTO) &&
             (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
         {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
+            emergencyMode = true;
             if (systemState != HEATING)
             {
                 systemState = HEATING;

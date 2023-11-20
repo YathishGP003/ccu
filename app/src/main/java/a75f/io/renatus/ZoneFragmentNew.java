@@ -112,6 +112,8 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.MigrationUtil;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
@@ -207,7 +209,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     TextView zoneLoadTextView = null;
 
     private BroadcastReceiver siteLocationChangedReceiver;
-    private boolean alertDialogShown = false;
 
     public ZoneFragmentNew() {
     }
@@ -335,7 +336,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-        if(isSRMigrationRequired() && !validateMigration()) {
+        if(!PreferenceUtil.isDataMigrationPopUpClosed() && isSRMigrationRequired() && !validateMigration()) {
             showMigrationPendingDialog(getActivity());
         }
     }
@@ -686,10 +687,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         } catch (Exception e) {
                             CcuLog.e(LOG_TAG, "Loading Zone failed");
                             e.printStackTrace();
-                            if (!validateMigration() && !alertDialogShown) {
-                                showMigrationErrorDialog(requireContext());
-                                alertDialogShown = true;
-                            }
                         }
                     }
                     setCcuReady();
@@ -4410,14 +4407,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         }, 0, 3000);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+                timer.cancel(); // Cancel the timer and dismiss dialog after 30 minutes if still alive.
+                PreferenceUtil.setDataMigrationPopUpClosed();
+            }
+        }, 30 * 60 * 1000);
     }
 
     public void loadGrid(AlertDialog dialog, Timer timer) {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> {
+                MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());
                 loadGrid(parentRootView);
                 dialog.dismiss();
                 timer.cancel();
+                PreferenceUtil.setDataMigrationPopUpClosed();
             });
         }
     }

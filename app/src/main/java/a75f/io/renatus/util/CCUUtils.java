@@ -1,6 +1,8 @@
 package a75f.io.renatus.util;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.util.Log;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
 
@@ -541,6 +545,19 @@ public class CCUUtils {
 
 		if (prefs.getBoolean(context.getString(R.string.SET_SETUP_PASSWORD))) {
 			prefs.setString(context.getString(R.string.USE_SETUP_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+	}
+
+	public static void updateMigrationDiagWithAppVersion(){
+		PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+		try {
+			PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
+			String appVersion = info.versionName + "." + info.versionCode;
+			CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", appVersion);
+			CcuLog.d("CCU_MIGRATION", "Update Migration Diag Point "+appVersion);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
 		}
 
 	}

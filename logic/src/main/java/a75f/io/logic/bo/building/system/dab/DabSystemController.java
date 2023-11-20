@@ -98,7 +98,7 @@ public class DabSystemController extends SystemController
     private double weightedAverageHeatingLoadSum = 0;
     
     
-    private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
+    Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
     
     private DabSystemController()
     {

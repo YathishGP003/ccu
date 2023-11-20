@@ -100,7 +100,7 @@ object Domain {
     fun getPointHisFromDomain(equip: Equip, domainName: String): Double {
         val pointId = getPointIdFromDomain(equip,domainName)
         if (pointId != null) {
-            return hayStack.readDefaultValById(pointId)
+            return hayStack.readHisValById(pointId)
         }
         return 0.0
     }

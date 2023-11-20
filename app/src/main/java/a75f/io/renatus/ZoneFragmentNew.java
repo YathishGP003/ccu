@@ -1196,16 +1196,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         float heatingDeadBand ;
         float coolingDeadBand;
 
-        heatUpperLimitVal = (float)heatUpperlimit;
-        heatLowerLimitVal = (float)heatLowerlimit;
-        coolingLowerLimitVal = (float) coolLowerlimit;
-        coolingUpperLimitVal = (float) coolUpperlimit;
-        coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"").floatValue();
-        heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"").floatValue();
-        heatingDeadBand = (float) heatDeadband;
-        coolingDeadBand = (float) coolDeadband;
-
-      /*  if (MasterControlUtil.isMigrated()) {
+        if (MasterControlUtil.isMigrated()) {
             String roomRefZone = StringUtils.prependIfMissing(p.getRoomRef(), "@");
             heatUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
             heatLowerLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and min and heating and roomRef == \"" +roomRefZone + "\"").floatValue();
@@ -1224,7 +1215,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"").floatValue();
             heatingDeadBand = (float) heatDeadband;
             coolingDeadBand = (float) coolDeadband;
-        }*/
+        }
 
 
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);

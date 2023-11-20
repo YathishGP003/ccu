@@ -46,6 +46,14 @@ fun pushDamperCmd(
 ) {
     mapModbusPoint(haystack, DAMPER_CMD, equipId, value, setPointsList)
 }
+fun pushOccupancyMode(
+    haystack: CCUHsApi,
+    equipId: String,
+    value: Double,
+    setPointsList: ArrayList<String>
+) {
+    mapModbusPoint(haystack, OCCUPANCY_MODE, equipId, value, setPointsList)
+}
 
 fun pushHumidifierCmd(
     haystack: CCUHsApi,

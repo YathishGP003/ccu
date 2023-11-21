@@ -757,10 +757,26 @@ public class HyperSplitMsgReceiver {
             }
             CcuLog.e(L.TAG_CCU_DEVICE, "coolingDesiredTemp " + coolingDesiredTemp + " heatingDesiredTemp " + heatingDesiredTemp + "  averageDesiredTemp " + averageDesiredTemp);
 
-            DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                    new Point.Builder().setHashMap(heatingDtPoint).build(),
-                    new Point.Builder().setHashMap(dtPoint).build(),
-                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+            switch (temperatureMode) {
+                case DUAL:
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                            new Point.Builder().setHashMap(heatingDtPoint).build(),
+                            new Point.Builder().setHashMap(dtPoint).build(),
+                            coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                    break;
+                case COOLING:
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                            new Point.Builder().setHashMap(heatingDtPoint).build(),
+                            new Point.Builder().setHashMap(dtPoint).build(),
+                            coolingDesiredTemp, 0, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                    break;
+                case HEATING:
+                    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                            new Point.Builder().setHashMap(heatingDtPoint).build(),
+                            new Point.Builder().setHashMap(dtPoint).build(),
+                            0, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                    break;
+            }
         }
     }
 

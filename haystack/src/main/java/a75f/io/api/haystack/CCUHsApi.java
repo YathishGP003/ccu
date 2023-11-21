@@ -3072,7 +3072,7 @@ public class CCUHsApi
                             continue;
                         }
                     //save his data to local cache
-                    tagsDb.saveHisItemsToCache(rec,
+                    tagsDb.saveHisItems(rec,
                             new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
                                     HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
                             true);

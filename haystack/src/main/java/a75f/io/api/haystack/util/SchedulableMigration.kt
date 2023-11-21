@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.util
 
 import a75f.io.api.haystack.*
+import a75f.io.logger.CcuLog
 import android.util.Log
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ fun setDiagMigrationVal() {
 
 fun validateMigration(): Boolean {
     val numberOfSchedulableZonePoints = 7
-    val numberOfSchedulableBuildingPoints = 7
+    val numberOfSchedulableBuildingPoints = 24
     val numberOfBuildingLimits = 3
     val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllSchedulable()
     val rooms = hayStack.readAllEntities("room")
@@ -40,10 +41,15 @@ fun validateMigration(): Boolean {
             roomsWithZoneScheduleSize++
         }
     }
-    val buildingLimits =
-        hayStack.readAllEntities("building and (limit or differential) and not tuner")
-    return (((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints + numberOfBuildingLimits)
-            == (schedulabaledata.size + buildingLimits.size))
+    /*val buildingLimits =
+        hayStack.readAllEntities("building and (limit or differential) and not tuner")*/
+    CcuLog.i("CCU_SCHEDULER","validateMigration $roomsWithZoneScheduleSize * $numberOfSchedulableZonePoints " +
+                                    "+ $numberOfSchedulableBuildingPoints == ${schedulabaledata.size}")
+    schedulabaledata.forEach {
+        CcuLog.i("CCU_SCHEDULER", "Schedulable "+it["domainName"])
+    }
+    return (((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints /*+ numberOfBuildingLimits*/)
+            == (schedulabaledata.size /*+ buildingLimits.size*/))
 }
 
 fun importSchedules() {

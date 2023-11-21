@@ -774,7 +774,7 @@ public class CCUTagsDb extends HServer {
 
     public String addPointWithId(Point p, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(id))
+                .add("id", HRef.copy(id))
                 .add("dis", p.getDisplayName())
                 .add("point", HMarker.VAL)
                 .add("siteRef", p.getSiteRef())

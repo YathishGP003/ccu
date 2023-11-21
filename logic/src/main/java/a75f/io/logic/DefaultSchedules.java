@@ -80,7 +80,6 @@ public class DefaultSchedules {
         return localId.toCode();
     }
 
-
     public static HDict getDefaultForDay(int day, String zoneId) {
         HDictBuilder hDictDay = new HDictBuilder()
                 .add("day", HNum.make(day))

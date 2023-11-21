@@ -67,8 +67,8 @@ public class Schedule extends Entity
 
     public static String getZoneIdByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
         return equip.getRoomRef();
     }
 

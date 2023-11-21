@@ -69,6 +69,38 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         return this
     }
 
+    fun getActiveConfiguration() : VavProfileConfiguration {
+        damperType = getDefaultAssociationConfig(DomainName.damperType, model)
+        damperSize = getDefaultAssociationConfig(DomainName.damperSize, model)
+        damperShape = getDefaultAssociationConfig(DomainName.damperShape, model)
+        reheatType = getDefaultAssociationConfig(DomainName.reheatType, model)
+        zonePriority = getDefaultAssociationConfig(DomainName.zonePriority, model)
+
+        autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
+        autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
+        enableCo2Control = getDefaultEnableConfig(DomainName.enableCo2Control, model)
+        enableIAQControl = getDefaultEnableConfig(DomainName.enableIAQControl, model)
+        enableCFMControl = getDefaultEnableConfig(DomainName.enableCFMControl, model)
+
+        temperatureOffset = getDefaultValConfig(DomainName.temperatureOffset, model)
+
+        maxCoolingDamperPos = getDefaultValConfig(DomainName.maxCoolingDamperPos, model)
+        minCoolingDamperPos = getDefaultValConfig(DomainName.minCoolingDamperPos, model)
+        maxHeatingDamperPos = getDefaultValConfig(DomainName.maxHeatingDamperPos, model)
+        minHeatingDamperPos = getDefaultValConfig(DomainName.minHeatingDamperPos, model)
+
+        kFactor = getDefaultValConfig(DomainName.kFactor, model)
+        kFactor.currentVal = 2.000 // TODO: remove this once model is updated with a defaultVal for kFactor
+        maxCFMCooling = getDefaultValConfig(DomainName.maxCFMCooling, model)
+        minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)
+        maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
+        minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
+
+        isDefault = true
+
+        return this
+    }
+
     override fun getAssociationConfigs() : List<AssociationConfig> {
         var associations = mutableListOf<AssociationConfig>()
         return associations

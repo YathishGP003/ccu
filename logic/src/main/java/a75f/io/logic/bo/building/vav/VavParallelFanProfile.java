@@ -33,12 +33,12 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 public class VavParallelFanProfile extends VavProfile
 {
     public VavParallelFanProfile(String equipRef, Short nodeAddress) {
-        super(equipRef, nodeAddress);
+        super(equipRef, nodeAddress, ProfileType.VAV_PARALLEL_FAN);
     }
 
     //TODO - Only for backward compatibility during development. Should be removed.
     public VavParallelFanProfile() {
-        super(null, null);
+        super(null, null, ProfileType.VAV_PARALLEL_FAN);
     }
     @Override
     public ProfileType getProfileType()

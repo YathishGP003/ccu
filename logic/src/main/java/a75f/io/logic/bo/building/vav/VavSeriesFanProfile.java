@@ -33,12 +33,12 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 public class VavSeriesFanProfile extends VavProfile
 {
     public VavSeriesFanProfile(String equipRef, Short nodeAddress) {
-        super(equipRef, nodeAddress);
+        super(equipRef, nodeAddress, ProfileType.VAV_SERIES_FAN);
     }
 
     //TODO - Only for backward compatibility during development. Should be removed.
     public VavSeriesFanProfile() {
-        super(null, null);
+        super(null, null, ProfileType.VAV_SERIES_FAN);
     }
     private boolean fanReady = false;
     private boolean damperOverride = false;

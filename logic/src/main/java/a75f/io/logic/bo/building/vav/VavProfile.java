@@ -10,6 +10,7 @@ import android.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import a75.io.algos.CO2Loop;
@@ -131,7 +132,7 @@ public abstract class VavProfile extends ZoneProfile {
     CCUHsApi hayStack= CCUHsApi.getInstance();
     String equipRef = null;
         
-    public VavProfile(String equipRef, Short addr) {
+    public VavProfile(String equipRef, Short addr, ProfileType profileType) {
 
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
@@ -148,8 +149,7 @@ public abstract class VavProfile extends ZoneProfile {
         spResetRequest = new TrimResponseRequest();
         hwstResetRequest = new TrimResponseRequest();
 
-        /*profileType = T;
-        switch (T) {
+        switch (profileType) {
             case VAV_REHEAT:
                 vavUnit = new VavUnit();
                 break;
@@ -159,7 +159,7 @@ public abstract class VavProfile extends ZoneProfile {
             case VAV_PARALLEL_FAN:
                 vavUnit = new ParallelFanVavUnit();
                 break;
-        }*/
+        }
         nodeAddr = addr;
 
         //createHaystackPoints();
@@ -430,9 +430,11 @@ public abstract class VavProfile extends ZoneProfile {
         return 0;
     }
 
-    public Set<Short> getNodeAddresses()
-    {
-        return null;
+    public Set<Short> getNodeAddresses() {
+        //TODO
+        Set<Short> nodeSet = new HashSet();
+        nodeSet.add((short)nodeAddr);
+        return nodeSet;
     }
 
     @Override

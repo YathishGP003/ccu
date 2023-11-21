@@ -82,23 +82,26 @@ class VavProfileViewModel : ViewModel() {
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
 
-        if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
-            vavProfile = L.getProfile(deviceAddress) as VavProfile
-        } /*else {
-            vavProfile = when (profileType) {
-                ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
-                ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
-                else -> VavReheatProfile()
-            }
-        }*/
-
         // Models are temporarily loaded from local files to allow quick model revisions during development.
         // In the released CCU build, these will draw from the Hayloft API.
         model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
         deviceModel = ModelSource.getDeviceModelByFileName("nickTestSmartNodeDevice_v0.0.0") as SeventyFiveFDeviceDirective //deviceModel = ModelSource.getModelByProfileName("nickTestSmartNodeDevice") as SeventyFiveFDeviceDirective
 
-        profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
-                                        zoneRef, floorRef , model ).getDefaultConfiguration()
+
+        if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
+            vavProfile = L.getProfile(deviceAddress) as VavProfile
+        } else {
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
+                zoneRef, floorRef , model ).getDefaultConfiguration()
+            /*vavProfile = when (profileType) {
+                ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
+                ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
+                else -> VavReheatProfile()
+            }*/
+        }
+
+
+
 
         viewState = VavConfigViewState.fromVavProfileConfig(profileConfiguration)
 
@@ -180,7 +183,7 @@ class VavProfileViewModel : ViewModel() {
     }
 
     private fun setUpVavProfile() {
-        DomainManager.buildDomain(CCUHsApi.getInstance())
+        //DomainManager.buildDomain(CCUHsApi.getInstance())
         viewState.updateConfigFromViewState(profileConfiguration)
 
         val equipBuilder = ProfileEquipBuilder(hayStack)

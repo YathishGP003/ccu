@@ -35,13 +35,13 @@ public class VavReheatProfile extends VavProfile
 {
 
     public VavReheatProfile(String equipRef, Short nodeAddress) {
-        super(equipRef, nodeAddress);
+        super(equipRef, nodeAddress, ProfileType.VAV_REHEAT);
     }
 
 
     //TODO - Only for backward compatibility during development. Should be removed.
     public VavReheatProfile() {
-        super(null, null);
+        super(null, null, ProfileType.VAV_REHEAT);
     }
     @Override
     public ProfileType getProfileType()

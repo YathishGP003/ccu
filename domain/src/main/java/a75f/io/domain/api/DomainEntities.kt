@@ -57,7 +57,7 @@ class Equip(domainName : String, val id : String) : Entity(domainName) {
     val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
-        val id = entityMap["id"].toString()
+       // val id = entityMap["id"].toString()
         points[domainName] = Point(domainName, id)
     }
 
@@ -76,7 +76,7 @@ class Device(domainName : String, val id : String) : Entity(domainName) {
         return points[domainName]
     }
 }
-class Ccu(domainName : String, id : String) : Entity(domainName, id) {
+class Ccu(domainName : String, id : String) : Entity(domainName) {
     val equips = mutableMapOf<String, Equip>()
     val devices = mutableMapOf<String, Device>()
 

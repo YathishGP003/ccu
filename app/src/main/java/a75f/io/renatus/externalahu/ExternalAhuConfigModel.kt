@@ -1,15 +1,15 @@
 package a75f.io.renatus.externalahu
 
-import a75f.io.domain.api.systemCoolingSATMaximum
-import a75f.io.domain.api.systemCoolingSATMinimum
-import a75f.io.domain.api.systemDCVDamperPosMinimum
-import a75f.io.domain.api.systemHeatingSATMaximum
-import a75f.io.domain.api.systemHeatingSATMinimum
-import a75f.io.domain.api.systemSATMaximum
-import a75f.io.domain.api.systemSATMinimum
-import a75f.io.domain.api.systemStaticPressureMaximum
-import a75f.io.domain.api.systemStaticPressureMinimum
-import a75f.io.domain.api.systemDCVDamperPosMaximum
+import a75f.io.domain.api.DomainName.systemCoolingSATMaximum
+import a75f.io.domain.api.DomainName.systemCoolingSATMinimum
+import a75f.io.domain.api.DomainName.systemDCVDamperPosMinimum
+import a75f.io.domain.api.DomainName.systemHeatingSATMaximum
+import a75f.io.domain.api.DomainName.systemHeatingSATMinimum
+import a75f.io.domain.api.DomainName.systemSATMaximum
+import a75f.io.domain.api.DomainName.systemSATMinimum
+import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
+import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
+import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
 import a75f.io.domain.config.ExternalAhuConfiguration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

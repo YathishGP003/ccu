@@ -63,6 +63,7 @@ object DomainManager {
                     val domainName = point["domainName"]
                     domainName?.let {
                         Domain.site?.ccus?.get(ccuId)?.equips?.get(equipId.toString())?.addPoint(point)
+
                     }
                 }
             }

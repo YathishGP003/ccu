@@ -181,43 +181,60 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     fun saveConfiguration() {
         CcuLog.i(TAG, "saveConfiguration")
-        RxjavaUtil.executeBackgroundTask(
-            { ProgressDialogUtils.showProgressDialog(context, "Saving Profile Configuration...") },
-            {
-                if (L.ccu().systemProfile != null) {
-                    if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
-                        L.ccu().systemProfile!!.deleteSystemEquip()
-                        L.ccu().systemProfile = null
-                        addEquip()
-                        saveModbusConfiguration()
+        if (checkValidConfiguration()) {
+            RxjavaUtil.executeBackgroundTask(
+                {
+                    ProgressDialogUtils.showProgressDialog(
+                        context,
+                        "Saving Profile Configuration..."
+                    )
+                },
+                {
+                    if (L.ccu().systemProfile != null) {
+                        if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
+                            L.ccu().systemProfile!!.deleteSystemEquip()
+                            L.ccu().systemProfile = null
+                            addEquip()
+                            saveExternalEquip()
+                        } else {
+                            updateSystemProfile()
+                        }
                     } else {
-                        updateSystemProfile()
+                        addEquip()
+                        saveExternalEquip()
                     }
-                } else {
-                    addEquip()
-                    saveModbusConfiguration()
-                }
-            },
+                },
 
-            {
-                L.saveCCUState()
-                CCUHsApi.getInstance().setCcuReady()
-                CCUHsApi.getInstance().syncEntityTree()
-                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                ProgressDialogUtils.hideProgressDialog()
-                showToast("Configuration saved successfully", context)
-            }
-        )
+                {
+                    L.saveCCUState()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CCUHsApi.getInstance().syncEntityTree()
+                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    ProgressDialogUtils.hideProgressDialog()
+                    showToast("Configuration saved successfully", context)
+                }
+            )
+        }
     }
 
-    private fun saveModbusConfiguration() {
+
+    private fun checkValidConfiguration(): Boolean {
+        //TODO check validations for bacnet if configured as bacnet
+        if (configType.value == ConfigType.MODBUS && (!isValidConfiguration()))
+            return false
+        if ( configType.value == ConfigType.BACNET) {
+            showToast("Bacnet configuration is not available",context)
+            return false
+        }
+        return true
+    }
+
+    private fun saveExternalEquip() {
         if (configType.value == ConfigType.MODBUS) {
             CcuLog.i(TAG, "saveModbusConfiguration")
-            if (isValidConfiguration()) {
-                populateSlaveId()
-                CCUHsApi.getInstance().resetCcuReady()
-                setUpsModbusProfile()
-            }
+            populateSlaveId()
+            CCUHsApi.getInstance().resetCcuReady()
+            setUpsModbusProfile()
         }
     }
 
@@ -289,7 +306,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             CCUHsApi.getInstance().site!!.id,
             ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name
         )
-        saveModbusConfiguration()
+        saveExternalEquip()
     }
 
     private fun addEquip() {

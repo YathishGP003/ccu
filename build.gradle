@@ -30,7 +30,6 @@ buildscript {
         gradle.projectsEvaluated {
             tasks.withType(JavaCompile) {
                 options.compilerArgs += ['-AZURE_ARTIFACTS_ENV_ACCESS_TOKEN="' + System.getenv('AZURE_ARTIFACTS_ENV_ACCESS_TOKEN') + '"']
-                print(System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN"))
             }
         }
         repositories {

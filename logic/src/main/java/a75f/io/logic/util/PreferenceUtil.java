@@ -94,13 +94,11 @@ public class PreferenceUtil {
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
     private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
     private static final String HSS_OUTSIDE_DAMPER_MIN_OPEN = "hssOutsideDamperMinOpenMigration";
-
-
     private static final String LAST_USERINTENT_CONDITIONING_MODE = "lastUserIntentConditioningMode";
-
     public static final String FIRMWARE_VERSION_POINT_MIGRATION = "firmwareVersionRemotePointMigrationIssueFix";
-
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
+    private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
+    private static final String SR_MIGRATION_POINT = "srMigrationPoint";
 
     public static void setContext(Context c) {
         context= c;
@@ -803,5 +801,19 @@ public class PreferenceUtil {
     }
     public static void setHSSOutsideDamperMinOpenMigrationDone() {
         setBooleanPreference(HSS_OUTSIDE_DAMPER_MIN_OPEN, true);
+    }
+
+    public static boolean isDataMigrationPopUpClosed() {
+        return getBooleanPreference(DATA_MIGRATION_POP_UP);
+    }
+    public static void setDataMigrationPopUpClosed() {
+        setBooleanPreference(DATA_MIGRATION_POP_UP, true);
+    }
+
+    public static boolean isSRMigrationPointUpdated() {
+        return getBooleanPreference(SR_MIGRATION_POINT);
+    }
+    public static void setSRMigrationPointUpdated() {
+        setBooleanPreference(SR_MIGRATION_POINT, true);
     }
 }

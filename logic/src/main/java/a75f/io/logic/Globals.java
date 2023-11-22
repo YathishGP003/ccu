@@ -294,6 +294,7 @@ public class Globals {
             ////TODO- Common data feature
             /*if (CCUHsApi.getInstance().isPrimaryCcu()) {
                 BuildingTuners.getInstance().updateBuildingTuners();
+                CCUHsApi.getInstance().importBuildingTuners();
             } else {
                 CCUHsApi.getInstance().importBuildingTuners();
             }*/

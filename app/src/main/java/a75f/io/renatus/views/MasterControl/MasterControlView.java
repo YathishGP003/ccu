@@ -157,18 +157,12 @@ public class MasterControlView extends LinearLayout {
     }
 
     private void updateData() {
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
-
-        BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
-        HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
-        HashMap<Object,Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
 
         hdb = Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
         cdb = Domain.buildingEquip.getCoolingDeadband().readPriorityVal();
 
-        setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and default");
-        zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
+        setbackMap = CCUHsApi.getInstance().readEntity("unoccupied and setback and default");
+        zoneDiffMap = CCUHsApi.getInstance().readEntity("building and zone and differential");
 
     }
 

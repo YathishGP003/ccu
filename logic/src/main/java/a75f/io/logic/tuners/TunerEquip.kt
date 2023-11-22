@@ -77,26 +77,34 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             } else {
                 CcuLog.i(
                     L.TAG_CCU_TUNER,
-                    "Copy UUID of Building equip remote point ${it}"
+                    "Copy UUID of Building equip remote point ${it.domainName}"
                 )
-                val localPointDict = Domain.readDict(it.domainName)
-                if (!localPointDict.isEmpty) {
-                    val localPoint = Point.Builder().setHDict(localPointDict).build()
-                    if (localPoint.id != it.id) {
-                        CcuLog.i(
-                            L.TAG_CCU_TUNER,
-                            "Update UUID of local Building equip point ${localPoint.domainName}"
-                        )
-                        haystack.removeEntity(localPoint.id)
-                        localPoint.id = it.id
-                        haystack.addPoint(localPoint)
-                    } else {
-                        CcuLog.i(
-                            L.TAG_CCU_TUNER,
-                            "UUID already synced - Building equip point ${localPoint.domainName}"
-                        )
+                try {
+                    val localPointDict = Domain.readDict(it.domainName)
+                    if (!localPointDict.isEmpty) {
+                        val localPoint = Point.Builder().setHDict(localPointDict).build()
+                        val defaultVal = haystack.readDefaultValByLevel(localPoint.id, 17)
+                        if (localPoint.id != it.id) {
+                            CcuLog.i(
+                                L.TAG_CCU_TUNER,
+                                "Update UUID of local Building equip point ${localPoint.domainName}"
+                            )
+                            haystack.removeEntity(localPoint.id)
+                            localPoint.id = it.id
+                            haystack.addRemotePoint(localPoint, localPoint.id)
+                            haystack.writeDefaultTunerValById(localPoint.id, defaultVal)
+                        } else {
+                            CcuLog.i(
+                                L.TAG_CCU_TUNER,
+                                "UUID already synced - Building equip point ${localPoint.domainName}"
+                            )
+                        }
                     }
+                } catch ( e : Exception) {
+                    CcuLog.e(L.TAG_CCU_TUNER, "Point not found in local DB for domainName ${it.domainName}", e)
                 }
+
+
             }
         }
         val pointDictTobeSynced = remotePoints.filter { !it.domainName.isNullOrEmpty()}

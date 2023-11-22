@@ -37,8 +37,17 @@ class BuildingEquipTest {
 
         println(dmModel)
 
+        val s = Site.Builder()
+            .setDisplayName("75F")
+            .addMarker("site")
+            .setGeoCity("Burnsville")
+            .setGeoState("MN")
+            .setTz("Chicago")
+            .setArea(1000).build()
+        val siteRef = mockHayStack.addSite(s)
+
         val equipBuilder = TunerEquipBuilder(mockHayStack)
-        equipBuilder.buildTunerEquipAndPoints(dmModel, "TestSite")
+        equipBuilder.buildTunerEquipAndPoints(dmModel, siteRef)
 
         val tunerEquip = mockHayStack.readEntity("equip and tuner")
         assert(tunerEquip.isNotEmpty())

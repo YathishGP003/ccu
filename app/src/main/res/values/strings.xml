@@ -268,10 +268,10 @@
     <string name="key_card_sensor"> Key Card Sensor </string>
     <string name="door_window_sensor_ai">  Door/Window Sensor</string>
 
-    <string name="filter_nc">  Filter Pressure (NC)</string>
-    <string name="filter_no">  Filter Pressure (NO)</string>
-    <string name="condensate_nc">  Condensate (NC)</string>
-    <string name="condensate_no">  Condensate (NO)</string>
+    <string name="filter_nc">  Filter Status (N/C)</string>
+    <string name="filter_no">  Filter Status (N/O)</string>
+    <string name="condensate_nc">  Condensate Overflow (N/C)</string>
+    <string name="condensate_no">  Condensate Overflow (N/O)</string>
 
     <string name="outside_air">  Outside Air Temp &amp; Humidity</string>
     <string name="supply_air">  Supply Air Temp &amp; Humidity</string>

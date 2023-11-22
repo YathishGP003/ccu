@@ -61,6 +61,9 @@ import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.*;
+
+import org.projecthaystack.HDict;
+
 /**
  *
  * Created by samjithsadasivan on 5/31/18.
@@ -457,8 +460,8 @@ public abstract class VavProfile extends ZoneProfile {
 
     @Override
     public Equip getEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
-        return new Equip.Builder().setHashMap(equip).build();
+        HDict equip = CCUHsApi.getInstance().readHDictById("equip and group == \""+nodeAddr+"\"");
+        return new Equip.Builder().setHDict(equip).build();
     }
     @Override
     public <T extends BaseProfileConfiguration> T getProfileConfiguration(short address) {

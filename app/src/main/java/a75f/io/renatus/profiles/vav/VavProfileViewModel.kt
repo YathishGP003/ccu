@@ -99,6 +99,7 @@ class VavProfileViewModel : ViewModel() {
             }*/
         }
 
+        CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
 
 
 

@@ -4,6 +4,7 @@ import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.BaseConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
@@ -16,11 +17,11 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
     lateinit var temperatureOffset: ValueConfig
 
-    lateinit var damperType: AssociationConfig
-    lateinit var damperSize: AssociationConfig
-    lateinit var damperShape: AssociationConfig
+    lateinit var damperType: ValueConfig
+    lateinit var damperSize: ValueConfig
+    lateinit var damperShape: ValueConfig
     lateinit var reheatType: AssociationConfig
-    lateinit var zonePriority: AssociationConfig
+    lateinit var zonePriority: ValueConfig
 
     lateinit var autoForceOccupied: EnableConfig
     lateinit var autoAway: EnableConfig
@@ -41,11 +42,11 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var minCFMReheating: ValueConfig
 
     fun getDefaultConfiguration() : VavProfileConfiguration {
-        damperType = getDefaultAssociationConfig(DomainName.damperType, model)
-        damperSize = getDefaultAssociationConfig(DomainName.damperSize, model)
-        damperShape = getDefaultAssociationConfig(DomainName.damperShape, model)
+        damperType = getDefaultValConfig(DomainName.damperType, model)
+        damperSize = getDefaultValConfig(DomainName.damperSize, model)
+        damperShape = getDefaultValConfig(DomainName.damperShape, model)
         reheatType = getDefaultAssociationConfig(DomainName.reheatType, model)
-        zonePriority = getDefaultAssociationConfig(DomainName.zonePriority, model)
+        zonePriority = getDefaultValConfig(DomainName.zonePriority, model)
 
         autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
         autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
@@ -79,13 +80,37 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             return this
         }
         val vavEquip = VavEquip(equip[Tags.ID].toString())
-        damperType = AssociationConfig(DomainName.damperType, vavEquip.damperType.readDefaultVal().toInt())
 
-        damperType = AssociationConfig(DomainName.damperType, vavEquip.damperType.readDefaultVal().toInt())
-        damperSize = AssociationConfig(DomainName.damperSize, vavEquip.damperSize.readDefaultVal().toInt())
-        damperShape = AssociationConfig(DomainName.damperShape, vavEquip.damperShape.readDefaultVal().toInt())
+        getDefaultConfiguration()
+        damperType.currentVal = vavEquip.damperType.readDefaultVal()
+        damperSize.currentVal = vavEquip.damperSize.readDefaultVal()
+        damperShape.currentVal = vavEquip.damperShape.readDefaultVal()
+        reheatType.associationVal = vavEquip.damperType.readDefaultVal().toInt()
+        zonePriority.currentVal = vavEquip.zonePriority.readDefaultVal()
+
+        autoAway.enabled = vavEquip.autoAway.readDefaultVal() > 0
+        autoForceOccupied.enabled = vavEquip.autoForceOccupied.readDefaultVal() > 0
+        enableCo2Control.enabled = vavEquip.enableCo2Control.readDefaultVal() > 0
+        enableIAQControl.enabled = vavEquip.enableIAQControl.readDefaultVal() > 0
+        enableCFMControl.enabled = vavEquip.enableCFMControl.readDefaultVal() > 0
+
+        temperatureOffset.currentVal = vavEquip.temperatureOffset.readDefaultVal()
+        maxCoolingDamperPos.currentVal = vavEquip.maxCoolingDamperPos.readDefaultVal()
+        minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readDefaultVal()
+        maxHeatingDamperPos.currentVal = vavEquip.maxHeatingDamperPos.readDefaultVal()
+        minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readDefaultVal()
+        kFactor.currentVal = vavEquip.kFactor.readDefaultVal()
+        maxCFMCooling.currentVal = vavEquip.maxCFMCooling.readDefaultVal()
+        minCFMCooling.currentVal = vavEquip.minCFMCooling.readDefaultVal()
+        maxCFMReheating.currentVal = vavEquip.maxCFMReheating.readDefaultVal()
+        minCFMReheating.currentVal = vavEquip.minCFMReheating.readDefaultVal()
+
+
+        /*damperType = ValueConfig(DomainName.damperType, vavEquip.damperType.readDefaultVal())
+        damperSize = ValueConfig(DomainName.damperSize, vavEquip.damperSize.readDefaultVal())
+        damperShape = ValueConfig(DomainName.damperShape, vavEquip.damperShape.readDefaultVal())
         reheatType = AssociationConfig(DomainName.reheatType, vavEquip.reheatType.readDefaultVal().toInt())
-        zonePriority = AssociationConfig(DomainName.zonePriority, vavEquip.zonePriority.readDefaultVal().toInt())
+        zonePriority = ValueConfig(DomainName.zonePriority, vavEquip.zonePriority.readDefaultVal())
 
         autoAway = EnableConfig(DomainName.autoAway, vavEquip.autoAway.readDefaultVal() > 0)
         autoForceOccupied = EnableConfig(DomainName.autoForceOccupied, vavEquip.autoForceOccupied.readDefaultVal() > 0)
@@ -94,34 +119,57 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         enableCFMControl = EnableConfig(DomainName.enableCFMControl, vavEquip.enableCFMControl.readDefaultVal() > 0)
 
         temperatureOffset = ValueConfig(DomainName.temperatureOffset, vavEquip.enableCFMControl.readDefaultVal())
-
         maxCoolingDamperPos = ValueConfig(DomainName.maxCoolingDamperPos, vavEquip.maxCoolingDamperPos.readDefaultVal())
         minCoolingDamperPos = ValueConfig(DomainName.minCoolingDamperPos, vavEquip.minCoolingDamperPos.readDefaultVal())
         maxHeatingDamperPos = ValueConfig(DomainName.maxHeatingDamperPos, vavEquip.maxHeatingDamperPos.readDefaultVal())
         minHeatingDamperPos = ValueConfig(DomainName.minHeatingDamperPos, vavEquip.minHeatingDamperPos.readDefaultVal())
-
         kFactor = ValueConfig(DomainName.kFactor, vavEquip.kFactor.readDefaultVal())
         maxCFMCooling = ValueConfig(DomainName.maxCFMCooling, vavEquip.maxCFMCooling.readDefaultVal())
         minCFMCooling = ValueConfig(DomainName.minCFMCooling, vavEquip.minCFMCooling.readDefaultVal())
         maxCFMReheating = ValueConfig(DomainName.maxCFMReheating, vavEquip.maxCFMReheating.readDefaultVal())
-        minCFMReheating = ValueConfig(DomainName.minCFMReheating, vavEquip.minCFMReheating.readDefaultVal())
+        minCFMReheating = ValueConfig(DomainName.minCFMReheating, vavEquip.minCFMReheating.readDefaultVal())*/
 
         isDefault = false
         return this
     }
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
-        var associations = mutableListOf<AssociationConfig>()
-        return associations
+        return mutableListOf<AssociationConfig>().apply {
+            add(reheatType)
+        }
     }
     override fun getEnableConfigs() : List<EnableConfig> {
-        var enabled = mutableListOf<EnableConfig>()
-        return enabled
+        return mutableListOf<EnableConfig>().apply {
+            add(autoAway)
+            add(autoForceOccupied)
+            add(enableCFMControl)
+            add(enableCo2Control)
+            add(enableIAQControl)
+            add(enableCFMControl)
+        }
     }
 
+    override fun getValueConfigs(): List<ValueConfig> {
+        return mutableListOf<ValueConfig>().apply {
+            add(damperType)
+            add(damperSize)
+            add(damperShape)
+            add(zonePriority)
+            add(temperatureOffset)
+            add(maxCoolingDamperPos)
+            add(minCoolingDamperPos)
+            add(minHeatingDamperPos)
+            add(maxHeatingDamperPos)
+            add(kFactor)
+            add(minCFMCooling)
+            add(maxCFMCooling)
+            add(minCFMReheating)
+            add(maxCFMReheating)
+        }
+    }
     override fun toString(): String {
-        return " temperatureOffset ${temperatureOffset.currentVal} damperType ${damperType.associationVal} damperSize ${damperSize.associationVal}"+
-            "damperShape ${damperShape.associationVal} reheatType ${reheatType.associationVal} autoForceOccupied ${autoForceOccupied.enabled}"+
+        return " temperatureOffset ${temperatureOffset.currentVal} damperType ${damperType.currentVal} damperSize ${damperSize.currentVal}"+
+            "damperShape ${damperShape.currentVal} reheatType ${reheatType.associationVal} autoForceOccupied ${autoForceOccupied.enabled}"+
                 "autoAway ${autoAway.enabled} enableIAQControl ${enableIAQControl.enabled} enableCo2Control ${enableCo2Control.enabled}"+
                 " enableCFMControl ${enableCFMControl.enabled} maxCoolingDamperPos ${maxCoolingDamperPos.currentVal}" +
                 " minCoolingDamperPos ${minCoolingDamperPos.currentVal} maxHeatingDamperPos ${maxHeatingDamperPos.currentVal}" +

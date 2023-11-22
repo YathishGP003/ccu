@@ -57,3 +57,7 @@ fun <T : BaseConfig> List<T>.containsConfig(domainName : String) : Boolean {
 fun <T : BaseConfig> List<T>.getConfig(domainName : String) : T? {
     return this.find {it.domainName == domainName}
 }
+fun <T : AssociationConfig> List<T>.getConfig(domainName : String) : T? {
+    return this.find {it.domainName == domainName}
+}
+

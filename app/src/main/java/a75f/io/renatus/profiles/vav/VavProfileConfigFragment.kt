@@ -62,8 +62,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val rootView = ComposeView(requireContext())
         viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+        val rootView = ComposeView(requireContext())
         rootView.apply {
             setContent { RootView() }
             return rootView
@@ -98,24 +98,30 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         list = viewModel.damperTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
-                        onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex },
-                        defaultSelection = viewModel.viewState.damperType
+                        onSelected = { selectedIndex -> viewModel.viewState.damperType =
+                            selectedIndex.toDouble()
+                        },
+                        defaultSelection = viewModel.viewState.damperType.toInt()
                     )
                     DropDownWithLabel(
                         label = "Damper Size",
                         list = viewModel.damperSizesList,
                         previewWidth = 60,
                         expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.damperSize = selectedIndex },
-                        defaultSelection = viewModel.viewState.damperSize
+                        onSelected = { selectedIndex -> viewModel.viewState.damperSize =
+                            selectedIndex.toDouble()
+                        },
+                        defaultSelection = viewModel.viewState.damperSize.toInt()
                     )
                     DropDownWithLabel(
                         label = "Damper Shape",
                         list = viewModel.damperShapesList,
                         previewWidth = 100,
                         expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.damperShape = selectedIndex},
-                        defaultSelection = viewModel.viewState.damperShape
+                        onSelected = { selectedIndex -> viewModel.viewState.damperShape =
+                            selectedIndex.toDouble()
+                        },
+                        defaultSelection = viewModel.viewState.damperShape.toInt()
                     )
                 }
 
@@ -127,7 +133,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         list = viewModel.reheatTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
-                        onSelected = {selectedIndex -> viewModel.viewState.reheatType = selectedIndex},
+                        onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex},
                         defaultSelection = viewModel.viewState.reheatType
                     )
                     DropDownWithLabel(
@@ -135,8 +141,10 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         list = viewModel.zonePrioritiesList,
                         previewWidth = 100,
                         expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex},
-                        defaultSelection = viewModel.viewState.zonePriority
+                        onSelected = { selectedIndex -> viewModel.viewState.zonePriority =
+                            selectedIndex.toDouble()
+                        },
+                        defaultSelection = viewModel.viewState.zonePriority.toInt()
                     )
                 }
 

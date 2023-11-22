@@ -1,8 +1,11 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
+import a75f.io.logger.CcuLog
+import org.projecthaystack.UnknownNameException
 
 object ReconfigHandler {
 
@@ -13,13 +16,19 @@ object ReconfigHandler {
     private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
         val domainNameMap = mutableMapOf<String, Double>()
         val configPoints =
-            hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+            hayStack.readAllEntities("point and config and equipRef == \"$equipRef\"")
         configPoints.forEach {
-            val pointVal = hayStack.readDefaultValById(it["id"].toString())
-            //TODO - handle string type val if there is any.
-            if (pointVal is Number) {
-                domainNameMap[it["domainName"].toString()] = pointVal
+            CcuLog.i(Domain.LOG_TAG, "Config point $it")
+                try {
+                val pointVal = hayStack.readDefaultValById(it["id"].toString())
+                //TODO - handle string type val if there is any.
+                if (pointVal is Number) {
+                    domainNameMap[it["domainName"].toString()] = pointVal
+                }
+            } catch (e : UnknownNameException) {
+                CcuLog.i(Domain.LOG_TAG, "Invalid point in domainModel $it", e.cause)
             }
+
         }
         return domainNameMap
     }

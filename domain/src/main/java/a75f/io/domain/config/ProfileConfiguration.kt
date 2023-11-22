@@ -21,13 +21,17 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      * Only configs which are configured via UI.
      *
      */
-    abstract fun getEnableConfigs() : List<EnableConfig>
+    open fun getEnableConfigs() : List<EnableConfig> {
+        return emptyList()
+    }
 
     /**
      * Get a list of domainNames of all associations
      *
      */
-    abstract fun getAssociationConfigs() : List<AssociationConfig>
+    open fun getAssociationConfigs() : List<AssociationConfig> {
+        return emptyList()
+    }
 
     /**
      * Get a list of domainNames of all dependencies
@@ -35,6 +39,9 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      */
     //abstract fun getDependencies() : List<ProfileConfig>
 
+    open fun getValueConfigs() : List<ValueConfig> {
+        return emptyList()
+    }
     fun getDefaultValConfig(domainName : String, model : SeventyFiveFProfileDirective) :ValueConfig {
         val point = model.points.find { it.domainName == domainName }
         val config = ValueConfig(domainName, point?.defaultValue?.toString()?.toDouble() ?: 0.0)
@@ -60,6 +67,7 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         config.disName = point?.name ?:""
         return config
     }
+
     override fun toString(): String {
         return "nodeAddr $nodeAddress roomRef $roomRef floorRe $floorRef"
     }

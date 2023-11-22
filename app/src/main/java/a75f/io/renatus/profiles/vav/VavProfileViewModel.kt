@@ -2,12 +2,11 @@ package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
-import a75f.io.domain.VavEquip
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
-import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelSource
@@ -15,10 +14,8 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavReheatProfile
-import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -90,6 +87,8 @@ class VavProfileViewModel : ViewModel() {
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
+                zoneRef, floorRef , model ).getActiveConfiguration()
         } else {
             profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
                 zoneRef, floorRef , model ).getDefaultConfiguration()
@@ -136,8 +135,8 @@ class VavProfileViewModel : ViewModel() {
     }
 
     fun saveConfiguration() {
-        CcuLog.i("CCU_DOMAIN", " Save Profile : damperType ${viewState.damperType}")
-        CcuLog.i("CCU_DOMAIN", " Save Profile : damperSize ${viewState.damperSize}")
+        CcuLog.i(Domain.LOG_TAG, " Save Profile : damperType ${viewState.damperType}")
+        CcuLog.i(Domain.LOG_TAG, " Save Profile : damperSize ${viewState.damperSize}")
 
         RxjavaUtil.executeBackgroundTask({
             ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
@@ -145,13 +144,14 @@ class VavProfileViewModel : ViewModel() {
             CCUHsApi.getInstance().resetCcuReady()
 
             setUpVavProfile()
-
+            CcuLog.i(Domain.LOG_TAG, "VavProfile Setup complete")
             L.saveCCUState()
 
             hayStack.syncEntityTree()
             CCUHsApi.getInstance().setCcuReady()
+            CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
             LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
-
+            CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
         }, {
             ProgressDialogUtils.hideProgressDialog()
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
@@ -215,6 +215,7 @@ class VavProfileViewModel : ViewModel() {
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-VAV-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints")
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
                 .id, equipDis
@@ -222,6 +223,7 @@ class VavProfileViewModel : ViewModel() {
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
         val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         deviceBuilder.buildDeviceAndPoints(
             config,
             deviceModel,
@@ -229,7 +231,8 @@ class VavProfileViewModel : ViewModel() {
             hayStack.site!!.id,
             deviceDis
         )
-        L.ccu().zoneProfiles.add(VavReheatProfile(equipId, addr))
+        CcuLog.i(Domain.LOG_TAG, " add Profile")
+        vavProfile = VavReheatProfile(equipId, addr)
         //vavDeviceMap.put(addr, deviceMap)
         //vavEquip = VavEquip(equipId)
 

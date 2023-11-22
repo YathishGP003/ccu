@@ -1,6 +1,6 @@
 package a75f.io.domain.config
 
-import a75f.io.domain.api.EntityConfig
+import a75f.io.domain.DomainEquip
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 
@@ -47,17 +47,20 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         return config
     }
 
-    fun getDefaultAssociationConfig(domainName : String, model : SeventyFiveFProfileDirective) : AssociationConfig {
+    fun getDefaultAssociationConfig(
+        domainName: String,
+        model: SeventyFiveFProfileDirective
+    ): AssociationConfig {
         val point = model.points.find { it.domainName == domainName }
-        val config = AssociationConfig(domainName, point?.defaultValue?.toString()?.toInt() ?: 0)
-        return config
+        return AssociationConfig(domainName, point?.defaultValue?.toString()?.toInt() ?: 0)
     }
-
     fun getDefaultEnableConfig(domainName : String, model : SeventyFiveFProfileDirective) : EnableConfig {
         val point = model.points.find { it.domainName == domainName }
         val config = EnableConfig(domainName, point?.defaultValue?.toString()?.toBoolean() ?: false)
         config.disName = point?.name ?:""
         return config
     }
-
+    override fun toString(): String {
+        return "nodeAddr $nodeAddress roomRef $roomRef floorRe $floorRef"
+    }
 }

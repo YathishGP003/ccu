@@ -5,14 +5,16 @@ import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
-
+        CcuLog.i(Domain.LOG_TAG, "buildDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
@@ -45,7 +47,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
     }
     private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String, siteRef : String, deviceDis: String) : Device{
-
+        CcuLog.i(Domain.LOG_TAG, "buildDevice ${modelDef.domainName}")
         val deviceBuilder = Device.Builder().setDisplayName(deviceDis)
             .setDomainName(modelDef.domainName)
             .setEquipRef(equipRef)
@@ -58,7 +60,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
 
     private fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device, deviceDis: String) : RawPoint{
-
+        CcuLog.i(Domain.LOG_TAG, "buildRawPoint ${modelDef.domainName}")
         val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
             .setDeviceRef(device.id)

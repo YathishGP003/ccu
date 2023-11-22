@@ -133,7 +133,7 @@ public abstract class VavProfile extends ZoneProfile {
     String equipRef = null;
         
     public VavProfile(String equipRef, Short addr, ProfileType profileType) {
-
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile ");
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
@@ -174,10 +174,11 @@ public abstract class VavProfile extends ZoneProfile {
         this.equipRef = equipRef;
 
         init();
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Done");
     }
 
     public void init() {
-
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
 
@@ -221,9 +222,11 @@ public abstract class VavProfile extends ZoneProfile {
 
         vavUnit.vavDamper.minPosition = 0;
         vavUnit.vavDamper.maxPosition = 100;
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
     }
 
     private void initializeCfmController(String equipId) {
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController");
         double cfmProportionalGain = TunerUtil.readTunerValByQuery("pgain and trueCfm",equipId);
         double cfmIntegralGain = TunerUtil.readTunerValByQuery("igain and trueCfm",equipId);
         int cfmProportionalSpread = (int) TunerUtil.readTunerValByQuery("prange and trueCfm",equipId);
@@ -238,6 +241,7 @@ public abstract class VavProfile extends ZoneProfile {
         cfmController.setProportionalSpread(cfmProportionalSpread);
         cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
         cfmController.reset();
+        CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController Done");
     }
     
     public void initTRSystem() {

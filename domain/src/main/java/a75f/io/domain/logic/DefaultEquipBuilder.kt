@@ -4,8 +4,10 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
+import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.ph.core.TagType
@@ -18,7 +20,7 @@ import org.projecthaystack.HStr
 open class DefaultEquipBuilder : EquipBuilder {
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
-
+        CcuLog.i(Domain.LOG_TAG, "buildEquip ${equipConfig.modelDef.domainName}")
         val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
@@ -52,7 +54,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     }
 
     override fun buildPoint(pointConfig : PointBuilderConfig) : Point {
-
+        CcuLog.i(Domain.LOG_TAG, "buildPoint ${pointConfig.modelDef.domainName}")
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
             .setDomainName(pointConfig.modelDef.domainName)

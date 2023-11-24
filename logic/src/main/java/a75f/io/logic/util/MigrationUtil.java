@@ -33,6 +33,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -40,6 +41,7 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -432,11 +434,59 @@ public class MigrationUtil {
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
+        if(SchedulableMigrationKt.validateMigration()) {
+            writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
+        }
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
     }
+
+    private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
+        List<HashMap<Object,Object>> rooms = ccuHsApi.readAllEntities("room");
+        rooms.forEach(zoneMap -> {
+            String roomRef = zoneMap.get("id").toString();
+            HashMap<Object, Object> coolingUpperLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and max and cooling and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingUpperLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and min and heating and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> coolingLowerLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and min and cooling and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingLowerLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and max and heating and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> coolingDeadBand = ccuHsApi.readEntity("schedulable and cooling" +
+                    " and deadband and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingDeadBand = ccuHsApi.readEntity("schedulable and heating" +
+                    " and deadband and roomRef == \""+roomRef+"\"");
+            if(HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+            }
+        });
+    }
+
+
 
     private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");

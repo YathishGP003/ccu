@@ -2421,4 +2421,25 @@ public class MigrationUtil {
             }
         }
     }
+
+    public static void migrateZoneScheduleIfMissed(CCUHsApi ccuHsApi) {
+        List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        for(HashMap<Object, Object> room : rooms) {
+            HashMap<Object, Object> scheduleHashmap = ccuHsApi.readEntity(
+                    "schedule and " +
+                            "not special and not vacation and roomRef " + "== " + room.get("id"));
+            if(scheduleHashmap.size() > 0 && !scheduleHashmap.containsKey("unoccupiedZoneSetback")){
+                String oldZoneScheduleId =  scheduleHashmap.get("id").toString();
+                SchedulabeLimits.Companion.addSchedulableLimits(
+                        false,room.get("id").toString(), room.get("dis").toString());
+                String newZoneScheduleId = DefaultSchedules.generateDefaultSchedule(true,
+                        scheduleHashmap.get("roomRef").toString());
+                ccuHsApi.deleteEntityItem(oldZoneScheduleId);
+                Schedule newZoneSchedule = ccuHsApi.getScheduleById(newZoneScheduleId);
+                newZoneSchedule.setId(oldZoneScheduleId);
+                ccuHsApi.updateSchedule(newZoneSchedule);
+                ccuHsApi.deleteEntityItem(newZoneScheduleId);
+            }
+        }
+    }
 }

@@ -339,6 +339,7 @@ public class DiagEquip
             }
             if(!PreferenceUtil.isSRMigrationPointUpdated() && SchedulableMigrationKt.validateMigration()) {
                 MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());
+                MigrationUtil.migrateZoneScheduleIfMissed(CCUHsApi.getInstance());
                 PreferenceUtil.setSRMigrationPointUpdated();
             }
 

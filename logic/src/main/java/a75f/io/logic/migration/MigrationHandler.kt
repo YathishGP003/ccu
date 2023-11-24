@@ -44,6 +44,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             createMigrationVersionPoint(ccuHsApi)
             val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery("schedulable and" +
                     " heating and limit and max and default")
+            if(remoteScheduleAblePoint == null)
+                return
             val sGrid = HZincReader(remoteScheduleAblePoint).readGrid()
             val it = sGrid.iterator();
             if(!it.hasNext()) {

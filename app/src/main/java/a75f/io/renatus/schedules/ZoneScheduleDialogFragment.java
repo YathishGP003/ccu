@@ -48,6 +48,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -530,6 +531,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;
+
+            CcuLog.i(L.TAG_CCU, "buildingLimitMin "+buildingLimitMin);
+            CcuLog.i(L.TAG_CCU, "heatingUserLimitMinVal "+heatingUserLimitMinVal);
+            CcuLog.i(L.TAG_CCU, "buildingToZoneDiff "+buildingToZoneDiff);
+            CcuLog.i(L.TAG_CCU, "unoccupiedZoneSetback "+unoccupiedZoneSetback);
+            CcuLog.i(L.TAG_CCU, "buildingLimitMax "+buildingLimitMax);
+            CcuLog.i(L.TAG_CCU, "coolingUserLimitMaxVal "+coolingUserLimitMaxVal);
 
             if(!followBuilding.isChecked()) {
                 warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,

@@ -3081,20 +3081,24 @@ public class CCUHsApi
                         }
                         pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         hDictList.add(pid.toDict());
+                        try {
+                            HDict rec = hsClient.readById(HRef.copy(id));
 
-                        HDict rec = hsClient.readById(HRef.copy(id));
+                            //save points on tagsDb
+                            tagsDb.onPointWrite(rec, Integer.parseInt(level),
+                                    kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
+                                            val, who, HNum.make(0), rec, lastModifiedDateTime);
 
-                        //save points on tagsDb
-                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
-                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                        val, who, HNum.make(0), rec, lastModifiedDateTime);
+                            //save his data to local cache
+                            tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                                    new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                            HStr.make(String.valueOf(HSUtil.getPriorityVal(id))))},
+                                    true);
+                        } catch (UnknownRecException e) {
+                            CcuLog.e(TAG, "Import point array failed "+id, e);
+                        }
 
                     }
-                    //save his data to local cache
-                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
-                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
-                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
-                            true);
                 }
 
                 }
@@ -3148,6 +3152,16 @@ public class CCUHsApi
         Iterator it = sGrid.iterator();
         HRow r = (HRow) it.next();
         return new HDictBuilder().add(r).toDict();
+    }
+
+    public HDict readRemotePointById(String id){
+        HGrid sGrid = readPointArrRemote(id);
+        if (sGrid != null) {
+            Iterator it = sGrid.iterator();
+            HRow r = (HRow) it.next();
+            return new HDictBuilder().add(r).toDict();
+        }
+        return null;
     }
 
     public String fetchRemoteEntityByQuery(String query) {

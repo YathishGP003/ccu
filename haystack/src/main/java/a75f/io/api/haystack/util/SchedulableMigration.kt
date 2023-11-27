@@ -202,7 +202,7 @@ fun setZoneEnabled() {
     for(zoneSchedule in zoneSchedules){
         Log.d("CCU_SCHEDULABLE", "Enabling =" + zoneSchedule.get("id").toString())
         val s = hayStack.getScheduleById(zoneSchedule.get("id").toString())
-        if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef())) {
+        if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef()) && zoneSchedule["unoccupiedZoneSetback"] != null) {
             s.setDisabled(false)
             CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
             Log.d("CCU_SCHEDULABLE", "Enabled =" + s.toString())

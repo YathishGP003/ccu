@@ -2982,7 +2982,6 @@ public class CCUHsApi
                 if(isZone) p.setCcuRef(getCcuId());
                 String pointLuid = ccuHsApi.addRemotePoint(p, p.getId().replace("@", ""));
                 updatePoint(p,pointLuid);
-                syncStatusService.addUnSyncedEntity(pointLuid);
             }
         }
         syncEntityTree();
@@ -3051,7 +3050,13 @@ public class CCUHsApi
                         pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         hDictList.add(pid.toDict());
 
-                        HDict rec = hsClient.readById(HRef.copy(id));
+                        HDict rec;
+                        try {
+                            rec = hsClient.readById(HRef.copy(id));
+                        } catch (UnknownRecException e){
+                            e.printStackTrace();
+                            continue;
+                        }
 
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level),
@@ -3059,8 +3064,15 @@ public class CCUHsApi
                                         val, who, HNum.make(0), rec, lastModifiedDateTime);
 
                     }
+                        HDict rec;
+                        try {
+                            rec = hsClient.readById(HRef.copy(id));
+                        }catch (UnknownRecException e){
+                            e.printStackTrace();
+                            continue;
+                        }
                     //save his data to local cache
-                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                    tagsDb.saveHisItemsToCache(rec,
                             new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
                                     HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
                             true);

@@ -441,6 +441,7 @@ public class MigrationUtil {
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
+        ccuHsApi.scheduleSync();
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
@@ -2340,8 +2341,11 @@ public class MigrationUtil {
         String ccuId = hayStack.getCcuId();
         zoneSpecialScheduleList.forEach( scheduleMap -> {
             Object roomRef = scheduleMap.get(Tags.ROOMREF);
-            if (roomRef != null && !hayStack.isEntityExisting(roomRef.toString())) {
-                hayStack.removeEntity(scheduleMap.get(Tags.ID).toString());
+            String scheduleCcuRef = scheduleMap.get("ccuRef").toString();
+            String zoneCcuRef = hayStack.getCcuRef().toString();
+            if (roomRef != null && !hayStack.isEntityExisting(roomRef.toString())  &&
+                    !scheduleCcuRef.equals(zoneCcuRef)) {
+                hayStack.deleteEntityLocally(scheduleMap.get(Tags.ID).toString());
                 CcuLog.i(TAG_CCU_MIGRATION_UTIL, "delete invalid zone schedule "+scheduleMap);
             } else {
                 String ccuRef = scheduleMap.get("ccuRef").toString();
@@ -2434,7 +2438,6 @@ public class MigrationUtil {
                         false,room.get("id").toString(), room.get("dis").toString());
                 String newZoneScheduleId = DefaultSchedules.generateDefaultSchedule(true,
                         scheduleHashmap.get("roomRef").toString());
-                ccuHsApi.deleteEntityItem(oldZoneScheduleId);
                 Schedule newZoneSchedule = ccuHsApi.getScheduleById(newZoneScheduleId);
                 newZoneSchedule.setId(oldZoneScheduleId);
                 ccuHsApi.updateSchedule(newZoneSchedule);

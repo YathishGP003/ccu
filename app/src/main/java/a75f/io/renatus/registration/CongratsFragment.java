@@ -116,7 +116,7 @@ public class CongratsFragment extends Fragment {
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
         p.setMargins(0, 0, 0, 80);
 
-        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
         String buldingLimit;
         String heatingLimit;
@@ -154,8 +154,13 @@ public class CongratsFragment extends Fragment {
         } else {
             currentHumidity = TunerUtil.readSystemUserIntentVal("humidity") + "%";
         }
-
-        mCCUName.setText(ccu.get("dis").toString());
+        String ccuName = L.ccu().getCCUName();
+        if(ccu.containsKey("dis")){
+            ccuName = ccu.get("dis").toString();
+        }
+        if(ccuName != null) {
+            mCCUName.setText(ccuName);
+        }
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         mSerialNo.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         mCMFirwareVer.setText("NA");

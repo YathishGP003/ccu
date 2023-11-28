@@ -104,10 +104,23 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
                 hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
                 hayStackPoint.id = existingPoint["id"].toString()
-                val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
-                if (enableConfig != null) {
-                    initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
-                } else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
+                if (profileConfiguration.getEnableConfigs().getConfig(point.domainName) != null) {
+                    val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
+                    if (enableConfig != null) {
+                        initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
+                    }
+                } else if (profileConfiguration.getAssociationConfigs().getConfig(point.domainName) != null) {
+                    val associationConfig = profileConfiguration.getAssociationConfigs().getConfig(point.domainName)
+                    associationConfig?.associationVal?.let {
+                        initializeDefaultVal(hayStackPoint, it)
+                    }
+                } else if (profileConfiguration.getValueConfigs().getConfig(point.domainName) != null) {
+                    val valueConfig = profileConfiguration.getValueConfigs().getConfig(point.domainName)
+                    if (valueConfig != null) {
+                        initializeDefaultVal(hayStackPoint, valueConfig.currentVal )
+                    }
+                }
+                else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
                 }
                 DomainManager.addPoint(hayStackPoint)

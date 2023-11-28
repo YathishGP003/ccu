@@ -22,6 +22,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
+import a75f.io.domain.api.Domain;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.migration.MigrationHandler;
@@ -426,7 +427,7 @@ public class MasterControlUtil {
 
     public static boolean validateNamed(double heatingUserLimitMin,double coolingUserLimitMax,
                                         double unOccupiedzonesetback) {
-        double buildingZoneDifferential = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and differential");
+        double buildingZoneDifferential = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
         double buildingLimMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
 

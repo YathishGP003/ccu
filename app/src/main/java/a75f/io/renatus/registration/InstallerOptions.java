@@ -726,8 +726,8 @@ public class InstallerOptions extends Fragment {
                 coolDBVal = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
                 coolMaxVal = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
                 coolMinVal = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
-                heatMinVal = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
-                heatMaxVal = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+                heatMinVal = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+                heatMaxVal = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
                 setBack = (float) Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
                 buildingMinLimit = (float) Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
                 buildingMaxLimit = (float) Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();

@@ -43,7 +43,7 @@ class TunerUpdateHandler {
             return;
         }
 
-        HDict remotePoint = hayStack.readRemotePoint(pointUid);
+        HDict remotePoint = hayStack.readRemotePointById(pointUid);
         CcuLog.i(L.TAG_CCU_PUBNUB, "Fetched remote point "+remotePoint);
         if (!remotePoint.has(Tags.DOMAIN_NAME)) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Point does not domainName, tuner change cannot be applied");

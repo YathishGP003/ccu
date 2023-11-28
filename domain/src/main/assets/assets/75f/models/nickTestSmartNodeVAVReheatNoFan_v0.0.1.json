@@ -5683,7 +5683,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": 100,
+      "defaultValue": 20,
       "defaultUnit": "%",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -5924,7 +5924,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": 100,
+      "defaultValue": 20,
       "defaultUnit": "%",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -12887,7 +12887,7 @@
         "constraintType": "MULTI_STATE"
       },
       "presentationData": {},
-      "defaultValue": 0,
+      "defaultValue": 2,
       "defaultUnit": "",
       "isGpc36": false,
       "hisInterpolate": "COV",

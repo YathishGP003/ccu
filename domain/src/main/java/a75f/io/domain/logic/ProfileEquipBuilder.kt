@@ -48,7 +48,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             "equip and group == \"${configuration.nodeAddress}\"")
 
         val equipId =  equip["id"].toString()
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
         hayStack.updateEquip(hayStackEquip, equipId)
 
         //TODO - Fix crash

@@ -527,7 +527,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
             Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
-            Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
+            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;

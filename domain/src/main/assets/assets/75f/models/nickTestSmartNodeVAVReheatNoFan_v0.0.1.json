@@ -10530,7 +10530,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint":null,
       "descriptiveTags": [
         {
           "name": "config",
@@ -10999,7 +10999,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "analog1Out",
       "descriptiveTags": [
         {
           "name": "cmd",

@@ -441,6 +441,25 @@ public class LSmartNode
         }
         return false;
     }
+
+    public static boolean isAnalog(RawPoint point) {
+        String port = point.getPort();
+        if (port != null) {
+            return port == ANALOG_OUT_ONE
+                    || port == ANALOG_OUT_TWO
+                    || port == ANALOG_IN_ONE
+                    || port == ANALOG_IN_TWO;
+        }
+        String domainName = point.getDomainName();
+        if (domainName != null) {
+            return domainName == "analog1Out"
+                    || domainName == "analog2Out"
+                    || domainName == "analog1In"
+                    || domainName == "analog2In";
+        }
+
+        return false;
+    }
     
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);

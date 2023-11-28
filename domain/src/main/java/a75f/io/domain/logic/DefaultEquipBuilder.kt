@@ -16,6 +16,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
+import java.lang.StringBuilder
 
 /**
  * A common implementation of EquipBuilder interface with a generic equip/point build support.
@@ -79,7 +80,12 @@ open class DefaultEquipBuilder : EquipBuilder {
 
             val incrementValTag = pointConfig.modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
             incrementValTag?.let { pointBuilder.setIncrementVal(it.value.toString()) }
+        } else if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+            val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
+            val enumString = constraint.allowedValues.joinToString { it.value }
+            pointBuilder.setEnums(enumString)
         }
+
         //TODO - Support added for currently used tag types. Might need updates in future.
         pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
         pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->

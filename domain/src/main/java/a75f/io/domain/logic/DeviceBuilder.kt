@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
+import kotlin.math.log
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -94,13 +95,43 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
     private fun updatePhysicalRef(configuration: ProfileConfiguration, rawPoint : RawPoint, entityMapper: EntityMapper , equipRef : String, deviceDis: String) {
         val logicalPointRefName = entityMapper.getPhysicalProfilePointRef(configuration, rawPoint.domainName)
-
+        CcuLog.i(Domain.LOG_TAG, "updatePhysicalRef $logicalPointRefName")
         /*val logicalPointId = Domain.site?.floors?.get(rawPoint.floorRef)?.
                                         rooms?.get(rawPoint.roomRef)?.equips?.get(equipRef)?.
                                         points?.get(logicalPointRefName)?.id*/
         logicalPointRefName?.let {
-            val logicalPointId = hayStack.readEntity("point and domainName == \"$logicalPointRefName\"")
-            rawPoint.pointRef = logicalPointId["id"]?.toString()
+            val logicalPoint = hayStack.readEntity("point and domainName == \"$logicalPointRefName\" " +
+                                            "and equipRef == \"$equipRef\"")
+            rawPoint.pointRef = logicalPoint["id"]?.toString()
+            rawPoint.type= getType(logicalPointRefName, equipRef)
+
+        }
+    }
+
+    private fun getType(domainName : String, equipRef: String) : String{
+        val typeMapping = getTypePointMappingFromCmd(domainName)
+        if (typeMapping.isNotEmpty()) {
+            val typePoint = hayStack.readEntity(
+                "point and domainName == \"$typeMapping\" " +
+                        "and equipRef == \"$equipRef\""
+            )
+            CcuLog.i(Domain.LOG_TAG, "typePoint $typePoint")
+            val enumArray = typePoint["enum"]?.toString()?.split(",")
+            CcuLog.i(Domain.LOG_TAG, "enumArray $enumArray")
+            if (enumArray?.isNotEmpty() == true) {
+                val logicalPointVal = hayStack.readPointPriorityVal(typePoint["id"]?.toString())
+                val type = enumArray[logicalPointVal.toInt()]
+                CcuLog.i(Domain.LOG_TAG, "setType $type")
+                return type
+            }
+        }
+        return ""
+    }
+
+    private fun getTypePointMappingFromCmd(cmd : String) : String{
+        return when(cmd) {
+            "normalizedDamperCmd" -> "damperType"
+            else -> {""}
         }
     }
 }

@@ -1,12 +1,15 @@
 package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.SaveTextView
@@ -19,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +32,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VavProfileConfigFragment : BaseDialogFragment() {
 
@@ -62,7 +72,11 @@ class VavProfileConfigFragment : BaseDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            }
+        }
         val rootView = ComposeView(requireContext())
         rootView.apply {
             setContent { RootView() }
@@ -79,9 +93,27 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         }
     }
 
+    @Composable
+    fun ShowProgressBar() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = primaryColor,)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "Loading Profile Configuration")
+        }
+    }
+
     //@Preview
     @Composable
     fun RootView() {
+        if (!viewModel.modelLoaded) {
+            ShowProgressBar()
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
+            return
+        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

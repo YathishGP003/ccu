@@ -24,6 +24,9 @@ import a75f.io.renatus.util.RxjavaUtil
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -69,6 +72,8 @@ class VavProfileViewModel : ViewModel() {
     lateinit var minCFMReheatingList: List<String>
 
     private val _isDialogOpen = MutableLiveData<Boolean>()
+
+    var modelLoaded by  mutableStateOf(false)
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -109,7 +114,8 @@ class VavProfileViewModel : ViewModel() {
         this.hayStack = hayStack
 
         initializeLists()
-
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
+        modelLoaded = true
     }
 
     private fun initializeLists() {

@@ -48,6 +48,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -526,21 +527,26 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
             Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
-            Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
+            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;
 
-            if(!followBuilding.isChecked()) {
-                warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
-                        coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+            CcuLog.i(L.TAG_CCU, "buildingLimitMin "+buildingLimitMin);
+            CcuLog.i(L.TAG_CCU, "heatingUserLimitMinVal "+heatingUserLimitMinVal);
+            CcuLog.i(L.TAG_CCU, "buildingToZoneDiff "+buildingToZoneDiff);
+            CcuLog.i(L.TAG_CCU, "unoccupiedZoneSetback "+unoccupiedZoneSetback);
+            CcuLog.i(L.TAG_CCU, "buildingLimitMax "+buildingLimitMax);
+            CcuLog.i(L.TAG_CCU, "coolingUserLimitMaxVal "+coolingUserLimitMaxVal);
+
+            warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
+                    coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+            if (warning == null) {
+                warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
+                        buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
                 if (warning == null) {
-                    warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
-                            buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
-                    if (warning == null) {
-                        warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
-                                heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
-                    }
+                    warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
+                            heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
                 }
             }
 

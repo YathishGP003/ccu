@@ -39,6 +39,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -396,13 +397,20 @@ public class ScheduleManager {
 
     public void updateLimitsAndDeadBand() {
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
+            Equip equip = profile.getEquip();
+            String roomRef = equip.getRoomRef();
 
+
+            ArrayList<HashMap<Object, Object>> schedulableOfTheRoom = CCUHsApi.getInstance().readAllEntities("schedulable and zone and roomRef ==\""
+                    +roomRef+ "\"");
+
+            if(schedulableOfTheRoom.size() > 7) {
+                SchedulableMigrationKt.deleteDuplicateLimits(roomRef);
+            }
             if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
                 continue;
             }
 
-            Equip equip = profile.getEquip();
-            String roomRef = equip.getRoomRef();
             Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                     .replace("@", ""));
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();

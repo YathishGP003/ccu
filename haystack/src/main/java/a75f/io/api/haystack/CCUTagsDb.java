@@ -1523,7 +1523,7 @@ public class CCUTagsDb extends HServer {
             CcuLog.d(TAG_CCU_HS," Invalid point array delete command "+id);
         }
 
-        a75f.io.data.WriteArray writeArray = new a75f.io.data.WriteArray();
+        a75f.io.data.WriteArray writeArray = fillValuesFromArray(array);
         writeArray.setValue(null, level - 1);
         writeArray.setWho(null, level - 1);
         writeArray.setDuration(0, level - 1);

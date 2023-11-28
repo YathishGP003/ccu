@@ -202,6 +202,7 @@ public class AddtoExisting extends Fragment {
 
             mNext1.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    mNext1.setEnabled(false);
                     // TODO Auto-generated method stub
                     int[] mandotaryIds = new int[]
                             {
@@ -455,7 +456,7 @@ public class AddtoExisting extends Fragment {
     }
 
     public void loadExistingSite(final String siteId) {
-        
+        mNext1.setEnabled(true);
         @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, String> getHSClientTask = new AsyncTask<Void, Void, String>() {
 

@@ -43,15 +43,80 @@ fun validateMigration(): Boolean {
     }
     /*val buildingLimits =
         hayStack.readAllEntities("building and (limit or differential) and not tuner")*/
-    CcuLog.i("CCU_SCHEDULER","validateMigration $roomsWithZoneScheduleSize * $numberOfSchedulableZonePoints " +
-                                    "+ $numberOfSchedulableBuildingPoints == ${schedulabaledata.size}")
-    schedulabaledata.forEach {
-        CcuLog.i("CCU_SCHEDULER", "Schedulable "+it["domainName"])
+
+    val idealNumberOfPoints = ((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints /*+ numberOfBuildingLimits*/)
+    val importedNumberOfPoints  = (schedulabaledata.size /*+ buildingLimits.size*/)
+
+    if(importedNumberOfPoints > idealNumberOfPoints)
+        deleteDuplication(rooms, importedNumberOfPoints , idealNumberOfPoints)
+
+    return (importedNumberOfPoints >= idealNumberOfPoints)
+}
+fun deleteDuplication(
+    rooms: ArrayList<HashMap<Any, Any>>,
+    importedNumberOfPoints: Int,
+    idealNumberOfPoints: Int
+) {
+    for(room in rooms){
+        val zoneScheduleOfTheRoom = hayStack.readAllEntities("zone and schedule and not special and not vacation and roomRef"+" == "+ room["id"].toString())
+        if (zoneScheduleOfTheRoom.size > 1) {
+            val roomsZoneScheduleId = room["scheduleRef"].toString().replace("@","")
+            val scheduleRoomFollowing = hayStack.getScheduleById(roomsZoneScheduleId)
+            if ( scheduleRoomFollowing != null
+                && scheduleRoomFollowing.isZoneSchedule) {
+                for (zoneSchedule in zoneScheduleOfTheRoom) {
+                    if (!((zoneSchedule["id"].toString().replace("@","")).equals(roomsZoneScheduleId))) {
+                        //delete the duplicate userlimit
+                        //copy the limit value.
+                        //if dulpicate zone Schedule- clear.
+                        hayStack.deleteEntity(zoneSchedule["id"].toString())
+                    }
+                }
+                deleteDuplicateLimits(room["id"].toString())
+            } else {
+                retainAndRemove(zoneScheduleOfTheRoom)
+                deleteDuplicateLimits(room["id"].toString())
+            }
+        } else {
+            if(importedNumberOfPoints > idealNumberOfPoints) {
+                deleteDuplicateLimits(room["id"].toString())
+            }
+        }
     }
-    return (((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints /*+ numberOfBuildingLimits*/)
-            == (schedulabaledata.size /*+ buildingLimits.size*/))
+
+    Log.d("SCHEDULE_MIGRATION", "Complete")
 }
 
+fun deleteDuplicateLimits(roomRef: String) {
+    val queries = listOf(
+        "heating and min and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+        "heating and max and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+        "cooling and max and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+        "cooling and min and user and limit and zone and schedulable and roomRef ==\"$roomRef\"",
+        "heating and deadband and zone and schedulable and roomRef ==\"$roomRef\"",
+        "cooling and deadband and zone and schedulable and roomRef ==\"$roomRef\"",
+        "unoccupied and setback and zone and schedulable and roomRef ==\"$roomRef\""
+    )
+
+    queries.forEach { query ->
+        val entities = hayStack.readAllEntities(query)
+        retainAndRemove(entities)
+    }
+}
+
+fun retainAndRemove(entitiesToRemoveDuplication: ArrayList<HashMap<Any, Any>>) {
+    if(entitiesToRemoveDuplication.size > 1){
+        val limitToKeep = entitiesToRemoveDuplication.get(0)
+        for (limit in entitiesToRemoveDuplication){
+            if(!(limit["id"].toString().equals((limitToKeep.get("id").toString())))){
+                hayStack.deleteEntity(limit["id"].toString())
+            }
+        }
+    }
+
+    hayStack.syncEntityTree()
+
+}
 fun importSchedules() {
     GlobalScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
         Log.d("CCU_SCHEDULABLE", "Update schedule object start")
@@ -137,7 +202,7 @@ fun setZoneEnabled() {
     for(zoneSchedule in zoneSchedules){
         Log.d("CCU_SCHEDULABLE", "Enabling =" + zoneSchedule.get("id").toString())
         val s = hayStack.getScheduleById(zoneSchedule.get("id").toString())
-        if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef())) {
+        if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef()) && zoneSchedule["unoccupiedZoneSetback"] != null) {
             s.setDisabled(false)
             CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
             Log.d("CCU_SCHEDULABLE", "Enabled =" + s.toString())

@@ -530,18 +530,18 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;
 
-            if(!followBuilding.isChecked()) {
-                warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
-                        coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+
+            warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
+                    coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+            if (warning == null) {
+                warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
+                        buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
                 if (warning == null) {
-                    warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
-                            buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
-                    if (warning == null) {
-                        warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
-                                heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
-                    }
+                    warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
+                            heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
                 }
             }
+
 
             if(warning == null) {
                 if (!mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),

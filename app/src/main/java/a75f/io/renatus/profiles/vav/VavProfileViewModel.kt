@@ -84,10 +84,10 @@ class VavProfileViewModel : ViewModel() {
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
 
-        // Models are temporarily loaded from local files to allow quick model revisions during development.
+        // Profile models is temporarily loaded from a local file to allow quick model revisions during development.
         // In the released CCU build, these will draw from the Hayloft API.
         model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
-        deviceModel = ModelSource.getDeviceModelByFileName("nickTestSmartNodeDevice_v0.0.0") as SeventyFiveFDeviceDirective //deviceModel = ModelSource.getModelByProfileName("nickTestSmartNodeDevice") as SeventyFiveFDeviceDirective
+        deviceModel = ModelSource.getModelByProfileName("smartnodeDevice") as SeventyFiveFDeviceDirective
 
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {

@@ -3327,6 +3327,12 @@
           "valueEnum": []
         },
         {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
           "name": "zone",
           "kind": "MARKER",
           "defaultValue": null,
@@ -3351,11 +3357,13 @@
         "siteRef",
         "sp",
         "temp",
-        "tz"
+        "tz",
+        "writable"
       ],
       "rootTagNames": [
         "sp",
-        "temp"
+        "temp",
+        "writable"
       ],
       "kind": "NUMBER",
       "valueConstraint": {
@@ -3441,6 +3449,12 @@
         },
         {
           "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -5234,6 +5248,729 @@
         },
         {
           "name": "max",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351126407f88d3b5ec4337e",
+      "name": "Max Cooling Damper Pos",
+      "domainName": "maxCoolingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "max",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "floorRef",
+        "his",
+        "damper",
+        "zone",
+        "roomRef",
+        "equipRef",
+        "cooling",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "max",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "max",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 100,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "max",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351126407f88c1a1df4937e",
+      "name": "Min Heating Damper Pos",
+      "domainName": "minHeatingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "heating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "floorRef",
+        "his",
+        "damper",
+        "zone",
+        "roomRef",
+        "equipRef",
+        "heating",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "min",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "min",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 100,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "heating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351126407f88c1e5da4337e",
+      "name": "Min Cooling Damper Pos",
+      "domainName": "minCoolingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "floorRef",
+        "his",
+        "damper",
+        "zone",
+        "roomRef",
+        "equipRef",
+        "cooling",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "min",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "min",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 100,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "min",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []

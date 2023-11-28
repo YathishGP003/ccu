@@ -249,11 +249,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         Picker(
                             header = "Max Damper Pos\n    Cooling",
                             state = valuesPickerState,
-                            // TODO: this point isn't in v0.0.1 of the model
-                            //items = viewModel.maxCoolingDamperPosList,
+                            items = viewModel.maxCoolingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.maxCoolingDamperPos = it.toDouble() },
-                            //startIndex = viewModel.maxCoolingDamperPosList.indexOf(viewModel.viewState.maxCoolingDamperPos.toInt().toString()),
-                            items = values,
+                            startIndex = viewModel.maxCoolingDamperPosList.indexOf(viewModel.viewState.maxCoolingDamperPos.toInt().toString()),
                             visibleItemsCount = 3,
                             modifier = Modifier.weight(0.3f),
                             textModifier = Modifier.padding(8.dp),
@@ -263,11 +261,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         Picker(
                             header = "Min Damper Pos\n    Cooling",
                             state = valuesPickerState,
-                            // TODO: this point isn't in v0.0.1 of the model
-                            //items = viewModel.minCoolingDamperPosList,
+                            items = viewModel.minCoolingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.minCoolingDamperPos = it.toDouble() },
-                            //startIndex = viewModel.minCoolingDamperPosList.indexOf(viewModel.viewState.minCoolingDamperPos.toInt().toString()),
-                            items = values,
+                            startIndex = viewModel.minCoolingDamperPosList.indexOf(viewModel.viewState.minCoolingDamperPos.toInt().toString()),
                             visibleItemsCount = 3,
                             modifier = Modifier.weight(0.3f),
                             textModifier = Modifier.padding(8.dp),
@@ -343,11 +339,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         Picker(
                             header = "Min Damper Pos\n    Heating",
                             state = valuesPickerState,
-                            // TODO: this point isn't in v0.0.1 of the model
-                            //items = viewModel.minHeatingDamperPosList,
+                            items = viewModel.minHeatingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.minHeatingDamperPos = it.toDouble() },
-                            //startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
-                            items = values,
+                            startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
                             visibleItemsCount = 3,
                             modifier = Modifier.weight(0.3f),
                             textModifier = Modifier.padding(8.dp),

@@ -581,7 +581,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = moduleTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = moduleTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -605,7 +605,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         }
 
-        Map<String, List<HashMap>> filteredGroupTuner = filteredList.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> filteredGroupTuner = filteredList.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> filteredSortedGroup = new TreeMap<>(filteredGroupTuner);
         for (String groupTitle : filteredSortedGroup.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle,filteredSortedGroup.get(groupTitle));
@@ -626,7 +626,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = zoneTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = zoneTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -713,7 +713,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         Collections.reverse(moduleTuners);
         tuners.addAll(moduleTuners);
 
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -737,7 +737,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {

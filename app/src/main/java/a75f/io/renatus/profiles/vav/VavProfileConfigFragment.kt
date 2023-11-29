@@ -252,7 +252,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 previewWidth = 100,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.3f").format(viewModel.viewState.kFactor))
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
                             )
                         }
                     }

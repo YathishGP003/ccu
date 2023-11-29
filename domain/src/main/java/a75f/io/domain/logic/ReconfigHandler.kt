@@ -16,7 +16,7 @@ object ReconfigHandler {
     private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
         val domainNameMap = mutableMapOf<String, Double>()
         val configPoints =
-            hayStack.readAllEntities("point and config and equipRef == \"$equipRef\"")
+            hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         configPoints.forEach {
             CcuLog.i(Domain.LOG_TAG, "Config point $it")
                 try {

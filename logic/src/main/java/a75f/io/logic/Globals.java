@@ -370,7 +370,12 @@ public class Globals {
                     e.printStackTrace();
                 } finally {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
-                    loadEquipProfiles();
+
+                    try {
+                        loadEquipProfiles();
+                    } catch (Exception e) {
+                        CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
+                    }
                     isInitCompleted = true;
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     if (CCUHsApi.getInstance().isCCURegistered()) {

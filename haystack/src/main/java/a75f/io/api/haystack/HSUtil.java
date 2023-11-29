@@ -589,8 +589,11 @@ public class HSUtil
     public static void writeValLevel10(HashMap<Object, Object> point, double val) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         String pointId = point.get("id").toString();
-        hsApi.writePointForCcuUser(pointId, 10, val, 60000);
-        hsApi.writeHisValById(pointId, val);
+        double existingVal = HSUtil.getPriorityLevelVal(pointId,HayStackConstants.USER_APP_WRITE_LEVEL);
+        if(existingVal != val) {
+            hsApi.writePointForCcuUser(pointId, 10, val, 0);
+            hsApi.writeHisValById(pointId, val);
+        }
 
     }
 

@@ -290,6 +290,7 @@ public class Globals {
                         /* Only primary CCUs shall create new tuners created in the upgrade releases and
                         non-primary CCUs should fetch in the next app start up.*/
                 BuildingTuners.getInstance().updateBuildingTuners();
+                CCUHsApi.getInstance().importBuildingTuners();
             } else {
                         /*If a non-primary tuner fails to load all the  building tuners, it should
                         fall back hard-coded constant tuner values. Creating new tuner instances here will result in

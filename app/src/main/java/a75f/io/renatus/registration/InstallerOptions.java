@@ -157,9 +157,6 @@ public class InstallerOptions extends Fragment {
     boolean isEthernet = false;
     UtilityApplication utilityApplication;
     LinearLayout linearLayout;
-    TextView textNetworkError;
-    private BroadcastReceiver mNetworkReceiver;
-
     View toastLayout;
 
     private CustomCCUSwitch toggleCoolingLockout;
@@ -242,8 +239,6 @@ public class InstallerOptions extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        mNetworkReceiver = new NetworkChangeReceiver();
-        getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @SuppressLint("MissingInflatedId")
@@ -271,7 +266,6 @@ public class InstallerOptions extends Fragment {
         //BACnet Setup UI Components
         toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
         textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
-        textNetworkError = rootView.findViewById(R.id.textNetworkError);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         Button buttonApply = rootView.findViewById(R.id.buttonApply);
         Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
@@ -1124,18 +1118,6 @@ public class InstallerOptions extends Fragment {
                     Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
                     Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) >= 0 &
                     Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
-        }
-    }
-
-    public class NetworkChangeReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("CCU_UTILITYAPP", "NetworkChangeReceiver:" +utilityApplication.checkNetworkConnected());
-            if(utilityApplication.checkNetworkConnected()) {
-                textNetworkError.setVisibility(View.GONE);
-            }else {
-                textNetworkError.setVisibility(View.VISIBLE);
-            }
         }
     }
 

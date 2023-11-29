@@ -372,6 +372,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
+                    mViewPager.getAdapter().notifyDataSetChanged();
                 }   else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SchedulerFragment){
                     if (isBuildingPassWordRequired()) {
                         showRequestPasswordAlert("Building Settings Authentication", getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), i);

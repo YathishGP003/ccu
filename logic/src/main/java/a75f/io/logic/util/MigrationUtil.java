@@ -33,6 +33,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -40,7 +41,9 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
@@ -71,6 +74,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
+import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
@@ -430,11 +434,60 @@ public class MigrationUtil {
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
+        if(SchedulableMigrationKt.validateMigration()) {
+            writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
+        }
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
+        ccuHsApi.scheduleSync();
     }
+
+    private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
+        List<HashMap<Object,Object>> rooms = ccuHsApi.readAllEntities("room");
+        rooms.forEach(zoneMap -> {
+            String roomRef = zoneMap.get("id").toString();
+            HashMap<Object, Object> coolingUpperLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and max and cooling and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingUpperLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and min and heating and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> coolingLowerLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and min and cooling and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingLowerLimit = ccuHsApi.readEntity("schedulable and point" +
+                    " and limit and max and heating and user and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> coolingDeadBand = ccuHsApi.readEntity("schedulable and cooling" +
+                    " and deadband and roomRef == \""+roomRef+"\"");
+            HashMap<Object, Object> heatingDeadBand = ccuHsApi.readEntity("schedulable and heating" +
+                    " and deadband and roomRef == \""+roomRef+"\"");
+            if(HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+            }
+            if(HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0){
+                ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
+                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+            }
+        });
+    }
+
+
 
     private static void migrateAirFlowTunerPoints(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> allSnTuners = ccuHsApi.readAllEntities("sn and tuner");
@@ -2288,8 +2341,11 @@ public class MigrationUtil {
         String ccuId = hayStack.getCcuId();
         zoneSpecialScheduleList.forEach( scheduleMap -> {
             Object roomRef = scheduleMap.get(Tags.ROOMREF);
-            if (roomRef != null && !hayStack.isEntityExisting(roomRef.toString())) {
-                hayStack.removeEntity(scheduleMap.get(Tags.ID).toString());
+            String scheduleCcuRef = scheduleMap.get("ccuRef").toString();
+            String zoneCcuRef = hayStack.getCcuRef().toString();
+            if (roomRef != null && !hayStack.isEntityExisting(roomRef.toString())  &&
+                    !scheduleCcuRef.equals(zoneCcuRef)) {
+                hayStack.deleteEntityLocally(scheduleMap.get(Tags.ID).toString());
                 CcuLog.i(TAG_CCU_MIGRATION_UTIL, "delete invalid zone schedule "+scheduleMap);
             } else {
                 String ccuRef = scheduleMap.get("ccuRef").toString();
@@ -2346,9 +2402,47 @@ public class MigrationUtil {
                 Point modifiedPoint  = new Point.Builder().setHashMap(outsideDamperMinOpen).addMarker("his").build();
                 haystack.updatePoint(modifiedPoint, modifiedPoint.getId());
             }
-
         });
+    }
 
+    public static void createZoneSchedulesIfMissing(CCUHsApi ccuHsApi) {
+        List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        for(HashMap<Object, Object> room : rooms) {
+            HashMap<Object, Object> scheduleHashmap = ccuHsApi.readEntity(
+                    "schedule and " +
+                            "not special and not vacation and roomRef " + "== " + room.get("id"));
+            if (scheduleHashmap.size() == 0) {
+                SchedulabeLimits.Companion.addSchedulableLimits(
+                        false,room.get("id").toString(), room.get("dis").toString());
+                String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
+                if(ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
+                        + room.get("id") +"\"") == ScheduleType.ZONE.ordinal()){
+                    HashMap<Object, Object> roomToUpdate = ccuHsApi.readMapById(room.get("id").toString());
+                    Zone zone = new Zone.Builder().setHashMap(roomToUpdate).build();
+                    zone.setScheduleRef(scheduleRef);
+                    ccuHsApi.updateZone(zone, zone.getId());
+                }
+            }
+        }
+    }
 
+    public static void migrateZoneScheduleIfMissed(CCUHsApi ccuHsApi) {
+        List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        for(HashMap<Object, Object> room : rooms) {
+            HashMap<Object, Object> scheduleHashmap = ccuHsApi.readEntity(
+                    "schedule and " +
+                            "not special and not vacation and roomRef " + "== " + room.get("id"));
+            if(scheduleHashmap.size() > 0 && !scheduleHashmap.containsKey("unoccupiedZoneSetback")){
+                String oldZoneScheduleId =  scheduleHashmap.get("id").toString();
+                SchedulabeLimits.Companion.addSchedulableLimits(
+                        false,room.get("id").toString(), room.get("dis").toString());
+                String newZoneScheduleId = DefaultSchedules.generateDefaultSchedule(true,
+                        scheduleHashmap.get("roomRef").toString());
+                Schedule newZoneSchedule = ccuHsApi.getScheduleById(newZoneScheduleId);
+                newZoneSchedule.setId(oldZoneScheduleId);
+                ccuHsApi.updateSchedule(newZoneSchedule);
+                ccuHsApi.deleteEntityItem(newZoneScheduleId);
+            }
+        }
     }
 }

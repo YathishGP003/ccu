@@ -3021,7 +3021,6 @@ public class CCUHsApi
                 if(isZone) p.setCcuRef(getCcuId());
                 String pointLuid = ccuHsApi.addRemotePoint(p, p.getId().replace("@", ""));
                 updatePoint(p,pointLuid);
-                syncStatusService.addUnSyncedEntity(pointLuid);
             }
         }
         syncEntityTree();
@@ -3091,7 +3090,6 @@ public class CCUHsApi
                         hDictList.add(pid.toDict());
                         try {
                             HDict rec = hsClient.readById(HRef.copy(id));
-
                             //save points on tagsDb
                             tagsDb.onPointWrite(rec, Integer.parseInt(level),
                                     kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :

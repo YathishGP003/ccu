@@ -43,7 +43,7 @@ class TunerUpdateHandler {
             return;
         }
 
-        HDict remotePoint = hayStack.readRemotePointById(pointUid);
+        HDict remotePoint = hayStack.readRemotePoint("id == "+pointUid);
         CcuLog.i(L.TAG_CCU_PUBNUB, "Fetched remote point "+remotePoint);
         if (!remotePoint.has(Tags.DOMAIN_NAME)) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Point does not domainName, tuner change cannot be applied");
@@ -59,7 +59,7 @@ class TunerUpdateHandler {
         String domainName = remotePoint.get(Tags.DOMAIN_NAME).toString();
 
         Map<Object, Object> tunerPoint = Domain.readPointForEquip(domainName, tunerEquip.get("id").toString());
-        if (tunerEquip.isEmpty()) {
+        if (tunerPoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner point does not exist on CCU "+domainName);
             return;
         }
@@ -90,7 +90,7 @@ class TunerUpdateHandler {
                                                                 .readAllEntities(tunerQuery);
     
         CcuLog.i(L.TAG_CCU_PUBNUB,
-                 "Propagate tuners for point : "+tunerPoint.getDisplayName()+" to "+equipTuners.size()+" equips");
+                 "Propagate tuners for point : "+tunerPoint.getDisplayName()+" to "+equipTuners.size()+" equips : query "+tunerQuery);
         Observable.fromIterable(equipTuners)
                   .subscribeOn(Schedulers.io())
                   .map(map -> map.get(Tags.ID).toString())

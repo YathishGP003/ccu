@@ -85,6 +85,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
     private BuildingOccupancy buildingOccupancy;
     private BuildingOccupancyViewModel buildingOccupancyViewModel;
     String errorMessage;
+    AlertDialog alert;
 
 
 
@@ -261,7 +262,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                             buildingOccupancy.getDays().add(position, removeEntry);
                     });
 
-            AlertDialog alert = builder.create();
+            alert = builder.create();
             alert.show();
             return false;
 
@@ -288,7 +289,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                         .setNegativeButton("Re-Edit", (dialog, id) -> {
                                             showdialog(position);
                                         });
-                                AlertDialog alert = builder.create();
+                                alert = builder.create();
                                 alert.show();
                             } else if (errorMessage.contains("zone")) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -307,7 +308,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                             }
                                             doScheduleUpdate(false);
                                         });
-                                AlertDialog alert = builder.create();
+                                alert = builder.create();
                                 alert.show();
                             }
                         } else {
@@ -324,6 +325,14 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         }
         return true;
     }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(alert != null){
+            alert.dismiss();
+        }
+    }
+
     public void refreshScreen() {
         if(getActivity() != null) {
             doScheduleUpdate(true);

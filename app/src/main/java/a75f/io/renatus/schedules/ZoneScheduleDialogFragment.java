@@ -527,7 +527,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
             Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
-            Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
+            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;
@@ -539,16 +539,14 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             CcuLog.i(L.TAG_CCU, "buildingLimitMax "+buildingLimitMax);
             CcuLog.i(L.TAG_CCU, "coolingUserLimitMaxVal "+coolingUserLimitMaxVal);
 
-            if(!followBuilding.isChecked()) {
-                warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
-                        coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+            warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
+                    coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
+            if (warning == null) {
+                warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
+                        buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
                 if (warning == null) {
-                    warning = MasterControlUtil.validateZone(buildingLimitMin, heatingUserLimitMinVal,
-                            buildingToZoneDiff, unoccupiedZoneSetback, buildingLimitMax, coolingUserLimitMaxVal);
-                    if (warning == null) {
-                        warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
-                                heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
-                    }
+                    warning = MasterControlUtil.validateLimits(heatingUserLimitMaxVal, heatingUserLimitMinVal,
+                            heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
                 }
             }
 

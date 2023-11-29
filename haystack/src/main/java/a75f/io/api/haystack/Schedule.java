@@ -74,16 +74,16 @@ public class Schedule extends Entity
 
     public static Schedule getScheduleByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
     }
 
     public static Schedule getVacationByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), true);
 

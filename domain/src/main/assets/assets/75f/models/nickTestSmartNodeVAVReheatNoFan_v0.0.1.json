@@ -21761,7 +21761,7 @@
     "version": {
       "major": 0,
       "minor": 0,
-      "patch": 0
+      "patch": 1
     }
   },
   "associatedWithTuner": {
@@ -21775,7 +21775,7 @@
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 7
+    "patch": 8
   },
   "modelType": "PROFILE",
   "namespace": "bms75f",

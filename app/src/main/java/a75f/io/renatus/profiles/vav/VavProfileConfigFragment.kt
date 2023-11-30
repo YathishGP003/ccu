@@ -165,8 +165,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         list = viewModel.reheatTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
-                        onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex},
-                        defaultSelection = viewModel.viewState.reheatType
+                        onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex.toDouble()},
+                        defaultSelection = viewModel.viewState.reheatType.toInt()
                     )
                     DropDownWithLabel(
                         label = "Zone Priority",
@@ -252,7 +252,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 previewWidth = 100,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.3f").format(viewModel.viewState.kFactor))
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
                             )
                         }
                     }

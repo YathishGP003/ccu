@@ -9,7 +9,7 @@ class VavConfigViewState {
     var damperType by mutableStateOf (0.0)
     var damperSize by mutableStateOf (0.0)
     var damperShape by mutableStateOf (0.0)
-    var reheatType by mutableStateOf (0)
+    var reheatType by mutableStateOf (0.0)
     var zonePriority by mutableStateOf (0.0)
 
     var autoAway by mutableStateOf (false)
@@ -38,7 +38,7 @@ class VavConfigViewState {
                 this.damperType = config.damperType.currentVal
                 this.damperSize = config.damperSize.currentVal
                 this.damperShape = config.damperShape.currentVal
-                this.reheatType = config.reheatType.associationVal
+                this.reheatType = config.reheatType.currentVal
                 this.zonePriority = config.zonePriority.currentVal
 
                 this.autoAway = config.autoAway.enabled
@@ -68,7 +68,7 @@ class VavConfigViewState {
         config.damperType.currentVal = this.damperType
         config.damperSize.currentVal = this.damperSize
         config.damperShape.currentVal = this.damperShape
-        config.reheatType.associationVal = this.reheatType
+        config.reheatType.currentVal = this.reheatType
         config.zonePriority.currentVal = this.zonePriority
 
         config.autoAway.enabled = this.autoAway

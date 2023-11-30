@@ -84,7 +84,7 @@ class VavProfileViewModel : ViewModel() {
         val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
         profileType = ProfileType.values()[profileOriginalValue]
 
-        // Profile models is temporarily loaded from a local file to allow quick model revisions during development.
+        // Profile model is temporarily loaded from a local file to allow quick model revisions during development.
         // In the released CCU build, these will draw from the Hayloft API.
         model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
         deviceModel = ModelSource.getModelByProfileName("smartnodeDevice") as SeventyFiveFDeviceDirective
@@ -132,7 +132,6 @@ class VavProfileViewModel : ViewModel() {
         maxHeatingDamperPosList = getListByDomainName(DomainName.maxHeatingDamperPos, model)
         minHeatingDamperPosList = getListByDomainName(DomainName.minHeatingDamperPos, model)
 
-        // TODO: In v0.0.1 of the model, this is a 2000-item dropdown. Very slow, but it doesn't crash the CCU.
         kFactorsList = getListByDomainName(DomainName.kFactor, model)
 
         maxCFMCoolingList = getListByDomainName(DomainName.maxCFMCooling, model)

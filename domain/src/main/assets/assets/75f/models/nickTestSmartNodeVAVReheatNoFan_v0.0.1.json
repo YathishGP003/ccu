@@ -126,7 +126,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 1,
+          "defaultValue": "1",
           "valueEnum": []
         },
         {
@@ -325,7 +325,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "th1In",
       "descriptiveTags": [
         {
           "name": "air",
@@ -336,7 +336,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 1,
+          "defaultValue": "1",
           "valueEnum": []
         },
         {
@@ -437,7 +437,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 14,
+          "defaultValue": "14",
           "valueEnum": []
         },
         {
@@ -650,7 +650,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 14,
+          "defaultValue": "14",
           "valueEnum": []
         },
         {
@@ -751,7 +751,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 38,
+          "defaultValue": "38",
           "valueEnum": []
         },
         {
@@ -964,7 +964,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 38,
+          "defaultValue": "38",
           "valueEnum": []
         },
         {
@@ -1065,7 +1065,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 4,
+          "defaultValue": "4",
           "valueEnum": []
         },
         {
@@ -1286,7 +1286,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 4,
+          "defaultValue": "4",
           "valueEnum": []
         },
         {
@@ -1387,7 +1387,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 8,
+          "defaultValue": "8",
           "valueEnum": []
         },
         {
@@ -1597,7 +1597,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 8,
+          "defaultValue": "8",
           "valueEnum": []
         },
         {
@@ -1698,7 +1698,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 31,
+          "defaultValue": "31",
           "valueEnum": []
         },
         {
@@ -1908,7 +1908,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 31,
+          "defaultValue": "31",
           "valueEnum": []
         },
         {
@@ -2650,7 +2650,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 29,
+          "defaultValue": "29",
           "valueEnum": []
         },
         {
@@ -2852,7 +2852,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 29,
+          "defaultValue": "29",
           "valueEnum": []
         },
         {
@@ -3191,7 +3191,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 17,
+          "defaultValue": "17",
           "valueEnum": []
         },
         {
@@ -3350,6 +3350,7 @@
         "vav",
         "config",
         "group",
+        "writable",
         "dis",
         "id",
         "kind",
@@ -3357,13 +3358,11 @@
         "siteRef",
         "sp",
         "temp",
-        "tz",
-        "writable"
+        "tz"
       ],
       "rootTagNames": [
         "sp",
-        "temp",
-        "writable"
+        "temp"
       ],
       "kind": "NUMBER",
       "valueConstraint": {
@@ -3386,7 +3385,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 17,
+          "defaultValue": "17",
           "valueEnum": []
         },
         {
@@ -4197,7 +4196,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -4451,7 +4453,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -4705,7 +4710,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -4959,7 +4967,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -5248,729 +5259,6 @@
         },
         {
           "name": "max",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
-      "id": "6351126407f88d3b5ec4337e",
-      "name": "Max Cooling Damper Pos",
-      "domainName": "maxCoolingDamperPos",
-      "tags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cooling",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "max",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "cur",
-        "floorRef",
-        "his",
-        "damper",
-        "zone",
-        "roomRef",
-        "equipRef",
-        "cooling",
-        "group",
-        "config",
-        "dis",
-        "id",
-        "kind",
-        "max",
-        "point",
-        "siteRef",
-        "sp",
-        "tz",
-        "writable"
-      ],
-      "rootTagNames": [
-        "config",
-        "max",
-        "sp",
-        "writable"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "minValue": 0,
-        "maxValue": 100,
-        "constraintType": "NUMERIC"
-      },
-      "presentationData": {
-        "tagValueIncrement": 1
-      },
-      "defaultValue": 100,
-      "defaultUnit": "%",
-      "isGpc36": false,
-      "hisInterpolate": "COV",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "associatedWithDevicePoint": null,
-      "descriptiveTags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cooling",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "max",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
-      "id": "6351126407f88c1a1df4937e",
-      "name": "Min Heating Damper Pos",
-      "domainName": "minHeatingDamperPos",
-      "tags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "heating",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "min",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "cur",
-        "floorRef",
-        "his",
-        "damper",
-        "zone",
-        "roomRef",
-        "equipRef",
-        "heating",
-        "group",
-        "config",
-        "dis",
-        "id",
-        "kind",
-        "min",
-        "point",
-        "siteRef",
-        "sp",
-        "tz",
-        "writable"
-      ],
-      "rootTagNames": [
-        "config",
-        "min",
-        "sp",
-        "writable"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "minValue": 0,
-        "maxValue": 100,
-        "constraintType": "NUMERIC"
-      },
-      "presentationData": {
-        "tagValueIncrement": 1
-      },
-      "defaultValue": 100,
-      "defaultUnit": "%",
-      "isGpc36": false,
-      "hisInterpolate": "COV",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "associatedWithDevicePoint": null,
-      "descriptiveTags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "heating",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "min",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
-      "id": "6351126407f88c1e5da4337e",
-      "name": "Min Cooling Damper Pos",
-      "domainName": "minCoolingDamperPos",
-      "tags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cooling",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "min",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "cur",
-        "floorRef",
-        "his",
-        "damper",
-        "zone",
-        "roomRef",
-        "equipRef",
-        "cooling",
-        "group",
-        "config",
-        "dis",
-        "id",
-        "kind",
-        "min",
-        "point",
-        "siteRef",
-        "sp",
-        "tz",
-        "writable"
-      ],
-      "rootTagNames": [
-        "config",
-        "min",
-        "sp",
-        "writable"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "minValue": 0,
-        "maxValue": 100,
-        "constraintType": "NUMERIC"
-      },
-      "presentationData": {
-        "tagValueIncrement": 1
-      },
-      "defaultValue": 100,
-      "defaultUnit": "%",
-      "isGpc36": false,
-      "hisInterpolate": "COV",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "associatedWithDevicePoint": null,
-      "descriptiveTags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "damper",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cooling",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "min",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -6509,7 +5797,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 18,
+          "defaultValue": "18",
           "valueEnum": []
         },
         {
@@ -6732,7 +6020,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 18,
+          "defaultValue": "18",
           "valueEnum": []
         },
         {
@@ -6839,7 +6127,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 20,
+          "defaultValue": "20",
           "valueEnum": []
         },
         {
@@ -7062,7 +6350,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 20,
+          "defaultValue": "20",
           "valueEnum": []
         },
         {
@@ -7175,7 +6463,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 19,
+          "defaultValue": "19",
           "valueEnum": []
         },
         {
@@ -7398,7 +6686,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 19,
+          "defaultValue": "19",
           "valueEnum": []
         },
         {
@@ -7511,7 +6799,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 76,
+          "defaultValue": "76",
           "valueEnum": []
         },
         {
@@ -7710,7 +6998,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "th2In",
       "descriptiveTags": [
         {
           "name": "air",
@@ -7721,7 +7009,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 76,
+          "defaultValue": "76",
           "valueEnum": []
         },
         {
@@ -7822,7 +7110,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 69,
+          "defaultValue": "69",
           "valueEnum": []
         },
         {
@@ -8018,7 +7306,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 69,
+          "defaultValue": "69",
           "valueEnum": []
         },
         {
@@ -8887,7 +8175,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 77,
+          "defaultValue": "77",
           "valueEnum": []
         },
         {
@@ -9090,7 +8378,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 77,
+          "defaultValue": "77",
           "valueEnum": []
         },
         {
@@ -9195,8 +8483,20 @@
           "valueEnum": []
         },
         {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
           "name": "floorRef",
           "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
           "defaultValue": null,
           "valueEnum": []
         },
@@ -9291,6 +8591,8 @@
         "his",
         "zone",
         "vav",
+        "equipRef",
+        "group",
         "cur",
         "diag",
         "dis",
@@ -9473,6 +8775,12 @@
         {
           "name": "diag",
           "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
           "defaultValue": null,
           "valueEnum": []
         },
@@ -9682,14 +8990,17 @@
         "constraintType": "NUMERIC"
       },
       "presentationData": {
-        "tagValueIncrement": 0.001
+        "tagValueIncrement": 0.01
       },
-      "defaultValue": null,
+      "defaultValue": 2,
       "defaultUnit": "cfm",
       "isGpc36": false,
       "hisInterpolate": "NONE",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -9763,7 +9074,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 71,
+          "defaultValue": "71",
           "valueEnum": []
         },
         {
@@ -9952,12 +9263,12 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "analog2Out",
       "descriptiveTags": [
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 71,
+          "defaultValue": "71",
           "valueEnum": []
         },
         {
@@ -10290,7 +9601,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 66,
+          "defaultValue": "66",
           "valueEnum": []
         },
         {
@@ -10486,12 +9797,12 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "analog1Out",
       "descriptiveTags": [
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 66,
+          "defaultValue": "66",
           "valueEnum": []
         },
         {
@@ -10586,7 +9897,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 70,
+          "defaultValue": "70",
           "valueEnum": []
         },
         {
@@ -10780,7 +10091,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 70,
+          "defaultValue": "70",
           "valueEnum": []
         },
         {
@@ -11255,6 +10566,10 @@
           {
             "index": 4,
             "value": "smartDamper"
+          },
+          {
+            "index": 5,
+            "value": "0-5v"
           }
         ],
         "constraintType": "MULTI_STATE"
@@ -11267,7 +10582,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint":null,
+      "associatedWithDevicePoint": null,
       "descriptiveTags": [
         {
           "name": "config",
@@ -11736,7 +11051,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": "analog1Out",
+      "associatedWithDevicePoint": null,
       "descriptiveTags": [
         {
           "name": "cmd",
@@ -11808,7 +11123,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 73,
+          "defaultValue": "73",
           "valueEnum": []
         },
         {
@@ -11997,7 +11312,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -12010,7 +11328,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 73,
+          "defaultValue": "73",
           "valueEnum": []
         },
         {
@@ -12105,7 +11423,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 72,
+          "defaultValue": "72",
           "valueEnum": []
         },
         {
@@ -12294,7 +11612,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -12307,7 +11628,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 72,
+          "defaultValue": "72",
           "valueEnum": []
         },
         {
@@ -12402,7 +11723,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 45,
+          "defaultValue": "45",
           "valueEnum": []
         },
         {
@@ -12616,7 +11937,7 @@
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": 45,
+          "defaultValue": "45",
           "valueEnum": []
         },
         {
@@ -12887,7 +12208,7 @@
         "constraintType": "MULTI_STATE"
       },
       "presentationData": {},
-      "defaultValue": 0,
+      "defaultValue": 2,
       "defaultUnit": "",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -14640,6 +13961,777 @@
         },
         {
           "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351122707f88c1a0ce4937d",
+      "name": "Min Cooling Damper Pos",
+      "domainName": "minCoolingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "his",
+        "floorRef",
+        "damper",
+        "zone",
+        "roomRef",
+        "cooling",
+        "equipRef",
+        "vav",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "min",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "min",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 20,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 0,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351122707f88c1a0ce4937d",
+      "name": "Min Heating Damper Pos",
+      "domainName": "minHeatingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "heating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "damper",
+        "his",
+        "floorRef",
+        "zone",
+        "roomRef",
+        "equipRef",
+        "vav",
+        "heating",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "min",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "min",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 20,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 0,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "heating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "min",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "6351126407f88c1a0ce4937e",
+      "name": "Max Cooling Damper Pos",
+      "domainName": "maxCoolingDamperPos",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "max",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "his",
+        "damper",
+        "floorRef",
+        "zone",
+        "roomRef",
+        "cooling",
+        "equipRef",
+        "vav",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "max",
+        "point",
+        "siteRef",
+        "sp",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "max",
+        "sp",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 100,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 0,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cooling",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "damper",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "max",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -17489,7 +17581,10 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "associatedWithDevicePoint": null,
       "descriptiveTags": [
@@ -20870,6 +20965,794 @@
           "valueEnum": []
         }
       ]
+    },
+    {
+      "id": "62e8c71ea841cb7abb470541",
+      "name": "Airflow CFM Integral KFactor",
+      "domainName": "vavAirFlowCfmIntegralKfactor",
+      "tags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "igain",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "his",
+        "trueCFM",
+        "equipRef",
+        "vav",
+        "air",
+        "flow",
+        "dis",
+        "floorRef",
+        "id",
+        "igain",
+        "kind",
+        "point",
+        "roomRef",
+        "siteRef",
+        "sp",
+        "tuner",
+        "tunerGroup",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "igain",
+        "sp",
+        "tuner",
+        "tunerGroup",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0.1,
+        "maxValue": 1,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 0.1
+      },
+      "defaultValue": 0.5,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "igain",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "62e8b5fda841cb7abb470539",
+      "name": "Airflow CFM Integral Time",
+      "domainName": "vavAirFlowCfmIntegralTime",
+      "tags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "itimeout",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "time",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "his",
+        "trueCFM",
+        "equipRef",
+        "vav",
+        "air",
+        "flow",
+        "dis",
+        "floorRef",
+        "id",
+        "itimeout",
+        "kind",
+        "point",
+        "roomRef",
+        "siteRef",
+        "sp",
+        "time",
+        "tuner",
+        "tunerGroup",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "itimeout",
+        "sp",
+        "time",
+        "tuner",
+        "tunerGroup",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 1,
+        "maxValue": 60,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": 30,
+      "defaultUnit": "min",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "itimeout",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "time",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "62e8c893a841cb7abb470542",
+      "name": "Airflow CFM Proportional KFactor",
+      "domainName": "vavAirFlowCfmProportionalKFactor",
+      "tags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "pgain",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "his",
+        "trueCFM",
+        "equipRef",
+        "vav",
+        "air",
+        "flow",
+        "dis",
+        "floorRef",
+        "id",
+        "kind",
+        "pgain",
+        "point",
+        "roomRef",
+        "siteRef",
+        "sp",
+        "tuner",
+        "tunerGroup",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "pgain",
+        "sp",
+        "tuner",
+        "tunerGroup",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0.1,
+        "maxValue": 1,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 0.1
+      },
+      "defaultValue": 0.5,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "enableCFMControl",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "associatedWithDevicePoint": null,
+      "descriptiveTags": [
+        {
+          "name": "air",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "flow",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "pgain",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "trueCFM",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tuner",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tunerGroup",
+          "kind": "STR",
+          "defaultValue": "vav",
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
     }
   ],
   "equips": [],
@@ -20886,13 +21769,13 @@
     "version": {
       "major": 0,
       "minor": 0,
-      "patch": 8
+      "patch": 11
     }
   },
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 1
+    "patch": 7
   },
   "modelType": "PROFILE",
   "namespace": "bms75f",

@@ -230,7 +230,10 @@ public class HisSyncHandler
         Date quarterHourSyncDateTimeForDeviceOrEquip = new Date(System.currentTimeMillis());
 
         for (HashMap pointToSync : pointList) {
-
+            if (pointToSync.get("tz") == null) {
+                CcuLog.e(TAG," His point without TZ cannot be synced "+pointToSync);
+                continue;
+            }
             String pointID = pointToSync.get("id").toString();
             List<HisItem> unsyncedHisItems;
             String pointDescription = pointToSync.get("dis").toString();

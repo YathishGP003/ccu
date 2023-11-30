@@ -55,6 +55,13 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
 
     private fun syncBuildingTuners(siteId: String, hClient: HClient, haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners $siteId")
+
+        val tunerEquip = haystack.readEntity("equip and tuner")
+        if (tunerEquip.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Failed : BuildingTuner $tunerEquip")
+            return
+        }
+
         val remotePoints = mutableListOf<Point>()
         try {
             val tunerPointsDict = HDictBuilder().add(
@@ -80,7 +87,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
                     "Copy UUID of Building equip remote point ${it.domainName}"
                 )
                 try {
-                    val localPointDict = Domain.readDict(it.domainName)
+                    val localPointDict = Domain.readDictOnEquip(it.domainName, tunerEquip[Tags.ID].toString())
                     if (!localPointDict.isEmpty) {
                         val localPoint = Point.Builder().setHDict(localPointDict).build()
                         val defaultVal = haystack.readDefaultValByLevel(localPoint.id, 17)
@@ -113,11 +120,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
         syncPointArrays(pointDictTobeSynced, hClient, haystack)
 
         //Re-initialize cached Ids in building equip singleton.
-        val tunerEquip = haystack.readEntity("equip and tuner")
-        if (tunerEquip.isNotEmpty()) {
-            Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
-        }
-
+        Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
         CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Completed")
     }
 

@@ -5,12 +5,14 @@ import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
+import org.projecthaystack.HStr
 import kotlin.math.log
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
@@ -73,6 +75,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setSiteRef(device.siteRef)
 
         modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        if (modelDef.tags.find { it.name == Tags.HIS } != null) {
+            pointBuilder.addTag(Tags.TZ, HStr.make(hayStack.site?.tz))
+        }
 
         val rawPoint = pointBuilder.build()
         updatePhysicalRef(configuration, rawPoint, entityMapper, device.equipRef, deviceDis)

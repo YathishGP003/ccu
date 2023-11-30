@@ -17,6 +17,8 @@ import org.projecthaystack.HDict
 object Domain {
 
     const val LOG_TAG = "CCU_DOMAIN"
+    const val LOG_TAG_TUNER = "CCU_DOMAIN_TUNER"
+
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
     val hayStack: CCUHsApi = CCUHsApi.getInstance()
     var site: Site? = null
@@ -92,6 +94,11 @@ object Domain {
     @JvmStatic
     fun readDict(domainName: String) : HDict {
         return hayStack.readHDict("point and domainName == \"$domainName\"")
+    }
+
+    @JvmStatic
+    fun readDictOnEquip(domainName: String, equipRef: String) : HDict {
+        return hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
 
     @JvmStatic

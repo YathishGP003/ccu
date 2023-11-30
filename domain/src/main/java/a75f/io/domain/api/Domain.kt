@@ -92,7 +92,12 @@ object Domain {
     }
 
     @JvmStatic
-    fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
+    fun readDictOnEquip(domainName: String, equipRef: String) : HDict {
+        return hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+
+    @JvmStatic
+    fun readPointOnEquip(domainName: String, equipRef : String) : Map<Any,Any> {
         return hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
 }

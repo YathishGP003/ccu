@@ -1,5 +1,7 @@
 package a75f.io.messaging.handler;
 
+import android.media.MediaParser;
+
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HDict;
@@ -12,6 +14,7 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -43,40 +46,33 @@ class TunerUpdateHandler {
             return;
         }
 
-        HDict remotePoint = hayStack.readRemotePoint("id == "+pointUid);
-        CcuLog.i(L.TAG_CCU_PUBNUB, "Fetched remote point "+remotePoint);
-        if (!remotePoint.has(Tags.DOMAIN_NAME)) {
-            CcuLog.e(L.TAG_CCU_PUBNUB, "Point does not domainName, tuner change cannot be applied");
-            return;
-        }
-
         HashMap<Object, Object> tunerEquip = hayStack.readEntity("tuner and equip");
         if (tunerEquip.isEmpty()) {
             CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner equip does not exist on CCU, Ignore updates");
             return;
         }
 
-        String domainName = remotePoint.get(Tags.DOMAIN_NAME).toString();
-
-        Map<Object, Object> tunerPoint = Domain.readPointForEquip(domainName, tunerEquip.get("id").toString());
-        if (tunerPoint.isEmpty()) {
-            CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner point does not exist on CCU "+domainName);
-            return;
-        }
-
         //Do a local write to building level of BuildingTuner equip point
         writePointFromJson(pointUid, msgObject, hayStack, true);
-    
-        //Propagate the updated tuner value to building level of corresponding system/zone equips
-        propagateTuner(pointUid, msgObject, hayStack);
-        
+
+        HDict remotePoint = hayStack.readRemotePoint("id == "+pointUid);
+        CcuLog.i(L.TAG_CCU_PUBNUB, "Fetched remote point "+remotePoint);
+        if (!remotePoint.has(Tags.DOMAIN_NAME)) {
+            String domainName = remotePoint.get(Tags.DOMAIN_NAME).toString();
+            propagateTunerByDomainName(domainName, msgObject, hayStack);
+        } else {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Remote point does not have domainName : " +
+                    "attempt propagation based on tags");
+            //Propagate the updated tuner value to building level of corresponding system/zone equips
+            propagateTunerByTags(pointUid, msgObject, hayStack);
+        }
     }
     
     /**
      * Building tuner updates for building level has to be propagated to corresponding
      * equip/system tuner points.
      */
-    private static void propagateTuner(String pointId, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void propagateTunerByTags(String pointId, JsonObject msgObject, CCUHsApi hayStack) {
     
         HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(pointId);
         Point tunerPoint = new Point.Builder().setHashMap(pointMap).build();
@@ -93,8 +89,17 @@ class TunerUpdateHandler {
                  "Propagate tuners for point : "+tunerPoint.getDisplayName()+" to "+equipTuners.size()+" equips : query "+tunerQuery);
         Observable.fromIterable(equipTuners)
                   .subscribeOn(Schedulers.io())
-                  .map(map -> map.get(Tags.ID).toString())
+                  .map(point -> point.get(Tags.ID).toString())
                   .subscribe(id -> writePointFromJson(id, msgObject, hayStack, false));
+    }
+
+    private static void propagateTunerByDomainName(String domainName, JsonObject msgObject, CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> equipTuners = hayStack.readAllEntities("tuner and not default and domainName == \""+domainName+"\"");
+        CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner count for propagation "+equipTuners.size());
+        Observable.fromIterable(equipTuners)
+                .subscribeOn(Schedulers.io())
+                .map(point -> point.get(Tags.ID).toString())
+                .subscribe(id -> writePointFromJson(id, msgObject, hayStack, false));
     }
     
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack,

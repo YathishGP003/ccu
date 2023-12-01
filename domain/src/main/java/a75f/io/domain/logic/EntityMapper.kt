@@ -160,7 +160,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     private fun getPhysicalRefMapping(profileConfiguration: ProfileConfiguration) : Map<String, String>{
         val refMapping = mutableMapOf<String, String>()
-        val pointsWithPhysicalRefs = modelDef.points.filter {it.devicePointAssociation?.devicePointDomainName != null }
+        val pointsWithPhysicalRefs = modelDef.points.filter {it.devicePointAssociation != null }
         val associationPoints = modelDef.points.filter {
                                         it.configuration.configType == PointConfiguration.ConfigType.ASSOCIATION
                                     }
@@ -186,8 +186,8 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                     }
                 }
             } else {
-                profilePoint.devicePointAssociation?.devicePointDomainName?.let {
-                    refMapping[profilePoint.domainName] = it
+                profilePoint.devicePointAssociation?.let {
+                    refMapping[profilePoint.domainName] = it.devicePointDomainName
                 }
 
             }
@@ -219,8 +219,8 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                 return constraint.allowedValues[profileConfig?.associationVal!!].value
             }
         } else {
-            profilePointWithPhysicalMapping.devicePointAssociation?.devicePointDomainName?.let {
-                if (it == rawPointName) {
+            profilePointWithPhysicalMapping.devicePointAssociation?.let {
+                if (it.devicePointDomainName == rawPointName) {
                     return profilePointWithPhysicalMapping.domainName
                 }
             }

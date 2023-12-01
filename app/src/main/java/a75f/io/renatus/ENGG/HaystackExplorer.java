@@ -23,12 +23,15 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.device.mesh.Pulse;
+import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.SystemScheduleUtil;
@@ -36,6 +39,10 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.GlobalScope;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -395,7 +402,17 @@ public class HaystackExplorer extends Fragment
                 if (p.getMarkers().contains("his"))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    hayStack.writeHisValueByIdWithoutCOV(id, val);
+                    if (p.getDomainName() == "currentTemp" && p.getMarkers().contains("vav")) {
+                        RxjavaUtil.executeBackground( () -> {
+                            Random r = new Random();
+                            CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+                            msg.update.smartNodeAddress.set(Integer.parseInt(p.getGroup()));
+                            msg.update.roomTemperature.set(680 + r.nextInt(100));
+                            Pulse.regularSNUpdate(msg);
+                        });
+                    } else {
+                        hayStack.writeHisValueByIdWithoutCOV(id, val);
+                    }
                 }
                 return null;
             }

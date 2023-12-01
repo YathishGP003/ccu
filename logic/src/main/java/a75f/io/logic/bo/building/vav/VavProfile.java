@@ -22,6 +22,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.VavEquip;
 import a75f.io.domain.logic.DeviceBuilder;
 import a75f.io.domain.logic.EntityMapper;
 import a75f.io.domain.logic.ProfileEquipBuilder;
@@ -184,6 +185,8 @@ public abstract class VavProfile extends ZoneProfile {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
+
+        vavEquip = new VavEquip(equipRef);
 
         if (equipMap != null && equipMap.size() > 0)
         {
@@ -460,7 +463,7 @@ public abstract class VavProfile extends ZoneProfile {
 
     @Override
     public Equip getEquip() {
-        HDict equip = CCUHsApi.getInstance().readHDictById("equip and group == \""+nodeAddr+"\"");
+        HDict equip = CCUHsApi.getInstance().readHDict("equip and group == \""+nodeAddr+"\"");
         return new Equip.Builder().setHDict(equip).build();
     }
     @Override

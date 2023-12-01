@@ -124,6 +124,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
         CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Completed")
     }
 
+
     private fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "syncPointArrays Size ${points.size}")
         val partitionSize = 25

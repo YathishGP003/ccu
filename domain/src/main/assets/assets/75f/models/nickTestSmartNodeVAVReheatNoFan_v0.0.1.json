@@ -630,7 +630,6 @@
         "tagValueIncrement": 0.1
       },
       "defaultValue": null,
-      "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {

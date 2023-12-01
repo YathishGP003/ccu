@@ -147,13 +147,13 @@ public class HSUtil
     }
     
     public static Equip getEquipFromZone(String roomRef) {
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and roomRef == \""+roomRef+"\"");
-        return new Equip.Builder().setHashMap(equip).build();
+        HDict equip = CCUHsApi.getInstance().readHDict("equip and roomRef == \""+roomRef+"\"");
+        return new Equip.Builder().setHDict(equip).build();
     }
     
     public static String getZoneIdFromEquipId(String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip equip = new Equip.Builder().setHDict(equipDict).build();
         return equip.getRoomRef();
     }
     public static Equip getEquipInfo(String equipId) {
@@ -161,8 +161,8 @@ public class HSUtil
     }
     
     public static Equip getEquip(CCUHsApi hayStack, String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        return new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        return new Equip.Builder().setHDict(equipDict).build();
     }
     public static HDict mapToHDict(Map<String, Object> m)
     {

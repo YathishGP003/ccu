@@ -2466,8 +2466,9 @@ public class MigrationUtil {
                 SchedulabeLimits.Companion.addSchedulableLimits(
                         false,room.get("id").toString(), room.get("dis").toString());
                 String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
-                if(ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
-                        + room.get("id") +"\"") == ScheduleType.ZONE.ordinal()){
+                Double scheduleType = ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
+                        + room.get("id") +"\"");
+                if( scheduleType == null || scheduleType == ScheduleType.ZONE.ordinal()){
                     HashMap<Object, Object> roomToUpdate = ccuHsApi.readMapById(room.get("id").toString());
                     Zone zone = new Zone.Builder().setHashMap(roomToUpdate).build();
                     zone.setScheduleRef(scheduleRef);

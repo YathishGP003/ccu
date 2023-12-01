@@ -483,6 +483,12 @@ public class Equip extends Entity
                 else if (pair.getKey().equals("version")) {
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
+                else if (pair.getKey().equals("modelId")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                }
+                else if (pair.getKey().equals("modelVersion")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
                 }

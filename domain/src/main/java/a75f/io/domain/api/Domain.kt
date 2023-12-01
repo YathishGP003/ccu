@@ -96,18 +96,14 @@ object Domain {
 
 
     fun getPointFromDomain(equip: Equip, domainName: String): Double {
-        val pointId = getPointIdFromDomain(equip,domainName)
-        if (pointId != null) {
-            return hayStack.readDefaultValById(pointId)
-        }
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readDefaultVal() }
         return 0.0
     }
 
     fun getPointHisFromDomain(equip: Equip, domainName: String): Double {
-        val pointId = getPointIdFromDomain(equip,domainName)
-        if (pointId != null) {
-            return hayStack.readHisValById(pointId)
-        }
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readHisVal() }
         return 0.0
     }
 
@@ -116,13 +112,12 @@ object Domain {
         return point?.id
     }
 
-    fun writePointByDomainName(equip: Equip, domainName: String, value: Any){
-        val pointId = getPointIdFromDomain(equip,domainName)
-        if (pointId != null) {
-            if (value is String)
-                hayStack.writeDefaultValById(pointId, value)
+    fun writePointByDomainName(equip: Equip, domainName: String, value: Any) {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let {
+            it.writeDefaultVal(value)
             if (value is Double) {
-                hayStack.writeHisValById(pointId, value)
+                it.writeHisVal(value)
             }
         }
     }

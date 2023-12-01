@@ -418,7 +418,7 @@ public class UsbModbusService extends Service {
                     if (serialPort != null ) {
                         data = modbusQueue.poll(1, TimeUnit.SECONDS);
                         if (data != null && data.length > 0) {
-                            Log.i(TAG, "Write MB data : " + Arrays.toString(data));
+                            Log.i(TAG, "Write MB data : " + Arrays.toString(data) +" Hex : "+byteArrayToHex(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                             Thread.sleep(50);
                         }
@@ -432,7 +432,16 @@ public class UsbModbusService extends Service {
         }
 
     };
-    
+
+
+    public static String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for(byte b: a)
+            sb.append(String.format("%02x", b)).append(" ");
+
+        return sb.toString();
+    }
+
     /*
      * This function will be called from MainActivity to write data through Serial Port
      */

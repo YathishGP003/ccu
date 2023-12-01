@@ -436,7 +436,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     private fun readDeviceModels() {
         CcuLog.i(TAG, "readDeviceModels")
-        domainService.readModbusModelsList("external", object : ResponseCallback {
+        domainService.readModbusModelsList("ahu", object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 try {
                     if (!response.isNullOrEmpty()) {

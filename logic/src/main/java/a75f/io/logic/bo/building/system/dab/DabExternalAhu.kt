@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.system.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writePointByDomainName
+import a75f.io.domain.api.DomainName.conditioningMode
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.DomainName.dabAnalogFanSpeedMultiplier
@@ -43,6 +44,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
@@ -242,17 +244,23 @@ class DabExternalAhu : DabSystemProfile() {
     private fun calculateSetPoints(dabSystemController: DabSystemController) {
         logIt("=============================================================================")
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        if (systemEquip == null) {
+            logIt("DAB_EXTERNAL_AHU_CONTROLLER system equip is empty")
+            return
+        }
         val externalEquipId = getExternalEquipId()
         val coolingLoop = dabSystemController.coolingSignal
         val heatingLoop = dabSystemController.heatingSignal
         val weightedAverageCO2 = dabSystemController.co2WeightedAverageSum
         val loopOutput = if (coolingLoop > 0) coolingLoop.toDouble() else heatingLoop.toDouble()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
-        logIt("System is $occupancyMode")
+        val conditioningMode = StandaloneConditioningMode.values()[Domain.getPointFromDomain(systemEquip, conditioningMode).toInt()]
+        logIt("System is $occupancyMode conditioningMode : $conditioningMode")
         logIt("coolingLoop $coolingLoop heatingLoop $heatingLoop")
         logIt("weightedAverageCO2 $weightedAverageCO2 loopOutput $loopOutput")
-
-        calculateSATSetPoints(systemEquip!!, heatingLoop, loopOutput, externalEquipId)
+        if (conditioningMode == StandaloneConditioningMode.OFF)
+            return
+        calculateSATSetPoints(systemEquip, heatingLoop, loopOutput, externalEquipId)
         calculateDuctStaticPressureSetPoints(systemEquip, loopOutput, externalEquipId)
         setOccupancyMode(systemEquip, externalEquipId)
         doDCVAction(systemEquip, weightedAverageCO2, occupancyMode, externalEquipId)
@@ -266,14 +274,12 @@ class DabExternalAhu : DabSystemProfile() {
         systemEquip: Equip,
         heatingLoop: Int,
         loopOutput: Double,
-        externalEquipId: String?
+        externalEquipId: String?,
     ) {
-
         val isSetPointEnabled =
             Domain.getPointFromDomain(systemEquip, satSetpointControlEnable) == 1.0
         /*
         // TODO CHECK WITH PRODUCT TEAM HOW IT WORKS
-          val tempDirection = getTempDirection(heatingLoop)
           if (tempDirection == TempDirection.COOLING)  {
 
           }

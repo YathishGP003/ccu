@@ -331,5 +331,6 @@ object DomainName {
     const val dcvDamperCalculatedSetpoint = "dcvDamperCalculatedSetpoint"
     const val humidifierEnable = "humidifierEnable"
     const val dehumidifierEnable = "dehumidifierEnable"
+    const val conditioningMode = "conditioningMode"
 }
 

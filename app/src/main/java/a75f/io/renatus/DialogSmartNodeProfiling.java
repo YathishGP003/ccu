@@ -438,7 +438,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         /*Code to disable VAV profiles if DAB is selected*/
         if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_EXTERNAL_AHU){
             //rlVAV.setEnabled(false);
             //lt_VAVProfile.setEnabled(false);
             rlVAVNoFan.setEnabled(false);
@@ -472,7 +472,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_EXTERNAL_AHU){
             rlDabSingleDuct.setEnabled(false);
             rlDabDualDuct.setEnabled(false);
             textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));

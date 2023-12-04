@@ -312,7 +312,7 @@ class DabExternalAhu : DabSystemProfile() {
                     satSetPointValue,
                     setPointsList
                 )
-            logIt("systemCoolingSATMinimum: ${satSetPointLimits.first} systemCoolingSATMaximum: ${satSetPointLimits.second}")
+            logIt("SATMinimum: ${satSetPointLimits.first} SATMaximum: ${satSetPointLimits.second}")
             logIt("satSetPointValue: $satSetPointValue")
 
         } else logIt("satSetpointControl disabled")
@@ -487,7 +487,7 @@ class DabExternalAhu : DabSystemProfile() {
     private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
 
         val isDualSetPointEnabled =
-            Domain.getPointFromDomain(equip, satSetpointControlEnable) == 1.0
+            Domain.getPointFromDomain(equip, dualSetpointControlEnable) == 1.0
         return if (isDualSetPointEnabled) {
             if (getTempDirection(heatingLoop) == TempDirection.COOLING) {
                 Pair(
@@ -503,7 +503,7 @@ class DabExternalAhu : DabSystemProfile() {
         } else {
             Pair(
                 Domain.getPointFromDomain(equip, systemSATMinimum),
-                Domain.getPointFromDomain(equip, systemSATMinimum),
+                Domain.getPointFromDomain(equip, systemSATMaximum),
             )
         }
     }

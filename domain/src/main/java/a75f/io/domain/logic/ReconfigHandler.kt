@@ -19,7 +19,7 @@ object ReconfigHandler {
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         configPoints.forEach {
             CcuLog.i(Domain.LOG_TAG, "Config point $it")
-                try {
+            try {
                 val pointVal = hayStack.readDefaultValById(it["id"].toString())
                 //TODO - handle string type val if there is any.
                 if (pointVal is Number) {

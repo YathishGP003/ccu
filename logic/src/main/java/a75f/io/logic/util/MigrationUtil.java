@@ -434,6 +434,9 @@ public class MigrationUtil {
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
+
+        migrateZoneScheduleTypeIfMissed(ccuHsApi);
+
         if(SchedulableMigrationKt.validateMigration()) {
             writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
         }
@@ -2444,5 +2447,131 @@ public class MigrationUtil {
                 ccuHsApi.deleteEntityItem(newZoneScheduleId);
             }
         }
+    }
+
+    public static void migrateZoneScheduleTypeIfMissed(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        Log.d("SpooLog","in migrateScheduletype");
+
+        for(HashMap<Object, Object> room : rooms) {
+
+            String zoneId = room.get("id").toString();
+            String scheduleId = room.get("scheduleRef").toString();
+            Double scheduleTypeToBeSet = 2.0 ;
+            Schedule roomSchedule = ccuHsApi.getScheduleById(scheduleId);
+            HashMap<Object, Object> defaultSchedule = ccuHsApi.readEntity("default and schedule");
+            if(defaultSchedule.isEmpty() || roomSchedule.isZoneSchedule()){
+                scheduleTypeToBeSet = 1.0;
+            }
+
+            ArrayList<HashMap<Object, Object>> scheduleTypePoints = ccuHsApi.readAllEntities("scheduleType and roomRef == \"" + zoneId + "\"");
+            ArrayList<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
+
+            Log.d("SpooLog","in migrateScheduletype"+zoneId);
+
+            if (scheduleTypePoints.isEmpty() || equips.size() > scheduleTypePoints.size()) {
+                //create schedule type point assign it to 2
+                //set schedule ref to default name to that zone
+                // return deafult named
+
+                Log.d("SpooLog","scheduletype is empty");
+
+
+
+
+                ArrayList<HashMap<Object, Object>> allEquip =
+                        ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
+                for (HashMap<Object, Object> equip : allEquip) {
+                    String profileType = equip.get("profile").toString();
+                    Log.d("SpooLog","createScheduleType call");
+                    createScheduleType(equip, profileType,scheduleTypeToBeSet);
+                }
+
+                Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                if (zone != null) {
+                    if(scheduleTypeToBeSet == 2.0 && !defaultSchedule.isEmpty()) {
+                        zone.setScheduleRef(defaultSchedule.get("id").toString());
+                        CCUHsApi.getInstance().updateZone(zone, zoneId);
+                    }
+                }
+
+            }else{
+                Log.d("SpooLog","scheduletype not null");
+             //   Log.d("SpooLog","scheduleTypeid"+scheduleTypePoints.get("id").toString());
+            }
+        }
+        ccuHsApi.scheduleSync();
+
+    }
+
+
+    public static void createScheduleType(HashMap<Object, Object> equip, String profileType,double scheduleType){
+        String siteDis = equip.get("dis").toString();
+        String nodeAddr = equip.get("group").toString();
+        String equipRef = equip.get("id").toString();
+        String siteRef = equip.get("siteRef").toString();
+        String roomRef = equip.get("roomRef").toString();
+        String floorRef = equip.get("floorRef").toString();
+        String tz = equip.get("tz").toString();
+
+        Log.d("SpooLog","createScheduleType in call");
+
+        Point.Builder equipScheduleType = new Point.Builder()
+                .setDisplayName(siteDis+"-scheduleType")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("zone").addMarker("scheduleType").addMarker("writable").addMarker("his")
+                .setGroup((nodeAddr))
+                .setEnums("building,zone,named")
+                .setTz(tz);
+
+        addTagBasedOnProfile(equipScheduleType,profileType,equip);
+
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType.build());
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId,  scheduleType);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, scheduleType);
+
+    }
+
+    private static void addTagBasedOnProfile(Point.Builder equipScheduleType, String profileType,HashMap<Object, Object> equip) {
+        if(profileType.equals("TEMP_INFLUENCE") )
+            equipScheduleType.addMarker("ti");
+        else if(profileType.contains("DAB"))
+            equipScheduleType.addMarker("dab");
+        else if(profileType.contains("DUAL_DUCT"))
+            equipScheduleType.addMarker("dualDuct");
+        else if(profileType.contains("EMR"))
+            equipScheduleType.addMarker("emr");
+        else if(profileType.contains("HYPERSTAT"))
+            equipScheduleType.addMarker("hyperstat");
+        else if(profileType.contains("MODBUS"))
+            equipScheduleType.addMarker("modbus");
+        else if(profileType.contains("OTN"))
+            equipScheduleType.addMarker("otn");
+        else if(profileType.contains("PLC"))
+            equipScheduleType.addMarker("pid");
+        else if(profileType.contains("SMARTSTAT")){
+            if(profileType.contains("SMARTSTAT_CONVENTIONAL_PACK_UNIT"))
+                equipScheduleType.addMarker("cpu");
+            if(profileType.contains("SMARTSTAT_HEAT_PUMP_UNIT"))
+                equipScheduleType.addMarker("hpu");
+            if(profileType.contains("SMARTSTAT_TWO_PIPE_FCU"))
+                equipScheduleType.addMarker("pipe2");
+            if(profileType.contains("SMARTSTAT_FOUR_PIPE_FCU"))
+                equipScheduleType.addMarker("pipe4");
+        }else if(profileType.contains("SSE"))
+            equipScheduleType.addMarker("sse");
+        else if(profileType.contains("VAV")) {
+            if( equip.containsKey("series"))
+                equipScheduleType.addMarker("series");
+            else
+                equipScheduleType.addMarker("parallel");
+        }else if(profileType.contains("VRV"))
+            equipScheduleType.addMarker("vrv");
+
     }
 }

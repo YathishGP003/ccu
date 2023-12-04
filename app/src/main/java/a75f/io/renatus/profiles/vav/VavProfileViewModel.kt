@@ -162,6 +162,7 @@ class VavProfileViewModel : ViewModel() {
             ProgressDialogUtils.hideProgressDialog()
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
             showToast("VAV Configuration saved successfully", context)
+            CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
             _isDialogOpen.value = false
         })
 

@@ -83,7 +83,12 @@ class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val coolingAirflowTemp = Point(DomainName.coolingAirflowTemp, equipRef)
     val vavZonePrioritySpread = Point(DomainName.vavZonePrioritySpread, equipRef)
     val valveActuationStartDamperPosDuringSysHeating = Point(DomainName.valveActuationStartDamperPosDuringSysHeating, equipRef)
+
+    val vavAirflowCFMProportionalKFactor = Point(DomainName.vavAirflowCFMProportionalKFactor, equipRef)
     val vavAirflowCFMProportionalRange = Point(DomainName.vavAirflowCFMProportionalRange, equipRef)
+    val vavAirflowCFMIntegralTime = Point(DomainName.vavAirflowCFMIntegralTime, equipRef)
+    val vavAirflowCFMIntegralKFactor = Point(DomainName.vavAirflowCFMIntegralKFactor, equipRef)
+
     val reheatZoneMaxDischargeTemp = Point(DomainName.reheatZoneMaxDischargeTemp, equipRef)
     val vavHeatingDeadbandMultiplier = Point(DomainName.vavHeatingDeadbandMultiplier, equipRef)
     val vavIntegralKfactor = Point(DomainName.vavIntegralKfactor, equipRef)

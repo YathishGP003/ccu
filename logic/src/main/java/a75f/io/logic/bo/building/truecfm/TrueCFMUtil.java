@@ -39,7 +39,7 @@ public class TrueCFMUtil {
     }
     
     public static boolean isTrueCfmEnabled(CCUHsApi hayStack, String equipRef) {
-        return hayStack.readDefaultVal("config and trueCfm and enable and equipRef ==\""
+        return hayStack.readDefaultVal("config and (trueCfm or trueCFM) and enable and equipRef ==\""
                                                                 +equipRef+"\"").intValue() > 0;
     }
     

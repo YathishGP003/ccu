@@ -27,6 +27,8 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
+import org.projecthaystack.UnknownRecException;
+
 /**
  * Created by samjithsadasivan on 8/23/18.
  */
@@ -68,9 +70,7 @@ public class VavReheatProfile extends VavProfile
             updateZoneDead();
             return;
         }
-
         initLoopVariables();
-
         double roomTemp = getCurrentTemp();
 
         int loopOp = 0;
@@ -80,7 +80,8 @@ public class VavReheatProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
-
+        CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
+                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode);
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -107,8 +108,11 @@ public class VavReheatProfile extends VavProfile
                 handleDeadband();
             }
         }
-
-        updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+        try {
+            updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+        } catch (UnknownRecException e) {
+            CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
+        }
         CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
@@ -141,11 +145,9 @@ public class VavReheatProfile extends VavProfile
     
     private void logLoopParams(int node, double roomTemp, int loopOp) {
         
-        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling+
-                                " Op: "+coolingLoop.getLoopOutput());
+        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
         coolingLoop.dump();
-        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating+
-                                " Op: "+heatingLoop.getLoopOutput());
+        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop Op: "+heatingLoop.getLoopOutput());
         heatingLoop.dump();
         CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                  +", valve:"+valve.currentPosition);
@@ -187,6 +189,8 @@ public class VavReheatProfile extends VavProfile
         VavUnit vavUnit = vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;*/
+        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
+        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits( (short) nodeAddr, damper);
     }
     
@@ -285,7 +289,7 @@ public class VavReheatProfile extends VavProfile
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
         }
-    
+
         //VOC loop output from 0-50% modulates damper min position.
         if (enabledIAQControl && occupied && vocLoop.getLoopOutput(vavEquip.getZoneVoc().readHisVal()) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;

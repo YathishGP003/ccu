@@ -117,7 +117,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readDefaultStrVal() : String {
         requireId()
-        return Domain.hayStack.readDefaultStrVal(id)
+        return Domain.hayStack.readDefaultStrValById(id)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()

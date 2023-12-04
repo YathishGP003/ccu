@@ -63,7 +63,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                                         equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
         entityConfiguration.tobeAdded.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints addPoint - ${point.domainName}")
+            CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
@@ -97,7 +97,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
         entityConfiguration.tobeUpdated.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints updatePoint - ${point.domainName}")
+            CcuLog.i(Domain.LOG_TAG, "updatePoint - ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
@@ -131,17 +131,18 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeDeleted.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints deletePoint - ${point.domainName}")
+            CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
             hayStack.deleteEntity(existingPoint["id"].toString())
         }
     }
 
     private fun initializeDefaultVal(point : Point, defaultVal : Number) {
-        CcuLog.i(Domain.LOG_TAG,"initializeDefaultVal ${point.domainName} - val $defaultVal")
-        when{
-            point.markers.contains("config") /*&& point.defaultVal is String*/-> hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
-            point.markers.contains("tuner") -> TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
+        CcuLog.i(Domain.LOG_TAG,"InitializeDefaultVal ${point.domainName} - val $defaultVal")
+        if (point.markers.contains("tuner")) {
+            TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
+        } else {
+            hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
         }
     }
 

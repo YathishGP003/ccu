@@ -188,18 +188,26 @@ public abstract class VavProfile extends ZoneProfile {
 
         vavEquip = new VavEquip(equipRef);
 
-        if (equipMap != null && equipMap.size() > 0)
-        {
+        if (equipMap != null && equipMap.size() > 0) {
             String equipId = equipMap.get("id").toString();
-            proportionalGain = TunerUtil.readTunerValByQuery("pgain and not trueCfm",equipId);
-            integralGain = TunerUtil.readTunerValByQuery("igain and not trueCfm",equipId);
-            proportionalSpread = (int) TunerUtil.readTunerValByQuery("pspread and not trueCfm",equipId);
-            integralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and not trueCfm",equipId);
+            proportionalGain = vavEquip.getVavProportionalKFactor().readPriorityVal();
+            integralGain = vavEquip.getVavIntegralKfactor().readPriorityVal();
+            proportionalSpread = (int) vavEquip.getVavTemperatureProportionalRange().readPriorityVal();
+            integralMaxTimeout = (int) vavEquip.getVavTemperatureIntegralTime().readPriorityVal();
 
-            co2Target = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and target and equipRef == \""+equipId+"\"");
-            co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and threshold and equipRef == \""+equipId+"\"");
-            vocTarget = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and target and equipRef == \""+equipId+"\"");
-            vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and threshold and equipRef == \""+equipId+"\"");
+            co2Target = (int) vavEquip.getVavZoneCo2Target().readPriorityVal();
+            co2Threshold = (int) vavEquip.getVavZoneCo2Threshold().readPriorityVal();
+            vocTarget = (int) vavEquip.getVavZoneVocTarget().readPriorityVal();
+            vocThreshold = (int) vavEquip.getVavZoneVocThreshold().readPriorityVal();
+
+            CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" proportionalGain "+proportionalGain
+                    +" integralGain "+integralGain
+                    +" proportionalSpread "+proportionalSpread
+                    +" integralMaxTimeout "+integralMaxTimeout
+                    +" co2Target "+co2Target
+                    +" co2Threshold "+co2Threshold
+                    +" vocTarget "+vocTarget
+                    +" integralMaxTimeout "+vocThreshold);
 
             initializeCfmController(equipId);
         }
@@ -228,15 +236,17 @@ public abstract class VavProfile extends ZoneProfile {
 
         vavUnit.vavDamper.minPosition = 0;
         vavUnit.vavDamper.maxPosition = 100;
+        damper = vavUnit.vavDamper; //This is not necessary. Keeping to maintain legacy code.
+        valve = vavUnit.reheatValve;
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
     }
 
     private void initializeCfmController(String equipId) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController");
-        double cfmProportionalGain = TunerUtil.readTunerValByQuery("pgain and trueCfm",equipId);
-        double cfmIntegralGain = TunerUtil.readTunerValByQuery("igain and trueCfm",equipId);
-        int cfmProportionalSpread = (int) TunerUtil.readTunerValByQuery("prange and trueCfm",equipId);
-        int cfmIntegralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and trueCfm",equipId);
+        double cfmProportionalGain = vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal();
+        double cfmIntegralGain = vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal();
+        int cfmProportionalSpread = (int)vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal();
+        int cfmIntegralMaxTimeout = (int) vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal();
 
         CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" cfmProportionalGain "+cfmProportionalGain
                 +" cfmIntegralGain "+cfmIntegralGain
@@ -458,7 +468,7 @@ public abstract class VavProfile extends ZoneProfile {
     }
     @Override
     public double getCurrentTemp() {
-        return 0;
+        return vavEquip.getCurrentTemp().readHisVal();
     }
 
     @Override
@@ -664,9 +674,8 @@ public abstract class VavProfile extends ZoneProfile {
 
     public void setStatus(double status, boolean emergency) {
 
-        if (vavEquip.getEquipStatus().readHisVal() != status )
-        {
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
+        if (vavEquip.getEquipStatus().readHisVal() != status ) {
+            vavEquip.getEquipStatus().writeHisVal(status);
         }
 
         String message;
@@ -684,10 +693,9 @@ public abstract class VavProfile extends ZoneProfile {
 
         message += getFanStatusMessage();
 
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
-        if (!curStatus.equals(message))
-        {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
+        String curStatus = vavEquip.getEquipStatusMessage().readDefaultStrVal();
+        if (!curStatus.equals(message)) {
+            vavEquip.getEquipStatusMessage().writeDefaultVal(message);
         }
     }
 

@@ -534,7 +534,7 @@ public class VavSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == " +
+        return CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == " +
                                                         "\""+equipRef+"\""
         );
     }
@@ -562,7 +562,7 @@ public class VavSystemController extends SystemController
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId() + "\"") > 0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and (space or current) and temp and equipRef == \"" + q.getId() + "\"") > 0;
         } catch (Exception e) {
             return false;
         }
@@ -676,7 +676,7 @@ public class VavSystemController extends SystemController
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
-                    "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
+                    "temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!isZoneDead(equip.getId()) && (tempVal > 0)) {

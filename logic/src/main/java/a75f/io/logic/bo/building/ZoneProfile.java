@@ -89,7 +89,9 @@ public abstract class ZoneProfile
             return true;
         }
 
-        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef == \""+equip.getId()+"\"");
+        //TODO- TEMP commented for testing
+
+        /*HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.getId()+"\"");
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
@@ -106,13 +108,14 @@ public abstract class ZoneProfile
                 CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat "+hisItem.getDate().toString()+" "+equip.getDisplayName()+" "+zoneDeadTime);
                 return true;
             }
-        }
+        }*/
 
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
 
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and temp and equipRef == \""+equip.getId()+"\"");
+
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("sensor and (current or space) and temp and equipRef == \""+equip.getId()+"\"");
 
         if (currentTemp > (buildingLimitMax + tempDeadLeeway)
                 || currentTemp < (buildingLimitMin - tempDeadLeeway)) {

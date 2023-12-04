@@ -160,7 +160,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     private fun getPhysicalRefMapping(profileConfiguration: ProfileConfiguration) : Map<String, String>{
         val refMapping = mutableMapOf<String, String>()
-        val pointsWithPhysicalRefs = modelDef.points.filter {it.devicePointAssociation != null }
+        val pointsWithPhysicalRefs = modelDef.points.filter {it.associatedWithDevicePoint != null }
         val associationPoints = modelDef.points.filter {
                                         it.configuration.configType == PointConfiguration.ConfigType.ASSOCIATION
                                     }
@@ -186,8 +186,8 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                     }
                 }
             } else {
-                profilePoint.devicePointAssociation?.let {
-                    refMapping[profilePoint.domainName] = it.devicePointDomainName
+                profilePoint.associatedWithDevicePoint?.let {
+                    refMapping[profilePoint.domainName] = it
                 }
 
             }
@@ -196,7 +196,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     }
 
     fun getPhysicalProfilePointRef(profileConfiguration: ProfileConfiguration, rawPointName : String) : String?{
-        val profilePointWithPhysicalMapping = modelDef.points.find {it.devicePointAssociation?.devicePointDomainName == rawPointName }
+        val profilePointWithPhysicalMapping = modelDef.points.find {it.associatedWithDevicePoint == rawPointName }
             ?: return null
 
         val associationPoints = modelDef.points.filter {
@@ -219,8 +219,8 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                 return constraint.allowedValues[profileConfig?.associationVal!!].value
             }
         } else {
-            profilePointWithPhysicalMapping.devicePointAssociation?.let {
-                if (it.devicePointDomainName == rawPointName) {
+            profilePointWithPhysicalMapping.associatedWithDevicePoint?.let {
+                if (it == rawPointName) {
                     return profilePointWithPhysicalMapping.domainName
                 }
             }

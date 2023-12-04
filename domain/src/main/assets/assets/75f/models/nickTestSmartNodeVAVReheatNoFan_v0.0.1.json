@@ -633,10 +633,7 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "sensorType": "TEMPERATURE",
-        "value": 0,
-        "comparisonType": "GREATER_THAN",
-        "configType": "DYNAMIC_SENSOR"
+        "configType": "BASE"
       },
       "associatedWithDevicePoint": "currentTemp",
       "descriptiveTags": [
@@ -2846,7 +2843,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "rssi",
       "descriptiveTags": [
         {
           "name": "bacnetId",
@@ -6331,7 +6328,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": null,
+      "defaultValue": 74,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -6667,7 +6664,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": null,
+      "defaultValue": 70,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",

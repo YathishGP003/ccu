@@ -211,7 +211,7 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation project(':data')
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.15-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
     implementation project(':domain')
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"

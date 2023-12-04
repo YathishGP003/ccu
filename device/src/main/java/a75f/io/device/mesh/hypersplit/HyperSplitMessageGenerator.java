@@ -74,18 +74,38 @@ public class HyperSplitMessageGenerator {
         if(mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING){
             singleMode = true;
         }
+
+        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
+        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
+        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue();
+        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue();
+
+        if (minCoolingUserTemp == 0) {
+            minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
+            CcuLog.d(L.TAG_CCU_DEVICE, "Zone min cooling user limit not found; falling back to BuildingTuner value of " + minCoolingUserTemp);
+        }
+        if (maxCoolingUserTemp == 0) {
+            maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and max").intValue();
+            CcuLog.d(L.TAG_CCU_DEVICE, "Zone max cooling user limit not found; falling back to BuildingTuner value of " + maxCoolingUserTemp);
+        }
+        if (minHeatingUserTemp == 0) {
+            minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and heating and user and limit and min").intValue();
+            CcuLog.d(L.TAG_CCU_DEVICE, "Zone min heating user limit not found; falling back to BuildingTuner value of " + minHeatingUserTemp);
+        }
+        if (maxHeatingUserTemp == 0) {
+            maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and heating and user and limit and max").intValue();
+            CcuLog.d(L.TAG_CCU_DEVICE, "Zone max heating user limit not found; falling back to BuildingTuner value of " + maxHeatingUserTemp);
+        }
+
+
         HyperSplit.HyperSplitSettingsMessage_t.Builder msg = HyperSplit.HyperSplitSettingsMessage_t.newBuilder()
                 .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
-                .setMinCoolingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
-                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue())
-                .setMaxCoolingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
-                        HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue())
-                .setMinHeatingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
-                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue())
-                .setMaxHeatingUserTemp(CCUHsApi.getInstance().readPointPriorityValByQuery(
-                        HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue())
+                .setMinCoolingUserTemp(minCoolingUserTemp)
+                .setMaxCoolingUserTemp(maxCoolingUserTemp)
+                .setMinHeatingUserTemp(minHeatingUserTemp)
+                .setMaxHeatingUserTemp(maxHeatingUserTemp)
                 .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
                 .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
                 .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))

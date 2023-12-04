@@ -211,6 +211,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                     CCUHsApi.getInstance().syncEntityTree()
                     context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                     ProgressDialogUtils.hideProgressDialog()
+                    equipModel.value.isDevicePaired = true
                     showToast("Configuration saved successfully", context)
                 }
             )

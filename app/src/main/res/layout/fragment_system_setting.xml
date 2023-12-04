@@ -246,6 +246,59 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_marginTop="30dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/supply_airflow_temp"
+                        android:textAppearance="@style/label_black" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/current"
+                        android:textAppearance="@style/label_black" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/setpoint"
+                        android:textAppearance="@style/label_black" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_marginTop="30dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/duct_static_pressure"
+                        android:textAppearance="@style/label_black" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/current"
+                        android:textAppearance="@style/label_black" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/setpoint"
+                        android:textAppearance="@style/label_black" />
+
+                </LinearLayout>
+                <LinearLayout
                     android:id="@+id/lastUpdated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -71,15 +71,15 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
 fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     var isAllSelected = true
     if (equipDevice.registers.isNotEmpty()) {
-        equipDevice.registers[0].parameters.forEach {
-            if (!it.isDisplayInUI)
+        equipDevice.registers.forEach {
+            if (!it.parameters[0].isDisplayInUI)
                 isAllSelected = false
         }
     }
     if (equipDevice.equips.isNotEmpty()) {
         equipDevice.equips.forEach { subEquip ->
-            subEquip.registers[0].parameters.forEach {
-                if (!it.isDisplayInUI)
+            subEquip.registers.forEach {
+                if (!it.parameters[0].isDisplayInUI)
                     isAllSelected = false
             }
         }

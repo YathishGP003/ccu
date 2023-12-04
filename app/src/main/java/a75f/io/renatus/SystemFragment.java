@@ -75,6 +75,7 @@ import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
@@ -195,7 +196,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private Drawable mDrawableBreakLineRight;
 
 	Schedule schedule;
-
+	RecyclerView externalModbusParams;
+	TextView externalModbusModelDetails;
+	private TextView externalModbusStatus;
+	private TextView externalModbusLastUpdated;
+	View externalModbusConfig;
 
 	public SystemFragment()
 	{
@@ -763,6 +768,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
 		configBTUMeterDetails(view);
 
+	/*	externalModbusconfig = view.findViewById(R.id.externalModbusconfig);
+		externalModbusParams = view.findViewById(R.id.externalModbusParams);
+		externalModbusModelDetails = view.findViewById(R.id.externalModbusDetails);
+		externalModbusStatus = view.findViewById(R.id.externalModbusModule_status);
+		externalModbusLastUpdated = view.findViewById(R.id.last_updated_status_external_modbus);
+		showExternalModbusDevice(view);*/
+
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -1118,5 +1130,38 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshData() {
 		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
 	}
+	private void showExternalModbusDevice(View view) {
+		if (L.ccu().systemProfile instanceof DabExternalAhu) {
+			//externalModbusconfig.setVisibility(View.VISIBLE);
+			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
+			if (!modbusEquip.isEmpty()) {
+				externalModbusParams.setVisibility(View.VISIBLE);
+				externalModbusModelDetails.setVisibility(View.VISIBLE);
+				externalModbusStatus.setVisibility(View.VISIBLE);
+				externalModbusLastUpdated.setVisibility(View.VISIBLE);
 
+				EquipmentDevice externalModbusEquip = buildModbusModelByEquipRef(Objects.requireNonNull(modbusEquip.get("id")).toString());
+				List<Parameter> parameterList = new ArrayList<>();
+
+				List<Parameter> allParamList = UtilSourceKt.getParametersList(externalModbusEquip);
+				allParamList.forEach(parameter -> {
+					if (parameter.isDisplayInUI())
+						parameterList.add(parameter);
+				});
+
+				String nodeAddress = String.valueOf(externalModbusEquip.getSlaveId());
+				externalModbusModelDetails.setText(externalModbusEquip.getName()+ "("+externalModbusEquip.getEquipType().toUpperCase() + nodeAddress + ")");
+				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+				externalModbusParams.setLayoutManager(gridLayoutManager);
+				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
+						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
+				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
+				TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
+				btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+				TextView textViewModule = view.findViewById(R.id.module_status_btu);
+				HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+			}
+
+		}
+	}
 }

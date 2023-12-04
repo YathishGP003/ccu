@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -24,7 +25,6 @@ import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -129,16 +129,16 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     case AUTO:
                         if(roomTemp < averageDesiredTemp){
                             //state = HEATING;
-                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
+                            hpuHeatOnlyMode(hpuDevice,hpuEquip ,roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             //state = COOLING;
-                            hpuCoolOnlyMode(hpuDevice, hpuEquip.getId(), roomTemp,occuStatus,node,fanSpeed);
+                            hpuCoolOnlyMode(hpuDevice, hpuEquip , roomTemp,occuStatus,node,fanSpeed);
                         }
                             break;
                     case COOL_ONLY:
                         if(roomTemp > averageDesiredTemp){
                            // state = COOLING;
-                            hpuCoolOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
+                            hpuCoolOnlyMode(hpuDevice,hpuEquip ,roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             //state = DEADBAND;
                             if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO)
@@ -153,7 +153,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     case HEAT_ONLY:
                         if(roomTemp < averageDesiredTemp){
                             //state = HEATING;
-                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
+                            hpuHeatOnlyMode(hpuDevice,hpuEquip ,roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             //state = DEADBAND;
                             if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO)
@@ -400,10 +400,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStages ,temperatureState);
     }
 
-    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp,  Occupied occuStatus,Short addr, StandaloneLogicalFanSpeeds fanSpeed){
+    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, Equip equip, double curTemp, Occupied occuStatus, Short addr, StandaloneLogicalFanSpeeds fanSpeed){
 
 
-        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
+        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
         boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
         boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
@@ -415,16 +415,22 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         double coolingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            coolingDeadband = occuStatus.getCoolingDeadBand();
+            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+            HashMap<Object,Object> cDBMap = CCUHsApi.getInstance().readEntity("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            if (!isSchedulableAvailable.isEmpty() && !cDBMap.isEmpty()) {
+                coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            }else{
+                coolingDeadband = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
+            }
             occupied = occuStatus.isOccupied();
         }
         SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[fanStage2Type];
         switch (fanRelayType){
             case HUMIDIFIER:
-                humidifierTargetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and humidity and equipRef == \"" + equipId + "\"");
+                humidifierTargetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and humidity and equipRef == \"" + equip.getId() + "\"");
                 break;
             case DE_HUMIDIFIER:
-                humidifierTargetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and dehumidifier and equipRef == \"" + equipId + "\"");
+                humidifierTargetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and dehumidifier and equipRef == \"" + equip.getId() + "\"");
                 break;
         }
         int heatPumpChangeoverType = (int)getConfigType("relay6",addr);
@@ -625,11 +631,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         ZoneTempState temperatureState = ZoneTempState.NONE;
         if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
             temperatureState = ZoneTempState.EMERGENCY;
-        StandaloneScheduler.updateSmartStatStatus(equipId, COOLING, relayStages,temperatureState);
+        StandaloneScheduler.updateSmartStatStatus(equip.getId(), COOLING, relayStages,temperatureState);
 		hpuEquip.setStatus(COOLING.ordinal());
     }
-    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, Occupied occuStatus,Short addr, StandaloneLogicalFanSpeeds fanSpeed){
-        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
+    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip, Equip equip, double curTemp, Occupied occuStatus, Short addr, StandaloneLogicalFanSpeeds fanSpeed){
+        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
         boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
         boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
@@ -643,15 +649,21 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            heatingDeadband = occuStatus.getHeatingDeadBand();
+            ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+            HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
+                heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
+            }else{
+                heatingDeadband = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
+            }
             occupied = occuStatus.isOccupied();
         }
         switch (fanRelayType){
             case HUMIDIFIER:
-                humidifierTargetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and equipRef == \"" + equipId + "\"");
+                humidifierTargetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and equipRef == \"" + equip.getId() + "\"");
                 break;
             case DE_HUMIDIFIER:
-                humidifierTargetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and equipRef == \"" + equipId + "\"");
+                humidifierTargetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and equipRef == \"" + equip.getId() + "\"");
                 break;
         }
         SmartStatHeatPumpChangeOverType hpChangeOverType = SmartStatHeatPumpChangeOverType.values()[heatPumpChangeoverType];
@@ -877,7 +889,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         ZoneTempState temperatureState = ZoneTempState.NONE;
         if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
             temperatureState = ZoneTempState.EMERGENCY;
-        StandaloneScheduler.updateSmartStatStatus(equipId, HEATING, relayStages,temperatureState);
+        StandaloneScheduler.updateSmartStatStatus(equip.getId(), HEATING, relayStages,temperatureState);
 		hpuEquip.setStatus(HEATING.ordinal());
 
     }

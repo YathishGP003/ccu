@@ -21,7 +21,7 @@ public class HisItemCache
 	
 	private HisItemCache()
 	{
-		mCache = new LRUCache<>(10000);
+		mCache = new LRUCache<>(12000);
 	}
 	
 	public static HisItemCache getInstance() {
@@ -62,4 +62,9 @@ public class HisItemCache
 	{
 		return mCache.get(id);
 	}
+
+	public LRUCache<String, HisItem> getCache() {
+		return mCache;
+	}
 }
+

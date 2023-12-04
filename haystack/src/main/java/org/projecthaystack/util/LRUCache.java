@@ -95,10 +95,18 @@ public class LRUCache<K, V> {
         }
     }
 
-    private static class Entry<K, V> {
+    public static class Entry<K, V> {
         K key;
         V value;
         Entry prev;
         Entry next;
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
     }
 }

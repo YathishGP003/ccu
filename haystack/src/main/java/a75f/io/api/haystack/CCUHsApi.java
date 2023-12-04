@@ -35,7 +35,6 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
-import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
@@ -72,7 +71,6 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
-import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -223,7 +221,9 @@ public class CCUHsApi
 
     public EntitySyncResponse hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
 
-        HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
+
+        HGrid hisWriteRequest = hisWriteMetadata != null ? HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints)
+                                            : HGridBuilder.dictsToGrid(hisWritePoints);
 
         return HttpUtil.executeEntitySync(
                 CCUHsApi.getInstance().getHSUrl() + "hisWriteMany/",
@@ -3067,15 +3067,15 @@ public class CCUHsApi
                         HDict rec;
                         try {
                             rec = hsClient.readById(HRef.copy(id));
+                            //save his data to local cache
+                            tagsDb.saveHisItems(hsClient.readById(HRef.copy(id)),
+                                    new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                            HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
+                                    true);
                         }catch (UnknownRecException e){
                             e.printStackTrace();
                             continue;
                         }
-                    //save his data to local cache
-                    tagsDb.saveHisItems(rec,
-                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
-                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
-                            true);
                 }
 
                 }
@@ -3271,5 +3271,10 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public int getCacheSyncFrequency() {
+        return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("cacheSyncFrequency", 1);
     }
 }

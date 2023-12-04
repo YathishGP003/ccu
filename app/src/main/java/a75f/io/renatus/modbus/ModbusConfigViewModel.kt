@@ -38,7 +38,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -64,10 +63,10 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private lateinit var modbusProfile: ModbusProfile
     private lateinit var filer: String
+    private lateinit var moduleLevel: String
 
     lateinit var zoneRef: String
     lateinit var floorRef: String
-    lateinit var moduleLevel: String
     lateinit var profileType: ProfileType
     lateinit var deviceModelList: List<ModelMetaData>
 
@@ -327,7 +326,6 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         modbusProfile.updateModbusEquip(
             equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),
-            equipModel.value.equipDevice.value,
             getParametersList(equipModel.value)
         )
 
@@ -335,7 +333,6 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             modbusProfile.updateModbusEquip(
                 it.value.equipDevice.value.deviceEquipRef,
                 it.value.equipDevice.value.slaveId.toShort(),
-                it.value.equipDevice.value,
                 getParametersList(it.value)
             )
         }

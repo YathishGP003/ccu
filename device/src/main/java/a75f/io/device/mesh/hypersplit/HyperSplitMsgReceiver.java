@@ -683,8 +683,8 @@ public class HyperSplitMsgReceiver {
 
     private static void writeIlluminanceVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
-        hayStack.writeHisValById(rawPoint.getId(), (double) (10*regularUpdateMessage.getRegularUpdateCommon().getIlluminance()));
-        hayStack.writeHisValById(point.getId(), (double) (10*regularUpdateMessage.getRegularUpdateCommon().getIlluminance()));
+        hayStack.writeHisValById(rawPoint.getId(), (double) (regularUpdateMessage.getRegularUpdateCommon().getIlluminance()));
+        hayStack.writeHisValById(point.getId(), (double) (regularUpdateMessage.getRegularUpdateCommon().getIlluminance()));
     }
 
     private static void writeCO2Val(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t

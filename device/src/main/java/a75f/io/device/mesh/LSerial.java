@@ -1,6 +1,8 @@
 package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
+import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
+import static a75f.io.logic.L.ccu;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +24,7 @@ import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CmToCcuOtaStatus_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -461,6 +464,17 @@ public class LSerial
         if(isConnected()) {
             isNodeSeeding = true;
             Pulse.sendSeedMessage(isSs, isTi, addr, roomRef, floorRef);
+        }
+    }
+
+    public void sendOAOSeedMessage(){
+        if(isConnected()) {
+            LSerial.getInstance().setNodeSeeding(true);
+            CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN SEED Message =====================");
+            CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
+                    (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
+            sendStructToCM(seedMessage);
+            LSerial.getInstance().setNodeSeeding(false);
         }
     }
     

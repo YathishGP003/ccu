@@ -83,4 +83,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob <- Instance of job still running");
         }
     }
+
+
 }

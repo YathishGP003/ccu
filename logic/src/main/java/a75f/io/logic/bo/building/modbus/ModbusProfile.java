@@ -60,25 +60,17 @@ public class ModbusProfile extends ZoneProfile {
         modBusEquip.init(slaveId);
     }
 
-    public void updateMbEquip(short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
-        modBusEquip.updateHaystackPoints(getModbusEquip(slaveId).getId(), equipmentDevice,configParams);
+    public void updateModbusEquip(String equipRef, short slaveId, List<Parameter> configParams){
+        modBusEquip.updateHaystackPoints(equipRef,configParams);
         modBusEquip.init(slaveId);
     }
-
-    public void updateModbusEquip(String equipRef, short slaveId, EquipmentDevice equipmentDevice, List<Parameter> configParams){
-        modBusEquip.updateHaystackPoints(equipRef,equipmentDevice,configParams);
-        modBusEquip.init(slaveId);
-    }
-
 
     @Override
     public void updateZonePoints() {
-
     }
 
     @Override
     public ProfileType getProfileType() {
-
         return modBusEquip.profileType;
     }
 
@@ -90,7 +82,7 @@ public class ModbusProfile extends ZoneProfile {
     @Override
     public Set<Short> getNodeAddresses() {
         return new HashSet<Short>() {{
-            add((short) modBusEquip.slaveId);
+            add(modBusEquip.slaveId);
         }};
     }
     public short getSlaveId(){
@@ -101,12 +93,6 @@ public class ModbusProfile extends ZoneProfile {
     public Equip getEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and modbus and not equipRef and " +
                         "group == \"" + modBusEquip.slaveId + "\"");
-        return new Equip.Builder().setHashMap(equip).build();
-    }
-
-    public Equip getModbusEquip(short slaveId) {
-        HashMap<Object, Object> equip =
-                CCUHsApi.getInstance().readEntity("equip and not equipRef and group == \"" + slaveId + "\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
 

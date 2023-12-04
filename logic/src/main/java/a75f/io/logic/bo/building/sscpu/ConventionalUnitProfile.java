@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +27,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -110,10 +112,16 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             double coolingDeadband = 2.0;
             double heatingDeadband = 2.0;
-
             if(occuStatus != null){
-                coolingDeadband = occuStatus.getCoolingDeadBand();
-                heatingDeadband = occuStatus.getHeatingDeadBand();
+                ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+                HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
+                if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
+                    heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
+                    coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
+                }else{
+                    heatingDeadband = TunerUtil.readTunerValByQuery("heating and deadband and base", cpuEquip.getId());
+                    coolingDeadband = TunerUtil.readTunerValByQuery("cooling and deadband and base", cpuEquip.getId());
+                }
                 occupied = occuStatus.isOccupied();
             }else
                 occupied = false;
@@ -221,7 +229,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         setCmdSignal("cooling and stage1", 0, node);
                 }
                 if(isCoolingStage2Enabled){
-                    if (roomTemp >= (setTempCooling + coolingDeadband)) {
+                    if (roomTemp > (setTempCooling + coolingDeadband)) {
                         if(getCmdSignal("cooling and stage2",node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);

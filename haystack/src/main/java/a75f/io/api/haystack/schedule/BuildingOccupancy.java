@@ -89,12 +89,14 @@ public class BuildingOccupancy {
     }
 
     public static String buildDefaultBuildingOccupancy(){
-        HDict[] days = new HDict[5];
+        HDict[] days = new HDict[7];
         days[0] = getDefaultForDay(DAYS.MONDAY.ordinal());
         days[1] = getDefaultForDay(DAYS.TUESDAY.ordinal());
         days[2] = getDefaultForDay(DAYS.WEDNESDAY.ordinal());
         days[3] = getDefaultForDay(DAYS.THURSDAY.ordinal());
         days[4] = getDefaultForDay(DAYS.FRIDAY.ordinal());
+        days[5] = getDefaultForDay(DAYS.SATURDAY.ordinal());
+        days[6] = getDefaultForDay(DAYS.SUNDAY.ordinal());
         HList hList = HList.make(days);
 
         HRef localId = HRef.make(UUID.randomUUID().toString());
@@ -114,10 +116,10 @@ public class BuildingOccupancy {
     private static HDict getDefaultForDay(int day) {
         HDict hDictDay = new HDictBuilder()
                 .add(Tags.DAY, HNum.make(day))
-                .add(Tags.STHH, HNum.make(8))
+                .add(Tags.STHH, HNum.make(0))
                 .add(Tags.STMM, HNum.make(0))
-                .add(Tags.ETHH, HNum.make(17))
-                .add(Tags.ETMM, HNum.make(30))
+                .add(Tags.ETHH, HNum.make(24))
+                .add(Tags.ETMM, HNum.make(0))
                 .toDict();
         return hDictDay;
     }

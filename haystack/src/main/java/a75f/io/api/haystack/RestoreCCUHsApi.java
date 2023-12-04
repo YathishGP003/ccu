@@ -547,7 +547,7 @@ public class RestoreCCUHsApi {
                         HDict rec = hsClient.readById(HRef.copy(id));
                         if(row.has("his") && NumberUtils.isCreatable(val.toString())){
                             //save his data to local cache
-                            tagsDb.saveHisItemsToCache(rec,
+                            tagsDb.saveHisItems(rec,
                                     new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
                                             kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
                         }
@@ -816,7 +816,7 @@ public class RestoreCCUHsApi {
                         //save his data to local cache
                         HDict rec = hsClient.readById(HRef.copy(id));
                         if(row.has("his") && NumberUtils.isCreatable(val.toString())) {
-                            tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+                            tagsDb.saveHisItems(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
                         }
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ?

@@ -31,6 +31,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.instabug.crash.CrashReporting;
+import com.instabug.library.Feature;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
 import java.io.IOException;
@@ -126,9 +134,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.saveRegisterRequestCount) Button btnregisterRequestCount;
 
+    public @BindView(R.id.cacheSyncFrequency) Spinner cacheSyncFrequency;
     SharedPreferences spDefaultPrefs = null;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
+
+    public @BindView(R.id.anrReportBtn) ToggleButton anrReporting;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -300,7 +311,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                                       : android.R.drawable.checkbox_off_background);
         mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
                                       : android.R.drawable.checkbox_off_background);
-    
         reconnectSerial.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -312,7 +322,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
         if (BuildConfig.BUILD_TYPE.equals("local")
             || BuildConfig.BUILD_TYPE.equals("dev")
-            || BuildConfig.BUILD_TYPE.equals("qa")) {
+            || BuildConfig.BUILD_TYPE.equals("qa")
+            || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
 
             crashButton.setVisibility(View.VISIBLE);
             crashButton.setOnClickListener(view1 -> {
@@ -374,6 +385,19 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             dialog.show();
         });
 
+        ArrayList<Integer> oneToFifteen = new ArrayList<>();
+        for (int val = 1;  val <= 15; val++)
+        {
+            oneToFifteen.add(val);
+        }
+        ArrayAdapter<Integer> oneToFifteenAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, oneToFifteen);
+        oneToFifteenAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        cacheSyncFrequency.setAdapter(oneToFifteenAdapter);
+        cacheSyncFrequency.setOnItemSelectedListener(this);
+        cacheSyncFrequency.setSelection(oneToFifteenAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("cacheSyncFrequency", 1)));
+
+
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
             Log.d("CCU"," ResetAppState ");
             L.ccu().systemProfile.reset();
@@ -425,6 +449,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        anrReporting.setChecked(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
+                , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
+        anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
+
+            CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                    .edit().putBoolean("anr_reporting_enabled", b).apply();
+        });
     }
 
     @Override
@@ -449,7 +483,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.cwFlowRate:
                 writePref("cw_FlowRate", Integer.parseInt(cwFlowRate.getSelectedItem().toString()));
                 break;
-            
+            case R.id.cacheSyncFrequency:
+                writePref("cacheSyncFrequency", Integer.parseInt(cacheSyncFrequency.getSelectedItem().toString()));
+                break;
         }
     }
     
@@ -523,4 +559,5 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             e.printStackTrace();
         }
     }
+
 }

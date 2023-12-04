@@ -156,8 +156,8 @@ public class LSmartStat {
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zone.getId());
             if(occuStatus != null) {
                 Log.d("LSmartStat", "sch status22=" + occuStatus.getCoolingVal() + "," + occuStatus.getHeatingVal() + "," + occuStatus.getHeatingDeadBand() + "," + occuStatus.getCoolingDeadBand());
-                settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
-                settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
+                settings_t.heatingDeadBand.set((short) (hdb * 10)); //Send in multiples of 10
+                settings_t.coolingDeadBand.set((short) (cdb * 10));
                 settings_t.changeToOccupiedTime.set((short) (occuStatus.getCurrentOccupiedSlot()));
                 settings_t.changeToUnoccupiedTime.set((short) (occuStatus.getCurrentUnOccupiedSlot()));
             }

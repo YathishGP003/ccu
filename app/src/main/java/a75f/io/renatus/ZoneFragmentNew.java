@@ -2531,7 +2531,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     existingLayoutParams.height,
                     existingLayoutParams.weight
             );
-            newLayoutParams.setMargins(existingLayoutParams.leftMargin, -9, existingLayoutParams.rightMargin, existingLayoutParams.bottomMargin);
+            newLayoutParams.setMargins(existingLayoutParams.leftMargin, existingLayoutParams.topMargin, existingLayoutParams.rightMargin, existingLayoutParams.bottomMargin);
 
             textViewLabel3.setLayoutParams(newLayoutParams);
             textViewValue3.setLayoutParams(newLayoutParams);

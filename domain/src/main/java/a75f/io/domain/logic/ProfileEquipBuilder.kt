@@ -72,7 +72,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,
                                         equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
-            entityConfiguration.tobeAdded.forEach { point ->
+        entityConfiguration.tobeAdded.forEach { point ->
             CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {

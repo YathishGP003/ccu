@@ -630,6 +630,7 @@
         "tagValueIncrement": 0.1
       },
       "defaultValue": null,
+      "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
@@ -944,10 +945,7 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "sensorType": "HUMIDITY",
-        "value": 0,
-        "comparisonType": "GREATER_THAN",
-        "configType": "DYNAMIC_SENSOR"
+        "configType": "BASE"
       },
       "associatedWithDevicePoint": "humiditySensor",
       "descriptiveTags": [
@@ -2843,7 +2841,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": "rssi",
+      "associatedWithDevicePoint": null,
       "descriptiveTags": [
         {
           "name": "bacnetId",
@@ -6328,7 +6326,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": 74,
+      "defaultValue": null,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -6664,7 +6662,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": 70,
+      "defaultValue": null,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -21771,7 +21769,7 @@
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 8
+    "patch": 9
   },
   "modelType": "PROFILE",
   "namespace": "bms75f",

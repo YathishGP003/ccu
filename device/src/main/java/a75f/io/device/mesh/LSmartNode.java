@@ -145,11 +145,11 @@ public class LSmartNode
         try
         {
             double coolingDeadband =
-                    CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
+                    CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband));
     
             double heatingDeadband =
-                    CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
+                    CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             
             settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband));
         } catch (Exception e) {

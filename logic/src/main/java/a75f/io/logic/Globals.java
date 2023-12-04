@@ -340,14 +340,9 @@ public class Globals {
                                 HayStackConstants.USER, HayStackConstants.PASS), siteObject);
                     }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
+                    TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
-                Site siteObject = new Site.Builder().setHashMap(site).build();
-                CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                        HayStackConstants.USER, HayStackConstants.PASS),siteObject);
-                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);

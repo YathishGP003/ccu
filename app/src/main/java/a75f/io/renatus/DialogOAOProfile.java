@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -162,6 +163,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             new Thread(() -> {
                 setUpOAOProfile();
                 L.saveCCUState();
+                LSerial.getInstance().sendOAOSeedMessage();
             }).start();
 
             new Handler().postDelayed(() -> {

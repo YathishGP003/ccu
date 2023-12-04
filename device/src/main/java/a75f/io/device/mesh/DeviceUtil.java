@@ -125,9 +125,9 @@ public class DeviceUtil {
         if (equip == null) {
             return false;
         }
-        double coolingDeadband = CCUHsApi.getInstance().readPointPriorityVal("cooling and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
+        double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
     
-        double heatingDeadband = CCUHsApi.getInstance().readPointPriorityVal("heating and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
+        double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+equip.getRoomRef()+"\"");
         
         BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
         if ((desiredTemp + coolingDeadband) > buildingTuner.getMaxCoolingUserLimit() ||

@@ -2,6 +2,7 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
@@ -24,6 +25,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
+        val systemEquip = hayStack.readEntity("system and equip and not modbus")
+        if (systemEquip.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
+        } else if (systemEquip.contains(Tags.DEFAULT)) {
+            hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
+        } else {
+            hayStackEquip.ahuRef = systemEquip[Tags.ID].toString()
+        }
+
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)

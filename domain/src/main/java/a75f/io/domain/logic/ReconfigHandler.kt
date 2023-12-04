@@ -13,7 +13,7 @@ object ReconfigHandler {
      * Get map of all profile configurations and its current val from haystack database.
      * Map contains in domainName of config and rhw value in 8th level of point array.
      */
-    private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
+    /*private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
         val domainNameMap = mutableMapOf<String, Double>()
         val configPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
@@ -31,26 +31,33 @@ object ReconfigHandler {
 
         }
         return domainNameMap
-    }
+    }*/
 
-    private fun getAllConfig(equipGroup : Int, hayStack : CCUHsApi) : Map<String, Any> {
-        val equip = hayStack.readEntity(
-            "equip and group == \"$equipGroup\"")
-        return getAllConfig(equip["id"].toString(), hayStack)
-    }
+
+    /*private fun getAllConfig(equipGroup : Int, hayStack : CCUHsApi) : List<String> {
+        //val equip = hayStack.readEntity(
+        //    "equip and group == \"$equipGroup\"")
+        //return getAllConfig(equip["id"].toString(), hayStack)
+        return hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+            .map { it -> it["domainName"].toString() }
+    }*/
 
     fun getEntityReconfiguration(equipGroup: Int, hayStack: CCUHsApi, config : EntityConfiguration) :
                                                                         EntityConfiguration {
-        val existingEntityMap = getAllConfig(equipGroup, hayStack)
+        //val existingEntityMap = getAllConfig(equipGroup, hayStack)
+
+        val existingEntityList = hayStack.readAllEntities("point and group == \"$equipGroup\"")
+                                .map { it["domainName"].toString() }
+        CcuLog.i(Domain.LOG_TAG, "Equip currently has ${existingEntityList.size} points")
         val newEntityConfig = EntityConfiguration()
 
-        existingEntityMap.keys.forEach{ entityName ->
+        existingEntityList.forEach{ entityName ->
             if (config.tobeAdded.find { it.domainName == entityName} == null) {
                 newEntityConfig.tobeDeleted.add(EntityConfig(entityName))
             }
         }
         config.tobeAdded.forEach{
-            if (existingEntityMap.keys.contains(it.domainName)) {
+            if (existingEntityList.contains(it.domainName)) {
                 newEntityConfig.tobeUpdated.add(it)
             } else {
                 newEntityConfig.tobeAdded.add(it)

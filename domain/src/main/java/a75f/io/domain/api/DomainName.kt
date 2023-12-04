@@ -134,6 +134,14 @@ object DomainName {
     const val vavZonePriorityMultiplier = "vavZonePriorityMultiplier"
     const val dabHeatingDeadbandMultiplier = "dabHeatingDeadbandMultiplier"
 
+    //ACB-Zone
+    const val valveType = "valveType"
+    const val thermistor2Type = "thermistor2Type"
+    const val condensateNC = "condensateNC"
+    const val condensateNO = "condensateNO"
+    const val chilledWaterValve = "chilledWaterValveCoolCmdPoint"
+    const val chilledWaterShutOffValve = "chilledWaterValveIsolationCmdPoint"
+    const val relayActivationHysteresis = "relayActivationHysteresis"
 
     //VAV-TR
     const val satSPInit = "satSPInit"

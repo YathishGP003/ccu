@@ -22,6 +22,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.VavEquip;
 import a75f.io.domain.logic.DeviceBuilder;
 import a75f.io.domain.logic.EntityMapper;
@@ -29,10 +30,10 @@ import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
@@ -40,28 +41,11 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import io.seventyfivef.domainmodeler.client.ModelDirective;
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective;
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
-
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
-import static a75f.io.logic.bo.building.system.SystemController.*;
-
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.*;
 
 import org.projecthaystack.HDict;
 
@@ -156,13 +140,19 @@ public abstract class VavProfile extends ZoneProfile {
         switch (profileType) {
             case VAV_REHEAT:
                 vavUnit = new VavUnit();
+                vavEquip = new VavEquip(equipRef);
                 break;
             case VAV_SERIES_FAN:
                 vavUnit = new SeriesFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
                 break;
             case VAV_PARALLEL_FAN:
                 vavUnit = new ParallelFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
                 break;
+            case VAV_ACB:
+                vavUnit = new VavAcbUnit();
+                vavEquip = new VavAcbEquip(equipRef);
         }
         nodeAddr = addr;
 
@@ -185,8 +175,6 @@ public abstract class VavProfile extends ZoneProfile {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
-
-        vavEquip = new VavEquip(equipRef);
 
         if (equipMap != null && equipMap.size() > 0) {
             String equipId = equipMap.get("id").toString();

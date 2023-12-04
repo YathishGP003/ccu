@@ -62,6 +62,10 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RelativeLayout rlVAVHead;
 
     @Nullable
+    @BindView(R.id.rl_acb)
+    RelativeLayout rlACB;
+
+    @Nullable
     @BindView(R.id.rl_dabTitle)
     RelativeLayout rlDAB;
 
@@ -209,6 +213,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @BindView(R.id.textParallelDesc)
     TextView textParallelDesc;
 
+    @Nullable
+    @BindView(R.id.textACB)
+    TextView textACB;
+
+    @Nullable
+    @BindView(R.id.textACBdesc)
+    TextView textACBdesc;
+
     @BindView(R.id.textTitleFragment)
     TextView     textTitleFragment;
 
@@ -255,7 +267,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             }
         }
     }
-    
+
+    @Optional
+    @OnClick(R.id.rl_acb)
+    void onACBOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_ACB, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
+    }
+
     @Optional
     @OnClick(R.id.rl_dabTitle)
     void onDabOnClick()
@@ -444,6 +463,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             rlVAVNoFan.setEnabled(false);
             rlVAVSeriesFan.setEnabled(false);
             rlVAVParallelFan.setEnabled(false);
+            rlACB.setEnabled(false);
 
             textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
             textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
@@ -454,6 +474,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
             textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
             textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -499,6 +521,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             rlVAVNoFan.setEnabled(false);
             rlVAVSeriesFan.setEnabled(false);
             rlVAVParallelFan.setEnabled(false);
+            rlACB.setEnabled(false);
 
             textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
             textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
@@ -509,6 +532,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
             textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
             textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;

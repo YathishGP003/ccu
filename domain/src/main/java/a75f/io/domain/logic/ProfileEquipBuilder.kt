@@ -76,8 +76,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     }
                 } else if (profileConfiguration.getAssociationConfigs().getConfig(point.domainName) != null) {
                     val associationConfig = profileConfiguration.getAssociationConfigs().getConfig(point.domainName)
-                    associationConfig?.associationVal?.let {
-                        initializeDefaultVal(hayStackPoint, it)
+                    if (associationConfig != null) {
+                        initializeDefaultVal(hayStackPoint, associationConfig.associationVal )
                     }
                 } else if (profileConfiguration.getValueConfigs().getConfig(point.domainName) != null) {
                     val valueConfig = profileConfiguration.getValueConfigs().getConfig(point.domainName)

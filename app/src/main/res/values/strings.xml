@@ -846,6 +846,8 @@
     <string name="desc_seriesfan">Control a series fan powered VAV box</string>
     <string name="vav_parallelfan">VAV Reheat - Parallel fan</string>
     <string name="desc_parallelfan">Control a parallel fan powered VAV box</string>
+    <string name="title_acb">Active Chilled Beams + DOAS</string>
+    <string name="desc_acb">Controls a VAV box for airflow and active chilled beam chilled water valve</string>
 
     <string name="title_dab_single_duct">DAB</string>
     <string name="title_dab_dual_duct">DAB Dual Duct</string>

@@ -63,6 +63,9 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+
+
+import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -475,6 +478,10 @@ public class Globals {
                         case VAV_PARALLEL_FAN:
                             VavParallelFanProfile vpf = new VavParallelFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
+                            break;
+                        case VAV_ACB:
+                            VavAcbProfile acb = new VavAcbProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(acb);
                             break;
                         case DAB:
                             DabProfile dab = new DabProfile();

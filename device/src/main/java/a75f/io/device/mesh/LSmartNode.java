@@ -347,6 +347,11 @@ public class LSmartNode
                             mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                                                  mapDigitalOut(p.getType(), logicalVal > 0)
                             );
+                        } else if (isEquipType("acb", node)) {
+                            // In case of vav - acb, relay-1 maps to shut-off valve. No relay 2.
+                            double relayActivationHysteresis = TunerUtil.readTunerValByQuery("relay and activation and hysteresis", equipRef);
+                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                    mapDigitalOut(p.getType(), (hayStack.readHisValById(p.getId()) > 0.0 ? logicalVal > 0 : logicalVal > relayActivationHysteresis)));
                         } else {
                             //In case of vav - no fan, relay-2 maps to stage-2
                             mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :

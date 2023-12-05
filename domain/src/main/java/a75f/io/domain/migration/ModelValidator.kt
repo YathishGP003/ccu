@@ -36,7 +36,7 @@ class ModelValidator {
 
         fun isValidaModel(modelId: String): Boolean {
             try {
-                val originalModel = getModelDirective("${DiffManger.ORIGINAL_FIle_PATH}$modelId.json")
+                val originalModel = getModelDirective("${DiffManger.NEW_FILE_PATH}$modelId.json")
 
                 if (originalModel != null) {
                     when (originalModel) {

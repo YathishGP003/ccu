@@ -9,6 +9,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -86,9 +87,10 @@ class VavProfileViewModel : ViewModel() {
 
         // Profile model is temporarily loaded from a local file to allow quick model revisions during development.
         // In the released CCU build, these will draw from the Hayloft API.
-        model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
-        deviceModel = ModelSource.getModelByProfileName("smartnodeDevice") as SeventyFiveFDeviceDirective
-
+        model = ModelLoader.geVavNoFanModelDef() as SeventyFiveFProfileDirective
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel EquipModel Loaded")
+        deviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Device Model Loaded")
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile

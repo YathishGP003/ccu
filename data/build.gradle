@@ -137,6 +137,13 @@ task getExternalLibraryPaths {
     doLast {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
+        def destination = file("${parentFolder}/domain/src/main/assets/models")
+        project.copy {
+            from domainAssets
+            into destination
+            includeEmptyDirs = false
+        }
+
         configurations.customImplementation.getFiles().each { file ->
             if (file.getAbsolutePath().endsWith('domain-modeler-lib-20231115.1-qa.jar')) {
                 project.ext.myParam = file.getAbsolutePath()

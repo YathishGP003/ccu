@@ -29,6 +29,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
+import a75f.io.domain.util.ModelCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -226,7 +227,8 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
-        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
     }
 
     public void startTimerTask(){

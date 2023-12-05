@@ -2,6 +2,11 @@ package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.domain.api.Domain
+import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -10,6 +15,7 @@ import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGridBuilder
@@ -36,6 +42,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
+        doVavDomainModelMigration()
+
         if (!isMigrationRequired()) {
             return
         }
@@ -93,4 +101,30 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         return ""
     }
+
+    private fun doVavDomainModelMigration() {
+        val vavEquips = hayStack.readAllEntities("equip and zone and vav")
+                                .filter { it["domainName"] == null }
+                                .toList()
+        if (vavEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "VAV DM zone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        vavEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+            val model = when {
+                it.containsKey("series") -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
+                                                                as SeventyFiveFProfileDirective
+                it.containsKey("parallel") -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
+                        as SeventyFiveFProfileDirective
+                else -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
+                        as SeventyFiveFProfileDirective
+            }
+            val equipDis = "${site?.displayName}-${it["group"]}-${model.name}"
+            equipBuilder.doCutOverMigration(it["id"].toString(), model, equipDis, VavZoneProfileCutOverMapping.entries )
+        }
+    }
+
 }

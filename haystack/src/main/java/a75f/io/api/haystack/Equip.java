@@ -145,6 +145,11 @@ public class Equip extends Entity
     {
         return displayName;
     }
+
+    public void setDisplayName(String displayName)
+    {
+        this.displayName = displayName;
+    }
     public HashSet<String> getMarkers()
     {
         return markers;

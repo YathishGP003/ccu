@@ -102,7 +102,10 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
                 else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
+                } else if (modelPointDef.tagNames.contains("his")) {
+                    hayStack.writeHisValById(pointId, 0.0)
                 }
+
                 DomainManager.addPoint(hayStackPoint)
             }
         }
@@ -158,6 +161,10 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
         } else {
             hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
+        }
+        if (point.markers.contains("his")) {
+            val priorityVal = hayStack.readPointPriorityVal(point.id)
+            hayStack.writeHisValById(point.id, priorityVal)
         }
     }
 

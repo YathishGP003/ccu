@@ -3,7 +3,7 @@ package a75f.io.domain.cutover
 
 fun getDomainNameFromDis(point : Map<Any, Any>, mapping : Map <String, String>) : String? {
     val displayNme = point["dis"].toString()
-    return mapping.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
+    return mapping.filterKeys { displayNme.replace("\\s".toRegex(),"").substringAfterLast("-") == it }
         .map { it.value }
         .firstOrNull()
 }

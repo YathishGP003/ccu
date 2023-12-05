@@ -485,14 +485,14 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
-
+        val tempDirection = getTempDirection(heatingLoop)
         val isDualSetPointEnabled =
             Domain.getPointFromDomain(equip, dualSetpointControlEnable) == 1.0
         return if (isDualSetPointEnabled) {
-            if (getTempDirection(heatingLoop) == TempDirection.COOLING) {
+            if (tempDirection == TempDirection.COOLING) {
                 Pair(
-                    Domain.getPointFromDomain(equip, systemCoolingSATMinimum),
                     Domain.getPointFromDomain(equip, systemCoolingSATMaximum),
+                    Domain.getPointFromDomain(equip, systemCoolingSATMinimum),
                 )
             } else {
                 Pair(
@@ -501,10 +501,17 @@ class DabExternalAhu : DabSystemProfile() {
                 )
             }
         } else {
-            Pair(
-                Domain.getPointFromDomain(equip, systemSATMinimum),
-                Domain.getPointFromDomain(equip, systemSATMaximum),
-            )
+            if (tempDirection == TempDirection.COOLING) {
+                Pair(
+                    Domain.getPointFromDomain(equip, systemSATMaximum),
+                    Domain.getPointFromDomain(equip, systemSATMinimum),
+                )
+            } else {
+                Pair(
+                    Domain.getPointFromDomain(equip, systemSATMinimum),
+                    Domain.getPointFromDomain(equip, systemSATMaximum),
+                )
+            }
         }
     }
 

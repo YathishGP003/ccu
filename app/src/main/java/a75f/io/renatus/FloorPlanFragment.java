@@ -856,7 +856,6 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-
             if (floorToRename != null) {
                 isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
             } else {
@@ -1433,7 +1432,7 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_PARALLEL_FAN:
                     VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
                     showDialogFragment(VavProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), NodeType.SMART_NODE, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

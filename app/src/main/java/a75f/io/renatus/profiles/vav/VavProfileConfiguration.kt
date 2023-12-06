@@ -9,11 +9,12 @@ import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
-class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int, roomRef : String, floorRef : String, val model : SeventyFiveFProfileDirective)
-    : ProfileConfiguration (nodeAddress, nodeType, priority, roomRef, floorRef) {
+class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int, roomRef : String, floorRef : String, profileType : ProfileType, val model : SeventyFiveFProfileDirective)
+    : ProfileConfiguration (nodeAddress, nodeType, priority, roomRef, floorRef, profileType.name) {
 
     lateinit var temperatureOffset: ValueConfig
 

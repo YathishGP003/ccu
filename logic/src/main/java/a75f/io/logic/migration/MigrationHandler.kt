@@ -6,6 +6,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.logic.EquipBuilder
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -115,15 +116,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         vavEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
             val model = when {
-                it.containsKey("series") -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
-                                                                as SeventyFiveFProfileDirective
-                it.containsKey("parallel") -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
-                        as SeventyFiveFProfileDirective
-                else -> ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1")
-                        as SeventyFiveFProfileDirective
+                it.containsKey("series") -> ModelLoader.getSmartNodeVavSeriesModelDef()
+                it.containsKey("parallel") -> ModelLoader.getSmartNodeVavParallelFanModelDef()
+                else -> ModelLoader.getSmartNodeVavNoFanModelDef()
             }
             val equipDis = "${site?.displayName}-${it["group"]}-${model.name}"
-            equipBuilder.doCutOverMigration(it["id"].toString(), model, equipDis, VavZoneProfileCutOverMapping.entries )
+            equipBuilder.doCutOverMigration(it["id"].toString(), model as SeventyFiveFProfileDirective,
+                                    equipDis, VavZoneProfileCutOverMapping.entries )
         }
     }
 

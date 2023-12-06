@@ -40,6 +40,7 @@ class VavProfileViewModel : ViewModel() {
     lateinit var zoneRef: String
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
+    lateinit var nodeType: NodeType
     private var deviceAddress by Delegates.notNull<Short>()
 
     private lateinit var vavProfile: VavProfile
@@ -82,12 +83,10 @@ class VavProfileViewModel : ViewModel() {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
-        val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
-        profileType = ProfileType.values()[profileOriginalValue]
+        profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
+        nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
 
-        // Profile model is temporarily loaded from a local file to allow quick model revisions during development.
-        // In the released CCU build, these will draw from the Hayloft API.
-        model = ModelLoader.geVavNoFanModelDef() as SeventyFiveFProfileDirective
+        model = getProfileDomainModel(profileType, nodeType)
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel EquipModel Loaded")
         deviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Device Model Loaded")
@@ -95,10 +94,10 @@ class VavProfileViewModel : ViewModel() {
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
             profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
-                zoneRef, floorRef , model ).getActiveConfiguration()
+                zoneRef, floorRef , profileType, model ).getActiveConfiguration()
         } else {
             profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
-                zoneRef, floorRef , model ).getDefaultConfiguration()
+                zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             /*vavProfile = when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
                 ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
@@ -162,10 +161,10 @@ class VavProfileViewModel : ViewModel() {
             CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
         }, {
             ProgressDialogUtils.hideProgressDialog()
+            _isDialogOpen.value = false
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
             showToast("VAV Configuration saved successfully", context)
             CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-            _isDialogOpen.value = false
         })
 
         // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
@@ -224,7 +223,7 @@ class VavProfileViewModel : ViewModel() {
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-VAV-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints")
+        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${model.domainName}" )
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
                 .id, equipDis
@@ -246,5 +245,13 @@ class VavProfileViewModel : ViewModel() {
         //vavEquip = VavEquip(equipId)
 
         //deviceMap.init();
+    }
+
+    private fun getProfileDomainModel(profileType: ProfileType, nodeType: NodeType) : SeventyFiveFProfileDirective{
+        return when(profileType) {
+            ProfileType.VAV_SERIES_FAN -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+            ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
+            else -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+        }
     }
 }

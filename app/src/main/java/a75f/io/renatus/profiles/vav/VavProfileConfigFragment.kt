@@ -3,6 +3,8 @@ package a75f.io.renatus.profiles.vav
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -56,7 +58,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         val ID: String = VavProfileConfigFragment::class.java.simpleName
 
         fun newInstance(
-            meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType
+            meshAddress: Short, roomName: String, floorName: String, nodeType : NodeType, profileType: ProfileType
         ): VavProfileConfigFragment {
             val fragment = VavProfileConfigFragment()
             val bundle = Bundle()
@@ -64,6 +66,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
             bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
+            bundle.putInt(FragmentCommonBundleArgs.NODE_TYPE, nodeType.ordinal)
             fragment.arguments = bundle
             return fragment
         }
@@ -87,6 +90,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
+            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
             if (!isDialogOpen) {
                 this@VavProfileConfigFragment.closeAllBaseDialogFragments()
             }
@@ -121,7 +125,11 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         ) {
             item {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleTextView("VAV - NO FAN")
+                    when (viewModel.profileType) {
+                        ProfileType.VAV_SERIES_FAN -> TitleTextView("VAV Reheat - Series")
+                        ProfileType.VAV_PARALLEL_FAN -> TitleTextView("VAV Reheat - Parallel")
+                        else -> TitleTextView("VAV - NO FAN")
+                    }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
@@ -195,6 +203,25 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
+                if (viewModel.profileType != ProfileType.VAV_REHEAT) {
+                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                        Row {
+                            HeaderTextView(text = "Relay 1")
+                            Spacer(modifier = Modifier.width(60.dp))
+                            LabelTextView(text = "Stage Electric Heater")
+                        }
+                        Row {
+                            HeaderTextView(text = "Relay 2")
+                            Spacer(modifier = Modifier.width(60.dp))
+                            LabelTextView(text = when(viewModel.profileType) {
+                                ProfileType.VAV_SERIES_FAN -> "Series Fan"
+                                else -> "Parallel Fan"
+                            })
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName)

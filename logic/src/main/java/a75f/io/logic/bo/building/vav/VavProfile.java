@@ -106,16 +106,7 @@ public abstract class VavProfile extends ZoneProfile {
     int proportionalSpread = 20;
     double proportionalGain = 0.2;
     double integralGain = 0.8;
-
-    double      currentTemp;
-    double      humidity;
-    double desiredTemp;
-    double supplyAirTemp;
-    double dischargeTemp;
-    double co2;
     double dischargeSp;
-
-    double staticPressure;
 
     VavUnit             vavUnit;
 
@@ -138,6 +129,7 @@ public abstract class VavProfile extends ZoneProfile {
         
     public VavProfile(String equipRef, Short addr, ProfileType profileType) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile ");
+        this.profileType = profileType;
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
@@ -281,39 +273,6 @@ public abstract class VavProfile extends ZoneProfile {
             trSystem.updateHwstRequest(getHwstRequests(node));
         }
     }
-
-    /*public void addLogicalMap(short addr) {
-        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
-        vavDeviceMap.put(addr, deviceMap);
-        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.init();
-    }*/
-
-
-    /*public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
-        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
-        deviceMap.createHaystackPoints(config, floorRef, roomRef, nodeType);
-        vavDeviceMap.put(addr, deviceMap);
-        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.init();
-    }
-
-    public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
-        VavEquip deviceMap = vavDeviceMap.get(addr);
-        deviceMap.updateHaystackPoints(config);
-    
-        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
-    }*/
-    
     
     @Override
     public void updateZonePoints() {
@@ -545,9 +504,8 @@ public abstract class VavProfile extends ZoneProfile {
      * the airflow set point from the heating minimum airflow set point to the heating maximum airflow set point.
      */
     public int getGPC36AdjustedHeatingLoopOp(double heatingLoop, double roomTemp,
-                                                 double dischargeTemp, Equip vavEquip) {
-        double reheatDatDifferential = TunerUtil.readTunerValByQuery("vav and reheat and dat and min and " +
-                                                                     "differential and equipRef == \""+vavEquip.getId()+"\"");
+                                                 double dischargeTemp, Equip equip) {
+        double reheatDatDifferential = vavEquip.getReheatZoneToDATMinDifferential().readPriorityVal();
         
         CcuLog.i(L.TAG_CCU_ZONE,
                  "getGPC36AdjustedHeatingLoopOp heatingLoop "+heatingLoop+" dischargeTemp "+dischargeTemp+" " +
@@ -694,60 +652,30 @@ public abstract class VavProfile extends ZoneProfile {
         message += getFanStatusMessage();
 
         String curStatus = vavEquip.getEquipStatusMessage().readDefaultStrVal();
+        CcuLog.i(L.TAG_CCU_ZONE, "setStatus "+status+" : "+message);
         if (!curStatus.equals(message)) {
             vavEquip.getEquipStatusMessage().writeDefaultVal(message);
         }
     }
 
-    public String getFanStatusMessage() {
+    protected String getFanStatusMessage() {
         if (profileType == ProfileType.VAV_SERIES_FAN) {
-            return isFanOn("series") ? ", Fan ON" : ", Fan OFF";
+            return vavEquip.getSeriesFanCmd().readHisVal() > 0 ? ", Fan ON" : ", Fan OFF";
         } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
-            return isFanOn("parallel") ? ", Fan ON" : ", Fan OFF";
+            return vavEquip.getParallelFanCmd().readHisVal() > 0 ? ", Fan ON" : ", Fan OFF";
         }
         return "";
     }
 
-    public boolean isFanOn(String type)
-    {
-        double fanState = CCUHsApi.getInstance().readHisValByQuery(type+" and point and " +
-                "fan and cmd and group == \""+nodeAddr+ "\"");
-        return fanState > 0;
-    }
-    public void setFanOn(String type, boolean state)
-    {
-        CCUHsApi.getInstance().writeHisValByQuery(type+" and point and fan and cmd and group == \""+nodeAddr+"\"",
-                state ? 1.0 : 0);
-    }
-
-    public void updateLoopParams() {
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and heating and loop and sp and his and group == \""+nodeAddr+"\"", heatingLoop.getLoopOutput());
-
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and cooling and loop and sp and his and group == \""+nodeAddr+"\"", coolingLoop.getLoopOutput());
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and discharge and air and temp and sp and his and group == \""+nodeAddr+"\"", dischargeSp);
-
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
-                "supply and air and temp and his and group == \""+nodeAddr+"\"", satResetRequest.cumulativeRequestHoursPercent);
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
-                "co2 and his and group == \""+nodeAddr+"\"", co2ResetRequest.cumulativeRequestHoursPercent);
-        /*CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
-                                                  "hwst and his and group == \""+nodeAddr+"\"", hwstResetRequest.cumulativeRequestHoursPercent);*/
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
-                "staticPressure and his and group == \""+nodeAddr+"\"", spResetRequest.cumulativeRequestHoursPercent);
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
-                "sat and his and group == \""+nodeAddr+"\"", (double)satResetRequest.currentRequests);
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
-                "co2 and his and group == \""+nodeAddr+"\"", (double)co2ResetRequest.currentRequests);
-
-        CCUHsApi.getInstance().writeHisValByQuery("point and request and current and tr and " +
-                "staticPressure and his and group == \""+nodeAddr+"\"", (double)spResetRequest.currentRequests);
-
+    protected void updateLoopParams() {
+        vavEquip.getHeatingLoopOutput().writeHisVal(heatingLoop.getLoopOutput());
+        vavEquip.getCoolingLoopOutput().writeHisVal(coolingLoop.getLoopOutput());
+        vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
+        vavEquip.getSatRequestPercentage().writeHisVal(satResetRequest.cumulativeRequestHoursPercent);
+        vavEquip.getCo2RequestPercentage().writeHisVal(co2ResetRequest.cumulativeRequestHoursPercent);
+        vavEquip.getPressureRequestPercentage().writeHisVal(spResetRequest.cumulativeRequestHoursPercent);
+        vavEquip.getSatCurrentRequest().writeHisVal(satResetRequest.currentRequests);
+        vavEquip.getCo2CurrentRequest().writeHisVal(co2ResetRequest.currentRequests);
+        vavEquip.getPressureCurrentRequest().writeHisVal(spResetRequest.currentRequests);
     }
 }

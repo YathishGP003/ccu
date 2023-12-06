@@ -129,7 +129,7 @@ object ResourceHelper {
         val inputStream = context.assets.open(fileName)
         CcuLog.i("CCU_DM", "loadModel stream $inputStream")
         @Nullable val modelData: String? = loadString(inputStream)
-        CcuLog.i("CCU_DM", "loadModel modelString $modelData")
+        CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

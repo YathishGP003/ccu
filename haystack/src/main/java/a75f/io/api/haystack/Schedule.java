@@ -581,8 +581,8 @@ public class Schedule extends Entity
     }
     public static Zone getZoneforEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict dict = CCUHsApi.getInstance().readHDict(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(dict).build();
         HashMap<Object, Object> zoneHashMap  = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();

@@ -236,7 +236,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (L.isSimulation())
             {
                 showDialogFragment(VavProfileConfigFragment.Companion
-                                           .newInstance(mNodeAddress, mRoomName, mFloorName, mProfileType), VavProfileConfigFragment.Companion.getID());
+                                           .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
             }
             else
             {

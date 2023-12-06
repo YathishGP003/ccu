@@ -2,6 +2,8 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildingEquip
+import a75f.io.domain.DomainEquip
+import a75f.io.domain.VavEquip
 import a75f.io.domain.logic.DomainManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
@@ -23,7 +25,7 @@ object Domain {
     val hayStack: CCUHsApi = CCUHsApi.getInstance()
     var site: Site? = null
     lateinit var buildingEquip : BuildingEquip
-
+    var equips = mutableMapOf<String, DomainEquip>()
     /**
      * Retrieve the domain object of a point by it id and equipRef.
      */
@@ -152,4 +154,7 @@ object Domain {
         return if (formattedString.toDouble() != 0.0) formattedString else ("%." + decimalPlaces.toString() + "f").format(0.0)
     }
 
+    fun getDomainEquip(equipId : String) : DomainEquip? {
+        return equips[equipId]
+    }
 }

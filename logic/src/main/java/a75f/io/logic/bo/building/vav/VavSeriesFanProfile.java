@@ -52,7 +52,7 @@ public class VavSeriesFanProfile extends VavProfile
     
     @Override
     public void updateZonePoints() {
-        CcuLog.d(L.TAG_CCU_ZONE, "VAV Series Fan Control");
+        CcuLog.i(L.TAG_CCU_ZONE, "--->VavSeriesFanProfile<--- "+nodeAddr);
         
         if(mInterface != null) {
             mInterface.refreshView();
@@ -68,6 +68,10 @@ public class VavSeriesFanProfile extends VavProfile
         }
 
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
+
+        CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
+                "setTempHeating "+setTempHeating+" systemMode "+conditioning);
+
         int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
 
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
@@ -99,6 +103,8 @@ public class VavSeriesFanProfile extends VavProfile
     }
     
     private void initLoopVariables(short node) {
+        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
+        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits(node, damper);
     }
     
@@ -188,7 +194,7 @@ public class VavSeriesFanProfile extends VavProfile
         
         double dischargeTemp = vavEquip.getDischargeAirTemp().readHisVal();
         double supplyAirTemp = vavEquip.getEnteringAirTemp().readHisVal();
-        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", equipId);
+        double maxDischargeTemp = vavEquip.getMaxCoolingDamperPos().readPriorityVal();
         double dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
         vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
@@ -198,7 +204,7 @@ public class VavSeriesFanProfile extends VavProfile
     
     private void updateReheatDuringSystemHeating(String equipId) {
         
-        double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+equipId+"\"");
+        double valveStartDamperPercent = vavEquip.getValveActuationStartDamperPosDuringSysHeating().readPriorityVal();
         double maxHeatingPos = vavEquip.getMaxHeatingDamperPos().readDefaultVal();
         double minHeatingPos = vavEquip.getMinHeatingDamperPos().readDefaultVal();
         double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
@@ -207,6 +213,7 @@ public class VavSeriesFanProfile extends VavProfile
         } else {
             valve.currentPosition = 0;
         }
+        CcuLog.d(L.TAG_CCU_ZONE,"updateReheatDuringSystemHeating valveStart "+valveStart);
     }
     
     private boolean getZoneOccupancy(String equipId) {
@@ -247,25 +254,21 @@ public class VavSeriesFanProfile extends VavProfile
     private void updateZoneDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+nodeAddr+" roomTemp : "+getCurrentTemp());
         if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", "Zone Temp Dead");
-            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
                     : vavEquip.getMinCoolingDamperPos().readDefaultVal());
             double damperMax = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
                     : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
             double damperPos = (damperMax+damperMin)/2;
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if(systemMode == SystemMode.OFF) {
                 damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
             vavEquip.getReheatCmd().writeHisVal(damperPos);
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", (double) TEMPDEAD.ordinal());
-
-            setFanOn("series", false);
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", (double) TEMPDEAD.ordinal());
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"",
-                    "Zone Temp Dead "+getFanStatusMessage());
+            vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
+            vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead : "+getFanStatusMessage());
+            vavEquip.getSeriesFanCmd().writeHisVal(0);
         }
     }
     
@@ -274,12 +277,11 @@ public class VavSeriesFanProfile extends VavProfile
             //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
             //Once the fan is proven on for a fixed time delay (15 seconds), the damper override is released
             CcuLog.d(L.TAG_CCU_ZONE,
-                     "updateFanStatus fanOnDelayCounter: "+fanOnDelayCounter+" fanOn: "+isFanOn("series"));
-            if (!isFanOn("series")) {
-                double fanOnDelay = TunerUtil.readTunerValByQuery("vav and fan and control and delay " +
-                                                                  "and equipRef == \""+equipId+"\"");
-                if (fanOnDelayCounter == fanOnDelay) {
-                    setFanOn("series", true);
+                     "updateFanStatus fanOnDelayCounter: "+fanOnDelayCounter+" fanOn: "+vavEquip.getSeriesFanCmd().readHisVal());
+            if (vavEquip.getSeriesFanCmd().readHisVal() == 0) {
+                double fanOnDelay = vavEquip.getFanControlOnFixedTimeDelay().readPriorityVal();
+                if (fanOnDelayCounter >= fanOnDelay) {
+                    vavEquip.getSeriesFanCmd().writeHisVal(1);
                     damperOverride = false;
                 } else {
                     damperOverride = true;
@@ -290,9 +292,7 @@ public class VavSeriesFanProfile extends VavProfile
         
         } else {
             CcuLog.d(L.TAG_CCU_ZONE, "updateFanStatus false");
-            if (isFanOn("series")) {
-                setFanOn("series", false);
-            }
+            vavEquip.getSeriesFanCmd().writeHisVal(0);
             fanOnDelayCounter = 0;
             damperOverride = false;
         }

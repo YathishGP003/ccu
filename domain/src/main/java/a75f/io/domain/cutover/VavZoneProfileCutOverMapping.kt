@@ -102,5 +102,9 @@ object VavZoneProfileCutOverMapping {
         "airflowCFMIntegralKFactor" to "vavAirFlowCfmIntegralKfactor",
         "airflowCFMProportionalRange" to "vavAirflowCFMProportionalRange",
         "airflow" to "airFlowSensor",
+
+        "seriesFan" to "seriesFanCmd",
+        "parallelFan" to "parallelFanCmd",
+        "fanControlOnFixedTimeDelay" to "fanControlOnFixedTimeDelay"
     )
 }

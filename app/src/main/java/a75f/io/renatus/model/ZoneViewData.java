@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.domain.VavEquip;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.logic.DomainManager;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -108,16 +111,16 @@ public class ZoneViewData {
     }
     
     public static HashMap getVAVEquipPoints(String equipID) {
+        VavEquip vavEquip = (VavEquip) Domain.INSTANCE.getDomainEquip(equipID);
         HashMap vavPoints = new HashMap();
         boolean isThermister1On = (CCUHsApi.getInstance().readDefaultVal(THERMISTER_QUERY_POINT + equipID + "\"") > 0);
-        
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
-        //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
-        double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and normalized and cmd and equipRef == \""+equipID+"\"");
-        double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
-        double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
-        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and air and flow and trueCfm and vav and equipRef == \""+equipID+"\"");
+
+        String equipStatusPoint = vavEquip.getEquipStatusMessage().readDefaultStrVal();
+        double damperPosPoint = vavEquip.getNormalizedDamperCmd().readHisVal();
+        double reheatPoint = vavEquip.getReheatCmd().readHisVal();
+        double enteringAirPoint = vavEquip.getEnteringAirTemp().readHisVal();
+        double dischargePoint = vavEquip.getDischargeAirTemp().readHisVal();
+        double airflowCFM =  vavEquip.getAirFlowSensor().readHisVal();
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {
@@ -164,7 +167,7 @@ public class ZoneViewData {
         } else {
             vavPoints.put("Profile", "VAV Reheat - No Fan");
         }
-        
+
         return vavPoints;
     }
 

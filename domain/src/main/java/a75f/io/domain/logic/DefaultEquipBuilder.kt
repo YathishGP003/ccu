@@ -29,6 +29,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
             .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+            .setProfile(equipConfig.profileConfiguration?.profileType)
             .setSiteRef(equipConfig.siteRef)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {

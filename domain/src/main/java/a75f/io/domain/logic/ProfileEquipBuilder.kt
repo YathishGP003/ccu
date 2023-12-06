@@ -41,9 +41,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
-        DomainManager.addEquip(hayStackEquip)
         createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
-
+        DomainManager.addDomainEquip(hayStackEquip)
+        DomainManager.addEquip(hayStackEquip)
         return equipId
     }
 
@@ -204,7 +204,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
                 if (modelPointName == null) {
                     delete++
-                    //DB point does not exist in model. Delete it.
+                    //DB point does not exist in model. Should be deleted.
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Redundant Point $dbPoint")
                     //hayStack.deleteEntityTree(dbPoint["id"].toString())
                 } else {
@@ -226,13 +226,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update ")
 
         updateEquip(equipRef, modelDef, equipDis)
-
-        /*val hayStackEquip = buildEquip(
-            EquipBuilderConfig(modelDef, null, site.id,
-                hayStack.timeZone, site.displayName)
-        )
-        hayStack.updateEquip(hayStackEquip, equipRef)*/
-        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
+        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
 
 }

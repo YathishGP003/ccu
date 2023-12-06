@@ -358,8 +358,10 @@ object DomainName {
     const val pressureCurrentRequest = "pressureCurrentRequest"
     const val vavZoneVocThreshold = "vavZoneVocThreshold"
 
-
-
+    const val relay1 = "relay1"
+    const val relay2 = "relay2"
+    const val analog1Out = "analog1Out"
+    const val analog2Out = "analog2Out"
 
 }
 

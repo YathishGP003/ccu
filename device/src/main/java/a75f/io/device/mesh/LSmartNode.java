@@ -234,7 +234,8 @@ public class LSmartNode
         } else if (equip.getMarkers().contains("vav")) {
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
             int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
-            setupDamperActuator(settings, damperConfig, 0, reheatConfig, "vav");
+            // With DM integration, reheatType enum is incremented by 1. ("notInstalled" was -1, now it's zero). This is why we are subtracting 1 from the value here.
+            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
         }
     }
 
@@ -344,14 +345,14 @@ public class LSmartNode
                     {
                         //In case of vav - series/paralle fan, relay-2 maps to fan
                         if (isEquipType("series", node) || isEquipType("parallel", node)) {
-                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                                                  mapDigitalOut(p.getType(), logicalVal > 0)
                             );
                         } else {
                             //In case of vav - no fan, relay-2 maps to stage-2
-                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                                 mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
-                                                                                            logicalVal > 50 : logicalVal > 0)
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                    mapDigitalOut(p.getType(), isRelayTwo(p) ?
+                                            logicalVal > 50 : logicalVal > 0)
                             );
                         }
                     }else if (isEquipType("sse", node))
@@ -360,15 +361,15 @@ public class LSmartNode
                         mappedVal = mapSSEDigitalOut(p.getType(), logicalVal > 0);
                     } else if (isEquipType("dab", node)) {
                         double relay2Threshold = 50;
-                        if (p.getPort().equals(RELAY_TWO)) {
+                        if (isRelayTwo(p)) {
                             double relayActivationHysteresis = TunerUtil.readTunerValByQuery("relay and activation and hysteresis", equipRef);
                             if (hayStack.readHisValById(p.getId()) == 0) {
                                 relay2Threshold = 50 + relayActivationHysteresis;
                             }
                         }
 
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                            mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                            mapDigitalOut(p.getType(), isRelayTwo(p) ?
                                                              logicalVal > relay2Threshold : logicalVal > 0));
                         //Analog2 on DAB profile could be mapped to reheat or damper2. When damper 2 is MAT, type is not configured via
                         //analog.
@@ -381,15 +382,15 @@ public class LSmartNode
                         }
 
                     } else {
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
                     }
 
                     //TODo -MAT is currently configured on analog2 , what if reheat is also configured.
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal >= 0) {
+                    if (isAnalog(p) && p.getType().equals(MAT) && logicalVal >= 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
@@ -403,7 +404,7 @@ public class LSmartNode
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                    LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
+                    LSmartNode.getSmartNodePort(controls_t, p).set(mappedVal);
 
                 }  else {
                     //Disabled output port should reset its val
@@ -430,17 +431,6 @@ public class LSmartNode
             return 0;
         }
     }
-    
-    public static boolean isAnalog(String port) {
-        switch (port) {
-            case ANALOG_OUT_ONE:
-            case ANALOG_OUT_TWO:
-            case ANALOG_IN_ONE:
-            case ANALOG_IN_TWO:
-                return true;
-        }
-        return false;
-    }
 
     public static boolean isAnalog(RawPoint point) {
         String port = point.getPort();
@@ -452,15 +442,27 @@ public class LSmartNode
         }
         String domainName = point.getDomainName();
         if (domainName != null) {
-            return domainName == "analog1Out"
-                    || domainName == "analog2Out"
-                    || domainName == "analog1In"
-                    || domainName == "analog2In";
+            return domainName.equals("analog1Out")
+                    || domainName.equals("analog2Out")
+                    || domainName.equals("analog1In")
+                    || domainName.equals("analog2In");
         }
 
         return false;
     }
-    
+
+    public static boolean isRelayTwo(RawPoint point) {
+        String port = point.getPort();
+        if (port != null) {
+            return port == RELAY_TWO;
+        }
+        String domainName = point.getDomainName();
+        if (domainName != null) {
+            return domainName.equals("relay2Out");
+        }
+        return false;
+    }
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -475,6 +477,8 @@ public class LSmartNode
                 return (short) (20 + scaleAnalog(val, 80));
             case "10-2v":
                 return (short) (100 - scaleAnalog(val, 80));
+            case "0-5v":
+                return (short) (scaleAnalog(val, 50));
             default:
                 String [] arrOfStr = type.split("-");
                 if (arrOfStr.length == 2)
@@ -544,6 +548,41 @@ public class LSmartNode
             default:
                 return null;
         }
+    }
+
+    public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls, RawPoint p) {
+        String port = p.getPort();
+        if (port != null) {
+            switch (port)
+            {
+                case ANALOG_OUT_ONE:
+                    return controls.analogOut1;
+                case ANALOG_OUT_TWO:
+                    return controls.analogOut2;
+                case RELAY_ONE:
+                    return controls.digitalOut1;
+                case RELAY_TWO:
+                    return controls.digitalOut2;
+                default:
+                    return null;
+            }
+        }
+
+        String domainName = p.getDomainName();
+        if (domainName != null) {
+            switch (domainName) {
+                case "analog1Out":
+                    return controls.analogOut1;
+                case "analog2Out":
+                    return controls.analogOut2;
+                case "relay1Out":
+                    return controls.digitalOut1;
+                case "relay2Out":
+                    return controls.digitalOut2;
+            }
+        }
+
+        return null;
     }
     
     
@@ -643,16 +682,16 @@ public class LSmartNode
                     if (isEquipType("vav", Short.parseShort(node)))
                     {
                         //IN case of vav , relay-2 maps to stage-2
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), isRelayTwo(p) ? logicalVal > 50 : logicalVal > 0));
                     } else {
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(MAT) && logicalVal > 0) {
                         controlsMessage.controls.damperPosition.set(mappedVal);
                         mappedVal = 0;
                     }

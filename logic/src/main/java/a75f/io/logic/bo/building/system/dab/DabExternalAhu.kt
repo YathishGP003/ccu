@@ -348,13 +348,19 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun setOccupancyMode(systemEquip: Equip, externalEquipId: String?) {
-        val occupancy = if (DabSystemController.getInstance().currSystemOccupancy == Occupancy.UNOCCUPIED) 0.0 else 1.0
+        val occupancy = DabSystemController.getInstance().currSystemOccupancy
+        var occuMode = 1.0
+        if (occupancy == Occupancy.UNOCCUPIED ||
+            occupancy == Occupancy.VACATION ||
+            occupancy == Occupancy.AUTOAWAY) {
+            occuMode = 0.0
+        }
         val isOccupancyModeControlEnabled =
             Domain.getPointFromDomain(systemEquip, occupancyModeControl) == 1.0
         if (isOccupancyModeControlEnabled) {
-            updateSetPoint(systemEquip, systemOccupancyMode, occupancy)
+            updateSetPoint(systemEquip, systemOccupancyMode, occuMode)
             if (externalEquipId != null)
-                pushOccupancyMode(CCUHsApi.getInstance(), externalEquipId, occupancy, modbusSetPointsList)
+                pushOccupancyMode(CCUHsApi.getInstance(), externalEquipId, occuMode, modbusSetPointsList)
         } else logIt("OccupancyModeControlEnabled disabled")
     }
 
@@ -498,6 +504,7 @@ class DabExternalAhu : DabSystemProfile() {
         return ("Current  $value  ${point["unit"]}")
     }
 
+
     private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
         val tempDirection = getTempDirection(heatingLoop)
         val isDualSetPointEnabled =
@@ -552,4 +559,5 @@ class DabExternalAhu : DabSystemProfile() {
         val loopOutput: Double,
         val weightedAverageCO2: Double,
     )
+
 }

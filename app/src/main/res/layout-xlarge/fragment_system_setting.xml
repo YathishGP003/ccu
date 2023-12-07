@@ -455,6 +455,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_marginTop="@dimen/appbar_padding_top"
                     android:orientation="vertical"
                     android:id="@+id/external_modbus_config"
                     android:layout_width="match_parent"
@@ -503,7 +504,6 @@
                 </LinearLayout>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/external_modbus_device"
-                    android:layout_marginLeft="@dimen/fab_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"

@@ -210,6 +210,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	TextView externalModbusModelDetails;
 	private TextView externalModbusStatus;
 	private TextView externalModbusLastUpdated;
+	private TextView external_last_updated;
 
 	LinearLayout setPointConfig;
 	TextView satSetPoint;
@@ -795,6 +796,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
 		externalModbusStatus = view.findViewById(R.id.external_device_status);
 		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
+		external_last_updated = view.findViewById(R.id.external_last_updated);
 		showExternalModbusDevice(view);
 
 
@@ -993,11 +995,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					if(L.ccu().systemProfile instanceof DabExternalAhu) {
 						DabExternalAhu systemProfile = (DabExternalAhu)L.ccu().systemProfile;
 						setPointConfig.setVisibility(View.VISIBLE);
-						satSetPoint.setText(systemProfile.getSetPoint("Setpoint",supplyAirflowTemperatureSetpoint));
-						dspSetPoint.setText(systemProfile.getSetPoint("Setpoint",ductStaticPressureSetpoint));
+						satSetPoint.setText(systemProfile.getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"));
+						dspSetPoint.setText(systemProfile.getSetPoint(ductStaticPressureSetpoint,"Setpoint"));
 						satCurrent.setText(systemProfile.getModbusPointValue(DISCHARGE_AIR_TEMP));
 						dspCurrent.setText(systemProfile.getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR));
-						external_damper.setText(systemProfile.getSetPoint("DCV Damper:",dcvDamperCalculatedSetpoint));
+						external_damper.setText(systemProfile.getSetPoint(dcvDamperCalculatedSetpoint,""));
 					}
 				}
 				if (L.ccu().systemProfile != null) {
@@ -1084,7 +1086,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), parameterList);
+					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), parameterList,15);
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1121,7 +1123,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), parameterList);
+					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), parameterList,15);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1168,6 +1170,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				externalModbusModelDetails.setVisibility(View.VISIBLE);
 				externalModbusStatus.setVisibility(View.VISIBLE);
 				externalModbusLastUpdated.setVisibility(View.VISIBLE);
+				external_last_updated.setVisibility(View.VISIBLE);
 
 				EquipmentDevice externalModbusEquip = buildModbusModelByEquipRef(Objects.requireNonNull(modbusEquip.get("id")).toString());
 				List<Parameter> parameterList = new ArrayList<>();
@@ -1183,7 +1186,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 				externalModbusParams.setLayoutManager(gridLayoutManager);
 				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
+						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList,15);
 				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
 				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);

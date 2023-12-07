@@ -2442,7 +2442,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
                                         new ZoneRecyclerModbusParamAdapter(getContext(),
                                                                            modbusDevices.get(i).getDeviceEquipRef(),
-                                                                           parameterList);
+                                                                           parameterList,25);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

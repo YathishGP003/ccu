@@ -6,7 +6,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 
 /**
- * Reading of Model through ModelLoder will have the model cached at first read.
+ * Reading of Model through ModelLoder will have the model cached after first read.
  */
 object ModelLoader {
 

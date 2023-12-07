@@ -2259,12 +2259,6 @@
           "valueEnum": []
         },
         {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "id",
           "kind": "REF",
           "defaultValue": null,
@@ -2348,7 +2342,6 @@
       "tagNames": [
         "cur",
         "floorRef",
-        "his",
         "zone",
         "roomRef",
         "equipRef",
@@ -2392,12 +2385,6 @@
         {
           "name": "group",
           "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },

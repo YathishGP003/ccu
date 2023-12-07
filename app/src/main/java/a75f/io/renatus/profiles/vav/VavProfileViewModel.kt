@@ -15,8 +15,10 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavReheatProfile
+import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -86,7 +88,8 @@ class VavProfileViewModel : ViewModel() {
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
         nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
-
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Init profileType:$profileType " +
+                "nodeType:$nodeType deviceAddress:$deviceAddress")
         model = getProfileDomainModel()
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel EquipModel Loaded")
         deviceModel = getDeviceDomainModel() as SeventyFiveFDeviceDirective
@@ -94,10 +97,10 @@ class VavProfileViewModel : ViewModel() {
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
-            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getActiveConfiguration()
         } else {
-            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             /*vavProfile = when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
@@ -222,7 +225,7 @@ class VavProfileViewModel : ViewModel() {
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-VAV-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${model.domainName}" )
+        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${model.domainName} profileType ${config.profileType}" )
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
                 .id, equipDis
@@ -240,7 +243,12 @@ class VavProfileViewModel : ViewModel() {
             deviceDis
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
-        vavProfile = VavReheatProfile(equipId, addr)
+        vavProfile = when(profileType) {
+            ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile(equipId, addr)
+            ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile(equipId, addr)
+            else -> VavReheatProfile(equipId, addr)
+        }
+
     }
 
     private fun getProfileDomainModel() : SeventyFiveFProfileDirective{

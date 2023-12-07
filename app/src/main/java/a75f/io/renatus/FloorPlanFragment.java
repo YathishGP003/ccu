@@ -1431,8 +1431,11 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
                     VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
+                    Equip equip = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equip.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
                     showDialogFragment(VavProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), NodeType.SMART_NODE, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeType, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

@@ -132,7 +132,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "1",
           "valueEnum": []
         },
@@ -342,7 +342,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "1",
           "valueEnum": []
         },
@@ -443,7 +443,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "14",
           "valueEnum": []
         },
@@ -653,7 +653,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "14",
           "valueEnum": []
         },
@@ -754,7 +754,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "38",
           "valueEnum": []
         },
@@ -964,7 +964,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "38",
           "valueEnum": []
         },
@@ -1065,7 +1065,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "4",
           "valueEnum": []
         },
@@ -1286,7 +1286,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "4",
           "valueEnum": []
         },
@@ -1387,7 +1387,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "8",
           "valueEnum": []
         },
@@ -1597,7 +1597,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "8",
           "valueEnum": []
         },
@@ -1698,7 +1698,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "31",
           "valueEnum": []
         },
@@ -1908,7 +1908,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "31",
           "valueEnum": []
         },
@@ -2259,12 +2259,6 @@
           "valueEnum": []
         },
         {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "id",
           "kind": "REF",
           "defaultValue": null,
@@ -2348,7 +2342,6 @@
       "tagNames": [
         "cur",
         "floorRef",
-        "his",
         "zone",
         "roomRef",
         "equipRef",
@@ -2392,12 +2385,6 @@
         {
           "name": "group",
           "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
@@ -2650,7 +2637,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "29",
           "valueEnum": []
         },
@@ -2852,7 +2839,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "29",
           "valueEnum": []
         },
@@ -3191,7 +3178,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "17",
           "valueEnum": []
         },
@@ -3385,7 +3372,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "17",
           "valueEnum": []
         },
@@ -5797,7 +5784,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "18",
           "valueEnum": []
         },
@@ -6020,7 +6007,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "18",
           "valueEnum": []
         },
@@ -6127,7 +6114,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "20",
           "valueEnum": []
         },
@@ -6350,7 +6337,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "20",
           "valueEnum": []
         },
@@ -6463,7 +6450,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "19",
           "valueEnum": []
         },
@@ -6686,7 +6673,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "19",
           "valueEnum": []
         },
@@ -6799,7 +6786,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "76",
           "valueEnum": []
         },
@@ -7009,7 +6996,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "76",
           "valueEnum": []
         },
@@ -7110,7 +7097,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "69",
           "valueEnum": []
         },
@@ -7306,7 +7293,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "69",
           "valueEnum": []
         },
@@ -8175,7 +8162,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "77",
           "valueEnum": []
         },
@@ -8378,7 +8365,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "77",
           "valueEnum": []
         },
@@ -9074,7 +9061,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "71",
           "valueEnum": []
         },
@@ -9268,7 +9255,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "71",
           "valueEnum": []
         },
@@ -9601,7 +9588,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "66",
           "valueEnum": []
         },
@@ -9802,7 +9789,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "66",
           "valueEnum": []
         },
@@ -9897,7 +9884,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "70",
           "valueEnum": []
         },
@@ -10091,7 +10078,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "70",
           "valueEnum": []
         },
@@ -11123,7 +11110,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "73",
           "valueEnum": []
         },
@@ -11328,7 +11315,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "73",
           "valueEnum": []
         },
@@ -11423,7 +11410,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "72",
           "valueEnum": []
         },
@@ -11628,7 +11615,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "72",
           "valueEnum": []
         },
@@ -11723,7 +11710,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "45",
           "valueEnum": []
         },
@@ -11937,7 +11924,7 @@
         },
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "45",
           "valueEnum": []
         },
@@ -13981,7 +13968,7 @@
       "tags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "78",
           "valueEnum": []
         },
@@ -14196,7 +14183,7 @@
       "descriptiveTags": [
         {
           "name": "bacnetId",
-          "kind": "STR",
+          "kind": "NUMBER",
           "defaultValue": "78",
           "valueEnum": []
         },

@@ -90,7 +90,7 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20231207.1"
+def domainLibVersion = "20231207.4"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -145,7 +145,7 @@ task getExternalLibraryPaths {
         }
 
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20231207.1-qa.jar')) {
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20231207.4-qa.jar')) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

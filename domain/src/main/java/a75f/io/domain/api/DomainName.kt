@@ -332,5 +332,6 @@ object DomainName {
     const val humidifierEnable = "humidifierEnable"
     const val dehumidifierEnable = "dehumidifierEnable"
     const val conditioningMode = "conditioningMode"
+    const val equipStatusMessage = "equipStatusMessage"
 }
 

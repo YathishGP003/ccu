@@ -18,7 +18,8 @@ const val DAMPER_CMD = "cmd and outside and dcv and damper"
 const val HUMIDIFIER_CMD = "cmd and enable and humidifier"
 const val DEHUMIDIFIER_CMD = "cmd and dessicantDehumidifier"
 const val OCCUPANCY_MODE = "hvac and occupancy and sensor"
-
+const val DISCHARGE_AIR_TEMP = "air and discharge and temp and sensor"
+const val DUCT_STATIC_PRESSURE_SENSOR = "air and discharge and pressure and sensor"
 
 fun pushSatSetPoints(
     haystack: CCUHsApi,

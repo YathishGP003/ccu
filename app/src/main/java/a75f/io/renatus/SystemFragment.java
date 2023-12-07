@@ -1,7 +1,12 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
+import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
+import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.system.SetPointUtilKt.DISCHARGE_AIR_TEMP;
+import static a75f.io.logic.bo.building.system.SetPointUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
@@ -59,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -68,6 +74,9 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.Equip;
+import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -75,6 +84,7 @@ import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
@@ -93,6 +103,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.OaoArc;
+import a75f.io.domain.api.Domain;
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -100,7 +111,6 @@ import a75f.io.renatus.views.OaoArc;
 public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface,
 		IntrinsicScheduleListener, CloudConnectivityListener
 {
-	private static final String TAG = "SystemFragment";
 	private static IntrinsicScheduleListener intrinsicScheduleListener;
 	SeekBar  sbComfortValue;
 	private static final long TOOLTIP_TIME = 3000;
@@ -200,7 +210,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	TextView externalModbusModelDetails;
 	private TextView externalModbusStatus;
 	private TextView externalModbusLastUpdated;
-	View externalModbusConfig;
+
+	LinearLayout setPointConfig;
+	TextView satSetPoint;
+	TextView satCurrent;
+	TextView dspSetPoint;
+	TextView dspCurrent;
+	TextView external_damper;
 
 	public SystemFragment()
 	{
@@ -768,12 +784,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
 		configBTUMeterDetails(view);
 
-	/*	externalModbusconfig = view.findViewById(R.id.externalModbusconfig);
-		externalModbusParams = view.findViewById(R.id.externalModbusParams);
-		externalModbusModelDetails = view.findViewById(R.id.externalModbusDetails);
-		externalModbusStatus = view.findViewById(R.id.externalModbusModule_status);
-		externalModbusLastUpdated = view.findViewById(R.id.last_updated_status_external_modbus);
-		showExternalModbusDevice(view);*/
+		setPointConfig = view.findViewById(R.id.setpoint_config);
+		satSetPoint = view.findViewById(R.id.sat_setpoint);
+		dspSetPoint = view.findViewById(R.id.dsp_setpoint);
+		satCurrent = view.findViewById(R.id.sat_current);
+		dspCurrent = view.findViewById(R.id.dsp_current);
+		external_damper = view.findViewById(R.id.external_damper);
+
+		externalModbusParams = view.findViewById(R.id.external_modbus_device);
+		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
+		externalModbusStatus = view.findViewById(R.id.external_device_status);
+		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
+		showExternalModbusDevice(view);
+
 
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
@@ -967,9 +990,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						IEGatewayOccupancyStatus.setText(getOccStatus());
 						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
 					}
-				
+					if(L.ccu().systemProfile instanceof DabExternalAhu) {
+						DabExternalAhu systemProfile = (DabExternalAhu)L.ccu().systemProfile;
+						setPointConfig.setVisibility(View.VISIBLE);
+						satSetPoint.setText(systemProfile.getSetPoint("Setpoint",supplyAirflowTemperatureSetpoint));
+						dspSetPoint.setText(systemProfile.getSetPoint("Setpoint",ductStaticPressureSetpoint));
+						satCurrent.setText(systemProfile.getModbusPointValue(DISCHARGE_AIR_TEMP));
+						dspCurrent.setText(systemProfile.getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR));
+						external_damper.setText(systemProfile.getSetPoint("DCV Damper:",dcvDamperCalculatedSetpoint));
+					}
 				}
-				
 				if (L.ccu().systemProfile != null) {
 					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}
@@ -1132,7 +1162,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 	private void showExternalModbusDevice(View view) {
 		if (L.ccu().systemProfile instanceof DabExternalAhu) {
-			//externalModbusconfig.setVisibility(View.VISIBLE);
 			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
 			if (!modbusEquip.isEmpty()) {
 				externalModbusParams.setVisibility(View.VISIBLE);
@@ -1156,10 +1185,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
 						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
 				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
-				TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
-				btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-				TextView textViewModule = view.findViewById(R.id.module_status_btu);
-				HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);
 			}
 
 		}

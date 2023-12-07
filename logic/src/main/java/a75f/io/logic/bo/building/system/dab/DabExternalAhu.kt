@@ -2,10 +2,9 @@ package a75f.io.logic.bo.building.system.dab
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.readPoint
 import a75f.io.domain.api.Domain.writePointByDomainName
 import a75f.io.domain.api.DomainName.conditioningMode
-import a75f.io.domain.api.Equip
-import a75f.io.domain.api.Point
 import a75f.io.domain.api.DomainName.dabAnalogFanSpeedMultiplier
 import a75f.io.domain.api.DomainName.dabHumidityHysteresis
 import a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint
@@ -15,6 +14,7 @@ import a75f.io.domain.api.DomainName.dehumidifierEnable
 import a75f.io.domain.api.DomainName.dehumidifierOperationEnable
 import a75f.io.domain.api.DomainName.dualSetpointControlEnable
 import a75f.io.domain.api.DomainName.ductStaticPressureSetpoint
+import a75f.io.domain.api.DomainName.equipStatusMessage
 import a75f.io.domain.api.DomainName.humidifierEnable
 import a75f.io.domain.api.DomainName.humidifierOperationEnable
 import a75f.io.domain.api.DomainName.occupancyModeControl
@@ -36,6 +36,8 @@ import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.systemtargetMaxInsideHumidty
 import a75f.io.domain.api.DomainName.systemtargetMinInsideHumidty
+import a75f.io.domain.api.Equip
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -60,6 +62,7 @@ import a75f.io.logic.interfaces.ModbusWritableDataInterface
 import android.content.Intent
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import java.util.Objects
 
 /**
  * Created by Manjunath K on 12-10-2023.
@@ -68,17 +71,14 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 class DabExternalAhu : DabSystemProfile() {
 
     private var modbusInterface: ModbusWritableDataInterface? = null
-    private var setPointsList = ArrayList<String>()
+    private var modbusSetPointsList = ArrayList<String>()
+    private val dabSystem: DabSystemController = DabSystemController.getInstance()
     override fun getProfileName(): String {
         return "DAB External AHU Controller"
     }
 
     override fun getProfileType(): ProfileType {
         return ProfileType.SYSTEM_DAB_EXTERNAL_AHU
-    }
-
-    override fun getStatusMessage(): String {
-        return ""
     }
 
     fun setModbusWritableDataInterface(callBack: ModbusWritableDataInterface) {
@@ -111,9 +111,7 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
-
-        val dabSystem = DabSystemController.getInstance()
-        calculateSetPoints(dabSystem)
+        calculateSetPoints()
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal.toDouble())
@@ -240,8 +238,11 @@ class DabExternalAhu : DabSystemProfile() {
         return 0.0
     }
 
+    override fun getStatusMessage(): String {
+        return if (getBasicDabConfigData().loopOutput > 0) "System ON" else "System OFF"
+    }
 
-    private fun calculateSetPoints(dabSystemController: DabSystemController) {
+    private fun calculateSetPoints() {
         logIt("=============================================================================")
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (systemEquip == null) {
@@ -249,31 +250,29 @@ class DabExternalAhu : DabSystemProfile() {
             return
         }
         val externalEquipId = getExternalEquipId()
-        val coolingLoop = dabSystemController.coolingSignal
-        val heatingLoop = dabSystemController.heatingSignal
-        val weightedAverageCO2 = dabSystemController.co2WeightedAverageSum
-        val loopOutput = if (coolingLoop > 0) coolingLoop.toDouble() else heatingLoop.toDouble()
+        val basicDabConfig = getBasicDabConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
         val conditioningMode = StandaloneConditioningMode.values()[Domain.getPointFromDomain(systemEquip, conditioningMode).toInt()]
         logIt("System is $occupancyMode conditioningMode : $conditioningMode")
-        logIt("coolingLoop $coolingLoop heatingLoop $heatingLoop")
-        logIt("weightedAverageCO2 $weightedAverageCO2 loopOutput $loopOutput")
+        logIt("coolingLoop ${basicDabConfig.coolingLoop} heatingLoop ${basicDabConfig.heatingLoop}")
+        logIt("weightedAverageCO2 $weightedAverageCO2 loopOutput ${basicDabConfig.loopOutput}")
         if (conditioningMode == StandaloneConditioningMode.OFF)
             return
-        calculateSATSetPoints(systemEquip, heatingLoop, loopOutput, externalEquipId)
-        calculateDuctStaticPressureSetPoints(systemEquip, loopOutput, externalEquipId)
+        calculateSATSetPoints(systemEquip, basicDabConfig, externalEquipId)
+        calculateDuctStaticPressureSetPoints(systemEquip, basicDabConfig.loopOutput, externalEquipId)
         setOccupancyMode(systemEquip, externalEquipId)
         doDCVAction(systemEquip, weightedAverageCO2, occupancyMode, externalEquipId)
         handleHumidityOperation(systemEquip, externalEquipId, occupancyMode)
         handleDeHumidityOperation(systemEquip, externalEquipId, occupancyMode)
+        writePointByDomainName(systemEquip, equipStatusMessage, statusMessage)
 
-        instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, setPointsList)
+        instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, modbusSetPointsList)
     }
+
 
     private fun calculateSATSetPoints(
         systemEquip: Equip,
-        heatingLoop: Int,
-        loopOutput: Double,
+        basicDabConfig: BasicDabConfig,
         externalEquipId: String?,
     ) {
         val isSetPointEnabled =
@@ -301,16 +300,16 @@ class DabExternalAhu : DabSystemProfile() {
           }*/
 
         if (isSetPointEnabled) {
-            val satSetPointLimits = getSetPointMinMax(systemEquip, heatingLoop)
+            val satSetPointLimits = getSetPointMinMax(systemEquip, basicDabConfig.heatingLoop)
             val satSetPointValue =
-                mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, loopOutput)
+                mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, basicDabConfig.loopOutput)
             updateSetPoint(systemEquip, supplyAirflowTemperatureSetpoint, satSetPointValue)
             if (externalEquipId != null)
                 pushSatSetPoints(
                     CCUHsApi.getInstance(),
                     externalEquipId,
                     satSetPointValue,
-                    setPointsList
+                    modbusSetPointsList
                 )
             logIt("SATMinimum: ${satSetPointLimits.first} SATMaximum: ${satSetPointLimits.second}")
             logIt("satSetPointValue: $satSetPointValue")
@@ -341,7 +340,7 @@ class DabExternalAhu : DabSystemProfile() {
                     CCUHsApi.getInstance(),
                     externalEquipId,
                     ductStaticPressureSetPoint,
-                    setPointsList
+                    modbusSetPointsList
                 )
 
         } else logIt("StaticPressureSp is disabled")
@@ -355,7 +354,7 @@ class DabExternalAhu : DabSystemProfile() {
         if (isOccupancyModeControlEnabled) {
             updateSetPoint(systemEquip, systemOccupancyMode, occupancy)
             if (externalEquipId != null)
-                pushOccupancyMode(CCUHsApi.getInstance(), externalEquipId, occupancy, setPointsList)
+                pushOccupancyMode(CCUHsApi.getInstance(), externalEquipId, occupancy, modbusSetPointsList)
         } else logIt("OccupancyModeControlEnabled disabled")
     }
 
@@ -388,7 +387,7 @@ class DabExternalAhu : DabSystemProfile() {
             updateSetPoint(systemEquip, dcvLoopOutput, damperOperationPercent)
             updateSetPoint(systemEquip, dcvDamperCalculatedSetpoint, dcvSetPoint)
             if (externalEquipId != null)
-                pushDamperCmd(CCUHsApi.getInstance(), externalEquipId, dcvSetPoint, setPointsList)
+                pushDamperCmd(CCUHsApi.getInstance(), externalEquipId, dcvSetPoint, modbusSetPointsList)
             logIt("systemDCVDamperPosMinimum: $dcvMin  systemDCVDamperPosMaximum: $dcvMax")
             logIt("systemSensorCO2: $systemSensorCO2 systemCO2DamperOpeningRate $systemCO2DamperOpeningRate systemCO2Threshold: $systemCO2Threshold")
             logIt("$ damperOperationPercent $damperOperationPercent dcvSetPoint: $dcvSetPoint")
@@ -426,7 +425,7 @@ class DabExternalAhu : DabSystemProfile() {
                         CCUHsApi.getInstance(),
                         externalEquipId,
                         newHumidifier,
-                        setPointsList
+                        modbusSetPointsList
                     )
             } else logIt("Humidifier control is disabled")
         }
@@ -461,7 +460,7 @@ class DabExternalAhu : DabSystemProfile() {
                         CCUHsApi.getInstance(),
                         externalEquipId,
                         newDeHumidifier,
-                        setPointsList
+                        modbusSetPointsList
                     )
                 logIt(" targetMaxInsideHumidity: $targetMaxInsideHumidity DeHumidifier $newDeHumidifier")
             } else logIt("DeHumidifier control is disabled")
@@ -484,35 +483,44 @@ class DabExternalAhu : DabSystemProfile() {
         writePointByDomainName(equip, domainName, setPointValue)
     }
 
+    fun getSetPoint(domainName: String, preFix: String): String {
+        val point = readPoint(domainName)
+        if (point.isEmpty()) return ""
+        val unit = Objects.requireNonNull(point["unit"]).toString()
+        val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
+        return ("$preFix  $value  $unit")
+    }
+
+    fun getModbusPointValue(query: String): String {
+        val point = CCUHsApi.getInstance().readEntity("$query and equipRef == \"${getExternalEquipId()}\"")
+        if (point.isEmpty()) return ""
+        val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
+        return ("Current  $value  ${point["unit"]}")
+    }
+
     private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
         val tempDirection = getTempDirection(heatingLoop)
         val isDualSetPointEnabled =
             Domain.getPointFromDomain(equip, dualSetpointControlEnable) == 1.0
-        return if (isDualSetPointEnabled) {
-            if (tempDirection == TempDirection.COOLING) {
-                Pair(
-                    Domain.getPointFromDomain(equip, systemCoolingSATMaximum),
-                    Domain.getPointFromDomain(equip, systemCoolingSATMinimum),
-                )
-            } else {
-                Pair(
-                    Domain.getPointFromDomain(equip, systemHeatingSATMinimum),
-                    Domain.getPointFromDomain(equip, systemHeatingSATMaximum),
-                )
+
+        val minKey: String
+        val maxKey: String
+
+        when (tempDirection) {
+            TempDirection.COOLING -> {
+                minKey = if (isDualSetPointEnabled) systemCoolingSATMaximum else systemSATMaximum
+                maxKey = if (isDualSetPointEnabled) systemCoolingSATMinimum else systemSATMinimum
             }
-        } else {
-            if (tempDirection == TempDirection.COOLING) {
-                Pair(
-                    Domain.getPointFromDomain(equip, systemSATMaximum),
-                    Domain.getPointFromDomain(equip, systemSATMinimum),
-                )
-            } else {
-                Pair(
-                    Domain.getPointFromDomain(equip, systemSATMinimum),
-                    Domain.getPointFromDomain(equip, systemSATMaximum),
-                )
+            TempDirection.HEATING -> {
+                minKey = if (isDualSetPointEnabled) systemHeatingSATMinimum else systemSATMinimum
+                maxKey = if (isDualSetPointEnabled) systemHeatingSATMaximum else systemSATMaximum
             }
         }
+
+        val minSetPoint = Domain.getPointFromDomain(equip, minKey)
+        val maxSetPoint = Domain.getPointFromDomain(equip, maxKey)
+
+        return Pair(minSetPoint, maxSetPoint)
     }
 
     private fun getTempDirection(heatingLoop: Int): TempDirection {
@@ -529,4 +537,19 @@ class DabExternalAhu : DabSystemProfile() {
     private fun logIt(msg: String) {
         Log.i("DEV_DEBUG", msg)
     }
+
+   private fun getBasicDabConfigData() =
+        BasicDabConfig (
+             coolingLoop = dabSystem.coolingSignal,
+             heatingLoop = dabSystem.heatingSignal,
+             loopOutput = ( if (dabSystem.coolingSignal> 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble()),
+             weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
+        )
+
+    data class BasicDabConfig(
+        val coolingLoop: Int,
+        val heatingLoop: Int,
+        val loopOutput: Double,
+        val weightedAverageCO2: Double,
+    )
 }

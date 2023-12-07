@@ -17,6 +17,7 @@ object ModelLoader {
     private const val MODEL_HN_VAV_NO_FAN = "6519b3e1951f37007b7956eb"
     private const val MODEL_HN_VAV_SERIES_FAN = "6519b451951f37007b7956ec"
     private const val MODEL_HN_VAV_PARALLEL_FAN = "6519b4d6951f37007b7956ed"
+
     private const val MODEL_SMART_NODE_DEVICE = "64e258c5cb3df279a3608efa"
     private const val MODEL_HELIO_NODE_DEVICE = "64e32aa2cb3df279a3608efc"
     fun getBuildingEquipModelDef(context: Context? = null) : ModelDirective {

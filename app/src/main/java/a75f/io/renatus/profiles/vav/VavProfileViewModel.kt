@@ -229,7 +229,8 @@ class VavProfileViewModel : ViewModel() {
         )
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        val deviceName = when(nodeType) { NodeType.HELIO_NODE -> "-HN-" else -> "-SN-"}
+        val deviceDis = hayStack.siteName + deviceName + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         deviceBuilder.buildDeviceAndPoints(
             config,

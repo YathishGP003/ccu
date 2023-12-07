@@ -58,7 +58,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setFloorRef(configuration.floorRef)
             .setAddr(configuration.nodeAddress)
             .setSiteRef(siteRef)
-        modelDef.tagNames.forEach{ deviceBuilder.addMarker(it)}
+        modelDef.tags.forEach{ deviceBuilder.addMarker(it.name)}
         return deviceBuilder.build()
     }
 

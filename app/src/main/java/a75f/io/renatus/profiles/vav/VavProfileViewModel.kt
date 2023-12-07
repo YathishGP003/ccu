@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlin.properties.Delegates
@@ -86,9 +87,9 @@ class VavProfileViewModel : ViewModel() {
         profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
         nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
 
-        model = getProfileDomainModel(profileType, nodeType)
+        model = getProfileDomainModel()
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel EquipModel Loaded")
-        deviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+        deviceModel = getDeviceDomainModel() as SeventyFiveFDeviceDirective
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Device Model Loaded")
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
@@ -191,7 +192,6 @@ class VavProfileViewModel : ViewModel() {
     }
 
     private fun setUpVavProfile() {
-        //DomainManager.buildDomain(CCUHsApi.getInstance())
         viewState.updateConfigFromViewState(profileConfiguration)
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
@@ -218,7 +218,6 @@ class VavProfileViewModel : ViewModel() {
         equipModel: SeventyFiveFProfileDirective?,
         deviceModel: SeventyFiveFDeviceDirective?
     ) {
-        //val deviceMap = VavEquip(getProfileType(), addr)
         requireNotNull(equipModel)
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
@@ -241,17 +240,29 @@ class VavProfileViewModel : ViewModel() {
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
         vavProfile = VavReheatProfile(equipId, addr)
-        //vavDeviceMap.put(addr, deviceMap)
-        //vavEquip = VavEquip(equipId)
-
-        //deviceMap.init();
     }
 
-    private fun getProfileDomainModel(profileType: ProfileType, nodeType: NodeType) : SeventyFiveFProfileDirective{
-        return when(profileType) {
-            ProfileType.VAV_SERIES_FAN -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
-            ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
-            else -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+    private fun getProfileDomainModel() : SeventyFiveFProfileDirective{
+        return if (nodeType == NodeType.SMART_NODE) {
+            when (profileType) {
+                ProfileType.VAV_SERIES_FAN -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+                ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
+                else -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+            }
+        } else {
+            when (profileType) {
+                ProfileType.VAV_SERIES_FAN -> ModelLoader.getHelioNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+                ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getHelioNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
+                else -> ModelLoader.getHelioNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+            }
+        }
+    }
+
+    private fun getDeviceDomainModel() : ModelDirective {
+        return if (nodeType == NodeType.SMART_NODE) {
+            ModelLoader.getSmartNodeDevice()
+        } else {
+            ModelLoader.getHelioNodeDevice()
         }
     }
 }

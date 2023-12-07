@@ -20810,7 +20810,7 @@
       "valueEnum": []
     },
     {
-      "id": "6351122707f88c1a0ce4937d",
+      "id": "6351122707f88c1a0ce49371",
       "name": "Min Heating Damper Pos",
       "domainName": "minHeatingDamperPos",
       "tags": [
@@ -21067,7 +21067,7 @@
       ]
     },
     {
-      "id": "6351126407f88c1a0ce4937e",
+      "id": "6351126407f88c1a0ce49372",
       "name": "Max Cooling Damper Pos",
       "domainName": "maxCoolingDamperPos",
       "tags": [

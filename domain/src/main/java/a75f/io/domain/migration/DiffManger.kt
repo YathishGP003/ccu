@@ -3,15 +3,12 @@ package a75f.io.domain.migration
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.EntityConfiguration
-import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import android.content.Context
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDiff
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.common.Version
 
 
@@ -23,10 +20,9 @@ class DiffManger(var context: Context?) {
 
 
     companion object {
-        const val ORIGINAL_FIle_PATH = "models/"
-        const val NEW_FIle_PATH = "assets/75f/models/"
-        const val NEW_VERSION = "assets/75f/versions.json"
-        const val VERSION = "models/versions.json"
+        const val NEW_FILE_PATH = "assets/75f/models/"
+        const val BACKUP_FIle_PATH = "models/assets/75f/models/"
+        const val VERSION = "versions.json"
     }
 
     /**
@@ -35,27 +31,26 @@ class DiffManger(var context: Context?) {
      */
     fun processModelMigration(siteRef: String) {
         Log.i(Domain.LOG_TAG, "processModelMigration")
-        val metaData : MutableList<ModelMeta> =  getModelFileVersionDetails(NEW_VERSION)
-        Log.i(Domain.LOG_TAG, " Found ${metaData.size} models at $NEW_VERSION")
-        val anyInvalidModels = ModelValidator.validateAllDomainModels(metaData)
+        val newVersionFiles : MutableList<ModelMeta> =  getModelFileVersionDetails("$NEW_FILE_PATH$VERSION")
+        Log.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} models at $NEW_FILE_PATH$VERSION")
+        val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles)
         Log.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
 
         if (anyInvalidModels.isNotEmpty()) {
             anyInvalidModels.forEach {
                 Log.i(Domain.LOG_TAG, "Invalid model definition $it: ")
-                val invalidModel = metaData.find { model -> model.modelId == it }
+                val invalidModel = newVersionFiles.find { model -> model.modelId == it }
                 if(invalidModel != null) {
-                    metaData.remove(invalidModel)
+                    newVersionFiles.remove(invalidModel)
                 }
             }
         }
-        if (metaData.isEmpty()) {
+        if (newVersionFiles.isEmpty()) {
             Log.e(Domain.LOG_TAG, "No valid model found for migration ")
             return
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
-        val newVersionFiles = getModelFileVersionDetails(NEW_VERSION)
-        val versionFiles = getModelFileVersionDetails(VERSION)
+        val versionFiles = getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
         updateEquipModels (newVersionFiles, versionFiles, migrationHandler, siteRef)
     }
 
@@ -72,8 +67,8 @@ class DiffManger(var context: Context?) {
                 CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
                     CcuLog.i(Domain.LOG_TAG, " Model Updated  ${version.modelId}")
-                    val originalModel = getModelDetective("$ORIGINAL_FIle_PATH${version.modelId}.json")
-                    val newModel = getModelDetective("$NEW_FIle_PATH${version.modelId}.json")
+                    val originalModel = getModelDetective("$BACKUP_FIle_PATH${version.modelId}.json")
+                    val newModel = getModelDetective("$NEW_FILE_PATH${version.modelId}.json")
 
                     val entityConfiguration =
                         originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }

@@ -13,12 +13,9 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.Condition;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -29,13 +26,12 @@ import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.modbusbox.ModbusCategory;
 
 public class ModbusEquip {
     ProfileType profileType;
     public short slaveId;
     String equipRef = null;
-    public List<Parameter> configuredParams= new ArrayList<Parameter>();
+    public List<Parameter> configuredParams= new ArrayList<>();
     CCUHsApi hayStack = CCUHsApi.getInstance();
 
     public ModbusEquip(ProfileType type, short node) {
@@ -239,9 +235,6 @@ public class ModbusEquip {
                         if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
-                        /*if (marker.getTagName().contains("kind")) {
-                            logicalParamPoint.setKind(marker.getTagValue());
-                        }*/
                     } else {
                         logicalParamPoint.addMarker(marker.getTagName());
                         physicalParamPoint.addMarker(marker.getTagName());
@@ -263,7 +256,7 @@ public class ModbusEquip {
                 }
                 if (Objects.nonNull(enumVariables)) {
                     logicalParamPoint.setEnums(enumVariables.toString());
-                    Log.d("Modbus", modbusEquipType+"MBEquip read params enums=" + enumVariables.toString());
+                    Log.d("Modbus", modbusEquipType+"MBEquip read params enums=" + enumVariables);
                 }
             }else if(Objects.nonNull( configParam.getCommands())){
 
@@ -279,7 +272,7 @@ public class ModbusEquip {
                 }
                 if (Objects.nonNull(enumVariables)) {
                     logicalParamPoint.setEnums(enumVariables.toString());
-                    Log.d("Modbus", modbusEquipType+"MBEquip write params enums=" + enumVariables.toString());
+                    Log.d("Modbus", modbusEquipType+"MBEquip write params enums=" + enumVariables);
                 }
             }
             Point logicalPoint = logicalParamPoint.build();
@@ -331,7 +324,7 @@ public class ModbusEquip {
         return equipmentRef;
     }
 
-    public void updateHaystackPoints(String equipRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
+    public void updateHaystackPoints(String equipRef, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {
             //Read all points for this markers
             StringBuilder tags = new StringBuilder();
@@ -342,18 +335,7 @@ public class ModbusEquip {
             }
 
             if (tags.length() > 0) {
-                String zoneTag="";
-                boolean isZone = false;
-                String[] modbusEquipTypes = equipmentDevice.getEquipType().replaceAll("\\s","").split(",");
-                for (String equipType :
-                        modbusEquipTypes) {
-                    isZone = !equipType.equals(ModbusCategory.BTU.displayName)
-                            && !equipType.equals(ModbusCategory.EMR.displayName);
-                }
-                if(!isZone){
-                    zoneTag="and zone";
-                }
-                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus "+zoneTag + tags + " and equipRef == \"" + equipRef + "\"");
+                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
                 Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
 
                 if (configParams.isDisplayInUI()) {
@@ -384,7 +366,7 @@ public class ModbusEquip {
         return false;
     }
 
-    public List<Parameter> getProfileConfiguration(short slaveId){
+    public List<Parameter> getProfileConfiguration(){
         if(configuredParams != null && (configuredParams.size() > 0))
             return configuredParams;
         else {

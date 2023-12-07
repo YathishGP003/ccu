@@ -71,7 +71,6 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
-import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -223,7 +222,9 @@ public class CCUHsApi
 
     public EntitySyncResponse hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
 
-        HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
+
+        HGrid hisWriteRequest = hisWriteMetadata != null ? HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints)
+                                            : HGridBuilder.dictsToGrid(hisWritePoints);
 
         return HttpUtil.executeEntitySync(
                 CCUHsApi.getInstance().getHSUrl() + "hisWriteMany/",
@@ -3096,7 +3097,7 @@ public class CCUHsApi
                                             val, who, HNum.make(0), rec, lastModifiedDateTime);
 
                             //save his data to local cache
-                            tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                            tagsDb.saveHisItems(hsClient.readById(HRef.copy(id)),
                                     new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
                                             HStr.make(String.valueOf(HSUtil.getPriorityVal(id))))},
                                     true);
@@ -3349,12 +3350,15 @@ public class CCUHsApi
             syncStatusService.addUpdatedEntity(id);
         }
     }
-
     public boolean isBuildingTunerPoint(String id) {
         HashMap<Object, Object> point = readMapById(id);
         if (point.isEmpty()) {
             return false;
         }
         return isBuildingTunerPoint(new Point.Builder().setHashMap(point).build());
+    }
+    public int getCacheSyncFrequency() {
+        return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("cacheSyncFrequency", 1);
     }
 }

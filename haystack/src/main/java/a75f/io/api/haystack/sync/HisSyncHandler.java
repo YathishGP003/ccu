@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import android.content.Context;
 import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -85,22 +86,31 @@ public class HisSyncHandler
     }
     
     private void doSync(boolean syncAllData) {
-        CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData);
+        int cacheSyncFrequency = Math.max(ccuHsApi.getCacheSyncFrequency(), 1);
+        CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData+" cacheSyncFrequency "+cacheSyncFrequency);
         if (syncAllData) {
             nonCovSyncPending = false;
         }
-        //Device sync is initiated concurrently on Rx thread
-        Observable.fromCallable(() -> {
-            syncHistorizedDevicePoints(syncAllData);
-            return true;
-        }).doOnError( throwable -> CcuLog.d(TAG,"Historized device points sync failed: "+throwable.getMessage()))
-                .subscribeOn(Schedulers.io())
-                  .subscribe();
-    
-        //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
-        syncHistorizedEquipPoints(syncAllData);
+        syncCachedHisData();
 
-        syncHistorizedZonePoints(syncAllData);
+        if (ccuHsApi.getAppAliveMinutes() % cacheSyncFrequency == 0) {
+            CcuLog.d(TAG,"syncDBHisData");
+            //Device sync is initiated concurrently on Rx thread
+            Observable.fromCallable(() -> {
+                        syncHistorizedDevicePoints(syncAllData);
+                        return true;
+                    }).doOnError(throwable -> CcuLog.d(TAG, "Historized device points sync failed: " + throwable.getMessage()))
+                    .subscribeOn(Schedulers.io())
+                    .subscribe();
+
+            //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
+            syncHistorizedEquipPoints(syncAllData);
+
+            syncHistorizedZonePoints(syncAllData);
+
+            ccuHsApi.tagsDb.persistUnsyncedCachedItems();
+
+        }
     }
     
     /**
@@ -122,23 +132,59 @@ public class HisSyncHandler
         }
 
     }
-    
-    /**
-     * Does a one-time history sync of all data.
-     */
-    public void syncHisData() {
-        if (syncLock.tryLock()) {
+
+    private void syncCachedHisData() {
+        CcuLog.d(TAG,"syncCachedHisData");
+        List<HisItem> unSyncedItems = ccuHsApi.tagsDb.getUnSyncedCachedHisData();
+        String pointTimezone = ccuHsApi.getTimeZone();
+        List<HisItem> hisItemList = new ArrayList<>();
+        List<HDict> hDictList = new ArrayList<>();
+        for (HisItem hisItem : unSyncedItems) {
             try {
-                doSync(true);
+                HVal pointValue = HNum.make(hisItem.getVal());
+                long pointTimestamp = hisItem.getDateInMillis();
+                if (!StringUtils.equals("NaN", pointValue.toString())) {
+                    HDict hDict = buildHDict(hisItem.getRec(), pointTimezone, pointValue, pointTimestamp);
+                    hDictList.add(hDict);
+                    hisItemList.add(hisItem);
+                    CcuLog.d(TAG, "syncCachedHisData: Adding historized value point ID " + hisItem.getRec() +
+                            " value of " + pointValue + " for syncing.");
+                } else {
+                    CcuLog.e(TAG, "syncCachedHisData: Historized point value for point ID " + hisItem.getRec()
+                            + " is null. Skipping.");
+                }
             } catch (Exception e) {
-                CcuLog.e(TAG,"HisSync Sync Failed ", e);
-            } finally {
-                syncLock.unlock();
+                //Found a corrupted history entry. We don't want to abort the hisWrite session.
+                CcuLog.e(TAG, "Invalid hisItem "+hisItem, e);
             }
-        } else {
-            CcuLog.d(TAG,"Cant do HisSync. Already in progress.");
+            if (hisItemList.size() > HIS_ITEM_BATCH_SIZE) {
+                writeCachedHisData(hDictList, hisItemList);
+                hisItemList.clear();
+                hDictList.clear();
+            }
         }
-        
+        if (hDictList.size() > 0) {
+            writeCachedHisData(hDictList, hisItemList);
+        }
+
+    }
+
+    private void writeCachedHisData(List<HDict> hDictList, List<HisItem> hisItemList) {
+        HDict[] hDicts = hDictListToArray(hDictList);
+
+        EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(null, hDicts);
+
+        CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
+        if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
+            try {
+                ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
+            } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
+                CcuLog.e(TAG, "Failed to update HisItem !", e);
+            }
+        } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+            CcuLog.e(TAG, "His write failed! , Trying to handle the error");
+            EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+        }
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
@@ -238,6 +284,10 @@ public class HisSyncHandler
             List<HisItem> unsyncedHisItems;
             String pointDescription = pointToSync.get("dis").toString();
 
+            if (pointToSync.get("tz") == null) {
+                CcuLog.d(TAG, "Invalid point without tz "+pointToSync);
+                continue;
+            }
             String pointTimezone = pointToSync.get("tz").toString();
     
             String kind = pointToSync.get("kind").toString();

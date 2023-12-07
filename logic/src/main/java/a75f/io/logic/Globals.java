@@ -29,6 +29,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
+import a75f.io.domain.util.ModelCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -227,7 +228,8 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
-        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
     }
 
     public void startTimerTask(){
@@ -338,14 +340,9 @@ public class Globals {
                                 HayStackConstants.USER, HayStackConstants.PASS), siteObject);
                     }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
+                    TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
-                Site siteObject = new Site.Builder().setHashMap(site).build();
-                CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                        HayStackConstants.USER, HayStackConstants.PASS),siteObject);
-                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);

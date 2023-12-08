@@ -2569,6 +2569,10 @@ public class CCUHsApi
             }
         } else {
             Log.e("CCURegInfo","Registration cannot be completed now  - siteSynced : "+siteSynced());
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "CCU cannot be completed at the moment. Please complete registration by clicking REGISTER button ", LENGTH_LONG).show();
+                importNamedSchedule(hsClient);
+            });
         }
     }
 
@@ -2646,16 +2650,18 @@ public class CCUHsApi
                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                 importNamedSchedule(hsClient);
             });
-
-            Log.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
-            onCcuRegistrationCompletedListeners.forEach( listener -> {
-                listener.onRegistrationCompleted(this);
-                Log.d("CCURegInfo", "RegistrationCompletedListener "+listener);
-            } );
-
+            publishRegistrationSuccessful();
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void publishRegistrationSuccessful() {
+        Log.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
+        onCcuRegistrationCompletedListeners.forEach( listener -> {
+            listener.onRegistrationCompleted(this);
+            Log.d("CCURegInfo", "RegistrationCompletedListener "+listener);
+        } );
     }
 
     /**

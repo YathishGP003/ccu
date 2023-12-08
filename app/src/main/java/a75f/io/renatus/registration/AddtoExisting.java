@@ -455,7 +455,6 @@ public class AddtoExisting extends Fragment {
     }
 
     public void loadExistingSite(final String siteId) {
-        mNext1.setEnabled(true);
         @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, String> getHSClientTask = new AsyncTask<Void, Void, String>() {
 
@@ -496,8 +495,6 @@ public class AddtoExisting extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Site not found", Toast.LENGTH_LONG).show();
                 }
-
-                mNext1.setEnabled(true);
             }
         };
         getHSClientTask.execute();
@@ -554,6 +551,7 @@ public class AddtoExisting extends Fragment {
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Toast.makeText(getActivity(), "Canceled use of existing site", Toast.LENGTH_LONG).show();
+                mNext1.setEnabled(true);
             }
         });
 
@@ -564,6 +562,7 @@ public class AddtoExisting extends Fragment {
         builder.setMessage("Are you sure you want to add a new CCU to site " +site.get("dis"));*/
 
         AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
         dialog.show();
     }
 

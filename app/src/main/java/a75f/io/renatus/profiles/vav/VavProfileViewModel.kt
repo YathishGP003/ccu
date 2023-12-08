@@ -10,13 +10,13 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
-import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavReheatProfile
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs

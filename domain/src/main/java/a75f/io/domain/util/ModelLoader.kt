@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import android.content.Context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
+import java.lang.IllegalStateException
 
 /**
  * Reading of Model through ModelLoder will have the model cached after first read.
@@ -54,5 +55,17 @@ object ModelLoader {
 
     fun getHelioNodeDevice() : ModelDirective {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DEVICE)
+    }
+
+    fun getModelForDomainName( domainName : String) : ModelDirective {
+        return when(domainName) {
+            "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
+            "smartnodeVAVReheatSeriesFan" -> getSmartNodeVavSeriesModelDef()
+            "smartnodeVAVReheatParallelFan" -> getSmartNodeVavParallelFanModelDef()
+            "helionodeVAVReheatNoFan" -> getHelioNodeVavNoFanModelDef()
+            "helionodeVAVReheatSeriesFan" -> getHelioNodeVavSeriesModelDef()
+            "helionodeVAVReheatParallelFan" -> getHelioNodeVavParallelFanModelDef()
+            else -> throw IllegalStateException("Invalid Model Name")
+        }
     }
 }

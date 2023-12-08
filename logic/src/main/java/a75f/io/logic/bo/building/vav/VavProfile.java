@@ -23,9 +23,11 @@ import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.domain.VavEquip;
+import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.logic.DeviceBuilder;
 import a75f.io.domain.logic.EntityMapper;
 import a75f.io.domain.logic.ProfileEquipBuilder;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -677,5 +679,19 @@ public abstract class VavProfile extends ZoneProfile {
         vavEquip.getSatCurrentRequest().writeHisVal(satResetRequest.currentRequests);
         vavEquip.getCo2CurrentRequest().writeHisVal(co2ResetRequest.currentRequests);
         vavEquip.getPressureCurrentRequest().writeHisVal(spResetRequest.currentRequests);
+    }
+
+    @Override
+    public ProfileConfiguration getDomainProfileConfiguration() {
+        Equip equip = getEquip();
+        NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+        return new VavProfileConfiguration(nodeAddr, nodeType.name(),
+                (int) vavEquip.getZonePriority().readDefaultVal(),
+                equip.getRoomRef(),
+                equip.getFloorRef() ,
+                profileType,
+                (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
+                .getActiveConfiguration();
+
     }
 }

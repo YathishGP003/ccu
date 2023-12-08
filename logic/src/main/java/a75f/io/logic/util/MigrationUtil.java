@@ -426,7 +426,10 @@ public class MigrationUtil {
             doHSSOutsideDamperMinOpenMigration(CCUHsApi.getInstance());
             PreferenceUtil.setHSSOutsideDamperMinOpenMigrationDone();
         }
-
+        if(!PreferenceUtil.getZoneEquipConfigPointMigration()){
+            UpdateFloorRefRoomRefForConfigPoints(CCUHsApi.getInstance());
+            PreferenceUtil.setZoneEquipConfigPointMigrationDone();
+        }
         CCUHsApi.getInstance().removeAllNamedSchedule();
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
@@ -1772,6 +1775,7 @@ public class MigrationUtil {
             if(dischargeOffset.isEmpty()) {
                 Point equipTunerPoint = VavTuners.createDischargeTempOffsetTuner(false,
                         vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getFloorRef(),
                         vavEquip.getRoomRef(), vavEquip.getSiteRef(),
                         hayStack.getTimeZone());
                 Log.i(MIGRATION_DEBUG, "dischargeOffset Points created");
@@ -1783,7 +1787,7 @@ public class MigrationUtil {
 
             if(dischargeMax.isEmpty()){
                 Point reheatZoneMaxDischargeTempOffsetTuner = VavTuners.createMaxDischargeTempTuner(false,
-                        vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getDisplayName(), vavEquip.getId(),vavEquip.getFloorRef(),
                         vavEquip.getRoomRef(), vavEquip.getSiteRef(),
                         hayStack.getTimeZone());
                 String equipTunerPointId = hayStack.addPoint(reheatZoneMaxDischargeTempOffsetTuner);
@@ -2598,5 +2602,25 @@ public class MigrationUtil {
         }else if(profileType.contains("VRV"))
             equipScheduleType.addMarker("vrv");
 
+    }
+    private static void UpdateFloorRefRoomRefForConfigPoints(CCUHsApi haystack){
+        ArrayList<HashMap<Object, Object>> equipList = haystack.readAllEntities("zone and equip and (ti or sse or" +
+                " dab or dualDuct)");
+        for(HashMap<Object, Object> equipMap : equipList){
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            ArrayList<HashMap<Object, Object>> configPointList = haystack.readAllEntities("point and " +
+                    "equipRef== \""+ equip.getId() +"\"");
+            for( HashMap<Object, Object> configPointMap : configPointList){
+                Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
+                if(equipPoint.getFloorRef().equalsIgnoreCase("SYSTEM") ||
+                        (equipPoint.getRoomRef().equalsIgnoreCase("SYSTEM"))) {
+                    equipPoint.setFloorRef(equip.getFloorRef());
+                    equipPoint.setRoomRef(equip.getRoomRef());
+                    haystack.updatePoint(equipPoint, equipPoint.getId());
+                    Log.i(TAG_CCU_MIGRATION_UTIL,
+                            "FloorRef and RoomRef updated for the point id :" +equipPoint.getId());
+                }
+            }
+        }
     }
 }

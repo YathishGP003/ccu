@@ -30,7 +30,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -165,7 +164,7 @@ public class DabEquip
                                                                roomRef,
                                                                floorRef,
                                                                tz));
-        createDabConfigPoints(config, equipRef);
+        createDabConfigPoints(config, equipRef, roomRef, floorRef);
     
         List<HisItem> hisItems = new ArrayList<>();
         Point damper1Pos = new Point.Builder()
@@ -582,18 +581,21 @@ public class DabEquip
     String getId(){
         return equipRef;
     }
-    
-    public void createDabConfigPoints(DabProfileConfiguration config, String equipRef) {
+
+    public void createDabConfigPoints(DabProfileConfiguration config, String equipRef, String roomRef,
+                                      String floorRef) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis+"-DAB-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-        
+
         Point damper1Type = new Point.Builder()
                                    .setDisplayName(equipDis+"-damper1Type")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("primary").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -607,6 +609,8 @@ public class DabEquip
                                    .setDisplayName(equipDis+"-damper1Size")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("primary").addMarker("size").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -619,6 +623,8 @@ public class DabEquip
                                     .setDisplayName(equipDis+"-damper1Shape")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
+                                    .setRoomRef(roomRef)
+                                    .setFloorRef(floorRef)
                                     .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                     .addMarker("damper").addMarker("primary").addMarker("shape").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
@@ -633,6 +639,8 @@ public class DabEquip
                                    .setDisplayName(equipDis+"-damper2Type")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("secondary").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -646,6 +654,8 @@ public class DabEquip
                                    .setDisplayName(equipDis+"-damper2Size")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("secondary").addMarker("size").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -658,6 +668,8 @@ public class DabEquip
                                     .setDisplayName(equipDis+"-damper2Shape")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
+                                    .setRoomRef(roomRef)
+                                    .setFloorRef(floorRef)
                                     .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                     .addMarker("damper").addMarker("secondary").addMarker("shape").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
@@ -670,6 +682,8 @@ public class DabEquip
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his")
@@ -684,6 +698,8 @@ public class DabEquip
         Point enableIAQControl = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableIAQControl")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his")
@@ -698,6 +714,8 @@ public class DabEquip
         Point zonePriority = new Point.Builder()
                                      .setDisplayName(equipDis+"-zonePriority")
                                      .setEquipRef(equipRef)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
                                      .setSiteRef(siteRef).setHisInterpolate("cov")
                                      .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                      .addMarker("priority").addMarker("sp").addMarker("his")
@@ -713,6 +731,8 @@ public class DabEquip
                                           .setDisplayName(equipDis+"-temperatureOffset")
                                           .setEquipRef(equipRef)
                                           .setSiteRef(siteRef)
+                                          .setRoomRef(roomRef)
+                                          .setFloorRef(floorRef)
                                           .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                           .addMarker("temperature").addMarker("offset").addMarker("sp")
                                           .setGroup(String.valueOf(nodeAddr))
@@ -728,6 +748,8 @@ public class DabEquip
         Point damperMinCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-minCoolingDamperPos")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
@@ -742,6 +764,8 @@ public class DabEquip
         Point damperMaxCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxCoolingDamperPos")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
@@ -757,6 +781,8 @@ public class DabEquip
         Point damperMinHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-minHeatingDamperPos")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
@@ -771,6 +797,8 @@ public class DabEquip
         Point damperMaxHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")

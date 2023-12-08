@@ -3,6 +3,7 @@ package a75f.io.logic;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -321,6 +322,7 @@ public class Globals {
             {
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+                    ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
                         new MigrationHandler(CCUHsApi.getInstance()).doMigration();

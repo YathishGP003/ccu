@@ -42,6 +42,12 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var maxCFMReheating: ValueConfig
     lateinit var minCFMReheating: ValueConfig
 
+    companion object {
+        fun getConfigurationForEquip(equipRef : String) : VavProfileConfiguration {
+
+        }
+    }
+
     fun getDefaultConfiguration() : VavProfileConfiguration {
         damperType = getDefaultValConfig(DomainName.damperType, model)
         damperSize = getDefaultValConfig(DomainName.damperSize, model)

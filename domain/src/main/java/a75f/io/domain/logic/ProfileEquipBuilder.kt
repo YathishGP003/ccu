@@ -5,7 +5,6 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
-import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -21,7 +20,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone),profileName)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         DomainManager.addEquip(hayStackEquip)
@@ -35,16 +34,17 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String,profileName: String?) : String{
-        CcuLog.i("DEV_DEBUG", "Updated configuration is started")
+    fun updateEquipAndPoints(
+        configuration: ProfileConfiguration,
+        modelDef: ModelDirective,
+        siteRef: String
+    ) : String{
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val equip = getEquip(configuration,modelDef.domainName)
-        CcuLog.i("DEV_DEBUG", "Equip Details :  ${equip.toString()}")
         val equipId =  equip?.get("id").toString()
-        val updatedConfiguration = ReconfigHandler
-            .getEntityReconfiguration(equipId, hayStack, entityMapper.getEntityConfiguration(configuration))
-
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone),profileName)
+        val updatedConfiguration = ReconfigurationHandler
+            .getEntityReconfiguration(equipId, hayStack, entityMapper.getEntityConfiguration(configuration),configuration)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone))
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
@@ -56,14 +56,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,
                                         equipRef: String, siteRef: String) {
+
         val tz = hayStack.timeZone
         entityConfiguration.tobeAdded.forEach { point ->
+            Log.i("DEV_DEBUG", "tobeAdded : ${point.domainName}")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz))
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
-                Log.i("DEV_DEBUG", "createPoints: ${point.domainName}")
                 val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
                 if (enableConfig != null) {
                     initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
@@ -79,6 +80,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String) {
         val tz = hayStack.timeZone
         entityConfiguration.tobeUpdated.forEach { point -> // New changed point
+            Log.i("DEV_DEBUG", "tobeUpdated : ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"") // existing point
 
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
@@ -113,6 +115,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeDeleted.forEach { point ->
+            Log.i("DEV_DEBUG", "tobeDeleted : ${point.domainName}")
             val existingPoint = getPoint(point.domainName,equipRef)
             if (existingPoint!!.isNotEmpty())
                 hayStack.deleteEntity(existingPoint["id"]!!.toString())
@@ -120,7 +123,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     }
 
     private fun initializeDefaultVal(point : Point, defaultVal : Number) {
-        Log.i("DEV_DEBUG", "${point.domainName}: default : $defaultVal ")
         hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
     /*
         when {

@@ -17,11 +17,14 @@ import a75f.io.domain.api.DomainName.systemSATMaximum
 import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+
 /**
  * Created by Manjunath K on 13-06-2023.
  */
 
-class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM", "SYSTEM" ) {
+class ExternalAhuConfiguration (profileType : String)
+    : ProfileConfiguration(-1, "CONTROL_MOTO", 0, "SYSTEM", "SYSTEM",  profileType ) {
 
     var setPointControl = EnableConfig(satSetpointControlEnable)
     var dualSetPointControl = EnableConfig(dualSetpointControlEnable)
@@ -43,9 +46,7 @@ class ExternalAhuConfiguration : ProfileConfiguration(-1, "SYSTEM", 0, "SYSTEM",
     var dcvMax = ValueConfig(systemDCVDamperPosMaximum)
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
-        val associations = mutableListOf<AssociationConfig>()
-        associations.add(AssociationConfig("relay1Association", 0))
-        return associations
+        return mutableListOf()
     }
 
     override fun getDependencies(): List<ValueConfig> {

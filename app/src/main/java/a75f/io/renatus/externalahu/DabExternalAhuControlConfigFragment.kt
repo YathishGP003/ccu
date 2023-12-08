@@ -18,7 +18,6 @@ import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.tagValueIncrement
-import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
@@ -513,7 +512,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
     }
 
     private fun init() {
-        CcuLog.i("DEV_DEBUG", "init")
         ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
         viewModel.configModelDefinition(
             requireContext()
@@ -552,7 +550,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun BacnetConfig() {
-        CcuLog.i("DEV_DEBUG", "BacnetConfig")
         /**
          * Add Bacnet configuration here
          */
@@ -560,7 +557,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun ModbusConfig() {
-        CcuLog.i("DEV_DEBUG", "ModbusConfig")
         viewModel.configModbusDetails()
         Row {
             Box(
@@ -583,11 +579,13 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                 } else {
                     TextViewWithClick(
                         text = viewModel.modelName, onClick = {
-                            showDialogFragment(
-                                ModelSelectionFragment.newInstance(
-                                    viewModel.deviceList, viewModel.onItemSelect, SEARCH_MODEL
-                                ), ModelSelectionFragment.ID
-                            )
+                            if (!viewModel.equipModel.value.isDevicePaired) {
+                                showDialogFragment(
+                                    ModelSelectionFragment.newInstance(
+                                        viewModel.deviceList, viewModel.onItemSelect, SEARCH_MODEL
+                                    ), ModelSelectionFragment.ID
+                                )
+                            }
                         }, enableClick = true, isCompress = false
                     )
                     HeaderTextView(viewModel.equipModel.value.version.value)
@@ -649,7 +647,6 @@ class DabExternalAhuControlConfigFragment : Fragment() {
 
     @Composable
     fun ParametersListView(data: MutableState<EquipModel>) {
-        CcuLog.i("DEV_DEBUG", "ParametersListView")
         if (data.value.parameters.isNotEmpty()) {
             var index = 0
             while (index < data.value.parameters.size) {

@@ -22,7 +22,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef(hayStack.context), siteRef)
     }
     fun buildTunerEquipAndPoints(modelDef: ModelDirective, siteRef : String): String {
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone, hayStack.site?.displayName!!),null)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone, hayStack.site?.displayName!!))
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
         Domain.buildingEquip = BuildingEquip(equipId)
@@ -99,7 +99,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
     private fun updateEquipAndPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, equipId: String, siteRef: String) : String{
 
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone),null)
+        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone))
         hayStack.updateEquip(hayStackEquip, equipId)
 
         DomainManager.addEquip(hayStackEquip)
@@ -324,7 +324,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         CcuLog.e(Domain.LOG_TAG, " Added $add Updated $update Deleted $delete Passed $pass")
 
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, site.id,
-                                        hayStack.timeZone, site.displayName),null)
+                                        hayStack.timeZone, site.displayName))
         hayStack.updateEquip(hayStackEquip, equipRef)
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
         //Required to update backend points since local building tuners are no longer synced.

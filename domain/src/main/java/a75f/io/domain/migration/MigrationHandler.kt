@@ -47,7 +47,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
                 val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
-                    haystack.timeZone, haystack.siteName!!),profileName)
+                    haystack.timeZone, haystack.siteName!!))
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)
@@ -81,7 +81,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
                 val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
-                    haystack.timeZone, haystack.siteName!!),profileName)
+                    haystack.timeZone, haystack.siteName!!))
                 equips.forEach {
                     haystack.updateEquip(hayStackEquip, it.id)
                     DomainManager.addEquip(hayStackEquip)

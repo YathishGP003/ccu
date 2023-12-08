@@ -187,7 +187,9 @@ class DabExternalAhu : DabSystemProfile() {
 
     fun getConfiguration(modelDef: SeventyFiveFProfileDirective): ExternalAhuConfiguration {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-        val config = ExternalAhuConfiguration()
+        val config = ExternalAhuConfiguration(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name)
+
+
         if (systemEquip == null)
             return config
 
@@ -542,7 +544,7 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun logIt(msg: String) {
-        Log.i("DEV_DEBUG", msg)
+        Log.i(L.TAG_CCU_SYSTEM, msg)
     }
 
    private fun getBasicDabConfigData() =

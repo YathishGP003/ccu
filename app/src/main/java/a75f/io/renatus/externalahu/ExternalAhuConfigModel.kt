@@ -11,6 +11,7 @@ import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
 import a75f.io.domain.config.ExternalAhuConfiguration
+import a75f.io.logic.bo.building.definitions.ProfileType
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -58,7 +59,8 @@ class ExternalAhuConfigModel {
     }
 
     fun getConfiguration(): ExternalAhuConfiguration {
-        val config =  ExternalAhuConfiguration()
+        val config =  ExternalAhuConfiguration(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name)
+
         config.setPointControl.enabled = this.setPointControl
         config.dualSetPointControl.enabled = this.dualSetPointControl
         config.fanStaticSetPointControl.enabled = this.fanStaticSetPointControl

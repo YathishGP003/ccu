@@ -20,7 +20,7 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(equipConfig: EquipBuilderConfig, profileName: String?): Equip {
+    override fun buildEquip(equipConfig: EquipBuilderConfig): Equip {
 
         val equipBuilder =
             Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
@@ -28,14 +28,12 @@ open class DefaultEquipBuilder : EquipBuilder {
                 .setFloorRef(equipConfig.profileConfiguration?.floorRef)
                 .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
                 .setSiteRef(equipConfig.siteRef)
+                .setProfile(equipConfig.profileConfiguration?.profileType)
                 .setDomainName(equipConfig.modelDef.domainName)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
-        if (profileName != null)
-            equipBuilder.setProfile(profileName)
-
         equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }
             .forEach { tag -> equipBuilder.addMarker(tag.name) }
         equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach { tag ->
@@ -125,11 +123,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-
-        /* Log.i("DEV_DEBUG", "buildPoint: Domain Name : ${pointConfig.modelDef.domainName} received ${HStr.make(pointConfig.tz)} ")
+        /*
         if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null && pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null) {
             pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-            Log.i("DEV_DEBUG", "buildPoint: TZ added ${HStr.make(pointConfig.tz)} ")
         }*/
 
         var enums = ""

@@ -2834,7 +2834,7 @@
       "configuration": {
         "configType": "BASE"
       },
-      "associatedWithDevicePoint": null,
+      "associatedWithDevicePoint": "rssi",
       "descriptiveTags": [
         {
           "name": "bacnetId",
@@ -6319,7 +6319,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": null,
+      "defaultValue": 74,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",
@@ -6655,7 +6655,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": null,
+      "defaultValue": 70,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",

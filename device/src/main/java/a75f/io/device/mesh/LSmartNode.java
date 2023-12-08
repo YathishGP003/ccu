@@ -29,6 +29,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -348,11 +349,10 @@ public class LSmartNode
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                                                  mapDigitalOut(p.getType(), logicalVal > 0)
                             );
-                        } else if (isEquipType("acb", node)) {
+                        } else if (isEquipType("chilledBeam", node)) {
                             // In case of vav - acb, relay-1 maps to shut-off valve. No relay 2.
-                            double relayActivationHysteresis = TunerUtil.readTunerValByQuery("relay and activation and hysteresis", equipRef);
-                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                    mapDigitalOut(p.getType(), (hayStack.readHisValById(p.getId()) > 0.0 ? logicalVal > 0 : logicalVal > relayActivationHysteresis)));
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                    mapDigitalOut(p.getType(), (logicalVal > 0)));
                         } else {
                             //In case of vav - no fan, relay-2 maps to stage-2
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
@@ -447,10 +447,10 @@ public class LSmartNode
         }
         String domainName = point.getDomainName();
         if (domainName != null) {
-            return domainName.equals("analog1Out")
-                    || domainName.equals("analog2Out")
-                    || domainName.equals("analog1In")
-                    || domainName.equals("analog2In");
+            return domainName.equals(DomainName.analog1Out)
+                    || domainName.equals(DomainName.analog2Out)
+                    || domainName.equals(DomainName.analog1In)
+                    || domainName.equals(DomainName.analog2In);
         }
 
         return false;
@@ -463,7 +463,7 @@ public class LSmartNode
         }
         String domainName = point.getDomainName();
         if (domainName != null) {
-            return domainName.equals("relay2Out");
+            return domainName.equals(DomainName.relay2);
         }
         return false;
     }
@@ -576,13 +576,13 @@ public class LSmartNode
         String domainName = p.getDomainName();
         if (domainName != null) {
             switch (domainName) {
-                case "analog1Out":
+                case DomainName.analog1Out:
                     return controls.analogOut1;
-                case "analog2Out":
+                case DomainName.analog2Out:
                     return controls.analogOut2;
-                case "relay1Out":
+                case DomainName.relay1:
                     return controls.digitalOut1;
-                case "relay2Out":
+                case DomainName.relay2:
                     return controls.digitalOut2;
             }
         }

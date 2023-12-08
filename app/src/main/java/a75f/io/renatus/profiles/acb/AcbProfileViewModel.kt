@@ -1,7 +1,9 @@
 package a75f.io.renatus.profiles.acb
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
+import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
@@ -18,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.VavAcbProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavReheatProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -156,6 +159,7 @@ class AcbProfileViewModel : ViewModel() {
             CCUHsApi.getInstance().setCcuReady()
             CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
             LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
+            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
             CcuLog.i(Domain.LOG_TAG, "VavAcbProfile Pairing complete")
         }, {
             ProgressDialogUtils.hideProgressDialog()
@@ -197,10 +201,12 @@ class AcbProfileViewModel : ViewModel() {
         if (profileConfiguration.isDefault) {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
+            setOutputTypes(profileConfiguration)
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
-            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+            updateEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
+            setOutputTypes(profileConfiguration)
         }
 
     }
@@ -243,4 +249,81 @@ class AcbProfileViewModel : ViewModel() {
 
         //deviceMap.init();
     }
+
+    private fun updateEquipAndPoints(
+        addr: Short,
+        config: ProfileConfiguration,
+        floorRef: String?,
+        roomRef: String?,
+        nodeType: NodeType?,
+        hayStack: CCUHsApi,
+        equipModel: SeventyFiveFProfileDirective,
+        deviceModel: SeventyFiveFDeviceDirective
+    ) {
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val equipDis = hayStack.siteName + "-ACB-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " updateEquipAndPoints")
+        val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
+        deviceBuilder.updateDeviceAndPoints(
+            config,
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+    }
+
+    // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.
+    // We are setting this value upon equip creation/reconfiguration for now.
+    private fun setOutputTypes(config: AcbProfileConfiguration) {
+        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+
+        // Set
+        val relay1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
+        var relay1Point = RawPoint.Builder().setHashMap(relay1)
+        hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
+
+        var relay2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
+        var relay2Point = RawPoint.Builder().setHashMap(relay2)
+        hayStack.updatePoint(relay2Point.setType("Relay N/C").build(), relay2.get("id").toString())
+
+        var analogOut1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"");
+        var analog1Point = RawPoint.Builder().setHashMap(analogOut1)
+        hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
+
+        var analogOut2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+        var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
+        hayStack.updatePoint(analog2Point.setType(getValveTypeString(config)).build(), analogOut2.get("id").toString())
+
+    }
+
+    // This logic will break if the "damperType" point enum is changed
+    private fun getDamperTypeString(config: AcbProfileConfiguration) : String {
+        return when(config.damperType.currentVal.toInt()) {
+            0 -> "0-10v"
+            1 -> "2-10v"
+            2 -> "10-2v"
+            3 -> "10-0v"
+            4 -> LSmartNode.MAT
+            5 -> "0-5v"
+            else -> { "0-10v" }
+        }
+    }
+
+    // This logic will break if the "reheatType" enum is changed
+    private fun getValveTypeString(config: AcbProfileConfiguration) : String {
+        return when(config.valveType.currentVal.toInt()) {
+            1 -> "0-10v"
+            2 -> "2-10v"
+            3 -> "10-2v"
+            4 -> "10-0v"
+            5 -> LSmartNode.PULSE
+            else -> { "0-10v" }
+        }
+    }
+
 }

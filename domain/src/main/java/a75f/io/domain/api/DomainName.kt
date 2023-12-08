@@ -370,6 +370,10 @@ object DomainName {
     const val relay2 = "relay2"
     const val analog1Out = "analog1Out"
     const val analog2Out = "analog2Out"
+    const val analog1In = "analog1In"
+    const val analog2In = "analog2In"
+
+    const val smartnodeActiveChilledBeam = "smartnodeActiveChilledBeam"
 
 }
 

@@ -7,6 +7,8 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.projecthaystack.UnknownRecException;
+
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -20,6 +22,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -33,8 +36,6 @@ import a75f.io.logic.tuners.TunerUtil;
 
 public class VavAcbProfile extends VavProfile
 {
-
-    a75f.io.domain.VavAcbEquip vavAcbEquip;
 
     public VavAcbProfile(String equipRef, Short nodeAddress) {
         super(equipRef, nodeAddress, ProfileType.VAV_ACB);
@@ -71,11 +72,10 @@ public class VavAcbProfile extends VavProfile
             updateZoneDead();
             return;
         }
-
         initLoopVariables();
-
         double roomTemp = getCurrentTemp();
         boolean condensate = getCondensate();
+        CcuLog.e(L.TAG_CCU_ZONE, "Condensate detected? " + condensate);
 
         int loopOp = 0;
         //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -84,7 +84,9 @@ public class VavAcbProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
-
+        CcuLog.e(L.TAG_CCU_ZONE, "");
+        CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
+                "setTempHeating "+setTempHeating+" systemMode "+systemMode);
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -93,18 +95,23 @@ public class VavAcbProfile extends VavProfile
             if (conditioning == SystemController.State.COOLING) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
                 chwValve.currentPosition = condensate ? 0 : loopOp;
+            } else {
+                // Damper and CHW Valve go to minimum if system is in heating
+                loopOp = 0;
+                chwValve.currentPosition = 0;
             }
         } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
             }
-
-            // For now, damper goes to min if there is heating demand.
-            // If reheat is added as an option later, this can be replaced by same logic as other VAV profiles.
-            loopOp = 0;
+            if (conditioning == SystemController.State.COOLING) {
+                loopOp =  0;
+            } else if (conditioning == SystemController.State.HEATING) {
+                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+                loopOp = heatingLoopOp;
+            }
             chwValve.currentPosition = 0;
-
         } else {
             //Zone is in deadband
             if (state != DEADBAND) {
@@ -112,13 +119,17 @@ public class VavAcbProfile extends VavProfile
             }
         }
 
-        updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+        try {
+            updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+        } catch (UnknownRecException e) {
+            CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
+        }
         CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
 
-        if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
-            valve.currentPosition = 0;
+        if (systemMode == SystemMode.OFF || coolingLoop.getLoopOutput() == 0) {
+            chwValve.currentPosition = 0;
         }
 
         chwValve.applyLimits();
@@ -126,6 +137,7 @@ public class VavAcbProfile extends VavProfile
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
         ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(chwValve.currentPosition);
+        ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(getShutOffValveCmd());
 
         logLoopParams(nodeAddr, roomTemp, loopOp);
 
@@ -140,19 +152,17 @@ public class VavAcbProfile extends VavProfile
 
     private boolean getCondensate() {
         if (((VavAcbEquip)vavEquip).getThermistor2Type().readPriorityVal() > 0.0) {
-            return ((VavAcbEquip)vavEquip).getCondensateNC().readPriorityVal() > 0.0;
+            return ((VavAcbEquip)vavEquip).getCondensateNC().readHisVal() > 0.0;
         } else {
-            return ((VavAcbEquip)vavEquip).getCondensateNO().readPriorityVal() > 0.0;
+            return ((VavAcbEquip)vavEquip).getCondensateNO().readHisVal() > 0.0;
         }
     }
 
     private void logLoopParams(int node, double roomTemp, int loopOp) {
-        
-        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling+
-                                " Op: "+coolingLoop.getLoopOutput());
+
+        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
         coolingLoop.dump();
-        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating+
-                                " Op: "+heatingLoop.getLoopOutput());
+        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop Op: "+heatingLoop.getLoopOutput());
         heatingLoop.dump();
         CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                  +", chwValve:"+ chwValve.currentPosition);
@@ -175,9 +185,21 @@ public class VavAcbProfile extends VavProfile
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
+            ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(0.0);
             ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(damperPos);
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
+    }
+
+    private double getShutOffValveCmd() {
+        boolean shutOffValveCmd;
+        if (((VavAcbEquip)vavEquip).getChwShutOffValve().readHisVal() > 0.0) {
+            shutOffValveCmd = (chwValve.currentPosition > 0.0);
+        } else {
+            double relayActivationHysteresis = ((VavAcbEquip) vavEquip).getRelayActivationHysteresis().readPriorityVal();
+            shutOffValveCmd = (chwValve.currentPosition > relayActivationHysteresis);
+        }
+        return shutOffValveCmd ? 1.0 : 0.0;
     }
     
     private void initLoopVariables() {
@@ -195,6 +217,9 @@ public class VavAcbProfile extends VavProfile
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;*/
         setDamperLimits( (short) nodeAddr, damper);
+        chwValve = ((VavAcbUnit)vavUnit).chwValve;
+        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
+        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
     }
     
     private void handleCoolingChangeOver() {

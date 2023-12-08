@@ -223,8 +223,10 @@ public class VavTRTuners
     
     public static double getSatTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and default and tuner and tr and sat and "+trParam);
-    
+        HashMap cdb = hayStack.read("point and system and tuner and tr and sat and "+trParam);
+        if (cdb.isEmpty()) {
+            cdb = hayStack.read("point and default and tuner and tr and sat and "+trParam);
+        }
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
@@ -448,7 +450,10 @@ public class VavTRTuners
     public static double getStaticPressureTRTunerVal(String trParam) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and default and tuner and tr and staticPressure and "+trParam);
+        HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
+        if (cdb.isEmpty()) {
+            cdb = hayStack.read("point and default and tuner and tr and staticPressure and "+trParam);
+        }
     
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
@@ -672,8 +677,10 @@ public class VavTRTuners
     
     public static double getCO2TRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
-    
+        HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
+        if (cdb.isEmpty()) {
+            cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
+        }
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {

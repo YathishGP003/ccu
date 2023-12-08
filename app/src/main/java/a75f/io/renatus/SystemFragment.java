@@ -797,7 +797,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusStatus = view.findViewById(R.id.external_device_status);
 		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
 		external_last_updated = view.findViewById(R.id.external_last_updated);
-		showExternalModbusDevice(view);
+		showExternalModbusDevice();
 
 
 
@@ -1000,6 +1000,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						satCurrent.setText(systemProfile.getModbusPointValue(DISCHARGE_AIR_TEMP));
 						dspCurrent.setText(systemProfile.getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR));
 						external_damper.setText(systemProfile.getSetPoint(dcvDamperCalculatedSetpoint,""));
+					} else {
+						setPointConfig.setVisibility(View.GONE);
 					}
 				}
 				if (L.ccu().systemProfile != null) {
@@ -1162,7 +1164,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshData() {
 		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
 	}
-	private void showExternalModbusDevice(View view) {
+	private void showExternalModbusDevice() {
 		if (L.ccu().systemProfile instanceof DabExternalAhu) {
 			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
 			if (!modbusEquip.isEmpty()) {

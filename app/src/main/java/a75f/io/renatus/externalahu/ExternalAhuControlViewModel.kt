@@ -473,7 +473,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         modbusProfile.updateModbusEquip(
             equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),
-            equipModel.value.equipDevice.value,
             getParametersList(equipModel.value)
         )
 
@@ -481,7 +480,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             modbusProfile.updateModbusEquip(
                 it.value.equipDevice.value.deviceEquipRef,
                 it.value.equipDevice.value.slaveId.toShort(),
-                it.value.equipDevice.value,
                 getParametersList(it.value)
             )
         }

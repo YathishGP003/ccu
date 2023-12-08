@@ -235,7 +235,7 @@ public abstract class VavProfile extends ZoneProfile {
 
     private void initializeCfmController(String equipId) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController");
-        double cfmProportionalGain = vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal();
+        double cfmProportionalGain = vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal();
         double cfmIntegralGain = vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal();
         int cfmProportionalSpread = (int)vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal();
         int cfmIntegralMaxTimeout = (int) vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal();

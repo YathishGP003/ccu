@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -95,23 +96,23 @@ public class DamperReheatTypeHandler {
                     DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
 
-            if (typeVal < 0) {
-                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), false);
+            if (typeVal <= 0) {
+                SmartNode.setDomainPointEnabled(address, "analog2Out", false);
             } else if (typeVal <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
-                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal].displayName);
-                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+                SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
+                SmartNode.setDomainPointEnabled(address, "analog2Out", true);
 
-                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false);
+                SmartNode.setDomainPointEnabled(address, "relay1", false);
 
             } else {
-                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.name(), false);
-                SmartNode.updatePhysicalPointType(address, Port.RELAY_ONE.toString(),
+                SmartNode.setDomainPointEnabled(address, "analog2Out", false);
+                SmartNode.updateDomainPhysicalPointType(address, "relay1",
                         OutputRelayActuatorType.NormallyClose.displayName);
-                SmartNode.setPointEnabled(address, Port.RELAY_ONE.toString(), true);
+                SmartNode.setPointEnabled(address, "relay1", true);
                 if (typeVal == ReheatType.TwoStage.ordinal()) {
-                    SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
-                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                    SmartNode.updatePhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
+                    SmartNode.setDomainPointEnabled(address, "relay2", true);
                 }
             }
         }

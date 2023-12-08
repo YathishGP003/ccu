@@ -598,6 +598,7 @@ public class CCUHsApi
         spPrefsEditor.putString("address", updatedSite.getGeoAddress());
         spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
+        spPrefsEditor.putString("state", updatedSite.getGeoState());
 
         spPrefsEditor.commit();
     }

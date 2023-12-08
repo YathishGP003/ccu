@@ -589,24 +589,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             updateView(note, "Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-            String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
-            if (address.isEmpty()) {
-                updateView(place, city + ", " + country);
-            } else {
-                //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
-                String[] addrArray = address.split(",");
-                String placeStr = "";
-                if (addrArray != null && addrArray.length >= 3) {
-                    placeStr = addrArray[0] + ", " + addrArray[2];
-                } else if (addrArray != null && addrArray.length == 2) {
-                    placeStr = address;
-                } else {
-                    placeStr = city + ", " + country;
-                }
-                updateView(place, placeStr);
-            }
+            String state = spDefaultPrefs.getString("state", "");
+            updateView(place, city + ", " + state + ", " + country);
             updateView(weather_condition, WeatherDataDownloadService.getSummary());
 
             final ImageView ivWeatherIcon = weather_icon;

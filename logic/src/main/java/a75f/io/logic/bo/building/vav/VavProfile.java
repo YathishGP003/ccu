@@ -642,6 +642,7 @@ public abstract class VavProfile extends ZoneProfile {
         }
 
         message += getFanStatusMessage();
+        message += getAcbStatusMessage();
 
         String curStatus = vavEquip.getEquipStatusMessage().readDefaultStrVal();
         CcuLog.i(L.TAG_CCU_ZONE, "setStatus "+status+" : "+message);
@@ -655,6 +656,24 @@ public abstract class VavProfile extends ZoneProfile {
             return vavEquip.getSeriesFanCmd().readHisVal() > 0 ? ", Fan ON" : ", Fan OFF";
         } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
             return vavEquip.getParallelFanCmd().readHisVal() > 0 ? ", Fan ON" : ", Fan OFF";
+        }
+        return "";
+    }
+
+    protected String getAcbStatusMessage() {
+        if (profileType == ProfileType.VAV_ACB) {
+            VavAcbEquip acbEquip = (VavAcbEquip)vavEquip;
+            if (acbEquip.getCondensateNC().readHisVal() > 0.0 || acbEquip.getCondensateNO().readHisVal() > 0.0) {
+                return ", Condensate Detected";
+            } else if (acbEquip.getValveType().readPriorityVal() > 0.0) {
+                if (acbEquip.getChwValveCmd().readHisVal() > 0.0) {
+                    return ", CHW Valve ON";
+                }
+            } else {
+                if (acbEquip.getChwShutOffValve().readHisVal() > 0.0) {
+                    return ", CHW Valve ON";
+                }
+            }
         }
         return "";
     }

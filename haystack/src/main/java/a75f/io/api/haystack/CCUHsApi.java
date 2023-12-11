@@ -433,6 +433,18 @@ public class CCUHsApi
         return pointId;
     }
 
+    public String addBuildingTunerPoint(Point p, boolean syncToServer) {
+        p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
+        String pointId = tagsDb.addPoint(p);
+        //BuildingTuner euip will be local to each CCU based its domain model. It should not be synced.
+        if(syncToServer) {
+            syncStatusService.addUnSyncedEntity(pointId);
+        }
+        return pointId;
+    }
+
     /** For adding an point originating from server, e.g. import tuners */
     public String addRemotePoint(Point p, String id) {
         if(!isBuildingTunerPoint(p)){
@@ -648,6 +660,18 @@ public class CCUHsApi
         if(!isBuildingTunerPoint(point)){
             if (syncStatusService.hasEntitySynced(id)) {
                 syncStatusService.addUpdatedEntity(id);
+            }
+        }
+    }
+
+    public void updateBuildingTunerPoint(Point point, String id, boolean syncToServer) {
+        point.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        tagsDb.updatePoint(point, id);
+        if (syncToServer) {
+            if (syncStatusService.hasEntitySynced(id)) {
+                syncStatusService.addUpdatedEntity(id);
+            } else {
+                syncStatusService.addUnSyncedEntity(id);
             }
         }
     }
@@ -3213,7 +3237,10 @@ public class CCUHsApi
         }
     }
     public void writeDefaultTunerValById(String id, double val) {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
+        double currentVal = readDefaultValByLevel(id, HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
+        if (currentVal != val) {
+            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
+        }
     }
     public String readPointArr(String id) {
 

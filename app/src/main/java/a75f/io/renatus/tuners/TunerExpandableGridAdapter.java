@@ -29,6 +29,7 @@ import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 
 import java.util.ArrayList;
@@ -240,7 +241,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 final TunerGroupItem section = (TunerGroupItem) mDataArrayList.get(position);
                 previousOpenGroup = section;
 
-                if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod") && section.getName().equalsIgnoreCase("DAB")){
+                if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && section.getName().equalsIgnoreCase("DAB")){
                     holder.tunerGroupTitle.setText("VVT-C");
                 }else{
                     holder.tunerGroupTitle.setText(section.getName());

@@ -92,7 +92,7 @@ public class DamperReheatTypeHandler {
                 }
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {
-            SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
+            SmartNode.updateDomainPhysicalPointType(address, "analog2Out",
                     DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
 
@@ -111,7 +111,7 @@ public class DamperReheatTypeHandler {
                         OutputRelayActuatorType.NormallyClose.displayName);
                 SmartNode.setPointEnabled(address, "relay1", true);
                 if (typeVal == ReheatType.TwoStage.ordinal()) {
-                    SmartNode.updatePhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
+                    SmartNode.updateDomainPhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setDomainPointEnabled(address, "relay2", true);
                 }
             }

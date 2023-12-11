@@ -29,7 +29,9 @@ fun setDiagMigrationVal() {
 }
 
 fun validateMigration(): Boolean {
-    val numberOfSchedulableZonePoints = 7
+    return true
+    //TODO- Commenting this assuming we wont need Schedule revamp migration beyond 2.3
+    /*val numberOfSchedulableZonePoints = 7
     val numberOfSchedulableBuildingPoints = 24
     val numberOfBuildingLimits = 3
     val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllSchedulable()
@@ -41,16 +43,16 @@ fun validateMigration(): Boolean {
             roomsWithZoneScheduleSize++
         }
     }
-    /*val buildingLimits =
-        hayStack.readAllEntities("building and (limit or differential) and not tuner")*/
+    *//*val buildingLimits =
+        hayStack.readAllEntities("building and (limit or differential) and not tuner")*//*
 
-    val idealNumberOfPoints = ((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints /*+ numberOfBuildingLimits*/)
-    val importedNumberOfPoints  = (schedulabaledata.size /*+ buildingLimits.size*/)
+    val idealNumberOfPoints = ((roomsWithZoneScheduleSize * numberOfSchedulableZonePoints) + numberOfSchedulableBuildingPoints *//*+ numberOfBuildingLimits*//*)
+    val importedNumberOfPoints  = (schedulabaledata.size *//*+ buildingLimits.size*//*)
 
     if(importedNumberOfPoints > idealNumberOfPoints)
-        deleteDuplication(rooms, importedNumberOfPoints , idealNumberOfPoints)
+        deleteDuplication(rooms, importedNumberOfPoints , idealNumberOfPoints)*
 
-    return (importedNumberOfPoints >= idealNumberOfPoints)
+    return (importedNumberOfPoints >= idealNumberOfPoints)*/
 }
 fun deleteDuplication(
     rooms: ArrayList<HashMap<Any, Any>>,
@@ -109,6 +111,7 @@ fun retainAndRemove(entitiesToRemoveDuplication: ArrayList<HashMap<Any, Any>>) {
         val limitToKeep = entitiesToRemoveDuplication.get(0)
         for (limit in entitiesToRemoveDuplication){
             if(!(limit["id"].toString().equals((limitToKeep.get("id").toString())))){
+                CcuLog.i("SCHEDULE_MIGRATION","deleteEntity $limit")
                 hayStack.deleteEntity(limit["id"].toString())
             }
         }

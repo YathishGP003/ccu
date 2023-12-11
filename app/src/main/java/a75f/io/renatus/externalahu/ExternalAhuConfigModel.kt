@@ -59,7 +59,7 @@ class ExternalAhuConfigModel {
     }
 
     fun getConfiguration(): ExternalAhuConfiguration {
-        val config =  ExternalAhuConfiguration(ProfileType.SYSTEM_DAB_EXTERNAL_AHU.name)
+        val config =  ExternalAhuConfiguration(ProfileType.dabExternalAHUController.name)
 
         config.setPointControl.enabled = this.setPointControl
         config.dualSetPointControl.enabled = this.dualSetPointControl

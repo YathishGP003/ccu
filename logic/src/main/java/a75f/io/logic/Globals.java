@@ -445,7 +445,7 @@ public class Globals {
                 case SYSTEM_DAB_HYBRID_RTU:
                     L.ccu().systemProfile = new DabAdvancedHybridRtu();
                     break;
-                case SYSTEM_DAB_EXTERNAL_AHU:
+                case dabExternalAHUController:
                     L.ccu().systemProfile = new DabExternalAhu();
                     break;
                 default:
@@ -454,7 +454,7 @@ public class Globals {
                     break;
             }
         } else {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
+            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Default System Profile");
             L.ccu().systemProfile = new DefaultSystem();
             isDefaultSystem = true;
         }

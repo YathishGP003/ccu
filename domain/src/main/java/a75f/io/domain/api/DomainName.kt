@@ -327,11 +327,14 @@ object DomainName {
     const val outsideHumidity = "outsideHumidity"
     const val systemtargetMinInsideHumidty = "systemtargetMinInsideHumidty"
     const val systemtargetMaxInsideHumidty = "systemtargetMaxInsideHumidty"
-    const val dcvLoopOutput = "dcvLoopOutput"
     const val dcvDamperCalculatedSetpoint = "dcvDamperCalculatedSetpoint"
     const val humidifierEnable = "humidifierEnable"
     const val dehumidifierEnable = "dehumidifierEnable"
     const val conditioningMode = "conditioningMode"
     const val equipStatusMessage = "equipStatusMessage"
+    const val dcvLoopOutput = "dcvLoopOutput"
+    const val heatingLoopOutput = "heatingLoopOutput"
+    const val coolingLoopOutput = "coolingLoopOutput"
+    const val fanLoopOutput = "fanLoopOutput"
 }
 

@@ -94,7 +94,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         try {
             this.context = context
             loadModel()
-            if (L.ccu().systemProfile.profileType == ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
+            if (L.ccu().systemProfile.profileType == ProfileType.dabExternalAHUController) {
                 systemProfile = L.ccu().systemProfile as DabExternalAhu
                 setCurrentConfig(systemProfile!!.getConfiguration(profileModelDefinition))
             } else {
@@ -121,7 +121,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             configType.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
             val address: Short = modbusEquip["group"].toString().toShort()
-            modbusProfile.addMbEquip(address, ProfileType.SYSTEM_DAB_EXTERNAL_AHU)
+            modbusProfile.addMbEquip(address, ProfileType.dabExternalAHUController)
             selectedSlaveId = modbusProfile.slaveId
             val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
             val model = EquipModel()
@@ -191,7 +191,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 },
                 {
                     if (L.ccu().systemProfile != null) {
-                        if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DAB_EXTERNAL_AHU) {
+                        if (L.ccu().systemProfile.profileType != ProfileType.dabExternalAHUController) {
                             L.ccu().systemProfile!!.deleteSystemEquip()
                             L.ccu().systemProfile = null
                             addEquip()
@@ -258,7 +258,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                 "SYSTEM",
                 equipModel.value.equipDevice.value,
                 getParametersList(equipModel.value.equipDevice.value),
-                ProfileType.SYSTEM_DAB_EXTERNAL_AHU,
+                ProfileType.dabExternalAHUController,
                 subEquipmentDevices,
                 "system",
                 equipModel.value.version.value

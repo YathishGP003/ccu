@@ -59,7 +59,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         val tz = hayStack.timeZone
         entityConfiguration.tobeAdded.forEach { point ->
-            Log.i("DEV_DEBUG", "tobeAdded : ${point.domainName}")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz))

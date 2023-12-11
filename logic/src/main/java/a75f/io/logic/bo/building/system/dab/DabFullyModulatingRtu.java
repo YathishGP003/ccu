@@ -24,6 +24,7 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.SystemProfileUtil;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createAnalog4LoopConfigPoints;
@@ -56,7 +57,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public String getProfileName() {
-        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             return "VVT-C Fully Modulating AHU";
         }else{
             return "DAB Fully Modulating AHU";

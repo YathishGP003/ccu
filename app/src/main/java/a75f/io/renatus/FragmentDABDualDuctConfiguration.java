@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -212,7 +213,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         });
 
         TextView title = view.findViewById(R.id.textTitleFragment);
-        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             title.setText(R.string.vvt_dual_duct_title);
         }else{
             title.setText(R.string.dab_dual_duct_title);

@@ -28,6 +28,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.SystemProfileUtil;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
@@ -69,7 +70,7 @@ public class DabStagedRtu extends DabSystemProfile
     int[] stageStatus = new int[17];
     
     public String getProfileName() {
-        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             return "VVT-C Staged RTU";
         }else{
             return "DAB Staged RTU";

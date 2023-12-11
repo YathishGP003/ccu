@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 
@@ -26,7 +27,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     private static final int MAX_RELAY_COUNT = 8;
     
     public String getProfileName() {
-        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             return "VVT-C Staged RTU with VFD Fan";
         }else{
             return "DAB Staged RTU with VFD Fan";

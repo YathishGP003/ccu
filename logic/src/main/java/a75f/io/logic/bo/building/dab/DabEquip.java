@@ -86,6 +86,8 @@ public class DabEquip
 
     private ControlLoop heatingLoop;
 
+    public static final String CARRIER_PROD = "carrier_prod";
+
     public DabEquip(ProfileType type, int node)
     {
         profileType = type;
@@ -1233,7 +1235,7 @@ public class DabEquip
 
     public static String getDisName(String siteDis, String nodeAddr){
         String tempEquipDis;
-        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
             tempEquipDis = siteDis+"-VVT-"+nodeAddr;
         }else{
             tempEquipDis = siteDis+"-DAB-"+nodeAddr;

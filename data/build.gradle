@@ -94,7 +94,7 @@ def domainLibVersion = "20231207.4"
 
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion+'-qa')  {
+    customImplementation("io.seventyfivef:domain-modeler-lib:$domainModelLibVersion")  {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -145,7 +145,7 @@ task getExternalLibraryPaths {
         }
 
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20231207.4-qa.jar')) {
+            if (file.getAbsolutePath().endsWith("domain-modeler-lib-$domainModelLibVersion"+".jar")) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

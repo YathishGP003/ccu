@@ -228,15 +228,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun isValidConfiguration(): Boolean {
-        if (equipModel.value.parameters.isEmpty()) {
-            showToast("Please select modbus device", context)
-            return false
-        }
         if (equipModel.value.isDevicePaired)
             return true // If it is paired then will not allow the use to to edit slave id
 
         if (zoneRef.contentEquals("SYSTEM")) {
-            if (equipModel.value.subEquips.isNotEmpty() && isModbusExist()) {
+            if (equipModel.value.subEquips.isNotEmpty() && isSystemModbusExist()) {
                 showToast("Modbus device already paired", context)
                 return false
             }
@@ -408,7 +404,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
-    private fun isModbusExist(): Boolean {
+    private fun isSystemModbusExist(): Boolean {
         return (CCUHsApi.getInstance().readAllEntities(
             "equip and modbus and roomRef == \"SYSTEM\"")).isNotEmpty()
     }

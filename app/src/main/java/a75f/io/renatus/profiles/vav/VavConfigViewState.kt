@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.vav
 
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue

@@ -9,55 +9,48 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.logic.ProfileEquipBuilder;
+import a75f.io.domain.util.ModelLoader;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class TrueCFMVAVConfigHandler {
     public static void updateVAVConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double value = msgObject.get("val").getAsDouble();
-        String fanMarker = "";
-        if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
-            fanMarker = "series";
-        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
-            fanMarker = "parallel";
-        }
-        VavProfileConfiguration vavProfileConfiguration = new VavProfileConfiguration();
-            if (value > 0) {
-                vavProfileConfiguration.numMaxCFMReheating = 500;
-                vavProfileConfiguration.numMinCFMCooling = 100;
-                vavProfileConfiguration.nuMaxCFMCooling = 500;
-                vavProfileConfiguration.numMinCFMReheating = 100;
-                vavProfileConfiguration.kFactor = 2;
-                TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), vavProfileConfiguration,
-                 fanMarker);
-                TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV, TunerConstants.VAV_TUNER_GROUP);
-                TrueCFMPointsHandler.deleteNonCfmDamperPoints(hayStack, equip.getId());
-            } else {
-                vavProfileConfiguration.minDamperCooling = 20;
-                vavProfileConfiguration.minDamperHeating = 20;
-                vavProfileConfiguration.maxDamperCooling = 100;
-                TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
-                TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, vavProfileConfiguration, fanMarker);
-            }
-        writePointFromJson(configPoint, msgObject, hayStack);
+        Short address = Short.parseShort(configPoint.getGroup());
+        VavProfile profile = (VavProfile) L.getProfile((short) address);
+        Equip equip = profile.getEquip();
+        VavProfileConfiguration config = (VavProfileConfiguration) profile.getDomainProfileConfiguration();
+        config.enableCFMControl.setEnabled(value > 0);
+        ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+        equipBuilder.updateEquipAndPoints(config,
+                ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
+                equip.getSiteRef(),
+                equip.getDisplayName());
+
+        //writePointFromJson(configPoint, msgObject, hayStack);
     }
 
+    /**
+     * Keeping these custom logic outside of the framework for now.
+     * Need revisit if this is a scenario that needs to be addressed across profiles.
+     */
     public static void updateMinCoolingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxCfmValue = msgObject.get("val").getAsDouble();
-        Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and trueCfm and min and cooling and equipRef == \""+equip.getId()+"\"");
-        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and cooling and group == \""+equip.getGroup()+"\"");
+        Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and (trueCfm or trueCFM) and min and cooling and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and (trueCfm or trueCFM) and min and cooling and group == \""+equip.getGroup()+"\"");
         String maxValForMinCFM = String.valueOf(maxCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(maxValForMinCFM).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
+            CCUHsApi.getInstance().writeDefaultVal("vav and (trueCfm or trueCFM) and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
@@ -66,13 +59,13 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxHeatingCfmValue = msgObject.get("val").getAsDouble();
-        Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and trueCfm and min and heating and equipRef == \""+equip.getId()+"\"");
-        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and heating and group == \""+equip.getGroup()+"\"");
+        Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and (trueCfm or trueCFM) and min and heating and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and (trueCfm or trueCFM) and min and heating and group == \""+equip.getGroup()+"\"");
         String minHeatingCFMValue = String.valueOf(maxHeatingCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(minHeatingCFMValue).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and heating and group == \""+equip.getGroup()+"\"", maxHeatingCfmValue);
+            CCUHsApi.getInstance().writeDefaultVal("vav and (trueCfm or trueCFM) and min and heating and group == \""+equip.getGroup()+"\"", maxHeatingCfmValue);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }

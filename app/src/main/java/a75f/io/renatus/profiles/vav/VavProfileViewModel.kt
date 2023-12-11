@@ -11,13 +11,16 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
-import a75f.io.domain.util.ModelSource
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavReheatProfile
+import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlin.properties.Delegates
@@ -41,6 +45,7 @@ class VavProfileViewModel : ViewModel() {
     lateinit var zoneRef: String
     lateinit var floorRef: String
     lateinit var profileType: ProfileType
+    lateinit var nodeType: NodeType
     private var deviceAddress by Delegates.notNull<Short>()
 
     private lateinit var vavProfile: VavProfile
@@ -83,22 +88,22 @@ class VavProfileViewModel : ViewModel() {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
-        val profileOriginalValue = bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)
-        profileType = ProfileType.values()[profileOriginalValue]
-
-        // Profile model is temporarily loaded from a local file to allow quick model revisions during development.
-        // In the released CCU build, these will draw from the Hayloft API.
-        model = ModelSource.getProfileModelByFileName("nickTestSmartNodeVAVReheatNoFan_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
-        deviceModel = ModelSource.getModelByProfileName("smartnodeDevice") as SeventyFiveFDeviceDirective
-
+        profileType = ProfileType.values()[bundle.getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
+        nodeType = NodeType.values()[bundle.getInt(FragmentCommonBundleArgs.NODE_TYPE)]
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Init profileType:$profileType " +
+                "nodeType:$nodeType deviceAddress:$deviceAddress")
+        model = getProfileDomainModel()
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel EquipModel Loaded")
+        deviceModel = getDeviceDomainModel() as SeventyFiveFDeviceDirective
+        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Device Model Loaded")
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is VavProfile) {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
-            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
-                zoneRef, floorRef , model ).getActiveConfiguration()
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
+                zoneRef, floorRef , profileType, model ).getActiveConfiguration()
         } else {
-            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), NodeType.SMART_NODE.name, 0,
-                zoneRef, floorRef , model ).getDefaultConfiguration()
+            profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
+                zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             /*vavProfile = when (profileType) {
                 ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
                 ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
@@ -162,10 +167,10 @@ class VavProfileViewModel : ViewModel() {
             CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
         }, {
             ProgressDialogUtils.hideProgressDialog()
+            _isDialogOpen.value = false
             context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
             showToast("VAV Configuration saved successfully", context)
             CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-            _isDialogOpen.value = false
         })
 
         // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
@@ -192,7 +197,6 @@ class VavProfileViewModel : ViewModel() {
     }
 
     private fun setUpVavProfile() {
-        //DomainManager.buildDomain(CCUHsApi.getInstance())
         viewState.updateConfigFromViewState(profileConfiguration)
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
@@ -221,19 +225,19 @@ class VavProfileViewModel : ViewModel() {
         equipModel: SeventyFiveFProfileDirective?,
         deviceModel: SeventyFiveFDeviceDirective?
     ) {
-        //val deviceMap = VavEquip(getProfileType(), addr)
         requireNotNull(equipModel)
         requireNotNull(deviceModel)
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-VAV-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints")
+        CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${model.domainName} profileType ${config.profileType}" )
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
                 .id, equipDis
         )
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        val deviceName = when(nodeType) { NodeType.HELIO_NODE -> "-HN-" else -> "-SN-"}
+        val deviceDis = hayStack.siteName + deviceName + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         deviceBuilder.buildDeviceAndPoints(
             config,
@@ -243,11 +247,36 @@ class VavProfileViewModel : ViewModel() {
             deviceDis
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
-        vavProfile = VavReheatProfile(equipId, addr)
-        //vavDeviceMap.put(addr, deviceMap)
-        //vavEquip = VavEquip(equipId)
+        vavProfile = when(profileType) {
+            ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile(equipId, addr)
+            ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile(equipId, addr)
+            else -> VavReheatProfile(equipId, addr)
+        }
 
-        //deviceMap.init();
+    }
+
+    private fun getProfileDomainModel() : SeventyFiveFProfileDirective{
+        return if (nodeType == NodeType.SMART_NODE) {
+            when (profileType) {
+                ProfileType.VAV_SERIES_FAN -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+                ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
+                else -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+            }
+        } else {
+            when (profileType) {
+                ProfileType.VAV_SERIES_FAN -> ModelLoader.getHelioNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+                ProfileType.VAV_PARALLEL_FAN -> ModelLoader.getHelioNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
+                else -> ModelLoader.getHelioNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
+            }
+        }
+    }
+
+    private fun getDeviceDomainModel() : ModelDirective {
+        return if (nodeType == NodeType.SMART_NODE) {
+            ModelLoader.getSmartNodeDevice()
+        } else {
+            ModelLoader.getHelioNodeDevice()
+        }
     }
 
     // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.

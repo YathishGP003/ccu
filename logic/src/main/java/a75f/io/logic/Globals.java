@@ -3,6 +3,7 @@ package a75f.io.logic;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -27,8 +28,10 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
+import a75f.io.domain.util.ModelCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -229,11 +232,11 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
-        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
     }
 
     public void startTimerTask(){
-        Log.d(L.TAG_CCU_JOB, " running after db is done");
        // CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
 
         new RestoreCCUHsApi();
@@ -243,20 +246,22 @@ public class Globals {
                 .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band
-        String addrBand = getSmartNodeBand();
-        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        try {
+            String addrBand = getSmartNodeBand();
+            L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        } catch ( NumberFormatException e) {
+            CcuLog.i(L.TAG_CCU_INIT, "Failerd to read device address band ", e);
+            L.ccu().setSmartNodeAddressBand((short)1000);
+        }
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
         DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
-
         updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
-        CcuLog.i(L.TAG_CCU_INIT,"Initialize completed");
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -322,6 +327,7 @@ public class Globals {
             {
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+                    ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
                         new MigrationHandler(CCUHsApi.getInstance()).doMigration();
@@ -638,11 +644,13 @@ public class Globals {
 
     public String getSmartNodeBand() {
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr");
+        CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
         } else {
             HashMap<Object,Object> band = CCUHsApi.getInstance().readEntity("point and snband");
+            CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
             if (band != null && band.size() > 0 && band.get("val") != null) {
                 return band.get("val").toString();
             }

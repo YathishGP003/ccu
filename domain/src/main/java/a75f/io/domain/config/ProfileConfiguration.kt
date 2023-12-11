@@ -1,6 +1,8 @@
 package a75f.io.domain.config
 
 import a75f.io.domain.DomainEquip
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 
@@ -12,7 +14,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
  * Each profile shall override these methods and provide list of domainNames for further processing
  * by the framework.
  */
-abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : String, var priority : Int, var roomRef : String, var floorRef : String) {
+abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : String, var priority : Int, var roomRef : String, var floorRef : String, var profileType : String) {
 
     var isDefault = false
     /**
@@ -51,6 +53,7 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
             config.maxVal = (point?.valueConstraint as NumericConstraint).maxValue
         }
         point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
+        CcuLog.i(Domain.LOG_TAG, "defaultValConfig $domainName ${config.currentVal} $point")
         return config
     }
 

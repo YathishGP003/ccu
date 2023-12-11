@@ -1242,9 +1242,14 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         buttonNext.setEnabled(false);
 
+        //This is a hack to give bit more time to complete Site-registration before we start
+        //CCU registration
+        long delay = CCUHsApi.getInstance().siteSynced() ? 1000 : 15000;
+        CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo with delay "+delay);
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
+                CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo");
                 if (!Globals.getInstance().siteAlreadyCreated()) {
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }
@@ -1277,7 +1282,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .show();
                 }
             }
-        }, 5000);
+        }, delay);
     }
 
     private void registerCcuInBackground() {

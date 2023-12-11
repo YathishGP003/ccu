@@ -1,9 +1,6 @@
 package a75f.io.domain.api
 
-import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
-import java.lang.IllegalStateException
-import kotlin.reflect.KClass
 
 /**
  * An entity definition that binds its domainName to database UUID.
@@ -100,7 +97,6 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readPriorityVal() : Double {
         requireId()
-        CcuLog.i(Domain.LOG_TAG, "Point "+Domain.hayStack.readMapById(id))
         return Domain.hayStack.readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {
@@ -118,6 +114,11 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     fun readDefaultStrVal() : String {
         requireId()
         return Domain.hayStack.readDefaultStrValById(id)
+    }
+
+    fun writeVal(level: Int, value : Double) {
+        requireId()
+        Domain.hayStack.writePointForCcuUser(id, level, value, 0, null)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()

@@ -1,8 +1,10 @@
 package a75f.io.domain.logic
 
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
@@ -24,6 +26,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     fun getEntityConfiguration(configuration: ProfileConfiguration) : EntityConfiguration{
         val entityConfiguration = EntityConfiguration()
         entityConfiguration.tobeAdded.addAll(getBasePoints().map { EntityConfig(it.domainName)})
+        CcuLog.i(Domain.LOG_TAG, "All base points "+entityConfiguration.tobeAdded.map { it.domainName }.joinToString { "," })
         entityConfiguration.tobeAdded.addAll(getEnabledAssociations(configuration).map { EntityConfig(it)})
         entityConfiguration.tobeAdded.addAll(getEnabledDependencies(configuration).map { EntityConfig(it)})
         return entityConfiguration

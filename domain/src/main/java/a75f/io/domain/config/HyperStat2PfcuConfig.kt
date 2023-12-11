@@ -5,7 +5,7 @@ import a75f.io.domain.config.*
 
 class HyperStat2pfcuConfiguration(nodeAddress: Int,
                                       nodeType: String, priority: Int, roomRef : String, floorRef : String
-) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef ) {
+) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, "HSCPU",floorRef ) {
 
 
     var temperatureOffset = ValueConfig("temperatureOffset", 0.0)

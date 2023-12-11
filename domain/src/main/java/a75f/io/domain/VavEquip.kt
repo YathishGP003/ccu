@@ -101,4 +101,8 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val vavZoneCo2Threshold = Point(DomainName.vavZoneCo2Threshold, equipRef)
     val vavTemperatureProportionalRange = Point(DomainName.vavTemperatureProportionalRange, equipRef)
     val reheatZoneDischargeTempOffset = Point(DomainName.reheatZoneDischargeTempOffset, equipRef)
+
+    val seriesFanCmd = Point(DomainName.seriesFanCmd , equipRef)
+    val parallelFanCmd = Point(DomainName.parallelFanCmd , equipRef)
+    val fanControlOnFixedTimeDelay = Point(DomainName.fanControlOnFixedTimeDelay, equipRef)
 }

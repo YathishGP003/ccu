@@ -66,7 +66,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
@@ -858,7 +857,6 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-
             if (floorToRename != null) {
                 isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
             } else {
@@ -1433,9 +1431,11 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
-                    VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
+                    Equip equip = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equip.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
                     showDialogFragment(VavProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeType, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
                     break;
                 case VAV_ACB:
                     showDialogFragment(AcbProfileConfigFragment.Companion

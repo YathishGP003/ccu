@@ -1,3 +1,4 @@
+/*
 package a75f.io.logic.bo.building.vav;
 
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
@@ -63,15 +64,17 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTuners;
 import a75f.io.logic.util.RxTask;
 
-/**
+*
  * Created by samjithsadasivan on 6/21/18.
- */
 
-/**
+
+
+*
  * It acts as a container of profile's PI controllers and TR Request objects and it interfaces profile with the haystack.
  * Current design requires only one equip/map per profile, but map/list of LogicalMap
  * per profile is maintained to support any requirement of adding multiple equips/devices per profile.
- */
+
+
 public class VavEquipTobeDeleted
 {
     //TODO - Tuners
@@ -466,13 +469,14 @@ public class VavEquipTobeDeleted
 
     }
 
-    /**
+*
      * Create damperSize configuration points when TrueCfm is disabled.
      * @param hayStack
      * @param equip
      * @param config
      * @param fanMarker
-     */
+
+
     public void createNonCfmDamperConfigPoints(CCUHsApi hayStack, Equip equip, VavProfileConfiguration config,
                                                String fanMarker) {
         Point damperMinCooling = new Point.Builder()
@@ -1093,8 +1097,9 @@ public class VavEquipTobeDeleted
 
         CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "co2 and his and group == \""+nodeAddr+"\"", co2ResetRequest.cumulativeRequestHoursPercent);
-        /*CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
-                                                  "hwst and his and group == \""+nodeAddr+"\"", hwstResetRequest.cumulativeRequestHoursPercent);*/
+CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
+                                                  "hwst and his and group == \""+nodeAddr+"\"", hwstResetRequest.cumulativeRequestHoursPercent);
+
         CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
                                                   "staticPressure and his and group == \""+nodeAddr+"\"", spResetRequest.cumulativeRequestHoursPercent);
 
@@ -1136,3 +1141,4 @@ public class VavEquipTobeDeleted
          return ccuHsApi.addPoint(damperFeedback);
     }
 }
+*/

@@ -17,9 +17,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.mock.MockCcuHsApi;
 
 
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
-
-
 public class TrueCFMTunersTest {
     CCUHsApi hayStack;
     Equip equip;

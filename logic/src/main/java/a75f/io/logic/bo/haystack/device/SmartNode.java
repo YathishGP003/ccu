@@ -361,6 +361,24 @@ public class SmartNode
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
     }
+
+    public static void updateDomainPhysicalPointType(int addr, String domainName, String type) {
+        Log.d("CCU"," Update Physical point "+domainName+" "+type);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        if (point.get("analogType" ) == null || !point.get("analogType" ).equals(type))
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setType(type);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+        }
+    }
     
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
         Log.d("CCU"," Update Physical point "+port);
@@ -388,6 +406,25 @@ public class SmartNode
         }
         
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+        }
+    }
+
+    public static void setDomainPointEnabled(int addr, String domainName, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+domainName+" "+enabled);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
         if (point != null && point.size() > 0)
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();

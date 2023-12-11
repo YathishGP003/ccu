@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -57,7 +58,9 @@ public abstract class ZoneProfile
         return mProfileConfiguration;
     }
     
-    
+    public ProfileConfiguration getDomainProfileConfiguration() {
+        return null;
+    }
     public void setProfileConfiguration(HashMap<Short, BaseProfileConfiguration> baseProfileConfiguration)
     {
         this.mProfileConfiguration = baseProfileConfiguration;

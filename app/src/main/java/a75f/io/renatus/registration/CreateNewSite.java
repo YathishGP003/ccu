@@ -957,9 +957,8 @@ public class CreateNewSite extends Fragment {
             BuildingOccupancy.buildDefaultBuildingOccupancy();
         }
 
-        RxjavaUtil.executeBackground(()->CCUHsApi.getInstance().importNamedScheduleWithOrg(
-                new HClient(CCUHsApi.getInstance().getHSUrl(),
-                        HayStackConstants.USER, HayStackConstants.PASS),org));
+        CCUHsApi.getInstance().importNamedScheduleWithOrg(
+                new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS),org);
         return localSiteId;
     }
 

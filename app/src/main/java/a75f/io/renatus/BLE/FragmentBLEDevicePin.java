@@ -402,7 +402,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case VAV_SERIES_FAN:
                     case VAV_PARALLEL_FAN:
                         showDialogFragment(VavProfileConfigFragment.Companion
-                                                   .newInstance(mPairingAddress, mName, mFloorName, mProfileType), VavProfileConfigFragment.Companion.getID());
+                                                   .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
                         break;
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration

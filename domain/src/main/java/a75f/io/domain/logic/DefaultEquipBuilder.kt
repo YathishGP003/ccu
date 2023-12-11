@@ -29,6 +29,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
             .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+            .setProfile(equipConfig.profileConfiguration?.profileType)
             .setSiteRef(equipConfig.siteRef)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
@@ -38,7 +39,11 @@ open class DefaultEquipBuilder : EquipBuilder {
         equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
         equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
             tag.defaultValue?.let {
-                equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                //TODO- Temp Sam : This should be removed in future when profile models consistent with profile tag.
+                // We will stick with old profileType enum till then
+                if (tag.name != "profile") {
+                    equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                }
             }
         }
         equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->

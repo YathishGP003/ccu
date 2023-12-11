@@ -16,8 +16,10 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Units;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.getDisName;
 import static a75f.io.logic.tuners.TunerConstants.DAB_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
@@ -36,7 +38,7 @@ public class DabTuners {
         }
         CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner  does not exist. Create Now");
         Point zonePrioritySpread = new Point.Builder()
-                                       .setDisplayName(equipDis+"-DAB-"+"zonePrioritySpread")
+                                       .setDisplayName(getDisName(equipDis, "zonePrioritySpread"))
                                        .setSiteRef(siteRef)
                                        .setEquipRef(equipRef).setHisInterpolate("cov")
                                        .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -49,7 +51,7 @@ public class DabTuners {
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
 
         Point zonePriorityMultiplier = new Point.Builder()
-                                           .setDisplayName(equipDis+"-DAB-"+"zonePriorityMultiplier")
+                                           .setDisplayName(getDisName(equipDis, "zonePriorityMultiplier"))
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -64,7 +66,7 @@ public class DabTuners {
 
 
         Point coolingDbMultiplier = new Point.Builder()
-                                        .setDisplayName(equipDis+"-DAB-"+"coolingDeadbandMultiplier")
+                                        .setDisplayName(getDisName(equipDis, "coolingDeadbandMultiplier"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -79,7 +81,7 @@ public class DabTuners {
 
 
         Point heatingDbMultiplier = new Point.Builder()
-                                        .setDisplayName(equipDis+"-DAB-"+"heatingDeadbandMultiplier")
+                                        .setDisplayName(getDisName(equipDis, "heatingDeadbandMultiplier"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -92,7 +94,7 @@ public class DabTuners {
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
 
         Point propGain = new Point.Builder()
-                             .setDisplayName(equipDis+"-DAB-"+"proportionalKFactor ")
+                             .setDisplayName(getDisName(equipDis, "proportionalKFactor "))
                              .setSiteRef(siteRef)
                              .setEquipRef(equipRef).setHisInterpolate("cov")
                              .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -105,7 +107,7 @@ public class DabTuners {
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
 
         Point integralGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-DAB-"+"integralKFactor ")
+                                 .setDisplayName(getDisName(equipDis, "integralKFactor "))
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -118,7 +120,7 @@ public class DabTuners {
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
 
         Point propSpread = new Point.Builder()
-                               .setDisplayName(equipDis+"-DAB-"+"temperatureProportionalRange ")
+                               .setDisplayName(getDisName(equipDis, "temperatureProportionalRange "))
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -131,7 +133,7 @@ public class DabTuners {
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
 
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DAB-"+"temperatureIntegralTime ")
+                                    .setDisplayName(getDisName(equipDis, "temperatureIntegralTime "))
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -145,7 +147,7 @@ public class DabTuners {
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
         Point zoneCO2Target  = new Point.Builder()
-                                   .setDisplayName(equipDis+"-DAB-"+"zoneCO2Target")
+                                   .setDisplayName(getDisName(equipDis, "zoneCO2Target"))
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                    .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -159,7 +161,7 @@ public class DabTuners {
         hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
 
         Point zoneCO2Threshold  = new Point.Builder()
-                                      .setDisplayName(equipDis+"-DAB-"+"zoneCO2Threshold")
+                                      .setDisplayName(getDisName(equipDis, "zoneCO2Threshold"))
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -173,7 +175,7 @@ public class DabTuners {
         hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
 
         Point zoneVOCTarget  = new Point.Builder()
-                                   .setDisplayName(equipDis+"-DAB-"+"zoneVOCTarget")
+                                   .setDisplayName(getDisName(equipDis, "zoneVOCTarget"))
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                    .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -187,7 +189,7 @@ public class DabTuners {
         hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
 
         Point zoneVOCThreshold  = new Point.Builder()
-                                      .setDisplayName(equipDis+"-DAB-"+"zoneVOCThreshold")
+                                      .setDisplayName(getDisName(equipDis, "zoneVOCThreshold"))
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -207,7 +209,7 @@ public class DabTuners {
                                                  String tz)
     {
         Point targetCumulativeDamper = new Point.Builder()
-                                           .setDisplayName(equipDis+"-DAB-"+"targetCumulativeDamper")
+                                           .setDisplayName(getDisName(equipDis, "targetCumulativeDamper"))
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -221,7 +223,7 @@ public class DabTuners {
         hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
 
         Point analogFanSpeedMultiplier = new Point.Builder()
-                                             .setDisplayName(equipDis+"-DAB-"+"analogFanSpeedMultiplier")
+                                             .setDisplayName(getDisName(equipDis, "analogFanSpeedMultiplier"))
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipRef).setHisInterpolate("cov")
                                              .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -234,7 +236,7 @@ public class DabTuners {
         hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
 
         Point humidityHysteresis = new Point.Builder()
-                                       .setDisplayName(equipDis+"-DAB-"+"humidityHysteresis")
+                                       .setDisplayName(getDisName(equipDis, "humidityHysteresis"))
                                        .setSiteRef(siteRef)
                                        .setEquipRef(equipRef).setHisInterpolate("cov")
                                        .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -248,7 +250,7 @@ public class DabTuners {
         hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
 
         Point relayDeactivationHysteresis = new Point.Builder()
-                                                .setDisplayName(equipDis+"-DAB-"+"relayDeactivationHysteresis")
+                                                .setDisplayName(getDisName(equipDis, "relayDeactivationHysteresis"))
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipRef).setHisInterpolate("cov")
                                                 .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
@@ -276,7 +278,7 @@ public class DabTuners {
         hayStack.writePointForCcuUser(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.REBALANCE_HOLD_TIME, 0);
         hayStack.writeHisValById(rebalanceHoldTimeId, TunerConstants.REBALANCE_HOLD_TIME);
     
-        Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "modeChangeoverHysteresis")
+        Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(getDisName(equipDis, "modeChangeoverHysteresis"))
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipRef)
                                                 .setHisInterpolate("cov")
@@ -295,7 +297,7 @@ public class DabTuners {
                                       DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
         hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
     
-        Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "stageUpTimerCounter")
+        Point stageUpTimerCounter = new Point.Builder().setDisplayName(getDisName(equipDis ,  "stageUpTimerCounter"))
                                                        .setSiteRef(siteRef)
                                                        .setEquipRef(equipRef)
                                                        .setHisInterpolate("cov")
@@ -315,8 +317,7 @@ public class DabTuners {
                                       DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
         hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
     
-        Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
-                                                                         "stageDownTimerCounter")
+        Point stageDownTimerCounter = new Point.Builder().setDisplayName(getDisName(equipDis, "stageDownTimerCounter"))
                                                          .setSiteRef(siteRef)
                                                          .setEquipRef(equipRef)
                                                          .setHisInterpolate("cov")

@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -55,7 +56,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public String getProfileName() {
-        return "DAB Fully Modulating AHU";
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            return "VVT-C Fully Modulating AHU";
+        }else{
+            return "DAB Fully Modulating AHU";
+        }
     }
     
     @Override

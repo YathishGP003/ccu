@@ -210,6 +210,13 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             
             }
         });
+
+        TextView title = view.findViewById(R.id.textTitleFragment);
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            title.setText(R.string.vvt_dual_duct_title);
+        }else{
+            title.setText(R.string.dab_dual_duct_title);
+        }
     }
     
     private void handleAnalog1Selection(DualDuctAnalogActuator actuator) {

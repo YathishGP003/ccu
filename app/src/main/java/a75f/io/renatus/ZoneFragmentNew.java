@@ -2622,7 +2622,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-        textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            textViewTitle.setText("VVT-C" + " (" + nodeAddress + ")");
+        }else{
+            textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        }
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
@@ -2689,7 +2693,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
         TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
 
-        textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            textViewTitle.setText("VVT-C Dual Duct" + " (" + nodeAddress + ")");
+        }else{
+            textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        }
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         if( isCelsiusTunerAvailableStatus()) {

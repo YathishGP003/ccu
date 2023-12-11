@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -33,7 +34,11 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     @Override
     public String getProfileName()
     {
-        return "DAB Advanced Hybrid AHU";
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            return "VVT-C Advanced Hybrid AHU";
+        }else{
+            return "DAB Advanced Hybrid AHU";
+        }
     }
     
     @Override

@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -25,7 +26,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     private static final int MAX_RELAY_COUNT = 8;
     
     public String getProfileName() {
-        return "DAB Staged RTU with VFD Fan";
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            return "VVT-C Staged RTU with VFD Fan";
+        }else{
+            return "DAB Staged RTU with VFD Fan";
+        }
     }
     
     @Override

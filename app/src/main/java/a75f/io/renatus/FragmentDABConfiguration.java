@@ -451,7 +451,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
                 compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                         ()->{
-                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                            if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+                                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VVT-C Configuration");
+                            }else{
+                                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                            }
                         },()->{
                             CCUHsApi.getInstance().resetCcuReady();
                             setupDabZoneProfile();
@@ -496,6 +500,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                                                         ? mProfileConfig.minReheatDamperPos : 40);
         minReheatDamperPos.setWrapSelectorWheel(false);
         minReheatDamperPosLayout.setVisibility(reheatSpinner.getSelectedItemPosition() == 0 ? View.GONE : View.VISIBLE);
+
+        TextView title = view.findViewById(R.id.textTitleFragment);
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            title.setText("VVT-C");
+        }else{
+            title.setText("DAB");
+        }
     }
     
     private void setupDabZoneProfile() {

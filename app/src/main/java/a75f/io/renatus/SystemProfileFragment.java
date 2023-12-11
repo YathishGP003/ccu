@@ -224,6 +224,8 @@ public class SystemProfileFragment extends Fragment {
     private int getSystemProfileArrayResource() {
         if (BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
             return R.array.system_profile_select_daikin;
+        }else if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            return R.array.system_profile_select_carrier;
         }
         return R.array.system_profile_select;
     }

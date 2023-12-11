@@ -231,6 +231,16 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         }else {
             textTitleFragment.setText(R.string.title_smartnodemodule);
         }
+
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            textDABTitle.setText(R.string.txt_variable_volume_and_temperature);
+            textDabSingleDuct.setText(R.string.txt_vvtc);
+            textDabDualDuct.setText(R.string.txt_vvtc_dual_duct);
+        }else{
+            textDABTitle.setText(R.string.txt_dynamic_airflow_balancing);
+            textDABTitle.setText(R.string.title_dab_single_duct);
+            textDabDualDuct.setText(R.string.dab_dual_duct_title);
+        }
     }
 
     @Optional

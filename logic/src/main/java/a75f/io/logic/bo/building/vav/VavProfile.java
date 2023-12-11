@@ -32,6 +32,7 @@ import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -48,6 +49,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 import org.projecthaystack.HDict;
 

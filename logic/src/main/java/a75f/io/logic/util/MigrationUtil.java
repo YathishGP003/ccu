@@ -472,7 +472,7 @@ public class MigrationUtil {
         HashMap desiredTempPoint = ccuHsApi.readPoint(desiredTempPointId).get(levelToBeCleared - 1);
         return desiredTempPoint.get("val") != null &&
                 Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
-                        Integer.parseInt(desiredTempPoint.get("duration").toString()) > oneDayInMs;
+                Double.parseDouble(desiredTempPoint.get("duration").toString()) > oneDayInMs;
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {

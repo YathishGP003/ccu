@@ -12,7 +12,6 @@ import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
-import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -250,9 +249,9 @@ class AcbProfileViewModel : ViewModel() {
 
     private fun getProfileDomainModel() : SeventyFiveFProfileDirective{
         return if (nodeType == NodeType.SMART_NODE) {
-            ModelSource.getProfileModelByFileName("nickTestSmartNodeActiveChilledBeam_v0.0.1") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
+            ModelLoader.getSmartNodeVavAcbModelDef() as SeventyFiveFProfileDirective
         } else {
-            ModelSource.getProfileModelByFileName("nickTestHelioNodeActiveChilledBeam_v0.0.5") as SeventyFiveFProfileDirective // ModelSource.getModelByProfileName("smartnodeVAVReheatNoFan") as SeventyFiveFProfileDirective
+            ModelLoader.getHelioNodeVavAcbModelDef() as SeventyFiveFProfileDirective
         }
     }
 

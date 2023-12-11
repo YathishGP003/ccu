@@ -53,6 +53,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
+import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.mapToSetPoint
 import a75f.io.logic.bo.building.system.pushDamperCmd
 import a75f.io.logic.bo.building.system.pushDeHumidifierCmd
@@ -62,6 +63,7 @@ import a75f.io.logic.bo.building.system.pushOccupancyMode
 import a75f.io.logic.bo.building.system.pushSatSetPoints
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
+import a75f.io.logic.tuners.TunerUtil
 import android.content.Intent
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -244,7 +246,7 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun getStatusMessage(): String {
-        return if (getBasicDabConfigData().loopOutput > 0) "System ON" else "System OFF"
+            return if (getBasicDabConfigData().loopOutput > 0) "System ON" else "System OFF"
     }
 
     private fun calculateSetPoints() {
@@ -257,13 +259,13 @@ class DabExternalAhu : DabSystemProfile() {
         val externalEquipId = getExternalEquipId()
         val basicDabConfig = getBasicDabConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
-        val conditioningMode = StandaloneConditioningMode.values()[Domain.getPointFromDomain(systemEquip, conditioningMode).toInt()]
+        val conditioningMode = SystemMode.values()[Domain.getPointFromDomain(systemEquip, conditioningMode).toInt()]
         logIt("System is $occupancyMode conditioningMode : $conditioningMode")
         logIt("coolingLoop ${basicDabConfig.coolingLoop} heatingLoop ${basicDabConfig.heatingLoop}")
         logIt("weightedAverageCO2 $weightedAverageCO2 loopOutput ${basicDabConfig.loopOutput}")
-        if (conditioningMode == StandaloneConditioningMode.OFF)
+        if (conditioningMode == SystemMode.OFF)
             return
-        calculateSATSetPoints(systemEquip, basicDabConfig, externalEquipId)
+        calculateSATSetPoints(systemEquip, basicDabConfig, externalEquipId, conditioningMode)
         calculateDuctStaticPressureSetPoints(systemEquip, basicDabConfig.loopOutput, externalEquipId)
         setOccupancyMode(systemEquip, externalEquipId)
         doDCVAction(systemEquip, weightedAverageCO2, occupancyMode, externalEquipId)
@@ -280,30 +282,28 @@ class DabExternalAhu : DabSystemProfile() {
         systemEquip: Equip,
         basicDabConfig: BasicDabConfig,
         externalEquipId: String?,
+        conditioningMode: SystemMode
     ) {
         val isSetPointEnabled =
             Domain.getPointFromDomain(systemEquip, satSetpointControlEnable) == 1.0
-        /*
-        // TODO CHECK WITH PRODUCT TEAM HOW IT WORKS
-          if (tempDirection == TempDirection.COOLING)  {
+        val tempDirection = getTempDirection(basicDabConfig.heatingLoop)
+        if (tempDirection == TempDirection.COOLING && conditioningMode == SystemMode.COOLONLY)  {
 
-          }
-          val smartPurgeDabFanLoopOp: Double = TunerUtil.readTunerValByQuery(
-              "system and purge and dab and fan and loop and output",
-              L.ccu().oaoProfile.equipRef
-          )
-          if (L.ccu().oaoProfile.isEconomizingAvailable) {
-              val economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery(
-                  "oao and economizing and main and cooling and loop and map",
+              val smartPurgeDabFanLoopOp: Double = TunerUtil.readTunerValByQuery(
+                  "system and purge and dab and fan and loop and output",
                   L.ccu().oaoProfile.equipRef
               )
-              loopOutput = Math.max(
-                  Math.max(
-                      systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap,
+              if (L.ccu().oaoProfile.isEconomizingAvailable) {
+                  val economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery(
+                      "oao and economizing and main and cooling and loop and map",
+                      L.ccu().oaoProfile.equipRef
+                  )
+                  basicDabConfig.coolingLoop  = (systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap).coerceAtLeast(
                       systemHeatingLoopOp
-                  ), smartPurgeDabFanLoopOp
-              )
-          }*/
+                  ).coerceAtLeast(smartPurgeDabFanLoopOp).toInt()
+              }
+          }
+
 
         if (isSetPointEnabled) {
             val satSetPointLimits = getSetPointMinMax(systemEquip, basicDabConfig.heatingLoop)
@@ -570,7 +570,7 @@ class DabExternalAhu : DabSystemProfile() {
         )
 
     data class BasicDabConfig(
-        val coolingLoop: Int,
+        var coolingLoop: Int,
         val heatingLoop: Int,
         val loopOutput: Double,
         val weightedAverageCO2: Double,

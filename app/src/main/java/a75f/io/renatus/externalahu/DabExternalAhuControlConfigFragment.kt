@@ -615,12 +615,14 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                 TextViewWithClickOption(
                     text = viewModel.equipModel.value.slaveId,
                     onClick = {
-                        ProgressDialogUtils.showProgressDialog(context, LOADING)
-                        showDialogFragment(
-                            ModelSelectionFragment.newInstance(
-                                viewModel.slaveIdList, onItemSelect, SEARCH_SLAVE_ID
-                            ), ModelSelectionFragment.ID
-                        )
+                        if (!viewModel.equipModel.value.isDevicePaired) {
+                            ProgressDialogUtils.showProgressDialog(context, LOADING)
+                            showDialogFragment(
+                                ModelSelectionFragment.newInstance(
+                                    viewModel.slaveIdList, onItemSelect, SEARCH_SLAVE_ID
+                                ), ModelSelectionFragment.ID
+                            )
+                        }
                     },
                     enableClick = !viewModel.equipModel.value.isDevicePaired,
                 )

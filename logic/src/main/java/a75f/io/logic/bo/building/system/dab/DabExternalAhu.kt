@@ -474,7 +474,6 @@ class DabExternalAhu : DabSystemProfile() {
             } else logIt("DeHumidifier control is disabled")
         }
         logIt("----------------------------------------------------------------")
-
     }
 
     private fun getExternalEquipId(): String? {
@@ -499,12 +498,22 @@ class DabExternalAhu : DabSystemProfile() {
         return ("$preFix  $value  $unit")
     }
 
+
     fun getModbusPointValue(query: String): String {
-        val point = CCUHsApi.getInstance().readEntity("$query and equipRef == \"${getExternalEquipId()}\"")
-        if (point.isEmpty()) return ""
-        val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
-        return ("Current  $value  ${point["unit"]}")
+        val equipId = getExternalEquipId()
+        val point = CCUHsApi.getInstance().readEntity("$query and equipRef == \"$equipId\"")
+
+        if (point.isEmpty()) {
+            return ""
+        }
+
+        val pointId = point["id"].toString()
+        val value = CCUHsApi.getInstance().readHisValById(pointId)
+        val unit = point["unit"]
+
+        return "Current $value $unit"
     }
+
 
 
     private fun getSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {

@@ -109,7 +109,11 @@ public class VavAcbProfile extends VavProfile
                 loopOp =  0;
             } else if (conditioning == SystemController.State.HEATING) {
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                loopOp = heatingLoopOp;
+                if (vavEquip.getDischargeAirTemp().readPriorityVal() > vavEquip.getCurrentTemp().readPriorityVal() + vavEquip.getReheatZoneToDATMinDifferential().readPriorityVal()) {
+                    loopOp = heatingLoopOp;
+                } else {
+                    loopOp = 0;
+                }
             }
             chwValve.currentPosition = 0;
         } else {

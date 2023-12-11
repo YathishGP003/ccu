@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -114,11 +115,17 @@ public class ZoneViewData {
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and normalized and cmd and equipRef == \""+equipID+"\"");
+        double valvePoint = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.chilledWaterValve + "\" and equipRef == \""+equipID+"\"");
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
         double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
         double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and air and flow and trueCfm and vav and equipRef == \""+equipID+"\"");
+        double condensateNC = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNC + "\" and equipRef == \""+equipID+"\"");
+        double condensateNO = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNO + "\" and equipRef == \""+equipID+"\"");
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);
+
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
+
         if (equipStatusPoint.length() > 0)
         {
             vavPoints.put("Status",equipStatusPoint);
@@ -133,14 +140,16 @@ public class ZoneViewData {
         }
         if (reheatPoint  > 0)
         {
-            vavPoints.put("Reheat Coil",reheatPoint+"% Open");
+            vavPoints.put("Reheat Coil",(int)reheatPoint+"% Open");
+        } else if (valvePoint > 0) {
+            vavPoints.put("Reheat Coil",(int)valvePoint+"% Open");
         }else{
             vavPoints.put("Reheat Coil",0);
         }
         if (enteringAirPoint != 0)
         {
             vavPoints.put("Entering Airflow",enteringAirPoint+" \u2109");
-        }else{
+        }else {
             vavPoints.put("Entering Airflow",0+" \u2109");
         }
         if (dischargePoint != 0)
@@ -155,12 +164,18 @@ public class ZoneViewData {
         }else{
             vavPoints.put("Airflow CFM",0);
         }
-        
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
+        if (condensateNC > 0.0 || condensateNO > 0.0) {
+            vavPoints.put("Condensate","Condensate Sensed");
+        } else {
+            vavPoints.put("Condensate", 0);
+        }
+
         if (equip.containsKey("series")) {
             vavPoints.put("Profile","VAV Series Fan");
         } else if (equip.containsKey("parallel")){
             vavPoints.put("Profile","VAV Parallel Fan");
+        } else if (equip.containsKey("chilledBeam")) {
+            vavPoints.put("Profile", "Active Chilled Beams + DOAS");
         } else {
             vavPoints.put("Profile", "VAV Reheat - No Fan");
         }

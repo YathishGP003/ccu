@@ -361,6 +361,12 @@ object DomainName {
     const val seriesFanCmd = "seriesFanCmd"
     const val parallelFanCmd = "parallelFanCmd"
 
+    const val relay1 = "relay1"
+    const val relay2 = "relay2"
+    const val analog1Out = "analog1Out"
+    const val analog2Out = "analog2Out"
+    const val analog1In = "analog1In"
+    const val analog2In = "analog2In"
 
 }
 

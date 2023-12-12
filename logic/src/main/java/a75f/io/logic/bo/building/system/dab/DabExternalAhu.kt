@@ -262,13 +262,13 @@ class DabExternalAhu : DabSystemProfile() {
         val conditioningMode = SystemMode.values()[Domain.getPointFromDomain(systemEquip, conditioningMode).toInt()]
         logIt("System is $occupancyMode conditioningMode : $conditioningMode")
         logIt("coolingLoop ${basicDabConfig.coolingLoop} heatingLoop ${basicDabConfig.heatingLoop}")
-        logIt("weightedAverageCO2 $weightedAverageCO2 loopOutput ${basicDabConfig.loopOutput}")
+        logIt("weightedAverageCO2 ${basicDabConfig.weightedAverageCO2} loopOutput ${basicDabConfig.loopOutput}")
         if (conditioningMode == SystemMode.OFF)
             return
         calculateSATSetPoints(systemEquip, basicDabConfig, externalEquipId, conditioningMode)
         calculateDuctStaticPressureSetPoints(systemEquip, basicDabConfig.loopOutput, externalEquipId)
         setOccupancyMode(systemEquip, externalEquipId)
-        doDCVAction(systemEquip, weightedAverageCO2, occupancyMode, externalEquipId)
+        doDCVAction(systemEquip, basicDabConfig.weightedAverageCO2, occupancyMode, externalEquipId)
         handleHumidityOperation(systemEquip, externalEquipId, occupancyMode)
         handleDeHumidityOperation(systemEquip, externalEquipId, occupancyMode)
         writePointByDomainName(systemEquip, equipStatusMessage, statusMessage)

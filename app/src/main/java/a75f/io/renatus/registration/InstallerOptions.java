@@ -632,55 +632,6 @@ public class InstallerOptions extends Fragment {
     // initial master control values
     private void getTempValues() {
 
-        /*HDict tuner = CCUHsApi.getInstance().readHDict("equip and tuner");
-        Equip p = new Equip.Builder().setHDict(tuner).build();
-        if(MasterControlUtil.isMigrated()) {
-            HashMap<Object, Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
-            HashMap<Object, Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
-            HashMap<Object, Object> coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-            HashMap<Object, Object> heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-            HashMap<Object, Object> coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-            HashMap<Object, Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-            HashMap<Object, Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
-            HashMap<Object, Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
-            HashMap<Object, Object> setbackMap = CCUHsApi.getInstance().readEntity("unocc and setback and equipRef == \"" + p.getId() + "\"");
-            HashMap<Object, Object> zoneDiffMap = CCUHsApi.getInstance().readEntity("building and zone and differential");
-
-            hdb = (float) HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
-            cdb = (float) HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
-            upperCoolingTemp = (float) HSUtil.getLevelValueFrom16(coolUL.get("id").toString());
-            lowerCoolingTemp = (float) HSUtil.getLevelValueFrom16(coolLL.get("id").toString());
-            upperHeatingTemp = (float) HSUtil.getLevelValueFrom16(heatUL.get("id").toString());
-            lowerHeatingTemp = (float) HSUtil.getLevelValueFrom16(heatLL.get("id").toString());
-
-            lowerBuildingTemp = (float) getTuner(buildingMin.get("id").toString());
-            upperBuildingTemp = (float) getTuner(buildingMax.get("id").toString());
-            mSetBack = (float) getTuner(setbackMap.get("id").toString());
-            zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
-        }else{
-
-            hdb = (float) TunerUtil.getHeatingDeadband(p.getId());
-            cdb = (float) TunerUtil.getCoolingDeadband(p.getId());
-            HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and tuner");
-            HashMap heatUL = CCUHsApi.getInstance().read("point and limit and min and heating and user and tuner");
-            HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and tuner");
-            HashMap heatLL = CCUHsApi.getInstance().read("point and limit and max and heating and user and tuner");
-            HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-            HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-            HashMap setbackMap = CCUHsApi.getInstance().read("unocc and setback and equipRef == \"" + p.getId() + "\"");
-            HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
-
-            upperCoolingTemp = (float) getTuner(coolUL.get("id").toString());
-            lowerCoolingTemp = (float) getTuner(coolLL.get("id").toString());
-            upperHeatingTemp = (float) getTuner(heatUL.get("id").toString());
-            lowerHeatingTemp = (float) getTuner(heatLL.get("id").toString());
-            lowerBuildingTemp = (float) getTuner(buildingMin.get("id").toString());
-            upperBuildingTemp = (float) getTuner(buildingMax.get("id").toString());
-            mSetBack = (float) getTuner(setbackMap.get("id").toString());
-            zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
-
-        }*/
-
         hdb = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
         cdb = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
         upperCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();

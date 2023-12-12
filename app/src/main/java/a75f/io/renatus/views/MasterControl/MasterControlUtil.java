@@ -94,16 +94,10 @@ public class MasterControlUtil {
                 }
                 return min;
             } else {
-
-                HashMap<Object, Object> heatingMin =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(heatingMin.get("id").toString());
-
+                return Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> heatingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and min and heating and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+            return Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
         }
 
     }
@@ -123,15 +117,10 @@ public class MasterControlUtil {
                 }
                 return max;
             } else {
-
-                HashMap<Object, Object> heatingMax =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+                return Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> heatingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and max and heating and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+            return Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
         }
     }
 
@@ -152,16 +141,10 @@ public class MasterControlUtil {
                 }
                 return min;
             } else {
-
-                HashMap<Object, Object> coolingMin =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(coolingMin.get("id").toString());
-
+                return Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> coolingMin =
-                    CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(coolingMin.get("id").toString());
+            return Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
         }
     }
 
@@ -180,17 +163,10 @@ public class MasterControlUtil {
                 }
                 return max;
             } else {
-
-
-                HashMap<Object, Object> coolingMax =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(coolingMax.get("id").toString());
-
+                return Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> coolingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and max and cooling and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(coolingMax.get("id").toString());
+            return Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
         }
     }
 

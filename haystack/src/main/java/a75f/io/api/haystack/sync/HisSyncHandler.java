@@ -380,9 +380,10 @@ public class HisSyncHandler
                      */
                     CcuLog.e(TAG, "Failed to update HisItem !", e);
                 }
-            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+            } else if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
                 CcuLog.e(TAG, "His write failed! , Trying to handle the error");
                 EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+                ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
             }
         }
     }

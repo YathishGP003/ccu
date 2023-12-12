@@ -272,8 +272,8 @@ class DabExternalAhu : DabSystemProfile() {
         handleHumidityOperation(systemEquip, externalEquipId, occupancyMode)
         handleDeHumidityOperation(systemEquip, externalEquipId, occupancyMode)
         writePointByDomainName(systemEquip, equipStatusMessage, statusMessage)
-        updatePointValue(systemEquip, heatingLoopOutput, basicDabConfig.coolingLoop.toDouble())
-        updatePointValue(systemEquip, coolingLoopOutput, basicDabConfig.heatingLoop.toDouble())
+        updatePointValue(systemEquip, coolingLoopOutput, basicDabConfig.coolingLoop.toDouble())
+        updatePointValue(systemEquip, heatingLoopOutput, basicDabConfig.heatingLoop.toDouble())
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, modbusSetPointsList)
     }
 

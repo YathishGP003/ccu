@@ -49,7 +49,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
@@ -78,6 +77,7 @@ class DabExternalAhu : DabSystemProfile() {
     private var modbusInterface: ModbusWritableDataInterface? = null
     private var modbusSetPointsList = ArrayList<String>()
     private val dabSystem: DabSystemController = DabSystemController.getInstance()
+    private var hsApi = CCUHsApi.getInstance()
     override fun getProfileName(): String {
         return "DAB External AHU Controller"
     }
@@ -312,7 +312,7 @@ class DabExternalAhu : DabSystemProfile() {
             updatePointValue(systemEquip, supplyAirflowTemperatureSetpoint, satSetPointValue)
             if (externalEquipId != null)
                 pushSatSetPoints(
-                    CCUHsApi.getInstance(),
+                    hsApi,
                     externalEquipId,
                     satSetPointValue,
                     modbusSetPointsList
@@ -332,8 +332,8 @@ class DabExternalAhu : DabSystemProfile() {
         val isStaticPressureSpEnabled =
             Domain.getPointFromDomain(systemEquip, staticPressureSetpointControlEnable) == 1.0
         if (isStaticPressureSpEnabled) {
-            val analogFanMultiplier =
-                Domain.readPointValueByDomainName(dabAnalogFanSpeedMultiplier, systemEquip.id)
+            val analogFanMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", systemEquip.id)
+
             val fanLoop = loopOutput * analogFanMultiplier
             val min = Domain.getPointFromDomain(systemEquip, systemStaticPressureMinimum)
             val max = Domain.getPointFromDomain(systemEquip, systemStaticPressureMaximum)
@@ -344,7 +344,7 @@ class DabExternalAhu : DabSystemProfile() {
             updatePointValue(systemEquip, fanLoopOutput, fanLoop)
             if (externalEquipId != null)
                 pushDuctStaticPressure(
-                    CCUHsApi.getInstance(),
+                    hsApi,
                     externalEquipId,
                     ductStaticPressureSetPoint,
                     modbusSetPointsList
@@ -409,76 +409,112 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun handleHumidityOperation(systemEquip: Equip, externalEquipId: String?, occupancyMode: Occupancy) {
-        if (occupancyMode != Occupancy.UNOCCUPIED || occupancyMode != Occupancy.VACATION) {
-            val isHumidifierEnabled =
-                Domain.getPointFromDomain(systemEquip, humidifierOperationEnable) == 1.0
-            if (isHumidifierEnabled) {
-                val currentHumidity = DabSystemController.getInstance().getAverageSystemHumidity()
-                val humidityHysteresis =
-                    Domain.getPointFromDomain(systemEquip, dabHumidityHysteresis)
-                val targetMinInsideHumidity =
-                    Domain.getPointFromDomain(systemEquip, systemtargetMinInsideHumidty)
-                val currentHumidifierPortStatus =
-                    Domain.getPointHisFromDomain(systemEquip, humidifierEnable)
-                var newHumidifier = 0.0
-                if (currentHumidity > 0) {
-                    if (currentHumidity < targetMinInsideHumidity) {
-                        newHumidifier = 1.0
-                    } else if (currentHumidifierPortStatus > 0) {
-                        newHumidifier =
-                            if (currentHumidity > (targetMinInsideHumidity + humidityHysteresis)) 0.0 else 1.0
-                    }
-                } else newHumidifier = 0.0
+        val currentHumidifierPortStatus = Domain.getPointHisFromDomain(systemEquip, humidifierEnable)
+        var newHumidifier = 0.0
 
-                logIt("currentHumidity $currentHumidity humidityHysteresis: $humidityHysteresis")
-                logIt("targetMinInsideHumidity $targetMinInsideHumidity Humidifier $newHumidifier")
-                updatePointValue(systemEquip, humidifierEnable, newHumidifier)
-                if (externalEquipId != null)
+        // Disable humidifier control when in UNOCCUPIED or VACATION mode
+        if (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION) {
+            if (currentHumidifierPortStatus == 1.0) {
+                updatePointValue(systemEquip, humidifierEnable, 0.0)
+                if (externalEquipId != null) {
                     pushHumidifierCmd(
-                        CCUHsApi.getInstance(),
+                        hsApi,
                         externalEquipId,
-                        newHumidifier,
+                        0.0,
                         modbusSetPointsList
                     )
-            } else logIt("Humidifier control is disabled")
+                }
+            }
+            return
         }
-        logIt("----------------------------------------------------------------")
 
+        // Continue with humidifier control logic
+        val isHumidifierEnabled = Domain.getPointFromDomain(systemEquip, humidifierOperationEnable) == 1.0
+        if (isHumidifierEnabled) {
+            val currentHumidity = DabSystemController.getInstance().getAverageSystemHumidity()
+            val humidityHysteresis = TunerUtil.readTunerValByQuery(
+                "point domainName ==@$dabHumidityHysteresis", systemEquip.id
+            )
+            val targetMinInsideHumidity = Domain.getPointFromDomain(systemEquip, systemtargetMinInsideHumidty)
+
+            // Combine humidity conditions for readability
+            if (currentHumidity > 0 && currentHumidity < targetMinInsideHumidity) {
+                newHumidifier = 1.0
+            } else if (currentHumidifierPortStatus > 0 && currentHumidity > (targetMinInsideHumidity + humidityHysteresis)) {
+                newHumidifier = 0.0
+            }
+
+            logIt("currentHumidity $currentHumidity humidityHysteresis: $humidityHysteresis")
+            logIt("targetMinInsideHumidity $targetMinInsideHumidity Humidifier $newHumidifier")
+        } else {
+            logIt("Humidifier control is disabled")
+        }
+
+        // Update humidifier status if changed
+        if (currentHumidifierPortStatus != newHumidifier) {
+            updatePointValue(systemEquip, humidifierEnable, newHumidifier)
+            if (externalEquipId != null && currentHumidifierPortStatus != 0.0) {
+                pushHumidifierCmd(
+                    hsApi,
+                    externalEquipId,
+                    newHumidifier,
+                    modbusSetPointsList
+                )
+            }
+        }
     }
 
     private fun handleDeHumidityOperation(systemEquip: Equip, externalEquipId: String?, occupancyMode: Occupancy) {
-        if (occupancyMode != Occupancy.UNOCCUPIED || occupancyMode != Occupancy.VACATION) {
-            val isDeHumidifierEnabled =
-                Domain.getPointFromDomain(systemEquip, dehumidifierOperationEnable) == 1.0
-            if (isDeHumidifierEnabled) {
-                val currentHumidity = DabSystemController.getInstance().getAverageSystemHumidity()
-                val humidityHysteresis =
-                    Domain.getPointFromDomain(systemEquip, dabHumidityHysteresis)
-                val currentDeHumidifierPortStatus =
-                    Domain.getPointHisFromDomain(systemEquip, dehumidifierEnable)
-                val targetMaxInsideHumidity =
-                    Domain.getPointFromDomain(systemEquip, systemtargetMaxInsideHumidty)
-                var newDeHumidifier = 0.0
-                if (currentHumidity > 0) {
-                    if (currentHumidity > targetMaxInsideHumidity) {
-                        newDeHumidifier = 1.0
-                    } else if (currentDeHumidifierPortStatus > 0) {
-                        newDeHumidifier =
-                            if (currentHumidity < (targetMaxInsideHumidity - humidityHysteresis)) 0.0 else 1.0
-                    }
-                } else newDeHumidifier = 0.0
-                updatePointValue(systemEquip, dehumidifierEnable, newDeHumidifier)
-                if (externalEquipId != null)
+        val currentDeHumidifierPortStatus = Domain.getPointHisFromDomain(systemEquip, dehumidifierEnable)
+        var newDeHumidifier = 0.0
+
+        // Disable dehumidifier control when in UNOCCUPIED or VACATION mode
+        if (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION) {
+            if (currentDeHumidifierPortStatus == 1.0) {
+                updatePointValue(systemEquip, dehumidifierEnable, 0.0)
+                if (externalEquipId != null) {
                     pushDeHumidifierCmd(
-                        CCUHsApi.getInstance(),
+                        hsApi,
                         externalEquipId,
-                        newDeHumidifier,
+                        0.0,
                         modbusSetPointsList
                     )
-                logIt(" targetMaxInsideHumidity: $targetMaxInsideHumidity DeHumidifier $newDeHumidifier")
-            } else logIt("DeHumidifier control is disabled")
+                }
+            }
+            return
         }
-        logIt("----------------------------------------------------------------")
+
+        // Continue with dehumidifier control logic
+        val isDeHumidifierEnabled = Domain.getPointFromDomain(systemEquip, dehumidifierOperationEnable) == 1.0
+        if (isDeHumidifierEnabled) {
+            val currentHumidity = DabSystemController.getInstance().getAverageSystemHumidity()
+            val humidityHysteresis = Domain.getPointFromDomain(systemEquip, dabHumidityHysteresis)
+            val targetMaxInsideHumidity = Domain.getPointFromDomain(systemEquip, systemtargetMaxInsideHumidty)
+
+            // Combine humidity conditions for readability
+            if (currentHumidity > 0 && currentHumidity > targetMaxInsideHumidity) {
+                newDeHumidifier = 1.0
+            } else if (currentDeHumidifierPortStatus > 0 && currentHumidity < (targetMaxInsideHumidity - humidityHysteresis)) {
+                newDeHumidifier = 0.0
+            }
+
+            logIt(" targetMaxInsideHumidity: $targetMaxInsideHumidity DeHumidifier $newDeHumidifier")
+        } else {
+            logIt("DeHumidifier control is disabled")
+        }
+
+        // Update dehumidifier status if changed
+        if (currentDeHumidifierPortStatus != newDeHumidifier) {
+            updatePointValue(systemEquip, dehumidifierEnable, newDeHumidifier)
+            if (externalEquipId != null && currentDeHumidifierPortStatus != 0.0) {
+                pushDeHumidifierCmd(
+                    hsApi,
+                    externalEquipId,
+                    newDeHumidifier,
+                    modbusSetPointsList
+                )
+            }
+        }
     }
 
     private fun getExternalEquipId(): String? {
@@ -503,6 +539,10 @@ class DabExternalAhu : DabSystemProfile() {
         return ("$preFix  $value  $unit")
     }
 
+    fun getConfigValue(domainName: String): Boolean{
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        return getConfigByDomainName(systemEquip!!, domainName)
+    }
 
     fun getModbusPointValue(query: String): String {
         val equipId = getExternalEquipId()

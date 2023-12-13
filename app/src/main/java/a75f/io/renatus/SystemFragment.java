@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
 import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
+import static a75f.io.domain.api.DomainName.dcvDamperControlEnable;
 import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
 import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
@@ -208,6 +209,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView external_last_updated;
 
 	LinearLayout setPointConfig;
+	LinearLayout dcv_config;
 	TextView satSetPoint;
 	TextView satCurrent;
 	TextView dspSetPoint;
@@ -786,6 +788,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		satCurrent = view.findViewById(R.id.sat_current);
 		dspCurrent = view.findViewById(R.id.dsp_current);
 		external_damper = view.findViewById(R.id.external_damper);
+		dcv_config = view.findViewById(R.id.dcv_config);
 
 		externalModbusParams = view.findViewById(R.id.external_modbus_device);
 		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
@@ -994,7 +997,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						dspSetPoint.setText(systemProfile.getSetPoint(ductStaticPressureSetpoint,"Setpoint"));
 						satCurrent.setText(systemProfile.getModbusPointValue(DISCHARGE_AIR_TEMP));
 						dspCurrent.setText(systemProfile.getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR));
-						external_damper.setText(systemProfile.getSetPoint(dcvDamperCalculatedSetpoint,""));
+						if (systemProfile.getConfigValue(dcvDamperControlEnable)) {
+							external_damper.setText(systemProfile.getSetPoint(dcvDamperCalculatedSetpoint,""));
+							dcv_config.setVisibility(View.VISIBLE);
+						} else {
+							dcv_config.setVisibility(View.GONE);
+						}
 					} else {
 						setPointConfig.setVisibility(View.GONE);
 					}

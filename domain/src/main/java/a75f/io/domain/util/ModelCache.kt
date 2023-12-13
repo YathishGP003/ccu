@@ -12,7 +12,7 @@ object ModelCache {
     private val modelContainer = mutableMapOf<String, ModelDirective>()
 
     private const val MODEL_ASSET_PREFIX = "assets/75f/models/"
-    private const val BUILDING_EQUIP_MODEL = "assets/75f/models/64abb6a3a97798751b2bda14.json"
+    private const val BUILDING_EQUIP_MODEL = "assets/75f/models/657739fbd1743f797c4c2ca4.json"
 
     var context : Context? = null
     fun init(hayStack : CCUHsApi, context: Context) {
@@ -20,7 +20,7 @@ object ModelCache {
         if (!hayStack.isCCURegistered) {
             val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
             CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
-            modelContainer["64abb6a3a97798751b2bda14"] = buildingEquipModel
+            modelContainer["657739fbd1743f797c4c2ca4"] = buildingEquipModel
         }
     }
 

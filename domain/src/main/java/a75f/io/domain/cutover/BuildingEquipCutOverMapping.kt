@@ -301,4 +301,16 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",
 
     )
+
+    fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
+        val displayNme = point["dis"].toString()
+        return entries.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
+            .map { it.value }
+            .firstOrNull()
+    }
+    fun findDisFromDomainName(domainName : String) : String? {
+        return entries.filterValues { it.equals(domainName,true) }
+            .map { it.key }
+            .firstOrNull()
+    }
 }

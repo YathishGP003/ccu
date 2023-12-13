@@ -294,7 +294,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         tunerPoints.filter { it["domainName"] == null}
             .forEach { dbPoint ->
-                val modelPointName = getDomainNameFromDis(dbPoint)
+                val modelPointName = BuildingEquipCutOverMapping.getDomainNameFromDis(dbPoint)
 
                 if (modelPointName == null) {
                     delete++
@@ -318,7 +318,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         modelDef.points.forEach { modelPointDef ->
 
-            val displayName = findDisFromDomainName(modelPointDef.domainName)
+            val displayName = BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
             if (displayName == null) {
                 add++
                 //Point exists in model but not in mapping table or local db. create it.
@@ -356,19 +356,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             val ccu = hayStack.readEntity("device and ccu")
             ccuSyncHandler.updateCcuDeviceId(ccu, ccu["id"].toString(), buildingTuner["id"].toString())
         }
-    }
-
-    private fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
-        val displayNme = point["dis"].toString()
-        return BuildingEquipCutOverMapping.entries.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
-                                        .map { it.value }
-                                        .firstOrNull()
-    }
-
-    private fun findDisFromDomainName(domainName : String) : String? {
-        return BuildingEquipCutOverMapping.entries.filterValues { it.equals(domainName,true) }
-            .map { it.key }
-            .firstOrNull()
     }
 
     private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{

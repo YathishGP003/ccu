@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.truecfm;
 
+import java.util.Arrays;
+import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
@@ -74,11 +76,20 @@ public class TrueCFMUtil {
         double damperSize = equip.getDamperSize().readDefaultVal();
         int damperShapeVal = (int)equip.getDamperShape().readDefaultVal();
         DamperShape damperShape = DamperShape.values()[damperShapeVal];
-        double damperSizeInFeet = damperSize/12;
+        double damperSizeInFeet = getDamperSizeFromIndex((int)damperSize)/12;
         if (damperShape == DamperShape.ROUND) {
             return 3.14 * damperSizeInFeet/2 * damperSizeInFeet/2;
         } else {
             return damperSizeInFeet * damperSizeInFeet; //TODO - check if rectangular dimension available.
+        }
+    }
+    private static double getDamperSizeFromIndex(int index) {
+        List<Double> damperSizes = Arrays.asList(4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0);
+        try {
+            return damperSizes.get(index);
+        } catch(Exception e) {
+            CcuLog.e(L.TAG_CCU_ZONE, "Failed to fetch Damper Size from Haystack enum");
+            return 4.0;
         }
     }
     public static double calculateAndUpdateCfmVav(CCUHsApi hayStack, String equipRef, VavEquip equip) {
@@ -101,11 +112,11 @@ public class TrueCFMUtil {
     }
     
     public static double getMaxCFMReheating(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and max and (trueCfm or trueCFM) and heating and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and max and (trueCfm or trueCFM) and (heating or reheat) and equipRef == \""+equipId+"\"");
     }
     
     public static double getMinCFMReheating(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and min and (trueCfm or trueCFM) and heating and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and min and (trueCfm or trueCFM) and (heating or reheat) and equipRef == \""+equipId+"\"");
     }
     
     public static boolean cfmControlNotRequired(CCUHsApi hayStack, String equipRef) {

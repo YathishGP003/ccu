@@ -199,8 +199,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     }
 
     fun getPhysicalProfilePointRef(profileConfiguration: ProfileConfiguration, rawPointName : String) : String?{
-        val modelDefCopy = modelDef
-        val profilePointWithPhysicalMapping = modelDef.points.find {it.associatedWithDevicePoint == rawPointName && isPresentInConfig(it, profileConfiguration) }
+        val profilePointWithPhysicalMapping = modelDef.points.find {it.associatedWithDevicePoint == rawPointName && PointIsPresentInConfig(it, profileConfiguration) }
             ?: return null
 
         val associationPoints = modelDef.points.filter {
@@ -210,7 +209,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         //Linked profile point is an association point. Attach the link if it is enabled.
         val associationPoint = associationPoints.find {
             val associationConfig = it.configuration as AssociationConfiguration
-            profilePointWithPhysicalMapping.domainName == associationConfig.domainName && isPresentInConfig(it, profileConfiguration)
+            profilePointWithPhysicalMapping.domainName == associationConfig.domainName && PointIsPresentInConfig(it, profileConfiguration)
         }
 
         if (associationPoint != null) {
@@ -233,7 +232,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         return null
     }
 
-    private fun isPresentInConfig(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
+    private fun PointIsPresentInConfig(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
         if (point.configuration.configType.equals(PointConfiguration.ConfigType.DEPENDENT)) {
             if (getEnabledDependencies(config).find { it.equals(point.domainName)} == null) return false
         }

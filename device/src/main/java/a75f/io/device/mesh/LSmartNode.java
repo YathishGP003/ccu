@@ -256,7 +256,7 @@ public class LSmartNode
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        
+
         if (equip.getProfile().equals("VAV_ACB")) {
             VavAcbEquip acbEquip = new VavAcbEquip(equipRef);
             kFactor = (int)(100 * acbEquip.getKFactor().readPriorityVal());
@@ -571,7 +571,7 @@ public class LSmartNode
         }
         return false;
     }
-
+    
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -693,7 +693,7 @@ public class LSmartNode
 
         return null;
     }
-    
+
     
     public static double getDesiredTemp(short node)
     {

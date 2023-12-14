@@ -26,6 +26,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.BuildingEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.renatus.R;
@@ -142,7 +143,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         setBackAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         unOccupiedZoneSetBack.setAdapter(setBackAdapter);
         if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
-            int unoccupiedZoneSetBackDefaultValue = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and unoccupied and default and setback").intValue();
+            int unoccupiedZoneSetBackDefaultValue = (int)Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
             if(isCelsiusTunerAvailableStatus())
                 unoccupiedZoneSetBackDefaultValue = (int) Math.round(convertingRelativeValueFtoC(unoccupiedZoneSetBackDefaultValue));
             unOccupiedZoneSetBack.setSelection(unoccupiedZoneSetBackDefaultValue);

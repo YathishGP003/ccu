@@ -233,6 +233,7 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CcuLog.i(L.TAG_CCU_INIT,"Initialize ModelCache");
         ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
     }
 
@@ -381,10 +382,10 @@ public class Globals {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
                     }
                     isInitCompleted = true;
-                    initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     if (CCUHsApi.getInstance().isCCURegistered()) {
                         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     }
+                    initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                 }
             }
         }.start();

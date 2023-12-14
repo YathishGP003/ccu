@@ -257,6 +257,23 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return newEntityConfig
     }
 
+    private fun createCutoverMigrationPoint(pointConfig: PointBuilderConfig) {
+        val hayStackPoint = buildPoint(pointConfig)
+        val pointId = hayStack.addBuildingTunerPoint(hayStackPoint, true)
+        hayStackPoint.id = pointId
+        hayStack.writeDefaultTunerValById(pointId, pointConfig.modelDef.defaultValue.toString().toDouble())
+        DomainManager.addPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Created Tuner point ${pointConfig.modelDef.domainName}")
+    }
+    private fun updateCutOverMigrationPoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
+        val hayStackPoint = buildPoint(pointConfig)
+        hayStack.updateBuildingTunerPoint(hayStackPoint, existingPoint["id"].toString(), true)
+        hayStackPoint.id = existingPoint["id"].toString()
+        hayStack.writeDefaultTunerValById(hayStackPoint.id, pointConfig.modelDef.defaultValue.toString().toDouble())
+        DomainManager.addPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Updated Tuner point ${pointConfig.modelDef.domainName}")
+    }
+
     fun migrateBuildingTunerPointsForCutOver(equipRef: String, site: Site){
         val modelDef = ModelLoader.getBuildingEquipModelDef(hayStack.context)
         if (modelDef == null) {
@@ -276,7 +293,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         tunerPoints.filter { it["domainName"] == null}
             .forEach { dbPoint ->
-                val modelPointName = getDomainNameFromDis(dbPoint)
+                val modelPointName = BuildingEquipCutOverMapping.getDomainNameFromDis(dbPoint)
 
                 if (modelPointName == null) {
                     delete++
@@ -289,7 +306,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                     //println("Cut-Over migration Update $dbPoint")
                     val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
                     if (modelPoint != null) {
-                        updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site.id, site.tz, equipDis), dbPoint)
+                        updateCutOverMigrationPoint(PointBuilderConfig(modelPoint, null, equipRef, site.id, site.tz, equipDis), dbPoint)
                     } else {
                         CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
                     }
@@ -300,7 +317,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         modelDef.points.forEach { modelPointDef ->
 
-            val displayName = findDisFromDomainName(modelPointDef.domainName)
+            val displayName = BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
             if (displayName == null) {
                 add++
                 //Point exists in model but not in mapping table or local db. create it.
@@ -308,7 +325,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
                 if (!pointWithDomainNameExists(tunerPoints, modelPointDef.domainName)) {
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
-                    createPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
+                    createCutoverMigrationPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
                 }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
@@ -338,19 +355,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             val ccu = hayStack.readEntity("device and ccu")
             ccuSyncHandler.updateCcuDeviceId(ccu, ccu["id"].toString(), buildingTuner["id"].toString())
         }
-    }
-
-    private fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
-        val displayNme = point["dis"].toString()
-        return BuildingEquipCutOverMapping.entries.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
-                                        .map { it.value }
-                                        .firstOrNull()
-    }
-
-    private fun findDisFromDomainName(domainName : String) : String? {
-        return BuildingEquipCutOverMapping.entries.filterValues { it.equals(domainName,true) }
-            .map { it.key }
-            .firstOrNull()
     }
 
     private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{

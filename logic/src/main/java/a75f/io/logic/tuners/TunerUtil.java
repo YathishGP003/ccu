@@ -172,7 +172,7 @@ public class TunerUtil
         boolean isDefault = true;
 
         for (Equip q : zoneEquips) {
-            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomref == \"" + roomRef + "\"");
+            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomRef == \"" + roomRef + "\"");
 
             if (!hdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(hdb.get("id").toString());

@@ -2,9 +2,12 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
+import a75f.io.domain.util.TunerUtil
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -16,7 +19,11 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef : String, profileName: String?) : String{
+    fun buildEquipAndPoints(
+        configuration: ProfileConfiguration,
+        modelDef: ModelDirective,
+        siteRef: String
+    ) : String{
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
@@ -65,7 +72,14 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
                 val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
-                if (enableConfig != null) {
+
+                if (isItTunerPoint(hayStackPoint.markers)) {
+                    TunerUtil.copyDefaultBuildingTunerVal(
+                        pointId,
+                        hayStackPoint.domainName,
+                        hayStack
+                    )
+                } else if (enableConfig != null) {
                     initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
                 } else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
@@ -75,6 +89,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
+    private fun isItTunerPoint(mutableList: MutableList<String>): Boolean {
+        return mutableList.contains(Tags.TUNER)
+    }
     private fun updatePoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String) {
         val tz = hayStack.timeZone

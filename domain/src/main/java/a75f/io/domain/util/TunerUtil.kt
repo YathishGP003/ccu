@@ -1,6 +1,9 @@
 package a75f.io.domain.util
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.Tags
+import a75f.io.domain.util.Constants.TAG_DM_CCU
 import a75f.io.logger.CcuLog
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
@@ -108,4 +111,33 @@ object TunerUtil {
                 && copyTunerLevel(dstPointId, zoneTunerPointArray, 16, hayStack)
                 && copyTunerLevel(dstPointId, zoneTunerPointArray, 17, hayStack))
     }
+
+    fun copyDefaultBuildingTunerVal(
+        systemPointId: String?,
+        domainName: String,
+        hayStack: CCUHsApi
+    ) {
+        val buildingPoint = hayStack.readDefaultPointByDomainName(domainName)
+        if (buildingPoint.isEmpty()) {
+            CcuLog.e(TAG_DM_CCU, "!! Default point does not exist for $domainName")
+            return
+        }
+        val buildingPointArray = hayStack.readPoint(buildingPoint[Tags.ID].toString())
+        for (valMap in buildingPointArray) {
+            if (valMap["val"] != null) {
+                hayStack.pointWrite(
+                    HRef.copy(systemPointId),
+                    valMap["level"].toString().toDouble().toInt(),
+                    valMap["who"].toString(),
+                    HNum.make(
+                        valMap["val"].toString().toDouble()
+                    ),
+                    HNum.make(0)
+                )
+            }
+        }
+        CcuLog.e(TAG_DM_CCU, "Copy default value for $domainName $buildingPointArray")
+        hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId))
+    }
+
 }

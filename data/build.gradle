@@ -64,14 +64,6 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
-    /*sourceSets {
-        main {
-            java {
-                srcDirs = [ 'src/main/java','src/androidTest/java']
-            }
-        }
-    }*/
-
     testOptions {
         unitTests {
             all {
@@ -90,11 +82,10 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20231211.3"
-
+def domainLibVersion = "20231214.3-qa"
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion+'-qa')  {
+    customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion)  {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -152,7 +143,7 @@ task getExternalLibraryPaths {
             }
         }
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-'+domainLibVersion+'-qa.jar')) {
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-'+domainLibVersion+'.jar')) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

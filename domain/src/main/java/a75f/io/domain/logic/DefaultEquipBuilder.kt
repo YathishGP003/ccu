@@ -6,7 +6,6 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.util.TagsUtil
 import android.annotation.SuppressLint
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
@@ -78,14 +77,11 @@ open class DefaultEquipBuilder : EquipBuilder {
             pointBuilder.setGroup(pointConfig.configuration?.nodeAddress.toString())
         }
 
-        Log.i("CCU_DM", "buildPoint: ")
-
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
             if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
                 pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name)
             }
         }
-
 
         if (pointConfig.configuration?.roomRef != null) {
             pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
@@ -99,7 +95,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             val incrementValTag =
                 pointConfig.modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
             incrementValTag?.let { pointBuilder.setIncrementVal(it.value.toString()) }
-        }  else if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+        }  else if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)

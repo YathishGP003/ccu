@@ -14,6 +14,7 @@ import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -34,6 +35,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxjavaUtil;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -720,6 +722,28 @@ public abstract class SystemProfile
                                                                                                   1.0 : 0);
         hayStack.writeHisValByQuery("system and config and outsideTemp and heating and lockout", enabled ?
                                                                                                      1.0 : 0);
+    }
+
+
+    public void setCoolingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                "and cooling and lockout and equipRef ==\""
+                +ccu().systemProfile.getSystemEquipRef()+"\"");
+        if (!coolingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
+                    HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
+    }
+
+    public void setHeatingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                "and heating and lockout and equipRef ==\""
+                +ccu().systemProfile.getSystemEquipRef()+"\"");
+
+        if (!heatingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
+                    HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
     }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {

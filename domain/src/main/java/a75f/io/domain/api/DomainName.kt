@@ -298,6 +298,8 @@ object DomainName {
     const val coolingDeadband = "coolingDeadband"
     const val unoccupiedZoneSetback = "unoccupiedZoneSetback"
     const val buildingToZoneDifferential = "buildingToZoneDifferential"
+    const val useOutsideTempLockoutHeating = "useOutsideTempLockoutHeating"
+    const val useOutsideTempLockoutCooling = "useOutsideTempLockoutCooling"
 
 
     // External Ahu

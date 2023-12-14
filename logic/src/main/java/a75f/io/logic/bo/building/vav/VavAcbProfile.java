@@ -86,7 +86,7 @@ public class VavAcbProfile extends VavProfile
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
         CcuLog.e(L.TAG_CCU_ZONE, "");
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                "setTempHeating "+setTempHeating+" systemMode "+systemMode);
+                "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -97,23 +97,12 @@ public class VavAcbProfile extends VavProfile
                 chwValve.currentPosition = condensate ? 0 : loopOp;
             } else {
                 // Damper and CHW Valve go to minimum if system is in heating
-                loopOp = 0;
                 chwValve.currentPosition = 0;
             }
         } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
-            }
-            if (conditioning == SystemController.State.COOLING) {
-                loopOp =  0;
-            } else if (conditioning == SystemController.State.HEATING) {
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                if (vavEquip.getDischargeAirTemp().readPriorityVal() > vavEquip.getCurrentTemp().readPriorityVal() + vavEquip.getReheatZoneToDATMinDifferential().readPriorityVal()) {
-                    loopOp = heatingLoopOp;
-                } else {
-                    loopOp = 0;
-                }
             }
             chwValve.currentPosition = 0;
         } else {

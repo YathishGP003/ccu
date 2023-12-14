@@ -630,14 +630,23 @@ public abstract class VavProfile extends ZoneProfile {
 
         String message;
         if (emergency) {
-            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
+            if (profileType.equals(ProfileType.VAV_ACB)) {
+                message = (status == 1 ? "Emergency Cooling" : "Recirculating Air");
+            } else {
+                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
+            }
         } else
         {
             if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else
             {
-                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+                if (profileType.equals(ProfileType.VAV_ACB)) {
+                    message = (status == 1 ? "Cooling Space" : "Recirculating Air");
+                } else {
+                    message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+                }
+
             }
         }
 

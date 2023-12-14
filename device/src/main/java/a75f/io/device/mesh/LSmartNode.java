@@ -23,10 +23,14 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
+import a75f.io.device.serial.CondensateSensor_t;
 import a75f.io.device.serial.DamperActuator_t;
+import a75f.io.device.serial.DamperShape_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
+import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.api.DomainName;
@@ -130,6 +134,7 @@ public class LSmartNode
         fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef,profile);
         fillCurrentUpdatedTime(seedMessage.controls);
         fillSmartNodeControls(seedMessage.controls,zone,address,equipRef);
+        fillSmartNodeSettings2(seedMessage.settings2,zone,address,equipRef, profile);
         return seedMessage;
     }
     public static CcuToCmOverUsbSnSettingsMessage_t getSettingsMessage(Zone zone, short address, String equipRef,String profile)
@@ -223,6 +228,49 @@ public class LSmartNode
         }
     }
 
+    public static CcuToCmOverUsbSnSettings2Message_t getSettings2Message(Zone zone, short address, String equipRef, String profile)
+    {
+        CcuToCmOverUsbSnSettings2Message_t settingsMessage =
+                new CcuToCmOverUsbSnSettings2Message_t();
+        settingsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS2);
+        settingsMessage.smartNodeAddress.set(address);
+        fillSmartNodeSettings2(settingsMessage.settings2,zone,address,equipRef, profile);
+        return settingsMessage;
+    }
+    private static void fillSmartNodeSettings2(SmartNodeSettings2_t settings2, Zone zone, short address, String equipRef, String profile) {
+
+        int kFactor = 200;
+        int minCFMCooling = 50;
+        int maxCFMCooling = 250;
+        int minCFMReheating = 50;
+        int maxCFMReheating = 250;
+        DamperShape_t damperShape = DamperShape_t.DAMPER_SHAPE_ROUND;
+        CondensateSensor_t condensateSensor = CondensateSensor_t.CONDENSATE_SENSOR_NORMALLY_OPEN;
+        int damperSize = 4;
+        int airflowCFMProportionalRange = 200;
+        int airflowCFMProportionalKFactor = 50;
+        int airflowCFMIntegralTime = 30;
+        int airflowCFMIntegralKFactor = 50;
+        int enableCFM = 0;
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        settings2.kFactor.set(kFactor > 0 ? kFactor : 200);
+        settings2.minCFMCooling.set(minCFMCooling > 0 ? minCFMCooling : 50);
+        settings2.maxCFMCooling.set(maxCFMCooling > 0 ? maxCFMCooling : 250);
+        settings2.minCFMReheating.set(minCFMReheating > 0 ? minCFMReheating : 50);
+        settings2.maxCFMReheating.set(maxCFMReheating > 0 ? maxCFMReheating : 250);
+        settings2.damperShape.set(damperShape);
+        settings2.condensateSensor.set(condensateSensor);
+        settings2.damperSize.set((short)damperSize);
+        settings2.airflowCFMProportionalRange.set(airflowCFMProportionalRange > 0 ? airflowCFMProportionalRange : 200);
+        settings2.airflowCFMProportionalKFactor.set(airflowCFMProportionalKFactor > 0 ? (short)airflowCFMProportionalKFactor : (short)50);
+        settings2.airflowCFMIntegralTime.set(airflowCFMIntegralTime > 0 ? (short)airflowCFMIntegralTime : (short)30);
+        settings2.airflowCFMIntegralKFactor.set(airflowCFMIntegralKFactor > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
+        settings2.enableCFM.set((short)enableCFM);
+
+    }
 
     public static void setupDamperType(short address, SmartNodeSettings_t settings){
         CCUHsApi hsApi = CCUHsApi.getInstance();
@@ -245,13 +293,13 @@ public class LSmartNode
             SmartNodeSettings_t settings,
             int damperConfig, int damper2Config, int reheatConfig, String profileType
     ){
-
         Map<DamperType, DamperActuator_t> damperTypeMap = new HashMap<>();
         damperTypeMap.put(DamperType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
         damperTypeMap.put(DamperType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
         damperTypeMap.put(DamperType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
         damperTypeMap.put(DamperType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
         damperTypeMap.put(DamperType.MAT, DamperActuator_t.DAMPER_ACTUATOR_MAT);
+        damperTypeMap.put(DamperType.ZeroToFiveV, DamperActuator_t.DAMPER_ACTUATOR_0_5V);
 
         Map<ReheatType, DamperActuator_t> reheatTypeMap = new HashMap<>();
         reheatTypeMap.put(ReheatType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
@@ -299,6 +347,12 @@ public class LSmartNode
             }
             if (damperType == DamperType.TenToZeroV && reheatConfig == ReheatType.TwoStage.ordinal()) {
                 return DamperActuator_t.DAMPER_ACTUATOR_10_0V_REHEAT_TWO_STAGE;
+            }
+            if (damperType == DamperType.ZeroToFiveV && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_5V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.ZeroToFiveV && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_5V_REHEAT_TWO_STAGE;
             }
             ReheatType config = ReheatType.values()[reheatConfig];
             if (damperType == DamperType.MAT ) {

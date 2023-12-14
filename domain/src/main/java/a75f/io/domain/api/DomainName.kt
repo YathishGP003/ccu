@@ -83,6 +83,7 @@ object DomainName {
     const val vavHumidityHysteresis = "vavHumidityHysteresis"
     const val vavRelayDeactivationHysteresis = "vavRelayDeactivationHysteresis"
     const val vavRebalanceHoldTime = "vavRebalanceHoldTime"
+    const val vavModeChangeoverHysteresis = "vavModeChangeoverHysteresis"
     const val vavStageUpTimerCounter = "vavStageUpTimerCounter"
     const val vavStageDownTimerCounter = "vavStageDownTimerCounter"
     const val vavProportionalKFactor = "vavProportionalKFactor"
@@ -163,9 +164,9 @@ object DomainName {
     const val co2SPRes = "co2SpRes"
     const val co2SPResMax = "co2SpResMax"
 
-    const val vavAirflowCFMIntegralKFactor = "vavAirflowCFMIntegralKFactor"
-    const val vavAirflowCFMProportionalKFactor = "vavAirflowCFMProportionalKFactor"
-    const val vavAirflowCFMIntegralTime = "vavAirflowCFMIntegralTime"
+    const val vavAirflowCFMIntegralKFactor = "vavAirFlowCfmIntegralKfactor"
+    const val vavAirflowCFMProportionalKFactor = "vavAirFlowCfmProportionalKFactor"
+    const val vavAirflowCFMIntegralTime = "vavAirFlowCfmIntegralTime"
     const val vavAirflowCFMProportionalRange = "vavAirflowCFMProportionalRange"
 
 

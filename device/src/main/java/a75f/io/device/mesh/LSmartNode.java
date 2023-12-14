@@ -256,18 +256,18 @@ public class LSmartNode
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
-        settings2.kFactor.set(kFactor > 0 ? kFactor : 200);
-        settings2.minCFMCooling.set(minCFMCooling > 0 ? minCFMCooling : 50);
-        settings2.maxCFMCooling.set(maxCFMCooling > 0 ? maxCFMCooling : 250);
-        settings2.minCFMReheating.set(minCFMReheating > 0 ? minCFMReheating : 50);
-        settings2.maxCFMReheating.set(maxCFMReheating > 0 ? maxCFMReheating : 250);
+        settings2.kFactor.set(enableCFM > 0 ? kFactor : 200);
+        settings2.minCFMCooling.set(enableCFM > 0 ? minCFMCooling : 50);
+        settings2.maxCFMCooling.set(enableCFM > 0 ? maxCFMCooling : 250);
+        settings2.minCFMReheating.set(enableCFM > 0 ? minCFMReheating : 50);
+        settings2.maxCFMReheating.set(enableCFM > 0 ? maxCFMReheating : 250);
         settings2.damperShape.set(damperShape);
         settings2.condensateSensor.set(condensateSensor);
         settings2.damperSize.set((short)damperSize);
-        settings2.airflowCFMProportionalRange.set(airflowCFMProportionalRange > 0 ? airflowCFMProportionalRange : 200);
-        settings2.airflowCFMProportionalKFactor.set(airflowCFMProportionalKFactor > 0 ? (short)airflowCFMProportionalKFactor : (short)50);
-        settings2.airflowCFMIntegralTime.set(airflowCFMIntegralTime > 0 ? (short)airflowCFMIntegralTime : (short)30);
-        settings2.airflowCFMIntegralKFactor.set(airflowCFMIntegralKFactor > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
+        settings2.airflowCFMProportionalRange.set(enableCFM > 0 ? airflowCFMProportionalRange : 200);
+        settings2.airflowCFMProportionalKFactor.set(enableCFM > 0 ? (short)airflowCFMProportionalKFactor : (short)50);
+        settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
+        settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
 
     }

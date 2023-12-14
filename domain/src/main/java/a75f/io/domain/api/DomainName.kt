@@ -172,9 +172,9 @@ object DomainName {
     const val co2SPRes = "co2SpRes"
     const val co2SPResMax = "co2SpResMax"
 
-    const val vavAirflowCFMIntegralKFactor = "vavAirflowCFMIntegralKFactor"
-    const val vavAirflowCFMProportionalKFactor = "vavAirflowCFMProportionalKFactor"
-    const val vavAirflowCFMIntegralTime = "vavAirflowCFMIntegralTime"
+    const val vavAirflowCFMIntegralKFactor = "vavAirFlowCfmIntegralKfactor"
+    const val vavAirflowCFMProportionalKFactor = "vavAirFlowCfmProportionalKFactor"
+    const val vavAirflowCFMIntegralTime = "vavAirFlowCfmIntegralTime"
     const val vavAirflowCFMProportionalRange = "vavAirflowCFMProportionalRange"
 
 
@@ -377,6 +377,7 @@ object DomainName {
     const val analog2In = "analog2In"
 
     const val smartnodeActiveChilledBeam = "smartnodeActiveChilledBeam"
+    const val helionodeActiveChilledBeam = "helionodeActiveChilledBeam"
 
 }
 

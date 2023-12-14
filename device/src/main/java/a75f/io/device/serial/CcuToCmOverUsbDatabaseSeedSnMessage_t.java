@@ -29,7 +29,9 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 	
 
 	public final SmartNodeControls_t controls         = inner(new SmartNodeControls_t());
-	
+
+	public final SmartNodeSettings2_t settings2 = inner(new SmartNodeSettings2_t());
+
 	@Override
 	public ByteOrder byteOrder()
 	{

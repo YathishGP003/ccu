@@ -367,7 +367,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         damper1Type = view.findViewById(R.id.damper1Type);
         ArrayList<String> damper1Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
-            damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
+            if (!damper.equals(DamperType.ZeroToFiveV)) {
+                damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
+            }
         }
         damper1TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper1Types);
         damper1TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -594,7 +596,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private void configureDamper2Type() {
         ArrayList<String> damper2Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
-            damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
+            if (!damper.equals(DamperType.ZeroToFiveV)) {
+                damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
+            }
         }
 
         ArrayAdapter<String> damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, damper2Types) {

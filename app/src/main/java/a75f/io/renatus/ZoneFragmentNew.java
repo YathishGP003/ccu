@@ -3728,7 +3728,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (coolpoint.getMarkers().contains("writable")) {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
                     SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval
-                            , avgval, "CCU_Scheduler_"+CCUHsApi.getInstance().getCcuId());
+                            , avgval, "CCU");
 
                 }
 

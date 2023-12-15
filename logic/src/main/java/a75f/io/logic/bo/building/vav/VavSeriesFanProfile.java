@@ -194,7 +194,7 @@ public class VavSeriesFanProfile extends VavProfile
         
         double dischargeTemp = vavEquip.getDischargeAirTemp().readHisVal();
         double supplyAirTemp = vavEquip.getEnteringAirTemp().readHisVal();
-        double maxDischargeTemp = vavEquip.getMaxCoolingDamperPos().readPriorityVal();
+        double maxDischargeTemp = vavEquip.getReheatZoneMaxDischargeTemp().readPriorityVal();
         double dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
         vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
         valveController.updateControlVariable(dischargeSp, dischargeTemp);

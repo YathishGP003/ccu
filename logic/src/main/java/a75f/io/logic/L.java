@@ -63,6 +63,7 @@ public class L
     public static final String TAG_DESIRED_TEMP_MODE = "DESIRED_TEMP_MODE";
     public static final String TAG_CCU_BACNET = "CCU_BACNET";
     public static final String TAG_CCU_DOWNLOAD = "CCU_DOWNLOAD";
+    public static final String CCU_REMOTE_ACCESS = "CCU_REMOTE_ACCESS";
 
     public static Context app()
     {

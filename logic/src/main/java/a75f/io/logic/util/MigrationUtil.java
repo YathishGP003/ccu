@@ -50,6 +50,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
@@ -446,6 +447,7 @@ public class MigrationUtil {
         if(SchedulableMigrationKt.validateMigration()) {
             writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
         }
+        migrateRemoteAccess();
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
@@ -2620,6 +2622,37 @@ public class MigrationUtil {
                     Log.i(TAG_CCU_MIGRATION_UTIL,
                             "FloorRef and RoomRef updated for the point id :" +equipPoint.getId());
                 }
+            }
+        }
+    }
+    private static void migrateRemoteAccess() {
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+
+        Map<Object,Object> diagEquip = ccuHsApi.readEntity("equip and diag");
+
+        if(!diagEquip.isEmpty())    {
+
+            Map<Object,Object> remoteSessionStatusDiagPoint = ccuHsApi.readEntity("remote and status " +
+                    " and diag and point");
+
+            if(remoteSessionStatusDiagPoint.isEmpty())  {
+
+                String equipRef = Objects.requireNonNull(diagEquip.get("id")).toString();
+                String equipDis = "DiagEquip";
+                String siteRef = Objects.requireNonNull(diagEquip.get("siteRef")).toString();
+                String tz = Objects.requireNonNull(diagEquip.get("tz")).toString();
+
+                Point remoteSessionStatus = new Point.Builder()
+                        .setDisplayName(equipDis+"-remoteSessionStatus")
+                        .setEquipRef(equipRef)
+                        .setSiteRef(siteRef).setHisInterpolate("cov")
+                        .addMarker("diag").addMarker("remote").addMarker("status").addMarker("sp")
+                        .addMarker("storage").addMarker("his").addMarker("cur")
+                        .setEnums(RemoteSessionStatus.getEnum())
+                        .setTz(tz)
+                        .build();
+                ccuHsApi.addPoint(remoteSessionStatus);
             }
         }
     }

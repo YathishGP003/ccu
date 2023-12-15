@@ -19,6 +19,14 @@
         <receiver android:name=".service.FileBackupJobReceiver"
             android:enabled="true"
             android:exported="true"/>
+
+        <receiver
+            android:name=".RemoteAccessSessionBroadCastReceiver">
+            <intent-filter>
+                <action android:name="com.remote.SESSION_PROGRESS" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

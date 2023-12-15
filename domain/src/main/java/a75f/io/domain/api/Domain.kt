@@ -1,15 +1,12 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.BuildingEquip
 import a75f.io.domain.logic.DomainManager
-import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import org.projecthaystack.HDict
 
 @SuppressLint("StaticFieldLeak")
@@ -95,24 +92,24 @@ object Domain {
     }
 
 
-    fun getPointFromDomain(equip: Equip, domainName: String): Double {
+    fun getPointByDomain(equip: Equip, domainName: String): Double {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let { return point.readDefaultVal() }
         return 0.0
     }
 
-    fun getPointHisFromDomain(equip: Equip, domainName: String): Double {
+    fun getHisByDomain(equip: Equip, domainName: String): Double {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let { return point.readHisVal() }
         return 0.0
     }
 
-    private fun getPointIdFromDomain(equip: Equip, domainName: String): String? {
+    private fun getIdByDomain(equip: Equip, domainName: String): String? {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         return point?.id
     }
 
-    fun writePointByDomainName(equip: Equip, domainName: String, value: Any) {
+    fun writePointByDomain(equip: Equip, domainName: String, value: Any) {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let {
             it.writeDefaultVal(value)
@@ -145,15 +142,15 @@ object Domain {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
     @JvmStatic
-    fun readDefaultValByDomainName(domainName: String): Double {
+    fun readDefaultValByDomain(domainName: String): Double {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\"")
     }
     @JvmStatic
-    fun writeDefaultValByDomainName(domainName: String, value: Double) {
+    fun writeDefaultValByDomain(domainName: String, value: Double) {
         return hayStack.writeDefaultVal("point and domainName == \"$domainName\"", value)
     }
     @JvmStatic
-    fun writeHisValByDomainName(domainName: String, value: Double) {
+    fun writeHisValByDomain(domainName: String, value: Double) {
         return hayStack.writeDefaultVal("point and domainName == \"$domainName\"", value)
     }
 }

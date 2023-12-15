@@ -375,7 +375,9 @@ class DabExternalAhu : DabSystemProfile() {
             val fanLoop = loopOutput * analogFanMultiplier
             val min = Domain.getPointFromDomain(systemEquip, systemStaticPressureMinimum)
             val max = Domain.getPointFromDomain(systemEquip, systemStaticPressureMaximum)
-            val ductStaticPressureSetPoint: Double = mapToSetPoint(min, max, fanLoop)
+            var ductStaticPressureSetPoint: Double = mapToSetPoint(min, max, fanLoop)
+            if (ductStaticPressureSetPoint > max)
+                ductStaticPressureSetPoint = max
             updatePointValue(systemEquip, ductStaticPressureSetpoint, ductStaticPressureSetPoint)
             logIt("systemStaticPressureMinimum: $min systemStaticPressureMaximum: $max analogFanMultiplier: $analogFanMultiplier")
             logIt("ductStaticPressureSetPoint: $ductStaticPressureSetPoint")

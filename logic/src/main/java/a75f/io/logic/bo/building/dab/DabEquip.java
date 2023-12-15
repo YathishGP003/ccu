@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.ConfigUtil;
@@ -85,6 +86,8 @@ public class DabEquip
 
     private ControlLoop heatingLoop;
 
+    public static final String CARRIER_PROD = "carrier_prod";
+
     public DabEquip(ProfileType type, int node)
     {
         profileType = type;
@@ -136,7 +139,7 @@ public class DabEquip
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis+"-DAB-"+nodeAddr;
+        String equipDis = getDisName(siteDis, nodeAddr+"");
         String ahuRef = null;
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -168,7 +171,7 @@ public class DabEquip
     
         List<HisItem> hisItems = new ArrayList<>();
         Point damper1Pos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper1Pos")
+                                  .setDisplayName(getDisName(siteDis, nodeAddr+"-damper1Pos"))
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)
@@ -183,9 +186,8 @@ public class DabEquip
         String dpID = CCUHsApi.getInstance().addPoint(damper1Pos);
 
         hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
-    
         Point damper2Pos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper2Pos")
+                                  .setDisplayName(getDisName(siteDis, nodeAddr+"-damper2Pos"))
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)
@@ -203,7 +205,7 @@ public class DabEquip
         hisItems.add(new HisItem(dp2ID, new Date(System.currentTimeMillis()), 0.0));
     
         Point normalizedDamper1Pos = new Point.Builder()
-                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamper1Pos")
+                                            .setDisplayName(getDisName(siteDis, nodeAddr+"-normalizedDamper1Pos"))
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef)
                                             .setRoomRef(roomRef)
@@ -217,7 +219,7 @@ public class DabEquip
         String normalizedDamper1PosId = CCUHsApi.getInstance().addPoint(normalizedDamper1Pos);
     
         Point normalizedDamper2Pos = new Point.Builder()
-                                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamper2Pos")
+                                             .setDisplayName(getDisName(siteDis, nodeAddr+"-normalizedDamper2Pos"))
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
@@ -231,7 +233,7 @@ public class DabEquip
         String normalizedDamper2PosId = CCUHsApi.getInstance().addPoint(normalizedDamper2Pos);
     
         Point currentTemp = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-currentTemp")
+                                    .setDisplayName(getDisName(siteDis, nodeAddr+"-currentTemp"))
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
@@ -250,7 +252,7 @@ public class DabEquip
         hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
     
         Point humidity = new Point.Builder()
-                                 .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-humidity")
+                                 .setDisplayName(getDisName(siteDis, nodeAddr+"-humidity"))
                                  .setEquipRef(equipRef)
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
@@ -268,7 +270,7 @@ public class DabEquip
         hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
     
         Point co2 = new Point.Builder()
-                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-co2")
+                            .setDisplayName(getDisName(siteDis, nodeAddr+"-co2"))
                             .setEquipRef(equipRef)
                             .setSiteRef(siteRef)
                             .setRoomRef(roomRef)
@@ -286,7 +288,7 @@ public class DabEquip
         hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point voc = new Point.Builder()
-                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-voc")
+                            .setDisplayName(getDisName(siteDis,nodeAddr+"-voc"))
                             .setEquipRef(equipRef)
                             .setSiteRef(siteRef)
                             .setRoomRef(roomRef)
@@ -304,7 +306,7 @@ public class DabEquip
         hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
     
         Point desiredTemp = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-desiredTemp")
+                                    .setDisplayName(getDisName(siteDis, nodeAddr+"-desiredTemp"))
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
@@ -320,7 +322,7 @@ public class DabEquip
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
     
         Point desiredTempCooling = new Point.Builder()
-                                           .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-desiredTempCooling")
+                                           .setDisplayName(getDisName(siteDis, nodeAddr+"-desiredTempCooling"))
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
@@ -336,7 +338,7 @@ public class DabEquip
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
 
         Point desiredTempHeating = new Point.Builder()
-                                           .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-desiredTempHeating")
+                                           .setDisplayName(getDisName(siteDis, nodeAddr+"-desiredTempHeating"))
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
@@ -352,7 +354,7 @@ public class DabEquip
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatus")
+                                    .setDisplayName(getDisName(siteDis, nodeAddr+"-equipStatus"))
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
@@ -366,7 +368,7 @@ public class DabEquip
         hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 0.0));
     
         Point equipStatusMessage = new Point.Builder()
-                                           .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatusMessage")
+                                           .setDisplayName(getDisName(siteDis, nodeAddr+"-equipStatusMessage"))
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
@@ -378,7 +380,7 @@ public class DabEquip
                                            .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         Point equipScheduleStatus = new Point.Builder()
-                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipScheduleStatus")
+                                            .setDisplayName(getDisName(siteDis, +nodeAddr+"-equipScheduleStatus"))
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef)
                                             .setRoomRef(roomRef)
@@ -391,7 +393,7 @@ public class DabEquip
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
     
         Point equipScheduleType = new Point.Builder()
-                                          .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-scheduleType")
+                                          .setDisplayName(getDisName(siteDis, nodeAddr+"-scheduleType"))
                                           .setEquipRef(equipRef)
                                           .setSiteRef(siteRef)
                                           .setRoomRef(roomRef)
@@ -406,7 +408,7 @@ public class DabEquip
         hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), roomSchedule.isZoneSchedule() ? 1.0 : 2.0));
     
         Point supplyAirTemp1 = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp1")
+                                    .setDisplayName(getDisName(siteDis, nodeAddr+"-supplyAirTemp1"))
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
@@ -423,7 +425,7 @@ public class DabEquip
         hisItems.add(new HisItem(sat1Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point supplyAirTemp2 = new Point.Builder()
-                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp2")
+                                       .setDisplayName(getDisName(siteDis, nodeAddr+"-supplyAirTemp2"))
                                        .setEquipRef(equipRef)
                                        .setSiteRef(siteRef)
                                        .setRoomRef(roomRef)
@@ -440,7 +442,7 @@ public class DabEquip
         hisItems.add(new HisItem(sat2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point occupancy = new Point.Builder()
-                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-occupancy")
+                                  .setDisplayName(getDisName(siteDis, nodeAddr+"-occupancy"))
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)
@@ -468,7 +470,7 @@ public class DabEquip
         hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
         
         Point pressure = new Point.Builder()
-                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-pressure")
+                             .setDisplayName(getDisName(siteDis, nodeAddr+"-pressure"))
                              .setEquipRef(equipRef)
                              .setSiteRef(siteRef)
                              .setRoomRef(roomRef)
@@ -587,7 +589,14 @@ public class DabEquip
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
-        String equipDis = siteDis+"-DAB-"+nodeAddr;
+        String tempEquipDis;
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase("carrier_prod")){
+            tempEquipDis = siteDis+"-VVT-"+nodeAddr;
+        }else{
+            tempEquipDis = siteDis+"-DAB-"+nodeAddr;
+        }
+
+        String equipDis = tempEquipDis;
         String tz = siteMap.get("tz").toString();
 
         Point damper1Type = new Point.Builder()
@@ -1222,5 +1231,15 @@ public class DabEquip
 
     public ControlLoop getHeatingLoop () {
         return heatingLoop;
+    }
+
+    public static String getDisName(String siteDis, String nodeAddr){
+        String tempEquipDis;
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            tempEquipDis = siteDis+"-VVT-"+nodeAddr;
+        }else{
+            tempEquipDis = siteDis+"-DAB-"+nodeAddr;
+        }
+        return tempEquipDis;
     }
 }

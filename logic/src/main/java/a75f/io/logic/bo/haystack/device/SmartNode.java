@@ -326,6 +326,11 @@ public class SmartNode
     public RawPoint getRawPoint(Port p) {
         HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                                                      +" and port == \""+p.toString()+"\"");
+        if (sensorPoint.size() > 0) {
+            return new RawPoint.Builder().setHashMap(sensorPoint).build();
+        }
+
+        sensorPoint = CCUHsApi.getInstance().read("point and domainName == \"" + getDomainNameFromPort(p) + "\" and deviceRef == \"" + deviceRef + "\"");
         return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
     }
     
@@ -448,6 +453,39 @@ public class SmartNode
             return new RawPoint.Builder().setHashMap(point).build();
         }
         return null;
+    }
+
+    public static String getDomainNameFromPort(Port p) {
+        switch(p) {
+            case ANALOG_OUT_ONE: return "analog1Out";
+            case ANALOG_OUT_TWO: return "analog2Out";
+            case ANALOG_OUT_THREE: return "analog3Out";
+            case ANALOG_OUT_FOUR: return "analog4Out";
+            case RELAY_ONE: return "relay1";
+            case RELAY_TWO: return "relay2";
+            case RELAY_THREE: return "relay3";
+            case RELAY_FOUR: return "relay4";
+            case RELAY_FIVE: return "relay5";
+            case RELAY_SIX: return "relay6";
+            case RELAY_SEVEN: return "relay7";
+            case RELAY_EIGHT: return "relay8";
+
+            case TH1_IN: return "th1In";
+            case TH2_IN: return "th2In";
+
+            case ANALOG_IN_ONE: return "analog1In";
+            case ANALOG_IN_TWO: return "analog2In";
+
+            case SENSOR_RT: return "currentTemp";
+            case SENSOR_RH: return "humiditySensor";
+            case DESIRED_TEMP: return "desiredTemp";
+
+            case SENSOR_CO2: return "co2Sensor";
+            case SENSOR_VOC: return "vocSensor";
+            case SENSOR_PRESSURE: return "pressureSensor";
+            case RSSI: return "rssi";
+            default: return null;
+        }
     }
 
 }

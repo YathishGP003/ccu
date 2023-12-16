@@ -72,6 +72,7 @@ public class NamedSchedule extends DialogFragment {
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final String PARAM_SCHED_NAME = "PARAM_SCHED_NAME";
+    private static final String PARAM_SCHED_SET = "PARAM_SCHED_SET";
     private static final String TAG = "NAMED_SCHEDULE";
 
     TextView textViewMonday;
@@ -120,6 +121,7 @@ public class NamedSchedule extends DialogFragment {
     private float mPixelsBetweenADay;
     private OnExitListener mOnExitListener;
     Button setButton;
+    ImageView closeButton;
 
     @Override
     public void onStop() {
@@ -138,12 +140,13 @@ public class NamedSchedule extends DialogFragment {
         void onExit();
     }
 
-    public static NamedSchedule getInstance(String scheduleId,String roomRef,String scheduleName) {
+    public static NamedSchedule getInstance(String scheduleId,String roomRef,String scheduleName,boolean isSet) {
         NamedSchedule namedSchedule = new NamedSchedule();
         Bundle args = new Bundle();
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
         args.putString(PARAM_ROOM_REF, roomRef);
         args.putString(PARAM_SCHED_NAME, scheduleName);
+        args.putBoolean(PARAM_SCHED_SET, isSet);
         namedSchedule.setArguments(args);
         return namedSchedule;
     }
@@ -175,6 +178,17 @@ public class NamedSchedule extends DialogFragment {
         initialiseViews(rootView);
 
         setButton = rootView.findViewById(R.id.setButton);
+        closeButton = rootView.findViewById(R.id.btnCloseNamed);
+
+
+        if(!getArguments().getBoolean(PARAM_SCHED_SET)) {
+            setButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.VISIBLE);
+            closeButton.setOnClickListener(view -> {
+                dismiss();
+            });
+        }
+
         setButton.setOnClickListener(v -> {
             if (validateNamedSchedule()) {
                 CcuLog.d(TAG, "Valid Named Schedule");

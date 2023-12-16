@@ -96,7 +96,7 @@ public class TrueCFMUtil {
         double flowVelocity = getFlowVelocityVav(hayStack, equipRef, equip);
         double ductArea = getDuctCrossSectionAreaVav(hayStack, equipRef, equip);
         double airflowCfm = flowVelocity * ductArea;
-        equip.getAirFlowSensor().writeHisVal(flowVelocity);
+        equip.getAirFlowSensor().writeHisVal(airflowCfm);
         equip.getAirVelocity().writeHisVal(flowVelocity);
         CcuLog.i(L.TAG_CCU_ZONE,"flowVelocity " + flowVelocity + " ductArea "
                 + ductArea+" airflowCfm "+airflowCfm);

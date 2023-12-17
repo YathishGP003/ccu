@@ -326,6 +326,8 @@ public class Pulse
 			if (sp == null) {
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+			} else if (sp.getPointRef() == null) {
+				sp = node.addEquipSensorFromRawPoint(sp, p);
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {

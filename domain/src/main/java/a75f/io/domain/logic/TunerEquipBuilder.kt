@@ -326,7 +326,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
                 if (!pointWithDomainNameExists(tunerPoints, modelPointDef.domainName)) {
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
-                    createCutoverMigrationPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
+                    //createCutoverMigrationPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
                 }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.

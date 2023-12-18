@@ -13,7 +13,7 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-heartBeatsToSkip" to "heartBeatsToSkip",
         "BuildingTuner-humidityCompensationOffset" to "humidityCompensationOffset",
         "BuildingTuner-clockUpdateInterval" to "clockUpdateInterval",
-        "BuildingTuner-buildingLimitMax" to "buildingLimitMax",
+        //"BuildingTuner-buildingLimitMax" to "buildingLimitMax", //TODO- doing this may create duplicate point as new models dont have this point.
         "BuildingTuner-perDegreeHumidityFactor" to "perDegreeHumidityFactor",
         "BuildingTuner-ccuAlarmVolumeLevel" to "ccuAlarmVolumeLevel",
         "BuildingTuner-heatingUserLimitMin" to "heatingUserLimitMin",

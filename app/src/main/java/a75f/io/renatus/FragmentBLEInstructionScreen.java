@@ -263,7 +263,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (L.isSimulation())
             {
                 showDialogFragment(AcbProfileConfigFragment.Companion
-                        .newInstance(mNodeAddress, mRoomName, mFloorName, mProfileType), AcbProfileConfigFragment.Companion.getID());
+                        .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), AcbProfileConfigFragment.Companion.getID());
             }
             else
             {

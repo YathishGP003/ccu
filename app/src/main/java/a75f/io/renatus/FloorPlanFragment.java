@@ -1438,8 +1438,11 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeType, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
                     break;
                 case VAV_ACB:
+                    Equip equipHN = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipHN.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeTypeHN = equipHN.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
                     showDialogFragment(AcbProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

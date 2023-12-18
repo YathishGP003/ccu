@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.acb
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -57,7 +58,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
         val ID: String = AcbProfileConfigFragment::class.java.simpleName
 
         fun newInstance(
-            meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType
+            meshAddress: Short, roomName: String, floorName: String, nodeType: NodeType, profileType: ProfileType
         ): AcbProfileConfigFragment {
             val fragment = AcbProfileConfigFragment()
             val bundle = Bundle()
@@ -65,6 +66,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
             bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
+            bundle.putInt(FragmentCommonBundleArgs.NODE_TYPE, nodeType.ordinal)
             fragment.arguments = bundle
             return fragment
         }

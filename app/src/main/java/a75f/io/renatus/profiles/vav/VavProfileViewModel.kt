@@ -210,6 +210,7 @@ class VavProfileViewModel : ViewModel() {
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+            vavProfile.init()
             setOutputTypes(profileConfiguration)
         }
 

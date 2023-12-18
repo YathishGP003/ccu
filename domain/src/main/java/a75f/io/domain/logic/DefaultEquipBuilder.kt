@@ -99,9 +99,8 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
-        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null /*&& pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null*/) {
-            pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-        }
+        pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
+        pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz))}
 
         return pointBuilder.build()
     }

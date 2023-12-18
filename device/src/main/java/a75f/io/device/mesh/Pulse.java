@@ -37,6 +37,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
@@ -1456,6 +1457,8 @@ public class Pulse
 				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
 				MeshUtil.sendStructToCM(seedMessage);
+				CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
+				MeshUtil.sendStructToCM(settings2Message);
 				LSerial.getInstance().setNodeSeeding(false);
 				break;
 			case SMART_STAT:

@@ -190,7 +190,7 @@ public abstract class VavProfile extends ZoneProfile {
                     +" co2Target "+co2Target
                     +" co2Threshold "+co2Threshold
                     +" vocTarget "+vocTarget
-                    +" integralMaxTimeout "+vocThreshold);
+                    +" integralMaxTimeout "+integralMaxTimeout);
 
             initializeCfmController(equipId);
         }

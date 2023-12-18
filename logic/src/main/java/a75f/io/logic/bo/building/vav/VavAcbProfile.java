@@ -286,33 +286,6 @@ public class VavAcbProfile extends VavProfile
         hwstResetRequest.handleRequestUpdate();
         return hwstResetRequest;
     }
-
-    public void setStatus(double status, boolean emergency) {
-
-        if (vavEquip.getEquipStatus().readHisVal() != status ) {
-            vavEquip.getEquipStatus().writeHisVal(status);
-        }
-
-        String message;
-        if (emergency) {
-            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
-        } else
-        {
-            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
-                message = "In Preconditioning ";
-            } else
-            {
-                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
-            }
-        }
-
-        message += getFanStatusMessage();
-
-        String curStatus = vavEquip.getEquipStatusMessage().readDefaultStrVal();
-        if (!curStatus.equals(message)) {
-            vavEquip.getEquipStatusMessage().writeDefaultVal(message);
-        }
-    }
     
     @Override
     public ZoneState getState() {

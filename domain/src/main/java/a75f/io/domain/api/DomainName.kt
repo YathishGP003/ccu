@@ -171,9 +171,9 @@ object DomainName {
     const val co2SPRes = "co2SpRes"
     const val co2SPResMax = "co2SpResMax"
 
-    const val vavAirflowCFMIntegralKFactor = "vavAirFlowCfmIntegralKfactor"
-    const val vavAirflowCFMProportionalKFactor = "vavAirFlowCfmProportionalKFactor"
-    const val vavAirflowCFMIntegralTime = "vavAirFlowCfmIntegralTime"
+    const val vavAirflowCFMIntegralKFactor = "vavAirFlowCFMIntegralKFactor"
+    const val vavAirflowCFMProportionalKFactor = "vavAirFlowCFMProportionalKFactor"
+    const val vavAirflowCFMIntegralTime = "vavAirFlowCFMIntegralTime"
     const val vavAirflowCFMProportionalRange = "vavAirflowCFMProportionalRange"
 
 

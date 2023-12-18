@@ -20963,7 +20963,7 @@
     {
       "id": "62e8c71ea841cb7abb470541",
       "name": "Airflow CFM Integral KFactor",
-      "domainName": "vavAirFlowCfmIntegralKfactor",
+      "domainName": "vavAirFlowCFMIntegralKFactor",
       "tags": [
         {
           "name": "air",
@@ -21221,7 +21221,7 @@
     {
       "id": "62e8b5fda841cb7abb470539",
       "name": "Airflow CFM Integral Time",
-      "domainName": "vavAirFlowCfmIntegralTime",
+      "domainName": "vavAirFlowCFMIntegralTime",
       "tags": [
         {
           "name": "air",
@@ -21493,7 +21493,7 @@
     {
       "id": "62e8c893a841cb7abb470542",
       "name": "Airflow CFM Proportional KFactor",
-      "domainName": "vavAirFlowCfmProportionalKFactor",
+      "domainName": "vavAirFlowCFMProportionalKFactor",
       "tags": [
         {
           "name": "air",

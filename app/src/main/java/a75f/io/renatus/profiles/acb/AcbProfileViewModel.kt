@@ -288,6 +288,7 @@ class AcbProfileViewModel : ViewModel() {
             hayStack.site!!.id,
             deviceDis
         )
+        acbProfile = VavAcbProfile(equipId, addr)
     }
 
     // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.

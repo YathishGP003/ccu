@@ -17712,7 +17712,7 @@
     {
       "id": "62e8c71ea841cb7abb470541",
       "name": "Integral KFactor",
-      "domainName": "vavIntegralKfactor",
+      "domainName": "vavIntegralKFactor",
       "tags": [
         {
           "name": "cur",

@@ -115,7 +115,7 @@ object DomainName {
     const val minCFMReheating = "minCFMReheating"
     const val maxCFMReheating = "maxCFMReheating"
 
-    const val vavIntegralKfactor = "vavIntegralKfactor"
+    const val vavIntegralKfactor = "vavIntegralKFactor"
     const val vavZoneVocTarget = "vavZoneVocTarget"
     const val vavZoneCo2Threshold = "vavZoneCo2Threshold"
     const val vavZoneCo2Target = "vavZoneCo2Target"

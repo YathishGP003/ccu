@@ -172,7 +172,7 @@ public class LSmartNode
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
         
-        settings.temperatureOffset.set((short)getTempOffset(address));
+        settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         
         if(profile == null)
             profile = "dab";
@@ -200,6 +200,7 @@ public class LSmartNode
                 break;
             case "acb":
                 settings.profileBitmap.reserved.set((short)4);
+                setupDamperType(address, settings);
                 break;
 
         }
@@ -541,7 +542,7 @@ public class LSmartNode
     public static double getTempOffset(short addr) {
         try
         {
-            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and temperature and offset and group == \"" + addr + "\"");
+            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and (temp or temperature) and offset and group == \"" + addr + "\"");
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
@@ -739,11 +740,33 @@ public class LSmartNode
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
-            Log.d("CCU","DamperLimit: Invalid point Send Default");
-            return minMax.equals("max") ? 100 : 40 ;
+            ArrayList domainPoints = CCUHsApi.getInstance().readAll("point and domainName == \"" + getDamperLimitDomainName(coolHeat, minMax) + "\" and group == \""+nodeAddr+"\"");
+            if (domainPoints.size() == 0) {
+                Log.d("CCU","DamperLimit: Invalid point Send Default");
+                return minMax.equals("max") ? 100 : 40 ;
+            } else {
+                String id = ((HashMap)domainPoints.get(0)).get("id").toString();
+                return CCUHsApi.getInstance().readPointPriorityVal(id);
+            }
         }
         String id = ((HashMap)points.get(0)).get("id").toString();
         return CCUHsApi.getInstance().readDefaultValById(id);
+    }
+
+    public static String getDamperLimitDomainName(String coolHeat, String minMax) {
+        if (coolHeat.equals("heating")) {
+            if (minMax.equals("min")) {
+                return DomainName.minHeatingDamperPos;
+            } else {
+                return DomainName.maxHeatingDamperPos;
+            }
+        } else {
+            if (minMax.equals("min")) {
+                return DomainName.minCoolingDamperPos;
+            } else {
+                return DomainName.maxCoolingDamperPos;
+            }
+        }
     }
     
     public static double getStatus(short nodeAddr) {

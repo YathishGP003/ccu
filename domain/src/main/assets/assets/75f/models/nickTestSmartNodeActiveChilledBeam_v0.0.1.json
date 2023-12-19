@@ -5983,7 +5983,7 @@
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": null,
+      "defaultValue": 72,
       "defaultUnit": "°F",
       "isGpc36": false,
       "hisInterpolate": "COV",

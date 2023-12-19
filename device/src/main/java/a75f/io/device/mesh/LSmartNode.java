@@ -286,23 +286,6 @@ public class LSmartNode
         settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
         settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
-
-        CcuLog.d(L.TAG_CCU_DEVICE, "Smart Node Settings2 Message:");
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tkFactor: " + settings2.kFactor);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tminCFMCooling: " + settings2.minCFMCooling);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tmaxCFMCooling: " + settings2.maxCFMCooling);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tminCFMReheating: " + settings2.minCFMReheating);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tmaxCFMReheating: " + settings2.maxCFMReheating);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tdamperShape: " + settings2.damperShape);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tdamperSize: " + settings2.damperSize);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tcondensateSensor: " + settings2.condensateSensor);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tairflowCFMProportionalRange: " + settings2.airflowCFMProportionalRange);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tairflowCFMProportionalKFactor: " + settings2.airflowCFMProportionalKFactor);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tairflowCFMIntegralTime: " + settings2.airflowCFMIntegralTime);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tairflowCFMIntegralKFactor: " + settings2.airflowCFMIntegralKFactor);
-        CcuLog.d(L.TAG_CCU_DEVICE, "\tenableCFM: " + settings2.enableCFM);
-        CcuLog.d(L.TAG_CCU_DEVICE, "");
-
     }
     private static int getDamperSizeInInches(int index) {
         switch (index) {

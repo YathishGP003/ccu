@@ -134,7 +134,6 @@ public class LSmartNode
         fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef,profile);
         fillCurrentUpdatedTime(seedMessage.controls);
         fillSmartNodeControls(seedMessage.controls,zone,address,equipRef);
-        fillSmartNodeSettings2(seedMessage.settings2,zone,address,equipRef, profile);
         return seedMessage;
     }
     public static CcuToCmOverUsbSnSettingsMessage_t getSettingsMessage(Zone zone, short address, String equipRef,String profile)

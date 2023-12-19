@@ -41,6 +41,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -179,7 +180,17 @@ public class LSmartNode
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (equip.getProfile().equals("VAV_ACB")) { profile = "acb"; }
+        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString())) {
+            profile = "acb";
+        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString())) {
+            profile = "vavNoFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString())) {
+            profile = "vavParallelFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString())) {
+            profile = "vavSeriesFan";
+        } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
+            profile = "dualDuct";
+        }
 
         switch (profile){
             case "dab":
@@ -198,8 +209,24 @@ public class LSmartNode
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
                 break;
+            case "vavNoFan":
+                settings.profileBitmap.reserved.set((short)1);
+                setupDamperType(address, settings);
+                break;
+            case "vavSeriesFan":
+                settings.profileBitmap.reserved.set((short)2);
+                setupDamperType(address, settings);
+                break;
+            case "vavParallelFan":
+                settings.profileBitmap.reserved.set((short)3);
+                setupDamperType(address, settings);
+                break;
             case "acb":
                 settings.profileBitmap.reserved.set((short)4);
+                setupDamperType(address, settings);
+                break;
+            case "dualDuct":
+                settings.profileBitmap.reserved.set((short)5);
                 setupDamperType(address, settings);
                 break;
 

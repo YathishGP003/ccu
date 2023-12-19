@@ -391,7 +391,7 @@ fun operateDamper(
 
     damperOperationPercent = minOf(damperOperationPercent, 100.0)
 
-    val dcvSetPoint = mapToSetPoint(dcvMin, dcvMax, damperOperationPercent)
+    val dcvSetPoint = mapToSetPoint(dcvMin, dcvMax, damperOperationPercent).coerceAtMost(dcvMax)
 
     updatePointValue(systemEquip, dcvLoopOutput, damperOperationPercent)
     updatePointValue(systemEquip, dcvDamperCalculatedSetpoint, dcvSetPoint)

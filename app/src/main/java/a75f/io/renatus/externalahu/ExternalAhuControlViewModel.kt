@@ -156,6 +156,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             profileModelDefinition = def as SeventyFiveFProfileDirective
         }
     }
+    fun getDefaultValByDomain(domainName: String): String {
+        return profileModelDefinition.points.find { (it.domainName.contentEquals(domainName)) }?.defaultValue.toString()
+    }
 
     private fun setCurrentConfig(config: ExternalAhuConfiguration) {
         CcuLog.i(TAG, "setCurrentConfig")

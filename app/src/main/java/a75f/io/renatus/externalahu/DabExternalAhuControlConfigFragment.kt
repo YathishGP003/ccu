@@ -110,6 +110,13 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     viewModel.configModel.value.setPointControl = it
                                     if (!viewModel.configModel.value.setPointControl) viewModel.configModel.value.dualSetPointControl =
                                         false
+                                    viewModel.configModel.value.satMin = viewModel.getDefaultValByDomain(systemSATMinimum)
+                                    viewModel.configModel.value.satMax = viewModel.getDefaultValByDomain(systemSATMaximum)
+
+                                    viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
+                                    viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
+                                    viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
+                                    viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
                                 }
                                 if (viewModel.configModel.value.setPointControl) {
                                     SetPointControlCompose(
@@ -120,6 +127,10 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                         state = viewModel.configModel.value.dualSetPointControl
                                     ) {
                                         viewModel.configModel.value.dualSetPointControl = it
+                                        viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
+                                        viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
+                                        viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
+                                        viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
                                     }
                                 }
                             }
@@ -301,6 +312,8 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 state = viewModel.configModel.value.fanStaticSetPointControl
                             ) {
                                 viewModel.configModel.value.fanStaticSetPointControl = it
+                                viewModel.configModel.value.fanMinSp = viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
+                                viewModel.configModel.value.fanMaxSp = viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
                             }
                         }
                         item {
@@ -369,6 +382,11 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                 ), state = viewModel.configModel.value.dcvControl
                             ) {
                                 viewModel.configModel.value.dcvControl = it
+                                viewModel.configModel.value.dcvMin = viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
+                                viewModel.configModel.value.dcvMax = viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
+                                viewModel.configModel.value.co2Threshold = viewModel.getDefaultValByDomain(systemCO2Threshold)
+                                viewModel.configModel.value.co2Target = viewModel.getDefaultValByDomain(systemCO2Target)
+                                viewModel.configModel.value.damperOpeningRate = viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
                             }
                         }
                         item {

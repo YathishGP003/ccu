@@ -13,6 +13,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
+import java.util.Locale
 
 /**
  * A common implementation of EquipBuilder interface with a generic equip/point build support.
@@ -79,7 +80,9 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
             if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
-                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name)
+                pointBuilder.setHisInterpolate(
+                    pointConfig.modelDef.hisInterpolate.name.lowercase(Locale.ROOT)
+                )
             }
         }
 

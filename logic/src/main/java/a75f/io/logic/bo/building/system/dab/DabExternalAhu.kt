@@ -375,6 +375,7 @@ class DabExternalAhu : DabSystemProfile() {
         val point = CCUHsApi.getInstance().readEntity("$query and equipRef == \"$equipId\"")
 
         if (point.isEmpty()) {
+            logIt("$query = point not found $equipId")
             return ""
         }
 

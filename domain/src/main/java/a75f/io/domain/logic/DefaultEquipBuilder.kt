@@ -19,7 +19,7 @@ import org.projecthaystack.HStr
  */
 open class DefaultEquipBuilder : EquipBuilder {
 
-    override fun buildEquip(equipConfig: EquipBuilderConfig): Equip {
+    override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
 
         val equipBuilder =
             Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
@@ -119,10 +119,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-        /*
-        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null && pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null) {
-            pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-        }*/
+        pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
 
         var enums = ""
         if (pointConfig.modelDef.valueConstraint.constraintType.name.contentEquals("MULTI_STATE")) {

@@ -4,7 +4,7 @@
 buildscript {
     ext.kotlin_version = '1.7.20'
     ext.objectboxVersion = '2.6.0'
-    ext.domainModelLibVersion = '20231213.1-qa'
+    ext.domainModelLibVersion = '20231214.3-qa'
 
     repositories {
         mavenLocal()

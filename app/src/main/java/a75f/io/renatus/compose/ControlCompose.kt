@@ -50,7 +50,7 @@ fun SetPointConfig(title: String, defaultSelection:String, items: List<String>, 
         Text(
             modifier = Modifier
                 .padding(PaddingValues(top = 5.dp, start = 10.dp))
-                .width(350.dp),
+                .width(300.dp),
             style = TextStyle(
                 fontFamily = myFontFamily,
                 fontWeight = FontWeight.Medium,

@@ -42,9 +42,9 @@ fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, i
                 top = 5.dp
             )
         )) {
-        Column ( modifier = Modifier.width(160.dp).clickable(onClick = { expanded.value = true }) ) {
+        Column ( modifier = Modifier.width(200.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( fontSize = 20.sp, modifier = Modifier.width(120.dp),text = "${selectedItem.value} $unit")
+                Text( fontSize = 20.sp, modifier = Modifier.width(150.dp),text = "${selectedItem.value} $unit")
                 val drawableResource = R.drawable.ic_arrow_down
 
                 Image(

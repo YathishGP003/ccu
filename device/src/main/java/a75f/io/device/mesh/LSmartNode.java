@@ -176,6 +176,11 @@ public class LSmartNode
         
         if(profile == null)
             profile = "dab";
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        if (equip.getProfile().equals("VAV_ACB")) { profile = "acb"; }
+
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
@@ -192,6 +197,9 @@ public class LSmartNode
                 break;
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
+                break;
+            case "acb":
+                settings.profileBitmap.reserved.set((short)4);
                 break;
 
         }

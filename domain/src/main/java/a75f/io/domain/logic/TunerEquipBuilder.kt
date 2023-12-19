@@ -281,6 +281,14 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             CcuLog.e(Domain.LOG_TAG, " Cut-Over migration aborted. ModelDef does not exist")
             return
         }
+
+        var fcuTuners = hayStack.readAllEntities("standalone and threshold and fcu and equipRef == \"$equipRef\"")
+        fcuTuners.forEach {
+            if (it["tunerGroup"] != null && it["tunerGroup"].toString() == "HYPERSTAT") {
+                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Clean up $it")
+                hayStack.deleteEntityTree(it["id"].toString())
+            }
+        }
         var tunerPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
 
@@ -346,6 +354,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
         //Required to update backend points since local building tuners are no longer synced.
         updateBackendBuildingTuner(site.id, hayStack)
+        hayStack.syncEntityTree();
     }
 
     fun updateBackendBuildingTuner(siteRef: String, hayStack: CCUHsApi) {

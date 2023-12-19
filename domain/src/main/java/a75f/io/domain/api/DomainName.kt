@@ -326,6 +326,7 @@ object DomainName {
     const val supplyAirflowTemperatureSetpoint = "supplyAirflowTemperatureSetpoint"
     const val systemCO2Threshold = "systemCO2Threshold"
     const val systemCO2DamperOpeningRate = "systemCO2DamperOpeningRate"
+    const val systemCO2Target = "systemCO2Target"
     const val outsideHumidity = "outsideHumidity"
     const val systemtargetMinInsideHumidty = "systemtargetMinInsideHumidty"
     const val systemtargetMaxInsideHumidty = "systemtargetMaxInsideHumidty"

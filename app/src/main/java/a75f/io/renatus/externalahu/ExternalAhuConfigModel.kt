@@ -1,5 +1,8 @@
 package a75f.io.renatus.externalahu
 
+import a75f.io.domain.api.DomainName.systemCO2DamperOpeningRate
+import a75f.io.domain.api.DomainName.systemCO2Target
+import a75f.io.domain.api.DomainName.systemCO2Threshold
 import a75f.io.domain.api.DomainName.systemCoolingSATMaximum
 import a75f.io.domain.api.DomainName.systemCoolingSATMinimum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMinimum
@@ -44,6 +47,9 @@ class ExternalAhuConfigModel {
     var dcvMax: String by mutableStateOf("0")
     var targetHumidity: String by mutableStateOf("0")
     var targetDeHumidity: String by mutableStateOf("0")
+    var co2Threshold: String by mutableStateOf("0")
+    var co2Target: String by mutableStateOf("0")
+    var damperOpeningRate: String by mutableStateOf("0")
 
 
     fun controlName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): String {
@@ -80,6 +86,10 @@ class ExternalAhuConfigModel {
         config.dcvMin.currentVal = this.dcvMin.toDouble()
         config.dcvMax.currentVal = this.dcvMax.toDouble()
 
+        config.co2Threshold.currentVal = this.co2Threshold.toDouble()
+        config.co2Target.currentVal = this.co2Target.toDouble()
+        config.damperOpeningRate.currentVal = this.damperOpeningRate.toDouble()
+
         return config
     }
 
@@ -94,5 +104,8 @@ class ExternalAhuConfigModel {
         fanMaxSp = getPointByDomainName(modelDef,systemStaticPressureMaximum)?.defaultValue.toString()
         dcvMin = getPointByDomainName(modelDef,systemDCVDamperPosMinimum)?.defaultValue.toString()
         dcvMax = getPointByDomainName(modelDef,systemDCVDamperPosMaximum)?.defaultValue.toString()
+        co2Threshold = getPointByDomainName(modelDef,systemCO2Threshold)?.defaultValue.toString()
+        co2Target = getPointByDomainName(modelDef,systemCO2Target)?.defaultValue.toString()
+        damperOpeningRate = getPointByDomainName(modelDef,systemCO2DamperOpeningRate)?.defaultValue.toString()
     }
 }

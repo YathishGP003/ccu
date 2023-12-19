@@ -177,6 +177,9 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         configModel.value.fanMaxSp = config.fanMaxSp.currentVal.toString()
         configModel.value.dcvMin = config.dcvMin.currentVal.toString()
         configModel.value.dcvMax = config.dcvMax.currentVal.toString()
+        configModel.value.co2Threshold = config.co2Threshold.currentVal.toString()
+        configModel.value.co2Target = config.co2Target.currentVal.toString()
+        configModel.value.damperOpeningRate = config.damperOpeningRate.currentVal.toString()
     }
 
     fun saveConfiguration() {

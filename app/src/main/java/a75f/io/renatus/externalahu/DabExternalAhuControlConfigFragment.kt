@@ -7,6 +7,9 @@ import a75f.io.domain.api.DomainName.humidifierOperationEnable
 import a75f.io.domain.api.DomainName.occupancyModeControl
 import a75f.io.domain.api.DomainName.satSetpointControlEnable
 import a75f.io.domain.api.DomainName.staticPressureSetpointControlEnable
+import a75f.io.domain.api.DomainName.systemCO2DamperOpeningRate
+import a75f.io.domain.api.DomainName.systemCO2Target
+import a75f.io.domain.api.DomainName.systemCO2Threshold
 import a75f.io.domain.api.DomainName.systemCoolingSATMaximum
 import a75f.io.domain.api.DomainName.systemCoolingSATMinimum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
@@ -379,6 +382,18 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                     viewModel.profileModelDefinition,
                                     systemDCVDamperPosMaximum
                                 )
+                                val co2Threshold = viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition,
+                                    systemCO2Threshold
+                                )
+                                val damperOpeningRate = viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition,
+                                    systemCO2DamperOpeningRate
+                                )
+                                val co2Target = viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition,
+                                    systemCO2Target
+                                )
 
                                 Row {
                                     Column {
@@ -413,6 +428,70 @@ class DabExternalAhuControlConfigFragment : Fragment() {
                                                     items, dcvMax.defaultUnit ?: EMPTY,
                                                 ) { selected ->
                                                     viewModel.configModel.value.dcvMax = selected
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Row {
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            if (co2Threshold != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (co2Threshold.valueConstraint as NumericConstraint).minValue,
+                                                    (co2Threshold.valueConstraint as NumericConstraint).maxValue,
+                                                    (co2Threshold.presentationData?.get(tagValueIncrement) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    co2Threshold.name,
+                                                    viewModel.configModel.value.co2Threshold,
+                                                    items, co2Threshold.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.co2Threshold = selected
+                                                }
+                                            }
+                                            if (co2Target != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (co2Target.valueConstraint as NumericConstraint).minValue,
+                                                    (co2Target.valueConstraint as NumericConstraint).maxValue,
+                                                    (co2Target.presentationData?.get(tagValueIncrement) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    co2Target.name,
+                                                    viewModel.configModel.value.co2Target,
+                                                    items, co2Target.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.co2Target = selected
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Row {
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+
+                                            if (damperOpeningRate != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (damperOpeningRate.valueConstraint as NumericConstraint).minValue,
+                                                    (damperOpeningRate.valueConstraint as NumericConstraint).maxValue,
+                                                    (damperOpeningRate.presentationData?.get(tagValueIncrement) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    damperOpeningRate.name,
+                                                    viewModel.configModel.value.damperOpeningRate,
+                                                    items, damperOpeningRate.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.damperOpeningRate = selected
                                                 }
                                             }
                                         }

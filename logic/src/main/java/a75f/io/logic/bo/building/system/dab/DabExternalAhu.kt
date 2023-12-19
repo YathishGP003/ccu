@@ -18,6 +18,9 @@ import a75f.io.domain.api.DomainName.humidifierOperationEnable
 import a75f.io.domain.api.DomainName.occupancyModeControl
 import a75f.io.domain.api.DomainName.satSetpointControlEnable
 import a75f.io.domain.api.DomainName.staticPressureSetpointControlEnable
+import a75f.io.domain.api.DomainName.systemCO2DamperOpeningRate
+import a75f.io.domain.api.DomainName.systemCO2Target
+import a75f.io.domain.api.DomainName.systemCO2Threshold
 import a75f.io.domain.api.DomainName.systemCoolingSATMaximum
 import a75f.io.domain.api.DomainName.systemCoolingSATMinimum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
@@ -243,6 +246,9 @@ class DabExternalAhu : DabSystemProfile() {
             getConfigValue(modelDef, systemStaticPressureMaximum, systemEquip)
         config.dcvMin.currentVal = getConfigValue(modelDef, systemDCVDamperPosMinimum, systemEquip)
         config.dcvMax.currentVal = getConfigValue(modelDef, systemDCVDamperPosMaximum, systemEquip)
+        config.co2Threshold.currentVal = getConfigValue(modelDef, systemCO2Threshold, systemEquip)
+        config.damperOpeningRate.currentVal = getConfigValue(modelDef, systemCO2DamperOpeningRate, systemEquip)
+        config.co2Target.currentVal = getConfigValue(modelDef, systemCO2Target, systemEquip)
         return config
     }
 

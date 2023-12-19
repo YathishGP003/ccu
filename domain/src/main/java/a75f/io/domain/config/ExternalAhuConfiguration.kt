@@ -1,5 +1,6 @@
 package a75f.io.domain.config
 
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.DomainName.dcvDamperControlEnable
 import a75f.io.domain.api.DomainName.dehumidifierOperationEnable
 import a75f.io.domain.api.DomainName.dualSetpointControlEnable
@@ -17,7 +18,6 @@ import a75f.io.domain.api.DomainName.systemSATMaximum
 import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
  * Created by Manjunath K on 13-06-2023.
@@ -44,6 +44,9 @@ class ExternalAhuConfiguration (profileType : String)
     var fanMaxSp = ValueConfig(systemStaticPressureMaximum)
     var dcvMin = ValueConfig(systemDCVDamperPosMinimum)
     var dcvMax = ValueConfig(systemDCVDamperPosMaximum)
+    var co2Threshold = ValueConfig(DomainName.systemCO2Threshold)
+    var damperOpeningRate = ValueConfig(DomainName.systemCO2DamperOpeningRate)
+    var co2Target = ValueConfig(DomainName.systemCO2Target)
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
         return mutableListOf()
@@ -61,6 +64,9 @@ class ExternalAhuConfiguration (profileType : String)
         valueConfiguration.add(fanMaxSp)
         valueConfiguration.add(dcvMin)
         valueConfiguration.add(dcvMax)
+        valueConfiguration.add(co2Threshold)
+        valueConfiguration.add(damperOpeningRate)
+        valueConfiguration.add(co2Target)
         return valueConfiguration
     }
 

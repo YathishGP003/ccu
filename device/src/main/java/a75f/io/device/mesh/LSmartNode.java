@@ -40,6 +40,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -170,11 +171,26 @@ public class LSmartNode
             settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
-        
-        settings.temperatureOffset.set((short)getTempOffset(address));
+
+        settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         
         if(profile == null)
             profile = "dab";
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        if (equip.getProfile().equals("VAV_ACB")) {
+            profile = "acb";
+        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString())) {
+            profile = "vavNoFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString())) {
+            profile = "vavParallelFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString())) {
+            profile = "vavSeriesFan";
+        } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
+            profile = "dualDuct";
+        }
+
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
@@ -191,6 +207,26 @@ public class LSmartNode
                 break;
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
+                break;
+            case "vavNoFan":
+                settings.profileBitmap.reserved.set((short)1);
+                setupDamperType(address, settings);
+                break;
+            case "vavSeriesFan":
+                settings.profileBitmap.reserved.set((short)2);
+                setupDamperType(address, settings);
+                break;
+            case "vavParallelFan":
+                settings.profileBitmap.reserved.set((short)3);
+                setupDamperType(address, settings);
+                break;
+            case "acb":
+                settings.profileBitmap.reserved.set((short)4);
+                setupDamperType(address, settings);
+                break;
+            case "dualDuct":
+                settings.profileBitmap.reserved.set((short)5);
+                setupDamperType(address, settings);
                 break;
 
         }
@@ -465,7 +501,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controls_t.setTemperature.set((short) (getSetTemp(equipRef) * 2));
+            controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
     
         }
@@ -479,7 +515,7 @@ public class LSmartNode
     public static double getTempOffset(short addr) {
         try
         {
-            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and temperature and offset and group == \"" + addr + "\"");
+            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and (temp or temperature) and offset and group == \"" + addr + "\"");
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
@@ -676,13 +712,35 @@ public class LSmartNode
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
-            Log.d("CCU","DamperLimit: Invalid point Send Default");
-            return minMax.equals("max") ? 100 : 40 ;
+            ArrayList domainPoints = CCUHsApi.getInstance().readAll("point and domainName == \"" + getDamperLimitDomainName(coolHeat, minMax) + "\" and group == \""+nodeAddr+"\"");
+            if (domainPoints.size() == 0) {
+                Log.d("CCU","DamperLimit: Invalid point Send Default");
+                return minMax.equals("max") ? 100 : 40 ;
+            } else {
+                String id = ((HashMap)domainPoints.get(0)).get("id").toString();
+                return CCUHsApi.getInstance().readPointPriorityVal(id);
+            }
         }
         String id = ((HashMap)points.get(0)).get("id").toString();
         return CCUHsApi.getInstance().readDefaultValById(id);
     }
-    
+
+    public static String getDamperLimitDomainName(String coolHeat, String minMax) {
+        if (coolHeat.equals("heating")) {
+            if (minMax.equals("min")) {
+                return DomainName.minHeatingDamperPos;
+            } else {
+                return DomainName.maxHeatingDamperPos;
+            }
+        } else {
+            if (minMax.equals("min")) {
+                return DomainName.minCoolingDamperPos;
+            } else {
+                return DomainName.maxCoolingDamperPos;
+            }
+        }
+    }
+
     public static double getStatus(short nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
@@ -763,7 +821,7 @@ public class LSmartNode
                 }
             }
             Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
-            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
+            controlsMessage.controls.setTemperature.set((short)(getSetTemp(equip.getId()) > 0 ? (getSetTemp(equip.getId()) * 2) : 144));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

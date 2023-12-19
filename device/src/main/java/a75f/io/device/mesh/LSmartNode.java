@@ -528,7 +528,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controls_t.setTemperature.set((short) (getSetTemp(equipRef) * 2));
+            controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
     
         }

@@ -98,18 +98,27 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         enableCFMControl.enabled = vavEquip.enableCFMControl.readDefaultVal() > 0
 
         temperatureOffset.currentVal = vavEquip.temperatureOffset.readDefaultVal()
-        maxCoolingDamperPos.currentVal = vavEquip.maxCoolingDamperPos.readDefaultVal()
-        minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readDefaultVal()
+
         maxHeatingDamperPos.currentVal = vavEquip.maxHeatingDamperPos.readDefaultVal()
-        minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readDefaultVal()
+
         if (enableCFMControl.enabled) {
             kFactor.currentVal = vavEquip.kFactor.readDefaultVal()
+
+            minCoolingDamperPos = getDefaultValConfig(DomainName.minCoolingDamperPos, model)
+            maxCoolingDamperPos = getDefaultValConfig(DomainName.maxCoolingDamperPos, model)
+            minHeatingDamperPos = getDefaultValConfig(DomainName.minHeatingDamperPos, model)
+
             maxCFMCooling.currentVal = vavEquip.maxCFMCooling.readDefaultVal()
             minCFMCooling.currentVal = vavEquip.minCFMCooling.readDefaultVal()
             maxCFMReheating.currentVal = vavEquip.maxCFMReheating.readDefaultVal()
             minCFMReheating.currentVal = vavEquip.minCFMReheating.readDefaultVal()
         } else {
             kFactor = getDefaultValConfig(DomainName.kFactor, model)
+
+            minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readDefaultVal()
+            maxCoolingDamperPos.currentVal = vavEquip.maxCoolingDamperPos.readDefaultVal()
+            minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readDefaultVal()
+
             maxCFMCooling = getDefaultValConfig(DomainName.maxCFMCooling, model)
             minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)
             maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)

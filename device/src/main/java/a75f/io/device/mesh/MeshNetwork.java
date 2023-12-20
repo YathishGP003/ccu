@@ -27,6 +27,8 @@ import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
+import a75f.io.device.modbus.LModbus;
+import a75f.io.device.modbus.ModbusNetwork;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -82,7 +84,7 @@ public class MeshNetwork extends DeviceNetwork
                     for(Device d : HSUtil.getDevices(zone.getId())) {
 
                         if (d.getMarkers().contains("modbus")) {
-                            continue;
+                          continue;
                         }
                         NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))

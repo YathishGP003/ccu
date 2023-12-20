@@ -18,6 +18,8 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.ModbusMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -41,6 +43,10 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
+
+
+
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
         LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);
         int registerRequestCount = preferences.getInt("registerRequestCount", 3);
@@ -63,6 +69,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
                             break;
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+
                         CcuLog.d(L.TAG_CCU_MODBUS,
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
                                         ", count: "+count+

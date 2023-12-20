@@ -16,6 +16,8 @@ import java.util.HashSet;
 
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.ModbusMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -91,10 +93,41 @@ public class LModbus {
                 return;
             }
             RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
-            LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+
+            byte[] data = rtuMessageRequest.getMessageData();
+
+            ModbusMessage_t modbusMessage = getModbusMessage(data);
+
+
+            LSerial.getInstance().sendSerialToCM(modbusMessage);
+
+
+
+            if (LSerial.getInstance().isModbusConnected()) {
+                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+            }
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {
             Log.d(L.TAG_CCU_MODBUS, "Modbus write failed. "+register.getRegisterAddress()+" : "+writeValue+" "+e.getMessage());
         }
     }
+
+    private static ModbusMessage_t getModbusMessage(byte[] data) {
+
+        ModbusMessage_t modbusMessage  = new ModbusMessage_t();
+        modbusMessage.messageType.set(MessageType.MODBUS_MESSAGE);
+        modbusMessage.slaveId.set(data[0]);
+        modbusMessage.functionCode.set(data[1]);
+        modbusMessage.startingAddressHigh.set(data[2]);
+        modbusMessage.startingAddressLow.set(data[3]);
+        modbusMessage.quantityOfCoilsHigh.set(data[4]);
+        modbusMessage.quantityOfCoilsLow.set(data[5]);
+        modbusMessage.errorCheckLow.set(data[6]);
+        modbusMessage.errorCheckHigh.set(data[7]);
+
+        return modbusMessage;
+
+    }
+
+
 }

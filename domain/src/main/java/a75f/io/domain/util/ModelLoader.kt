@@ -15,9 +15,9 @@ object ModelLoader {
     private const val MODEL_SN_VAV_NO_FAN = "nickTestSmartNodeVAVReheatNoFan_v0.0.1"
     private const val MODEL_SN_VAV_SERIES_FAN = "smartnodeVAVReheatSeriesFan_v0.0.6";//""65198813951f37007b7956e9_Vav_Series_Sam"
     private const val MODEL_SN_VAV_PARALLEL_FAN = "smartnodeVAVReheatParallelFan_v0.0.5";//"6519a8e5951f37007b7956ea_Vav_Parallel_Sam"
-    private const val MODEL_HN_VAV_NO_FAN = "6519b3e1951f37007b7956eb"
-    private const val MODEL_HN_VAV_SERIES_FAN = "6519b451951f37007b7956ec"
-    private const val MODEL_HN_VAV_PARALLEL_FAN = "6519b4d6951f37007b7956ed"
+    private const val MODEL_HN_VAV_NO_FAN = "helionodeVAVReheatNoFan_v0.0.13"
+    private const val MODEL_HN_VAV_SERIES_FAN = "helionodeVAVReheatSeriesFan_v0.0.12"
+    private const val MODEL_HN_VAV_PARALLEL_FAN = "helionodeVAVReheatParallelFan_v0.0.11"
 
     private const val MODEL_VAV_NO_FAN = "64abb6a3a97798751b2bda14"
 

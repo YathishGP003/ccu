@@ -1,13 +1,17 @@
 package a75f.io.logic.bo.building.truecfm;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class TrueCFMUtil {
     
@@ -143,13 +147,15 @@ public class TrueCFMUtil {
     }
     
     public static boolean cfmControlNotRequired(CCUHsApi hayStack, String equipRef) {
-    
-        int occupancyMode = hayStack.readHisValByQuery("point and occupancy and mode and equipRef ==\""+equipRef+"\"")
-                                                    .intValue();
+
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(equip.getRoomRef());
+        boolean occupied = (occ == null ? false : occ.isOccupied())
+                || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
         
         return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)
-                                    || (occupancyMode != Occupancy.OCCUPIED.ordinal()
-                                        && occupancyMode != Occupancy.FORCEDOCCUPIED.ordinal()
-                                        && occupancyMode != Occupancy.AUTOFORCEOCCUPIED.ordinal());
+                                || !occupied;
     }
 }

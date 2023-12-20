@@ -22,7 +22,7 @@ object ModelLoader {
     private const val MODEL_VAV_NO_FAN = "64abb6a3a97798751b2bda14"
 
     private const val MODEL_SN_VAV_ACB = "nickTestSmartNodeActiveChilledBeam_v0.0.1"
-    private const val MODEL_HN_VAV_ACB = "651d8330951f37007b795706"
+    private const val MODEL_HN_VAV_ACB = "nickTestHelioNodeActiveChilledBeam_v0.0.1"
 
     private const val MODEL_SMART_NODE_DEVICE = "64e258c5cb3df279a3608efa"
     private const val MODEL_HELIO_NODE_DEVICE = "64e32aa2cb3df279a3608efc"

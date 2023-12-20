@@ -19,7 +19,7 @@ public class TrueCFMUtil {
             Starting with version ___, Haystack logical points were converted to read accurately in inH20.
             So, the unit conversion has been removed here, since it is already done when writing to the logical point.
          */
-        double kFactor = hayStack.readDefaultVal("(trueCfm or trueCFM) and (kfactor or KFactor) and equipRef == \""+equipRef+"\"");
+        double kFactor = hayStack.readDefaultVal("(trueCfm or trueCFM) and (kfactor or KFactor or kFactor) and equipRef == \""+equipRef+"\"");
         double pressureInWc = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
         CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInWc " + pressureInWc);
         double pressureInWGUnit = Math.abs(pressureInWc);
@@ -33,11 +33,34 @@ public class TrueCFMUtil {
         int damperShapeVal = hayStack.readDefaultVal(damperOrderQuery+"damper and shape and equipRef == \""+equipRef+
                                                      "\"").intValue();
         DamperShape damperShape = DamperShape.values()[damperShapeVal];
-        double damperSizeInFeet = damperSize/12;
+        double damperSizeInFeet = getDamperSizeFromEnum((int)damperSize)/12;
         if (damperShape == DamperShape.ROUND) {
             return 3.14 * damperSizeInFeet/2 * damperSizeInFeet/2;
         } else {
             return damperSizeInFeet * damperSizeInFeet; //TODO - check if rectangular dimension available.
+        }
+    }
+
+    private static double getDamperSizeFromEnum(int index) {
+        switch (index) {
+            case 1:
+                return 6.0;
+            case 2:
+                return 8.0;
+            case 3:
+                return 10.0;
+            case 4:
+                return 12.0;
+            case 5:
+                return 14.0;
+            case 6:
+                return 16.0;
+            case 7:
+                return 18.0;
+            case 8:
+                return 20.0;
+            default:
+                return 4.0;
         }
     }
     

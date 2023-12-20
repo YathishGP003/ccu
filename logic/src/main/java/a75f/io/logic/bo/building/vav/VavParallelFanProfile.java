@@ -6,6 +6,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -18,6 +19,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -84,7 +86,9 @@ public class VavParallelFanProfile extends VavProfile
             damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
         }
 
-        updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), vavEquip.getId())) {
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+        }
 
         //When in the system is in heating, REHEAT control does not follow RP-1455.
         if (conditioning == SystemController.State.HEATING && state == HEATING) {
@@ -98,6 +102,7 @@ public class VavParallelFanProfile extends VavProfile
     }
     
     private void initLoopVariables(int node) {
+        vavEquip = new VavEquip(equipRef);
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits((short) node, damper);

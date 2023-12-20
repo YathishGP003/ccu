@@ -161,7 +161,7 @@ dependencies {
             because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
         }
     }
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.16-SNAPSHOT')
 }
 repositories {
     mavenCentral()

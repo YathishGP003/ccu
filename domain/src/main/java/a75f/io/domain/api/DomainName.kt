@@ -83,6 +83,7 @@ object DomainName {
     const val vavHumidityHysteresis = "vavHumidityHysteresis"
     const val vavRelayDeactivationHysteresis = "vavRelayDeactivationHysteresis"
     const val vavRebalanceHoldTime = "vavRebalanceHoldTime"
+    const val vavModeChangeoverHysteresis = "vavModeChangeoverHysteresis"
     const val vavStageUpTimerCounter = "vavStageUpTimerCounter"
     const val vavStageDownTimerCounter = "vavStageDownTimerCounter"
     const val vavProportionalKFactor = "vavProportionalKFactor"

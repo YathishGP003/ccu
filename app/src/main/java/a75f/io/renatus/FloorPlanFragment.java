@@ -1199,7 +1199,8 @@ public class FloorPlanFragment extends Fragment {
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                 String zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, zoneId);
-                HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                hsZone.setScheduleRef(zoneSchedule);
+                /*HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
                         ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
 
                 if(defaultNamedSchedule.isEmpty()){
@@ -1209,7 +1210,7 @@ public class FloorPlanFragment extends Fragment {
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
 
-                }
+                }*/
 
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();

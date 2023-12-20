@@ -172,7 +172,7 @@ public class LSmartNode
             settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
-        
+
         settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         
         if(profile == null)
@@ -606,7 +606,7 @@ public class LSmartNode
         }
         return false;
     }
-    
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -728,7 +728,6 @@ public class LSmartNode
 
         return null;
     }
-
     
     public static double getDesiredTemp(short node)
     {
@@ -795,7 +794,7 @@ public class LSmartNode
             }
         }
     }
-    
+
     public static double getStatus(short nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
@@ -876,7 +875,7 @@ public class LSmartNode
                 }
             }
             Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
-            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
+            controlsMessage.controls.setTemperature.set((short)(getSetTemp(equip.getId()) > 0 ? (getSetTemp(equip.getId()) * 2) : 144));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

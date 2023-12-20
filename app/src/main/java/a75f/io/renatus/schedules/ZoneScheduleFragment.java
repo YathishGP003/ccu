@@ -878,7 +878,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
 
     public void onClickCancel(String mScheduleId) {
-        updateUI();
+        loadSchedule();
     }
 
     public void setOnExitListener(ZoneScheduleFragment.OnExitListener onExitListener) {

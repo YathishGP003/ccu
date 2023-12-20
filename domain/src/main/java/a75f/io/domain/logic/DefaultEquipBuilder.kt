@@ -10,6 +10,7 @@ import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -89,6 +90,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
+        }
+
+        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.

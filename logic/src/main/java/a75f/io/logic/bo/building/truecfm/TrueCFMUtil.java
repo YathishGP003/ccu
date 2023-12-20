@@ -1,13 +1,17 @@
 package a75f.io.logic.bo.building.truecfm;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class TrueCFMUtil {
     
@@ -19,7 +23,7 @@ public class TrueCFMUtil {
             Starting with version ___, Haystack logical points were converted to read accurately in inH20.
             So, the unit conversion has been removed here, since it is already done when writing to the logical point.
          */
-        double kFactor = hayStack.readDefaultVal("(trueCfm or trueCFM) and (kfactor or KFactor) and equipRef == \""+equipRef+"\"");
+        double kFactor = hayStack.readDefaultVal("(trueCfm or trueCFM) and (kfactor or KFactor or kFactor) and equipRef == \""+equipRef+"\"");
         double pressureInWc = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
         CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInWc " + pressureInWc);
         double pressureInWGUnit = Math.abs(pressureInWc);
@@ -33,11 +37,34 @@ public class TrueCFMUtil {
         int damperShapeVal = hayStack.readDefaultVal(damperOrderQuery+"damper and shape and equipRef == \""+equipRef+
                                                      "\"").intValue();
         DamperShape damperShape = DamperShape.values()[damperShapeVal];
-        double damperSizeInFeet = damperSize/12;
+        double damperSizeInFeet = getDamperSizeFromEnum((int)damperSize)/12;
         if (damperShape == DamperShape.ROUND) {
             return 3.14 * damperSizeInFeet/2 * damperSizeInFeet/2;
         } else {
             return damperSizeInFeet * damperSizeInFeet; //TODO - check if rectangular dimension available.
+        }
+    }
+
+    private static double getDamperSizeFromEnum(int index) {
+        switch (index) {
+            case 1:
+                return 6.0;
+            case 2:
+                return 8.0;
+            case 3:
+                return 10.0;
+            case 4:
+                return 12.0;
+            case 5:
+                return 14.0;
+            case 6:
+                return 16.0;
+            case 7:
+                return 18.0;
+            case 8:
+                return 20.0;
+            default:
+                return 4.0;
         }
     }
     
@@ -120,13 +147,15 @@ public class TrueCFMUtil {
     }
     
     public static boolean cfmControlNotRequired(CCUHsApi hayStack, String equipRef) {
-    
-        int occupancyMode = hayStack.readHisValByQuery("point and occupancy and mode and equipRef ==\""+equipRef+"\"")
-                                                    .intValue();
+
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(equip.getRoomRef());
+        boolean occupied = (occ == null ? false : occ.isOccupied())
+                || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
         
         return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)
-                                    || (occupancyMode != Occupancy.OCCUPIED.ordinal()
-                                        && occupancyMode != Occupancy.FORCEDOCCUPIED.ordinal()
-                                        && occupancyMode != Occupancy.AUTOFORCEOCCUPIED.ordinal());
+                                || !occupied;
     }
 }

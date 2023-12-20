@@ -10,6 +10,7 @@ import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -91,6 +92,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             pointBuilder.setEnums(enumString)
         }
 
+        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
+        }
+
         //TODO - Support added for currently used tag types. Might need updates in future.
         pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
         pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
@@ -107,9 +114,8 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
-        if (pointConfig.modelDef.tags.find { it.name == Tags.HIS } != null /*&& pointConfig.modelDef.tags.find { it.name == Tags.TZ } == null*/) {
-            pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
-        }
+        pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
+        pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz))}
 
         return pointBuilder.build()
     }

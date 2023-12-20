@@ -90,6 +90,7 @@ dependencies {
     implementation project(path: ':domain')
     testImplementation 'junit:junit:4.13.1'
     implementation project(path: ':usbserial')
+    implementation project(':domain')
     implementation project(':haystack')
     implementation project(':logic')
     implementation project(':alerts')

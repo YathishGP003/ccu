@@ -41,6 +41,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -171,7 +172,7 @@ public class LSmartNode
             settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
-        
+
         settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         
         if(profile == null)
@@ -179,7 +180,17 @@ public class LSmartNode
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (equip.getProfile().equals("VAV_ACB")) { profile = "acb"; }
+        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString())) {
+            profile = "acb";
+        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString())) {
+            profile = "vavNoFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString())) {
+            profile = "vavParallelFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString())) {
+            profile = "vavSeriesFan";
+        } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
+            profile = "dualDuct";
+        }
 
         switch (profile){
             case "dab":
@@ -198,8 +209,24 @@ public class LSmartNode
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
                 break;
+            case "vavNoFan":
+                settings.profileBitmap.reserved.set((short)1);
+                setupDamperType(address, settings);
+                break;
+            case "vavSeriesFan":
+                settings.profileBitmap.reserved.set((short)2);
+                setupDamperType(address, settings);
+                break;
+            case "vavParallelFan":
+                settings.profileBitmap.reserved.set((short)3);
+                setupDamperType(address, settings);
+                break;
             case "acb":
                 settings.profileBitmap.reserved.set((short)4);
+                setupDamperType(address, settings);
+                break;
+            case "dualDuct":
+                settings.profileBitmap.reserved.set((short)5);
                 setupDamperType(address, settings);
                 break;
 
@@ -579,7 +606,7 @@ public class LSmartNode
         }
         return false;
     }
-    
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -701,7 +728,6 @@ public class LSmartNode
 
         return null;
     }
-
     
     public static double getDesiredTemp(short node)
     {
@@ -768,7 +794,7 @@ public class LSmartNode
             }
         }
     }
-    
+
     public static double getStatus(short nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
@@ -849,7 +875,7 @@ public class LSmartNode
                 }
             }
             Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
-            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
+            controlsMessage.controls.setTemperature.set((short)(getSetTemp(equip.getId()) > 0 ? (getSetTemp(equip.getId()) * 2) : 144));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -20,6 +21,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -113,12 +115,15 @@ public class VavReheatProfile extends VavProfile
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
-        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
-
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
+        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
             valve.currentPosition = 0;
+        }
+
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), vavEquip.getId())) {
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
         }
 
         //When in the system is in heating, REHEAT control does not follow RP-1455.
@@ -127,7 +132,6 @@ public class VavReheatProfile extends VavProfile
         }
 
         valve.applyLimits();
-        updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
         vavEquip.getReheatCmd().writeHisVal(valve.currentPosition);
@@ -176,7 +180,7 @@ public class VavReheatProfile extends VavProfile
     }
     
     private void initLoopVariables() {
-
+        vavEquip = new VavEquip(equipRef);
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits( (short) nodeAddr, damper);
@@ -285,7 +289,7 @@ public class VavReheatProfile extends VavProfile
         }
         
     }
-    
+
     @Override
     public ZoneState getState() {
         return state;

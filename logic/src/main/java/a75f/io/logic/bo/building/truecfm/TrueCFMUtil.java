@@ -144,7 +144,7 @@ public class TrueCFMUtil {
     
     public static boolean cfmControlNotRequired(CCUHsApi hayStack, String equipRef) {
     
-        int occupancyMode = hayStack.readHisValByQuery("point and occupancy and mode and equipRef ==\""+equipRef+"\"")
+        int occupancyMode = hayStack.readHisValByQuery("point and (occupied or occupancy) and mode and equipRef ==\""+equipRef+"\"")
                                                     .intValue();
         
         return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)

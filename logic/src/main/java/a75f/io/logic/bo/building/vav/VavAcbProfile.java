@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 /**
@@ -117,16 +118,18 @@ public class VavAcbProfile extends VavProfile
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
-        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
-
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
+        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         if (systemMode == SystemMode.OFF || coolingLoop.getLoopOutput() == 0) {
             chwValve.currentPosition = 0;
         }
 
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), vavEquip.getId())) {
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+        }
+
         chwValve.applyLimits();
-        updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
         ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(chwValve.currentPosition);
@@ -209,6 +212,7 @@ public class VavAcbProfile extends VavProfile
         VavUnit vavUnit = vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;*/
+        vavEquip = new VavAcbEquip(equipRef);
         setDamperLimits( (short) nodeAddr, damper);
         chwValve = ((VavAcbUnit)vavUnit).chwValve;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();

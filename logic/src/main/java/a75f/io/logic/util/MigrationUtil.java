@@ -453,7 +453,24 @@ public class MigrationUtil {
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
         clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi);
+        removeHisTagForEquipStatusMessage(ccuHsApi);
+
         ccuHsApi.scheduleSync();
+    }
+
+    private static void removeHisTagForEquipStatusMessage(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip " +
+                "and (hyperstat or hyperstatsplit)");
+        for (HashMap<Object, Object> hsEquip : hsEquips) {
+            String equipRef = hsEquip.get("id").toString();
+            HashMap<Object, Object> equipStatusMessagePointMap = ccuHsApi.readEntity(
+                    "message and status and his and equipRef == \"" + equipRef + "\"");
+            Point equipStatusMessagePoint = new Point.Builder().setHashMap(equipStatusMessagePointMap).build();
+            if(equipStatusMessagePoint.getMarkers().contains(Tags.HIS)){
+                equipStatusMessagePoint.getMarkers().remove(Tags.HIS);
+                ccuHsApi.updatePoint(equipStatusMessagePoint, equipStatusMessagePoint.getId());
+            }
+        }
     }
 
     private static void clearLevel4ValuesOfDesiredTempIfDurationIs0(CCUHsApi ccuHsApi) {

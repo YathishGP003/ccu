@@ -133,9 +133,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                             int priorityVal = (int) HSUtil.getPriorityVal(registerId);
                             CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                     + register.getRegisterAddress() + " val " + priorityVal);
-                            if (LSerial.getInstance().isModbusConnected()) {
-                                LModbus.writeRegister(groupId, register, priorityVal);
-                            }
+                            LModbus.writeRegister(groupId, register, priorityVal);
                         }
                     }
                 }
@@ -176,9 +174,9 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         int priorityVal = (int) HSUtil.getPriorityVal(id);
                         CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                 + register.getRegisterAddress() + " val " + priorityVal);
-                        if (LSerial.getInstance().isModbusConnected()) {
-                            LModbus.writeRegister(groupId, register, priorityVal);
-                        }
+
+                        LModbus.writeRegister(groupId, register, priorityVal);
+
                     }
                 }
             }

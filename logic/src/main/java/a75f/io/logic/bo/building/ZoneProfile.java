@@ -92,9 +92,7 @@ public abstract class ZoneProfile
             return true;
         }
 
-        //TODO- TEMP commented for testing
-
-        /*HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.getId()+"\"");
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
@@ -111,7 +109,7 @@ public abstract class ZoneProfile
                 CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat "+hisItem.getDate().toString()+" "+equip.getDisplayName()+" "+zoneDeadTime);
                 return true;
             }
-        }*/
+        }
 
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();

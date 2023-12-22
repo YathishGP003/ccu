@@ -102,7 +102,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
                 else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
-                } else if (modelPointDef.tagNames.contains("his")) {
+                } else if (modelPointDef.tagNames.contains("his") && !(modelPointDef.tagNames.contains("heartBeat") || modelPointDef.tagNames.contains("heartbeat"))) {
+                    // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
                     hayStack.writeHisValById(pointId, 0.0)
                 }
 

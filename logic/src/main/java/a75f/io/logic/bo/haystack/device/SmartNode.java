@@ -576,6 +576,9 @@ public class SmartNode
 
             case SENSOR_CO2: return "co2Sensor";
             case SENSOR_VOC: return "vocSensor";
+            case SENSOR_UVI: return "uviSensor";
+            case SENSOR_ILLUMINANCE: return "illuminanceSensor";
+            case SENSOR_OCCUPANCY: return "occupancySensor";
             case SENSOR_PRESSURE: return "pressureSensor";
             case RSSI: return "rssi";
             default: return null;

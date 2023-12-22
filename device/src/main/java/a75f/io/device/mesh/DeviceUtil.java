@@ -18,9 +18,12 @@ import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 import static a75f.io.logic.bo.building.definitions.Port.RSSI;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_ILLUMINANCE;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_OCCUPANCY;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PRESSURE;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RH;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RT;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_UVI;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_VOC;
 import static a75f.io.logic.bo.building.definitions.Port.TH1_IN;
 import static a75f.io.logic.bo.building.definitions.Port.TH2_IN;
@@ -372,6 +375,9 @@ public class DeviceUtil {
 
             case "co2Sensor": return SENSOR_CO2;
             case "vocSensor": return SENSOR_VOC;
+            case "occupancySensor": return SENSOR_OCCUPANCY;
+            case "illuminanceSensor": return SENSOR_ILLUMINANCE;
+            case "uviSensor": return SENSOR_UVI;
             case "pressureSensor": return SENSOR_PRESSURE;
             case "rssi": return RSSI;
             default: return null;

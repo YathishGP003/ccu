@@ -204,7 +204,7 @@ class VavProfileViewModel : ViewModel() {
 
         if (profileConfiguration.isDefault) {
 
-            addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, NodeType.SMART_NODE, hayStack, model, deviceModel)
+            addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
             L.ccu().zoneProfiles.add(vavProfile)
 

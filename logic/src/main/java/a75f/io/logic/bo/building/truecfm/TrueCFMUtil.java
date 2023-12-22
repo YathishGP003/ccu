@@ -150,9 +150,10 @@ public class TrueCFMUtil {
 
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        boolean isInAutoForceOccupied = hayStack.readHisValByQuery("point and (occupancy or occupied) and mode and equipRef == \"" + equip.getId() + "\"").intValue() == Occupancy.AUTOFORCEOCCUPIED.ordinal();
 
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(equip.getRoomRef());
-        boolean occupied = (occ == null ? false : occ.isOccupied())
+        boolean occupied = (occ == null ? false : occ.isOccupied() || occ.isForcedOccupied() || isInAutoForceOccupied)
                 || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
         
         return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)

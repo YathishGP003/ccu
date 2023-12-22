@@ -66,7 +66,7 @@
         {
             "name": "profile",
             "kind": "STR",
-            "defaultValue": "VAV_PARALLEL_FAN",
+            "defaultValue": "vavReheatParallelFan",
             "valueEnum": []
         },
         {

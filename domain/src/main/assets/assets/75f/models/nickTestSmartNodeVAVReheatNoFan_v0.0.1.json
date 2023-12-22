@@ -48,7 +48,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "VAV_REHEAT",
+      "defaultValue": "vavReheatNoFan",
       "valueEnum": []
     },
     {

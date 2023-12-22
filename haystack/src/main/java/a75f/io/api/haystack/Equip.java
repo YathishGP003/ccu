@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 9/4/18.
  */
@@ -495,7 +497,11 @@ public class Equip extends Entity
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
                 else {
-                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                    try {
+                        this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                    } catch (Exception e) {
+                        CcuLog.e("CCU", "Failed to add tag " + (pair.getKey().toString() + " to equip"));
+                    }
                 }
             }
             return this;

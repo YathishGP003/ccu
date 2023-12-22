@@ -367,9 +367,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         damper1Type = view.findViewById(R.id.damper1Type);
         ArrayList<String> damper1Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
-            if (!damper.equals(DamperType.ZeroToFiveV)) {
-                damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
-            }
+            damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
         }
         damper1TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper1Types);
         damper1TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -596,16 +594,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private void configureDamper2Type() {
         ArrayList<String> damper2Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
-            if (!damper.equals(DamperType.ZeroToFiveV)) {
-                damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
-            }
+            damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
         }
 
         ArrayAdapter<String> damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, damper2Types) {
 
             @Override
             public boolean isEnabled(int position) {
-                if (position < DamperType.MAT.ordinal()) {
+                if (position != DamperType.MAT.ordinal()) {
                     return reheatSpinner.getSelectedItemPosition() == 0 ||
                             reheatSpinner.getSelectedItemPosition() > ReheatType.OneStage.ordinal() ;
                 }
@@ -620,7 +616,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
                 TextView view = (TextView)super.getDropDownView(position, convertView, parent);
-                if (position < DamperType.MAT.ordinal()
+                if (position != DamperType.MAT.ordinal()
                         && reheatSpinner.getSelectedItemPosition() > 0
                         && reheatSpinner.getSelectedItemPosition() <= ReheatType.OneStage.ordinal()) {
                     view.setTextColor(Color.LTGRAY);

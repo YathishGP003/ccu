@@ -3114,7 +3114,7 @@
         "constraintType": "MULTI_STATE"
     },
         "presentationData": {},
-        "defaultValue": null,
+        "defaultValue": 2,
         "defaultUnit": "",
         "isGpc36": false,
         "hisInterpolate": "COV",

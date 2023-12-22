@@ -336,7 +336,7 @@ class AcbProfileViewModel : ViewModel() {
             3 -> "10-2v"
             4 -> "10-0v"
             5 -> LSmartNode.PULSE
-            else -> { "0-10v" }
+            else -> { "0" }
         }
     }
 

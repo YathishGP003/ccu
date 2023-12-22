@@ -29,6 +29,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.domain.util.ModelCache;
@@ -468,7 +469,7 @@ public class Globals {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
                     CcuLog.d(L.TAG_CCU, "Load Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
-                    switch (ProfileType.valueOf(eq.getProfile())) {
+                    switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vr);
@@ -640,6 +641,21 @@ public class Globals {
             short address =Short.parseShort(m.get("group").toString());
             mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
+        }
+    }
+
+    private String getDomainSafeProfile(String profile) {
+        switch (profile) {
+            case DomainName.vavReheatNoFan:
+                return ProfileType.VAV_REHEAT.name();
+            case DomainName.vavReheatParallelFan:
+                return ProfileType.VAV_PARALLEL_FAN.name();
+            case DomainName.vavReheatSeriesFan:
+                return ProfileType.VAV_SERIES_FAN.name();
+            case DomainName.activeChilledBeam:
+                return ProfileType.VAV_ACB.name();
+            default:
+                return profile;
         }
     }
 

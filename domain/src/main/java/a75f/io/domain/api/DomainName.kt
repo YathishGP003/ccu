@@ -45,6 +45,11 @@ object DomainName {
     const val waterValveSamplingLoopDeadbandWaitTime = "waterValveSamplingLoopDeadbandWaitTime"
     const val buildingLimitAlertTimer = "buildingLimitAlertTimer"
 
+    // Profiles
+    const val vavReheatNoFan = "vavReheatNoFan"
+    const val vavReheatParallelFan = "vavReheatParallelFan"
+    const val vavReheatSeriesFan = "vavReheatSeriesFan"
+    const val activeChilledBeam = "activeChilledBeam"
 
     //DAB
     const val dabTargetCumulativeDamper = "dabTargetCumulativeDamper"

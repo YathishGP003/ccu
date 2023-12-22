@@ -180,13 +180,13 @@ public class LSmartNode
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString())) {
+        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString()) || equip.getProfile().equals(DomainName.activeChilledBeam)) {
             profile = "acb";
-        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString())) {
+        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString()) || equip.getProfile().equals(DomainName.vavReheatNoFan)) {
             profile = "vavNoFan";
-        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString())) {
+        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatParallelFan)) {
             profile = "vavParallelFan";
-        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString())) {
+        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatSeriesFan)) {
             profile = "vavSeriesFan";
         } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
             profile = "dualDuct";

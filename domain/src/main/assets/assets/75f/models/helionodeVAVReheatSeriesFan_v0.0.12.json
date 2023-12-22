@@ -60,7 +60,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "VAV_SERIES_FAN",
+      "defaultValue": "vavReheatSeriesFan",
       "valueEnum": []
     },
     {

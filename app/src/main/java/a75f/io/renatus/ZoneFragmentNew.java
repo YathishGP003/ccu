@@ -878,9 +878,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                 if(nameSched.get("default") != null){
-                    scheduleArray.add("Default");
+                    scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
                     hasImage.add(true);
-                } else if(namedScheduledis.length() > 15){
+                } else if(namedScheduledis.length() > 25){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
                     hasImage.add(true);
                 }else{
@@ -990,9 +990,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             namedScheduleView.setVisibility(View.VISIBLE);
 
         namedScheduleView.setOnClickListener(view -> {
+            String scheduleDis = (mSchedule.getDis());
+            String scheduleName = scheduleDis.contains("Default") ?
+                    "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
             NamedSchedule namedSchedule =
                     NamedSchedule.getInstance(mSchedule.getId(),
-                            zoneId,  mSchedule.getDis(),false);
+                            zoneId,  scheduleName,false);
             FragmentManager childFragmentManager = getChildFragmentManager();
             namedSchedule.show(childFragmentManager, "dialog");
         });
@@ -1142,10 +1146,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position >= 2 && (mScheduleType != -1)) {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
+                    String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+                    String scheduleName = scheduleDis.contains("Default") ?
+                           "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheds.get(position - 2).get("id").toString(),
-                                zoneId, namedScheds.get(position - 2).get("dis").toString(),true);
+                                zoneId, scheduleName,true);
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
                         scheduleSpinner.setSelection(position);
@@ -1597,7 +1605,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                 if(nameSched.get("default") != null){
-                    scheduleArray.add("Default");
+                    scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
                     hasImage.add(true);
                 }else if(namedScheduledis.length() > 15){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
@@ -1703,9 +1711,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             namedScheduleView.setVisibility(View.VISIBLE);
 
         namedScheduleView.setOnClickListener(view -> {
+
+            String scheduleDis = (mSchedule.getDis());
+            String scheduleName = scheduleDis.contains("Default") ?
+                    "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
             NamedSchedule namedSchedule =
                     NamedSchedule.getInstance(mSchedule.getId(),
-                            zoneId,  mSchedule.getDis(),false);
+                            zoneId,  scheduleName,false);
             FragmentManager childFragmentManager = getChildFragmentManager();
             namedSchedule.show(childFragmentManager, "dialog");
         });
@@ -1886,10 +1899,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position >= 2 && (mScheduleType != -1) && !isRemoteChangeApplied) {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
+                    String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+
+
+                    String scheduleName = scheduleDis.contains("Default") ?
+                            "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
+
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheduleId,
-                                        zoneId,  namedScheds.get(position - 2).get("dis").toString(),true);
+                                        zoneId,  scheduleName,true);
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
 

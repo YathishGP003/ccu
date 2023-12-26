@@ -8,6 +8,9 @@ import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_TEMP;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
@@ -74,6 +77,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -82,6 +86,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
@@ -985,26 +990,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					targetMinInsideHumidity.setSelection(humidityAdapter
 							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 
-					if(L.ccu().systemProfile instanceof VavIERtu){
+					if(L.ccu().systemProfile instanceof VavIERtu) {
 						IEGatewayDetail.setVisibility(View.VISIBLE);
 						IEGatewayOccupancyStatus.setText(getOccStatus());
 						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
-					}
-					if(L.ccu().systemProfile instanceof DabExternalAhu) {
-						DabExternalAhu systemProfile = (DabExternalAhu)L.ccu().systemProfile;
-						setPointConfig.setVisibility(View.VISIBLE);
-						satSetPoint.setText(systemProfile.getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"));
-						dspSetPoint.setText(systemProfile.getSetPoint(ductStaticPressureSetpoint,"Setpoint"));
-						satCurrent.setText(systemProfile.getModbusPointValue(DISCHARGE_AIR_TEMP));
-						dspCurrent.setText(systemProfile.getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR));
-						if (systemProfile.getConfigValue(dcvDamperControlEnable)) {
-							external_damper.setText(systemProfile.getSetPoint(dcvDamperCalculatedSetpoint,""));
-							dcv_config.setVisibility(View.VISIBLE);
-						} else {
-							dcv_config.setVisibility(View.GONE);
-						}
 					} else {
-						setPointConfig.setVisibility(View.GONE);
+						configureExternalAhu();
 					}
 				}
 				if (L.ccu().systemProfile != null) {
@@ -1014,6 +1005,50 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		
 	}
+
+	private void configureExternalAhu() {
+		if(L.ccu().systemProfile instanceof DabExternalAhu ||
+				L.ccu().systemProfile instanceof VavExternalAhu) {
+			if (L.ccu().systemProfile instanceof DabExternalAhu) {
+				setCurrentAndSetPoints (
+						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
+						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getModbusPointValue(DISCHARGE_AIR_TEMP),
+						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
+						getConfigValue(dcvDamperControlEnable, ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(dcvDamperCalculatedSetpoint,"")
+				);
+			} else {
+				setCurrentAndSetPoints (
+						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
+						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getModbusPointValue(DISCHARGE_AIR_TEMP),
+						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
+						getConfigValue(dcvDamperControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(dcvDamperCalculatedSetpoint,"")
+				);
+			}
+		} else {
+			setPointConfig.setVisibility(View.GONE);
+		}
+	}
+
+	private void setCurrentAndSetPoints(
+			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,String dcvSp
+	) {
+		setPointConfig.setVisibility(View.VISIBLE);
+		satSetPoint.setText(satSp);
+		dspSetPoint.setText(dspSp);
+		satCurrent.setText(satCur);
+		dspCurrent.setText(dspCur);
+		if (dcvEnabled) {
+			external_damper.setText(dcvSp);
+			dcv_config.setVisibility(View.VISIBLE);
+		} else {
+			dcv_config.setVisibility(View.GONE);
+		}
+	}
+
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)
@@ -1168,7 +1203,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
 	}
 	private void showExternalModbusDevice() {
-		if (L.ccu().systemProfile instanceof DabExternalAhu) {
+		if (L.ccu().systemProfile instanceof DabExternalAhu || L.ccu().systemProfile instanceof VavExternalAhu) {
 			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
 			if (!modbusEquip.isEmpty()) {
 				externalModbusParams.setVisibility(View.VISIBLE);

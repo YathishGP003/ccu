@@ -7,9 +7,6 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.util.TagsUtil
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
-import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.ModelPointDef
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint

@@ -7,13 +7,18 @@ import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
-import a75f.io.domain.util.ModelNames
+import a75f.io.domain.util.ModelNames.DAB_EXTERNAL_AHU_CONTROLLER
+import a75f.io.domain.util.ModelNames.VAV_EXTERNAL_AHU_CONTROLLER
 import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
+import a75f.io.logic.bo.building.system.SystemProfile
+import a75f.io.logic.bo.building.system.addSystemEquip
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu
+import a75f.io.logic.bo.building.system.getConfiguration
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.compose.ModelMetaData
@@ -63,13 +68,14 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     lateinit var profileModelDefinition: SeventyFiveFProfileDirective
     private var selectedSlaveId by Delegates.notNull<Short>()
     var configModel = mutableStateOf(ExternalAhuConfigModel())
-    var systemProfile: DabExternalAhu? = null
+    var systemProfile: SystemProfile? = null
     private lateinit var modbusProfile: ModbusProfile
 
     val TAG: String = "DEV_DEBUG"
 
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
+    lateinit var profileType: ProfileType
 
     private var domainService = DomainService()
     val onItemSelect = object : OnItemSelect {
@@ -84,20 +90,30 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     fun configModbusDetails() {
         CcuLog.i(TAG, "configModbusDetails")
         if (!equipModel.value.isDevicePaired) {
-        ProgressDialogUtils.showProgressDialog(context, LOADING)
+            ProgressDialogUtils.showProgressDialog(context, LOADING)
             readDeviceModels()
         }
     }
 
-    fun configModelDefinition(context: Context) {
+    fun configModelDefinition(context: Context, profileType: ProfileType) {
         CcuLog.i(TAG, "configModelDefinition")
         try {
             this.context = context
+            this.profileType = profileType
             loadModel()
-            if (L.ccu().systemProfile.profileType == ProfileType.dabExternalAHUController) {
-                systemProfile = L.ccu().systemProfile as DabExternalAhu
-                setCurrentConfig(systemProfile!!.getConfiguration())
+            if (isDABExternal() || isVAVExternal()) {
+                val configuration: ExternalAhuConfiguration
+                if (isDABExternal()) {
+                    systemProfile = L.ccu().systemProfile as DabExternalAhu
+                    configuration = getConfiguration(DAB_EXTERNAL_AHU_CONTROLLER, profileType)
+                } else {
+                    systemProfile = L.ccu().systemProfile as VavExternalAhu
+                    configuration = getConfiguration(VAV_EXTERNAL_AHU_CONTROLLER, profileType)
+                }
+                setCurrentConfig(configuration)
+                //    setCurrentConfig(systemProfile!!.getConfiguration())
             } else {
+                // Initial configuration based on the model
                 configModel.value.toConfig(profileModelDefinition)
             }
             slaveIdList.value = getSlaveIds(true)
@@ -112,6 +128,13 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             ProgressDialogUtils.hideProgressDialog()
         }
     }
+
+    private fun isDABExternal() =
+        L.ccu().systemProfile.profileType == ProfileType.dabExternalAHUController
+
+    private fun isVAVExternal() =
+        L.ccu().systemProfile.profileType == ProfileType.vavExternalAHUController
+
     private fun getModbusConfiguration() {
         CcuLog.i(TAG, "getModbusConfiguration")
         val modbusEquip =
@@ -151,11 +174,15 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     private fun loadModel() {
         CcuLog.i(TAG, "loadModel")
-        val def = getModelByProfileName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        val def = if (profileType == ProfileType.dabExternalAHUController)
+            getModelByProfileName(DAB_EXTERNAL_AHU_CONTROLLER) else getModelByProfileName(
+            VAV_EXTERNAL_AHU_CONTROLLER
+        )
         if (def != null) {
             profileModelDefinition = def as SeventyFiveFProfileDirective
         }
     }
+
     fun getDefaultValByDomain(domainName: String): String {
         return profileModelDefinition.points.find { (it.domainName.contentEquals(domainName)) }?.defaultValue.toString()
     }
@@ -229,8 +256,8 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
         //TODO check validations for bacnet if configured as bacnet
         if (configType.value == ConfigType.MODBUS && (!isValidConfiguration()))
             return false
-        if ( configType.value == ConfigType.BACNET) {
-            showToast("Bacnet configuration is not available",context)
+        if (configType.value == ConfigType.BACNET) {
+            showToast("Bacnet configuration is not available", context)
             return false
         }
         return true
@@ -284,8 +311,10 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             return true // If it is paired then will not allow the use to to edit slave id
 
         if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
-            showToast("Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
-                    "another slave id to proceed",context)
+            showToast(
+                "Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
+                        "another slave id to proceed", context
+            )
             return false
         }
         return true
@@ -317,8 +346,11 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
 
     private fun addEquip() {
         CcuLog.i(TAG, "addEquip")
-        systemProfile = DabExternalAhu()
-        systemProfile!!.addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition)
+        systemProfile = if (profileType == ProfileType.dabExternalAHUController)
+            DabExternalAhu()
+        else
+            VavExternalAhu()
+        addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition, systemProfile as SystemProfile)
         L.ccu().systemProfile = systemProfile
         DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance())
     }

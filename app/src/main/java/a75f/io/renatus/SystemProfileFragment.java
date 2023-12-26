@@ -19,6 +19,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.externalahu.ExternalAhuControlConfigFragment;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -183,7 +184,7 @@ public class SystemProfileFragment extends Fragment {
                     case 9:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new ExternalAhuControlConfigFragment()).commit();
+                                    .replace(R.id.profileContainer, new ExternalAhuControlConfigFragment(ProfileType.dabExternalAHUController),"dabExternalAHUController").commit();
 
                         } else {
                             Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
@@ -192,6 +193,17 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
                     case 10:
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new ExternalAhuControlConfigFragment(ProfileType.vavExternalAHUController),"vavExternalAHUController").commit();
+
+                        } else {
+                            Toast.makeText(getActivity(), "Unpair all VAV Zones and try", Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
+                        break;
+                    case 11:
 
                     if (canAddVAVProfile()) {
                         getActivity().getSupportFragmentManager().beginTransaction()

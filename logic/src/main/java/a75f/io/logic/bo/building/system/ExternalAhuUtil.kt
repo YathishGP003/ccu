@@ -25,13 +25,21 @@ import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemtargetMaxInsideHumidty
 import a75f.io.domain.api.DomainName.systemtargetMinInsideHumidty
 import a75f.io.domain.api.Equip
+import a75f.io.domain.api.Point
+import a75f.io.domain.config.ExternalAhuConfiguration
+import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.RxjavaUtil
 import android.util.Log
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
+import java.util.Objects
 
 /**
  * Created by Manjunath K on 27-10-2023.
@@ -247,14 +255,12 @@ fun calculateDSPSetPoints(
     externalEquipId: String?,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
+    analogFanMultiplier: Double
 ) {
     if (!isConfigEnabled(systemEquip, DomainName.staticPressureSetpointControlEnable)) {
         logIt("StaticPressureSp is disabled")
         return
     }
-    val analogFanMultiplier = getTunerByDomainName(systemEquip,
-        DomainName.dabAnalogFanSpeedMultiplier
-    )
     val fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
     val min = Domain.getPointByDomain(systemEquip, DomainName.systemStaticPressureMinimum)
     val max = Domain.getPointByDomain(systemEquip, DomainName.systemStaticPressureMaximum)
@@ -485,7 +491,117 @@ fun updatePointHistoryAndDefaultValue(domainName: String, value: Double) {
     Domain.writeHisValByDomain(domainName, value)
 }
 
-data class BasicConfig(
+fun getConfiguration(profileDomain: String,profileType: ProfileType): ExternalAhuConfiguration {
+    val systemEquip = Domain.getSystemEquipByDomainName(profileDomain)
+    val config = ExternalAhuConfiguration(profileType.name)
+
+    if (systemEquip == null)
+        return config
+
+    config.setPointControl.enabled =
+        getConfigByDomainName(systemEquip, DomainName.satSetpointControlEnable)
+    config.dualSetPointControl.enabled =
+        getConfigByDomainName(systemEquip, dualSetpointControlEnable)
+    config.fanStaticSetPointControl.enabled =
+        getConfigByDomainName(systemEquip, DomainName.staticPressureSetpointControlEnable)
+    config.dcvControl.enabled = getConfigByDomainName(systemEquip, dcvDamperControlEnable)
+    config.occupancyMode.enabled = getConfigByDomainName(systemEquip, occupancyModeControl)
+    config.humidifierControl.enabled =
+        getConfigByDomainName(systemEquip, humidifierOperationEnable)
+    config.dehumidifierControl.enabled =
+        getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
+
+    config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
+    config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
+    config.heatingMinSp.currentVal =
+        getConfigValue(systemHeatingSATMinimum, systemEquip)
+    config.heatingMaxSp.currentVal =
+        getConfigValue(DomainName.systemHeatingSATMaximum, systemEquip)
+    config.coolingMinSp.currentVal =
+        getConfigValue(DomainName.systemCoolingSATMinimum, systemEquip)
+    config.coolingMaxSp.currentVal =
+        getConfigValue(systemCoolingSATMaximum, systemEquip)
+    config.fanMinSp.currentVal =
+        getConfigValue(DomainName.systemStaticPressureMinimum, systemEquip)
+    config.fanMaxSp.currentVal =
+        getConfigValue(DomainName.systemStaticPressureMaximum, systemEquip)
+    config.dcvMin.currentVal = getConfigValue(systemDCVDamperPosMinimum, systemEquip)
+    config.dcvMax.currentVal = getConfigValue(systemDCVDamperPosMaximum, systemEquip)
+    config.co2Threshold.currentVal = getConfigValue(systemCO2Threshold, systemEquip)
+    config.damperOpeningRate.currentVal = getConfigValue(
+        systemCO2DamperOpeningRate,
+        systemEquip
+    )
+    config.co2Target.currentVal = getConfigValue(DomainName.systemCO2Target, systemEquip)
+    return config
+}
+
+fun getExternalEquipId(): String? {
+    // TODO check if bacnet is configured then we need to find bacnet equip id
+    val modbusEquip =
+        CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
+    if (modbusEquip.isNotEmpty()) {
+        return modbusEquip["id"].toString()
+    }
+    return null
+}
+
+fun addSystemEquip(config: ProfileConfiguration?, definition: SeventyFiveFProfileDirective?, systemProfile: SystemProfile) {
+    val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
+    val equipId = profileEquipBuilder.buildEquipAndPoints(
+        config!!, definition!!,
+        CCUHsApi.getInstance().site!!.id
+    )
+    systemProfile.updateAhuRef(equipId)
+    ControlMote(equipId)
+}
+
+fun getModbusPointValue(query: String): String {
+    val equipId = getExternalEquipId()
+    val point = CCUHsApi.getInstance().readEntity("$query and equipRef == \"$equipId\"")
+
+    if (point.isEmpty()) {
+        logIt("$query = point not found $equipId")
+        return ""
+    }
+
+    val pointId = point["id"].toString()
+    val value = CCUHsApi.getInstance().readHisValById(pointId)
+    val unit = point["unit"]
+
+    return "Current $value $unit"
+}
+fun getConfigValue(domainName: String, modelName: String): Boolean {
+    val systemEquip = Domain.getSystemEquipByDomainName(modelName)
+    return getConfigByDomainName(systemEquip!!, domainName)
+}
+fun getSetPoint(domainName: String, preFix: String): String {
+    val point = Domain.readPoint(domainName)
+    if (point.isEmpty()) return ""
+    val unit = Objects.requireNonNull(point["unit"]).toString()
+    val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
+    return ("$preFix  $value  $unit")
+}
+
+fun getConfigValue(domainName: String, equip: Equip): Double =
+    getDefaultValueByDomain(equip, domainName)
+
+fun getConfigByDomainName(equip: Equip, domainName: String): Boolean {
+    val config = getPointByDomain(equip, domainName)
+    config?.let { return config.readDefaultVal() == 1.0 }
+    return false
+}
+
+fun getDefaultValueByDomain(equip: Equip, domainName: String): Double {
+    val config = getPointByDomain(equip, domainName)
+    config?.let { return config.readDefaultVal() }
+    return 0.0
+}
+
+fun getPointByDomain(equip: Equip, domainName: String): Point? =
+    equip.points.entries.find { (it.value.domainName.contentEquals(domainName)) }?.value
+
+data class BasicConfig (
     var coolingLoop: Int,
     val heatingLoop: Int,
     val loopOutput: Double,

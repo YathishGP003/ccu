@@ -991,7 +991,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         namedScheduleView.setOnClickListener(view -> {
             String scheduleDis = (mSchedule.getDis());
-            String scheduleName = scheduleDis.contains("Default") ?
+            String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
                     "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
             NamedSchedule namedSchedule =
@@ -1147,7 +1147,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
-                    String scheduleName = scheduleDis.contains("Default") ?
+                    String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))  ?
                            "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
@@ -1713,7 +1713,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         namedScheduleView.setOnClickListener(view -> {
 
             String scheduleDis = (mSchedule.getDis());
-            String scheduleName = scheduleDis.contains("Default") ?
+            String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
                     "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
             NamedSchedule namedSchedule =
@@ -1902,7 +1902,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
 
 
-                    String scheduleName = scheduleDis.contains("Default") ?
+                    String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))?
                             "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
 

@@ -397,7 +397,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato_light"
-                    android:text="00:00"
+                    android:text="24:00"
                     android:textSize="17sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintHorizontal_bias="0.998"
@@ -720,6 +720,18 @@
                 tools:ignore="MissingConstraints">
 
                 <Button
+                    android:id="@+id/cancelButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@null"
+                    android:button="@null"
+                    android:text="@string/button_cancel"
+                    android:textColor="?orange_75f"
+                    android:textSize="19sp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
                     android:id="@+id/setButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -731,17 +743,7 @@
                     android:textSize="19sp"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/cancelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:background="@null"
-                    android:button="@null"
-                    android:text="@string/button_cancel"
-                    android:textColor="?orange_75f"
-                    android:textSize="19sp"
-                    app:layout_constraintTop_toTopOf="parent" />
+
 
             </LinearLayout>
 

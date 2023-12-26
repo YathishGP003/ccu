@@ -3246,7 +3246,7 @@ public class CCUHsApi
     }
     public void writeDefaultTunerValById(String id, double val) {
         double currentVal = readDefaultValByLevel(id, HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
-        if (currentVal != val) {
+        if ((currentVal == 0) || (currentVal != val)) {
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
         }
     }

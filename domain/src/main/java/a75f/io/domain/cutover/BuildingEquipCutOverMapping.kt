@@ -82,8 +82,8 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-VAV-temperatureIntegralTime" to "vavTemperatureIntegralTime",
         "BuildingTuner-VAV-heatingDeadbandMultiplier" to "vavHeatingDeadbandMultiplier",
         "BuildingTuner-VAV-coolingDeadbandMultiplier" to "vavCoolingDeadbandMultiplier",
-        "BuildingTuner-VAV-coolingDeadband" to "vavCoolingDeadband",
-        "BuildingTuner-VAV-heatingDeadband" to "vavHeatingDeadband",
+        //"BuildingTuner-VAV-coolingDeadband" to "vavCoolingDeadband",
+        //"BuildingTuner-VAV-heatingDeadband" to "vavHeatingDeadband",
 
         "BuildingTuner-co2SPTrim" to "co2SPTrim",
         "BuildingTuner-co2SPMax" to "co2SPMax",
@@ -123,13 +123,13 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-standaloneHeatingDeadbandMultiplier" to "standaloneHeatingDeadbandMultiplier",
         "BuildingTuner-standaloneCoolingDeadbandMultiplier" to "standaloneCoolingDeadbandMultiplier",
-        "BuildingTuner-standaloneCoolingDeadband" to "standaloneCoolingDeadband",
+        //"BuildingTuner-standaloneCoolingDeadband" to "standaloneCoolingDeadband",
         "BuildingTuner-standaloneStage2CoolingLowerOffset" to "standaloneStage2CoolingLowerOffset",
         "BuildingTuner-standaloneStage1HeatingUpperOffset" to "standaloneStage1HeatingUpperOffset",
         "BuildingTuner-standaloneStage1HeatingLowerOffset" to "standaloneStage1HeatingLowerOffset",
         "BuildingTuner-standaloneVOCThreshold" to "standaloneVOCThreshold",
         "BuildingTuner-standaloneCoolingPreconditioningRate" to "standaloneCoolingPreconditioningRate",
-        "BuildingTuner-standaloneHeatingDeadband" to "standaloneHeatingDeadband",
+        //"BuildingTuner-standaloneHeatingDeadband" to "standaloneHeatingDeadband",
         "BuildingTuner-standaloneHeatingPreconditioningRate" to "standaloneHeatingPreconditioningRate",
         "BuildingTuner-standaloneStage1CoolingUpperOffset" to "standaloneStage1CoolingUpperOffset",
         "BuildingTuner-standaloneCO2Target" to "standaloneCO2Target",
@@ -153,8 +153,8 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-DAB-heatingDeadbandMultiplier" to "dabHeatingDeadbandMultiplier",
         "BuildingTuner-DAB-coolingDeadbandMultiplier" to "dabCoolingDeadbandMultiplier",
-        "BuildingTuner-DAB-heatingDeadband" to "dabHeatingDeadband",
-        "BuildingTuner-DAB-coolingDeadband" to "dabCoolingDeadband",
+        //"BuildingTuner-DAB-heatingDeadband" to "dabHeatingDeadband",
+        //"BuildingTuner-DAB-coolingDeadband" to "dabCoolingDeadband",
         "BuildingTuner-DAB-stageDownTimerCounter" to "dabStageDownTimerCounter",
         "BuildingTuner-DAB-integralKFactor" to "dabIntegralKFactor",
         "BuildingTuner-DAB-modeChangeoverHysteresis" to "dabModeChangeoverHysteresis",
@@ -184,8 +184,8 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-TI-heatingDeadbandMultiplier" to "tiHeatingDeadbandMultiplier",
         "BuildingTuner-TI-coolingDeadbandMultiplier" to "tiCoolingDeadbandMultiplier",
-        "BuildingTuner-TI-heatingDeadband" to "tiHeatingDeadband",
-        "BuildingTuner-TI-coolingDeadband" to "tiCoolingDeadband",
+        //"BuildingTuner-TI-heatingDeadband" to "tiHeatingDeadband",
+        //"BuildingTuner-TI-coolingDeadband" to "tiCoolingDeadband",
         "BuildingTuner-TI-integralKFactor" to "tiIntegralKFactor",
         "BuildingTuner-TI-temperatureProportionalRange" to "tiTemperatureProportionalRange",
         "BuildingTuner-TI-temperatureIntegralTime" to "tiTemperatureIntegralTime",
@@ -234,8 +234,8 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-DualDuct-heatingDeadbandMultiplier" to "dualDuctHeatingDeadbandMultiplier",
         "BuildingTuner-DualDuct-coolingDeadbandMultiplier" to "dualDuctCoolingDeadbandMultiplier",
-        "BuildingTuner-DualDuct-heatingDeadband" to "dualDuctHeatingDeadband",
-        "BuildingTuner-DualDuct-coolingDeadband" to "dualDuctCoolingDeadband",
+        //"BuildingTuner-DualDuct-heatingDeadband" to "dualDuctHeatingDeadband",
+        //"BuildingTuner-DualDuct-coolingDeadband" to "dualDuctCoolingDeadband",
         "BuildingTuner-DualDuct-zoneVOCTarget" to "dualDuctZoneVocTarget",
         "BuildingTuner-DualDuct-zoneCO2Target" to "dualDuctZoneCO2Target",
         "BuildingTuner-DualDuct-integralKFactor" to "dualDuctIntegralKFactor",
@@ -272,8 +272,8 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-OTN-integralKFactor" to "otnIntegralKFactor",
         "BuildingTuner-OTN-temperatureIntegralTime" to "otnTemperatureIntegralTime",
         "BuildingTuner-OTN-zonePriorityMultiplier" to "otnZonePriorityMultiplier",
-        "BuildingTuner-OTN-coolingDeadband" to "otnCoolingDeadband",
-        "BuildingTuner-OTN-heatingDeadband" to "otnHeatingDeadband",
+        //"BuildingTuner-OTN-coolingDeadband" to "otnCoolingDeadband",
+        //"BuildingTuner-OTN-heatingDeadband" to "otnHeatingDeadband",
         "BuildingTuner-OTN-temperatureProportionalRange" to "otnTemperatureProportionalRange",
         "BuildingTuner-OTN-proportionalKFactor" to "otnProportionalKFactor",
         "BuildingTuner-OTN-zonePrioritySpread" to "otnZonePrioritySpread",
@@ -300,8 +300,8 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-VRV-heatingDeadbandMultiplier" to "vrvHeatingDeadbandMultiplier",
         "BuildingTuner-VRV-coolingDeadbandMultiplier" to "vrvCoolingDeadbandMultiplier",
-        "BuildingTuner-VRV-heatingDeadband" to "vrvHeatingDeadband",
-        "BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",
+        //"BuildingTuner-VRV-heatingDeadband" to "vrvHeatingDeadband",
+        //"BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",
 
     )
     fun getDomainNameFromDis(point : Map<Any, Any>) : String? {

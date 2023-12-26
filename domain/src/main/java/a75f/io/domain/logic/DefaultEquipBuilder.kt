@@ -7,6 +7,9 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.util.TagsUtil
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -65,18 +68,14 @@ open class DefaultEquipBuilder : EquipBuilder {
     override fun buildPoint(pointConfig: PointBuilderConfig): Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder =
-            Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
-                .setDomainName(pointConfig.modelDef.domainName)
-                .setEquipRef(pointConfig.equipRef)
-                .setFloorRef(pointConfig.configuration?.floorRef)
-                .setKind(Kind.parsePointType(pointConfig.modelDef.kind.name))
-                .setUnit(pointConfig.modelDef.defaultUnit)
-                .setSiteRef(pointConfig.siteRef)
-
-        if (pointConfig.configuration?.nodeAddress != 0 && pointConfig.configuration?.nodeAddress != -1) {
-            pointBuilder.setGroup(pointConfig.configuration?.nodeAddress.toString())
-        }
+        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
+            .setDomainName(pointConfig.modelDef.domainName)
+            .setEquipRef(pointConfig.equipRef)
+            .setFloorRef(pointConfig.configuration?.floorRef)
+            .setKind(Kind.parsePointType(pointConfig.modelDef.kind.name))
+            .setUnit(pointConfig.modelDef.defaultUnit)
+            .setGroup(pointConfig.configuration?.nodeAddress.toString())
+            .setSiteRef(pointConfig.siteRef)
 
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
             if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
@@ -102,6 +101,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
+        }
+
+        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.

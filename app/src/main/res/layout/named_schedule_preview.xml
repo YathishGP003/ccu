@@ -44,7 +44,7 @@
                 <View
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="100dp"
                     android:layout_marginTop="10dp"
                     android:background="@drawable/occupancy_occupied"
                     app:layout_constraintRight_toLeftOf="@+id/occupied"
@@ -88,14 +88,17 @@
 
                 <ImageView
                     android:id="@+id/btnCloseNamed"
-                    android:layout_width="20dp"
-                    android:layout_height="15dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:src="@drawable/outline_close_24"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="15dp"
+
+                    android:src="@drawable/close"
                     app:tint="?orange_75f"
                     tools:ignore="ContentDescription"
-                    android:visibility="gone"/>
+
+                    android:visibility="gone"
+                    />
 
             </LinearLayout>
 
@@ -714,7 +717,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginStart="1000dp"
-                app:layout_constraintBottom_toBottomOf="@+id/constraintLt_Scheduler"
+                app:layout_constraintEnd_toEndOf="@+id/constraintLt_Scheduler"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler"
                 tools:ignore="MissingConstraints">
 
                 <Button
@@ -740,6 +744,8 @@
                     android:textColor="?orange_75f"
                     android:textSize="19sp"
                     app:layout_constraintTop_toTopOf="parent" />
+
+
 
             </LinearLayout>
 

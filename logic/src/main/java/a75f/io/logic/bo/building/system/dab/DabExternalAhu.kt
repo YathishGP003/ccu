@@ -61,7 +61,6 @@ import a75f.io.logic.bo.building.system.updatePointValue
 import a75f.io.logic.bo.building.system.writePointForCcuUser
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
-import a75f.io.logic.tuners.TunerUtil
 import android.content.Intent
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import java.util.Objects
@@ -209,10 +208,9 @@ class DabExternalAhu : DabSystemProfile() {
         return 0.0
     }
 
-    fun getConfiguration(modelDef: SeventyFiveFProfileDirective): ExternalAhuConfiguration {
+    fun getConfiguration(): ExternalAhuConfiguration {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         val config = ExternalAhuConfiguration(ProfileType.dabExternalAHUController.name)
-
 
         if (systemEquip == null)
             return config
@@ -230,43 +228,36 @@ class DabExternalAhu : DabSystemProfile() {
         config.dehumidifierControl.enabled =
             getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 
-        config.satMin.currentVal = getConfigValue(modelDef, systemSATMinimum, systemEquip)
-        config.satMax.currentVal = getConfigValue(modelDef, systemSATMaximum, systemEquip)
+        config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
+        config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
         config.heatingMinSp.currentVal =
-            getConfigValue(modelDef, systemHeatingSATMinimum, systemEquip)
+            getConfigValue(systemHeatingSATMinimum, systemEquip)
         config.heatingMaxSp.currentVal =
-            getConfigValue(modelDef, systemHeatingSATMaximum, systemEquip)
+            getConfigValue(systemHeatingSATMaximum, systemEquip)
         config.coolingMinSp.currentVal =
-            getConfigValue(modelDef, systemCoolingSATMinimum, systemEquip)
+            getConfigValue(systemCoolingSATMinimum, systemEquip)
         config.coolingMaxSp.currentVal =
-            getConfigValue(modelDef, systemCoolingSATMaximum, systemEquip)
+            getConfigValue(systemCoolingSATMaximum, systemEquip)
         config.fanMinSp.currentVal =
-            getConfigValue(modelDef, systemStaticPressureMinimum, systemEquip)
+            getConfigValue(systemStaticPressureMinimum, systemEquip)
         config.fanMaxSp.currentVal =
-            getConfigValue(modelDef, systemStaticPressureMaximum, systemEquip)
-        config.dcvMin.currentVal = getConfigValue(modelDef, systemDCVDamperPosMinimum, systemEquip)
-        config.dcvMax.currentVal = getConfigValue(modelDef, systemDCVDamperPosMaximum, systemEquip)
-        config.co2Threshold.currentVal = getConfigValue(modelDef, systemCO2Threshold, systemEquip)
-        config.damperOpeningRate.currentVal = getConfigValue(modelDef, systemCO2DamperOpeningRate, systemEquip)
-        config.co2Target.currentVal = getConfigValue(modelDef, systemCO2Target, systemEquip)
+            getConfigValue(systemStaticPressureMaximum, systemEquip)
+        config.dcvMin.currentVal = getConfigValue(systemDCVDamperPosMinimum, systemEquip)
+        config.dcvMax.currentVal = getConfigValue(systemDCVDamperPosMaximum, systemEquip)
+        config.co2Threshold.currentVal = getConfigValue(systemCO2Threshold, systemEquip)
+        config.damperOpeningRate.currentVal = getConfigValue(
+            systemCO2DamperOpeningRate,
+            systemEquip
+        )
+        config.co2Target.currentVal = getConfigValue(systemCO2Target, systemEquip)
         return config
     }
 
-    private fun getConfigValue(
-        modelDefinition: SeventyFiveFProfileDirective, domainName: String, equip: Equip
-    ): Double {
-        val currentValue = getDefaultValueByDomain(equip, domainName)
-        if (currentValue != 0.0)
-            return currentValue
-        val point = modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
-        if (point != null)
-            return (point.defaultValue ?: 0).toString().toDouble()
-        return 0.0
-    }
+    private fun getConfigValue(domainName: String, equip: Equip): Double =
+        getDefaultValueByDomain(equip, domainName)
 
     override fun getStatusMessage(): String =
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
-
 
     private fun calculateSetPoints() {
 

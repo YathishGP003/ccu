@@ -81,7 +81,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
  * Created by Manjunath K on 06-06-2023.
  */
 
-class DabExternalAhuControlConfigFragment : Fragment() {
+class ExternalAhuControlConfigFragment : Fragment() {
     private lateinit var viewModel: ExternalAhuControlViewModel
 
 
@@ -616,7 +616,7 @@ class DabExternalAhuControlConfigFragment : Fragment() {
     }
     private fun reload() {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.profileContainer, DabExternalAhuControlConfigFragment()).commit()
+            .replace(R.id.profileContainer, ExternalAhuControlConfigFragment()).commit()
     }
 
     @Composable

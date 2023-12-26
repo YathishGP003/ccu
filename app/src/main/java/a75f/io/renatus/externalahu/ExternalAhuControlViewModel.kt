@@ -96,7 +96,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             loadModel()
             if (L.ccu().systemProfile.profileType == ProfileType.dabExternalAHUController) {
                 systemProfile = L.ccu().systemProfile as DabExternalAhu
-                setCurrentConfig(systemProfile!!.getConfiguration(profileModelDefinition))
+                setCurrentConfig(systemProfile!!.getConfiguration())
             } else {
                 configModel.value.toConfig(profileModelDefinition)
             }
@@ -391,7 +391,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun fetchModelDetails(selectedDevice: String) {
-        CcuLog.i(TAG, "fetchModelDetails")
         val modelId = getModelIdByName(selectedDevice)
         val version = getVersionByID(modelId)
         domainService.readModelById(modelId, version, object : ResponseCallback {
@@ -441,7 +440,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun readDeviceModels() {
-        CcuLog.i(TAG, "readDeviceModels")
         domainService.readModbusModelsList("ahu", object : ResponseCallback {
             override fun onSuccessResponse(response: String?) {
                 try {
@@ -474,7 +472,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     }
 
     private fun updateModbusProfile() {
-        CcuLog.i(TAG, "updateModbusProfile")
         modbusProfile.updateModbusEquip(
             equipModel.value.equipDevice.value.deviceEquipRef,
             equipModel.value.equipDevice.value.slaveId.toShort(),

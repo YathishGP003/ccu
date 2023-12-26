@@ -48,7 +48,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     String equipRef;
     String deviceRef;
     int minCharsForParam;
-    public ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam,int minCharsForParam) {
+    public  ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam,int minCharsForParam) {
         this.context = context;
         this.modbusParam = modbusParam;
         this.equipRef = equipRef;

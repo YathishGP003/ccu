@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -448,6 +449,9 @@ public class Globals {
                     break;
                 case dabExternalAHUController:
                     L.ccu().systemProfile = new DabExternalAhu();
+                    break;
+                case vavExternalAHUController:
+                    L.ccu().systemProfile = new VavExternalAhu();
                     break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();

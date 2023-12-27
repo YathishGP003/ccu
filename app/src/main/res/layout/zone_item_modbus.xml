@@ -14,27 +14,31 @@
         <TextView
             android:id="@+id/tvParamLabel"
             style="@style/label_black"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="5"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:text="Unit Status" />
         <TextView
             android:id="@+id/tvUnit"
             style="@style/label_black"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:visibility="gone" />
         <TextView
             style="@style/label_black"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:text=":" />
         <TextView
             android:id="@+id/tvParamValue"
             style="@style/label_grey"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:textSize="22sp"
@@ -43,7 +47,8 @@
         <Spinner
             android:id="@+id/spValue"
             style="@style/Widget.AppCompat.Spinner.Underlined"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="3"
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:gravity="center"

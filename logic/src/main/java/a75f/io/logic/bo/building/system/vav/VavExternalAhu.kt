@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.dab
+package a75f.io.logic.bo.building.system.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
@@ -9,10 +9,10 @@ import a75f.io.domain.api.DomainName.equipStatusMessage
 import a75f.io.domain.api.DomainName.heatingLoopOutput
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
-import a75f.io.domain.api.DomainName.dabAnalogFanSpeedMultiplier
-import a75f.io.domain.api.DomainName.dabHumidityHysteresis
-import a75f.io.domain.api.DomainName.dabOutsideTempCoolingLockout
-import a75f.io.domain.api.DomainName.dabOutsideTempHeatingLockout
+import a75f.io.domain.api.DomainName.vavAnalogFanSpeedMultiplier
+import a75f.io.domain.api.DomainName.vavHumidityHysteresis
+import a75f.io.domain.api.DomainName.vavOutsideTempCoolingLockout
+import a75f.io.domain.api.DomainName.vavOutsideTempHeatingLockout
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
@@ -40,29 +40,29 @@ import a75f.io.logic.interfaces.ModbusWritableDataInterface
 import android.content.Intent
 
 /**
- * Created by Manjunath K on 12-10-2023.
+ * Created by Manjunath K on 26-12-2023.
  */
 
-class DabExternalAhu : DabSystemProfile() {
+class VavExternalAhu: VavSystemProfile() {
 
     companion object {
-        const val PROFILE_NAME = "DAB External AHU Controller"
+        const val PROFILE_NAME = "VAV External AHU Controller"
         const val SYSTEM_ON = "System ON"
         const val SYSTEM_OFF = "System OFF"
         const val SYSTEM_MODBUS = "equip and system and not modbus"
-        private val instance = DabExternalAhu()
-        fun getInstance(): DabExternalAhu = instance
+        private val instance = VavExternalAhu()
+        fun getInstance(): VavExternalAhu = instance
     }
 
     private var modbusInterface: ModbusWritableDataInterface? = null
     private var externalSpList = ArrayList<String>()
-    private val dabSystem: DabSystemController = DabSystemController.getInstance()
+    private val vavSystem: VavSystemController = VavSystemController.getInstance()
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
 
     override fun getProfileName(): String = PROFILE_NAME
 
-    override fun getProfileType(): ProfileType = ProfileType.dabExternalAHUController
+    override fun getProfileType(): ProfileType = ProfileType.vavExternalAHUController
 
     fun setModbusWritableDataInterface(callBack: ModbusWritableDataInterface) {
         modbusInterface = callBack
@@ -77,13 +77,13 @@ class DabExternalAhu : DabSystemProfile() {
     override fun isHeatingActive(): Boolean = true
 
     override fun getCoolingLockoutVal(): Double {
-        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-        return getTunerByDomainName(systemEquip!!, dabOutsideTempCoolingLockout)
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempCoolingLockout)
     }
 
     override fun getHeatingLockoutVal(): Double {
-        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
-        return getTunerByDomainName(systemEquip!!, dabOutsideTempHeatingLockout)
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempHeatingLockout)
     }
 
     override fun isOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi): Boolean =
@@ -101,15 +101,15 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun setCoolingLockoutVal(hayStack: CCUHsApi, value: Double) {
-        writePointForCcuUser(hayStack, dabOutsideTempCoolingLockout, value)
+        writePointForCcuUser(hayStack, vavOutsideTempCoolingLockout, value)
     }
 
     override fun setHeatingLockoutVal(hayStack: CCUHsApi, value: Double) {
-        writePointForCcuUser(hayStack, dabOutsideTempHeatingLockout, value)
+        writePointForCcuUser(hayStack, vavOutsideTempHeatingLockout, value)
     }
 
     override fun doSystemControl() {
-        DabSystemController.getInstance().runDabSystemControlAlgo()
+        VavSystemController.getInstance().runVavSystemControlAlgo()
         updateSystemPoints()
     }
 
@@ -118,7 +118,7 @@ class DabExternalAhu : DabSystemProfile() {
         val equip = hayStack.readEntity(SYSTEM_MODBUS)
         if (equip != null && equip.size > 0) {
             if (!equip["profile"]?.toString()
-                    .contentEquals(ProfileType.dabExternalAHUController.name)
+                    .contentEquals(ProfileType.vavExternalAHUController.name)
             ) {
                 hayStack.deleteEntityTree(equip[Tags.ID].toString())
             }
@@ -128,7 +128,7 @@ class DabExternalAhu : DabSystemProfile() {
     @Synchronized
     override fun deleteSystemEquip() {
         val equip = CCUHsApi.getInstance().readEntity(SYSTEM_MODBUS)
-        if (equip["profile"]?.toString().contentEquals(ProfileType.dabExternalAHUController.name)) {
+        if (equip["profile"]?.toString().contentEquals(ProfileType.vavExternalAHUController.name)) {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
     }
@@ -138,7 +138,7 @@ class DabExternalAhu : DabSystemProfile() {
         calculateSetPoints()
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
-        setSystemPoint("operating and mode", dabSystem.systemState.ordinal.toDouble())
+        setSystemPoint("operating and mode", vavSystem.systemState.ordinal.toDouble())
         val systemStatus = statusMessage
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $systemStatus")
@@ -158,43 +158,43 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun getStatusMessage(): String =
-        if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
+        if (getBasicVavConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
 
     private fun calculateSetPoints() {
 
-        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
         if (systemEquip == null) {
-            logIt("DAB_EXTERNAL_AHU_CONTROLLER system equip is empty")
+            logIt("VAV_EXTERNAL_AHU_CONTROLLER system equip is empty")
             return
         }
         val externalEquipId = getExternalEquipId()
-        val dabConfig = getBasicDabConfigData()
+        val vavConfig = getBasicVavConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
         val conditioningMode = getConditioningMode(systemEquip)
-        val currentHumidity = DabSystemController.getInstance().getAverageSystemHumidity()
-        val humidityHysteresis = getTunerByDomainName(systemEquip, dabHumidityHysteresis)
-        val analogFanMultiplier = getTunerByDomainName(systemEquip, dabAnalogFanSpeedMultiplier)
+        val currentHumidity = VavSystemController.getInstance().getAverageSystemHumidity()
+        val humidityHysteresis = getTunerByDomainName(systemEquip, vavHumidityHysteresis)
+        val analogFanMultiplier = getTunerByDomainName(systemEquip, vavAnalogFanSpeedMultiplier)
         logIt(
             " System is $occupancyMode conditioningMode : $conditioningMode" +
-                    " coolingLoop ${dabConfig.coolingLoop} heatingLoop ${dabConfig.heatingLoop}" +
-                    " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
+                    " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" +
+                    " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
         )
-        updateLoopDirection(dabConfig, systemEquip)
+        updateLoopDirection(vavConfig, systemEquip)
         calculateSATSetPoints(
             systemEquip,
-            dabConfig,
+            vavConfig,
             externalEquipId,
             conditioningMode,
             hayStack,
             externalSpList,
             loopRunningDirection,
-            dabConfig.coolingLoop.toDouble(),
-            dabConfig.heatingLoop.toDouble(),
-            Tags.DAB
+            vavConfig.coolingLoop.toDouble(),
+            vavConfig.heatingLoop.toDouble(),
+            Tags.VAV
         )
         calculateDSPSetPoints(
             systemEquip,
-            dabConfig.loopOutput,
+            vavConfig.loopOutput,
             externalEquipId,
             hayStack,
             externalSpList,
@@ -203,7 +203,7 @@ class DabExternalAhu : DabSystemProfile() {
         setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
         operateDamper(
             systemEquip,
-            dabConfig.weightedAverageCO2,
+            vavConfig.weightedAverageCO2,
             occupancyMode,
             externalEquipId,
             hayStack,
@@ -230,7 +230,7 @@ class DabExternalAhu : DabSystemProfile() {
         Domain.writePointByDomain(systemEquip, equipStatusMessage, statusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
     }
-
+    
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
         if (basicConfig.coolingLoop > 0)
             loopRunningDirection = TempDirection.COOLING
@@ -239,12 +239,12 @@ class DabExternalAhu : DabSystemProfile() {
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
     }
-
-    private fun getBasicDabConfigData() =
+    
+    private fun getBasicVavConfigData() =
         BasicConfig(
-            coolingLoop = dabSystem.coolingSignal,
-            heatingLoop = dabSystem.heatingSignal,
-            loopOutput = (if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble()),
-            weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
+            coolingLoop = vavSystem.coolingSignal,
+            heatingLoop = vavSystem.heatingSignal,
+            loopOutput = (if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble()),
+            weightedAverageCO2 = vavSystem.co2WeightedAverageSum,
         )
 }

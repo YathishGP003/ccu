@@ -24,6 +24,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 
@@ -35,7 +36,10 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
     public ModbusNetwork() {
         UpdatePointHandler.setModbusWritableDataInterface(this);
-        DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
+        if (L.ccu().systemProfile instanceof DabExternalAhu)
+            DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
+        if (L.ccu().systemProfile instanceof VavExternalAhu)
+            VavExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
     }
     @Override
     public void sendMessage() {
@@ -43,9 +47,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
-
-
-
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
         LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);

@@ -70,11 +70,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        if (modbusParam.get(position).getName().length() > 15)
+        /*if (modbusParam.get(position).getName().length() > 15)
             viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,15));
         else
-            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
-
+            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());*/
+        viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
         viewHolder.tvParamLabel.setOnClickListener(view -> showToolTip(modbusParam.get(position).getName(), view));
 
         if (modbusParam.get(position).getParameterDefinitionType() != null) {

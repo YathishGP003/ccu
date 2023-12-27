@@ -359,15 +359,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             equipModel.value.parameters.forEach {
                 it.displayInUi.value = isSelected
             }
-            if (equipModel.value.subEquips.isNotEmpty()) {
-                equipModel.value.subEquips.forEach { subEquip ->
-                    subEquip.value.selectAllParameters.value = isSelected
-                    subEquip.value.parameters.forEach {
-                        it.displayInUi.value = isSelected
-                    }
+        }
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach { subEquip ->
+                subEquip.value.selectAllParameters.value = isSelected
+                subEquip.value.parameters.forEach {
+                    it.displayInUi.value = isSelected
                 }
             }
         }
+
     }
 
     fun updateSelectAll() {

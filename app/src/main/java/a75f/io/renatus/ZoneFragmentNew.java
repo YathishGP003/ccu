@@ -1282,7 +1282,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             double curAvgDt = (coolingDesiredTemp + heatingDesiredTemp) / 2.0;
                             HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                            HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and average and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                            HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and (avg or average) and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             setPointVal(coolDT.get("id").toString(), curCoolDt, heatDT.get("id").toString(), curHeatDt, avgDT.get("id").toString(), curAvgDt);
                         }
                     }

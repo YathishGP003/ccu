@@ -92,13 +92,10 @@
                     android:layout_height="30dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
-
                     android:src="@drawable/close"
                     app:tint="?orange_75f"
                     tools:ignore="ContentDescription"
-
-                    android:visibility="gone"
-                    />
+                    android:visibility="gone" />
 
             </LinearLayout>
 

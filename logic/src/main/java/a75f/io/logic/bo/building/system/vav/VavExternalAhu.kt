@@ -3,7 +3,16 @@ package a75f.io.logic.bo.building.system.vav
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
+
+import a75f.io.domain.api.DomainName.coolingLoopOutput
+import a75f.io.domain.api.DomainName.equipStatusMessage
+import a75f.io.domain.api.DomainName.heatingLoopOutput
+import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
+import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
+import a75f.io.domain.api.DomainName.vavAnalogFanSpeedMultiplier
+import a75f.io.domain.api.DomainName.vavHumidityHysteresis
+import a75f.io.domain.api.DomainName.vavOutsideTempCoolingLockout
+import a75f.io.domain.api.DomainName.vavOutsideTempHeatingLockout
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
@@ -67,37 +76,36 @@ class VavExternalAhu: VavSystemProfile() {
 
     override fun isHeatingActive(): Boolean = true
 
-
     override fun getCoolingLockoutVal(): Double {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
-        return getTunerByDomainName(systemEquip!!, DomainName.vavOutsideTempCoolingLockout)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempCoolingLockout)
     }
 
     override fun getHeatingLockoutVal(): Double {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
-        return getTunerByDomainName(systemEquip!!, DomainName.vavOutsideTempHeatingLockout)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempHeatingLockout)
     }
 
     override fun isOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(DomainName.useOutsideTempLockoutHeating) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
 
     override fun isOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(DomainName.useOutsideTempLockoutCooling) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
 
     override fun setOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
-        updatePointHistoryAndDefaultValue(DomainName.useOutsideTempLockoutCooling, if (enabled) 1.0 else 0.0)
+        updatePointHistoryAndDefaultValue(useOutsideTempLockoutCooling, if (enabled) 1.0 else 0.0)
     }
 
     override fun setOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
-        updatePointHistoryAndDefaultValue(DomainName.useOutsideTempLockoutHeating, if (enabled) 1.0 else 0.0)
+        updatePointHistoryAndDefaultValue(useOutsideTempLockoutHeating, if (enabled) 1.0 else 0.0)
     }
 
     override fun setCoolingLockoutVal(hayStack: CCUHsApi, value: Double) {
-        writePointForCcuUser(hayStack, DomainName.vavOutsideTempCoolingLockout, value)
+        writePointForCcuUser(hayStack, vavOutsideTempCoolingLockout, value)
     }
 
     override fun setHeatingLockoutVal(hayStack: CCUHsApi, value: Double) {
-        writePointForCcuUser(hayStack, DomainName.vavOutsideTempHeatingLockout, value)
+        writePointForCcuUser(hayStack, vavOutsideTempHeatingLockout, value)
     }
 
     override fun doSystemControl() {
@@ -117,7 +125,6 @@ class VavExternalAhu: VavSystemProfile() {
         }
     }
 
-
     @Synchronized
     override fun deleteSystemEquip() {
         val equip = CCUHsApi.getInstance().readEntity(SYSTEM_MODBUS)
@@ -125,6 +132,7 @@ class VavExternalAhu: VavSystemProfile() {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
     }
+
     @Synchronized
     private fun updateSystemPoints() {
         calculateSetPoints()
@@ -164,8 +172,8 @@ class VavExternalAhu: VavSystemProfile() {
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
         val conditioningMode = getConditioningMode(systemEquip)
         val currentHumidity = VavSystemController.getInstance().getAverageSystemHumidity()
-        val humidityHysteresis = getTunerByDomainName(systemEquip, DomainName.vavHumidityHysteresis)
-        val analogFanMultiplier = getTunerByDomainName(systemEquip, DomainName.vavAnalogFanSpeedMultiplier)
+        val humidityHysteresis = getTunerByDomainName(systemEquip, vavHumidityHysteresis)
+        val analogFanMultiplier = getTunerByDomainName(systemEquip, vavAnalogFanSpeedMultiplier)
         logIt(
             " System is $occupancyMode conditioningMode : $conditioningMode" +
                     " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" +
@@ -181,7 +189,8 @@ class VavExternalAhu: VavSystemProfile() {
             externalSpList,
             loopRunningDirection,
             vavConfig.coolingLoop.toDouble(),
-            vavConfig.heatingLoop.toDouble()
+            vavConfig.heatingLoop.toDouble(),
+            Tags.VAV
         )
         calculateDSPSetPoints(
             systemEquip,
@@ -218,7 +227,7 @@ class VavExternalAhu: VavSystemProfile() {
             humidityHysteresis,
             currentHumidity
         )
-        Domain.writePointByDomain(systemEquip, DomainName.equipStatusMessage, statusMessage)
+        Domain.writePointByDomain(systemEquip, equipStatusMessage, statusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
     }
     
@@ -227,8 +236,8 @@ class VavExternalAhu: VavSystemProfile() {
             loopRunningDirection = TempDirection.COOLING
         if (basicConfig.heatingLoop > 0)
             loopRunningDirection = TempDirection.HEATING
-        updatePointValue(systemEquip, DomainName.coolingLoopOutput, basicConfig.coolingLoop.toDouble())
-        updatePointValue(systemEquip, DomainName.heatingLoopOutput, basicConfig.heatingLoop.toDouble())
+        updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
+        updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
     }
     
     private fun getBasicVavConfigData() =

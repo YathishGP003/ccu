@@ -35,9 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 
 class VavProfileViewModel : ViewModel() {
@@ -150,28 +154,31 @@ class VavProfileViewModel : ViewModel() {
     fun saveConfiguration() {
         CcuLog.i(Domain.LOG_TAG, " Save Profile : damperType ${viewState.damperType}")
         CcuLog.i(Domain.LOG_TAG, " Save Profile : damperSize ${viewState.damperSize}")
-
-        RxjavaUtil.executeBackgroundTask({
+        viewModelScope.launch {
             ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
-        }, {
-            CCUHsApi.getInstance().resetCcuReady()
+            withContext(Dispatchers.IO) {
+                CCUHsApi.getInstance().resetCcuReady()
 
-            setUpVavProfile()
-            CcuLog.i(Domain.LOG_TAG, "VavProfile Setup complete")
-            L.saveCCUState()
+                setUpVavProfile()
+                CcuLog.i(Domain.LOG_TAG, "VavProfile Setup complete")
+                L.saveCCUState()
 
-            hayStack.syncEntityTree()
-            CCUHsApi.getInstance().setCcuReady()
-            CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-            LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
-            CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
-        }, {
-            ProgressDialogUtils.hideProgressDialog()
-            _isDialogOpen.value = false
-            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-            showToast("VAV Configuration saved successfully", context)
-            CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-        })
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                LSerial.getInstance()
+                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
+            }
+
+            withContext(Dispatchers.Main) {
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                showToast("VAV Configuration saved successfully", context)
+                CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+            }
+        }
 
         // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
         /*

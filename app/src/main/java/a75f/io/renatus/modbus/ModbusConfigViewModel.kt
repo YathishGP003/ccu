@@ -232,7 +232,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             return true // If it is paired then will not allow the use to to edit slave id
 
         if (zoneRef.contentEquals("SYSTEM")) {
-            if (equipModel.value.subEquips.isNotEmpty() && isSystemModbusExist()) {
+            if (equipModel.value.subEquips.isNotEmpty() && isSystemModbusExist(profileType)) {
                 showToast("Modbus device already paired", context)
                 return false
             }
@@ -405,9 +405,15 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
-    private fun isSystemModbusExist(): Boolean {
-        return (CCUHsApi.getInstance().readAllEntities(
-            "equip and modbus and roomRef == \"SYSTEM\"")).isNotEmpty()
+    private fun isSystemModbusExist(profileType: ProfileType): Boolean {
+        return if (profileType == ProfileType.MODBUS_BTU) {
+            (CCUHsApi.getInstance().readAllEntities(
+                "equip and modbus and btu and roomRef == \"SYSTEM\"")).isNotEmpty()
+        } else {
+            (CCUHsApi.getInstance().readAllEntities(
+                "equip and modbus and emr and roomRef == \"SYSTEM\"")).isNotEmpty()
+        }
+
     }
 
 

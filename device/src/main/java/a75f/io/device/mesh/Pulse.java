@@ -141,6 +141,7 @@ public class Pulse
 
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+			boolean isDomainEquip = !equip.getDomainName().equals(null);
 			boolean isAcb = equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam);
 
 			boolean isCondensateNc = false;
@@ -276,7 +277,7 @@ public class Pulse
 			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
-				handleSensorEvents(sensorReadings, nodeAddr ,deviceInfo);
+				handleSensorEvents(sensorReadings, nodeAddr, deviceInfo, isDomainEquip);
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -308,7 +309,7 @@ public class Pulse
 			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
 	}
 
-	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device, boolean isDomainEquip) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
 
@@ -332,7 +333,11 @@ public class Pulse
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {
-				sp = node.addEquipSensorFromRawPoint(sp, p);
+				if (isDomainEquip) {
+					sp = node.addDomainEquipSensorFromRawPoint(sp, p);
+				} else {
+					sp = node.addEquipSensorFromRawPoint(sp, p);
+				}
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {

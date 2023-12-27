@@ -11,12 +11,18 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.config.ProfileConfiguration;
+import a75f.io.domain.util.PointsUtil;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by samjithsadasivan on 9/5/18.
@@ -395,7 +401,43 @@ public class SmartNode
 
         return deviceSensor;
     }
-    
+
+    public RawPoint addDomainEquipSensorFromRawPoint(RawPoint deviceSensor, Port p) {
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \""+smartNodeAddress+"\"")).build();
+
+        PointsUtil pointsUtil = new PointsUtil(CCUHsApi.getInstance());
+        String pointRef = pointsUtil.createDynamicSensorEquipPoint(q, getEquipDomainNameFromPort(p), getConfigurationFromEquip(q, pointsUtil));
+        updatePhysicalPointRef(smartNodeAddress, p, pointRef);
+
+        CCUHsApi.getInstance().scheduleSync();
+
+        return deviceSensor;
+    }
+
+    private ProfileConfiguration getConfigurationFromEquip(Equip equip, PointsUtil pointsUtil) {
+        if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatNoFan)) {
+            int group = Integer.parseInt(equip.getGroup());
+            String nodeType = NodeType.SMART_NODE.name();
+            String roomRef = equip.getRoomRef();
+            String floorRef = equip.getFloorRef();
+            SeventyFiveFProfileDirective model = pointsUtil.getModelFromEquip(equip);
+            VavProfileConfiguration config = new VavProfileConfiguration(group, nodeType, 0, roomRef, floorRef, ProfileType.VAV_REHEAT, model).getActiveConfiguration();
+            return config;
+        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatParallelFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip));
+        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip));
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip));
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip));
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip));
+        } else {
+            return null;
+        }
+    }
+
     public RawPoint getRawPoint(Port p) {
         HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                                                      +" and port == \""+p.toString()+"\"");

@@ -372,5 +372,14 @@ object DomainName {
     const val analog1In = "analog1In"
     const val analog2In = "analog2In"
 
+    const val smartnodeVAVReheatNoFan = "smartnodeVAVReheatNoFan"
+    const val smartnodeVAVReheatParallelFan = "smartnodeVAVReheatParallelFan"
+    const val smartnodeVAVReheatSeriesFan = "smartnodeVAVReheatSeriesFan"
+    const val smartnodeActiveChilledBeam = "smartnodeActiveChilledBeam"
+    const val helionodeVAVReheatNoFan = "helionodeVAVReheatNoFan"
+    const val helionodeVAVReheatParallelFan = "helionodeVAVReheatParallelFan"
+    const val helionodeVAVReheatSeriesFan = "helionodeVAVReheatSeriesFan"
+    const val helionodeActiveChilledBeam = "helionodeActiveChilledBeam"
+
 }
 

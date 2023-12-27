@@ -48,6 +48,7 @@ import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -137,6 +138,11 @@ public class Pulse
 			if (Globals.getInstance().isTemporaryOverrideMode()) {
 				return;
 			}
+
+			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
+			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+			boolean isDomainEquip = !equip.getDomainName().equals(null);
+
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
 			String logicalCurTempPoint = "";
@@ -256,7 +262,7 @@ public class Pulse
 			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
-				handleSensorEvents(sensorReadings, nodeAddr ,deviceInfo);
+				handleSensorEvents(sensorReadings, nodeAddr, deviceInfo, isDomainEquip);
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -288,7 +294,7 @@ public class Pulse
 			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
 	}
 
-	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device, boolean isDomainEquip) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
 
@@ -312,7 +318,11 @@ public class Pulse
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {
-				sp = node.addEquipSensorFromRawPoint(sp, p);
+				if (isDomainEquip) {
+					sp = node.addDomainEquipSensorFromRawPoint(sp, p);
+				} else {
+					sp = node.addEquipSensorFromRawPoint(sp, p);
+				}
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {

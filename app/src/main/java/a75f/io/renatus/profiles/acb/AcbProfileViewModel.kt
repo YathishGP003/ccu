@@ -32,9 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 
 class AcbProfileViewModel : ViewModel() {
@@ -145,28 +149,31 @@ class AcbProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
 
-        RxjavaUtil.executeBackgroundTask({
+        viewModelScope.launch {
             ProgressDialogUtils.showProgressDialog(context, "Saving ACB Configuration")
-        }, {
-            CCUHsApi.getInstance().resetCcuReady()
+            withContext(Dispatchers.IO) {
+                CCUHsApi.getInstance().resetCcuReady()
 
-            setUpAcbProfile()
-            CcuLog.i(Domain.LOG_TAG, "VavAcbProfile Setup complete")
-            L.saveCCUState()
+                setUpAcbProfile()
+                CcuLog.i(Domain.LOG_TAG, "AcbProfile Setup complete")
+                L.saveCCUState()
 
-            hayStack.syncEntityTree()
-            CCUHsApi.getInstance().setCcuReady()
-            CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-            LSerial.getInstance().sendSeedMessage(false,false, deviceAddress, zoneRef,floorRef)
-            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
-            CcuLog.i(Domain.LOG_TAG, "VavAcbProfile Pairing complete")
-        }, {
-            ProgressDialogUtils.hideProgressDialog()
-            _isDialogOpen.value = false
-            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-            showToast("ACB Configuration saved successfully", context)
-            CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-        })
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                LSerial.getInstance()
+                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
+            }
+
+            withContext(Dispatchers.Main) {
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                showToast("ACB Configuration saved successfully", context)
+                CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+            }
+        }
 
         // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
         /*

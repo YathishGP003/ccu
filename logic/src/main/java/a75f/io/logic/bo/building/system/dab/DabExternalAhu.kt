@@ -87,10 +87,10 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     override fun isOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
 
     override fun isOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
 
     override fun setOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
         updatePointHistoryAndDefaultValue(useOutsideTempLockoutCooling, if (enabled) 1.0 else 0.0)

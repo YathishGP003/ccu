@@ -2,6 +2,7 @@ package a75f.io.renatus.externalahu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.device.modbus.buildModbusModel
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -352,6 +353,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
             VavExternalAhu()
         addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition, systemProfile as SystemProfile)
         L.ccu().systemProfile = systemProfile
+        systemProfile?.setOutsideTempCoolingLockoutEnabled( hayStack, L.ccu().oaoProfile != null)
         DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance())
     }
 

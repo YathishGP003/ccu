@@ -194,8 +194,8 @@ public class SystemProfileFragment extends Fragment {
                         break;
                     case 10:
                         if (canAddVAVProfile()) {
-                            getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new ExternalAhuControlConfigFragment(ProfileType.vavExternalAHUController),"vavExternalAHUController").commit();
+//                            getActivity().getSupportFragmentManager().beginTransaction()
+//                                    .replace(R.id.profileContainer, new ExternalAhuControlConfigFragment(ProfileType.vavExternalAHUController),"vavExternalAHUController").commit();
 
                         } else {
                             Toast.makeText(getActivity(), "Unpair all VAV Zones and try", Toast.LENGTH_LONG).show();

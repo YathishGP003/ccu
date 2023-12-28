@@ -593,6 +593,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
             String state = spDefaultPrefs.getString("state", "");
+            if(state.isEmpty()){
+                state = CCUHsApi.getInstance().getSite().getGeoState();
+            }
             updateView(place, city + ", " + state + ", " + country);
             updateView(weather_condition, WeatherDataDownloadService.getSummary());
 

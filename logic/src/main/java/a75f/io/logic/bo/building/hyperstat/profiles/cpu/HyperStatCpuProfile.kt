@@ -90,6 +90,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
         logicalPointsList = equip.getLogicalPointList()
         hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
+        handleFanConditioningModes(equip.equipRef!!)
         if (isZoneDead) {
             handleDeadZone(equip)
             return
@@ -105,9 +106,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
         val basicSettings = fetchBasicSettings(equip)
+        logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
-
+        logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)
         hyperstatCPUAlgorithm.dumpLogs()
         handleChangeOfDirection(userIntents)

@@ -923,6 +923,7 @@ public class CCUHsApi
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
+        CcuLog.i("CCU_HAYSTACK","clearPointArrayLevel "+id + "level "+level + "local "+local);
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()

@@ -513,7 +513,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             return StandaloneFanStage.AUTO
         }
 
-        if ((occupancyStatus == Occupancy.OCCUPIED|| Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING )
+        if ((occupancyStatus == Occupancy.OCCUPIED
+                || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
+                || occupancyStatus == Occupancy.FORCEDOCCUPIED
+                || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING)
             && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
             HyperStatUserIntentHandler.updateHyperStatUIPoints(
@@ -529,6 +532,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
         return (occupancyStatus != Occupancy.OCCUPIED
+            && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
+            && occupancyStatus != Occupancy.FORCEDOCCUPIED
             && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
             && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO

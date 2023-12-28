@@ -3,7 +3,7 @@ package a75f.io.logic.bo.building.system
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.DomainName.co2WeightedAverage
 import a75f.io.domain.api.DomainName.conditioningMode
 import a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint
 import a75f.io.domain.api.DomainName.dcvDamperControlEnable
@@ -403,7 +403,7 @@ fun operateDamper(
     externalSpList: ArrayList<String>,
 ) {
     val isDcvControlEnabled = isConfigEnabled(systemEquip, dcvDamperControlEnable)
-
+    Domain.writeHisValByDomain(co2WeightedAverage, co2, systemEquip.id)
     if (!isDcvControlEnabled) {
         logIt("DCV control is disabled")
         return

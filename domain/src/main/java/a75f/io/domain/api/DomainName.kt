@@ -343,5 +343,6 @@ object DomainName {
     const val systemEnhancedVentilationEnable = "systemEnhancedVentilationEnable"
     const val operatingMode = "operatingMode"
     const val equipScheduleStatus = "equipScheduleStatus"
+    const val co2WeightedAverage  = "co2WeightedAverage"
 }
 

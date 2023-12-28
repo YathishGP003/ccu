@@ -2,6 +2,7 @@ package a75f.io.device.modbus;
 
 import android.util.Log;
 
+import com.x75f.modbus4j.ModbusConversions;
 import com.x75f.modbus4j.msg.ModbusRequest;
 import com.x75f.modbus4j.msg.ReadCoilsRequest;
 import com.x75f.modbus4j.msg.ReadDiscreteInputsRequest;
@@ -9,10 +10,8 @@ import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest;
 import com.x75f.modbus4j.msg.ReadInputRegistersRequest;
 import com.x75f.modbus4j.msg.WriteCoilRequest;
 import com.x75f.modbus4j.msg.WriteRegisterRequest;
+import com.x75f.modbus4j.msg.WriteRegistersRequest;
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
-
-import java.util.HashMap;
-import java.util.HashSet;
 
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.LSerial;
@@ -86,7 +85,7 @@ public class LModbus {
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
                 request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
             } else if (register.getRegisterType().equals(MODBUS_REGISTER_COIL)) {
-                request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0 ? true : false);
+                request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0);
             } else {
                 CcuLog.d(L.TAG_CCU_MODBUS,
                          "Write cannot be executed : Invalid Register Type "+register.getRegisterType());
@@ -126,8 +125,32 @@ public class LModbus {
         modbusMessage.errorCheckHigh.set(data[7]);
 
         return modbusMessage;
-
     }
+
+    public static synchronized void writeRegister(int slaveId, Register register, float writeValue) {
+        CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
+        try {
+            ModbusRequest request;
+            // short[] shortValues = ModbusConversions.getRegisterValue(register.parameterDefinitionType, register.parameterDefinitionType, writeValue);
+            short[] shortValues = ModbusConversions.floatToRegisters(writeValue);
+            if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
+                request = new WriteRegistersRequest(slaveId,  register.getRegisterAddress(), shortValues);
+            } else if (register.getRegisterType().equals(MODBUS_REGISTER_COIL)) {
+                request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0);
+            } else {
+                CcuLog.d(L.TAG_CCU_MODBUS,
+                        "Write cannot be executed : Invalid Register Type "+register.getRegisterType());
+                return;
+            }
+            RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
+            LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+            LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(L.TAG_CCU_MODBUS, "Modbus write failed. "+register.getRegisterAddress()+" : "+writeValue+" "+e.getMessage());
+        }
+    }
+
 
 
 }

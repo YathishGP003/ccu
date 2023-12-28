@@ -64,7 +64,17 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             "equip and group == \"${configuration.nodeAddress}\"")
 
         val equipId =  equip["id"].toString()
+
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
+        val systemEquip = hayStack.readEntity("system and equip and not modbus")
+        if (systemEquip.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
+        } else if (systemEquip.contains(Tags.DEFAULT)) {
+            hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
+        } else {
+            hayStackEquip.ahuRef = systemEquip[Tags.ID].toString()
+        }
+
         hayStack.updateEquip(hayStackEquip, equipId)
 
         //TODO - Fix crash

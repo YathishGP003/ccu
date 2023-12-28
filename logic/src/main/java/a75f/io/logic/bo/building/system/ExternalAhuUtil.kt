@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.system
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.DomainName.conditioningMode
 import a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint
 import a75f.io.domain.api.DomainName.dcvDamperControlEnable
@@ -11,6 +12,7 @@ import a75f.io.domain.api.DomainName.dehumidifierEnable
 import a75f.io.domain.api.DomainName.dehumidifierOperationEnable
 import a75f.io.domain.api.DomainName.dualSetpointControlEnable
 import a75f.io.domain.api.DomainName.ductStaticPressureSetpoint
+import a75f.io.domain.api.DomainName.equipStatusMessage
 import a75f.io.domain.api.DomainName.fanLoopOutput
 import a75f.io.domain.api.DomainName.humidifierEnable
 import a75f.io.domain.api.DomainName.humidifierOperationEnable
@@ -40,12 +42,15 @@ import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.RxjavaUtil
+import android.content.Intent
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -337,6 +342,15 @@ fun handleHumidityOperation(
     }
 }
 
+fun updateSystemStatusPoints(equipRef: String, newValue: String, domainName: String) {
+    val currentStatus = Domain.readStrPointValueByDomainName(domainName, equipRef)
+    if (!currentStatus.contentEquals(newValue)) {
+        Domain.writeDefaultValByDomain(domainName, newValue, equipRef)
+        if (domainName.contentEquals(equipStatusMessage))
+            Globals.getInstance().applicationContext.sendBroadcast(Intent(ScheduleUtil.ACTION_STATUS_CHANGE))
+    }
+
+}
 fun handleDeHumidityOperation(
     systemEquip: Equip,
     externalEquipId: String?,

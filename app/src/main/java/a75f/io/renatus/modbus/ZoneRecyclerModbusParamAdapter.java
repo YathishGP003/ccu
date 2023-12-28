@@ -47,12 +47,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     List<Parameter> modbusParam;
     String equipRef;
     String deviceRef;
-    int minCharsForParam;
-    public  ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam,int minCharsForParam) {
+
+    public  ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam) {
         this.context = context;
         this.modbusParam = modbusParam;
         this.equipRef = equipRef;
-        this.minCharsForParam = minCharsForParam;
         HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and equipRef == \""+equipRef+ "\"");
         if (!device.isEmpty()) {
             this.deviceRef = device.get("id").toString();
@@ -70,10 +69,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        /*if (modbusParam.get(position).getName().length() > 15)
-            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName().substring(0,15));
-        else
-            viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());*/
         viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
         viewHolder.tvParamLabel.setOnClickListener(view -> showToolTip(modbusParam.get(position).getName(), view));
 

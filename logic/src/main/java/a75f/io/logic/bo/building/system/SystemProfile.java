@@ -682,7 +682,7 @@ public abstract class SystemProfile
         }
 
         if (externalTemp != 0) {
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
             CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
         }
     }
@@ -747,7 +747,7 @@ public abstract class SystemProfile
     }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {
-        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp");
+        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp and not lockout");
         if (outsideAirTemp == 0 && ccu().oaoProfile != null) {
             //We could be here when weather API fails or the device is offline and oao is paired.
             //Try to read LocalOAT fed by the thermistor.

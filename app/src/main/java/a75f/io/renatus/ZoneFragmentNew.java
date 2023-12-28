@@ -12,7 +12,7 @@ import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
-import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -2442,7 +2442,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
                                         new ZoneRecyclerModbusParamAdapter(getContext(),
                                                                            modbusDevices.get(i).getDeviceEquipRef(),
-                                                                           parameterList,25);
+                                                                           parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

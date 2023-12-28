@@ -2428,7 +2428,7 @@ public class CCUHsApi
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
                 return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
             } else {
-                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
             }
         }
         return 0;

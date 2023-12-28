@@ -338,5 +338,10 @@ object DomainName {
     const val heatingLoopOutput = "heatingLoopOutput"
     const val coolingLoopOutput = "coolingLoopOutput"
     const val fanLoopOutput = "fanLoopOutput"
+    const val systemPrePurgeEnable = "systemPrePurgeEnable"
+    const val systemPostPurgeEnable = "systemPostPurgeEnable"
+    const val systemEnhancedVentilationEnable = "systemEnhancedVentilationEnable"
+    const val operatingMode = "operatingMode"
+    const val equipScheduleStatus = "equipScheduleStatus"
 }
 

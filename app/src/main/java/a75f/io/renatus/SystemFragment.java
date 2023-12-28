@@ -5,6 +5,9 @@ import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
 import static a75f.io.domain.api.DomainName.dcvDamperControlEnable;
 import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
 import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
+import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
+import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
+import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_TEMP;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
@@ -874,32 +877,58 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		tbSmartPrePurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemPrePurgeEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				}
 			}
 		});
 		tbSmartPostPurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemPostPurgeEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				}
+
 			}
 		});
 		tbEnhancedVentilation.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemEnhancedVentilationEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				}
+
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
-
 	}
+
+	private boolean isExternalAhu(){
+		return (L.ccu().systemProfile instanceof DabExternalAhu
+				|| L.ccu().systemProfile instanceof VavExternalAhu);
+	}
+
+
 
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null) {
 			oaoArc.setVisibility(View.VISIBLE);
 			purgeLayout.setVisibility(View.VISIBLE);
-			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-			tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+			if (isExternalAhu()) {
+				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
+				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
+				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
+			} else {
+				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+			}
 			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
@@ -979,9 +1008,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-					tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-					tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
+					if (isExternalAhu()) {
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
+					} else {
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+					}
 					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 					sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
@@ -1126,7 +1161,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), parameterList,15);
+					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), parameterList);
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1163,7 +1198,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), parameterList,15);
+					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), parameterList);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1226,7 +1261,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 				externalModbusParams.setLayoutManager(gridLayoutManager);
 				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList,15);
+						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
 				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
 				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);

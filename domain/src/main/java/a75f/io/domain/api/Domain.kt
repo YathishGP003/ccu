@@ -141,6 +141,9 @@ object Domain {
     fun readPointValueByDomainName(domainName: String, equipRef : String): Double {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
+    fun readStrPointValueByDomainName(domainName: String, equipRef : String): String {
+        return hayStack.readDefaultStrVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
     @JvmStatic
     fun readDefaultValByDomain(domainName: String): Double {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\"")
@@ -151,6 +154,16 @@ object Domain {
     }
     @JvmStatic
     fun writeHisValByDomain(domainName: String, value: Double) {
-        return hayStack.writeDefaultVal("point and domainName == \"$domainName\"", value)
+        return hayStack.writeHisValByQuery("point and domainName == \"$domainName\"", value)
+    }
+
+    @JvmStatic
+    fun writeHisValByDomain(domainName: String, value: Double, equipRef: String) {
+        return hayStack.writeHisValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
+    }
+
+    @JvmStatic
+    fun writeDefaultValByDomain(domainName: String, value: String, equipRef: String) {
+        return hayStack.writeDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
     }
 }

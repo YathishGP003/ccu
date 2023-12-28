@@ -51,7 +51,7 @@ object DomainName {
     const val dabAnalogFanSpeedMultiplier = "dabAnalogFanSpeedMultiplier"
     const val dabHumidityHysteresis = "dabHumidityHysteresis"
     const val dabRelayDeactivationHysteresis = "dabRelayDeactivationHysteresis"
-    const val dabRebalanceHoldTime = "dabRebalanceHoldTime"
+    const val dabRebalanceHoldTime = "rebalanceHoldTime"
     const val dabModeChangeoverHysteresis = "dabModeChangeOverHysteresis"
     const val dabStageUpTimerCounter = "dabStageUpTimerCounter"
     const val dabStageDownTimerCounter = "dabStageDownTimerCounter"

@@ -66,7 +66,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
         try {
             val tunerPointsDict = HDictBuilder().add(
                 "filter",
-                "point and (tuner or schedulable) and  and default and siteRef == $siteId"
+                "point and (tuner or schedulable) and default and siteRef == $siteId"
             ).toDict();
             val tunerPointsGrid = hClient.call ("read", HGridBuilder.dictToGrid(tunerPointsDict))
             tunerPointsGrid?.dump()

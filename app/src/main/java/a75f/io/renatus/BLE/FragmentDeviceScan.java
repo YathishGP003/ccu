@@ -95,7 +95,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                 }
                 break;
             case SerialConsts.HYPERSTAT_NAME :
-                if(mNodeType == NodeType.HYPER_STAT || mNodeType == NodeType.HYPERSTATSPLIT){
+                if(mNodeType == NodeType.HYPER_STAT){
                     return true;
                 }
                 break;
@@ -264,6 +264,9 @@ public class FragmentDeviceScan extends BaseDialogFragment
             ScanFilter hyperStat = new ScanFilter.Builder()
                     .setDeviceName(SerialConsts.HYPERSTAT_NAME)
                     .build();
+            ScanFilter hyperStatSplit = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.HYPERSTATSPLIT_NAME)
+                    .build();
             ScanFilter helioNode = new ScanFilter.Builder()
                     .setDeviceName(SerialConsts.HELIONODE_NAME)
                     .build();
@@ -271,6 +274,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
             filters.add(smartStat);
             filters.add(hyperStat);
             filters.add(helioNode);
+            filters.add(hyperStatSplit);
 
             ScanSettings scanSettings = new ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)

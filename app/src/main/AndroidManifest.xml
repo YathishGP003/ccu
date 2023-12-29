@@ -51,6 +51,15 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".CcuRefReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.remote.REQUEST_CCU_REF" />
+            </intent-filter>
+        </receiver>
+
         <activity
                 android:name=".SplashActivity"
                 android:launchMode="singleTask"

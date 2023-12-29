@@ -23,7 +23,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
@@ -34,11 +33,14 @@ import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 
 public class DiagEquip
 {
     private static final String CMD_UPDATE_CCU = "update_ccu";
     private static DiagEquip instance = null;
+    private static final String SHARED_PREFERENCE_NAME = "remote_status_pref";
+    private static final String KEY_SCREEN_SHARING_STATUS = "screen_sharing_status";
     private DiagEquip(){
     }
     
@@ -238,6 +240,16 @@ public class DiagEquip
                 .build();
         hsApi.addPoint(internalDiskStorage);
 
+        Point remoteSessionStatus = new Point.Builder()
+                .setDisplayName(equipDis+"-remoteSessionStatus")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("cov")
+                .addMarker("diag").addMarker("remote").addMarker("status").addMarker("sp")
+                .addMarker("storage").addMarker("his").addMarker("cur")
+                .setEnums(RemoteSessionStatus.getEnum())
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(remoteSessionStatus);
 
         addMigrationVersionPoint(hsApi, equipDis, equipRef, siteRef, tz);
     }
@@ -350,7 +362,14 @@ public class DiagEquip
 
         setDiagHisVal("safe and mode and status", Globals.getInstance().isSafeMode()? 1 : 0);
         updateFreeInternalStoragePoint();
+        updateRemoteSessionStatusPoint();
 
+    }
+
+    private void updateRemoteSessionStatusPoint() {
+        SharedPreferences sharedPreferences = Globals.getInstance().getApplicationContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        int screenSharingStatus = sharedPreferences.getInt(KEY_SCREEN_SHARING_STATUS, 0);
+        setDiagHisVal("remote and status",screenSharingStatus);
     }
 
     public void setDiagHisVal(String tag, double val) {

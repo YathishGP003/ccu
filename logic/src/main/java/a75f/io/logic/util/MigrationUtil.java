@@ -1,5 +1,7 @@
 package a75f.io.logic.util;
 
+import static a75f.io.api.haystack.HayStackConstants.AUTO_AWAY_LEVEL;
+import static a75f.io.api.haystack.HayStackConstants.FORCE_OVERRIDE_LEVEL;
 import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
@@ -17,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HNum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +50,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
@@ -423,7 +427,10 @@ public class MigrationUtil {
             doHSSOutsideDamperMinOpenMigration(CCUHsApi.getInstance());
             PreferenceUtil.setHSSOutsideDamperMinOpenMigrationDone();
         }
-
+        if(!PreferenceUtil.getZoneEquipConfigPointMigration()){
+            UpdateFloorRefRoomRefForConfigPoints(CCUHsApi.getInstance());
+            PreferenceUtil.setZoneEquipConfigPointMigrationDone();
+        }
         CCUHsApi.getInstance().removeAllNamedSchedule();
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
@@ -434,14 +441,57 @@ public class MigrationUtil {
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
+
+        migrateZoneScheduleTypeIfMissed(ccuHsApi);
+
         if(SchedulableMigrationKt.validateMigration()) {
             writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
         }
+        migrateRemoteAccess();
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
+        clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi);
+        removeHisTagForEquipStatusMessage(ccuHsApi);
+
         ccuHsApi.scheduleSync();
+    }
+
+    private static void removeHisTagForEquipStatusMessage(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip " +
+                "and (hyperstat or hyperstatsplit)");
+        for (HashMap<Object, Object> hsEquip : hsEquips) {
+            String equipRef = hsEquip.get("id").toString();
+            HashMap<Object, Object> equipStatusMessagePointMap = ccuHsApi.readEntity(
+                    "message and status and his and equipRef == \"" + equipRef + "\"");
+            Point equipStatusMessagePoint = new Point.Builder().setHashMap(equipStatusMessagePointMap).build();
+            if(equipStatusMessagePoint.getMarkers().contains(Tags.HIS)){
+                equipStatusMessagePoint.getMarkers().remove(Tags.HIS);
+                ccuHsApi.updatePoint(equipStatusMessagePoint, equipStatusMessagePoint.getId());
+            }
+        }
+    }
+
+    private static void clearLevel4ValuesOfDesiredTempIfDurationIs0(CCUHsApi ccuHsApi) {
+        List<HashMap<Object, Object>> listOfDesiredTempPoints = ccuHsApi.readAllEntities("desired and temp and (heating or cooling)");
+        for (HashMap<Object, Object> desiredTempPoint : listOfDesiredTempPoints) {
+            String desiredTempPointId = desiredTempPoint.get("id").toString();
+            if (isLevelToBeCleared(ccuHsApi, desiredTempPointId, FORCE_OVERRIDE_LEVEL)) {
+                ccuHsApi.clearPointArrayLevel(desiredTempPointId, FORCE_OVERRIDE_LEVEL, false);
+            }
+            if (isLevelToBeCleared(ccuHsApi, desiredTempPointId, AUTO_AWAY_LEVEL)) {
+                ccuHsApi.clearPointArrayLevel(desiredTempPointId, AUTO_AWAY_LEVEL, false);
+            }
+        }
+    }
+
+    private static boolean isLevelToBeCleared(CCUHsApi ccuHsApi, String desiredTempPointId, int levelToBeCleared) {
+        int oneDayInMs = 86400000;
+        HashMap desiredTempPoint = ccuHsApi.readPoint(desiredTempPointId).get(levelToBeCleared - 1);
+        return desiredTempPoint.get("val") != null &&
+                Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
+                Double.parseDouble(desiredTempPoint.get("duration").toString()) > oneDayInMs;
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
@@ -1744,6 +1794,7 @@ public class MigrationUtil {
             if(dischargeOffset.isEmpty()) {
                 Point equipTunerPoint = VavTuners.createDischargeTempOffsetTuner(false,
                         vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getFloorRef(),
                         vavEquip.getRoomRef(), vavEquip.getSiteRef(),
                         hayStack.getTimeZone());
                 Log.i(MIGRATION_DEBUG, "dischargeOffset Points created");
@@ -1755,7 +1806,7 @@ public class MigrationUtil {
 
             if(dischargeMax.isEmpty()){
                 Point reheatZoneMaxDischargeTempOffsetTuner = VavTuners.createMaxDischargeTempTuner(false,
-                        vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getDisplayName(), vavEquip.getId(),vavEquip.getFloorRef(),
                         vavEquip.getRoomRef(), vavEquip.getSiteRef(),
                         hayStack.getTimeZone());
                 String equipTunerPointId = hayStack.addPoint(reheatZoneMaxDischargeTempOffsetTuner);
@@ -2414,8 +2465,9 @@ public class MigrationUtil {
                 SchedulabeLimits.Companion.addSchedulableLimits(
                         false,room.get("id").toString(), room.get("dis").toString());
                 String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
-                if(ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
-                        + room.get("id") +"\"") == ScheduleType.ZONE.ordinal()){
+                Double scheduleType = ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
+                        + room.get("id") +"\"");
+                if( scheduleType == null || scheduleType == ScheduleType.ZONE.ordinal()){
                     HashMap<Object, Object> roomToUpdate = ccuHsApi.readMapById(room.get("id").toString());
                     Zone zone = new Zone.Builder().setHashMap(roomToUpdate).build();
                     zone.setScheduleRef(scheduleRef);
@@ -2441,6 +2493,183 @@ public class MigrationUtil {
                 newZoneSchedule.setId(oldZoneScheduleId);
                 ccuHsApi.updateSchedule(newZoneSchedule);
                 ccuHsApi.deleteEntityItem(newZoneScheduleId);
+            }
+        }
+    }
+
+    public static void migrateZoneScheduleTypeIfMissed(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        Log.d("SpooLog","in migrateScheduletype");
+
+        for(HashMap<Object, Object> room : rooms) {
+
+            String zoneId = room.get("id").toString();
+            String scheduleId = room.get("scheduleRef").toString();
+            Double scheduleTypeToBeSet = 2.0 ;
+            Schedule roomSchedule = ccuHsApi.getScheduleById(scheduleId);
+            HashMap<Object, Object> defaultSchedule = ccuHsApi.readEntity("default and schedule");
+            if(defaultSchedule.isEmpty() || roomSchedule.isZoneSchedule()){
+                scheduleTypeToBeSet = 1.0;
+            }
+
+            ArrayList<HashMap<Object, Object>> scheduleTypePoints = ccuHsApi.readAllEntities("scheduleType and roomRef == \"" + zoneId + "\"");
+            ArrayList<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
+
+            Log.d("SpooLog","in migrateScheduletype"+zoneId);
+
+            if (scheduleTypePoints.isEmpty() || equips.size() > scheduleTypePoints.size()) {
+                //create schedule type point assign it to 2
+                //set schedule ref to default name to that zone
+                // return deafult named
+
+                Log.d("SpooLog","scheduletype is empty");
+
+
+
+
+                ArrayList<HashMap<Object, Object>> allEquip =
+                        ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
+                for (HashMap<Object, Object> equip : allEquip) {
+                    String profileType = equip.get("profile").toString();
+                    Log.d("SpooLog","createScheduleType call");
+                    createScheduleType(equip, profileType,scheduleTypeToBeSet);
+                }
+
+                Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                if (zone != null) {
+                    if(scheduleTypeToBeSet == 2.0 && !defaultSchedule.isEmpty()) {
+                        zone.setScheduleRef(defaultSchedule.get("id").toString());
+                        CCUHsApi.getInstance().updateZone(zone, zoneId);
+                    }
+                }
+
+            }else{
+                Log.d("SpooLog","scheduletype not null");
+             //   Log.d("SpooLog","scheduleTypeid"+scheduleTypePoints.get("id").toString());
+            }
+        }
+        ccuHsApi.scheduleSync();
+
+    }
+
+
+    public static void createScheduleType(HashMap<Object, Object> equip, String profileType,double scheduleType){
+        String siteDis = equip.get("dis").toString();
+        String nodeAddr = equip.get("group").toString();
+        String equipRef = equip.get("id").toString();
+        String siteRef = equip.get("siteRef").toString();
+        String roomRef = equip.get("roomRef").toString();
+        String floorRef = equip.get("floorRef").toString();
+        String tz = equip.get("tz").toString();
+
+        Log.d("SpooLog","createScheduleType in call");
+
+        Point.Builder equipScheduleType = new Point.Builder()
+                .setDisplayName(siteDis+"-scheduleType")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("zone").addMarker("scheduleType").addMarker("writable").addMarker("his")
+                .setGroup((nodeAddr))
+                .setEnums("building,zone,named")
+                .setTz(tz);
+
+        addTagBasedOnProfile(equipScheduleType,profileType,equip);
+
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType.build());
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId,  scheduleType);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, scheduleType);
+
+    }
+
+    private static void addTagBasedOnProfile(Point.Builder equipScheduleType, String profileType,HashMap<Object, Object> equip) {
+        if(profileType.equals("TEMP_INFLUENCE") )
+            equipScheduleType.addMarker("ti");
+        else if(profileType.contains("DAB"))
+            equipScheduleType.addMarker("dab");
+        else if(profileType.contains("DUAL_DUCT"))
+            equipScheduleType.addMarker("dualDuct");
+        else if(profileType.contains("EMR"))
+            equipScheduleType.addMarker("emr");
+        else if(profileType.contains("HYPERSTAT"))
+            equipScheduleType.addMarker("hyperstat");
+        else if(profileType.contains("MODBUS"))
+            equipScheduleType.addMarker("modbus");
+        else if(profileType.contains("OTN"))
+            equipScheduleType.addMarker("otn");
+        else if(profileType.contains("PLC"))
+            equipScheduleType.addMarker("pid");
+        else if(profileType.contains("SMARTSTAT")){
+            if(profileType.contains("SMARTSTAT_CONVENTIONAL_PACK_UNIT"))
+                equipScheduleType.addMarker("cpu");
+            if(profileType.contains("SMARTSTAT_HEAT_PUMP_UNIT"))
+                equipScheduleType.addMarker("hpu");
+            if(profileType.contains("SMARTSTAT_TWO_PIPE_FCU"))
+                equipScheduleType.addMarker("pipe2");
+            if(profileType.contains("SMARTSTAT_FOUR_PIPE_FCU"))
+                equipScheduleType.addMarker("pipe4");
+        }else if(profileType.contains("SSE"))
+            equipScheduleType.addMarker("sse");
+        else if(profileType.contains("VAV")) {
+            if( equip.containsKey("series"))
+                equipScheduleType.addMarker("series");
+            else
+                equipScheduleType.addMarker("parallel");
+        }else if(profileType.contains("VRV"))
+            equipScheduleType.addMarker("vrv");
+
+    }
+    private static void UpdateFloorRefRoomRefForConfigPoints(CCUHsApi haystack){
+        ArrayList<HashMap<Object, Object>> equipList = haystack.readAllEntities("zone and equip and (ti or sse or" +
+                " dab or dualDuct)");
+        for(HashMap<Object, Object> equipMap : equipList){
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            ArrayList<HashMap<Object, Object>> configPointList = haystack.readAllEntities("point and " +
+                    "equipRef== \""+ equip.getId() +"\"");
+            for( HashMap<Object, Object> configPointMap : configPointList){
+                Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
+                if(equipPoint.getFloorRef().equalsIgnoreCase("SYSTEM") ||
+                        (equipPoint.getRoomRef().equalsIgnoreCase("SYSTEM"))) {
+                    equipPoint.setFloorRef(equip.getFloorRef());
+                    equipPoint.setRoomRef(equip.getRoomRef());
+                    haystack.updatePoint(equipPoint, equipPoint.getId());
+                    Log.i(TAG_CCU_MIGRATION_UTIL,
+                            "FloorRef and RoomRef updated for the point id :" +equipPoint.getId());
+                }
+            }
+        }
+    }
+    private static void migrateRemoteAccess() {
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+
+        Map<Object,Object> diagEquip = ccuHsApi.readEntity("equip and diag");
+
+        if(!diagEquip.isEmpty())    {
+
+            Map<Object,Object> remoteSessionStatusDiagPoint = ccuHsApi.readEntity("remote and status " +
+                    " and diag and point");
+
+            if(remoteSessionStatusDiagPoint.isEmpty())  {
+
+                String equipRef = Objects.requireNonNull(diagEquip.get("id")).toString();
+                String equipDis = "DiagEquip";
+                String siteRef = Objects.requireNonNull(diagEquip.get("siteRef")).toString();
+                String tz = Objects.requireNonNull(diagEquip.get("tz")).toString();
+
+                Point remoteSessionStatus = new Point.Builder()
+                        .setDisplayName(equipDis+"-remoteSessionStatus")
+                        .setEquipRef(equipRef)
+                        .setSiteRef(siteRef).setHisInterpolate("cov")
+                        .addMarker("diag").addMarker("remote").addMarker("status").addMarker("sp")
+                        .addMarker("storage").addMarker("his").addMarker("cur")
+                        .setEnums(RemoteSessionStatus.getEnum())
+                        .setTz(tz)
+                        .build();
+                ccuHsApi.addPoint(remoteSessionStatus);
             }
         }
     }

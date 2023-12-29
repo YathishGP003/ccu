@@ -1,6 +1,9 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
-import a75f.io.api.haystack.*
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Queries.Companion.ANALOG1_IN
 import a75f.io.api.haystack.Queries.Companion.ANALOG1_OUT
 import a75f.io.api.haystack.Queries.Companion.ANALOG2_IN
@@ -17,7 +20,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Reconfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import android.util.Log
 import com.google.gson.JsonObject
-import java.util.*
 
 /**
  * Created by Manjunath K on 19-10-2021.
@@ -56,7 +58,11 @@ class HyperStatReconfigureUtil {
         fun updateConfigValues(msgObject: JsonObject, haystack: CCUHsApi, configPoint: Point) {
             val updatedConfigValue = msgObject.get("val").asDouble
             val configPointId = msgObject.get("id").asString
-            haystack.writeDefaultValById(configPointId, updatedConfigValue)
+            val level = msgObject.get("level").asInt
+            val duration = if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null)
+            msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
+            val who = msgObject.get("who").asString
+            haystack.writePointLocal(configPointId, level, who, updatedConfigValue, duration)
             val equip = getEquip(configPoint.equipRef, haystack)
             val configType = configType(configPoint.markers)
             val portType = portType(configPoint.markers)

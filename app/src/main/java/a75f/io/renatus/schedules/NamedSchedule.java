@@ -72,6 +72,7 @@ public class NamedSchedule extends DialogFragment {
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final String PARAM_SCHED_NAME = "PARAM_SCHED_NAME";
+    private static final String PARAM_SCHED_SET = "PARAM_SCHED_SET";
     private static final String TAG = "NAMED_SCHEDULE";
 
     TextView textViewMonday;
@@ -120,6 +121,8 @@ public class NamedSchedule extends DialogFragment {
     private float mPixelsBetweenADay;
     private OnExitListener mOnExitListener;
     Button setButton;
+    Button cancelButton;
+    ImageView closeButton;
 
     @Override
     public void onStop() {
@@ -138,12 +141,13 @@ public class NamedSchedule extends DialogFragment {
         void onExit();
     }
 
-    public static NamedSchedule getInstance(String scheduleId,String roomRef,String scheduleName) {
+    public static NamedSchedule getInstance(String scheduleId,String roomRef,String scheduleName,boolean isSet) {
         NamedSchedule namedSchedule = new NamedSchedule();
         Bundle args = new Bundle();
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
         args.putString(PARAM_ROOM_REF, roomRef);
         args.putString(PARAM_SCHED_NAME, scheduleName);
+        args.putBoolean(PARAM_SCHED_SET, isSet);
         namedSchedule.setArguments(args);
         return namedSchedule;
     }
@@ -175,6 +179,24 @@ public class NamedSchedule extends DialogFragment {
         initialiseViews(rootView);
 
         setButton = rootView.findViewById(R.id.setButton);
+        closeButton = rootView.findViewById(R.id.btnCloseNamed);
+        cancelButton = rootView.findViewById(R.id.cancelButton);
+
+        cancelButton.setOnClickListener( view -> {
+            dismiss();
+        });
+
+
+
+        if(!getArguments().getBoolean(PARAM_SCHED_SET)) {
+            setButton.setVisibility(View.GONE);
+            cancelButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.VISIBLE);
+            closeButton.setOnClickListener(view -> {
+                dismiss();
+            });
+        }
+
         setButton.setOnClickListener(v -> {
             if (validateNamedSchedule()) {
                 CcuLog.d(TAG, "Valid Named Schedule");
@@ -579,10 +601,22 @@ public class NamedSchedule extends DialogFragment {
         CcuLog.d(TAG,"PARAM_SCHEDULE_ID "+mScheduleId);
         String namedScheduledis = getArguments().getString(PARAM_SCHED_NAME);
         String title;
-        if(namedScheduledis.length() > 20){
-            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME).substring(0,20)+"...";
-        }else{
-            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME);
+        String scheduledName = getArguments().getString(PARAM_SCHED_NAME);
+        boolean isScheduledSet = getArguments().getBoolean(PARAM_SCHED_SET);
+        int maxLength = 20;
+
+        if (!isScheduledSet) {
+            if (namedScheduledis.length() > 20) {
+                title = scheduledName.substring(0, 20) + "...";
+            } else {
+                title = scheduledName;
+            }
+        } else {
+            if (namedScheduledis.length() > 20) {
+                title = "Preview : " + scheduledName.substring(0, 20) + "...";
+            } else {
+                title = "Preview : " + scheduledName;
+            }
         }
 
         textViewScheduletitle.setText(title);

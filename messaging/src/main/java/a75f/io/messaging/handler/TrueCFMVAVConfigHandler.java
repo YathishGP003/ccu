@@ -9,6 +9,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
@@ -20,6 +22,10 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double value = msgObject.get("val").getAsDouble();
+        if(value == CCUHsApi.getInstance().readDefaultValById(configPoint.getId())) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "updateVAVConfigPoint - Message is not handled");
+            return;
+        }
         String fanMarker = "";
         if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
             fanMarker = "series";

@@ -447,7 +447,7 @@ fun setOccupancyMode(
     externalSpList: ArrayList<String>,
 ) {
     val occupancyMode = when (occupancy) {
-        Occupancy.UNOCCUPIED, Occupancy.VACATION, Occupancy.AUTOAWAY -> 0.0
+        Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
         else -> 1.0
     }
 

@@ -3,7 +3,6 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
@@ -72,18 +71,21 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
                 val enableConfig = profileConfiguration.getEnableConfigs().getConfig(point.domainName)
+                val value = if (modelPointDef.defaultValue == null) 0.0 else (modelPointDef.defaultValue as Number).toDouble()
+                  if (isItTunerPoint(hayStackPoint.markers)) {
+                      TunerUtil.copyDefaultBuildingTunerVal(
+                          pointId,
+                          hayStackPoint.domainName,
+                          hayStack
+                      )
+                  } else if (enableConfig != null) {
+                      initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt())
+                  } else if (modelPointDef.tagNames.contains("writable")) {
+                      initializeDefaultVal(hayStackPoint, value)
+                  } else if (modelPointDef.tagNames.contains("his")) {
+                      hayStack.writeHisValById(modelPointDef.id, value)
+                  }
 
-                if (isItTunerPoint(hayStackPoint.markers)) {
-                    TunerUtil.copyDefaultBuildingTunerVal(
-                        pointId,
-                        hayStackPoint.domainName,
-                        hayStack
-                    )
-                } else if (enableConfig != null) {
-                    initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
-                } else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
-                    initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
-                }
                 DomainManager.addPoint(hayStackPoint)
             }
         }
@@ -138,8 +140,10 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
-    private fun initializeDefaultVal(point : Point, defaultVal : Number) {
+    private fun initializeDefaultVal(point: Point, defaultVal: Number) {
         hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
+        if (point.markers.contains("his"))
+            hayStack.writeHisValById(point.id, defaultVal.toDouble())
     /*
         when {
             point.markers.contains("config") *//*&& point.defaultVal is String*//*-> hayStack.writeDefaultValById(point.id, defaultVal.toDouble())

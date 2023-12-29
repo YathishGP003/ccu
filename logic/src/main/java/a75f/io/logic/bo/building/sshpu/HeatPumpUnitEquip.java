@@ -1188,6 +1188,7 @@ public class HeatPumpUnitEquip{
         Point targetDehumidifier = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetDehumidifier")
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
+                .setFloorRef(floor).setRoomRef(room)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable")
                 .setGroup(String.valueOf(nodeAddr))
                 .addMarker("target").addMarker("his")
@@ -1198,6 +1199,7 @@ public class HeatPumpUnitEquip{
 
         Point targetHumidty = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetHumidity")
+                .setFloorRef(floor).setRoomRef(room)
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable")
                 .addMarker("target").addMarker("humidity").addMarker("sp")

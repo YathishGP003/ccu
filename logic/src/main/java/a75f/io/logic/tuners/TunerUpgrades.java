@@ -47,6 +47,7 @@ public class TunerUpgrades {
         migrateCelsiusSupportConfiguration(hayStack);
         migrateAutoAwaySetbackTuner(hayStack);
         migrateAutoAwayCpuSetbackTuner(hayStack);
+        addVavModeChangeoverHysteresisTuner(hayStack);
         GenericTuners.createCcuNetworkWatchdogTimeoutTuner(hayStack);
         Equip buildingTunerEquip = new Equip.Builder().setHashMap(hayStack.readEntity("equip and tuner")).build();
         DabReheatTunersKt.createDefaultReheatTuners(hayStack, buildingTunerEquip);
@@ -71,9 +72,8 @@ public class TunerUpgrades {
         HashMap<Object, Object> buildTuner = hayStack.readEntity(Queries.EQUIP_AND_TUNER);
         Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
         Point buildingTunerPoint = VavTuners.createReheatZoneToDATMinDifferentialTuner(true,
-                                                                                       tunerEquip.getDisplayName(), tunerEquip.getId(),
-                                                                                        null, tunerEquip.getSiteRef(),
-                                                                                       hayStack.getTimeZone());
+                tunerEquip.getDisplayName(), tunerEquip.getId(),null, null,
+                tunerEquip.getSiteRef(), hayStack.getTimeZone());
     
         String buildingReheatZoneToDATMinDifferentialId = hayStack.addPoint(buildingTunerPoint);
         hayStack.writePointForCcuUser(buildingReheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
@@ -85,9 +85,9 @@ public class TunerUpgrades {
         vavEquips.forEach(equip -> {
             Equip vavEquip = new Equip.Builder().setHashMap(equip).build();
             Point equipTunerPoint = VavTuners.createReheatZoneToDATMinDifferentialTuner(false,
-                                                                                        vavEquip.getDisplayName(), vavEquip.getId(),
-                                                                                        vavEquip.getRoomRef(), vavEquip.getSiteRef(),
-                                                                                        hayStack.getTimeZone());
+                    vavEquip.getDisplayName(), vavEquip.getId(),
+                    vavEquip.getRoomRef(), vavEquip.getFloorRef(),
+                    vavEquip.getSiteRef(), hayStack.getTimeZone());
             String reheatZoneToDATMinDifferentialId = hayStack.addPoint(equipTunerPoint);
             BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, vavEquip.getRoomRef(), hayStack);
             hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
@@ -211,9 +211,9 @@ public class TunerUpgrades {
 
             if (maxDischargeTempTuner.isEmpty()) {
                 CcuLog.i(L.TAG_CCU_TUNER,"maxDischargeTempTuner tuners not found, Creating new tuners");
-                Point reheatZoneMaxDischargeTempTuner = VavTuners.createMaxDischargeTempTuner(true,   tunerEquip.getDisplayName(), tunerEquip.getId(),
-                        null, tunerEquip.getSiteRef(),
-                        hayStack.getTimeZone());
+                Point reheatZoneMaxDischargeTempTuner = VavTuners.createMaxDischargeTempTuner(true,
+                        tunerEquip.getDisplayName(), tunerEquip.getId(), null, null,
+                        tunerEquip.getSiteRef(), hayStack.getTimeZone());
 
                 String maxDischargeTempTunerID = hayStack.addPoint(reheatZoneMaxDischargeTempTuner);
                 hayStack.writePointForCcuUser(maxDischargeTempTunerID, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
@@ -225,7 +225,7 @@ public class TunerUpgrades {
                     Equip vavEquip = new Equip.Builder().setHashMap(equip).build();
                     Point equipTunerPoint = VavTuners.createMaxDischargeTempTuner(false,
                             vavEquip.getDisplayName(), vavEquip.getId(),
-                            vavEquip.getRoomRef(), vavEquip.getSiteRef(),
+                            vavEquip.getRoomRef(),vavEquip.getFloorRef(), vavEquip.getSiteRef(),
                             hayStack.getTimeZone());
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
@@ -241,9 +241,8 @@ public class TunerUpgrades {
 
             if (dischargeTempOffsetTuner.isEmpty()) {
                 Point reheatZoneMaxDischargeTempOffsetTuner = VavTuners.createDischargeTempOffsetTuner(true,
-                        tunerEquip.getDisplayName(), tunerEquip.getId(),
-                        null, tunerEquip.getSiteRef(),
-                        hayStack.getTimeZone());
+                        tunerEquip.getDisplayName(), tunerEquip.getId(), null, null,
+                        tunerEquip.getSiteRef(), hayStack.getTimeZone());
 
                 String reheatZoneDischargeTempOffSetTunerId = hayStack.addPoint(reheatZoneMaxDischargeTempOffsetTuner);
                 hayStack.writePointForCcuUser(reheatZoneDischargeTempOffSetTunerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
@@ -255,9 +254,8 @@ public class TunerUpgrades {
                 vavEquips.forEach(equip -> {
                     Equip vavEquip = new Equip.Builder().setHashMap(equip).build();
                     Point equipTunerPoint = VavTuners.createDischargeTempOffsetTuner(false,
-                            vavEquip.getDisplayName(), vavEquip.getId(),
-                            vavEquip.getRoomRef(), vavEquip.getSiteRef(),
-                            hayStack.getTimeZone());
+                            vavEquip.getDisplayName(), vavEquip.getId(), vavEquip.getRoomRef(), vavEquip.getFloorRef(),
+                            vavEquip.getSiteRef(), hayStack.getTimeZone());
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
 
@@ -270,6 +268,33 @@ public class TunerUpgrades {
                 CcuLog.i(L.TAG_CCU_TUNER,"dischargeTempOffsetTuner found "+dischargeTempOffsetTuner.size());
 
         }
+
+    private static void addVavModeChangeoverHysteresisTuner(CCUHsApi hayStack){
+        CcuLog.i(L.TAG_CCU_TUNER,"migration addVavModeChangeoverHysteresisTuner");
+        ArrayList<HashMap<Object, Object>> vavModeChangeoverHysteresisTuner = hayStack.readAllEntities(
+                "vav and mode and changeover and hysteresis and tuner and default");
+
+        //Create the tuner point on building tuner equip.
+        HashMap<Object, Object> buildTuner = hayStack.readEntity(Queries.EQUIP_AND_TUNER);
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+
+        if (vavModeChangeoverHysteresisTuner.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_TUNER,"vavModeChangeoverHysteresis tuner not found, Creating new tuner");
+            Point newVavModeChangeoverHysteresisTuner = VavTuners.createDefaultModeChangeoverHysteresisTuner(tunerEquip.getDisplayName(), tunerEquip.getId(),
+                    tunerEquip.getSiteRef(),
+                    hayStack.getTimeZone());
+
+            String newVavModeChangeoverHysteresisTunerID = hayStack.addPoint(newVavModeChangeoverHysteresisTuner);
+            hayStack.writePointForCcuUser(newVavModeChangeoverHysteresisTunerID, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                    TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS, 0);
+            CCUHsApi.getInstance().writeHisValById(newVavModeChangeoverHysteresisTunerID, TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS);
+
+        }else{
+            CcuLog.i(L.TAG_CCU_TUNER,"vavModeChangeHysteresis tuner found "+vavModeChangeoverHysteresisTuner.size());
+        }
+
+
+    }
 
 
    private static void migrateCelsiusSupportConfiguration(CCUHsApi hayStack){

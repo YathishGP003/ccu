@@ -8,13 +8,11 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -128,8 +126,8 @@ public class DualDuctEquip {
         createUserIntentPoints(siteRef, equipDis, roomRef, floorRef, tz );
         
         createEquipOperationPoints(siteRef, equipDis, roomRef, floorRef, tz );
-        
-        createConfigPoints(siteRef, equipDis, tz, config);
+
+        createConfigPoints(siteRef, equipDis, tz, config, roomRef, floorRef);
 
         ConfigUtil.Companion.addConfigPoints("dualDuct",siteRef,roomRef,floorRef,
                 equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAwayControl ? 1:0,
@@ -476,15 +474,15 @@ public class DualDuctEquip {
                                             .build();
         CCUHsApi.getInstance().addPoint(equipScheduleStatus);
     }
-    
-    private void createConfigPoints(String siteRef,
-                                    String equipDis,
-                                    String tz,
-                                    DualDuctProfileConfiguration config) {
+
+    private void createConfigPoints(String siteRef, String equipDis, String tz, DualDuctProfileConfiguration config,
+                                    String roomRef, String floorRef) {
         
         Point minHeatingDamperPos = new Point.Builder()
                                              .setDisplayName(equipDis+"-minHeatingDamperPos")
                                              .setEquipRef(equipRef)
+                                             .setRoomRef(roomRef)
+                                             .setFloorRef(floorRef)
                                              .setSiteRef(siteRef).setHisInterpolate("cov")
                                              .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("min")
                                              .addMarker("heating").addMarker("pos").addMarker("limit")
@@ -503,6 +501,8 @@ public class DualDuctEquip {
         Point maxHeatingDamperPos = new Point.Builder()
                                             .setDisplayName(equipDis+"-maxHeatingDamperPos")
                                             .setEquipRef(equipRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("max")
                                             .addMarker("heating").addMarker("pos").addMarker("limit")
@@ -521,6 +521,8 @@ public class DualDuctEquip {
         Point minCoolingDamperPos = new Point.Builder()
                                             .setDisplayName(equipDis+"-minCoolingDamperPos")
                                             .setEquipRef(equipRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("min")
                                             .addMarker("cooling").addMarker("pos").addMarker("limit")
@@ -539,6 +541,8 @@ public class DualDuctEquip {
         Point maxCoolingDamperPos = new Point.Builder()
                                             .setDisplayName(equipDis+"-maxCoolingDamperPos")
                                             .setEquipRef(equipRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("max")
                                             .addMarker("cooling").addMarker("pos").addMarker("limit")
@@ -557,6 +561,8 @@ public class DualDuctEquip {
         Point enableOccupancyControl = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableOccupancyControl")
                                                .setEquipRef(equipRef)
+                                               .setRoomRef(roomRef)
+                                               .setFloorRef(floorRef)
                                                .setSiteRef(siteRef).setHisInterpolate("cov")
                                                .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("his").addMarker("sp")
@@ -571,6 +577,8 @@ public class DualDuctEquip {
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his")
@@ -585,6 +593,8 @@ public class DualDuctEquip {
         Point enableIAQControl = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableIAQControl")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his")
@@ -599,6 +609,8 @@ public class DualDuctEquip {
         Point zonePriority = new Point.Builder()
                                  .setDisplayName(equipDis+"-zonePriority")
                                  .setEquipRef(equipRef)
+                                 .setRoomRef(roomRef)
+                                 .setFloorRef(floorRef)
                                  .setSiteRef(siteRef).setHisInterpolate("cov")
                                  .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                  .addMarker("priority").addMarker("sp").addMarker("his")
@@ -613,6 +625,8 @@ public class DualDuctEquip {
         Point temperatureOffset = new Point.Builder()
                                          .setDisplayName(equipDis+"-temperatureOffset")
                                          .setEquipRef(equipRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                          .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                          .addMarker("temperature").addMarker("offset").addMarker("sp").addMarker("his")
@@ -626,20 +640,22 @@ public class DualDuctEquip {
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.getTemperatureOffset());
         CCUHsApi.getInstance().writeHisValById(temperatureOffsetId, config.getTemperatureOffset());
     
-        createOutputConfigPoints(siteRef, equipDis, tz, config);
-        createAnalog1OutputConfigPoints(siteRef, equipDis, tz, config);
-        createAnalog2OutputConfigPoints(siteRef, equipDis, tz, config);
+        createOutputConfigPoints(siteRef, equipDis, tz, config, roomRef, floorRef);
+        createAnalog1OutputConfigPoints(siteRef, equipDis, tz, config, roomRef, floorRef);
+        createAnalog2OutputConfigPoints(siteRef, equipDis, tz, config, roomRef, floorRef);
         
     }
     
     private void createOutputConfigPoints(String siteRef,
-                                                 String equipDis,
-                                                 String tz,
-                                                 DualDuctProfileConfiguration config) {
+                                          String equipDis,
+                                          String tz,
+                                          DualDuctProfileConfiguration config, String roomRef, String floorRef) {
     
         Point analog1OutputConfig = new Point.Builder()
                                             .setDisplayName(equipDis+"-analog1OutputConfig")
                                             .setEquipRef(equipRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                             .addMarker("analog1").addMarker("output").addMarker("type")
@@ -655,6 +671,8 @@ public class DualDuctEquip {
         Point analog2OutputConfig = new Point.Builder()
                                             .setDisplayName(equipDis+"-analog2OutputConfig")
                                             .setEquipRef(equipRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                             .addMarker("analog2").addMarker("output").addMarker("type")
@@ -671,6 +689,8 @@ public class DualDuctEquip {
         Point thermistor1OutputConfig = new Point.Builder()
                                                 .setDisplayName(equipDis+"-thermistor1OutputConfig")
                                                 .setEquipRef(equipRef)
+                                                .setRoomRef(roomRef)
+                                                .setFloorRef(floorRef)
                                                 .setSiteRef(siteRef).setHisInterpolate("cov")
                                                 .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                                 .addMarker("th1").addMarker("output").addMarker("type")
@@ -685,6 +705,8 @@ public class DualDuctEquip {
         Point thermistor2OutputConfig = new Point.Builder()
                                                 .setDisplayName(equipDis+"-thermistor2OutputConfig")
                                                 .setEquipRef(equipRef)
+                                                .setRoomRef(roomRef)
+                                                .setFloorRef(floorRef)
                                                 .setSiteRef(siteRef).setHisInterpolate("cov")
                                                 .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                                 .addMarker("th2").addMarker("output").addMarker("type")
@@ -704,11 +726,13 @@ public class DualDuctEquip {
     private void createAnalog1OutputConfigPoints(String siteRef,
                                                  String equipDis,
                                                  String tz,
-                                                 DualDuctProfileConfiguration config) {
+                                                 DualDuctProfileConfiguration config, String roomRef, String floorRef) {
         
         Point analog1OutputAtMinDamperHeatingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog1OutputAtMinDamperHeatingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog1").addMarker("output")
@@ -729,6 +753,8 @@ public class DualDuctEquip {
         Point analog1OutputAtMaxDamperHeatingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog1OutputAtMaxDamperHeatingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog1").addMarker("output")
@@ -748,6 +774,8 @@ public class DualDuctEquip {
         Point analog1OutputAtMinDamperCoolingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog1OutputAtMinDamperCoolingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog1").addMarker("output")
@@ -768,6 +796,8 @@ public class DualDuctEquip {
         Point analog1OutputAtMaxDamperCoolingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog1OutputAtMaxDamperCoolingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog1").addMarker("output")
@@ -789,11 +819,13 @@ public class DualDuctEquip {
     private void createAnalog2OutputConfigPoints(String siteRef,
                                                  String equipDis,
                                                  String tz,
-                                                 DualDuctProfileConfiguration config) {
+                                                 DualDuctProfileConfiguration config, String roomRef, String floorRef) {
         
         Point analog2OutputAtMinDamperHeatingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog2OutputAtMinDamperHeatingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog2").addMarker("output")
@@ -814,6 +846,8 @@ public class DualDuctEquip {
         Point analog2OutputAtMaxDamperHeatingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog2OutputAtMaxDamperHeatingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog2").addMarker("output")
@@ -833,6 +867,8 @@ public class DualDuctEquip {
         Point analog2OutputAtMinDamperCoolingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog2OutputAtMinDamperCoolingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog2").addMarker("output")
@@ -853,6 +889,8 @@ public class DualDuctEquip {
         Point analog2OutputAtMaxDamperCoolingPos = new Point.Builder()
                                                        .setDisplayName(equipDis+"-analog2OutputAtMaxDamperCoolingPos")
                                                        .setEquipRef(equipRef)
+                                                       .setRoomRef(roomRef)
+                                                       .setFloorRef(floorRef)
                                                        .setSiteRef(siteRef).setHisInterpolate("cov")
                                                        .addMarker("config").addMarker("dualDuct").addMarker("writable")
                                                        .addMarker("zone").addMarker("analog2").addMarker("output")

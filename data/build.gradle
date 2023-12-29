@@ -123,7 +123,6 @@ dependencies {
 repositories {
     mavenCentral()
 }
-
 task getExternalLibraryPaths {
     doLast {
         def parentFolder = file(projectDir.parent)

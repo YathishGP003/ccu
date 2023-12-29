@@ -29,6 +29,7 @@ import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
@@ -238,7 +240,12 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 childIndexPosition = 0;
                 final TunerGroupItem section = (TunerGroupItem) mDataArrayList.get(position);
                 previousOpenGroup = section;
-                holder.tunerGroupTitle.setText(section.getName());
+
+                if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && section.getName().equalsIgnoreCase("DAB")){
+                    holder.tunerGroupTitle.setText("VVT-C");
+                }else{
+                    holder.tunerGroupTitle.setText(section.getName());
+                }
                 holder.tunerGroupTitle.setOnClickListener(v -> {
                     mItemClickListener.itemClicked(section);
                     if (holder.tunerGroupToggle.isChecked()) {

@@ -21,7 +21,7 @@ class DiffManger(var context: Context?) {
 
     companion object {
         const val NEW_FILE_PATH = "assets/75f/models/"
-        const val BACKUP_FIle_PATH = "models/assets/75f/models/"
+        const val BACKUP_FIle_PATH = "assets/models/"
         const val VERSION = "versions.json"
     }
 

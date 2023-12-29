@@ -78,9 +78,11 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     }
     if (equipDevice.equips.isNotEmpty()) {
         equipDevice.equips.forEach { subEquip ->
-            subEquip.registers.forEach {
-                if (!it.parameters[0].isDisplayInUI)
-                    isAllSelected = false
+            if (subEquip.registers.isNotEmpty()) {
+                subEquip.registers[0].parameters.forEach {
+                    if (!it.isDisplayInUI)
+                        isAllSelected = false
+                }
             }
         }
     }

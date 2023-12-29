@@ -430,9 +430,17 @@ public class VavSystemController extends SystemController
             piController.reset();
             emergencyMode = false;
         }
+
+        double modeChangeoverHysteresis = TunerUtil.readTunerValByQuery("system and mode and changeover and " +
+                "hysteresis and equipRef == \""+
+                L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        CcuLog.d(L.TAG_CCU_SYSTEM," handleOperationalChangeOver : conditioningMode " + conditioningMode + ", weightedAverageCoolingOnlyLoadMA " + weightedAverageCoolingOnlyLoadMA + ", weightedAverageHeatingLoadMA " + weightedAverageHeatingOnlyLoadMA + ", modeChangeoverHysteresis "+modeChangeoverHysteresis);
+
         if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
         {
-            if (systemState != COOLING)
+            // Only switch into cooling if weightedAverageCoolingOnlyLoadMA > modeChangeoverHysteresis
+            // (But we want to be in this block any time there's cooling load, so that loops do not reset)
+            if (weightedAverageCoolingOnlyLoadMA > modeChangeoverHysteresis && systemState != COOLING)
             {
                 systemState = COOLING;
                 piController.reset();
@@ -454,6 +462,7 @@ public class VavSystemController extends SystemController
             heatingSignal = 0;
             piController.reset();
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemState " + systemState + ", coolingSignal " + coolingSignal + ", heatingSignal " + heatingSignal);
     }
 
     private void updateLoopOpSignals() {

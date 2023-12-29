@@ -277,7 +277,7 @@ class HyperStatSplitUserIntentHandler {
 
                 },
                 {
-                    zoneDataInterface?.refreshScreen("", false)
+
                 }
             )
 

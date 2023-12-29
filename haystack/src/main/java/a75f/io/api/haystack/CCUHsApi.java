@@ -619,6 +619,7 @@ public class CCUHsApi
         spPrefsEditor.putString("address", updatedSite.getGeoAddress());
         spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
+        spPrefsEditor.putString("state", updatedSite.getGeoState());
 
         spPrefsEditor.commit();
     }
@@ -958,6 +959,7 @@ public class CCUHsApi
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
+        CcuLog.i("CCU_HAYSTACK","clearPointArrayLevel "+id + "level "+level + "local "+local);
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()

@@ -1704,7 +1704,7 @@ class HyperStatPointsUtil(
             arrayOf("zone", "air", "temp", "desired", "logical", "sp", "writable", "userIntent", "heating", "his")
 
         val equipStatusPointMarkers = arrayOf("zone", "status", "his")
-        val equipStatusMessagePointMarkers = arrayOf("zone", "status", "his", "message", "writable")
+        val equipStatusMessagePointMarkers = arrayOf("zone", "status", "message", "writable")
         val scheduleStatusPointMarkers = arrayOf("zone", "scheduleStatus", "his", "message", "writable", "logical")
         val scheduleTypePointMarkers = arrayOf("zone", "scheduleType", "his", "writable", "logical")
 

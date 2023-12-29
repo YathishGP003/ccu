@@ -270,6 +270,20 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             matThrottle = false
             outsideAirFinalLoopOutput = 0
 
+            // Even if there's not an OAO damper, still calculate enthalpy for portal widgets
+            val externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp")
+            val externalHumidity =
+                CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity")
+
+            val indoorTemp = hsSplitHaystackUtil.getCurrentTemp()
+            val indoorHumidity = hsSplitHaystackUtil.getHumidity()
+
+            val insideEnthalpy = getAirEnthalpy(indoorTemp, indoorHumidity)
+            val outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity)
+
+            equip.setHisVal("inside and enthalpy", insideEnthalpy)
+            equip.setHisVal("outside and enthalpy", outsideEnthalpy)
+
         } else {
 
             val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()

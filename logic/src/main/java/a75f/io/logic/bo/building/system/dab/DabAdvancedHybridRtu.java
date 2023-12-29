@@ -9,10 +9,12 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
@@ -33,7 +35,11 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     @Override
     public String getProfileName()
     {
-        return "DAB Advanced Hybrid AHU";
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            return "VVT-C Advanced Hybrid AHU";
+        }else{
+            return "DAB Advanced Hybrid AHU";
+        }
     }
     
     @Override

@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -230,6 +232,16 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             textTitleFragment.setText(R.string.title_helionodemodule);
         }else {
             textTitleFragment.setText(R.string.title_smartnodemodule);
+        }
+
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            textDABTitle.setText(R.string.txt_variable_volume_and_temperature);
+            textDabSingleDuct.setText(R.string.txt_vvtc);
+            textDabDualDuct.setText(R.string.txt_vvtc_dual_duct);
+        }else{
+            textDABTitle.setText(R.string.txt_dynamic_airflow_balancing);
+            textDABTitle.setText(R.string.title_dab_single_duct);
+            textDabDualDuct.setText(R.string.dab_dual_duct_title);
         }
     }
 

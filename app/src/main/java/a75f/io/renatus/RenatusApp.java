@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -100,7 +102,7 @@ public class RenatusApp extends UtilityApplication
 
 
 					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
-					Log.d("CCU_DOWNLOAD", "APP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
+					Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
 						Process p = Runtime.getRuntime().exec("su");
 						InputStream es = p.getErrorStream();
@@ -121,15 +123,15 @@ public class RenatusApp extends UtilityApplication
 							output += new String(buffer, 0, read);
 						}
 						p.waitFor();
-						Log.d("CCU_DOWNLOAD", output.trim() + " (" + p.exitValue() + ")");
+						Log.d(TAG_CCU_DOWNLOAD, output.trim() + " (" + p.exitValue() + ")");
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
-						Log.d("CCU_DOWNLOAD", "APP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
+						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
 						closeApp();
 					}
 				} catch (IOException e) {
-					Log.e("CCU_DOWNLOAD", e.getMessage());
+					Log.e(TAG_CCU_DOWNLOAD, e.getMessage());
 				} catch (InterruptedException e) {
-					Log.e("CCU_DOWNLOAD", e.getMessage());
+					Log.e(TAG_CCU_DOWNLOAD, e.getMessage());
 				}
 			}
 		});

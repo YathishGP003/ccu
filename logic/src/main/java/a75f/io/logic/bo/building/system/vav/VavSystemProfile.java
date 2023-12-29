@@ -2,8 +2,12 @@ package a75f.io.logic.bo.building.system.vav;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS;
 
 import android.util.Log;
+
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -245,7 +249,7 @@ public abstract class VavSystemProfile extends SystemProfile
                     "changeover and hysteresis and vav");
 
             if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
-                hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), SYSTEM_DEFAULT_VAL_LEVEL,
+                hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
                         HNum.make(DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
             } else {
                 ArrayList<HashMap> modeChangeoverHysteresisArr =

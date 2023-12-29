@@ -24,6 +24,8 @@ import a75f.io.logic.tuners.TunerConstants;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 /**
  * Created by samjithsadasivan on 1/10/19.
@@ -200,6 +202,7 @@ public abstract class VavSystemProfile extends SystemProfile
         CcuLog.d(L.TAG_CCU_SYSTEM, "VAV : addNewTunerPoints");
         addStageUpTimerCounterTuner(equipRef);
         addStageDownTimerCounterTuner(equipRef);
+        addModeChangeHysteresisChangeOverTuner(equipRef);
     }
     
     private void addStageUpTimerCounterTuner(String equipRef) {
@@ -279,6 +282,49 @@ public abstract class VavSystemProfile extends SystemProfile
                 }
             }
             hayStack.writeHisValById(stageDownTimerCounterId, HSUtil.getPriorityVal(stageDownTimerCounterId));
+        }
+    }
+
+    private void addModeChangeHysteresisChangeOverTuner(String equipRef) {
+        HashMap<Object, Object> modeChangeOverHysteresisPoint = CCUHsApi.getInstance()
+                .readEntity("tuner and system and vav and mode and " +
+                        "changeover and hysteresis");
+
+        if (modeChangeOverHysteresisPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point modeChangeoverHysteresis = new Point.Builder()
+                    .setDisplayName(HSUtil.getDis(equipRef)+"-modeChangeoverHysteresis")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef)
+                    .setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cur")
+                    .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp").addMarker("system")
+                    .setMinVal("0").setMaxVal("5").setIncrementVal("0.5")
+                    .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                    .setTz(tz)
+                    .build();
+            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+
+            HashMap defaultModeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and " +
+                    "changeover and hysteresis and vav");
+
+            if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
+                hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), SYSTEM_DEFAULT_VAL_LEVEL,
+                        HNum.make(DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
+            } else {
+                ArrayList<HashMap> modeChangeoverHysteresisArr =
+                        hayStack.readPoint(defaultModeChangeoverHysteresisPoint.get("id").toString());
+                for (HashMap valMap : modeChangeoverHysteresisArr) {
+                    if (valMap.get("val") != null) {
+                        hayStack.pointWrite(HRef.copy(modeChangeoverHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
+                }
+            }
+            hayStack.writeHisValById(modeChangeoverHysteresisId, HSUtil.getPriorityVal(modeChangeoverHysteresisId));
         }
     }
     

@@ -47,6 +47,7 @@ public class TunerUpgrades {
         migrateCelsiusSupportConfiguration(hayStack);
         migrateAutoAwaySetbackTuner(hayStack);
         migrateAutoAwayCpuSetbackTuner(hayStack);
+        addVavModeChangeoverHysteresisTuner(hayStack);
         GenericTuners.createCcuNetworkWatchdogTimeoutTuner(hayStack);
         Equip buildingTunerEquip = new Equip.Builder().setHashMap(hayStack.readEntity("equip and tuner")).build();
         DabReheatTunersKt.createDefaultReheatTuners(hayStack, buildingTunerEquip);
@@ -267,6 +268,33 @@ public class TunerUpgrades {
                 CcuLog.i(L.TAG_CCU_TUNER,"dischargeTempOffsetTuner found "+dischargeTempOffsetTuner.size());
 
         }
+
+    private static void addVavModeChangeoverHysteresisTuner(CCUHsApi hayStack){
+        CcuLog.i(L.TAG_CCU_TUNER,"migration addVavModeChangeoverHysteresisTuner");
+        ArrayList<HashMap<Object, Object>> vavModeChangeoverHysteresisTuner = hayStack.readAllEntities(
+                "vav and mode and changeover and hysteresis and tuner and default");
+
+        //Create the tuner point on building tuner equip.
+        HashMap<Object, Object> buildTuner = hayStack.readEntity(Queries.EQUIP_AND_TUNER);
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+
+        if (vavModeChangeoverHysteresisTuner.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_TUNER,"vavModeChangeoverHysteresis tuner not found, Creating new tuner");
+            Point newVavModeChangeoverHysteresisTuner = VavTuners.createDefaultModeChangeoverHysteresisTuner(tunerEquip.getDisplayName(), tunerEquip.getId(),
+                    tunerEquip.getSiteRef(),
+                    hayStack.getTimeZone());
+
+            String newVavModeChangeoverHysteresisTunerID = hayStack.addPoint(newVavModeChangeoverHysteresisTuner);
+            hayStack.writePointForCcuUser(newVavModeChangeoverHysteresisTunerID, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                    TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS, 0);
+            CCUHsApi.getInstance().writeHisValById(newVavModeChangeoverHysteresisTunerID, TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS);
+
+        }else{
+            CcuLog.i(L.TAG_CCU_TUNER,"vavModeChangeHysteresis tuner found "+vavModeChangeoverHysteresisTuner.size());
+        }
+
+
+    }
 
 
    private static void migrateCelsiusSupportConfiguration(CCUHsApi hayStack){

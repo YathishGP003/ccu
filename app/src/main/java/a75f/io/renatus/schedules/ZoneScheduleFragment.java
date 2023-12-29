@@ -57,6 +57,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
@@ -490,33 +491,24 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                                boolean followBuilding, Schedule.Days mDay) {
 
         if (followBuilding) {
-            HashMap<Object, Object> coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-            HashMap<Object, Object> heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-            HashMap<Object, Object> coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-            HashMap<Object, Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-            HashMap<Object, Object> coolDB = CCUHsApi.getInstance().readEntity("schedulable and point and deadband and cooling and default");
-            HashMap<Object, Object> heatDB = CCUHsApi.getInstance().readEntity("schedulable and point and deadband and heating and default");
-
-
+            double heatUL = Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
+            double heatLL = Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+            double coolLL = Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
+            double coolUL = Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
+            double coolDB = Domain.buildingEquip.getCoolingDeadband().readPriorityVal();
+            double heatDB = Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
             ArrayList<Schedule.Days> daysInSchedule = schedule.getDays();
 
             for (Schedule.Days eachOccupied : daysInSchedule) {
 
-                if (validateDesiredTemp(coolingTemp, heatingTemp, HSUtil.getLevelValueFrom16(coolLL.get("id").toString()),
-                        HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), HSUtil.getLevelValueFrom16(heatLL.get("id").toString()),
-                        HSUtil.getLevelValueFrom16(heatUL.get("id").toString()),
-                        HSUtil.getLevelValueFrom16(heatDB.get("id").toString()),
-                        HSUtil.getLevelValueFrom16(coolDB.get("id").toString())) != null) {
+                if (validateDesiredTemp(coolingTemp, heatingTemp, coolLL, coolUL, heatLL, heatUL,
+                            heatDB, coolDB) != null) {
                     if (eachOccupied == mDay) {
-                        heatingTemp = HSUtil.getLevelValueFrom16
-                                (heatUL.get("id").toString()) - HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
-                        coolingTemp = HSUtil.getLevelValueFrom16
-                                (coolLL.get("id").toString()) + HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
+                        heatingTemp = heatUL - heatDB;
+                        coolingTemp = coolLL + coolDB;
                     }
-                    schedule.getDay(eachOccupied).setCoolingVal(HSUtil.getLevelValueFrom16
-                            (coolLL.get("id").toString()) + HSUtil.getLevelValueFrom16(coolDB.get("id").toString()));
-                    schedule.getDay(eachOccupied).setHeatingVal(HSUtil.getLevelValueFrom16
-                            (heatUL.get("id").toString()) - HSUtil.getLevelValueFrom16(heatDB.get("id").toString()));
+                    schedule.getDay(eachOccupied).setCoolingVal(coolLL + coolDB);
+                    schedule.getDay(eachOccupied).setHeatingVal(heatUL - heatDB);
 
                 }
             }

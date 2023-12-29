@@ -91,7 +91,7 @@ android {
 
 dependencies {
     implementation project(':haystack')
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.0.1-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.15-SNAPSHOT')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -103,8 +103,11 @@ dependencies {
     implementation "com.squareup.moshi:moshi:1.8.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.8.0"
     implementation("com.squareup.moshi:moshi-adapters:1.8.0")
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
 }

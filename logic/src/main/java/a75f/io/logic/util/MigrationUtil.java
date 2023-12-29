@@ -437,7 +437,7 @@ public class MigrationUtil {
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+//        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
@@ -2359,7 +2359,6 @@ public class MigrationUtil {
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
     }
-
     private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
         Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");

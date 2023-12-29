@@ -348,7 +348,7 @@ public class SmartNode
         Log.d("CCU"," Update Physical point "+port+" "+type);
     
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
+        if (device.isEmpty())
         {
             return ;
         }
@@ -366,7 +366,7 @@ public class SmartNode
         Log.d("CCU"," Update Physical point "+port);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
+        if (device.isEmpty())
         {
             return ;
         }
@@ -382,7 +382,7 @@ public class SmartNode
         Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
+        if (device.isEmpty())
         {
             return ;
         }
@@ -400,7 +400,7 @@ public class SmartNode
     public static RawPoint getPhysicalPoint(int addr, String port) {
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device == null)
+        if (device.isEmpty())
         {
             return null;
         }

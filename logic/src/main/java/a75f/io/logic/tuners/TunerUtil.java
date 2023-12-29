@@ -10,6 +10,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
@@ -65,7 +68,7 @@ public class TunerUtil
         if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
             if (values != null && values.size() > 0) {
-                for (int l = 1; l <= values.size(); l++) {
+                for (int l = 16; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
                         return Double.parseDouble(valMap.get("val").toString());
@@ -78,11 +81,12 @@ public class TunerUtil
     
     public static double readSystemUserIntentVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
-        if (cdb == null || cdb.size() == 0) {
+        HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU, "!!!! Value Not Read : User Intent does not exist for "+tags);
             return 0;
         }
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        ArrayList values = hayStack.readPoint(userIntent.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -97,12 +101,13 @@ public class TunerUtil
     
     public static void writeSystemUserIntentVal(String tags, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
+        HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);
+
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU, "!!!! Value Not set : User Intent does not exist for "+tags);
+            return;
         }
+        String id = userIntent.get("id").toString();
         hayStack.pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }
@@ -167,7 +172,7 @@ public class TunerUtil
         boolean isDefault = true;
 
         for (Equip q : zoneEquips) {
-            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomref == \"" + roomRef + "\"");
+            HashMap hdb = hayStack.read("point and deadband and heating and not adr and not multiplier and roomRef == \"" + roomRef + "\"");
 
             if (!hdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(hdb.get("id").toString());
@@ -326,6 +331,28 @@ public class TunerUtil
             }
         }
         return 0;
+    }
+
+    /**
+     * TODO - Optmize - commondata
+     * @param systemPointId
+     * @param domainName
+     */
+    public static void copyDefaultBuildingTunerVal(String systemPointId, String domainName, CCUHsApi hayStack) {
+        HashMap<Object, Object> buildingPoint = hayStack.readDefaultPointByDomainName(domainName);
+        if (buildingPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_TUNER, "!! Default point does not exist for "+domainName);
+            //TODO- write default val?
+            return;
+        }
+        ArrayList<HashMap> buildingPointArray = hayStack.readPoint(buildingPoint.get(Tags.ID).toString());
+        for (HashMap valMap : buildingPointArray) {
+            if (valMap.get("val") != null) {
+                hayStack.pointWrite(HRef.copy(systemPointId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        CcuLog.e(L.TAG_CCU_TUNER, "Copy default value for "+domainName+" "+buildingPointArray);
+        hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId));
     }
 
 }

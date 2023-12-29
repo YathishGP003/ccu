@@ -23,6 +23,7 @@ class SchedulerRevampMigration(hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "Do SchedulerRevampMigration")
         val migrationService = ServiceGenerator().createService(hayStack.gatewayServiceUrl, hayStack.jwt)
 
         hayStack.site?.id?.let {

@@ -347,7 +347,7 @@ public class RawPoint extends Entity
             this.endBit = endBit;
             return this;
         }
-    
+
         public Builder setRegisterType(String registerType) {
             this.registerType = registerType;
             return this;
@@ -367,7 +367,7 @@ public class RawPoint extends Entity
             this.tags.put(tag, val);
             return this;
         }
-    
+
         public RawPoint build(){
             RawPoint p = new RawPoint();
             p.displayName = this.displayName;

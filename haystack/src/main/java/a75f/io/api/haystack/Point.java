@@ -497,9 +497,6 @@ public class Point extends Entity
                 {
                     this.curStatus = pair.getValue().toString();
                 }
-                else {
-                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
-                }
             }
             return this;
         }

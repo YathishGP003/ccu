@@ -36,7 +36,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
     public ModbusNetwork() {
         UpdatePointHandler.setModbusWritableDataInterface(this);
-        VavExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
         DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
     }
     @Override

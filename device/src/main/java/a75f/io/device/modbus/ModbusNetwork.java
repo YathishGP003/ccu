@@ -36,10 +36,8 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
     public ModbusNetwork() {
         UpdatePointHandler.setModbusWritableDataInterface(this);
-        if (L.ccu().systemProfile instanceof DabExternalAhu)
-            DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
-        if (L.ccu().systemProfile instanceof VavExternalAhu)
-            VavExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
+        VavExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
+        DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
     }
     @Override
     public void sendMessage() {
@@ -131,7 +129,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                     for (Register register : modbusDevice.getRegisters()) {
                         if (Integer.parseInt(physicalPoint.get("registerAddress").toString())
                                 == register.getRegisterAddress()) {
-                            int priorityVal = (int) HSUtil.getPriorityVal(registerId);
+                            float priorityVal = (float) HSUtil.getPriorityVal(registerId);
                             CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                     + register.getRegisterAddress() + " val " + priorityVal);
                             LModbus.writeRegister(groupId, register, priorityVal);

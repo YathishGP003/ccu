@@ -13,7 +13,7 @@ import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
-
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -1219,6 +1219,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         float heatingDesired ;
         float heatingDeadBand ;
         float coolingDeadBand;
+
 
         if (MasterControlUtil.isMigrated()) {
             String roomRefZone = StringUtils.prependIfMissing(p.getRoomRef(), "@");

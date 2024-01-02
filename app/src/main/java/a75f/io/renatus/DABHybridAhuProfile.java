@@ -184,7 +184,6 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
                         }
                         systemProfile = new DabAdvancedHybridRtu();
                         systemProfile.addSystemEquip();
-
                         L.ccu().systemProfile = systemProfile;
                         setSystemModeForDab(CCUHsApi.getInstance());
                         return null;

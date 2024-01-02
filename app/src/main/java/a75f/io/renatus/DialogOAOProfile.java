@@ -301,8 +301,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef,  NodeType.SMART_NODE);
-            if (L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT)
+            if (L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
                 L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true);
+            }
         } else {
             mProfile.updateOaoEquip(oaoConfig);
         }

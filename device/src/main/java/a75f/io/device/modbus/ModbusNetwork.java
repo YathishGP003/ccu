@@ -53,7 +53,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 "equipRef and modbus");
         modbusEquips.forEach(equipMap -> {
             try {
-                boolean isExternalAhuDevice = equipMap.containsKey("ahu");
                 EquipmentDevice equipDevice = buildModbusModelByEquipRef(equipMap.get("id").toString());
                 List<EquipmentDevice> modbusDeviceList = new ArrayList<>();
                 modbusDeviceList.add(equipDevice);
@@ -72,9 +71,6 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
                                         ", count: "+count+
                                         ", registerRequestCount: "+registerRequestCount);
-                        if (isExternalAhuDevice) {
-
-                        }
                     }
                 }
             } catch (Exception e) {

@@ -131,7 +131,6 @@ public class LModbus {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
             ModbusRequest request;
-            // short[] shortValues = ModbusConversions.getRegisterValue(register.parameterDefinitionType, register.parameterDefinitionType, writeValue);
             short[] shortValues = ModbusConversions.floatToRegisters(writeValue);
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
                 request = new WriteRegistersRequest(slaveId,  register.getRegisterAddress(), shortValues);
@@ -150,7 +149,4 @@ public class LModbus {
             Log.d(L.TAG_CCU_MODBUS, "Modbus write failed. "+register.getRegisterAddress()+" : "+writeValue+" "+e.getMessage());
         }
     }
-
-
-
 }

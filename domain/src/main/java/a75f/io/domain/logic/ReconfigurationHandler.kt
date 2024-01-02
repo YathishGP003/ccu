@@ -27,7 +27,7 @@ object ReconfigurationHandler {
                 }
 
             } catch (e: Exception) {
-                CcuLog.e("DEV_DEBUG","Error ${e.message}",e)
+                CcuLog.e("CCU_DM","Error ${e.message}",e)
             }
         }
         return domainNameMap

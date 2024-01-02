@@ -72,7 +72,7 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
     var systemProfile: SystemProfile? = null
     private lateinit var modbusProfile: ModbusProfile
 
-    val TAG: String = "DEV_DEBUG"
+    val TAG: String = "CCU_SYSTEM"
 
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context

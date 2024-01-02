@@ -98,7 +98,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String) {
         val tz = hayStack.timeZone
         entityConfiguration.tobeUpdated.forEach { point -> // New changed point
-            Log.i("DEV_DEBUG", "tobeUpdated : ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"") // existing point
 
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
@@ -107,11 +106,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 if (valueConfigPoint != null) {
                     val currentPointId = getPoint(point.domainName,equipRef)?.get("id").toString()
                     val currentValue = hayStack.readDefaultValById(currentPointId)
-                    Log.i("DEV_DEBUG", "updatePoints $currentPointId")
-                    Log.i("DEV_DEBUG", "updatePoints ${domainName}: ${valueConfigPoint.currentVal} = $currentValue")
                     if (valueConfigPoint.currentVal != currentValue.toDouble()) {
                         hayStack.writeDefaultValById(currentPointId,valueConfigPoint.currentVal)
-                        Log.i("DEV_DEBUG", "After change change ${hayStack.readDefaultStrValById(currentPointId)}" )
                     }
                 } else {
                     val enableConfig =
@@ -133,7 +129,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeDeleted.forEach { point ->
-            Log.i("DEV_DEBUG", "tobeDeleted : ${point.domainName}")
             val existingPoint = getPoint(point.domainName,equipRef)
             if (existingPoint!!.isNotEmpty())
                 hayStack.deleteEntity(existingPoint["id"]!!.toString())

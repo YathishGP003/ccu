@@ -172,7 +172,7 @@ class AlertsRepository(
     *
     * I.e. This will only send one alert for any message, until restart.  (existing logic).  Used for interal alerts.
     */
-   fun generateAlert(title: String, msg: String,    equipRef: String) {
+   fun generateAlert(title: String, msg: String, equipRef: String) {
       val alertDef = alertDefsMap[title]
 
       if (alertDef == null) {

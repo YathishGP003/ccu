@@ -44,40 +44,207 @@ import android.content.Intent
  */
 
 class VavExternalAhu: VavSystemProfile() {
+
+    companion object {
+        const val PROFILE_NAME = "VAV External AHU Controller"
+        const val SYSTEM_ON = "System ON"
+        const val SYSTEM_OFF = "System OFF"
+        const val SYSTEM_MODBUS = "equip and system and not modbus"
+        private val instance = VavExternalAhu()
+        fun getInstance(): VavExternalAhu = instance
+    }
+
+    private var modbusInterface: ModbusWritableDataInterface? = null
+    private var externalSpList = ArrayList<String>()
+    private val vavSystem: VavSystemController = VavSystemController.getInstance()
+    private var loopRunningDirection = TempDirection.COOLING
+    private var hayStack = CCUHsApi.getInstance()
+
+    override fun getProfileName(): String = PROFILE_NAME
+
+    override fun getProfileType(): ProfileType = ProfileType.vavExternalAHUController
+
+    fun setModbusWritableDataInterface(callBack: ModbusWritableDataInterface) {
+        modbusInterface = callBack
+    }
+
+    override fun isCoolingAvailable(): Boolean = true
+
+    override fun isHeatingAvailable(): Boolean = true
+
+    override fun isCoolingActive(): Boolean = true
+
+    override fun isHeatingActive(): Boolean = true
+
+    override fun getCoolingLockoutVal(): Double {
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempCoolingLockout)
+    }
+
+    override fun getHeatingLockoutVal(): Double {
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+        return getTunerByDomainName(systemEquip!!, vavOutsideTempHeatingLockout)
+    }
+
+    override fun isOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi): Boolean =
+        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
+
+    override fun isOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi): Boolean =
+        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
+
+    override fun setOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
+        updatePointHistoryAndDefaultValue(useOutsideTempLockoutCooling, if (enabled) 1.0 else 0.0)
+    }
+
+    override fun setOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
+        updatePointHistoryAndDefaultValue(useOutsideTempLockoutHeating, if (enabled) 1.0 else 0.0)
+    }
+
+    override fun setCoolingLockoutVal(hayStack: CCUHsApi, value: Double) {
+        writePointForCcuUser(hayStack, vavOutsideTempCoolingLockout, value)
+    }
+
+    override fun setHeatingLockoutVal(hayStack: CCUHsApi, value: Double) {
+        writePointForCcuUser(hayStack, vavOutsideTempHeatingLockout, value)
+    }
+
     override fun doSystemControl() {
-        TODO("Not yet implemented")
+        VavSystemController.getInstance().runVavSystemControlAlgo()
+        updateSystemPoints()
     }
 
     override fun addSystemEquip() {
-        TODO("Not yet implemented")
+        val hayStack = CCUHsApi.getInstance()
+        val equip = hayStack.readEntity(SYSTEM_MODBUS)
+        if (equip != null && equip.size > 0) {
+            if (!equip["profile"]?.toString()
+                    .contentEquals(ProfileType.vavExternalAHUController.name)
+            ) {
+                hayStack.deleteEntityTree(equip[Tags.ID].toString())
+            }
+        }
     }
 
+    @Synchronized
     override fun deleteSystemEquip() {
-        TODO("Not yet implemented")
+        val equip = CCUHsApi.getInstance().readEntity(SYSTEM_MODBUS)
+        if (equip["profile"]?.toString().contentEquals(ProfileType.vavExternalAHUController.name)) {
+            CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
+        }
     }
 
-    override fun isCoolingAvailable(): Boolean {
-        TODO("Not yet implemented")
+    @Synchronized
+    private fun updateSystemPoints() {
+        calculateSetPoints()
+        updateOutsideWeatherParams()
+        updateMechanicalConditioning(CCUHsApi.getInstance())
+        setSystemPoint("operating and mode", vavSystem.systemState.ordinal.toDouble())
+        val systemStatus = statusMessage
+        val scheduleStatus = ScheduleManager.getInstance().systemStatusString
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $systemStatus")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: $scheduleStatus")
+        if (CCUHsApi.getInstance()
+                .readDefaultStrVal("system and status and message") != systemStatus
+        ) {
+            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus)
+            Globals.getInstance().applicationContext.sendBroadcast(Intent(ScheduleUtil.ACTION_STATUS_CHANGE))
+        }
+        if (CCUHsApi.getInstance()
+                .readDefaultStrVal("system and scheduleStatus") != scheduleStatus
+        ) {
+            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus)
+        }
+
     }
 
-    override fun isHeatingAvailable(): Boolean {
-        TODO("Not yet implemented")
+    override fun getStatusMessage(): String =
+        if (getBasicVavConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
+
+    private fun calculateSetPoints() {
+
+        val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+        if (systemEquip == null) {
+            logIt("VAV_EXTERNAL_AHU_CONTROLLER system equip is empty")
+            return
+        }
+        val externalEquipId = getExternalEquipId()
+        val vavConfig = getBasicVavConfigData()
+        val occupancyMode = ScheduleManager.getInstance().systemOccupancy
+        val conditioningMode = getConditioningMode(systemEquip)
+        val currentHumidity = VavSystemController.getInstance().getAverageSystemHumidity()
+        val humidityHysteresis = getTunerByDomainName(systemEquip, vavHumidityHysteresis)
+        val analogFanMultiplier = getTunerByDomainName(systemEquip, vavAnalogFanSpeedMultiplier)
+        logIt(
+            " System is $occupancyMode conditioningMode : $conditioningMode" +
+                    " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" +
+                    " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
+        )
+        updateLoopDirection(vavConfig, systemEquip)
+        calculateSATSetPoints(
+            systemEquip,
+            vavConfig,
+            externalEquipId,
+            conditioningMode,
+            hayStack,
+            externalSpList,
+            loopRunningDirection,
+            vavConfig.coolingLoop.toDouble(),
+            vavConfig.heatingLoop.toDouble(),
+            Tags.VAV
+        )
+        calculateDSPSetPoints(
+            systemEquip,
+            vavConfig.loopOutput,
+            externalEquipId,
+            hayStack,
+            externalSpList,
+            analogFanMultiplier
+        )
+        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
+        operateDamper(
+            systemEquip,
+            vavConfig.weightedAverageCO2,
+            occupancyMode,
+            externalEquipId,
+            hayStack,
+            externalSpList
+        )
+        handleHumidityOperation(
+            systemEquip,
+            externalEquipId,
+            occupancyMode,
+            hayStack,
+            externalSpList,
+            humidityHysteresis,
+            currentHumidity
+        )
+        handleDeHumidityOperation(
+            systemEquip,
+            externalEquipId,
+            occupancyMode,
+            hayStack,
+            externalSpList,
+            humidityHysteresis,
+            currentHumidity
+        )
+        Domain.writePointByDomain(systemEquip, equipStatusMessage, statusMessage)
+        instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
     }
 
-    override fun isCoolingActive(): Boolean {
-        TODO("Not yet implemented")
+    private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
+        if (basicConfig.coolingLoop > 0)
+            loopRunningDirection = TempDirection.COOLING
+        if (basicConfig.heatingLoop > 0)
+            loopRunningDirection = TempDirection.HEATING
+        updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
+        updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
     }
 
-    override fun isHeatingActive(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun getProfileType(): ProfileType {
-        TODO("Not yet implemented")
-    }
-
-    override fun getStatusMessage(): String {
-        TODO("Not yet implemented")
-    }
-
+    private fun getBasicVavConfigData() =
+        BasicConfig(
+            coolingLoop = vavSystem.coolingSignal,
+            heatingLoop = vavSystem.heatingSignal,
+            loopOutput = (if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble()),
+            weightedAverageCO2 = vavSystem.co2WeightedAverageSum,
+        )
 }

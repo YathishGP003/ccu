@@ -416,23 +416,17 @@ public class SmartNode
 
     private ProfileConfiguration getConfigurationFromEquip(Equip equip, PointsUtil pointsUtil) {
         if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatNoFan)) {
-            int group = Integer.parseInt(equip.getGroup());
-            String nodeType = NodeType.SMART_NODE.name();
-            String roomRef = equip.getRoomRef();
-            String floorRef = equip.getFloorRef();
-            SeventyFiveFProfileDirective model = pointsUtil.getModelFromEquip(equip);
-            VavProfileConfiguration config = new VavProfileConfiguration(group, nodeType, 0, roomRef, floorRef, ProfileType.VAV_REHEAT, model).getActiveConfiguration();
-            return config;
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatParallelFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip));
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip));
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip));
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip));
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip));
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else {
             return null;
         }

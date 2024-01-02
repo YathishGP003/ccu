@@ -55,7 +55,7 @@ import kotlin.properties.Delegates
  * Created by Manjunath K on 08-08-2022.
  */
 
-class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(application) {
+class ExternalAhuViewModel(application: Application) : AndroidViewModel(application) {
 
     var deviceList = mutableStateOf(emptyList<String>())
     var slaveIdList = mutableStateOf(emptyList<String>())

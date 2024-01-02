@@ -81,15 +81,15 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
  * Created by Manjunath K on 06-06-2023.
  */
 
-class ExternalAhuControlConfigFragment(var profileType: ProfileType) : Fragment() {
-    private lateinit var viewModel: ExternalAhuControlViewModel
+class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
+    private lateinit var viewModel: ExternalAhuViewModel
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val rootView = ComposeView(requireContext())
-        viewModel = ViewModelProvider(this)[ExternalAhuControlViewModel::class.java]
+        viewModel = ViewModelProvider(this)[ExternalAhuViewModel::class.java]
         rootView.apply {
             setContent {
                 LazyColumn(
@@ -575,19 +575,19 @@ class ExternalAhuControlConfigFragment(var profileType: ProfileType) : Fragment(
                                 when (it) {
                                     BACNET -> {
                                         viewModel.configType.value =
-                                            ExternalAhuControlViewModel.ConfigType.BACNET
+                                            ExternalAhuViewModel.ConfigType.BACNET
                                     }
 
                                     MODBUS -> {
                                         viewModel.configType.value =
-                                            ExternalAhuControlViewModel.ConfigType.MODBUS
+                                            ExternalAhuViewModel.ConfigType.MODBUS
                                     }
                                 }
                             }
                         }
                     }
                     item {
-                        if (viewModel.configType.value == ExternalAhuControlViewModel.ConfigType.MODBUS) {
+                        if (viewModel.configType.value == ExternalAhuViewModel.ConfigType.MODBUS) {
                             ModbusConfig()
                         } else {
                             BacnetConfig()
@@ -613,8 +613,8 @@ class ExternalAhuControlConfigFragment(var profileType: ProfileType) : Fragment(
     private fun reload() {
         val fragmentManager = requireActivity().supportFragmentManager
         val profile = if (profileType == ProfileType.dabExternalAHUController) "dabExternalAHUController" else "vavExternalAHUController"
-        val fragment: ExternalAhuControlConfigFragment =
-        fragmentManager.findFragmentByTag(profile) as ExternalAhuControlConfigFragment
+        val fragment: ExternalAhuFragment =
+        fragmentManager.findFragmentByTag(profile) as ExternalAhuFragment
         fragmentManager.beginTransaction().replace(R.id.profileContainer, fragment).commit()
     }
 

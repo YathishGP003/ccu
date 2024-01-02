@@ -173,17 +173,18 @@ public class HisSyncHandler
         HDict[] hDicts = hDictListToArray(hDictList);
 
         EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(null, hDicts);
-
-        CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
-        if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
-            try {
-                ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
-            } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
-                CcuLog.e(TAG, "Failed to update HisItem !", e);
+        if (response != null) {
+            CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
+            if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
+                try {
+                    ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
+                } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
+                    CcuLog.e(TAG, "Failed to update HisItem !", e);
+                }
+            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                CcuLog.e(TAG, "His write failed! , Trying to handle the error");
+                EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
             }
-        } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
-            CcuLog.e(TAG, "His write failed! , Trying to handle the error");
-            EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
         }
     }
 

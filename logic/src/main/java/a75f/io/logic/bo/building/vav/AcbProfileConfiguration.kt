@@ -1,4 +1,4 @@
-package a75f.io.renatus.profiles.acb
+package a75f.io.logic.bo.building.vav
 
 import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Domain

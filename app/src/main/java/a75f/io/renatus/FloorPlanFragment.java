@@ -73,7 +73,6 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
-import a75f.io.renatus.profiles.acb.AcbProfileConfiguration;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;

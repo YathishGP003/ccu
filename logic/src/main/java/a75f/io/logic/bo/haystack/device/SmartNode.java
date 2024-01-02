@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
@@ -421,12 +422,16 @@ public class SmartNode
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)) {
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam)) {
+            return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)) {
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)) {
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)) {
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        }  else if (equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
+            return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else {
             return null;
         }

@@ -26,7 +26,7 @@ open class DefaultEquipBuilder : EquipBuilder {
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
         CcuLog.i(Domain.LOG_TAG, "buildEquip ${equipConfig.modelDef.domainName}")
-        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
+        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}")
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
             .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())

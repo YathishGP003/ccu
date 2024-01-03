@@ -141,7 +141,7 @@ public class Pulse
 
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-			boolean isDomainEquip = !equip.getDomainName().equals(null);
+			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
 
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;

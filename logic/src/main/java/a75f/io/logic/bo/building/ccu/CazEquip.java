@@ -91,7 +91,7 @@ public class CazEquip
                                                              roomRef,
                                                              floorRef,
                                                              tz));
-        createCcuConfigPoints(config, equipRef);
+        createCcuConfigPoints(config, equipRef, roomRef, floorRef);
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-currentTemp")
@@ -378,7 +378,7 @@ public class CazEquip
         return equipRef;
     }
 
-    public void createCcuConfigPoints(CazProfileConfig config, String equipRef) {
+    public void createCcuConfigPoints(CazProfileConfig config, String equipRef, String roomRef, String floorRef) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -394,6 +394,8 @@ public class CazEquip
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("priority").addMarker("sp").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .setEnums("none,low,normal,high")
                 .setTz(tz)
                 .build();
@@ -408,6 +410,8 @@ public class CazEquip
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(nodeAddr))
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();

@@ -1513,11 +1513,13 @@ public class CCUTagsDb extends HServer {
     }
 
     public void deletePointArray(HRef id) {
+        CcuLog.i("CCU_HAYSTACK","deletePointArray "+id.val);
         writeArrays.remove(id.toVal());
         WritableArrayDBUtilKt.deleteEntitywithId(id.toString(), this.appContext);
     }
     
     public void deletePointArrayLevel(HRef id, int level) {
+        CcuLog.i("CCU_HAYSTACK","deletePointArrayLevel "+id.val+" level "+level);
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(id.toVal());
         if (array != null) {
             array.val[level - 1] = null;

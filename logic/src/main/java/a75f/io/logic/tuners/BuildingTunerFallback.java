@@ -117,7 +117,8 @@ class BuildingTunerFallback {
         tagsValMap.put("tr,staticPressure,timeInterval",TunerConstants.TR_TIME_INTERVAL);
     
         //System Tuners
-        tagsValMap.put("mode,changeover,hysteresis",TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+        tagsValMap.put("dab,mode,changeover,hysteresis",TunerConstants.DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS);
+        tagsValMap.put("vav,mode,changeover,hysteresis",TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS);
         tagsValMap.put("stageUp,timer,counter",TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER);
         tagsValMap.put("stageDown,timer,counter",TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER);
         tagsValMap.put("fan,control,delay",TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);

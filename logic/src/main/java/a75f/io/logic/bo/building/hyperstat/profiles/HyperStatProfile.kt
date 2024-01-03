@@ -21,6 +21,11 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import android.util.Log
+import org.projecthaystack.HDateTime
+import org.projecthaystack.HNum
+import org.projecthaystack.HRef
+import org.projecthaystack.HRow
+import org.projecthaystack.io.HZincWriter
 
 
 /**
@@ -495,11 +500,93 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
     }
 
+    fun handleFanConditioningModes(equipRef: String) {
+        try {
+            val fanModePoint = haystack.readId("point and fan and mode and equipRef == \"$equipRef\"")
+            val conditioningMode = haystack.readId("point and conditioning and mode and equipRef == \"$equipRef\"")
+            checkAndUpdate(fanModePoint,"Fan")
+            checkAndUpdate(conditioningMode, "conditioning")
+        } catch (e: Exception) {
+            logIt("isPriorityArrayCorrupted ${e.printStackTrace()}")
+        }
+    }
+
+    private fun checkAndUpdate(pointId: String, mode: String){
+        val hisValue = haystack.readHisValById(pointId)
+        val priorityValue = haystack.readPointPriorityVal(pointId)
+        logIt("$mode mode $pointId his : $hisValue priVal : $priorityValue isPriorityArrCorrupted : ${isPriorityArrCorrupted(pointId)}")
+        if (hisValue != priorityValue && isPriorityArrCorrupted(pointId)) {
+            pullRemoteArray(pointId)
+        }
+    }
+    private fun isPriorityArrCorrupted(pointId: String): Boolean{
+        try {
+            val values = haystack.readPoint(pointId)
+            if (values != null && values.size > 0) {
+                for (l in 1..values.size) {
+                    val valMap = values[l - 1] as java.util.HashMap<*, *>
+                    if (valMap["lastModifiedDateTime"] != null) {
+                        return false
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return true
+    }
+
+    private fun pullRemoteArray(pointId: String) {
+        val pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointId)
+
+        if (pointGrid == null) {
+            logIt( "Failed to read remote point : $pointId")
+            return
+        }
+        var level: Double
+        var value: Double
+        var duration: Double
+        var lastModifiedDateTime: HDateTime?
+        logIt( "REMOTE ARRAY: ${HZincWriter.gridToString(pointGrid)}");
+        val it = pointGrid.iterator()
+        while (it.hasNext()) {
+            val r = it.next() as HRow
+            val who = r["who"].toString()
+            try {
+                level = r["level"].toString().toDouble()
+                value = r["val"].toString().toDouble()
+                val durHVal = r["duration", false]
+                val lastModifiedTimeTag: Any? = r["lastModifiedDateTime", false]
+                lastModifiedDateTime = if (lastModifiedTimeTag != null) {
+                    lastModifiedTimeTag as HDateTime
+                } else {
+                    HDateTime.make(System.currentTimeMillis())
+                }
+                val durationRemote = durHVal?.toString()?.toDouble() ?: 0.0
+                //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                duration =
+                    if (durationRemote == 0.0) 0.0 else if (durationRemote - System.currentTimeMillis() > 0) durationRemote - System.currentTimeMillis() else 1.0
+                logIt("Remote point:  level $level val $value who $who duration $durationRemote dur $duration")
+                CCUHsApi.getInstance().getHSClient().pointWrite(
+                    HRef.copy(pointId),
+                    level.toInt(),
+                    CCUHsApi.getInstance().ccuUserName,
+                    HNum.make(value),
+                    HNum.make(duration),
+                    lastModifiedDateTime
+                )
+            } catch (e: NumberFormatException) {
+                logIt("Error while updating ${e.printStackTrace()}")
+                e.printStackTrace()
+            }
+        }
+
+    }
     fun fallBackFanMode(
         equip: HyperStatEquip, equipRef: String, fanModeSaved: Int,
         actualFanMode: Int, basicSettings: BasicSettings
     ): StandaloneFanStage {
-
+        logIt("Fall back fan mode "+basicSettings.fanMode +" conditioning mode "+basicSettings.conditioningMode)
         val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
@@ -513,7 +600,10 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             return StandaloneFanStage.AUTO
         }
 
-        if ((occupancyStatus == Occupancy.OCCUPIED|| Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING )
+        if ((occupancyStatus == Occupancy.OCCUPIED
+                || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
+                || occupancyStatus == Occupancy.FORCEDOCCUPIED
+                || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING)
             && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
             HyperStatUserIntentHandler.updateHyperStatUIPoints(
@@ -529,6 +619,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
         return (occupancyStatus != Occupancy.OCCUPIED
+            && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
+            && occupancyStatus != Occupancy.FORCEDOCCUPIED
             && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
             && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO

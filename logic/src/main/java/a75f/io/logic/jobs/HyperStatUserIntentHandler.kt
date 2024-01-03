@@ -225,7 +225,7 @@ class HyperStatUserIntentHandler {
 
                 },
                 {
-                    zoneDataInterface?.refreshScreen("", false)
+
                 }
             )
 

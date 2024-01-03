@@ -497,7 +497,7 @@ public class FloorPlanFragment extends Fragment {
 
     private boolean updateEnergyMeterModule() {
         ArrayList<Equip> equipList = new ArrayList<>();
-        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr and not zone")) {
+        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr and not zone and not equipRef")) {
             equipList.add(new Equip.Builder().setHashMap(m).build());
         }
 
@@ -515,7 +515,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private boolean updateBTUMeterModule() {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu and not zone");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu and not zone and not equipRef");
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips) {
             equipList.add(new Equip.Builder().setHashMap(m).build());

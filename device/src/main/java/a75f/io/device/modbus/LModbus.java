@@ -142,7 +142,20 @@ public class LModbus {
                 return;
             }
             RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
-            LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+
+            byte[] data = rtuMessageRequest.getMessageData();
+
+            ModbusMessage_t modbusMessage = getModbusMessage(data);
+
+
+            LSerial.getInstance().sendSerialToCM(modbusMessage);
+
+
+
+            if (LSerial.getInstance().isModbusConnected()) {
+                LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+            }
+
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {
             e.printStackTrace();

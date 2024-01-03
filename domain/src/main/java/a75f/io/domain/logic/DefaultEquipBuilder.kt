@@ -104,7 +104,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }

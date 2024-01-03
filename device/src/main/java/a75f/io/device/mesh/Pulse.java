@@ -141,8 +141,8 @@ public class Pulse
 
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-			boolean isDomainEquip = !equip.getDomainName().equals(null);
-			boolean isAcb = equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam);
+			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+			boolean isAcb = isDomainEquip ? (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) : false;
 
 			boolean isCondensateNc = false;
 			if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") != null) {

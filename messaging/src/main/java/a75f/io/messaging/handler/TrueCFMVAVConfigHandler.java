@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
@@ -22,6 +23,10 @@ import a75f.io.logic.tuners.TunerConstants;
 public class TrueCFMVAVConfigHandler {
     public static void updateVAVConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         double value = msgObject.get("val").getAsDouble();
+        if(value == CCUHsApi.getInstance().readDefaultValById(configPoint.getId())) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "updateVAVConfigPoint - Message is not handled");
+            return;
+        }
         Short address = Short.parseShort(configPoint.getGroup());
         VavProfile profile = (VavProfile) L.getProfile((short) address);
         Equip equip = profile.getEquip();

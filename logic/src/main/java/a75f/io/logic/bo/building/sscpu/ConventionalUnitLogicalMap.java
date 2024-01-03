@@ -1185,6 +1185,7 @@ public class ConventionalUnitLogicalMap {
         Point targetDehumidifier = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetDehumidifier")
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
+                .setRoomRef(room).setFloorRef(floor)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable")
                 .addMarker("target").addMarker("his")
                 .setTz(tz).addMarker("dehumidifier").addMarker("sp")
@@ -1197,6 +1198,7 @@ public class ConventionalUnitLogicalMap {
 
         Point targetHumidty = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetHumidity")
+                .setRoomRef(room).setFloorRef(floor)
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable")
                 .addMarker("target").addMarker("humidity").addMarker("sp")

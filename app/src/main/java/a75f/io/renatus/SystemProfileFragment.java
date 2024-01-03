@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -224,6 +226,8 @@ public class SystemProfileFragment extends Fragment {
     private int getSystemProfileArrayResource() {
         if (BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
             return R.array.system_profile_select_daikin;
+        }else if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            return R.array.system_profile_select_carrier;
         }
         return R.array.system_profile_select;
     }

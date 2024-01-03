@@ -99,6 +99,7 @@ public class PreferenceUtil {
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
+    public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -480,7 +481,9 @@ public class PreferenceUtil {
         setBooleanPreference(BPOS_TO_OTN_MIGRATION, true);
 
     }
-
+    public static boolean getZoneEquipConfigPointMigration() {
+        return getBooleanPreference(ZONE_EQUIP_CONFIG_POINT_MIGRATION);
+    }
     public static boolean getAutoAwaySetBackMigration() {
         return getBooleanPreference(AUTOAWAYSETBACK);
     }
@@ -815,5 +818,9 @@ public class PreferenceUtil {
     }
     public static void setSRMigrationPointUpdated() {
         setBooleanPreference(SR_MIGRATION_POINT, true);
+    }
+
+    public static void setZoneEquipConfigPointMigrationDone() {
+        setBooleanPreference(ZONE_EQUIP_CONFIG_POINT_MIGRATION, true);
     }
 }

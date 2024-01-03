@@ -78,9 +78,10 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = HSHaystackUtil.getHpuActualFanMode(equip.node.toString(), fanModeSaved)
         val basicSettings = fetchBasicSettings(equip)
+        logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
-
+        logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         hyperStatHpuAlgorithm.initialise(tuners = hyperStatTuners)
         hyperStatHpuAlgorithm.dumpLogs()
         handleChangeOfDirection(userIntents)

@@ -438,7 +438,7 @@ public class MasterControlUtil {
         if((coolingTemp < coolingMin || coolingTemp> coolingMax) && (heatingTemp < heatingMin || heatingTemp > heatingMax)){
             WarningMessage = "Please go back and edit both Heating and Cooling desired Temp to be within the building user limits";
         }if((coolingTemp-heatingTemp) < (heatDB+coolDB)){
-            WarningMessage = "Please go back and edit both Heating and Cooling desired Temp to be accomaodate with deadbands";
+            WarningMessage = "Please go back and edit both Heating and Cooling desired Temp to be accommodate with deadbands";
         }
 
         return WarningMessage;

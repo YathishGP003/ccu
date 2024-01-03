@@ -9,6 +9,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -590,24 +591,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             updateView(note, "Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-            String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
-            if (address.isEmpty()) {
-                updateView(place, city + ", " + country);
-            } else {
-                //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
-                String[] addrArray = address.split(",");
-                String placeStr = "";
-                if (addrArray != null && addrArray.length >= 3) {
-                    placeStr = addrArray[0] + ", " + addrArray[2];
-                } else if (addrArray != null && addrArray.length == 2) {
-                    placeStr = address;
-                } else {
-                    placeStr = city + ", " + country;
-                }
-                updateView(place, placeStr);
+            String state = spDefaultPrefs.getString("state", "");
+            if(state.isEmpty()){
+                state = CCUHsApi.getInstance().getSite().getGeoState();
             }
+            updateView(place, city + ", " + state + ", " + country);
             updateView(weather_condition, WeatherDataDownloadService.getSummary());
 
             final ImageView ivWeatherIcon = weather_icon;
@@ -875,11 +865,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
         TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
+        ImageButton namedScheduleView = zoneDetails.findViewById(R.id.schedule_view_button);
 
         ArrayList<String> scheduleArray = new ArrayList<>();
 //        scheduleArray.add("Building Schedule");
         scheduleArray.add("Zone Schedule");
         scheduleArray.add("Named Schedule");
+
+        ArrayList<Boolean> hasImage = new ArrayList<>();
+        hasImage.add(false);
+        hasImage.add(false);
 
         List<HashMap<Object, Object>> namedScheds = CCUHsApi.getInstance().getAllNamedSchedules();
         if(!namedScheds.isEmpty()){
@@ -887,18 +882,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                 if(nameSched.get("default") != null){
-                    scheduleArray.add("Default");
-                } else if(namedScheduledis.length() > 15){
+                    scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
+                    hasImage.add(true);
+                } else if(namedScheduledis.length() > 25){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                    hasImage.add(true);
                 }else{
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                    hasImage.add(true);
                 }
             }
         }else{
             scheduleArray.add("No Named Schedule available");
+            hasImage.add(false);
         }
 
-        ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
+
+        CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getActivity(), R.layout.custom_dropdown_item_with_image, scheduleArray, hasImage);
+       /* ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.custom_dropdown_item_with_image ,scheduleArray) {
 
             @Override
             public boolean isEnabled(int position) {
@@ -919,8 +920,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     v = vi.inflate(R.layout.spinner_item_grey, null);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
+                TextView tv = (TextView) v.findViewById(R.id.textview);
                 tv.setText(scheduleArray.get(position));
+
 
                 switch (position) {
                     case 0:
@@ -946,8 +948,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
                 return v;
             }
-        };
-        scheduleSpinner.setAdapter(scheduleAdapter);
+        };*/
+        scheduleSpinner.setAdapter(adapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
@@ -988,6 +990,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         vacationImageButton.setTag(mSchedule.getId());
         specialScheduleImageButton.setTag(mSchedule.getId());
 
+        if(mSchedule.isNamedSchedule())
+            namedScheduleView.setVisibility(View.VISIBLE);
+
+        namedScheduleView.setOnClickListener(view -> {
+            String scheduleDis = (mSchedule.getDis());
+            String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+                    "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
+            NamedSchedule namedSchedule =
+                    NamedSchedule.getInstance(mSchedule.getId(),
+                            zoneId,  scheduleName,false);
+            FragmentManager childFragmentManager = getChildFragmentManager();
+            namedSchedule.show(childFragmentManager, "dialog");
+        });
+
         if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
         } else {
@@ -1025,6 +1042,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
             isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            adapter.setSelectedPosition(spinnerposition);
             isItemSelectedEvent = false;
         }else{
             isItemSelectedEvent = true;
@@ -1035,6 +1053,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                adapter.setSelectedPosition(position);
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
                 if(isItemSelectedEvent)
                     return;
@@ -1067,6 +1086,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 //                } else
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                    boolean isContainment = true;
+                   namedScheduleView.setVisibility(View.GONE);
                    if (mSchedule.isZoneSchedule()) {
                        mSchedule.setDisabled(false);
                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
@@ -1130,13 +1150,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position >= 2 && (mScheduleType != -1)) {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
+                    String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+                    String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))  ?
+                           "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheds.get(position - 2).get("id").toString(),
-                                zoneId, namedScheds.get(position - 2).get("dis").toString());
+                                zoneId, scheduleName,true);
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
                         scheduleSpinner.setSelection(position);
+                        namedScheduleView.setVisibility(View.VISIBLE);
 
                         namedSchedule.setOnExitListener(() -> {
                             mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
@@ -1566,6 +1591,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
         TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
+        ImageButton namedScheduleView = zoneDetails.findViewById(R.id.schedule_view_button);
 
 
         ArrayList<String> scheduleArray = new ArrayList<>();
@@ -1573,24 +1599,34 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleArray.add("Zone Schedule");
         scheduleArray.add("Named Schedule");
 
+        ArrayList<Boolean> hasImage = new ArrayList<>();
+        hasImage.add(false);
+        hasImage.add(false);
+
         List<HashMap<Object, Object>> namedScheds = CCUHsApi.getInstance().getAllNamedSchedules();
         if(namedScheds.size() > 0){
             for (HashMap<Object, Object> nameSched :
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                 if(nameSched.get("default") != null){
-                    scheduleArray.add("Default");
+                    scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
+                    hasImage.add(true);
                 }else if(namedScheduledis.length() > 15){
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                    hasImage.add(true);
                 }else{
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                    hasImage.add(true);
                 }
             }
         }else{
             scheduleArray.add("No Named Schedule available");
+            hasImage.add(false);
         }
 
-        ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
+        CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getActivity(), R.layout.custom_dropdown_item_with_image, scheduleArray, hasImage);
+
+        /*ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
 
             @Override
             public boolean isEnabled(int position) {
@@ -1638,8 +1674,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
                 return v;
             }
-        };
-        scheduleSpinner.setAdapter(scheduleAdapter);
+        };*/
+        scheduleSpinner.setAdapter(adapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
 
@@ -1674,6 +1710,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Log.d("ScheduleType", "update mScheduleType==" + mScheduleType + "," + (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId) + "," + p.getDisplayName());
         mScheduleTypeMap.put(equipId, mScheduleType);
         mSchedule = Schedule.getScheduleByEquipId(equipId);
+
+        if(mSchedule.isNamedSchedule())
+            namedScheduleView.setVisibility(View.VISIBLE);
+
+        namedScheduleView.setOnClickListener(view -> {
+
+            String scheduleDis = (mSchedule.getDis());
+            String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+                    "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
+            NamedSchedule namedSchedule =
+                    NamedSchedule.getInstance(mSchedule.getId(),
+                            zoneId,  scheduleName,false);
+            FragmentManager childFragmentManager = getChildFragmentManager();
+            namedSchedule.show(childFragmentManager, "dialog");
+        });
 
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
@@ -1731,6 +1783,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
             isItemSelectedEvent = true;
             scheduleSpinner.setSelection(spinnerposition,false);
+            adapter.setSelectedPosition(spinnerposition);
             isItemSelectedEvent = false;
 
 
@@ -1748,6 +1801,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                adapter.setSelectedPosition(position);
                 if(isItemSelectedEvent)
                     return;
 
@@ -1782,6 +1836,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
+                   namedScheduleView.setVisibility(View.GONE);
                     if (mSchedule.isZoneSchedule() ) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
@@ -1848,10 +1903,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position >= 2 && (mScheduleType != -1) && !isRemoteChangeApplied) {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
+                    String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+
+
+                    String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))?
+                            "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
+
+
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheduleId,
-                                        zoneId,  namedScheds.get(position - 2).get("dis").toString());
+                                        zoneId,  scheduleName,true);
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
 
@@ -1860,6 +1922,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ScheduleManager.getInstance().updateSchedules(equipOpen);
                             Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                             scheduleImageButton.setTag(mSchedule.getId());
+                            namedScheduleView.setVisibility(View.VISIBLE);
                             vacationImageButton.setTag(mSchedule.getId());
                             specialScheduleImageButton.setTag(mSchedule.getId());
                             scheduleImageButton.setVisibility(View.GONE);
@@ -2533,7 +2596,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     existingLayoutParams.height,
                     existingLayoutParams.weight
             );
-            newLayoutParams.setMargins(existingLayoutParams.leftMargin, -9, existingLayoutParams.rightMargin, existingLayoutParams.bottomMargin);
+            newLayoutParams.setMargins(existingLayoutParams.leftMargin, existingLayoutParams.topMargin, existingLayoutParams.rightMargin, existingLayoutParams.bottomMargin);
 
             textViewLabel3.setLayoutParams(newLayoutParams);
             textViewValue3.setLayoutParams(newLayoutParams);
@@ -2652,7 +2715,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-        textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            textViewTitle.setText("VVT-C" + " (" + nodeAddress + ")");
+        }else{
+            textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        }
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
@@ -2719,7 +2786,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
         TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
 
-        textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            textViewTitle.setText("VVT-C Dual Duct" + " (" + nodeAddress + ")");
+        }else{
+            textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        }
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         if( isCelsiusTunerAvailableStatus()) {
@@ -3749,7 +3820,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (coolpoint.getMarkers().contains("writable")) {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
                     SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval
-                            , avgval, "CCU_Scheduler_"+CCUHsApi.getInstance().getCcuId());
+                            , avgval, "CCU");
 
                 }
 

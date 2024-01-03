@@ -294,9 +294,9 @@ object BuildingEquipCutOverMapping {
         "BuildingSchedulable-heatingUserLimitMin" to "heatingUserLimitMin",
         "BuildingSchedulable-coolingUserLimitMax" to "coolingUserLimitMax",
         "BuildingSchedulable-buildingToZoneDifferential" to "buildingToZoneDifferential",
-        //"BuildingSchedulable-heatingDeadband" to "heatingDeadband",
+        "BuildingSchedulable-heatingDeadband" to "heatingDeadband",
         "BuildingSchedulable-unoccupiedZoneSetback" to "unoccupiedZoneSetback",
-        //"BuildingSchedulable-coolingDeadband" to "coolingDeadband",
+        "BuildingSchedulable-coolingDeadband" to "coolingDeadband",
 
         "BuildingTuner-VRV-heatingDeadbandMultiplier" to "vrvHeatingDeadbandMultiplier",
         "BuildingTuner-VRV-coolingDeadbandMultiplier" to "vrvCoolingDeadbandMultiplier",

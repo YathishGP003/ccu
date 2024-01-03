@@ -619,6 +619,7 @@ public class CCUHsApi
         spPrefsEditor.putString("address", updatedSite.getGeoAddress());
         spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
+        spPrefsEditor.putString("state", updatedSite.getGeoState());
 
         spPrefsEditor.commit();
     }
@@ -958,6 +959,7 @@ public class CCUHsApi
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
+        CcuLog.i("CCU_HAYSTACK","clearPointArrayLevel "+id + "level "+level + "local "+local);
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()
@@ -3238,7 +3240,7 @@ public class CCUHsApi
     }
     public void writeDefaultTunerValById(String id, double val) {
         double currentVal = readDefaultValByLevel(id, HayStackConstants.DEFAULT_INIT_VAL_LEVEL);
-        if (currentVal != val) {
+        if ((currentVal == 0) || (currentVal != val)) {
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
         }
     }

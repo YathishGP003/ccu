@@ -8,6 +8,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 
@@ -16,7 +18,10 @@ public class TrueCFMDABConfigHandler {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double value = msgObject.get("val").getAsDouble();
-
+        if(value == CCUHsApi.getInstance().readDefaultValById(configPoint.getId())) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "updateDABConfigPoint - Message is not handled");
+            return;
+        }
         DabProfileConfiguration dabProfileConfiguration = new DabProfileConfiguration();
         if (value > 0) {
             dabProfileConfiguration.minCFMForIAQ = 100;

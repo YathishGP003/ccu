@@ -154,11 +154,13 @@ public class UpdatePointHandler implements MessageHandler
         if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateVAVConfigPoint(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();
+            return;
         }
 
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();
+            return;
         }
 
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){

@@ -420,7 +420,7 @@ public class Globals {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
-            switch (ProfileType.valueOf(eq.getProfile())) {
+            switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     L.ccu().systemProfile = new VavFullyModulatingRtu();
                     break;

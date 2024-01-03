@@ -112,7 +112,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     configuration = getConfiguration(VAV_EXTERNAL_AHU_CONTROLLER, profileType)
                 }
                 setCurrentConfig(configuration)
-                //    setCurrentConfig(systemProfile!!.getConfiguration())
             } else {
                 // Initial configuration based on the model
                 configModel.value.toConfig(profileModelDefinition)

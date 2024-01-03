@@ -55,7 +55,7 @@ import kotlin.properties.Delegates
  * Created by Manjunath K on 08-08-2022.
  */
 
-class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(application) {
+class ExternalAhuViewModel(application: Application) : AndroidViewModel(application) {
 
     var deviceList = mutableStateOf(emptyList<String>())
     var slaveIdList = mutableStateOf(emptyList<String>())
@@ -112,7 +112,6 @@ class ExternalAhuControlViewModel(application: Application) : AndroidViewModel(a
                     configuration = getConfiguration(VAV_EXTERNAL_AHU_CONTROLLER, profileType)
                 }
                 setCurrentConfig(configuration)
-                //    setCurrentConfig(systemProfile!!.getConfiguration())
             } else {
                 // Initial configuration based on the model
                 configModel.value.toConfig(profileModelDefinition)

@@ -290,9 +290,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 for (Parameter pam : register.getParameters()) {
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(point.getShortDis())) {
-                            if (LSerial.getInstance().isModbusConnected()) {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
-                            }
+                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
                             break;
                         }
                     }

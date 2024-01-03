@@ -77,7 +77,7 @@ public abstract class VavSystemProfile extends SystemProfile
     
     public void setSystemLoopOp(String loop, double val)
     {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and " + loop, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and not purge and " + loop, val);
     }
     
     public void addVavSystemTuners(String equipref)

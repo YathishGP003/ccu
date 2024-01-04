@@ -3,10 +3,11 @@ package a75f.io.logic.bo.building.system.vav
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
-
 import a75f.io.domain.api.DomainName.coolingLoopOutput
+import a75f.io.domain.api.DomainName.equipScheduleStatus
 import a75f.io.domain.api.DomainName.equipStatusMessage
 import a75f.io.domain.api.DomainName.heatingLoopOutput
+import a75f.io.domain.api.DomainName.operatingMode
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
 import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.DomainName.vavAnalogFanSpeedMultiplier
@@ -16,11 +17,9 @@ import a75f.io.domain.api.DomainName.vavOutsideTempHeatingLockout
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
-import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.bo.building.system.BasicConfig
 import a75f.io.logic.bo.building.system.TempDirection
 import a75f.io.logic.bo.building.system.calculateDSPSetPoints
@@ -35,9 +34,10 @@ import a75f.io.logic.bo.building.system.operateDamper
 import a75f.io.logic.bo.building.system.setOccupancyMode
 import a75f.io.logic.bo.building.system.updatePointHistoryAndDefaultValue
 import a75f.io.logic.bo.building.system.updatePointValue
+import a75f.io.logic.bo.building.system.updateSystemStatusPoints
 import a75f.io.logic.bo.building.system.writePointForCcuUser
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
-import android.content.Intent
+
 
 /**
  * Created by Manjunath K on 26-12-2023.
@@ -135,38 +135,24 @@ class VavExternalAhu: VavSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
-        calculateSetPoints()
-        updateOutsideWeatherParams()
-        updateMechanicalConditioning(CCUHsApi.getInstance())
-        setSystemPoint("operating and mode", vavSystem.systemState.ordinal.toDouble())
-        val systemStatus = statusMessage
-        val scheduleStatus = ScheduleManager.getInstance().systemStatusString
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $systemStatus")
-        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: $scheduleStatus")
-        if (CCUHsApi.getInstance()
-                .readDefaultStrVal("system and status and message") != systemStatus
-        ) {
-            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus)
-            Globals.getInstance().applicationContext.sendBroadcast(Intent(ScheduleUtil.ACTION_STATUS_CHANGE))
-        }
-        if (CCUHsApi.getInstance()
-                .readDefaultStrVal("system and scheduleStatus") != scheduleStatus
-        ) {
-            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus)
-        }
-
-    }
-
-    override fun getStatusMessage(): String =
-        if (getBasicVavConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
-
-    private fun calculateSetPoints() {
-
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
         if (systemEquip == null) {
             logIt("VAV_EXTERNAL_AHU_CONTROLLER system equip is empty")
             return
         }
+        val scheduleStatus = ScheduleManager.getInstance().systemStatusString
+        calculateSetPoints(systemEquip)
+        updateOutsideWeatherParams()
+        updateMechanicalConditioning(CCUHsApi.getInstance())
+        Domain.writeHisValByDomain(operatingMode, vavSystem.systemState.ordinal.toDouble(), systemEquip.id)
+        updateSystemStatusPoints(systemEquip.id, scheduleStatus, equipScheduleStatus)
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus")
+    }
+
+    override fun getStatusMessage(): String =
+        if (getBasicVavConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
+
+    private fun calculateSetPoints(systemEquip: Equip) {
         val externalEquipId = getExternalEquipId()
         val vavConfig = getBasicVavConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy

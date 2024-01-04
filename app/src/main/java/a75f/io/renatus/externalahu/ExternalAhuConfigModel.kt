@@ -64,8 +64,8 @@ class ExternalAhuConfigModel {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
 
-    fun getConfiguration(): ExternalAhuConfiguration {
-        val config =  ExternalAhuConfiguration(ProfileType.dabExternalAHUController.name)
+    fun getConfiguration(profileType: ProfileType): ExternalAhuConfiguration {
+        val config =  ExternalAhuConfiguration(profileType.name)
 
         config.setPointControl.enabled = this.setPointControl
         config.dualSetPointControl.enabled = this.dualSetPointControl

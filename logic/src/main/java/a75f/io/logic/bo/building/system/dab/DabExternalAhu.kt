@@ -135,7 +135,6 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
-
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (systemEquip == null) {
             logIt("DAB_EXTERNAL_AHU_CONTROLLER system equip is empty")
@@ -154,7 +153,6 @@ class DabExternalAhu : DabSystemProfile() {
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
 
     private fun calculateSetPoints(systemEquip: Equip) {
-
         val externalEquipId = getExternalEquipId()
         val dabConfig = getBasicDabConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy

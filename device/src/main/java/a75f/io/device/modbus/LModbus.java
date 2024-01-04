@@ -141,21 +141,15 @@ public class LModbus {
                         "Write cannot be executed : Invalid Register Type "+register.getRegisterType());
                 return;
             }
+
             RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
-
             byte[] data = rtuMessageRequest.getMessageData();
-
             ModbusMessage_t modbusMessage = getModbusMessage(data);
-
-
             LSerial.getInstance().sendSerialToCM(modbusMessage);
-
-
 
             if (LSerial.getInstance().isModbusConnected()) {
                 LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
             }
-
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {
             e.printStackTrace();

@@ -140,6 +140,15 @@ public class NamedSchedule extends DialogFragment {
     public interface OnExitListener {
         void onExit();
     }
+    public  OnCancelButtonClickListener OnCancel;
+
+    public void setOnCancelButtonClickListener(OnCancelButtonClickListener listener) {
+        this.OnCancel = listener;
+    }
+      public interface OnCancelButtonClickListener {
+        void onCancelButtonClicked();
+    }
+
 
     public static NamedSchedule getInstance(String scheduleId,String roomRef,String scheduleName,boolean isSet) {
         NamedSchedule namedSchedule = new NamedSchedule();
@@ -182,7 +191,8 @@ public class NamedSchedule extends DialogFragment {
         closeButton = rootView.findViewById(R.id.btnCloseNamed);
         cancelButton = rootView.findViewById(R.id.cancelButton);
 
-        cancelButton.setOnClickListener( view -> {
+        cancelButton.setOnClickListener(view -> {
+            OnCancel.onCancelButtonClicked();
             dismiss();
         });
 

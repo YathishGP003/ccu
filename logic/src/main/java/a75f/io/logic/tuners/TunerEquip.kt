@@ -100,6 +100,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
                             localPoint.id = it.id
                             haystack.addRemotePoint(localPoint, localPoint.id)
                             haystack.writeDefaultTunerValById(localPoint.id, defaultVal)
+                            haystack.writeHisValById(localPoint.id, defaultVal)
                         } else {
                             CcuLog.i(
                                 L.TAG_CCU_TUNER,

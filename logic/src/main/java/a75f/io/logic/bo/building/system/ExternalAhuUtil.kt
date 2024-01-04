@@ -301,12 +301,13 @@ fun handleHumidityOperation(
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
     humidityHysteresis: Double,
-    currentHumidity: Double
+    currentHumidity: Double,
+    conditioningMode: SystemMode
 ) {
     val currentStatus = Domain.getHisByDomain(systemEquip, humidifierEnable)
     var newStatus = 0.0
 
-    if ((occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION)) {
+    if ((occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION) || conditioningMode == SystemMode.OFF) {
         updatePointValue(systemEquip, humidifierEnable, 0.0)
         externalEquipId?.let {
             pushHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
@@ -358,12 +359,14 @@ fun handleDeHumidityOperation(
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
     humidityHysteresis: Double,
-    currentHumidity: Double
+    currentHumidity: Double,
+    conditioningMode: SystemMode
 ) {
     val currentStatus = Domain.getHisByDomain(systemEquip, dehumidifierEnable)
     var newStatus = 0.0
 
-    if ((occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION)) {
+    if (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.VACATION
+        || conditioningMode == SystemMode.OFF) {
         updatePointValue(systemEquip, dehumidifierEnable, 0.0)
         externalEquipId?.let {
             pushDeHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
@@ -401,6 +404,7 @@ fun operateDamper(
     externalEquipId: String?,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
+    conditioningMode: SystemMode
 ) {
     val isDcvControlEnabled = isConfigEnabled(systemEquip, dcvDamperControlEnable)
     Domain.writeHisValByDomain(co2WeightedAverage, co2, systemEquip.id)
@@ -415,8 +419,9 @@ fun operateDamper(
     val co2Threshold = Domain.getPointByDomain(systemEquip, systemCO2Threshold)
 
     var damperOperationPercent = 0.0
-
-    if (shouldOperateDamper(co2, occupancyMode, co2Threshold))
+    if (conditioningMode == SystemMode.OFF)
+        damperOperationPercent = 0.0
+    else if (shouldOperateDamper(co2, occupancyMode, co2Threshold))
         damperOperationPercent =
             calculateDamperOperationPercent(co2, co2Threshold, damperOpeningRate)
     else if (shouldResetDamper(co2, occupancyMode, co2Threshold))

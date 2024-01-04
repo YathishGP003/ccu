@@ -195,7 +195,8 @@ class DabExternalAhu : DabSystemProfile() {
             occupancyMode,
             externalEquipId,
             hayStack,
-            externalSpList
+            externalSpList,
+            conditioningMode
         )
         handleHumidityOperation(
             systemEquip,
@@ -204,7 +205,8 @@ class DabExternalAhu : DabSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
         handleDeHumidityOperation(
             systemEquip,
@@ -213,7 +215,8 @@ class DabExternalAhu : DabSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)

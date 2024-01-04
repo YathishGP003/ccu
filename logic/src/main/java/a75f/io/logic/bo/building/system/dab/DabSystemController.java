@@ -89,7 +89,7 @@ public class DabSystemController extends SystemController
     double co2LoopOpWeightedAverage = 0;
     double co2WeightedAverage = 0;
 
-    private SystemMode conditioningMode = SystemMode.OFF;
+    SystemMode conditioningMode = SystemMode.OFF;
     private DabSystemProfile systemProfile = null;
     double prioritySum = 0;
     double co2LoopWeightedAverageASum = 0;

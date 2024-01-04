@@ -344,5 +344,7 @@ object DomainName {
     const val operatingMode = "operatingMode"
     const val equipScheduleStatus = "equipScheduleStatus"
     const val co2WeightedAverage  = "co2WeightedAverage"
+    const val averageHumidity  = "averageHumidity"
+    const val averageTemperature  = "averageTemperature"
 }
 

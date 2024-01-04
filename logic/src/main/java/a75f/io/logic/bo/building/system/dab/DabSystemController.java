@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.building.system.SystemState;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.truecfm.DabTrueCfmHandler;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -35,6 +36,9 @@ import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.domain.api.DomainName.averageHumidity;
+import static a75f.io.domain.api.DomainName.averageTemperature;
+import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_OFF;
@@ -228,10 +232,13 @@ public class DabSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-
-        systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
-        systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
-
+        if (L.ccu().systemProfile instanceof  DabExternalAhu ) {
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
+        } else {
+            systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
+            systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+        }
     }
     
     private boolean isEmergencyCoolingRequired() {

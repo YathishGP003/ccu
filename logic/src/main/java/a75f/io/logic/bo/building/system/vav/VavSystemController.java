@@ -632,7 +632,7 @@ public class VavSystemController extends SystemController
 
         for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and (current or space) " +
                                                                 "and equipRef == \""+equip.get("id")+"\""
             );
     

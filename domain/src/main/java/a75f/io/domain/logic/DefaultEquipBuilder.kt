@@ -91,6 +91,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
+        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
+        }
+
         //TODO - Support added for currently used tag types. Might need updates in future.
         pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
         pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->

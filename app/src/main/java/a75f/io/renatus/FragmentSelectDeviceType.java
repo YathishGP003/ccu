@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
@@ -32,6 +33,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.hyperstatsplit.HyperStatSplitProfileSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -125,13 +127,16 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (isModbusPaired()) {
             return;
         }
+        RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
         DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired, NodeType.SMART_NODE);
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
+
     @OnClick(R.id.rl_helioNode) void onHelioNodeClick() {
         if (isModbusPaired()) {
             return;
         }
+        RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
         DialogSmartNodeProfiling wrmProfiling = DialogHelioNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired, NodeType.HELIO_NODE);
         showDialogFragment(wrmProfiling, DialogHelioNodeProfiling.ID);
     }

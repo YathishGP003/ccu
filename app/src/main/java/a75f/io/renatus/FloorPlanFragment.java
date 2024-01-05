@@ -583,6 +583,8 @@ public class FloorPlanFragment extends Fragment {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
             } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
             }
         } else if (equip.getMarkers().contains("helionode")) {
             RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
@@ -593,6 +595,8 @@ public class FloorPlanFragment extends Fragment {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
             } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
             }
         }
 

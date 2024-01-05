@@ -60,6 +60,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
@@ -79,6 +80,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -563,10 +565,36 @@ public class FloorPlanFragment extends Fragment {
         ArrayList<String> arrayList = new ArrayList<>();
 
         for (Equip e : equips) {
+            preLoadEquipModel(e);
             arrayList.add(e.getGroup());
 
         }
         return arrayList;
+    }
+
+    private void preLoadEquipModel(Equip equip) {
+        if (equip.getMarkers().contains("smartnode")) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
+
+            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+            }
+        } else if (equip.getMarkers().contains("helionode")) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
+
+            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+            }
+        }
+
     }
 
     private void enableFloorButton() {

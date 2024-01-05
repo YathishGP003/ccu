@@ -286,6 +286,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_acb)
     void onACBOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_ACB, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 

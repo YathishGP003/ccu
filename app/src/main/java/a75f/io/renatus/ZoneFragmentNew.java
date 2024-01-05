@@ -170,8 +170,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public static final String AIRFLOW_SENSOR = "airflow sensor";
     public static final String ENABLED = "enabled";
 
-    private static int prevPosition =-1;
-    private static int currentPosition =-1;
+    private int prevPosition =-1;
+    private int currentPosition =-1;
 
     ImageView imag;
     boolean imageOn = false;
@@ -1090,7 +1090,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 //                    CCUHsApi.getInstance().scheduleSync();
 //                } else
 
-                //ZONE SCHEL
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                    boolean isContainment = true;
                    namedScheduleView.setVisibility(View.GONE);
@@ -1333,10 +1332,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             @Override
             public void onClick(View v) {
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewTemperatureBasedZone.SeekArc Onclick");
-                Log.d("USER_TEST","spinner val for zone change = "+scheduleSpinner.getSelectedItemPosition());
-
                 currentPosition =scheduleSpinner.getSelectedItemPosition();
-
                 GridItem gridItemNew = (GridItem) v.getTag();
                 boolean isExpanded = false;
                 int clickedItemRow = 0;
@@ -1816,7 +1812,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     prevPosition = currentPosition;
                     currentPosition = position;
-                //adapter.setSelectedPosition(position);
+                    adapter.setSelectedPosition(position);
                 if(isItemSelectedEvent)
                     return;
 

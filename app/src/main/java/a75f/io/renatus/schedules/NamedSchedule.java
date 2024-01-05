@@ -120,6 +120,7 @@ public class NamedSchedule extends DialogFragment {
     private float mPixelsBetweenAnHour;
     private float mPixelsBetweenADay;
     private OnExitListener mOnExitListener;
+    private OnCancelButtonClickListener OnCancel;
     Button setButton;
     Button cancelButton;
     ImageView closeButton;
@@ -140,12 +141,12 @@ public class NamedSchedule extends DialogFragment {
     public interface OnExitListener {
         void onExit();
     }
-    public  OnCancelButtonClickListener OnCancel;
 
     public void setOnCancelButtonClickListener(OnCancelButtonClickListener listener) {
         this.OnCancel = listener;
     }
-      public interface OnCancelButtonClickListener {
+
+    public interface OnCancelButtonClickListener {
         void onCancelButtonClicked();
     }
 

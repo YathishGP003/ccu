@@ -48,10 +48,10 @@ class DiffFinder {
         diff.let { it ->
             it.points?.diff?.forEach {
                 if(it.diffType == DiffType.REMOVED) {
-                    updateEntityConfiguration(it.left?.domainName!!,entityConfiguration,it.diffType)
+                    updateEntityConfiguration(it.left?.point?.domainName!!,entityConfiguration,it.diffType)
                 }
                 else if(it.diffType != DiffType.EQUAL) {
-                    updateEntityConfiguration(it.right?.domainName!!,entityConfiguration,it.diffType)
+                    updateEntityConfiguration(it.right?.point?.domainName!!,entityConfiguration,it.diffType)
                 }
             }
         }

@@ -22,6 +22,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
+import a75f.io.domain.api.Domain;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.migration.MigrationHandler;
@@ -93,16 +94,10 @@ public class MasterControlUtil {
                 }
                 return min;
             } else {
-
-                HashMap<Object, Object> heatingMin =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(heatingMin.get("id").toString());
-
+                return Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> heatingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and min and heating and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+            return Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
         }
 
     }
@@ -122,15 +117,10 @@ public class MasterControlUtil {
                 }
                 return max;
             } else {
-
-                HashMap<Object, Object> heatingMax =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+                return Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> heatingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and max and heating and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(heatingMax.get("id").toString());
+            return Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
         }
     }
 
@@ -151,16 +141,10 @@ public class MasterControlUtil {
                 }
                 return min;
             } else {
-
-                HashMap<Object, Object> coolingMin =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(coolingMin.get("id").toString());
-
+                return Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> coolingMin =
-                    CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(coolingMin.get("id").toString());
+            return Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
         }
     }
 
@@ -179,17 +163,10 @@ public class MasterControlUtil {
                 }
                 return max;
             } else {
-
-
-                HashMap<Object, Object> coolingMax =
-                        CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-                return CCUHsApi.getInstance().readPointPriorityVal(coolingMax.get("id").toString());
-
+                return Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
             }
         } else {
-            HashMap<Object, Object> coolingMax =
-                    CCUHsApi.getInstance().readEntity("point and limit and max and cooling and user and default and tuner");
-            return CCUHsApi.getInstance().readPointPriorityVal(coolingMax.get("id").toString());
+            return Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
         }
     }
 
@@ -426,7 +403,7 @@ public class MasterControlUtil {
 
     public static boolean validateNamed(double heatingUserLimitMin,double coolingUserLimitMax,
                                         double unOccupiedzonesetback) {
-        double buildingZoneDifferential = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and differential");
+        double buildingZoneDifferential = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
         double buildingLimMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
 

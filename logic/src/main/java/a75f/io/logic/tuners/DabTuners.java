@@ -21,7 +21,7 @@ import a75f.io.logic.bo.building.definitions.Units;
 
 import static a75f.io.logic.bo.building.dab.DabEquip.getDisName;
 import static a75f.io.logic.tuners.TunerConstants.DAB_TUNER_GROUP;
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
 
@@ -294,8 +294,8 @@ public class DabTuners {
                                                 .build();
         String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
         hayStack.writePointForCcuUser(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
-                                      DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
-        hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+                                      DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS, 0);
+        hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS);
     
         Point stageUpTimerCounter = new Point.Builder().setDisplayName(getDisName(equipDis ,  "stageUpTimerCounter"))
                                                        .setSiteRef(siteRef)

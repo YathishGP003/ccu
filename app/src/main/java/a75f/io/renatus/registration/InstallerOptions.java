@@ -41,12 +41,11 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Objects;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -54,23 +53,22 @@ import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.Domain;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -100,7 +98,6 @@ import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
@@ -109,7 +106,6 @@ import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErro
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDiff;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class InstallerOptions extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -636,54 +632,20 @@ public class InstallerOptions extends Fragment {
     // initial master control values
     private void getTempValues() {
 
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
-        if(MasterControlUtil.isMigrated()) {
-            HashMap<Object, Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
-            HashMap<Object, Object> heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
-            HashMap<Object, Object> coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-            HashMap<Object, Object> heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-            HashMap<Object, Object> coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-            HashMap<Object, Object> heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-            HashMap<Object, Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
-            HashMap<Object, Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
-            HashMap<Object, Object> setbackMap = CCUHsApi.getInstance().readEntity("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
-            HashMap<Object, Object> zoneDiffMap = CCUHsApi.getInstance().readEntity("building and zone and differential");
+        hdb = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
+        cdb = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+        upperCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
+        lowerCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
+        upperHeatingTemp = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
+        lowerHeatingTemp = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
 
-            hdb = (float) HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
-            cdb = (float) HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
-            upperCoolingTemp = (float) HSUtil.getLevelValueFrom16(coolUL.get("id").toString());
-            lowerCoolingTemp = (float) HSUtil.getLevelValueFrom16(coolLL.get("id").toString());
-            upperHeatingTemp = (float) HSUtil.getLevelValueFrom16(heatUL.get("id").toString());
-            lowerHeatingTemp = (float) HSUtil.getLevelValueFrom16(heatLL.get("id").toString());
-
-            lowerBuildingTemp = (float) getTuner(buildingMin.get("id").toString());
-            upperBuildingTemp = (float) getTuner(buildingMax.get("id").toString());
-            mSetBack = (float) getTuner(setbackMap.get("id").toString());
-            zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
-        }else{
-
-            hdb = (float) TunerUtil.getHeatingDeadband(p.getId());
-            cdb = (float) TunerUtil.getCoolingDeadband(p.getId());
-            HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and tuner");
-            HashMap heatUL = CCUHsApi.getInstance().read("point and limit and min and heating and user and tuner");
-            HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and tuner");
-            HashMap heatLL = CCUHsApi.getInstance().read("point and limit and max and heating and user and tuner");
-            HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
-            HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
-            HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
-            HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
-
-            upperCoolingTemp = (float) getTuner(coolUL.get("id").toString());
-            lowerCoolingTemp = (float) getTuner(coolLL.get("id").toString());
-            upperHeatingTemp = (float) getTuner(heatUL.get("id").toString());
-            lowerHeatingTemp = (float) getTuner(heatLL.get("id").toString());
-            lowerBuildingTemp = (float) getTuner(buildingMin.get("id").toString());
-            upperBuildingTemp = (float) getTuner(buildingMax.get("id").toString());
-            mSetBack = (float) getTuner(setbackMap.get("id").toString());
-            zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
-
-        }
+        lowerBuildingTemp = (float) Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+        upperBuildingTemp = (float) Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+        mSetBack = (float) Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
+        zoneDiff = (float) Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+        CcuLog.i(Domain.LOG_TAG,hdb+" "+cdb+" "+upperBuildingTemp+" "+lowerCoolingTemp+
+                " "+upperHeatingTemp+" "+lowerHeatingTemp+" "+lowerBuildingTemp+" "+upperBuildingTemp+
+                " "+mSetBack+" "+zoneDiff);
 
     }
 
@@ -699,30 +661,32 @@ public class InstallerOptions extends Fragment {
 
             //12950- New User limits UI
 
-            HashMap<Object,Object> buildingCoolingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-            HashMap<Object,Object> buildingHeatingUpperLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-            HashMap<Object,Object> buildingCoolingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-            HashMap<Object,Object> buildingHeatingLowerLimit = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-            HashMap<Object,Object> buildingMin = CCUHsApi.getInstance().readEntity("building and limit and min and not tuner");
-            HashMap<Object,Object> buildingMax = CCUHsApi.getInstance().readEntity("building and limit and max and not tuner");
+            double heatDBVal;
+            double coolDBVal;
+            double coolMaxVal;
+            double coolMinVal;
+            double heatMinVal;
+            double heatMaxVal;
+            double setBack;
+            double buildingMinLimit;
+            double buildingMaxLimit;
+            double zoneDiff;
 
-            HashMap<Object,Object> coolingDeadbandObj = CCUHsApi.getInstance().readEntity("schedulable and cooling and deadband and default");
-            HashMap<Object,Object> heatingDeadbandObj = CCUHsApi.getInstance().readEntity("schedulable and heating and deadband and default");
-            HashMap<Object,Object> unoccupiedZoneObj = CCUHsApi.getInstance().readEntity("schedulable and unoccupied and default and setback");
-            HashMap<Object,Object> buildingToZoneDiffObj = CCUHsApi.getInstance().readEntity("building and zone and differential and cur");
-
-            if (buildingCoolingUpperLimit.isEmpty() ||
-                    buildingHeatingUpperLimit.isEmpty() ||
-                    buildingCoolingLowerLimit.isEmpty() ||
-                    buildingHeatingLowerLimit.isEmpty() ||
-                    buildingMin.isEmpty() ||
-                    buildingMax.isEmpty() ||
-                    coolingDeadbandObj.isEmpty() ||
-                    heatingDeadbandObj.isEmpty() ||
-                    unoccupiedZoneObj.isEmpty() ||
-                    buildingToZoneDiffObj.isEmpty()) {
+            try {
+                heatDBVal = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
+                coolDBVal = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+                coolMaxVal = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
+                coolMinVal = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
+                heatMinVal = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
+                heatMaxVal = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
+                setBack = (float) Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
+                buildingMinLimit = (float) Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+                buildingMaxLimit = (float) Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+                zoneDiff = (float) Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+            } catch (UnknownRecException e) {
                 throw new ScheduleMigrationNotComplete("Schedule revamp migration is not completed");
             }
+
             buildingLimitMin = dialog.findViewById(R.id.buildinglimmin);
             buildingLimitMax =  dialog.findViewById(R.id.buildinglimitmax);
             unoccupiedZoneSetback =  dialog.findViewById(R.id.unoccupiedzonesetback);
@@ -847,17 +811,8 @@ public class InstallerOptions extends Fragment {
             coolingDeadBand.setAdapter(deadBandAdapter);
             heatingDeadBand.setAdapter(deadBandAdapter);
 
-
-            double coolDBVal = HSUtil.getLevelValueFrom16(coolingDeadbandObj.get("id").toString());
-            double heatDBVal = HSUtil.getLevelValueFrom16(heatingDeadbandObj.get("id").toString());
-            double heatMinVal = HSUtil.getLevelValueFrom16(buildingHeatingUpperLimit.get("id").toString());
-            double coolMinVal = HSUtil.getLevelValueFrom16(buildingCoolingLowerLimit.get("id").toString());
-            double heatMaxVal = HSUtil.getLevelValueFrom16(buildingHeatingLowerLimit.get("id").toString());
-            double coolMaxVal = HSUtil.getLevelValueFrom16(buildingCoolingUpperLimit.get("id").toString());
-            double setBack = HSUtil.getLevelValueFrom16(unoccupiedZoneObj.get("id").toString());
-
             buildingToZoneDiff.setSelection(zoneDiffadapter.getPosition(
-                    getAdapterValDiff(HSUtil.getLevelValueFrom16(buildingToZoneDiffObj.get("id").toString()))));
+                    getAdapterValDiff(zoneDiff)));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
                     getAdapterValDeadBand(//coolDBVal == 0.0 ? 2:
                             coolDBVal, false)));
@@ -876,9 +831,9 @@ public class InstallerOptions extends Fragment {
                     getAdapterValDeadBand(//setBack == 0.0 ? 5:
                             setBack, false)));
             buildingLimitMin.setSelection(adapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(buildingMin.get("id").toString()), false)));
+                    getAdapterVal(buildingMinLimit, false)));
             buildingLimitMax.setSelection(adapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(buildingMax.get("id").toString()), false)));
+                    getAdapterVal(buildingMaxLimit, false)));
 
 
             dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
@@ -982,22 +937,6 @@ public class InstallerOptions extends Fragment {
                     });
                 });
 
-
-
-
-
-
-/*                         String warning = MasterControlUtil.isValidData(zones, heatingLimitMax.getSelectedItem().toString(),
-                                 heatingLimitMin.getSelectedItem().toString(),
-                                 coolingLimitMax.getSelectedItem().toString(),
-                                 coolingLimitMin.getSelectedItem().toString(),
-                                 coolingDeadBand.getSelectedItem().toString(),
-                                 heatingDeadBand.getSelectedItem().toString(),
-                                 buildingLimitMin.getSelectedItem().toString(),
-                                 buildingLimitMax.getSelectedItem().toString(),
-                                 unoccupiedZoneSetback.getSelectedItem().toString(),
-                                 buildingToZoneDiff.getSelectedItem().toString());*/
-
             });
 
 
@@ -1015,7 +954,7 @@ public class InstallerOptions extends Fragment {
                     masterControlView.setMasterControl((float) MasterControlUtil.zoneMaxHeatingVal()
                             , (float) MasterControlUtil.zoneMinHeatingVal(),(float) MasterControlUtil.zoneMinCoolingVal(),
                             (float)MasterControlUtil.zoneMaxCoolingVal(), lowerBuildingTemp, upperBuildingTemp,
-                            mSetBack, zoneDiff, hdb, cdb);
+                            mSetBack, (float) zoneDiff, hdb, cdb);
                 }
             }.start();
 
@@ -1045,8 +984,9 @@ public class InstallerOptions extends Fragment {
             protected Void doInBackground(Void... voids) {
 
                 if (!Globals.getInstance().siteAlreadyCreated()) {
-                    BuildingTuners.getInstance();
-                    SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    //BuildingTuners.getInstance();
+                    //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
 //                    DefaultSchedules.generateDefaultSchedule(false, null);
                 }

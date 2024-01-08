@@ -15,6 +15,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.entities.EntityDBUtilKt;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -133,9 +134,17 @@ public class MockCcuHsApi extends CCUHsApi {
     public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         return hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
     }
-
     @Override
     public void deleteEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
+    }
+
+    @Override
+    public String getTimeZone() {
+        return "Chicago";
+    }
+
+    public void deleteEntityTree(String id) {
+        deleteEntity(id);
     }
 }

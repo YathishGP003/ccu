@@ -58,6 +58,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.domain.cutover.BuildingEquipCutOverMapping;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -426,13 +427,33 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                     if (newTunerValueItem.get("newLevel").toString().equals("16")){
                         String buildingTunerDis = newTunerValueItem.get("dis").toString();
-
+                        String buildingTunerShortDis = buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).trim();
+                        String buildingTunerPointId = newTunerValueItem.get("id").toString();
+                        String buildingTunerShortDisDM = " ";
+                        if (!buildingTunerPointId.isEmpty()) {
+                            HashMap<Object, Object> buildingTuner = CCUHsApi.getInstance().readMapById(buildingTunerPointId);
+                            if (buildingTuner.get("domainName") != null) {
+                                String buildTunerDisPriorToDM = BuildingEquipCutOverMapping.INSTANCE
+                                        .findDisFromDomainName(buildingTuner.get("domainName").toString());
+                                if (!buildTunerDisPriorToDM.isEmpty()) {
+                                    buildingTunerShortDisDM = buildTunerDisPriorToDM.substring(buildTunerDisPriorToDM.lastIndexOf("-") + 1).trim();
+                                } else {
+                                    CcuLog.e(L.TAG_CCU_TUNER, "buildTunerDisPriorToDM is invalid for "+buildingTuner);
+                                }
+                            }
+                        }
+                        CcuLog.i(L.TAG_CCU_TUNER , "propageBuildingTuner buildingTunerDis "+buildingTunerDis+" buildingTunerShortDis "+buildingTunerShortDis
+                                +"buildingTunerShortDisDM "+buildingTunerShortDisDM);
                         //update dualDuct building tuners
                         ArrayList<HashMap> dualDuctBuildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and dualDuct");
-                        String buildingTunerShortDis = buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).trim();
                         for (HashMap hashMap : dualDuctBuildingTuners) {
                             String hashMapDis = hashMap.get("dis").toString();
-                            if (!newTunerValueItem.get("id").toString().equals(hashMap.get("id").toString()) && hashMapDis.contains("Building")&& newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(hashMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(hashMapDis.substring(hashMapDis.lastIndexOf("-") + 1).trim())) {
+                            String shortDis = hashMapDis.substring(hashMapDis.lastIndexOf("-") + 1).trim();
+                            if (!newTunerValueItem.get("id").toString().equals(hashMap.get("id").toString()) &&
+                                    hashMapDis.contains("Building")&&
+                                    newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(hashMap.get("tunerGroup").toString()) &&
+                                    (buildingTunerShortDis.equalsIgnoreCase(shortDis) ||
+                                            buildingTunerShortDisDM.equalsIgnoreCase(shortDis))) {
                                 setTuner(hashMap.get("id").toString(), 16, tunerVal == null ? null: Double.parseDouble(tunerVal.toString()), changeReason);
                             }
                         }
@@ -441,7 +462,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
                         for (HashMap systemTunersMap : systemTuners) {
                             String systemTunerDis = systemTunersMap.get("dis").toString();
-                             if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1).trim())){
+                            String systemTunerShortDis = systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1).trim();
+                            if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) &&
+                                     newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) &&
+                                     (buildingTunerShortDis.equalsIgnoreCase(systemTunerShortDis) ||
+                                             buildingTunerShortDisDM.equalsIgnoreCase(systemTunerShortDis) )){
                                  setTuner(systemTunersMap.get("id").toString(), 16, tunerVal == null ? null: Double.parseDouble(tunerVal.toString()), changeReason);
                              }
                         }
@@ -464,7 +489,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             for (HashMap moduleTunerMap : moduleTuners) {
                                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
-                                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1).trim())) {
+                                    String moduleTunerShortDis = moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1).trim();
+                                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) &&
+                                            newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) &&
+                                            (buildingTunerShortDis.equalsIgnoreCase(moduleTunerShortDis) ||
+                                                    buildingTunerShortDisDM.equalsIgnoreCase(moduleTunerShortDis))) {
                                         setTuner(moduleTunerMap.get("id").toString(), 16, tunerVal == null ? null:Double.parseDouble(tunerVal.toString()), changeReason);
                                     }
                                 }
@@ -581,7 +610,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = moduleTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = moduleTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -605,7 +634,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         }
 
-        Map<String, List<HashMap>> filteredGroupTuner = filteredList.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> filteredGroupTuner = filteredList.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> filteredSortedGroup = new TreeMap<>(filteredGroupTuner);
         for (String groupTitle : filteredSortedGroup.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle,filteredSortedGroup.get(groupTitle));
@@ -626,7 +655,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = zoneTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = zoneTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -713,7 +742,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         Collections.reverse(moduleTuners);
         tuners.addAll(moduleTuners);
 
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -728,12 +757,16 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and not dualDuct");
         for (HashMap m : buildingTuners) {
-            if (m.get("dis").toString().contains("Building")) {
+            /*if (m.get("dis").toString().contains("Building")) {
+                tuners.add(m);
+            }*/
+
+            if (m.keySet().contains("default")) {
                 tuners.add(m);
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {

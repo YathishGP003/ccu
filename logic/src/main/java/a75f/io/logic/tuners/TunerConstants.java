@@ -161,7 +161,8 @@ public class TunerConstants
     public static final double DEFAULT_PROPORTIONAL_SPREAD = 2;
     public static final double DEFAULT_INTEGRAL_TIMEOUT = 30;
     
-    public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
+    public static final double DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS = 0.5;
+    public static final double DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS = 0.5;
     public static final double DEFAULT_STAGE_UP_TIMER_COUNTER = 5;
     public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
     public static final double DEFAULT_FAN_ON_CONTROL_DELAY = 1;

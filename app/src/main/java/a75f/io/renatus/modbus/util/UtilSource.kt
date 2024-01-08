@@ -6,7 +6,6 @@ import a75f.io.logger.CcuLog
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import com.google.gson.Gson
@@ -75,9 +74,11 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     }
     if (equipDevice.equips.isNotEmpty()) {
         equipDevice.equips.forEach { subEquip ->
-            subEquip.registers[0].parameters.forEach {
-                if (!it.isDisplayInUI)
-                    isAllSelected = false
+            if (subEquip.registers.isNotEmpty()) {
+                subEquip.registers[0].parameters.forEach {
+                    if (!it.isDisplayInUI)
+                        isAllSelected = false
+                }
             }
         }
     }

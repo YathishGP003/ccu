@@ -1156,6 +1156,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule Title
                 } else if (position >= 2 && (mScheduleType != -1)) {
+                   scheduleImageButton.setVisibility(View.GONE);
+                   namedScheduleView.setVisibility(View.VISIBLE);
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
@@ -1453,8 +1455,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     linearLayoutZonePoints.removeAllViews();
                     if (scheduleSpinner.getSelectedItemPosition() == 0) {
                         scheduleImageButton.setVisibility(View.VISIBLE);
+                        namedScheduleView.setVisibility(View.GONE);
                     } else {
                         scheduleImageButton.setVisibility(View.GONE);
+                        namedScheduleView.setVisibility(View.VISIBLE);
                     }
 
                     String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
@@ -1847,7 +1851,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
-                   namedScheduleView.setVisibility(View.GONE);
+                    namedScheduleView.setVisibility(View.GONE);
+                    scheduleImageButton.setVisibility(View.VISIBLE);
                     if (mSchedule.isZoneSchedule() ) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
@@ -1913,6 +1918,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule
                 } else if (position >= 2 && (mScheduleType != -1) && !isRemoteChangeApplied) {
+                   namedScheduleView.setVisibility(View.VISIBLE);
+                   scheduleImageButton.setVisibility(View.GONE);
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());

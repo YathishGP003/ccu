@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -567,7 +568,13 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         new AsyncTask<String, Void, Void>() {
             @Override
             protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                String toastMessage;
+                if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+                    toastMessage = "Saving VVT-C Configuration";
+                }else{
+                    toastMessage = "Saving DAB Configuration";
+                }
+                ProgressDialogUtils.showProgressDialog(getActivity(),toastMessage);
                 super.onPreExecute();
             }
             @Override

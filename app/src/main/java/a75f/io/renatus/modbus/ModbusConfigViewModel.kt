@@ -228,15 +228,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun isValidConfiguration(): Boolean {
-        if (equipModel.value.parameters.isEmpty()) {
-            showToast("Please select modbus device", context)
-            return false
-        }
         if (equipModel.value.isDevicePaired)
             return true // If it is paired then will not allow the use to to edit slave id
 
         if (zoneRef.contentEquals("SYSTEM")) {
-            if (equipModel.value.subEquips.isNotEmpty() && isModbusExist()) {
+            if (equipModel.value.subEquips.isNotEmpty() && isSystemModbusExist(profileType)) {
                 showToast("Modbus device already paired", context)
                 return false
             }
@@ -363,15 +359,16 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
             equipModel.value.parameters.forEach {
                 it.displayInUi.value = isSelected
             }
-            if (equipModel.value.subEquips.isNotEmpty()) {
-                equipModel.value.subEquips.forEach { subEquip ->
-                    subEquip.value.selectAllParameters.value = isSelected
-                    subEquip.value.parameters.forEach {
-                        it.displayInUi.value = isSelected
-                    }
+        }
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            equipModel.value.subEquips.forEach { subEquip ->
+                subEquip.value.selectAllParameters.value = isSelected
+                subEquip.value.parameters.forEach {
+                    it.displayInUi.value = isSelected
                 }
             }
         }
+
     }
 
     fun updateSelectAll() {
@@ -408,9 +405,15 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
-    private fun isModbusExist(): Boolean {
-        return (CCUHsApi.getInstance().readAllEntities(
-            "equip and modbus and roomRef == \"SYSTEM\"")).isNotEmpty()
+    private fun isSystemModbusExist(profileType: ProfileType): Boolean {
+        return if (profileType == ProfileType.MODBUS_BTU) {
+            (CCUHsApi.getInstance().readAllEntities(
+                "equip and modbus and btu and roomRef == \"SYSTEM\"")).isNotEmpty()
+        } else {
+            (CCUHsApi.getInstance().readAllEntities(
+                "equip and modbus and emr and roomRef == \"SYSTEM\"")).isNotEmpty()
+        }
+
     }
 
 

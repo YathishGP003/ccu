@@ -87,9 +87,14 @@ configurations {
     customImplementation.extendsFrom implementation
 }
 
+/***
+ * domainLibVersion domain modeler JSON Library version please update when there is update in library
+ */
+def domainLibVersion = "20231207.4"
+
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
-    customImplementation('io.seventyfivef:domain-modeler-lib:20230621.10-dev') {
+    customImplementation("io.seventyfivef:domain-modeler-lib:$domainModelLibVersion")  {
         transitive = true
     }
     implementation 'com.google.android.material:material:1.8.0'
@@ -127,13 +132,26 @@ dependencies {
 repositories {
     mavenCentral()
 }
-
 task getExternalLibraryPaths {
     doLast {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
+        def destination = file("${parentFolder}/domain/src/main/assets/models")
+        def sourceFolder = file("${parentFolder}/domain/src/main/assets/assets/75f/models")
+        def versionFile = file("${parentFolder}/domain/src/main/assets/assets/75f/versions.json")
+        project.copy {
+            from versionFile // Use the parent directory of the source file
+            into destination
+        }
+        def files = sourceFolder.listFiles()
+        files.each { file ->
+            project.copy {
+                from file // Use the parent directory of the source file
+                into destination
+            }
+        }
         configurations.customImplementation.getFiles().each { file ->
-            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20230621.10-dev.jar')) {
+            if (file.getAbsolutePath().endsWith("domain-modeler-lib-$domainModelLibVersion"+".jar")) {
                 project.ext.myParam = file.getAbsolutePath()
                 project.copy {
                     from zipTree(file)

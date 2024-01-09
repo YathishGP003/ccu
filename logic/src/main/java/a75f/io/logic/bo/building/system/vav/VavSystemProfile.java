@@ -1,7 +1,10 @@
 package a75f.io.logic.bo.building.system.vav;
 
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS;
+
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -13,6 +16,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -21,9 +25,7 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
-
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by samjithsadasivan on 1/10/19.
@@ -90,69 +92,29 @@ public abstract class VavSystemProfile extends SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
 
-        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").setUnit("%")
+        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").setUnit("%")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and vav and target and cumulative and damper");
-        ArrayList<HashMap> targetCumulativeDamperArr = hayStack.readPoint(targetCumulativeDamperP.get("id").toString());
-        for (HashMap valMap : targetCumulativeDamperArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(targetCumulativeDamperId, HSUtil.getPriorityVal(targetCumulativeDamperId));
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavTargetCumulativeDamper, hayStack);
         
         Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and vav and analog and fan and speed and multiplier");
-        ArrayList<HashMap> analogFanSpeedMultiplierArr = hayStack.readPoint(analogFanSpeedMultiplierP.get("id").toString());
-        for (HashMap valMap : analogFanSpeedMultiplierArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(analogFanSpeedMultiplierId, HSUtil.getPriorityVal(analogFanSpeedMultiplierId));
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavAnalogFanSpeedMultiplier, hayStack);
 
         Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and vav and humidity and hysteresis");
-        ArrayList<HashMap> humidityHysteresisArr = hayStack.readPoint(humidityHysteresisPoint.get("id").toString());
-        for (HashMap valMap : humidityHysteresisArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavHumidityHysteresis, hayStack);
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");
-        ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
-        for (HashMap valMap : relayDeactivationHysteresisArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
+        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavRelayDeactivationHysteresis, hayStack);
         
         addNewTunerPoints(equipref);
         SystemTuners.addPITuners(equipref, TunerConstants.VAV_TUNER_GROUP, Tags.VAV, CCUHsApi.getInstance());
@@ -200,6 +162,7 @@ public abstract class VavSystemProfile extends SystemProfile
         CcuLog.d(L.TAG_CCU_SYSTEM, "VAV : addNewTunerPoints");
         addStageUpTimerCounterTuner(equipRef);
         addStageDownTimerCounterTuner(equipRef);
+        addModeChangeHysteresisChangeOverTuner(equipRef);
     }
     
     private void addStageUpTimerCounterTuner(String equipRef) {
@@ -226,19 +189,8 @@ public abstract class VavSystemProfile extends SystemProfile
                                             .setTz(tz)
                                             .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
-            
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stageUp and " +
-                                                                    "timer and counter");
-            
-            ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
-                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
-            for (HashMap valMap : defaultStageUpTimerCounterPointArr) {
-                if (valMap.get("val") != null) {
-                    hayStack.pointWrite(HRef.copy(stageUpTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
-                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                }
-            }
-            hayStack.writeHisValById(stageUpTimerCounterId, HSUtil.getPriorityVal(stageUpTimerCounterId));
+
+            TunerUtil.copyDefaultBuildingTunerVal(stageUpTimerCounterId, DomainName.vavStageUpTimerCounter, hayStack);
         }
     }
     
@@ -266,22 +218,53 @@ public abstract class VavSystemProfile extends SystemProfile
                                               .setTz(tz)
                                               .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stageDown and " +
-                                                                    "timer and counter");
-            
-            ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
-                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
-            for (HashMap valMap : defaultStageDownTimerCounterPointArr) {
-                if (valMap.get("val") != null) {
-                    hayStack.pointWrite(HRef.copy(stageDownTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
-                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                }
-            }
-            hayStack.writeHisValById(stageDownTimerCounterId, HSUtil.getPriorityVal(stageDownTimerCounterId));
+            TunerUtil.copyDefaultBuildingTunerVal(stageDownTimerCounterId, DomainName.vavStageDownTimerCounter, hayStack);
         }
     }
-    
+
+    private void addModeChangeHysteresisChangeOverTuner(String equipRef) {
+        HashMap<Object, Object> modeChangeOverHysteresisPoint = CCUHsApi.getInstance()
+                .readEntity("tuner and system and vav and mode and " +
+                        "changeover and hysteresis");
+
+        if (modeChangeOverHysteresisPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point modeChangeoverHysteresis = new Point.Builder()
+                    .setDisplayName(HSUtil.getDis(equipRef)+"-modeChangeoverHysteresis")
+                    .setSiteRef(siteRef)
+                    .setEquipRef(equipRef)
+                    .setHisInterpolate("cov")
+                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cur")
+                    .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp").addMarker("system")
+                    .setMinVal("0").setMaxVal("5").setIncrementVal("0.5")
+                    .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                    .setTz(tz)
+                    .build();
+            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+
+            HashMap defaultModeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and " +
+                    "changeover and hysteresis and vav");
+
+            if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
+                hayStack.pointWriteForCcuUser(HRef.copy(modeChangeoverHysteresisId), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                        HNum.make(DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
+            } else {
+                ArrayList<HashMap> modeChangeoverHysteresisArr =
+                        hayStack.readPoint(defaultModeChangeoverHysteresisPoint.get("id").toString());
+                for (HashMap valMap : modeChangeoverHysteresisArr) {
+                    if (valMap.get("val") != null) {
+                        hayStack.pointWrite(HRef.copy(modeChangeoverHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
+                }
+            }
+            hayStack.writeHisValById(modeChangeoverHysteresisId, HSUtil.getPriorityVal(modeChangeoverHysteresisId));
+        }
+    }
+
     public double getUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

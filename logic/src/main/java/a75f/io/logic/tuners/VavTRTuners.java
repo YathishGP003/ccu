@@ -1,14 +1,12 @@
 package a75f.io.logic.tuners;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.bo.building.definitions.Consts;
 
 /**
@@ -34,16 +32,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String satSPInitId = hayStack.addPoint(satSPInit);
-        HashMap satSPInitPoint = hayStack.read("point and default and tuner and sat and spinit");
-        ArrayList<HashMap> satSPInitArr = hayStack.readPoint(satSPInitPoint.get("id").toString());
-        for (HashMap valMap : satSPInitArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPInitId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPInitId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPInitId, DomainName.satSPInit, hayStack);
     
         Point satSPMin = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPMin")
@@ -56,16 +45,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPMinId = hayStack.addPoint(satSPMin);
-        HashMap satSPMinPoint = hayStack.read("point and default and tuner and sat and spmin");
-        ArrayList<HashMap> satSPMinArr = hayStack.readPoint(satSPMinPoint.get("id").toString());
-        for (HashMap valMap : satSPMinArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPMinId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPMinId, DomainName.satSPMin, hayStack);
     
         Point satSPMax = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"satSPMax")
@@ -78,16 +58,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String satSPMaxId = hayStack.addPoint(satSPMax);
-        HashMap satSPMaxPoint = hayStack.read("point and default and tuner and sat and spmax");
-        ArrayList<HashMap> satSPMaxArr = hayStack.readPoint(satSPMaxPoint.get("id").toString());
-        for (HashMap valMap : satSPMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPMaxId, DomainName.satSPMax, hayStack);
     
         Point satTimeDelay = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"satTimeDelay")
@@ -100,16 +71,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String satTimeDelayId = hayStack.addPoint(satTimeDelay);
-        HashMap satTimeDelayPoint = hayStack.read("point and default and tuner and sat and timeDelay");
-        ArrayList<HashMap> satTimeDelayArr = hayStack.readPoint(satTimeDelayPoint.get("id").toString());
-        for (HashMap valMap : satTimeDelayArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satTimeDelayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satTimeDelayId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satTimeDelayId, DomainName.satTimeDelay, hayStack);
     
         Point satTimeInterval = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"satTimeInterval")
@@ -122,16 +84,7 @@ public class VavTRTuners
                                      .setTz(tz)
                                      .build();
         String satTimeIntervalId = hayStack.addPoint(satTimeInterval);
-        HashMap satTimeIntervalPoint = hayStack.read("point and default and tuner and sat and timeInterval");
-        ArrayList<HashMap> satTimeIntervalArr = hayStack.readPoint(satTimeIntervalPoint.get("id").toString());
-        for (HashMap valMap : satTimeIntervalArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satTimeIntervalId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satTimeIntervalId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satTimeIntervalId, DomainName.satTimeInterval, hayStack);
     
         Point satIgnoreRequest = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"satIgnoreRequest")
@@ -143,16 +96,7 @@ public class VavTRTuners
                                         .setTz(tz)
                                         .build();
         String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
-        HashMap satIgnoreRequestPoint = hayStack.read("point and default and tuner and sat and ignoreRequest");
-        ArrayList<HashMap> satIgnoreRequestArr = hayStack.readPoint(satIgnoreRequestPoint.get("id").toString());
-        for (HashMap valMap : satIgnoreRequestArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satIgnoreRequestId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satIgnoreRequestId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satIgnoreRequestId, DomainName.satIgnoreRequest, hayStack);
     
         Point satSPTrim = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"satSPTrim")
@@ -165,16 +109,7 @@ public class VavTRTuners
                                          .setTz(tz)
                                          .build();
         String satSPTrimId = hayStack.addPoint(satSPTrim);
-        HashMap satSPTrimPoint = hayStack.read("point and default and tuner and sat and sptrim");
-        ArrayList<HashMap> satSPTrimArr = hayStack.readPoint(satSPTrimPoint.get("id").toString());
-        for (HashMap valMap : satSPTrimArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPTrimId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPTrimId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPTrimId, DomainName.satSPTrim, hayStack);
     
         Point satSPRes = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPRes")
@@ -187,16 +122,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPResId = hayStack.addPoint(satSPRes);
-        HashMap satSPResPoint = hayStack.read("point and default and tuner and sat and spres");
-        ArrayList<HashMap> satSPResArr = hayStack.readPoint(satSPResPoint.get("id").toString());
-        for (HashMap valMap : satSPResArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPResId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPResId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPResId, DomainName.satSPRes, hayStack);
     
         Point satSPResMax = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPResMax")
@@ -209,16 +135,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String satSPResMaxId = hayStack.addPoint(satSPResMax);
-        HashMap satSPResMaxPoint = hayStack.read("point and default and tuner and sat and spresmax");
-        ArrayList<HashMap> satSPResMaxArr = hayStack.readPoint(satSPResMaxPoint.get("id").toString());
-        for (HashMap valMap : satSPResMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(satSPResMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(satSPResMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(satSPResMaxId, DomainName.satSPResMax, hayStack);
     }
     
     public static double getSatTRTunerVal(String trParam) {
@@ -227,6 +144,7 @@ public class VavTRTuners
         if (cdb.isEmpty()) {
             cdb = hayStack.read("point and default and tuner and tr and sat and "+trParam);
         }
+    
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
@@ -237,7 +155,7 @@ public class VavTRTuners
                 }
             }
         }
-        throw new IllegalStateException("Tuner not initialized :"+trParam);
+        return 0;
     }
     public static void setSatTRTunerVal(String trParam, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and default and tuner and tr and sat and "+trParam, val);
@@ -260,16 +178,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        HashMap staticPressureSPInitPoint = hayStack.read("point and default and tuner and staticPressure and spinit");
-        ArrayList<HashMap> staticPressureSPInitArr = hayStack.readPoint(staticPressureSPInitPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPInitArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPInitId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPInitId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPInitId, DomainName.staticPressureSPInit, hayStack);
         
         Point staticPressureSPMin = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMin")
@@ -282,16 +191,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
-        HashMap staticPressureSPMinPoint = hayStack.read("point and default and tuner and staticPressure and spmin");
-        ArrayList<HashMap> staticPressureSPMinArr = hayStack.readPoint(staticPressureSPMinPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPMinArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPMinId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMinId, DomainName.staticPressureSPMin, hayStack);
         
         Point staticPressureSPMax = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMax")
@@ -304,16 +204,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
-        HashMap staticPressureSPMaxPoint = hayStack.read("point and default and tuner and staticPressure and spmax");
-        ArrayList<HashMap> staticPressureSPMaxArr = hayStack.readPoint(staticPressureSPMaxPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPMaxId, DomainName.staticPressureSPMax, hayStack);
         
         Point staticPressureTimeDelay = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"staticPressureTimeDelay")
@@ -326,16 +217,7 @@ public class VavTRTuners
                                      .setTz(tz)
                                      .build();
         String staticPressureTimeDelayId = hayStack.addPoint(staticPressureTimeDelay);
-        HashMap staticPressureTimeDelayPoint = hayStack.read("point and default and tuner and staticPressure and timeDelay");
-        ArrayList<HashMap> staticPressureTimeDelayArr = hayStack.readPoint(staticPressureTimeDelayPoint.get("id").toString());
-        for (HashMap valMap : staticPressureTimeDelayArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureTimeDelayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureTimeDelayId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeDelayId, DomainName.staticPressureTimeDelay, hayStack);
         
         Point staticPressureTimeInterval = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"staticPressureTimeInterval")
@@ -348,16 +230,7 @@ public class VavTRTuners
                                         .setTz(tz)
                                         .build();
         String staticPressureTimeIntervalId = hayStack.addPoint(staticPressureTimeInterval);
-        HashMap staticPressureTimeIntervalPoint = hayStack.read("point and default and tuner and staticPressure and timeInterval");
-        ArrayList<HashMap> staticPressureTimeIntervalArr = hayStack.readPoint(staticPressureTimeIntervalPoint.get("id").toString());
-        for (HashMap valMap : staticPressureTimeIntervalArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureTimeIntervalId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureTimeIntervalId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureTimeIntervalId, DomainName.staticPressureTimeInterval, hayStack);
         
         Point staticPressureIgnoreRequest = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"staticPressureIgnoreRequest")
@@ -369,16 +242,7 @@ public class VavTRTuners
                                          .setTz(tz)
                                          .build();
         String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
-        HashMap staticPressureIgnoreRequestPoint = hayStack.read("point and default and tuner and staticPressure and ignoreRequest");
-        ArrayList<HashMap> staticPressureIgnoreRequestArr = hayStack.readPoint(staticPressureIgnoreRequestPoint.get("id").toString());
-        for (HashMap valMap : staticPressureIgnoreRequestArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureIgnoreRequestId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureIgnoreRequestId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureIgnoreRequestId, DomainName.staticPressureIgnoreRequest, hayStack);
         
         Point staticPressureSPTrim = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"staticPressureSPTrim")
@@ -391,16 +255,7 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
-        HashMap staticPressureSPTrimPoint = hayStack.read("point and default and tuner and staticPressure and sptrim");
-        ArrayList<HashMap> staticPressureSPTrimArr = hayStack.readPoint(staticPressureSPTrimPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPTrimArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPTrimId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPTrimId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPTrimId, DomainName.staticPressureSPTrim, hayStack);
         
         Point staticPressureSPRes = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPRes")
@@ -413,16 +268,7 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
-        HashMap staticPressureSPResPoint = hayStack.read("point and default and tuner and staticPressure and spres");
-        ArrayList<HashMap> staticPressureSPResArr = hayStack.readPoint(staticPressureSPResPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPResArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPResId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPResId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResId, DomainName.staticPressureSPRes, hayStack);
         
         Point staticPressureSPResMax = new Point.Builder()
                                     .setDisplayName(equipDis+"-"+"staticPressureSPResMax")
@@ -435,16 +281,7 @@ public class VavTRTuners
                                     .setTz(tz)
                                     .build();
         String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);
-        HashMap staticPressureSPResMaxPoint = hayStack.read("point and default and tuner and staticPressure and spresmax");
-        ArrayList<HashMap> staticPressureSPResMaxArr = hayStack.readPoint(staticPressureSPResMaxPoint.get("id").toString());
-        for (HashMap valMap : staticPressureSPResMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(staticPressureSPResMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(staticPressureSPResMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(staticPressureSPResMaxId, DomainName.staticPressureSPResMax, hayStack);
     }
     
     public static double getStaticPressureTRTunerVal(String trParam) {
@@ -465,7 +302,7 @@ public class VavTRTuners
                 }
             }
         }
-        throw new IllegalStateException("Tuner not initialized :"+trParam);
+        return 0;
     }
     public static void setStaticPressureTRTunerVal(String trParam, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and default and tuner and tr and staticPressure and "+trParam, val);
@@ -488,16 +325,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String co2SPInitId = hayStack.addPoint(co2SPInit);
-        HashMap co2SPInitPoint = hayStack.read("point and default and tuner and co2 and spinit");
-        ArrayList<HashMap> co2SPInitArr = hayStack.readPoint(co2SPInitPoint.get("id").toString());
-        for (HashMap valMap : co2SPInitArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPInitId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPInitId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPInitId, DomainName.co2SPInit, hayStack);
         
         Point co2SPMin = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPMin")
@@ -510,16 +338,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPMinId = hayStack.addPoint(co2SPMin);
-        HashMap co2SPMinPoint = hayStack.read("point and default and tuner and co2 and spmin");
-        ArrayList<HashMap> co2SPMinArr = hayStack.readPoint(co2SPMinPoint.get("id").toString());
-        for (HashMap valMap : co2SPMinArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPMinId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPMinId, DomainName.co2SPMin, hayStack);
         
         Point co2SPMax = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPMax")
@@ -532,16 +351,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPMaxId = hayStack.addPoint(co2SPMax);
-        HashMap co2SPMaxPoint = hayStack.read("point and default and tuner and co2 and spmax");
-        ArrayList<HashMap> co2SPMaxArr = hayStack.readPoint(co2SPMaxPoint.get("id").toString());
-        for (HashMap valMap : co2SPMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPMaxId, DomainName.co2SPMax, hayStack);
         
         Point co2TimeDelay = new Point.Builder()
                                                 .setDisplayName(equipDis+"-"+"co2TimeDelay")
@@ -554,16 +364,7 @@ public class VavTRTuners
                                                 .setTz(tz)
                                                 .build();
         String co2TimeDelayId = hayStack.addPoint(co2TimeDelay);
-        HashMap co2TimeDelayPoint = hayStack.read("point and default and tuner and co2 and timeDelay");
-        ArrayList<HashMap> co2TimeDelayArr = hayStack.readPoint(co2TimeDelayPoint.get("id").toString());
-        for (HashMap valMap : co2TimeDelayArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2TimeDelayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2TimeDelayId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2TimeDelayId, DomainName.co2TimeDelay, hayStack);
         
         Point co2TimeInterval = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"co2TimeInterval")
@@ -576,16 +377,7 @@ public class VavTRTuners
                                                    .setTz(tz)
                                                    .build();
         String co2TimeIntervalId = hayStack.addPoint(co2TimeInterval);
-        HashMap co2TimeIntervalPoint = hayStack.read("point and default and tuner and co2 and timeInterval");
-        ArrayList<HashMap> co2TimeIntervalArr = hayStack.readPoint(co2TimeIntervalPoint.get("id").toString());
-        for (HashMap valMap : co2TimeIntervalArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2TimeIntervalId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2TimeIntervalId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2TimeIntervalId, DomainName.co2TimeInterval, hayStack);
         
         Point co2IgnoreRequest = new Point.Builder()
                                                     .setDisplayName(equipDis+"-"+"co2IgnoreRequest")
@@ -597,16 +389,7 @@ public class VavTRTuners
                                                     .setTz(tz)
                                                     .build();
         String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
-        HashMap co2IgnoreRequestPoint = hayStack.read("point and default and tuner and co2 and ignoreRequest");
-        ArrayList<HashMap> co2IgnoreRequestArr = hayStack.readPoint(co2IgnoreRequestPoint.get("id").toString());
-        for (HashMap valMap : co2IgnoreRequestArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2IgnoreRequestId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2IgnoreRequestId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2IgnoreRequestId, DomainName.co2IgnoreRequest, hayStack);
         
         Point co2SPTrim = new Point.Builder()
                                              .setDisplayName(equipDis+"-"+"co2SPTrim")
@@ -619,16 +402,7 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String co2SPTrimId = hayStack.addPoint(co2SPTrim);
-        HashMap co2SPTrimPoint = hayStack.read("point and default and tuner and co2 and sptrim");
-        ArrayList<HashMap> co2SPTrimArr = hayStack.readPoint(co2SPTrimPoint.get("id").toString());
-        for (HashMap valMap : co2SPTrimArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPTrimId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPTrimId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPTrimId, DomainName.co2SPTrim, hayStack);
         
         Point co2SPRes = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"co2SPRes")
@@ -641,16 +415,7 @@ public class VavTRTuners
                                             .setTz(tz)
                                             .build();
         String co2SPResId = hayStack.addPoint(co2SPRes);
-        HashMap co2SPResPoint = hayStack.read("point and default and tuner and co2 and spres");
-        ArrayList<HashMap> co2SPResArr = hayStack.readPoint(co2SPResPoint.get("id").toString());
-        for (HashMap valMap : co2SPResArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPResId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPResId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPResId, DomainName.co2SPRes, hayStack);
         
         Point co2SPResMax = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"co2SPResMax")
@@ -663,37 +428,6 @@ public class VavTRTuners
                                                .setTz(tz)
                                                .build();
         String co2SPResMaxId = hayStack.addPoint(co2SPResMax);
-        HashMap co2SPResMaxPoint = hayStack.read("point and default and tuner and co2 and spresmax");
-        ArrayList<HashMap> co2SPResMaxArr = hayStack.readPoint(co2SPResMaxPoint.get("id").toString());
-        for (HashMap valMap : co2SPResMaxArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(co2SPResMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(co2SPResMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-    }
-    
-    public static double getCO2TRTunerVal(String trParam) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
-        if (cdb.isEmpty()) {
-            cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
-        }
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        throw new IllegalStateException("Tuner not initialized :"+trParam);
-    }
-    public static void setCO2TRTunerVal(String trParam, double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and default and tuner and tr and co2 and "+trParam, val);
+        TunerUtil.copyDefaultBuildingTunerVal(co2SPResMaxId, DomainName.co2SPResMax, hayStack);
     }
 }

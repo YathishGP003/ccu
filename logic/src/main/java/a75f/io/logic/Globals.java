@@ -3,9 +3,10 @@ package a75f.io.logic;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 
-import org.projecthaystack.HRef;
 import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.logic.DomainManager;
+import a75f.io.domain.migration.DiffManger;
+import a75f.io.domain.util.ModelCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
@@ -67,17 +71,17 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.migration.smartnode.SmartNodeMigration;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
@@ -224,7 +228,9 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
         CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
 		renatusServicesUrls = urls;
-        new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
+        CcuLog.i(L.TAG_CCU_INIT,"Initialize ModelCache");
+        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
     }
 
     public void startTimerTask(){
@@ -244,6 +250,7 @@ public class Globals {
 
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
 
         updateCCUAhuRef();
         setRecoveryMode();
@@ -286,17 +293,14 @@ public class Globals {
     private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
-            if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
-                        non-primary CCUs should fetch in the next app start up.*/
+
+            ////TODO- Common data feature
+            /*if (CCUHsApi.getInstance().isPrimaryCcu()) {
                 BuildingTuners.getInstance().updateBuildingTuners();
                 CCUHsApi.getInstance().importBuildingTuners();
             } else {
-                        /*If a non-primary tuner fails to load all the  building tuners, it should
-                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
-                        multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
-            }
+            }*/
 
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
@@ -319,6 +323,7 @@ public class Globals {
             {
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+                    ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
                         new MigrationHandler(CCUHsApi.getInstance()).doMigration();
@@ -352,6 +357,12 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
+
+                    //TODO - Find the right place..For now just doing if registered already
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        DiffManger diffManger = new DiffManger(getApplicationContext());
+                        diffManger.processModelMigration(site.get("id").toString());
+                    }
                 }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
@@ -359,8 +370,16 @@ public class Globals {
                     e.printStackTrace();
                 } finally {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
-                    loadEquipProfiles();
+
+                    try {
+                        loadEquipProfiles();
+                    } catch (Exception e) {
+                        CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
+                    }
                     isInitCompleted = true;
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    }
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                 }
             }
@@ -392,7 +411,7 @@ public class Globals {
         HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
-            BuildingTuners.getInstance().addBuildingTunerEquip();
+            //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
@@ -715,7 +734,7 @@ public class Globals {
     public void registerOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.add(listener);
         if (isInitCompleted) {
-            CcuLog.i("UI_PROFILING","CCU Already registered");
+            CcuLog.i("UI_PROFILING","CCU Already initialized");
             listener.onInitCompleted();
         }
     }

@@ -429,19 +429,19 @@ public class HyperStatMsgReceiver {
                     DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
                             new Point.Builder().setHashMap(heatingDtPoint).build(),
                             new Point.Builder().setHashMap(dtPoint).build(),
-                            coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                            coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_WHO);
                     break;
                 case COOLING:
                     DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
                             new Point.Builder().setHashMap(heatingDtPoint).build(),
                             new Point.Builder().setHashMap(dtPoint).build(),
-                            coolingDesiredTemp, 0, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                            coolingDesiredTemp, 0, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_WHO);
                     break;
                 case HEATING:
                     DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
                             new Point.Builder().setHashMap(heatingDtPoint).build(),
                             new Point.Builder().setHashMap(dtPoint).build(),
-                            0, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
+                            0, heatingDesiredTemp, averageDesiredTemp, hayStack,  WhoFiledConstants.HYPERSTAT_WHO);
                     break;
             }
         }

@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -45,8 +44,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
-import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -329,8 +327,9 @@ public class RegisterGatherCCUDetails extends Activity {
             protected Void doInBackground(Void... voids) {
 
                 if(!Globals.getInstance().siteAlreadyCreated()) {
-                    BuildingTuners.getInstance();
-                    SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    //BuildingTuners.getInstance();
+                    //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
 //                    DefaultSchedules.generateDefaultSchedule(false, null);
                 }

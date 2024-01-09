@@ -1,0 +1,44 @@
+package a75f.io.domain.util
+
+/**
+ * Created by Manjunath K on 31-08-2023.
+ */
+
+object ModelNames {
+    const val DAB_ADVANCED_HYBRID_AHU = "dab_advanced_hybrid_AHU"
+    const val DAB_FULLY_MODULATING_AHU = "dab_fullymodulating_AHU"
+    const val VAV_FULLY_MODULATING_AHU = "vav_fullmodulating_AHU"
+    const val VAV_ADVANCED_HYBRID_AHU = "vav_advanced_hybrid_AHU"
+    const val DAB_STAGED_RTU = "dab_staged_RTU"
+    const val VAV_STAGED_RTU = "vav_staged_RTU"
+    const val VAV_STAGED_RTU_VFD = "vav_staged_RTU_VFD"
+    const val DAB_STAGED_RTU_VFD = "dab_staged_RTU_VFD"
+    const val HYPERSTAT_CPU = "hyperstatcpu"
+    const val HYPERSTAT_HPU = "hyperstathpu"
+    const val HYPERSTAT_2PFCU = "hyperstat2pfcu"
+    const val HYPERSTAT_4PFCU = "hyperstat4pfcu"
+    const val CM_DEVICE = "cmBoardDevice"
+    const val SMARTSTAT_DEVICE = "smartstatDevice"
+    const val HELIONODE_DEVICE = "helionodeDevice"
+    const val SMARTNODE_DEVICE = "smartnodeDevice"
+    const val HYPERSTAT_DEVICE = "hyperstatDevice"
+    const val HYPERSTAT_SPLIT_DEVICE = "hyperstatSplitDevice"
+    const val CONNECT_MODULE_DEVICE = "connectModuleDevice"
+    const val OTA_DEVICE = "otnDevice"
+    const val SMARTSTAT_CPU = "smartstatcpu"
+    const val SMARTSTAT_HPU = "smartstathpu"
+    const val SMARTSTAT_2PFCU = "smartstat2pfcu"
+    const val SMARTSTAT_4PFCU = "smartstat4pfcu"
+    const val SMARTNODE_DAB = "smartnode_dab"
+    const val SMARTNODE_VAV_PF = "smartnode_vav_pf"
+    const val SMARTNODE_VAV = "smartnode_vav"
+    const val SMARTNODE_OAO = "smartnode_oao"
+    const val SMARTNODE_SSE = "smartnode_sse"
+    const val SMARTNODE_VAV_SF = "smartnode_vav_sf"
+    const val SMARTNODE_TI = "smartnode_ti"
+    const val SMARTNODE_DAB_DD = "smartnode_dab_dd"
+    const val DAIG_EQUIP = "diagEquip"
+    const val BUILDING_EQUIP = "building_equip"
+    const val DAB_EXTERNAL_AHU_CONTROLLER = "dabExternalAHUController"
+    const val VAV_EXTERNAL_AHU_CONTROLLER = "vavExternalAHUController"
+}

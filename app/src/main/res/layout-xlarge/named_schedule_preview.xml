@@ -44,7 +44,7 @@
                 <View
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="100dp"
                     android:layout_marginTop="10dp"
                     android:background="@drawable/occupancy_occupied"
                     app:layout_constraintRight_toLeftOf="@+id/occupied"
@@ -85,29 +85,20 @@
                     android:textSize="18sp"
                     tools:ignore="MissingConstraints" />
 
-                <Button
-                    android:id="@+id/setButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:background="@null"
-                    android:button="@null"
-                    android:text="@string/button_set"
-                    android:textColor="?orange_75f"
-                    android:textSize="19sp"
-                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/btnCloseNamed"
-                    android:layout_width="20dp"
-                    android:layout_height="15dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="15dp"
-                    android:src="@drawable/icon_close"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="15dp"
+
+                    android:src="@drawable/close"
                     app:tint="?orange_75f"
                     tools:ignore="ContentDescription"
+
                     android:visibility="gone"
-                    />
+                   />
 
             </LinearLayout>
 
@@ -408,7 +399,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato_light"
-                    android:text="00:00"
+                    android:text="24:00"
                     android:textSize="17sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintHorizontal_bias="0.998"
@@ -721,8 +712,46 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="1000dp"
+                app:layout_constraintEnd_toEndOf="@+id/constraintLt_Scheduler"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler"
+                tools:ignore="MissingConstraints">
+
+                <Button
+                    android:id="@+id/cancelButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@null"
+                    android:button="@null"
+                    android:text="@string/button_cancel"
+                    android:textColor="?orange_75f"
+                    android:textSize="19sp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/setButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@null"
+                    android:button="@null"
+                    android:text="@string/button_set"
+                    android:textColor="?orange_75f"
+                    android:textSize="19sp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 

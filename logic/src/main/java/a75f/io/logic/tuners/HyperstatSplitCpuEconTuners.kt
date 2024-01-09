@@ -76,9 +76,12 @@ class HyperstatSplitCpuEconTuners {
                 .setTz(tz)
 
                 // add common  markers
-                .addMarker("tuner").addMarker("default").addMarker("sp")
+                .addMarker("tuner").addMarker("sp")
                 .addMarker("writable").addMarker("his")
 
+            if (buildingDefault) {
+                point.addMarker("default")
+            }
 
             if (!roomRef.isNullOrEmpty()) point.setRoomRef(roomRef)
             if (!floorRef.isNullOrEmpty()) point.setFloorRef(floorRef)

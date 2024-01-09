@@ -15,8 +15,9 @@ public enum FirmwareComponentType_t
 	HYPER_STAT_DEVICE_TYPE("HyperStat","hs_fw/","hyperstat"),
 	//Firm ware has limitation that helionode device type(8) to be same as firmware component type(7)
 	DUMMY_DEVICE_TYPE(null,null,null),
-	HELIO_NODE_DEVICE_TYPE("HelioNode", "hn_fw/", 	"helionode");
-
+	HELIO_NODE_DEVICE_TYPE("HelioNode", "hn_fw/", 	"helionode"),
+	HYPERSTAT_SPLIT_DEVICE_TYPE("HyperStat", "hs_fw/", "hyperstatsplit"),
+	CONNECT_MODULE_DEVICE_TYPE("Connect", "connect_fw/", "hyperstatsplit");
 
 	private final String updateFileName;
 	private final String updateUrlDirectory;

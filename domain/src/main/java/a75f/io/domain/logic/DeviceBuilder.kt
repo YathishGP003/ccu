@@ -11,19 +11,18 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
+    fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String) {
 
-    fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String) {
-
-        val hayStackDevice = buildDevice(modelDef, configuration, equipRef)
+        val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef)
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
         createPoints(modelDef, configuration, hayStackDevice)
     }
 
-    fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String) {
+    fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String) {
 
-        val hayStackDevice = buildDevice(modelDef, configuration, equipRef)
+        val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef)
 
         val device = hayStack.readEntity(
             "device and addr == \"${configuration.nodeAddress}\"")
@@ -45,7 +44,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             DomainManager.addRawPoint(hayStackPoint)
         }
     }
-    private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String) : Device{
+    private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String, siteRef : String) : Device{
 
         val deviceBuilder = Device.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -53,6 +52,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setRoomRef(configuration.roomRef)
             .setFloorRef(configuration.floorRef)
             .setAddr(configuration.nodeAddress)
+            .setSiteRef(siteRef)
         modelDef.tagNames.forEach{ deviceBuilder.addMarker(it)}
         return deviceBuilder.build()
     }
@@ -67,7 +67,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setKind(Kind.parsePointType(modelDef.kind.name))
             .setEnabled(true)
             .setUnit(modelDef.defaultUnit)
-
+            .setSiteRef(device.siteRef)
 
         modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
 

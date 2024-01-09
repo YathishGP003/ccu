@@ -46,7 +46,9 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -140,10 +142,6 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     Spinner coolingDeadBand;
 
     ToggleButton followBuilding;
-    HashMap<Object,Object> coolUL;
-    HashMap<Object,Object> heatUL;
-    HashMap<Object,Object> coolLL;
-    HashMap<Object,Object> heatLL;
     HashMap<Object,Object> coolDB;
     HashMap<Object,Object> heatDB;
 
@@ -263,10 +261,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 deadBand.add((val) + "\u00B0F");
             }
         }
-        coolUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-        heatUL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-        coolLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-        heatLL = CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
+
         coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
         heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
 
@@ -305,13 +300,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         followBuilding.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(followBuilding.isChecked()){
                 heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
+                        getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal(), true)));
                 heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                        getAdapterVal(HSUtil.getLevelValueFrom16(heatLL.get("id").toString()), true)));
+                        getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal(), true)));
                 coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(HSUtil.getLevelValueFrom16(coolLL.get("id").toString()), true)));
+                        getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal(), true)));
                 coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                        getAdapterVal(HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), true)));
+                        getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal(), true)));
                 heatingDeadBand.setSelection(deadBandAdapter.getPosition(
                         getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
                 coolingDeadBand.setSelection(deadBandAdapter.getPosition(
@@ -522,14 +517,20 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 return;
             }
 
-            Double buildingLimitMax =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and max");
-            Double buildingLimitMin =  CCUHsApi.getInstance().readPointPriorityValByQuery("building and limit and min");
+            Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+            Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
-            Double buildingToZoneDiff = CCUHsApi.getInstance().readPointPriorityValByQuery("building and zone and differential");
+            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
             String warning = null;
 
+            CcuLog.i(L.TAG_CCU, "buildingLimitMin "+buildingLimitMin);
+            CcuLog.i(L.TAG_CCU, "heatingUserLimitMinVal "+heatingUserLimitMinVal);
+            CcuLog.i(L.TAG_CCU, "buildingToZoneDiff "+buildingToZoneDiff);
+            CcuLog.i(L.TAG_CCU, "unoccupiedZoneSetback "+unoccupiedZoneSetback);
+            CcuLog.i(L.TAG_CCU, "buildingLimitMax "+buildingLimitMax);
+            CcuLog.i(L.TAG_CCU, "coolingUserLimitMaxVal "+coolingUserLimitMaxVal);
 
             warning = MasterControlUtil.validateDesiredTemp(coolingTemp, heatingTemp, coolingUserLimitMinVal,
                     coolingUserLimitMaxVal, heatingUserLimitMinVal, heatingUserLimitMaxVal, heatingDeadBandVal, coolingDeadBandVal);
@@ -541,7 +542,6 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                             heatingDeadBandVal, coolingUserLimitMaxVal, coolingUserLimitMinVal, coolingDeadBandVal);
                 }
             }
-
 
             if(warning == null) {
                 if (!mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
@@ -686,13 +686,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     private void setDefaultUserLimits(ArrayAdapter<String> heatingAdapter, ArrayAdapter<String> coolingAdapter, ArrayAdapter<String> deadBandAdapter) {
         if(followBuilding.isChecked()){
             heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal(), true)));
             heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(heatLL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal(), true)));
             coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(coolLL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal(), true)));
             coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal(), true)));
             heatingDeadBand.setSelection(deadBandAdapter.getPosition(
                     getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
@@ -810,13 +810,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         heatingDeadBand.setAdapter(deadBandAdapter);
         if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
             heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(heatUL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal(), true)));
             heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(heatLL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal(), true)));
             coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(coolLL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal(), true)));
             coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                    getAdapterVal(HSUtil.getLevelValueFrom16(coolUL.get("id").toString()), true)));
+                    getAdapterVal(Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal(), true)));
             heatingDeadBand.setSelection(deadBandAdapter.getPosition(
                     getAdapterValDeadBand(HSUtil.getLevelValueFrom16(heatDB.get("id").toString()), true)));
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(

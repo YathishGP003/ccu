@@ -48,6 +48,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 /**
@@ -157,9 +158,16 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             handleDabDwcbEnabled(dcwbEnabled);
             setupAnalogLimitSelectors();
         } else {
-    
+            String toastMessage = "";
+            if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+                toastMessage = "Saving VVT-C System Configuration";
+            }else{
+                toastMessage = "Saving DAB System Configuration";
+            }
+
+            String finalToastMessage = toastMessage;
             RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-                                                                                  "Saving DAB System Configuration"),
+                            finalToastMessage),
                                               () -> { if (systemProfile != null) {
                                                           systemProfile.deleteSystemEquip();
                                                           L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.

@@ -55,6 +55,7 @@ import butterknife.ButterKnife;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 /**
  * Created by samjithsadasivan on 11/8/18.
@@ -626,7 +627,14 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         {
             @Override
             protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                String toastMessage;
+                if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+                    toastMessage = "Saving VVT-C Configuration";
+                }else{
+                    toastMessage = "Saving DAB Configuration";
+                }
+
+                ProgressDialogUtils.showProgressDialog(getActivity(),toastMessage);
                 super.onPreExecute();
             }
             @Override

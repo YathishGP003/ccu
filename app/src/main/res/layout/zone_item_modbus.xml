@@ -40,7 +40,8 @@
             android:id="@+id/tvParamValue"
             style="@style/label_grey"
             android:layout_width="0dp"
-            android:layout_weight="2"
+            android:gravity="left"
+            android:layout_weight="3"
             android:textColor="@color/dark_gray"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -53,8 +54,8 @@
             android:layout_width="0dp"
             android:layout_weight="3"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:gravity="center"
+            android:layout_marginStart="10dp"
+            android:gravity="left"
             android:layout_gravity="start|center"
             android:visibility="gone" />
     </LinearLayout>

@@ -34,7 +34,6 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
-import a75f.io.device.mesh.LSerial;
 import a75f.io.device.modbus.LModbus;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusDataInterface;
@@ -142,7 +141,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             viewHolder.tvUnit.setVisibility(View.VISIBLE);
                             viewHolder.tvUnit.setText("(" + unit + ")");
                         } else {
-                            viewHolder.tvUnit.setVisibility(View.GONE);
+                            viewHolder.tvUnit.setVisibility(View.INVISIBLE);
                         }
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
@@ -168,7 +167,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                     viewHolder.tvUnit.setVisibility(View.VISIBLE);
                                     viewHolder.tvUnit.setText("(" + unit + ")");
                                 } else {
-                                    viewHolder.tvUnit.setVisibility(View.GONE);
+                                    viewHolder.tvUnit.setVisibility(View.INVISIBLE);
                                 }
                             }
                         }
@@ -176,7 +175,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
                 default:
                     viewHolder.spValue.setVisibility(View.GONE);
-                    viewHolder.tvUnit.setVisibility(View.GONE);
+                    viewHolder.tvUnit.setVisibility(View.INVISIBLE);
                     viewHolder.tvParamValue.setVisibility(View.VISIBLE);
                     viewHolder.tvParamValue.setText(modbusParam.get(position).isDisplayInUI() ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                     break;
@@ -201,7 +200,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         viewHolder.tvUnit.setVisibility(View.VISIBLE);
                         viewHolder.tvUnit.setText("(" + unit + ")");
                     } else {
-                        viewHolder.tvUnit.setVisibility(View.GONE);
+                        viewHolder.tvUnit.setVisibility(View.INVISIBLE);
                     }
                 }
                 

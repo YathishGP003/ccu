@@ -323,6 +323,8 @@ object DomainName {
     const val systemOccupancyMode = "systemOccupancyMode"
     const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val supplyAirflowTemperatureSetpoint = "supplyAirflowTemperatureSetpoint"
+    const val airTempHeatingSp = "airTempHeatingSp"
+    const val airTempCoolingSp = "airTempCoolingSp"
     const val systemCO2Threshold = "systemCO2Threshold"
     const val systemCO2DamperOpeningRate = "systemCO2DamperOpeningRate"
     const val systemCO2Target = "systemCO2Target"

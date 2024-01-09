@@ -150,10 +150,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             pageSettingButton = findViewById(R.id.pageSettingButton);
             pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
             configLogo();
-            if (isSetupPassWordRequired()) {
-                showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), 0);
-            }
-
 
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override

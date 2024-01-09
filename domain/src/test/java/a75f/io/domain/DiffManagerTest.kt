@@ -9,7 +9,7 @@ import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.migration.MAJOR
 import a75f.io.domain.migration.MINOR
@@ -52,7 +52,7 @@ class DiffManagerTest {
         val migrationHandler = MigrationHandler(mockHayStack)
         val newVersionFiles = getModelFileVersionDetails(DiffManger.NEW_VERSION)
         val versionFiles = getModelFileVersionDetails(DiffManger.VERSION)
-        diffManger.updateEquipModels(newVersionFiles,versionFiles,migrationHandler)
+        diffManger.updateEquipModels(newVersionFiles,versionFiles,migrationHandler, "@TestSiteRef")
         println(versionFiles)
         Domain.site?.floors?.entries?.forEach{
             val floor = it.value
@@ -113,14 +113,14 @@ class DiffManagerTest {
             .setSiteRef(siteRef)
             .build()
         val zoneRef = hayStack.addZone(z)
-       var dmModel = a75f.io.domain.ResourceHelper.loadProfileModelDefinition("models/6483676fad855161596a5040.json")
+       var dmModel = a75f.io.domain.ResourceHelper.loadProfileModelDefinition("models/645b27a27f70f27a05508363.json")
 
         dmModel?.let {
-            val equipBuilder = EquipBuilder(hayStack)
+            val equipBuilder = ProfileEquipBuilder(hayStack)
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef
             profileConfig.roomRef = zoneRef
-            equipBuilder.buildEquipAndPoints(profileConfig, dmModel)
+            equipBuilder.buildEquipAndPoints(profileConfig, dmModel,"@TestSiteRef")
         }
         DomainManager.buildDomain(hayStack)
     }

@@ -437,7 +437,7 @@ public class MigrationUtil {
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+//        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
@@ -453,7 +453,24 @@ public class MigrationUtil {
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
         clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi);
+        removeHisTagForEquipStatusMessage(ccuHsApi);
+
         ccuHsApi.scheduleSync();
+    }
+
+    private static void removeHisTagForEquipStatusMessage(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip " +
+                "and (hyperstat or hyperstatsplit)");
+        for (HashMap<Object, Object> hsEquip : hsEquips) {
+            String equipRef = hsEquip.get("id").toString();
+            HashMap<Object, Object> equipStatusMessagePointMap = ccuHsApi.readEntity(
+                    "message and status and his and equipRef == \"" + equipRef + "\"");
+            Point equipStatusMessagePoint = new Point.Builder().setHashMap(equipStatusMessagePointMap).build();
+            if(equipStatusMessagePoint.getMarkers().contains(Tags.HIS)){
+                equipStatusMessagePoint.getMarkers().remove(Tags.HIS);
+                ccuHsApi.updatePoint(equipStatusMessagePoint, equipStatusMessagePoint.getId());
+            }
+        }
     }
 
     private static void clearLevel4ValuesOfDesiredTempIfDurationIs0(CCUHsApi ccuHsApi) {
@@ -2342,7 +2359,6 @@ public class MigrationUtil {
             ccuHsApi.updateDevice(senseEquip, senseEquip.getId());
         }
     }
-
     private static void addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi haystack) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "addDefaultMarkerTagsToHyperStatTunerPoints migration started");
         Map<Object, Object> tunerEquip = haystack.readEntity("equip and tuner");
@@ -2449,8 +2465,9 @@ public class MigrationUtil {
                 SchedulabeLimits.Companion.addSchedulableLimits(
                         false,room.get("id").toString(), room.get("dis").toString());
                 String scheduleRef = DefaultSchedules.generateDefaultSchedule(true, room.get("id").toString());
-                if(ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
-                        + room.get("id") +"\"") == ScheduleType.ZONE.ordinal()){
+                Double scheduleType = ccuHsApi.readPointPriorityValByQuery("scheduleType and roomRef == \""
+                        + room.get("id") +"\"");
+                if( scheduleType == null || scheduleType == ScheduleType.ZONE.ordinal()){
                     HashMap<Object, Object> roomToUpdate = ccuHsApi.readMapById(room.get("id").toString());
                     Zone zone = new Zone.Builder().setHashMap(roomToUpdate).build();
                     zone.setScheduleRef(scheduleRef);

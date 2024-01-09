@@ -121,6 +121,7 @@ public class NamedSchedule extends DialogFragment {
     private float mPixelsBetweenADay;
     private OnExitListener mOnExitListener;
     Button setButton;
+    Button cancelButton;
     ImageView closeButton;
 
     @Override
@@ -179,10 +180,17 @@ public class NamedSchedule extends DialogFragment {
 
         setButton = rootView.findViewById(R.id.setButton);
         closeButton = rootView.findViewById(R.id.btnCloseNamed);
+        cancelButton = rootView.findViewById(R.id.cancelButton);
+
+        cancelButton.setOnClickListener( view -> {
+            dismiss();
+        });
+
 
 
         if(!getArguments().getBoolean(PARAM_SCHED_SET)) {
             setButton.setVisibility(View.GONE);
+            cancelButton.setVisibility(View.GONE);
             closeButton.setVisibility(View.VISIBLE);
             closeButton.setOnClickListener(view -> {
                 dismiss();
@@ -593,10 +601,22 @@ public class NamedSchedule extends DialogFragment {
         CcuLog.d(TAG,"PARAM_SCHEDULE_ID "+mScheduleId);
         String namedScheduledis = getArguments().getString(PARAM_SCHED_NAME);
         String title;
-        if(namedScheduledis.length() > 20){
-            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME).substring(0,20)+"...";
-        }else{
-            title = "Preview : " + getArguments().getString(PARAM_SCHED_NAME);
+        String scheduledName = getArguments().getString(PARAM_SCHED_NAME);
+        boolean isScheduledSet = getArguments().getBoolean(PARAM_SCHED_SET);
+        int maxLength = 20;
+
+        if (!isScheduledSet) {
+            if (namedScheduledis.length() > 20) {
+                title = scheduledName.substring(0, 20) + "...";
+            } else {
+                title = scheduledName;
+            }
+        } else {
+            if (namedScheduledis.length() > 20) {
+                title = "Preview : " + scheduledName.substring(0, 20) + "...";
+            } else {
+                title = "Preview : " + scheduledName;
+            }
         }
 
         textViewScheduletitle.setText(title);

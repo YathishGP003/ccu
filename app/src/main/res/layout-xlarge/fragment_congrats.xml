@@ -377,6 +377,15 @@
                         />
 
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/buildingTunerVersion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lt_row23"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:textAppearance="@style/text_appearance" />
             </RelativeLayout>
 
 

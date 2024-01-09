@@ -124,6 +124,7 @@ public class NamedSchedule extends DialogFragment {
     Button setButton;
     Button cancelButton;
     ImageView closeButton;
+    private  boolean flag = false;
 
     @Override
     public void onStop() {
@@ -209,6 +210,7 @@ public class NamedSchedule extends DialogFragment {
         }
 
         setButton.setOnClickListener(v -> {
+            flag = true;
             if (validateNamedSchedule()) {
                 CcuLog.d(TAG, "Valid Named Schedule");
                 try {
@@ -916,4 +918,12 @@ public class NamedSchedule extends DialogFragment {
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(flag == false && OnCancel!=null)
+        {
+            OnCancel.onCancelButtonClicked();
+        }
+    }
 }

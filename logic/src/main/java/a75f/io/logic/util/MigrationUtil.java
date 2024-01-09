@@ -496,8 +496,8 @@ public class MigrationUtil {
         int oneDayInMs = 86400000;
         HashMap desiredTempPoint = ccuHsApi.readPoint(desiredTempPointId).get(levelToBeCleared - 1);
         return desiredTempPoint.get("val") != null &&
-                Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
-                Double.parseDouble(desiredTempPoint.get("duration").toString()) > oneDayInMs;
+                (Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
+                        Double.parseDouble(desiredTempPoint.get("duration").toString()) - System.currentTimeMillis() > oneDayInMs);
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {

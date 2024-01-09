@@ -202,6 +202,7 @@ public abstract class VavProfile extends ZoneProfile {
                     +" co2Target "+co2Target
                     +" co2Threshold "+co2Threshold
                     +" vocTarget "+vocTarget
+                    +" vocThreshold "+vocThreshold
                     +" integralMaxTimeout "+integralMaxTimeout);
 
             initializeCfmController(equipId);
@@ -238,10 +239,10 @@ public abstract class VavProfile extends ZoneProfile {
 
     private void initializeCfmController(String equipId) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController");
-        double cfmProportionalGain = vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal();
-        double cfmIntegralGain = vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal();
-        int cfmProportionalSpread = (int)vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal();
-        int cfmIntegralMaxTimeout = (int) vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal();
+        double cfmProportionalGain = (vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() > 0) ? vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() : 0.5;
+        double cfmIntegralGain = (vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal() > 0) ? vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal() : 0.5;
+        int cfmProportionalSpread = (vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal() > 0.0) ? (int)vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal(): 200;
+        int cfmIntegralMaxTimeout = (vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal() > 0.0) ? (int)vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal() : 30;
 
         CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" cfmProportionalGain "+cfmProportionalGain
                 +" cfmIntegralGain "+cfmIntegralGain

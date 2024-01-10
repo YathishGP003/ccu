@@ -1,12 +1,24 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import static a75f.io.domain.api.DomainName.averageHumidity;
+import static a75f.io.domain.api.DomainName.averageTemperature;
+import static a75f.io.domain.api.DomainName.systemCI;
+import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_OFF;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
+import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
+import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
+
 import android.util.Log;
 
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -14,6 +26,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -26,8 +40,6 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
-import a75f.io.logic.bo.building.system.SystemState;
-import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.truecfm.DabTrueCfmHandler;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -35,19 +47,6 @@ import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.domain.api.DomainName.averageHumidity;
-import static a75f.io.domain.api.DomainName.averageTemperature;
-import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
-import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.EffectiveSatConditioning.SAT_OFF;
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
-import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
-import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 
 /**
  * Created by samjithsadasivan on 1/9/19.
@@ -459,23 +458,23 @@ public class DabSystemController extends SystemController
     }
     
     private void writeAlgoVariablesToDb() {
-        
-        systemProfile.setSystemPoint("ci and running", comfortIndex);
-    
-        systemProfile.setSystemPoint("operating and mode", systemState.ordinal());
-        
-        systemProfile.setSystemPoint("weighted and average and moving and load",
-                                     CCUUtils.roundToTwoDecimal(weightedAverageChangeOverLoadMA));
-        systemProfile.setSystemPoint("weighted and average and cooling and load",
-                                     CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
-        systemProfile.setSystemPoint("weighted and average and heating and load",
-                                     CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
-    }
-    
-    private void resetPILoopAtMidpoint() {
-        if ((systemState == HEATING && weightedAverageHeatingLoadPostML == 0 )
-            || (systemState == COOLING && weightedAverageCoolingLoadPostML == 0)) {
-            piController.reset();
+
+        if (L.ccu().systemProfile instanceof DabExternalAhu) {
+            Domain.writeHisValByDomain(systemCI, comfortIndex);
+            Domain.writeHisValByDomain(DomainName.weightedAverageChangeOverLoadMA, weightedAverageChangeOverLoadMA);
+            Domain.writeHisValByDomain(DomainName.weightedAverageCoolingLoadPostML, weightedAverageCoolingLoadPostML);
+            Domain.writeHisValByDomain(DomainName.weightedAverageHeatingLoadPostML, weightedAverageHeatingLoadPostML);
+        } else {
+            systemProfile.setSystemPoint("ci and running", comfortIndex);
+
+            systemProfile.setSystemPoint("operating and mode", systemState.ordinal());
+
+            systemProfile.setSystemPoint("weighted and average and moving and load",
+                    CCUUtils.roundToTwoDecimal(weightedAverageChangeOverLoadMA));
+            systemProfile.setSystemPoint("weighted and average and cooling and load",
+                    CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
+            systemProfile.setSystemPoint("weighted and average and heating and load",
+                    CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
         }
     }
     

@@ -348,5 +348,9 @@ object DomainName {
     const val co2WeightedAverage  = "co2WeightedAverage"
     const val averageHumidity  = "averageHumidity"
     const val averageTemperature  = "averageTemperature"
+    const val systemCI  = "systemCI"
+    const val weightedAverageChangeOverLoadMA  = "weightedAverageChangeOverLoadMA"
+    const val weightedAverageCoolingLoadPostML  = "weightedAverageCoolingLoadPostML"
+    const val weightedAverageHeatingLoadPostML  = "weightedAverageHeatingLoadPostML"
 }
 

@@ -1046,8 +1046,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				L.ccu().systemProfile instanceof VavExternalAhu) {
 			if (L.ccu().systemProfile instanceof DabExternalAhu) {
 				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
-						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getSetPoint(supplyAirflowTemperatureSetpoint,""),
+						getSetPoint(ductStaticPressureSetpoint,""),
 						getModbusPointValue(DISCHARGE_AIR_TEMP),
 						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
 						getConfigValue(dcvDamperControlEnable, ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
@@ -1055,8 +1055,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				);
 			} else {
 				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
-						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getSetPoint(supplyAirflowTemperatureSetpoint,""),
+						getSetPoint(ductStaticPressureSetpoint,""),
 						getModbusPointValue(DISCHARGE_AIR_TEMP),
 						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
 						getConfigValue(dcvDamperControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),

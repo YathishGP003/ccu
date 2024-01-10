@@ -57,6 +57,7 @@ import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 import java.util.Objects
+import kotlin.math.roundToInt
 
 /**
  * Created by Manjunath K on 27-10-2023.
@@ -605,8 +606,11 @@ private fun calculateDamperOperationPercent(
     sensorCO2: Double,
     threshold: Double,
     openingRate: Double
-): Double =
-    (sensorCO2 - threshold) / openingRate
+): Double {
+    val damperSp = (sensorCO2 - threshold) / openingRate
+    return (damperSp * 100.0).roundToInt() / 100.0
+}
+
 
 fun getSingleSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
     return when (getTempDirection(heatingLoop)) {
@@ -734,7 +738,7 @@ fun getModbusPointValue(query: String): String {
     val value = CCUHsApi.getInstance().readHisValById(pointId)
     val unit = point["unit"]
 
-    return "Current $value $unit"
+    return "$value $unit"
 }
 
 fun getConfigValue(domainName: String, modelName: String): Boolean {

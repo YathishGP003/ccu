@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:id="@+id/main_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
@@ -31,6 +31,7 @@
             android:textAppearance="@style/title_grey" />
 
     </RelativeLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -55,14 +56,14 @@
                     android:visibility="visible" />
 
                 <NumberPicker
-                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/systemModePicker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/oaoArc"
                     android:layout_centerInParent="true"
                     android:layout_marginTop="30dp"
-                    android:layout_marginBottom="30dp">
+                    android:layout_marginBottom="30dp"
+                    android:theme="?DefaultNumberPickerTheme">
 
                 </NumberPicker>
 
@@ -125,23 +126,25 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
                     android:orientation="horizontal">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last Updated : "
-                        android:textAppearance="@style/label_black"/>
+                        android:textAppearance="@style/label_black" />
 
                     <TextView
                         android:id="@+id/last_updated_time_ccu_hb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey"/>
+                        android:textAppearance="@style/label_grey" />
                 </LinearLayout>
 
-                <LinearLayout android:visibility="gone"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp">
+                    android:layout_marginTop="30dp"
+                    android:visibility="gone">
 
                     <TextView
                         android:id="@+id/textView6"
@@ -169,12 +172,13 @@
 
                 </LinearLayout>
 
-                <LinearLayout android:visibility="gone"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="24dp"
                     android:layout_marginTop="24dp"
-                    android:layout_marginRight="24dp">
+                    android:layout_marginRight="24dp"
+                    android:visibility="gone">
 
                     <SeekBar
                         android:id="@+id/systemComfortValue"
@@ -183,88 +187,134 @@
                         android:layout_weight="1"
                         android:max="3" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/setpoint_config"
-                    android:orientation="vertical"
-                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
                     <LinearLayout
-                        android:layout_marginTop="30dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp">
+
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                             android:text="@string/supply_airflow_temp"
                             android:textAppearance="@style/label_black" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/current"
+                            android:textAppearance="@style/label_black" />
+
                         <TextView
                             android:id="@+id/sat_current"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                             android:text="@string/current"
-                            android:textAppearance="@style/label_black" />
-                        <TextView
-                            android:id="@+id/sat_setpoint"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_black" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_marginTop="30dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                            android:textAppearance="@style/label_grey" />
+
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
-                            android:text="@string/duct_static_pressure"
-                            android:textAppearance="@style/label_black" />
-                        <TextView
-                            android:id="@+id/dsp_current"
-                            android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_black" />
-                        <TextView
-                            android:id="@+id/dsp_setpoint"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
                             android:text="@string/setpoint"
                             android:textAppearance="@style/label_black" />
 
+                        <TextView
+                            android:id="@+id/sat_setpoint"
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/setpoint"
+                            android:textAppearance="@style/label_grey" />
+
                     </LinearLayout>
+
                     <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/duct_static_pressure"
+                            android:textAppearance="@style/label_black" />
+
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/current"
+                            android:textAppearance="@style/label_black" />
+
+                        <TextView
+                            android:id="@+id/dsp_current"
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/current"
+                            android:textAppearance="@style/label_grey" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/setpoint"
+                            android:textAppearance="@style/label_black" />
+
+                        <TextView
+                            android:id="@+id/dsp_setpoint"
+                            android:layout_width="0dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/setpoint"
+                            android:textAppearance="@style/label_grey" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/dcv_config"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30dp"
-                        android:id="@+id/dcv_config"
                         android:orientation="horizontal">
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="DCV Damper:"
-                            android:textAppearance="@style/label_black"/>
+                            android:textAppearance="@style/label_black" />
 
                         <TextView
                             android:id="@+id/external_damper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey"/>
+                            android:textAppearance="@style/label_grey" />
                     </LinearLayout>
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -287,8 +337,8 @@
                             android:textAppearance="@style/label_black" />
 
                         <Spinner
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:id="@+id/targetMinInsideHumidity"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
@@ -348,9 +398,9 @@
                 <LinearLayout
                     android:id="@+id/ie_gateway_details"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    android:layout_height="wrap_content">
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -397,6 +447,7 @@
                     </LinearLayout>
 
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -458,65 +509,72 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_marginTop="@dimen/appbar_padding_top"
-                    android:orientation="vertical"
                     android:id="@+id/external_modbus_config"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_marginBottom="@dimen/fab_margin"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:id="@+id/external_device_details"
-                        android:layout_marginBottom="@dimen/fab_margin"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:textStyle="bold"
-                        android:visibility="gone"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        android:text="MODBUS"
-                        style="@style/label_black"/>
-                    <TextView
-                        android:id="@+id/external_device_status"
-                        android:layout_marginLeft="5dp"
-                        android:layout_width="9dp"
-                        android:visibility="gone"
-                        android:background="@drawable/module_dead"
-                        android:layout_height="9dp"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:id="@+id/external_last_updated"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Last Updated : "
-                        android:visibility="gone"
-                        android:textAppearance="@style/title_normal"/>
+                    android:layout_marginTop="@dimen/appbar_padding_top"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/external_last_updated_status"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/fab_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/external_device_details"
+                            style="@style/label_black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="@dimen/fab_margin"
+                            android:text="MODBUS"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            app:layout_constraintLeft_toLeftOf="parent" />
+
+                        <TextView
+                            android:id="@+id/external_device_status"
+                            android:layout_width="9dp"
+                            android:layout_height="9dp"
+                            android:layout_marginLeft="5dp"
+                            android:background="@drawable/module_dead"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey"/>
+                        android:layout_marginLeft="16dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/external_last_updated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Last Updated : "
+                            android:textAppearance="@style/title_normal"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/external_last_updated_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/label_grey" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/external_modbus_device"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_20"
+                        android:visibility="gone" />
                 </LinearLayout>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/external_modbus_device"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginBottom="@dimen/margin_20" />
-                </LinearLayout>
+
                 <LinearLayout
+                    android:id="@+id/intrinsicSchedulelayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/intrinsicSchedulelayout"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -538,7 +596,7 @@
                             android:layout_marginStart="20dp"
                             android:text="@string/txt_intrinsic_schedule"
                             android:textSize="20sp"
-                            android:visibility="gone"/>
+                            android:visibility="gone" />
 
                     </LinearLayout>
 
@@ -1137,43 +1195,47 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/purgelayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/purgelayout"
 
                     android:orientation="vertical">
+
                     <TextView
+                        style="@style/label_black"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_20"
-                        android:textStyle="bold"
-                        app:layout_constraintLeft_toLeftOf="parent"
                         android:text="@string/lable_epidemic_settings_text"
-                        style="@style/label_black"/>
+                        android:textStyle="bold"
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
                         android:layout_marginTop="24dp"
                         android:orientation="horizontal">
+
                         <TextView
                             android:id="@+id/last_updated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="OAO Last Updated : "
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/last_updated_status_oao"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey"/>
+                            android:textAppearance="@style/label_grey" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginLeft="@dimen/fab_margin"
+                        android:layout_marginTop="20dp"
                         android:orientation="horizontal">
 
                         <TextView
@@ -1198,11 +1260,12 @@
                             android:textOff=""
                             android:textOn="" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
                         android:layout_marginLeft="@dimen/fab_margin"
+                        android:layout_marginTop="30dp"
                         android:orientation="horizontal">
 
                         <TextView
@@ -1211,6 +1274,7 @@
                             android:layout_gravity="start"
                             android:text="@string/lable_smart_postpurge"
                             android:textAppearance="@style/label_black" />
+
                         <Space
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -1226,12 +1290,13 @@
                             android:textOff=""
                             android:textOn="" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/fab_margin"
                         android:layout_marginTop="30dp"
                         android:layout_marginBottom="@dimen/margin_20"
-                        android:layout_marginLeft="@dimen/fab_margin"
                         android:orientation="horizontal">
 
                         <TextView
@@ -1257,106 +1322,117 @@
                             android:textOn="" />
                     </LinearLayout>
                 </LinearLayout>
+
                 <LinearLayout
-                    android:orientation="horizontal"
                     android:id="@+id/status_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/energyMeterModelDetails"
-                        android:layout_marginBottom="@dimen/fab_margin"
-                        android:layout_marginTop="5dp"
+                        style="@style/label_black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="@dimen/fab_margin"
+                        android:text="Energy Meter"
                         android:textStyle="bold"
                         android:visibility="gone"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        android:text="Energy Meter"
-                        style="@style/label_black"/>
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
                     <TextView
                         android:id="@+id/module_status_emr"
-                        android:layout_marginLeft="5dp"
                         android:layout_width="9dp"
+                        android:layout_height="9dp"
+                        android:layout_marginLeft="5dp"
                         android:background="@drawable/module_dead"
-                        android:visibility="gone"
-                        android:layout_height="9dp"/>
+                        android:visibility="gone" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
                     android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/last_updated_emr"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last Updated : "
-                        android:visibility="gone"
-                        android:textAppearance="@style/title_normal"/>
+                        android:textAppearance="@style/title_normal"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/last_updated_statusEM"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey"/>
+                        android:textAppearance="@style/label_grey" />
                 </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/energyMeterParams"
-                    android:layout_marginLeft="@dimen/fab_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:layout_marginLeft="@dimen/fab_margin"
                     android:layout_marginBottom="@dimen/margin_20"
-                    />
+                    android:visibility="gone" />
+
                 <LinearLayout
-                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/btuMeterModelDetails"
-                        android:layout_marginBottom="@dimen/fab_margin"
+                        style="@style/label_black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
+                        android:layout_marginBottom="@dimen/fab_margin"
+                        android:text="BTU Meter"
                         android:textStyle="bold"
                         android:visibility="gone"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        android:text="BTU Meter"
-                        style="@style/label_black"/>
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
                     <TextView
                         android:id="@+id/module_status_btu"
-                        android:layout_marginLeft="5dp"
                         android:layout_width="9dp"
-                        android:visibility="gone"
+                        android:layout_height="9dp"
+                        android:layout_marginLeft="5dp"
                         android:background="@drawable/module_dead"
-                        android:layout_height="9dp"/>
+                        android:visibility="gone" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
                     android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/last_updated_btu"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last Updated : "
-                        android:visibility="gone"
-                        android:textAppearance="@style/title_normal"/>
+                        android:textAppearance="@style/title_normal"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/last_updated_statusBTU"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey"/>
+                        android:textAppearance="@style/label_grey" />
                 </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/btuMeterParams"
-                    android:layout_marginLeft="@dimen/fab_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginBottom="@dimen/margin_20" />
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/margin_20"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

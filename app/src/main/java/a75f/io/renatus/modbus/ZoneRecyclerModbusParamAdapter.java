@@ -39,6 +39,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -97,8 +98,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 commands = entry.getValue();
                             }
-                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_item_orange, commands);
-                            commandAdapter.setDropDownViewResource(R.layout.spinner_item_orange);
+                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, android.R.layout.simple_spinner_item, commands);
+                            commandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(commandAdapter);
                             for (int i = 0; i < modbusParam.get(position).getCommands().size(); i++) {
                                 if (Double.parseDouble(modbusParam.get(position).getCommands().get(i).getBitValues()) == readVal(p.getId())) {
@@ -112,8 +114,10 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 doubleArrayList = entry.getValue();
                             }
-                            ArrayAdapter<Double> spinnerAdapter = new ArrayAdapter<>(context, R.layout.spinner_item_orange, doubleArrayList);
-                            spinnerAdapter.setDropDownViewResource(R.layout.spinner_item_orange);
+
+                            ArrayAdapter<Double> spinnerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, doubleArrayList);
+                            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(spinnerAdapter);
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
                         }
@@ -138,10 +142,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         });
 
                         if (unit != null && !unit.equals("")) {
-                            viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                            viewHolder.tvUnit.setText("(" + unit + ")");
-                        } else {
-                            viewHolder.tvUnit.setVisibility(View.INVISIBLE);
+                            viewHolder.tvParamLabel.append("(" + unit + ")");
                         }
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
@@ -164,10 +165,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                     }
                                 }
                                 if (unit != null && !unit.equals(" ")) {
-                                    viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                                    viewHolder.tvUnit.setText("(" + unit + ")");
-                                } else {
-                                    viewHolder.tvUnit.setVisibility(View.INVISIBLE);
+                                    viewHolder.tvParamLabel.append("(" + unit + ")");
                                 }
                             }
                         }
@@ -175,7 +173,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     break;
                 default:
                     viewHolder.spValue.setVisibility(View.GONE);
-                    viewHolder.tvUnit.setVisibility(View.INVISIBLE);
                     viewHolder.tvParamValue.setVisibility(View.VISIBLE);
                     viewHolder.tvParamValue.setText(modbusParam.get(position).isDisplayInUI() ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                     break;
@@ -197,10 +194,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         viewHolder.tvParamValue.setText(String.format(java.util.Locale.US,"%.2f",readHisVal(p.getId())));
                     }
                     if (unit != null && !unit.equals(" ")) {
-                        viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                        viewHolder.tvUnit.setText("(" + unit + ")");
-                    } else {
-                        viewHolder.tvUnit.setVisibility(View.INVISIBLE);
+                        viewHolder.tvParamLabel.append("(" + unit + ")");
                     }
                 }
                 
@@ -301,7 +295,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvParamLabel;
         public TextView tvParamValue;
-        public TextView tvUnit;
         public Spinner spValue;
         public View layout;
 
@@ -310,7 +303,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             layout = v;
             tvParamLabel = v.findViewById(R.id.tvParamLabel);
             tvParamValue = v.findViewById(R.id.tvParamValue);
-            tvUnit = v.findViewById(R.id.tvUnit);
             spValue = v.findViewById(R.id.spValue);
         }
     }

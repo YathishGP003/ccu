@@ -579,10 +579,10 @@ public class LSmartNode
     public static boolean isAnalog(RawPoint point) {
         String port = point.getPort();
         if (port != null) {
-            return port == ANALOG_OUT_ONE
-                    || port == ANALOG_OUT_TWO
-                    || port == ANALOG_IN_ONE
-                    || port == ANALOG_IN_TWO;
+            return port.equals(ANALOG_OUT_ONE)
+                    || port.equals(ANALOG_OUT_TWO)
+                    || port.equals(ANALOG_IN_ONE)
+                    || port.equals(ANALOG_IN_TWO);
         }
         String domainName = point.getDomainName();
         if (domainName != null) {

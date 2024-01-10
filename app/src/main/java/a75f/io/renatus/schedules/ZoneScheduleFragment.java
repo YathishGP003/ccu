@@ -489,6 +489,12 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                                Double heatingUserLimitMaxVal, Double heatingUserLimitMinVal, Double coolingUserLimitMaxVal,
                                Double coolingUserLimitMinVal, Double heatingDeadBandVal, Double coolingDeadBandVal,
                                boolean followBuilding, Schedule.Days mDay) {
+        String masterZoneSetbackLevel = CCUHsApi.getInstance().readEntity("unoccupied and setback and not zone").get("id").toString();
+        String unoccupiedZoneSetbackLevel = CCUHsApi.getInstance().readEntity("unoccupied and setback and zone and roomRef==\""+schedule.getRoomRef()+"\"").get("id").toString();
+        Double masterControlSetback = HSUtil.getPriorityLevelVal(masterZoneSetbackLevel, 16);
+        Double zonePrioritySetback = HSUtil.getPriorityLevelVal(unoccupiedZoneSetbackLevel, 10);
+        if(zonePrioritySetback<0)
+            zonePrioritySetback = HSUtil.getPriorityLevelVal(unoccupiedZoneSetbackLevel, 17);
 
         if (followBuilding) {
             double heatUL = Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
@@ -512,6 +518,10 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
                 }
             }
+            schedule.setUnoccupiedZoneSetback(masterControlSetback);
+        }
+        else{
+                schedule.setUnoccupiedZoneSetback(zonePrioritySetback);
         }
 
         if (position != ZoneScheduleDialogFragment.NO_REPLACE) {

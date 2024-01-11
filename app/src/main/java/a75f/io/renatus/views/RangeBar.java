@@ -18,6 +18,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
@@ -424,6 +425,43 @@ public class RangeBar extends View {
         }
         invalidate();
     }
+
+    public void setHeatingDeadBand(float heatingDeadband) {
+        double oldHdb = this.hdb;
+        if(heatingDeadband != oldHdb) {
+            if ((lowerCoolingTemp - (heatingDeadband + cdb)) >= upperHeatingTemp && (lowerHeatingTemp + heatingDeadband + cdb) <= upperCoolingTemp) {
+                this.hdb = heatingDeadband;
+                if(heatingDeadband>oldHdb) {
+                    temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = (float) (lowerHeatingTemp - this.hdb);
+                    temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = (float) (lowerCoolingTemp + this.cdb);
+                }
+            }
+            else {
+                String str = "Heating Limit Max is violating the Deadband to be maintained, it can be extended only till following condition is satisfied,\n" +
+                        "Heating Limit Max + deadband (heating + cooling) should be less than or equal to Cooling Limit Max ";
+                Toast.makeText(this.getContext(), str, Toast.LENGTH_LONG).show();
+            }
+        }
+        invalidate();
+    }
+    public void setCoolingDeadBand(float coolingDeadband) {
+        double oldCdb = this.cdb;
+        if(oldCdb != coolingDeadband ) {
+            if ((lowerHeatingTemp + (coolingDeadband + hdb)) <= upperCoolingTemp) {
+                this.cdb = coolingDeadband;
+                if(coolingDeadband>oldCdb){
+                    temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()]=(float)(lowerCoolingTemp +this.cdb);
+                    temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]=(float)(lowerHeatingTemp - this.hdb);
+                }
+            } else {
+                String str = "Cooling Limit Min is violating the Deadband to be maintained, it can be extended only till following condition is satisfied, " +
+                        "Cooling Limit min - deadband (heating + cooling) should be greater than or equal to Heating Limit Min.";
+                Toast.makeText(this.getContext(), str, Toast.LENGTH_LONG).show();
+            }
+        }
+        invalidate();
+    }
+
 
     public static void setUnOccupiedFragment(boolean unOccupiedSetBackFragment) {
         isUnoccupiedSetBackFragment = unOccupiedSetBackFragment;

@@ -239,7 +239,16 @@ public class RangeBarView extends LinearLayout {
         rangeBar.setLowerHeatingTemp((float) heatValue);
         rangeBar.setLowerCoolingTemp((float) coolValue);
     }
-
+    public void setHeatingDeadBand(double heatingDeadBand) {
+        if (rangeBar != null){
+            rangeBar.setHeatingDeadBand((float) heatingDeadBand);
+        }
+    }
+    public void setCoolingDeadBand(double coolingDeadBand) {
+        if (rangeBar != null){
+            rangeBar.setCoolingDeadBand((float) coolingDeadBand);
+        }
+    }
     public void setUnOccupiedSetBack( int setBack) {
         if (rangeBar != null){
             rangeBar.setUnOccupiedSetBack( setBack);

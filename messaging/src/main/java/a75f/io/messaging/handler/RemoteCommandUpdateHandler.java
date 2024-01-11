@@ -34,6 +34,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     public static final String OTA_UPDATE_CM = "ota_update_CM";
     public static final String OTA_UPDATE_HN = "ota_update_helioNode";
+    public static final String OTA_UPDATE_CONNECT = "ota_update_connect";
     public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;
@@ -87,6 +88,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             case OTA_UPDATE_HS:
                             case OTA_UPDATE_CM:
                             case OTA_UPDATE_HN:
+                            case OTA_UPDATE_CONNECT:
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("remoteCmdLevel").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
@@ -140,6 +142,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                         case OTA_UPDATE_ITM:
                         case OTA_UPDATE_HS:
                         case OTA_UPDATE_HN:
+                        case OTA_UPDATE_CONNECT:
                             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

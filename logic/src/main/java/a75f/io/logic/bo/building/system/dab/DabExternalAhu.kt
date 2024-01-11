@@ -154,7 +154,6 @@ class DabExternalAhu : DabSystemProfile() {
             "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
         )
     }
-    var x = 1.0
 
     override fun getStatusMessage(): String =
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF

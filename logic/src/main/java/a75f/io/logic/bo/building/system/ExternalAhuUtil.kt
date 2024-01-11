@@ -415,7 +415,8 @@ fun calculateDSPSetPoints(
     val fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
     val min = Domain.getPointByDomain(systemEquip, systemStaticPressureMinimum)
     val max = Domain.getPointByDomain(systemEquip, systemStaticPressureMaximum)
-    val dspSetPoint: Double = mapToSetPoint(min, max, fanLoop).coerceAtMost(max)
+    var dspSetPoint: Double = mapToSetPoint(min, max, fanLoop).coerceAtMost(max)
+    dspSetPoint = (dspSetPoint * 100.0).roundToInt() / 100.0
     updatePointValue(systemEquip, ductStaticPressureSetpoint, dspSetPoint)
     updatePointValue(systemEquip, fanLoopOutput, fanLoop)
     externalEquipId?.let {

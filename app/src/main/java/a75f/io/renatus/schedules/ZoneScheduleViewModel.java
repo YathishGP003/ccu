@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import android.util.Log;
+
 import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HList;
@@ -43,16 +45,23 @@ public class ZoneScheduleViewModel {
             }
 
             for (Interval z : zoneIntervals) {
+                Log.d("Pree","inside zone intervals"+z);
                 boolean add = true;
                 for (Interval s : systemIntervals) {
+                    Log.d("Pree","inside system intervals"+s);
                     if (s.contains(z)) {
+                        Log.d("Pree",z+" is contained in "+s+" system interval");
                         add = false;
                         break;
                     } else if (s.overlaps(z)) {
+                        Log.d("Pree",z+" is getting overlapped with "+s);
                         add = false;
                         for (Interval i : disconnectedIntervals(systemIntervals, z)) {
+                            Log.d("Pree","disconnected interval "+i);
                             if (!intervalSpills.contains(i)) {
+                                Log.d("Pree",i+" is not contained in intervalSpills");
                                 intervalSpills.add(i);
+                                Log.d("Pree",i+" is added in intervalSpills");
                             }
                         }
                     }

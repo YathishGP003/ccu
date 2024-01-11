@@ -246,7 +246,7 @@ public class OAOTuners
 
         if(isNewSite || !verifyPointsAvailability("default","purge and dab and fan and loop and output and min",equipRef)) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabMinFanLoopOutput")
+                    .setDisplayName(equipDis + "-OAO-" + SystemTuners.getDisplayNameFromVariation("systemPurgeDabMinFanLoopOutput"))
                     .setSiteRef(siteRef)
                     .setEquipRef(equipRef).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
@@ -278,7 +278,7 @@ public class OAOTuners
 
         if(isNewSite || !verifyPointsAvailability("default","purge and dab and damper and pos and multiplier and min",equipRef)) {
             Point smartPurgeDabDamperMinOpenMultiplier = new Point.Builder()
-                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabDamperMinOpenMultiplier")
+                    .setDisplayName(equipDis + "-OAO-" + SystemTuners.getDisplayNameFromVariation("systemPurgeDabDamperMinOpenMultiplier"))
                     .setSiteRef(siteRef)
                     .setEquipRef(equipRef).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
@@ -711,7 +711,7 @@ public class OAOTuners
         }
         if(!verifyPointsAvailability("not default","purge and dab and fan and loop and output and min",equipref) && systemProfile.equals("dab")) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabMinFanLoopOutput")
+                    .setDisplayName(equipdis + "-OAO-" + SystemTuners.getDisplayNameFromVariation("systemPurgeDabMinFanLoopOutput"))
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
@@ -743,7 +743,7 @@ public class OAOTuners
         }
         if(!verifyPointsAvailability("not default","purge and dab and damper and pos and multiplier and min",equipref) && systemProfile.equals("dab")) {
             Point smartPurgeDabDamperMinOpenMultiplier = new Point.Builder()
-                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabDamperMinOpenMultiplier")
+                    .setDisplayName(equipdis + "-OAO-" + SystemTuners.getDisplayNameFromVariation("systemPurgeDabDamperMinOpenMultiplier"))
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")

@@ -4,6 +4,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.BuildConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -23,7 +24,7 @@ open class DefaultEquipBuilder : EquipBuilder {
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
 
-        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
+        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${getDisplayNameFromVariation(equipConfig.modelDef.name)}")
             .setDomainName(equipConfig.modelDef.domainName)
             .setFloorRef(equipConfig.profileConfiguration?.floorRef)
             .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
@@ -58,7 +59,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     override fun buildPoint(pointConfig : PointBuilderConfig) : Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
+        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)
             .setEquipRef(pointConfig.equipRef)
             .setFloorRef(pointConfig.configuration?.floorRef)
@@ -110,5 +111,20 @@ open class DefaultEquipBuilder : EquipBuilder {
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz))}
 
         return pointBuilder.build()
+    }
+
+    private fun getDisplayNameFromVariation(dis: String): String? {
+        var displayName = ""
+        displayName =
+            if (BuildConfig.BUILD_TYPE.equals(
+                    "carrier_prod",
+                    ignoreCase = true
+                )
+            ) {
+                dis.replace("(?i)-DAB-".toRegex(), "-VVT-")
+            } else {
+                dis
+            }
+        return displayName
     }
 }

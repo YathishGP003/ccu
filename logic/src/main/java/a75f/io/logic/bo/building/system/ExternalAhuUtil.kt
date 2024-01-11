@@ -383,7 +383,7 @@ fun checkOaoLoop(
     if (tempDirection == TempDirection.COOLING &&
         (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)
     ) {
-        val smartPurgeDabFanLoopOp: Double = TunerUtil.readTunerValByQuery(
+        val smartPurgeFanLoopOp: Double = TunerUtil.readTunerValByQuery(
             "system and purge and $profile and fan and loop and output",
             L.ccu().oaoProfile.equipRef
         )
@@ -395,7 +395,7 @@ fun checkOaoLoop(
             basicConfig.coolingLoop =
                 (systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap).coerceAtLeast(
                     systemHeatingLoopOp
-                ).coerceAtLeast(smartPurgeDabFanLoopOp).toInt()
+                ).coerceAtLeast(smartPurgeFanLoopOp).toInt()
         }
     }
 }

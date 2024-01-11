@@ -857,7 +857,9 @@ public class OTAUpdateService extends IntentService {
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
         message.lwMeshAddress.set(mCurrentLwMeshAddress);
 
-        message.metadata.deviceType.set(firmware);
+        FirmwareComponentType_t deviceTypeToSend = (firmware.equals(FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) && mFirmwareDeviceTypeFromMeta.equals(FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE)) ? mFirmwareDeviceTypeFromMeta : firmware;
+        message.metadata.deviceType.set(deviceTypeToSend);
+
         message.metadata.majorVersion.set(mVersionMajor);
         message.metadata.minorVersion.set(mVersionMinor);
         message.metadata.lengthInBytes.set(mUpdateLength);

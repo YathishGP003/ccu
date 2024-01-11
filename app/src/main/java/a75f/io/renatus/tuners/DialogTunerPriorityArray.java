@@ -34,6 +34,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logic.BuildConfig;
+import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -48,6 +50,7 @@ import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConve
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -329,7 +332,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         if (isCelsiusConversionRequired()) {
             defaultVal = getClosestNumberOfTarget(valueList,convertToCelsius(defaultVal));
         }
-         String tunerName = tunerItemSelected.get("dis").toString();
+         String tunerName = SystemTuners.getDisplayNameFromVariation(tunerItemSelected.get("dis").toString());
         if (tunerItemSelected.containsKey("unit")) {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
             textTunerDefaultValue.setText(defaultVal + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
@@ -340,7 +343,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         String tunerGroup = tunerItemSelected.get("tunerGroup") != null ? tunerItemSelected.get("tunerGroup").toString() :
                                                 tunerGroupSelected.getName();
-        textTunerGroupTitle.setText(tunerGroup);
+
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && tunerGroup.equalsIgnoreCase("DAB")){
+            textTunerGroupTitle.setText("VVT-C");
+        }else{
+            textTunerGroupTitle.setText(tunerGroup);
+        }
 
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());

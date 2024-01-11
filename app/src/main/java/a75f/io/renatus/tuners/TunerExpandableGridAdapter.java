@@ -37,6 +37,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -105,7 +106,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 childIndexPosition++;
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
-                String tunerName = tunerItem.get("dis").toString();
+                String tunerName = SystemTuners.getDisplayNameFromVariation(tunerItem.get("dis").toString());
                 Prefs prefs = new Prefs(getmContext().getApplicationContext());
                 ArrayList<String> valueList = new ArrayList<>();
                 DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(tunerItem, tunerGroupType,previousOpenGroup);

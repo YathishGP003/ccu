@@ -265,7 +265,7 @@ public class DabTuners {
 
 
         Point rebalanceHoldTime = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"rebalanceHoldTime")
+                                      .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"rebalanceHoldTime"))
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
@@ -349,7 +349,7 @@ public class DabTuners {
     
         List<HisItem> hisItems = new ArrayList<>();
         Point zonePrioritySpread = new Point.Builder()
-                                       .setDisplayName(equipdis+"-"+"zonePrioritySpread")
+                                       .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zonePrioritySpread"))
                                        .setSiteRef(siteRef)
                                        .setEquipRef(equipref)
                                        .setRoomRef(roomRef)
@@ -364,7 +364,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zonePrioritySpreadId));
 
         Point zonePriorityMultiplier = new Point.Builder()
-                                           .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
+                                           .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zonePriorityMultiplier"))
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
                                            .setRoomRef(roomRef)
@@ -379,7 +379,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zonePriorityMultiplierId));
 
         Point coolingDbMultiplier = new Point.Builder()
-                                        .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"coolingDeadbandMultiplier"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .setRoomRef(roomRef)
@@ -394,7 +394,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(coolingDbMultiplierId));
 
         Point heatingDbMultiplier = new Point.Builder()
-                                        .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"heatingDeadbandMultiplier"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .setRoomRef(roomRef)
@@ -409,7 +409,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(heatingDbMultiplierId));
         
         Point propGain = new Point.Builder()
-                             .setDisplayName(equipdis+"-"+"proportionalKFactor")
+                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"proportionalKFactor"))
                              .setSiteRef(siteRef)
                              .setEquipRef(equipref)
                              .setRoomRef(roomRef)
@@ -424,7 +424,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(pgainId));
 
         Point integralGain = new Point.Builder()
-                                 .setDisplayName(equipdis+"-"+"integralKFactor")
+                                 .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"integralKFactor"))
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
                                  .setRoomRef(roomRef)
@@ -439,7 +439,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(igainId));
 
         Point propSpread = new Point.Builder()
-                               .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
+                               .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"temperatureProportionalRange"))
                                .setSiteRef(siteRef)
                                .setEquipRef(equipref)
                                .setRoomRef(roomRef)
@@ -454,7 +454,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(pSpreadId));
 
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
+                                    .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"temperatureIntegralTime"))
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipref)
                                     .setRoomRef(roomRef)
@@ -470,7 +470,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(iTimeoutId));
 
         Point zoneCO2Target = new Point.Builder()
-                                  .setDisplayName(equipdis+"-"+"zoneCO2Target")
+                                  .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zoneCO2Target"))
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
@@ -486,7 +486,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zoneCO2TargetId));
 
         Point zoneCO2Threshold = new Point.Builder()
-                                     .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
+                                     .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zoneCO2Threshold"))
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
                                      .setRoomRef(roomRef)
@@ -502,7 +502,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zoneCO2ThresholdId));
         
         Point zoneVOCTarget = new Point.Builder()
-                                  .setDisplayName(equipdis+"-"+"zoneVOCTarget")
+                                  .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zoneVOCTarget"))
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
@@ -518,7 +518,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCTargetId));
 
         Point zoneVOCThreshold = new Point.Builder()
-                                     .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
+                                     .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"zoneVOCThreshold"))
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
                                      .setRoomRef(roomRef)
@@ -534,7 +534,7 @@ public class DabTuners {
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
 
         Point autoAwaySetback   = new Point.Builder()
-                .setDisplayName(equipdis+"-"+"autoAwaySetback")
+                .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipdis+"-"+"autoAwaySetback"))
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)

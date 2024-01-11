@@ -1648,6 +1648,9 @@
     <string name="duct_static_pressure">Duct Static pressure:</string>
     <string name="current">Current</string>
     <string name="setpoint">Setpoint</string>
+    <string name="heating_setpoint">Heating Setpoint</string>
+    <string name="cooling_setpoint">Cooling Setpoint</string>
+    <string name="operating_mode">Operating Mode</string>
 
     <string name="txt_dynamic_airflow_balancing">Dynamic Airflow Balancing</string>
     <string name="txt_variable_volume_and_temperature">Variable Volume &amp; Temperature</string>

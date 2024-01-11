@@ -16,6 +16,7 @@ import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.ModbusFloatMessage_t;
 import a75f.io.device.serial.ModbusMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -127,6 +128,27 @@ public class LModbus {
         return modbusMessage;
     }
 
+    private static ModbusFloatMessage_t getModbusFloatMessage(byte[] data) {
+
+        ModbusFloatMessage_t modbusMessage  = new ModbusFloatMessage_t();
+        modbusMessage.messageType.set(MessageType.MODBUS_MESSAGE);
+        modbusMessage.slaveId.set(data[0]);
+        modbusMessage.functionCode.set(data[1]);
+        modbusMessage.startingAddressHigh.set(data[2]);
+        modbusMessage.startingAddressLow.set(data[3]);
+        modbusMessage.quantityOfCoilsHigh.set(data[4]);
+        modbusMessage.quantityOfCoilsLow.set(data[5]);
+        modbusMessage.byteCount.set(data[6]);
+        modbusMessage.registerVal0.set(data[7]);
+        modbusMessage.registerVal1.set(data[8]);
+        modbusMessage.registerVal2.set(data[9]);
+        modbusMessage.registerVal3.set(data[10]);
+        modbusMessage.errorCheckLow.set(data[11]);
+        modbusMessage.errorCheckHigh.set(data[12]);
+
+        return modbusMessage;
+    }
+
     public static synchronized void writeRegister(int slaveId, Register register, float writeValue) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
@@ -144,7 +166,7 @@ public class LModbus {
 
             RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
             byte[] data = rtuMessageRequest.getMessageData();
-            ModbusMessage_t modbusMessage = getModbusMessage(data);
+            ModbusFloatMessage_t modbusMessage = getModbusFloatMessage(data);
             LSerial.getInstance().sendSerialToCM(modbusMessage);
 
             if (LSerial.getInstance().isModbusConnected()) {

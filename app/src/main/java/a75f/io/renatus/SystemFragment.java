@@ -1,9 +1,13 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.domain.api.DomainName.airTempCoolingSp;
+import static a75f.io.domain.api.DomainName.airTempHeatingSp;
 import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
 import static a75f.io.domain.api.DomainName.dcvDamperControlEnable;
+import static a75f.io.domain.api.DomainName.dualSetpointControlEnable;
 import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
+import static a75f.io.domain.api.DomainName.operatingMode;
 import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
@@ -13,6 +17,7 @@ import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_T
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -87,6 +92,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
@@ -218,10 +224,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	LinearLayout setPointConfig;
 	LinearLayout dcv_config;
+	LinearLayout dual_config;
+	LinearLayout singleSatConfig;
+	LinearLayout dualSatConfig;
 	TextView satSetPoint;
 	TextView satCurrent;
+	TextView dualSatCurrent;
 	TextView dspSetPoint;
 	TextView dspCurrent;
+	TextView opMode;
+	TextView coolingSp;
+	TextView heatingSp;
 	TextView external_damper;
 
 	public SystemFragment()
@@ -794,9 +807,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		satSetPoint = view.findViewById(R.id.sat_setpoint);
 		dspSetPoint = view.findViewById(R.id.dsp_setpoint);
 		satCurrent = view.findViewById(R.id.sat_current);
+		dualSatCurrent = view.findViewById(R.id.sat_dual_cur);
 		dspCurrent = view.findViewById(R.id.dsp_current);
 		external_damper = view.findViewById(R.id.external_damper);
 		dcv_config = view.findViewById(R.id.dcv_config);
+		singleSatConfig = view.findViewById(R.id.single_sat_config);
+		dualSatConfig = view.findViewById(R.id.dual_sat_config);
+		dual_config = view.findViewById(R.id.dual_config);
+		opMode = view.findViewById(R.id.sat_operatingmode);
+		coolingSp = view.findViewById(R.id.sat_coolingsp);
+		heatingSp = view.findViewById(R.id.sat_heatingsp);
 
 		externalModbusParams = view.findViewById(R.id.external_modbus_device);
 		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
@@ -1046,21 +1066,29 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				L.ccu().systemProfile instanceof VavExternalAhu) {
 			if (L.ccu().systemProfile instanceof DabExternalAhu) {
 				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
-						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getSetPoint(supplyAirflowTemperatureSetpoint),
+						getSetPoint(ductStaticPressureSetpoint),
 						getModbusPointValue(DISCHARGE_AIR_TEMP),
 						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
 						getConfigValue(dcvDamperControlEnable, ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(dcvDamperCalculatedSetpoint,"")
+						getSetPoint(dcvDamperCalculatedSetpoint),
+						getConfigValue(dualSetpointControlEnable,ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(airTempCoolingSp),
+						getSetPoint(airTempHeatingSp),
+						getOperatingMode(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
 				);
 			} else {
 				setCurrentAndSetPoints (
-						getSetPoint(supplyAirflowTemperatureSetpoint,"Setpoint"),
-						getSetPoint(ductStaticPressureSetpoint,"Setpoint"),
+						getSetPoint(supplyAirflowTemperatureSetpoint),
+						getSetPoint(ductStaticPressureSetpoint),
 						getModbusPointValue(DISCHARGE_AIR_TEMP),
 						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
 						getConfigValue(dcvDamperControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
-						getSetPoint(dcvDamperCalculatedSetpoint,"")
+						getSetPoint(dcvDamperCalculatedSetpoint),
+						getConfigValue(dualSetpointControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(airTempCoolingSp),
+						getSetPoint(airTempHeatingSp),
+						getOperatingMode(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
 				);
 			}
 		} else {
@@ -1069,18 +1097,35 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void setCurrentAndSetPoints(
-			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,String dcvSp
+			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,
+			String dcvSp, boolean dualEnabled, String coolingSpVal, String heatingSpVal,
+			String operationMode
 	) {
 		setPointConfig.setVisibility(View.VISIBLE);
 		satSetPoint.setText(satSp);
 		dspSetPoint.setText(dspSp);
 		satCurrent.setText(satCur);
+		dualSatCurrent.setText(satCur);
 		dspCurrent.setText(dspCur);
+		coolingSp.setText(coolingSpVal);
+		heatingSp.setText(heatingSpVal);
+		opMode.setText(operationMode);
+
 		if (dcvEnabled) {
 			external_damper.setText(dcvSp);
 			dcv_config.setVisibility(View.VISIBLE);
 		} else {
 			dcv_config.setVisibility(View.GONE);
+		}
+
+		if (dualEnabled) {
+			dual_config.setVisibility(View.VISIBLE);
+			dualSatConfig.setVisibility(View.VISIBLE);
+			singleSatConfig.setVisibility(View.GONE);
+		} else {
+			dual_config.setVisibility(View.GONE);
+			dualSatConfig.setVisibility(View.GONE);
+			singleSatConfig.setVisibility(View.VISIBLE);
 		}
 	}
 

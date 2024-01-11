@@ -323,6 +323,8 @@ object DomainName {
     const val systemOccupancyMode = "systemOccupancyMode"
     const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val supplyAirflowTemperatureSetpoint = "supplyAirflowTemperatureSetpoint"
+    const val airTempHeatingSp = "airTempHeatingSp"
+    const val airTempCoolingSp = "airTempCoolingSp"
     const val systemCO2Threshold = "systemCO2Threshold"
     const val systemCO2DamperOpeningRate = "systemCO2DamperOpeningRate"
     const val systemCO2Target = "systemCO2Target"
@@ -346,5 +348,9 @@ object DomainName {
     const val co2WeightedAverage  = "co2WeightedAverage"
     const val averageHumidity  = "averageHumidity"
     const val averageTemperature  = "averageTemperature"
+    const val systemCI  = "systemCI"
+    const val weightedAverageChangeOverLoadMA  = "weightedAverageChangeOverLoadMA"
+    const val weightedAverageCoolingLoadPostML  = "weightedAverageCoolingLoadPostML"
+    const val weightedAverageHeatingLoadPostML  = "weightedAverageHeatingLoadPostML"
 }
 

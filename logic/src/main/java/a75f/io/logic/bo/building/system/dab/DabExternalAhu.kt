@@ -3,18 +3,17 @@ package a75f.io.logic.bo.building.system.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
-
 import a75f.io.domain.api.DomainName.coolingLoopOutput
-import a75f.io.domain.api.DomainName.heatingLoopOutput
-import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
-import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.DomainName.dabAnalogFanSpeedMultiplier
 import a75f.io.domain.api.DomainName.dabHumidityHysteresis
 import a75f.io.domain.api.DomainName.dabOutsideTempCoolingLockout
 import a75f.io.domain.api.DomainName.dabOutsideTempHeatingLockout
 import a75f.io.domain.api.DomainName.equipScheduleStatus
 import a75f.io.domain.api.DomainName.equipStatusMessage
+import a75f.io.domain.api.DomainName.heatingLoopOutput
 import a75f.io.domain.api.DomainName.operatingMode
+import a75f.io.domain.api.DomainName.useOutsideTempLockoutCooling
+import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
@@ -33,6 +32,7 @@ import a75f.io.logic.bo.building.system.handleHumidityOperation
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.building.system.operateDamper
 import a75f.io.logic.bo.building.system.setOccupancyMode
+import a75f.io.logic.bo.building.system.updateOperatingMode
 import a75f.io.logic.bo.building.system.updatePointHistoryAndDefaultValue
 import a75f.io.logic.bo.building.system.updatePointValue
 import a75f.io.logic.bo.building.system.updateSystemStatusPoints
@@ -55,7 +55,10 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private var modbusInterface: ModbusWritableDataInterface? = null
+
+    /**  externalSpList this contains all the modbus set points id's which is used to write every to cycle to modbus **/
     private var externalSpList = ArrayList<String>()
+
     private val dabSystem: DabSystemController = DabSystemController.getInstance()
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
@@ -144,10 +147,13 @@ class DabExternalAhu : DabSystemProfile() {
         calculateSetPoints(systemEquip)
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
-        Domain.writeHisValByDomain(operatingMode, dabSystem.systemState.ordinal.toDouble(), systemEquip.id)
         updateSystemStatusPoints(systemEquip.id, scheduleStatus, equipScheduleStatus)
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus")
+        CcuLog.d(
+            L.TAG_CCU_SYSTEM,
+            "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
+        )
     }
+    var x = 1.0
 
     override fun getStatusMessage(): String =
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
@@ -166,6 +172,11 @@ class DabExternalAhu : DabSystemProfile() {
                     " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
         )
         updateLoopDirection(dabConfig, systemEquip)
+        updateOperatingMode(
+            systemEquip, dabSystem.systemState.ordinal.toDouble(),
+            operatingMode, externalSpList, externalEquipId, hayStack
+        )
+
         calculateSATSetPoints(
             systemEquip,
             dabConfig,
@@ -193,7 +204,8 @@ class DabExternalAhu : DabSystemProfile() {
             occupancyMode,
             externalEquipId,
             hayStack,
-            externalSpList
+            externalSpList,
+            conditioningMode
         )
         handleHumidityOperation(
             systemEquip,
@@ -202,7 +214,8 @@ class DabExternalAhu : DabSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
         handleDeHumidityOperation(
             systemEquip,
@@ -211,7 +224,8 @@ class DabExternalAhu : DabSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
@@ -228,9 +242,9 @@ class DabExternalAhu : DabSystemProfile() {
 
     private fun getBasicDabConfigData() =
         BasicConfig(
-            coolingLoop = dabSystem.coolingSignal,
-            heatingLoop = dabSystem.heatingSignal,
-            loopOutput = (if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble()),
+            coolingLoop = if (dabSystem.coolingSignal <= 0 ) 0 else dabSystem.coolingSignal,
+            heatingLoop = if (dabSystem.heatingSignal <= 0 ) 0 else dabSystem.heatingSignal,
+            loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
             weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
         )
 }

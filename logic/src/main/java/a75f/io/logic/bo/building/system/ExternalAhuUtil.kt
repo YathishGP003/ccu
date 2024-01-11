@@ -19,6 +19,7 @@ import a75f.io.domain.api.DomainName.fanLoopOutput
 import a75f.io.domain.api.DomainName.humidifierEnable
 import a75f.io.domain.api.DomainName.humidifierOperationEnable
 import a75f.io.domain.api.DomainName.occupancyModeControl
+import a75f.io.domain.api.DomainName.operatingMode
 import a75f.io.domain.api.DomainName.satSetpointControlEnable
 import a75f.io.domain.api.DomainName.staticPressureSetpointControlEnable
 import a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint
@@ -68,8 +69,8 @@ fun mapToSetPoint(min: Double, max: Double, current: Double): Double =
 
 
 const val SINGLE_SAT_SET_POINT = "air and discharge and sp and temp"
-const val COOLING_SAT_SET_POINT = "air and heating and sp and temp"
-const val HEATING_SAT_SET_POINT = "air and cooling and sp and temp"
+const val HEATING_SAT_SET_POINT = "air and heating and sp and temp"
+const val COOLING_SAT_SET_POINT = "air and cooling and sp and temp"
 const val DUCT_STATIC_PRESSURE = "pressure and air and discharge and sp"
 const val DAMPER_CMD = "cmd and outside and dcv and damper"
 const val HUMIDIFIER_CMD = "cmd and enable and humidifier"
@@ -311,8 +312,8 @@ fun calculateSATSetPoints(
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {
         val satSetPointLimits = getDualSetPointMinMax(systemEquip)
-        val coolingSatSetPointValue = if (basicConfig.loopOutput == 0.0)
-            updateDefaultSetPoints(conditioningMode, systemEquip, loopRunningDirection)
+        val coolingSatSetPointValue = if (basicConfig.coolingLoop.toDouble() == 0.0)
+            updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.COOLING)
         else
             mapToSetPoint(
                 satSetPointLimits.first.first,
@@ -320,8 +321,8 @@ fun calculateSATSetPoints(
                 basicConfig.coolingLoop.toDouble()
             )
 
-        val heatingSatSetPointValue = if (basicConfig.loopOutput == 0.0)
-            updateDefaultSetPoints(conditioningMode, systemEquip, loopRunningDirection)
+        val heatingSatSetPointValue = if (basicConfig.heatingLoop.toDouble() == 0.0)
+            updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.HEATING)
         else
             mapToSetPoint(
                 satSetPointLimits.second.first,
@@ -344,7 +345,11 @@ fun calculateSATSetPoints(
             externalEquipId,
             haystack
         )
-        logIt("Dual Setpoint  coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue")
+        logIt(
+            "Dual SP  cooling MinMax (${satSetPointLimits.first.first}, ${satSetPointLimits.first.second})" +
+                    "heating MinMax (${satSetPointLimits.second.first}, ${satSetPointLimits.second.second})" +
+                    " coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue"
+        )
     } else {
         val satSetPointLimits = getSingleSetPointMinMax(systemEquip, basicConfig.heatingLoop)
         val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0)
@@ -358,6 +363,10 @@ fun calculateSATSetPoints(
             externalSpList,
             externalEquipId,
             haystack
+        )
+        logIt(
+            "Single SP  min (${satSetPointLimits.first}, ${satSetPointLimits.second})" +
+                    " setpoint $satSetPointValue"
         )
     }
 
@@ -473,6 +482,7 @@ fun updateSystemStatusPoints(equipRef: String, newValue: String, domainName: Str
     }
 
 }
+
 fun handleDeHumidityOperation(
     systemEquip: Equip,
     externalEquipId: String?,
@@ -746,12 +756,26 @@ fun getConfigValue(domainName: String, modelName: String): Boolean {
     return getConfigByDomainName(systemEquip!!, domainName)
 }
 
-fun getSetPoint(domainName: String, preFix: String): String {
+fun getSetPoint(domainName: String): String {
     val point = Domain.readPoint(domainName)
     if (point.isEmpty()) return ""
     val unit = Objects.requireNonNull(point["unit"]).toString()
     val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
-    return ("$preFix  $value  $unit")
+    return (" $value  $unit")
+}
+
+fun getOperatingMode(equipName: String): String {
+    val systemEquip = Domain.getSystemEquipByDomainName(equipName)
+    val mode = getDefaultValueByDomain(systemEquip!!, operatingMode).toInt()
+    return when (SystemController.State.values()[mode]) {
+        SystemController.State.COOLING -> "Cooling"
+        SystemController.State.HEATING -> "Heating"
+        else -> {
+            "OFF"
+        }
+    }
+
+
 }
 
 fun getConfigValue(domainName: String, equip: Equip): Double =

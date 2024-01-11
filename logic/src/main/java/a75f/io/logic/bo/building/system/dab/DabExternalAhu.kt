@@ -244,9 +244,9 @@ class DabExternalAhu : DabSystemProfile() {
 
     private fun getBasicDabConfigData() =
         BasicConfig(
-            coolingLoop = dabSystem.coolingSignal,
-            heatingLoop = dabSystem.heatingSignal,
-            loopOutput = (if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble()),
+            coolingLoop = if (dabSystem.coolingSignal <= 0 ) 0 else dabSystem.coolingSignal,
+            heatingLoop = if (dabSystem.heatingSignal <= 0 ) 0 else dabSystem.heatingSignal,
+            loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
             weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
         )
 }

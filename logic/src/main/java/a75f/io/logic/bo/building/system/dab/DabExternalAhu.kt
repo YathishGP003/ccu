@@ -149,11 +149,9 @@ class DabExternalAhu : DabSystemProfile() {
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateSystemStatusPoints(systemEquip.id, scheduleStatus, equipScheduleStatus)
         CcuLog.d(
-            L.TAG_CCU_SYSTEM,
-            "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
+            L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
         )
     }
-    var x = 1.0
 
     override fun getStatusMessage(): String =
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
@@ -167,16 +165,17 @@ class DabExternalAhu : DabSystemProfile() {
         val humidityHysteresis = getTunerByDomainName(systemEquip, dabHumidityHysteresis)
         val analogFanMultiplier = getTunerByDomainName(systemEquip, dabAnalogFanSpeedMultiplier)
         logIt(
-            " System is $occupancyMode conditioningMode : $conditioningMode" +
-                    " coolingLoop ${dabConfig.coolingLoop} heatingLoop ${dabConfig.heatingLoop}" +
-                    " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
+            " System is $occupancyMode conditioningMode : $conditioningMode" + " coolingLoop ${dabConfig.coolingLoop} heatingLoop ${dabConfig.heatingLoop}" + " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
         )
         updateLoopDirection(dabConfig, systemEquip)
         updateOperatingMode(
-            systemEquip, dabSystem.systemState.ordinal.toDouble(),
-            operatingMode, externalSpList, externalEquipId, hayStack
+            systemEquip,
+            dabSystem.systemState.ordinal.toDouble(),
+            operatingMode,
+            externalSpList,
+            externalEquipId,
+            hayStack
         )
-
         calculateSATSetPoints(
             systemEquip,
             dabConfig,
@@ -232,19 +231,16 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
-        if (basicConfig.coolingLoop > 0)
-            loopRunningDirection = TempDirection.COOLING
-        if (basicConfig.heatingLoop > 0)
-            loopRunningDirection = TempDirection.HEATING
+        if (basicConfig.coolingLoop > 0) loopRunningDirection = TempDirection.COOLING
+        if (basicConfig.heatingLoop > 0) loopRunningDirection = TempDirection.HEATING
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
     }
 
-    private fun getBasicDabConfigData() =
-        BasicConfig(
-            coolingLoop = if (dabSystem.coolingSignal <= 0 ) 0 else dabSystem.coolingSignal,
-            heatingLoop = if (dabSystem.heatingSignal <= 0 ) 0 else dabSystem.heatingSignal,
-            loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
-            weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
-        )
+    private fun getBasicDabConfigData() = BasicConfig(
+        coolingLoop = if (dabSystem.coolingSignal <= 0) 0 else dabSystem.coolingSignal,
+        heatingLoop = if (dabSystem.heatingSignal <= 0) 0 else dabSystem.heatingSignal,
+        loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
+        weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
+    )
 }

@@ -32,18 +32,18 @@ import a75f.io.logic.bo.building.system.handleHumidityOperation
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.building.system.operateDamper
 import a75f.io.logic.bo.building.system.setOccupancyMode
+import a75f.io.logic.bo.building.system.updateOperatingMode
 import a75f.io.logic.bo.building.system.updatePointHistoryAndDefaultValue
 import a75f.io.logic.bo.building.system.updatePointValue
 import a75f.io.logic.bo.building.system.updateSystemStatusPoints
 import a75f.io.logic.bo.building.system.writePointForCcuUser
 import a75f.io.logic.interfaces.ModbusWritableDataInterface
 
-
 /**
  * Created by Manjunath K on 26-12-2023.
  */
 
-class VavExternalAhu: VavSystemProfile() {
+class VavExternalAhu : VavSystemProfile() {
 
     companion object {
         const val PROFILE_NAME = "VAV External AHU Controller"
@@ -55,7 +55,10 @@ class VavExternalAhu: VavSystemProfile() {
     }
 
     private var modbusInterface: ModbusWritableDataInterface? = null
+
+    /**  externalSpList this contains all the modbus set points id's which is used to write every to cycle to modbus **/
     private var externalSpList = ArrayList<String>()
+
     private val vavSystem: VavSystemController = VavSystemController.getInstance()
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
@@ -144,9 +147,10 @@ class VavExternalAhu: VavSystemProfile() {
         calculateSetPoints(systemEquip)
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
-        Domain.writeHisValByDomain(operatingMode, vavSystem.systemState.ordinal.toDouble(), systemEquip.id)
         updateSystemStatusPoints(systemEquip.id, scheduleStatus, equipScheduleStatus)
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus")
+        CcuLog.d(
+            L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
+        )
     }
 
     override fun getStatusMessage(): String =
@@ -161,11 +165,17 @@ class VavExternalAhu: VavSystemProfile() {
         val humidityHysteresis = getTunerByDomainName(systemEquip, vavHumidityHysteresis)
         val analogFanMultiplier = getTunerByDomainName(systemEquip, vavAnalogFanSpeedMultiplier)
         logIt(
-            " System is $occupancyMode conditioningMode : $conditioningMode" +
-                    " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" +
-                    " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
+            " System is $occupancyMode conditioningMode : $conditioningMode" + " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" + " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
         )
         updateLoopDirection(vavConfig, systemEquip)
+        updateOperatingMode(
+            systemEquip,
+            vavSystem.systemState.ordinal.toDouble(),
+            operatingMode,
+            externalSpList,
+            externalEquipId,
+            hayStack
+        )
         calculateSATSetPoints(
             systemEquip,
             vavConfig,
@@ -193,7 +203,8 @@ class VavExternalAhu: VavSystemProfile() {
             occupancyMode,
             externalEquipId,
             hayStack,
-            externalSpList
+            externalSpList,
+            conditioningMode
         )
         handleHumidityOperation(
             systemEquip,
@@ -202,7 +213,8 @@ class VavExternalAhu: VavSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
         handleDeHumidityOperation(
             systemEquip,
@@ -211,26 +223,24 @@ class VavExternalAhu: VavSystemProfile() {
             hayStack,
             externalSpList,
             humidityHysteresis,
-            currentHumidity
+            currentHumidity,
+            conditioningMode
         )
-        Domain.writePointByDomain(systemEquip, equipStatusMessage, statusMessage)
+        updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
-        if (basicConfig.coolingLoop > 0)
-            loopRunningDirection = TempDirection.COOLING
-        if (basicConfig.heatingLoop > 0)
-            loopRunningDirection = TempDirection.HEATING
+        if (basicConfig.coolingLoop > 0) loopRunningDirection = TempDirection.COOLING
+        if (basicConfig.heatingLoop > 0) loopRunningDirection = TempDirection.HEATING
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
     }
 
-    private fun getBasicVavConfigData() =
-        BasicConfig(
-            coolingLoop = vavSystem.coolingSignal,
-            heatingLoop = vavSystem.heatingSignal,
-            loopOutput = (if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble()),
-            weightedAverageCO2 = vavSystem.co2WeightedAverageSum,
-        )
+    private fun getBasicVavConfigData() = BasicConfig(
+        coolingLoop = if (vavSystem.coolingSignal <= 0) 0 else vavSystem.coolingSignal,
+        heatingLoop = if (vavSystem.heatingSignal <= 0) 0 else vavSystem.heatingSignal,
+        loopOutput = if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble(),
+        weightedAverageCO2 = vavSystem.co2WeightedAverageSum,
+    )
 }

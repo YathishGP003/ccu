@@ -310,13 +310,8 @@ public class MasterControlView extends LinearLayout {
         ArrayList<HashMap<Object, Object>> unoccupiedZoneObj = CCUHsApi.getInstance().readAllEntities(
                 "schedulable and unoccupied and setback");
         HSUtil.writeValToALLLevel16(unoccupiedZoneObj,val);
-        ArrayList<HashMap<Object, Object>> buildingScheduleFollowing = CCUHsApi.getInstance().readAllEntities("followBuilding and schedule and zone");
-        for(HashMap<Object, Object> zoneSchedule: buildingScheduleFollowing) {
-            Schedule updatedSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.get("id").toString());
-            updatedSchedule.setUnoccupiedZoneSetback(Double.valueOf(val));
-            CCUHsApi.getInstance().updateZoneSchedule(updatedSchedule, updatedSchedule.getRoomRef());
-        }
     }
+
     public void updateBuildingToZoneDiff(String adapterVal){
         float val ;
         val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);

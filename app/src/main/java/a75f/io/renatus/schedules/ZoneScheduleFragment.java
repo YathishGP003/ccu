@@ -52,6 +52,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
@@ -489,12 +490,6 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                                Double heatingUserLimitMaxVal, Double heatingUserLimitMinVal, Double coolingUserLimitMaxVal,
                                Double coolingUserLimitMinVal, Double heatingDeadBandVal, Double coolingDeadBandVal,
                                boolean followBuilding, Schedule.Days mDay) {
-        String masterZoneSetbackLevel = CCUHsApi.getInstance().readEntity("unoccupied and setback and not zone").get("id").toString();
-        String unoccupiedZoneSetbackLevel = CCUHsApi.getInstance().readEntity("unoccupied and setback and zone and roomRef==\""+schedule.getRoomRef()+"\"").get("id").toString();
-        Double masterControlSetback = HSUtil.getPriorityLevelVal(masterZoneSetbackLevel, 16);
-        Double zonePrioritySetback = HSUtil.getPriorityLevelVal(unoccupiedZoneSetbackLevel, 10);
-        if(zonePrioritySetback<0)
-            zonePrioritySetback = HSUtil.getPriorityLevelVal(unoccupiedZoneSetbackLevel, 17);
 
         if (followBuilding) {
             double heatUL = Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
@@ -518,10 +513,11 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
                 }
             }
-            schedule.setUnoccupiedZoneSetback(masterControlSetback);
-        }
-        else{
-                schedule.setUnoccupiedZoneSetback(zonePrioritySetback);
+            CCUHsApi ccuApi = CCUHsApi.getInstance();
+            String zoneSetbackPointId = CCUHsApi.getInstance().readEntity("setback and unoccupied and zone and roomRef==\""+schedule.getRoomRef()+"\"").get("id").toString();
+            if(ccuApi.readPoint(zoneSetbackPointId).get(HayStackConstants.USER_APP_WRITE_LEVEL - 1).get("val")!=null) {
+                ccuApi.clearPointArrayLevel(zoneSetbackPointId, HayStackConstants.USER_APP_WRITE_LEVEL, false);
+            }
         }
 
         if (position != ZoneScheduleDialogFragment.NO_REPLACE) {

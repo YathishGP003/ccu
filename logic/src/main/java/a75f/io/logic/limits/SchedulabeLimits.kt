@@ -249,6 +249,9 @@ class SchedulabeLimits {
             addTagsBasedOnCondition(isBuilding, unoccupiedZoneSetback, ref)
             val unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback.build())
             hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0)
+            val id = hayStack.readEntity("schedulable and unoccupied and setback and default").get("id").toString()
+            val setbackLvl16 = HSUtil.getPriorityLevelVal(id, 16)
+            hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, setbackLvl16, 0)
             hayStack.writeHisValById(heatingDbId, TunerConstants.ZONE_UNOCCUPIED_SETBACK)
             if(!isBuilding){
                 val buildingPoint: HashMap<Any, Any> = hayStack.readEntity("schedulable and unoccupied and zone and setback " +

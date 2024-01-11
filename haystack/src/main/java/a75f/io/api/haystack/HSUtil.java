@@ -257,8 +257,6 @@ public class HSUtil
             if (valMap.get("val") != null) {
                 return Double.parseDouble(valMap.get("val").toString());
             }
-            else
-                return -1.0;
         }
         return 0;
     }

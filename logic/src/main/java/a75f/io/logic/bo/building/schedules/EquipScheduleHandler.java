@@ -20,7 +20,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class EquipScheduleHandler implements Schedulable {
@@ -126,11 +125,7 @@ public class EquipScheduleHandler implements Schedulable {
         Double setback = null;
         if(!schedule.getMarkers().contains(Tags.FOLLOW_BUILDING))
             setback  = schedule.getUnoccupiedZoneSetback();
-        else {
-            String masterSetbackId =CCUHsApi.getInstance().readEntity("unoccupied and setback and not zone").get("id").toString();
-            setback = HSUtil.getPriorityLevelVal(masterSetbackId, 16);
-        }
-        if(setback == null) {
+        if(setback == null ) {
             setback = CCUHsApi.getInstance().readPointPriorityValByQuery
                     ("zone and unoccupied and setback and roomRef == \"" + HSUtil.getZoneIdFromEquipId(equipRef) + "\"");
         }

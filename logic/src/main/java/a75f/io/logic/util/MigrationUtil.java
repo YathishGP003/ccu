@@ -5,6 +5,7 @@ import static a75f.io.api.haystack.HayStackConstants.FORCE_OVERRIDE_LEVEL;
 import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -46,6 +47,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -452,6 +454,10 @@ public class MigrationUtil {
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
         clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi);
+		 if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && (!PreferenceUtil.getCarrierDabToVvtMigration())){
+                updateDisForPointsDabToVvt(CCUHsApi.getInstance());
+                PreferenceUtil.setCarrierDabToVvtMigrationDone();
+        }
         removeHisTagForEquipStatusMessage(ccuHsApi);
 
         ccuHsApi.scheduleSync();
@@ -489,8 +495,8 @@ public class MigrationUtil {
         int oneDayInMs = 86400000;
         HashMap desiredTempPoint = ccuHsApi.readPoint(desiredTempPointId).get(levelToBeCleared - 1);
         return desiredTempPoint.get("val") != null &&
-                Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
-                Double.parseDouble(desiredTempPoint.get("duration").toString()) > oneDayInMs;
+                (Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
+                        Double.parseDouble(desiredTempPoint.get("duration").toString()) - System.currentTimeMillis() > oneDayInMs);
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
@@ -2598,6 +2604,43 @@ public class MigrationUtil {
             }
         }
     }
+
+    private static void updateDisForPointsDabToVvt(CCUHsApi haystack){
+        findDabEquipsAndUpdate(haystack, "equip and dab");
+        findDabEquipsAndUpdate(haystack, "equip and tuner");
+        findDabPointsAndUpdate(haystack, haystack.readAllEntities("dab and purge"));
+        findDabPointsAndUpdate(haystack, haystack.readAllEntities("dab and oao"));
+    }
+
+    private static void findDabEquipsAndUpdate(CCUHsApi haystack, String query){
+        ArrayList<HashMap<Object, Object>> equipList = haystack.readAllEntities(query);
+        for(HashMap<Object, Object> equipMap : equipList){
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            if(equip.getDisplayName().toLowerCase().contains("dab")){
+                Equip tempEquip = new Equip.Builder().setHashMap(equipMap)
+                        .setDisplayName(equip.getDisplayName().replaceAll("(?i)dab", "VVT"))
+                        .build();
+                haystack.updateEquip(tempEquip, tempEquip.getId());
+            }
+
+            ArrayList<HashMap<Object, Object>> configPointList = haystack.readAllEntities("point and " +
+                    "equipRef== \""+ equip.getId() +"\"");
+            findDabPointsAndUpdate(haystack, configPointList);
+        }
+    }
+
+    private static void findDabPointsAndUpdate(CCUHsApi haystack, ArrayList<HashMap<Object, Object>> configPointList){
+        for( HashMap<Object, Object> configPointMap : configPointList){
+            Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
+            if(equipPoint.getDisplayName().toLowerCase().contains("dab")){
+                equipPoint.setDisplayName(equipPoint.getDisplayName().replaceAll("(?i)dab", "VVT"));
+                haystack.updatePoint(equipPoint, equipPoint.getId());
+                Log.i(TAG_CCU_MIGRATION_UTIL,
+                        "carrier migration dis updated for the point id :" +equipPoint.getId());
+            }
+        }
+    }
+
     private static void migrateRemoteAccess() {
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();

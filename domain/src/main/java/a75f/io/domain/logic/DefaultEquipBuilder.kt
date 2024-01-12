@@ -4,6 +4,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.BuildConfig
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
@@ -11,6 +12,7 @@ import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -66,7 +68,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     override fun buildPoint(pointConfig : PointBuilderConfig) : Point {
         CcuLog.i(Domain.LOG_TAG, "buildPoint ${pointConfig.modelDef.domainName}")
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
+        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)
             .setEquipRef(pointConfig.equipRef)
             .setFloorRef(pointConfig.configuration?.floorRef)
@@ -90,6 +92,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
+        }
+
+        if (pointConfig.modelDef is SeventyFiveFTunerPointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
         }
 
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
@@ -118,5 +126,20 @@ open class DefaultEquipBuilder : EquipBuilder {
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz))}
 
         return pointBuilder.build()
+    }
+
+    private fun getDisplayNameFromVariation(dis: String): String? {
+        var displayName = ""
+        displayName =
+            if (BuildConfig.BUILD_TYPE.equals(
+                    "carrier_prod",
+                    ignoreCase = true
+                )
+            ) {
+                dis.replace("(?i)-DAB-".toRegex(), "-VVT-")
+            } else {
+                dis
+            }
+        return displayName
     }
 }

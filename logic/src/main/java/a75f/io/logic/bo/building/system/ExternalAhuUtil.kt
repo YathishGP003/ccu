@@ -221,7 +221,7 @@ fun mapModbusPoint(
         if (!setPointsList.contains(pointId))
             setPointsList.add(pointId)
         val currentHisValue = haystack.readHisValById(pointId)
-        val currentDefaultValue = haystack.readDefaultVal(pointId)
+        val currentDefaultValue = haystack.readDefaultValById(pointId)
         if (currentHisValue != value)
             haystack.writeHisValById(pointId, value)
         if (currentDefaultValue != value)

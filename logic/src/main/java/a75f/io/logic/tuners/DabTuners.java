@@ -445,7 +445,7 @@ public class DabTuners {
                                .setRoomRef(roomRef)
                                .setFloorRef(floorRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
-                               .addMarker("pspread").addMarker("sp")
+                               .addMarker("pspread").addMarker("sp").addMarker("temp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
@@ -460,7 +460,7 @@ public class DabTuners {
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
-                                    .addMarker("itimeout").addMarker("sp")
+                                    .addMarker("itimeout").addMarker("sp").addMarker("temp")
                                     .setUnit("m")
                                     .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                     .setTz(tz)

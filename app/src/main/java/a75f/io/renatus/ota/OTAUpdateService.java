@@ -606,7 +606,7 @@ public class OTAUpdateService extends IntentService {
         if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) {
             if (!device.getMarkers().contains(Tags.HYPERSTAT)) return true;
         } else if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE) {
-            if (!device.getMarkers().contains(Tags.HYPERSTATSPLIT)) return true;
+            if (!(device.getMarkers().contains(Tags.HYPERSTATSPLIT) || device.getMarkers().contains(Tags.HYPERSTAT))) return true;
         }
 
         return false;

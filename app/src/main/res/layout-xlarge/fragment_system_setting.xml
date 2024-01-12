@@ -10,7 +10,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="80dp"
         android:layout_marginTop="36dp">
 
         <TextView
@@ -44,7 +44,7 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginStart="100dp"
+                android:layout_marginStart="80dp"
                 android:layout_marginBottom="50dp"
                 android:orientation="vertical">
 
@@ -72,8 +72,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -207,45 +207,52 @@
                             android:text="@string/duct_static_pressure"
                             android:textAppearance="@style/label_black" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_black" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:id="@+id/dsp_current"
+                            <TextView
+                                android:id="@+id/dsp_current"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_grey" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_black" />
-
-                        <TextView
-                            android:id="@+id/dsp_setpoint"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.5"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_grey" />
-
+                            <TextView
+                                android:id="@+id/dsp_setpoint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
                     </LinearLayout>
                     <LinearLayout
                         android:id="@+id/single_sat_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
                         android:layout_marginTop="30dp">
 
                         <TextView
@@ -256,39 +263,50 @@
                             android:text="@string/supply_airflow_temp"
                             android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:id="@+id/sat_current"
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_grey" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
+                            <TextView
+                                android:id="@+id/sat_current"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_black" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/sat_setpoint"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.5"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_grey" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_black" />
+
+                            <TextView
+                                android:id="@+id/sat_setpoint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_grey" />
+
+                        </LinearLayout>
+
 
                     </LinearLayout>
                     <LinearLayout
@@ -305,40 +323,49 @@
                             android:text="@string/supply_airflow_temp"
                             android:textAppearance="@style/label_black" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_black" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:id="@+id/sat_dual_cur"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_grey" />
+                            <TextView
+                                android:id="@+id/sat_dual_cur"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/sat_op_lable"
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/operating_mode"
-                            android:textAppearance="@style/label_black" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:id="@+id/sat_op_lable"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/operating_mode"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:id="@+id/sat_operatingmode"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.5"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_grey" />
+                            <TextView
+                                android:id="@+id/sat_operatingmode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
+
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -353,40 +380,48 @@
                             android:layout_gravity="center_vertical"
                             android:layout_weight="3"
                             android:textAppearance="@style/label_black" />
-
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/heating_setpoint"
-                            android:textAppearance="@style/label_black" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/heating_setpoint"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:id="@+id/sat_heatingsp"
+                            <TextView
+                                android:id="@+id/sat_heatingsp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/current"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/current"
-                            android:textAppearance="@style/label_grey" />
+                            android:layout_weight="3"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/cooling_setpoint"
+                                android:textAppearance="@style/label_black" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.8"
-                            android:text="@string/cooling_setpoint"
-                            android:textAppearance="@style/label_black" />
+                            <TextView
+                                android:id="@+id/sat_coolingsp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="@string/setpoint"
+                                android:textAppearance="@style/label_grey" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/sat_coolingsp"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.5"
-                            android:text="@string/setpoint"
-                            android:textAppearance="@style/label_grey" />
+
 
                     </LinearLayout>
                     <LinearLayout

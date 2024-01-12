@@ -376,8 +376,6 @@ fun calculateDSPSetPoints(
     basicConfig: BasicConfig,
     analogFanMultiplier: Double,
     coolingLoop: Double,
-    heatingLoop: Double,
-    profile: String,
     conditioningMode: SystemMode
 ) {
     if (!isConfigEnabled(systemEquip, staticPressureSetpointControlEnable)) {
@@ -751,7 +749,7 @@ fun getModbusPointValue(query: String): String {
     val value = CCUHsApi.getInstance().readHisValById(pointId)
     val unit = point["unit"]
 
-    return "$value $unit"
+    return " $value $unit"
 }
 
 fun getConfigValue(domainName: String, modelName: String): Boolean {
@@ -764,17 +762,17 @@ fun getSetPoint(domainName: String): String {
     if (point.isEmpty()) return ""
     val unit = Objects.requireNonNull(point["unit"]).toString()
     val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
-    return (" $value  $unit")
+    return (" $value $unit")
 }
 
 fun getOperatingMode(equipName: String): String {
     val systemEquip = Domain.getSystemEquipByDomainName(equipName)
     val mode = getDefaultValueByDomain(systemEquip!!, operatingMode).toInt()
     return when (SystemController.State.values()[mode]) {
-        SystemController.State.COOLING -> "Cooling"
-        SystemController.State.HEATING -> "Heating"
+        SystemController.State.COOLING -> " Cooling"
+        SystemController.State.HEATING -> " Heating"
         else -> {
-            "OFF"
+            " Off"
         }
     }
 

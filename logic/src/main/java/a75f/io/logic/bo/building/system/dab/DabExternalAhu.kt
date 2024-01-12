@@ -196,8 +196,6 @@ class DabExternalAhu : DabSystemProfile() {
             dabConfig,
             analogFanMultiplier,
             dabConfig.coolingLoop.toDouble(),
-            dabConfig.heatingLoop.toDouble(),
-            Tags.DAB,
             conditioningMode
         )
         setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)

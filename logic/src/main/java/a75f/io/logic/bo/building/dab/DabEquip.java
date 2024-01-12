@@ -1234,11 +1234,9 @@ public class DabEquip
     }
 
     public static String getDisName(String siteDis, String nodeAddr){
-        String tempEquipDis;
+        String tempEquipDis = siteDis+"-DAB-"+nodeAddr;
         if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
-            tempEquipDis = siteDis+"-VVT-"+nodeAddr;
-        }else{
-            tempEquipDis = siteDis+"-DAB-"+nodeAddr;
+            tempEquipDis = tempEquipDis.replaceAll("(?i)-DAB-","-VVT-");
         }
         return tempEquipDis;
     }

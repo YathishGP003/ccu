@@ -95,6 +95,7 @@ public class OTAUpdateService extends IntentService {
     private static int mUpdateLength = -1;         //Binary length (bytes)
     private static byte[] mFirmwareSignature = {};
     private static FirmwareComponentType_t mFirmwareDeviceType;
+    private static FirmwareComponentType_t mFirmwareDeviceTypeFromMeta;
 
     private static long mMetadataDownloadId = -1;
     private static long mBinaryDownloadId = -1;
@@ -419,6 +420,9 @@ public class OTAUpdateService extends IntentService {
         }else if(firmwareVersion.startsWith("CM_")){
             mFirmwareDeviceType = FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
+        }else if(firmwareVersion.startsWith("ConnectModule_")){
+            mFirmwareDeviceType = FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE;
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
         }else{
             otaRequestProcessInProgress = false;
         }
@@ -481,7 +485,7 @@ public class OTAUpdateService extends IntentService {
                     for(Zone zone : HSUtil.getZones(floor.getId())) {
                         for(Device device : HSUtil.getDevices(zone.getId())) {
 
-                            if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                            if(shouldBeCheckedForUpdate(device, deviceType)) {
                                 Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                                 mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
                             }
@@ -494,7 +498,7 @@ public class OTAUpdateService extends IntentService {
             case "zone":
                 //update all nodes in the same zone as the specified node
                 for(Device device : HSUtil.getDevices("@"+id)) {
-                    if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                    if(shouldBeCheckedForUpdate(device, deviceType)) {
                         Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
                     }
@@ -506,7 +510,7 @@ public class OTAUpdateService extends IntentService {
                 //update just the one node
                 Equip equip = HSUtil.getEquipInfo("@"+id);
                 Device device = HSUtil.getDevice(Short.parseShort(equip.getGroup()));
-                    if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                    if(shouldBeCheckedForUpdate(device, deviceType)) {
                         Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));
                     }
@@ -527,6 +531,25 @@ public class OTAUpdateService extends IntentService {
         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
     }
 
+    /*
+        Determine whether a device *may* require updating based on its Haystack tags.
+
+        At this stage, we only have the firmware filename and the device's Haystack tags. This isn't enough info to determine exactly
+        which devices need updating. So for now, all devices that might match to a given file name are added.
+
+        (Ex. if filename is "HyperStat_", all devices with tag "hyperstat" and "hyperstatsplit" are added, because we don't yet know
+        if the file contains HyperStat or HyperLite firmware.)
+
+        If the FirmwareDeviceType in the firmware metadata does not match the actual device, it will be skipped during the runMetadataCheck() step.
+     */
+    private boolean shouldBeCheckedForUpdate(Device device, FirmwareComponentType_t deviceType) {
+        if (device.getMarkers().contains(deviceType.getHsMarkerName())) {
+            return true;
+        } else if (deviceType.getHsMarkerName().equals(Tags.HYPERSTAT) && device.getMarkers().contains(Tags.HYPERSTATSPLIT)) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Checks if a metadata file is present, and if it matches the requested version number.
@@ -561,8 +584,32 @@ public class OTAUpdateService extends IntentService {
 
         }
 
-        Log.d(TAG, "[METADATA] Metadata passed check, starting binary check");
-        runBinaryCheck(versionMajor, versionMinor, deviceType);
+        if (skipCurrentDeviceBasedOnMetadata()) {
+            Log.d(TAG, "[METADATA] Metadata contents do not match device type, moving to next node");
+            OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_NOT_FOR_ME_DEV_TYPE, mCurrentLwMeshAddress);
+            moveUpdateToNextNode();
+        } else {
+            Log.d(TAG, "[METADATA] Metadata passed check, starting binary check");
+            runBinaryCheck(versionMajor, versionMinor, deviceType);
+        }
+
+    }
+
+    // Currently, the only devices that require the device type to be checked against metadata are HyperStat and HyperStat Split (HyperLite)
+
+    // All other types of firmware are not checked since the device type is already known from the request type, and
+    // backward-compatibility issues could result if other types of firmware didn't have this info in their metadata.
+    private boolean skipCurrentDeviceBasedOnMetadata() {
+        Device device = HSUtil.getDevice((short)mCurrentLwMeshAddress);
+        if (device == null) { return true; }
+
+        if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) {
+            if (!device.getMarkers().contains(Tags.HYPERSTAT)) return true;
+        } else if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE) {
+            if (!device.getMarkers().contains(Tags.HYPERSTATSPLIT)) return true;
+        }
+
+        return false;
     }
 
     /**
@@ -755,9 +802,8 @@ public class OTAUpdateService extends IntentService {
                 String name = reader.nextName();
                 switch (name) {
                     case "deviceType":
-                        //Not particularly useful, since we need to know the device type before
-                        //  downloading the firmware, to select between /sn_fw, /itm_fw, etc.
-                        reader.nextInt();
+                        // This is currently only used for HyperStat and HyperStat Split
+                        mFirmwareDeviceTypeFromMeta = FirmwareComponentType_t.values()[reader.nextInt()];
                         break;
                     case "versionMajor":
                         mVersionMajor = (short) reader.nextInt();

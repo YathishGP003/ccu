@@ -210,217 +210,217 @@ public abstract class SystemProfile
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
 
-        Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
+        Point heatingPreconditioningRate = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String heatingPreconditioningRateId = hayStack.addPoint(heatingPreconditioningRate);
         TunerUtil.copyDefaultBuildingTunerVal(heatingPreconditioningRateId, DomainName.heatingPreconditioningRate, hayStack);
 
-        Point coolingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "coolingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("precon").addMarker("rate").addMarker("sp")
+        Point coolingPreconditioningRate = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "coolingPreconditioningRate")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("precon").addMarker("rate").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String coolingPreconditioningRateId = hayStack.addPoint(coolingPreconditioningRate);
         TunerUtil.copyDefaultBuildingTunerVal(coolingPreconditioningRateId, DomainName.coolingPreconditioningRate, hayStack);
 
-        Point cmTempInfPercentileZonesDead = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmTempPercentDeadZonesAllowed").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("percent").addMarker("dead").addMarker("influence").addMarker("sp")
+        Point cmTempInfPercentileZonesDead = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "cmTempPercentDeadZonesAllowed")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("percent").addMarker("dead").addMarker("influence").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String cmTempPercentDeadZonesAllowedId = hayStack.addPoint(cmTempInfPercentileZonesDead);
         TunerUtil.copyDefaultBuildingTunerVal(cmTempPercentDeadZonesAllowedId, DomainName.cmTempPercentDeadZonesAllowed, hayStack);
 
-        Point airflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
+        Point airflowSampleWaitTime = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz).build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
         TunerUtil.copyDefaultBuildingTunerVal(airflowSampleWaitTimeId, DomainName.airflowSampleWaitTime, hayStack);
 
-        Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage1CoolingAirflowTempLowerOffsetId, DomainName.stage1CoolingAirflowTempLowerOffset, hayStack);
 
-        Point stage2CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage2CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage2CoolingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage2CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage2CoolingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage2CoolingAirflowTempLowerOffsetId, DomainName.stage2CoolingAirflowTempLowerOffset, hayStack);
 
-        Point stage3CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage3CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage3CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage3CoolingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage3CoolingAirflowTempLowerOffsetId, DomainName.stage3CoolingAirflowTempLowerOffset, hayStack);
 
-        Point stage4CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage4CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage4CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage4CoolingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage4CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage4CoolingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage4CoolingAirflowTempLowerOffsetId, DomainName.stage4CoolingAirflowTempLowerOffset, hayStack);
 
-        Point stage5CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage5CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage5CoolingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage5CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage5CoolingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage5CoolingAirflowTempLowerOffsetId, DomainName.stage5CoolingAirflowTempLowerOffset, hayStack);
 
-        Point stage1CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage1CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage1CoolingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage1CoolingAirflowTempUpperOffsetId, DomainName.stage1CoolingAirflowTempUpperOffset, hayStack);
 
-        Point stage2CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage2CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage2CoolingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage2CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage2CoolingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage2CoolingAirflowTempUpperOffsetId, DomainName.stage2CoolingAirflowTempUpperOffset, hayStack);
 
-        Point stage3CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage3CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage3CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage3CoolingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage3CoolingAirflowTempUpperOffsetId, DomainName.stage3CoolingAirflowTempUpperOffset, hayStack);
 
-        Point stage4CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage4CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage4CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage4CoolingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage4CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage4CoolingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage4CoolingAirflowTempUpperOffsetId, DomainName.stage4CoolingAirflowTempUpperOffset, hayStack);
 
-        Point stage5CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage5CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage5CoolingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage5CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage5CoolingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage5CoolingAirflowTempUpperOffsetId, DomainName.stage5CoolingAirflowTempUpperOffset, hayStack);
 
-        Point stage1HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage1HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage1HeatingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage1HeatingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage1HeatingAirflowTempLowerOffsetId, DomainName.stage1HeatingAirflowTempLowerOffset, hayStack);
 
-        Point stage2HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage2HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage2HeatingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage2HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage2HeatingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage2HeatingAirflowTempLowerOffsetId, DomainName.stage2HeatingAirflowTempLowerOffset, hayStack);
 
-        Point stage3HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage3HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage3HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage3HeatingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage3HeatingAirflowTempLowerOffsetId, DomainName.stage3HeatingAirflowTempLowerOffset, hayStack);
 
-        Point stage4HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage4HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage4HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage4HeatingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage4HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage4HeatingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage4HeatingAirflowTempLowerOffsetId, DomainName.stage4HeatingAirflowTempLowerOffset, hayStack);
 
-        Point stage5HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+        Point stage5HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempLowerOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage5HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage5HeatingAirflowTempLowerOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage5HeatingAirflowTempLowerOffsetId, DomainName.stage5HeatingAirflowTempLowerOffset, hayStack);
 
-        Point stage1HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage1HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage1HeatingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage1HeatingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage1HeatingAirflowTempUpperOffsetId, DomainName.stage1HeatingAirflowTempUpperOffset, hayStack);
 
-        Point stage2HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage2HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage2HeatingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage2HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage2HeatingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage2HeatingAirflowTempUpperOffsetId, DomainName.stage2HeatingAirflowTempUpperOffset, hayStack);
 
-        Point stage3HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage3HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage3HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage3HeatingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage3HeatingAirflowTempUpperOffsetId, DomainName.stage3HeatingAirflowTempUpperOffset, hayStack);
 
-        Point stage4HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage4HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage4HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage4HeatingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage4").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage4HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage4HeatingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage4HeatingAirflowTempUpperOffsetId, DomainName.stage4HeatingAirflowTempUpperOffset, hayStack);
 
-        Point stage5HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+        Point stage5HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempUpperOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage5HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage5HeatingAirflowTempUpperOffset);
         TunerUtil.copyDefaultBuildingTunerVal(stage5HeatingAirflowTempUpperOffsetId, DomainName.stage5HeatingAirflowTempUpperOffset, hayStack);
 
-        Point clockUpdateInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "clockUpdateInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("clock").addMarker("update").addMarker("interval").addMarker("sp")
+        Point clockUpdateInterval = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "clockUpdateInterval")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("clock").addMarker("update").addMarker("interval").addMarker("sp")
                 .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz).build();
         String clockUpdateIntervalId = hayStack.addPoint(clockUpdateInterval);
         TunerUtil.copyDefaultBuildingTunerVal(clockUpdateIntervalId, DomainName.clockUpdateInterval, hayStack);
 
-        Point perDegreeHumidityFactor = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "perDegreeHumidityFactor").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("per").addMarker("degree").addMarker("humidity").addMarker("factor").addMarker("sp")
+        Point perDegreeHumidityFactor = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "perDegreeHumidityFactor")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("per").addMarker("degree").addMarker("humidity").addMarker("factor").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("%")
                 .setTz(tz).build();
         String perDegreeHumidityFactorId = hayStack.addPoint(perDegreeHumidityFactor);
         TunerUtil.copyDefaultBuildingTunerVal(perDegreeHumidityFactorId, DomainName.perDegreeHumidityFactor, hayStack);
 
-        Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
+        Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
         TunerUtil.copyDefaultBuildingTunerVal(ccuAlarmVolumeLevelId, DomainName.ccuAlarmVolumeLevel, hayStack);
 
-        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("level").addMarker("sp")
+        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("level").addMarker("sp")
                 .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz).build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
         TunerUtil.copyDefaultBuildingTunerVal(cmHeartBeatIntervalId, DomainName.cmHeartBeatInterval, hayStack);
 
-        Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heartbeat").addMarker("sp")
+        Point heartBeatsToSkip = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heartbeat").addMarker("sp")
                 .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
         TunerUtil.copyDefaultBuildingTunerVal(heartBeatsToSkipId, DomainName.heartBeatsToSkip, hayStack);
 
-        Point cmResetCommandTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmResetCommandTimer").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("reset").addMarker("command").addMarker("time")
+        Point cmResetCommandTime = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "cmResetCommandTimer")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("reset").addMarker("command").addMarker("time")
                 .setMinVal("0").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER).setUnit("m")
                 .setTz(tz).build();
         String cmResetCommandTimerId = hayStack.addPoint(cmResetCommandTime);
         TunerUtil.copyDefaultBuildingTunerVal(cmResetCommandTimerId, DomainName.cmResetCommandTimer, hayStack);
 
-        Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
+        Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
                 .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
                 .setTz(tz).build();
         String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTempDeadLeeway);
         TunerUtil.copyDefaultBuildingTunerVal(zoneTemperatureDeadLeewayId, DomainName.zoneTemperatureDeadLeeway, hayStack);
 
-        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
+        Point humidityCompensationOffset = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(HSUtil.getDis(equipRef) + "-" + "humidityCompensationOffset")).setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
@@ -429,12 +429,12 @@ public abstract class SystemProfile
     }
 
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
-        Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp")
+        Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "cmCoolingDesiredTemp"))
                 .setBacnetId(BacnetIdKt.CMCOOLINGDESIREDTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);
         CCUHsApi.getInstance().writeDefaultValById(cmCoolDesiredTempId, 0.0);
         CCUHsApi.getInstance().writeHisValById(cmCoolDesiredTempId, 0.0);
-        Point cmHeatDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmHeatingDesiredTemp")
+        Point cmHeatDesiredTemp = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "cmHeatingDesiredTemp"))
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm")
                 .addMarker("heating").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his")
                 .addMarker("sp").setUnit("\u00B0F").setBacnetId(BacnetIdKt.CMHEATINGDESIREDTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
@@ -446,13 +446,13 @@ public abstract class SystemProfile
 
     public void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef)
+        Point cmCurrentTemp = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "cmCurrentTemp")).setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("current")
                 .addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setBacnetId(BacnetIdKt.CURRENTTEMPID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
         Point systemStatusMessage = new Point.Builder()
-                .setDisplayName(equipDis + "-StatusMessage")
+                .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-StatusMessage"))
                 .setEquipRef(equipref)
                 .setSiteRef(siteRef)
                 .addMarker("system")
@@ -463,7 +463,7 @@ public abstract class SystemProfile
                 .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemStatusMessage);
         Point systemScheduleStatus = new Point.Builder()
-                .setDisplayName(equipDis + "-ScheduleStatus")
+                .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-ScheduleStatus"))
                 .setEquipRef(equipref).setSiteRef(siteRef)
                 .addMarker("system")
                 .addMarker("scheduleStatus")
@@ -472,14 +472,14 @@ public abstract class SystemProfile
                 .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
 
-        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature")
+        Point outsideTemperature = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "outsideTemperature"))
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system")
                 .addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F")
                 .setBacnetId(BacnetIdKt.OUTSIDETEMPERATUREID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String outsideTempId = CCUHsApi.getInstance().addPoint(outsideTemperature);
         CCUHsApi.getInstance().writeHisValById(outsideTempId, 0.0);
         
-        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef)
+        Point outsideHumidity = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "outsideHumidity")).setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity")
                 .addMarker("his").addMarker("sp").setUnit("%").setBacnetId(BacnetIdKt.OUTSIDEHUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setTz(tz).build();
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
@@ -493,26 +493,26 @@ public abstract class SystemProfile
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
         Point systemOccupancy =
-                new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
+                new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "occupancy")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
                                    .setEnums(Occupancy.getEnumStringDefinition()).setTz(tz).build();
         String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
         CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
-        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode")
+        Point systemOperatingMode = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "operatingMode"))
                 .setBacnetId(BacnetIdKt.OPERATIONMODEID).setBacnetType(BacnetUtilKt.MULTI_STATE_VALUE)
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").
                 addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);
-        Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("sp").setTz(tz).build();
+        Point ciRunning = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemCI")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(ciRunning);
-        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity")
+        Point averageHumidity = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "averageHumidity"))
                 .setBacnetId(BacnetIdKt.AVERAGEHUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageHumidity);
-        Point cmHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "cmHumidity").setSiteRef(siteRef).setEquipRef(equipref).
+        Point cmHumidity = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "cmHumidity")).setSiteRef(siteRef).setEquipRef(equipref).
                 setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("sp").
                 setTz(tz).setUnit("%").setBacnetId(BacnetIdKt.HUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).build();
         String cmHumidityId = CCUHsApi.getInstance().addPoint(cmHumidity);
         CCUHsApi.getInstance().writeHisValById(cmHumidityId, 0.0);
-        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature")
+        Point averageTemperature = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "averageTemperature"))
                 .setBacnetId(BacnetIdKt.AVERAGETEMPERATUREID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
         addCMPoints(siteRef, equipref, equipDis, tz);
@@ -530,25 +530,25 @@ public abstract class SystemProfile
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         if(!verifyPointsAvailability("epidemic and mode and state",equipref)){
 
-            Point epidemicModeSystemState = new Point.Builder().setDisplayName(equipDis + "-" + "epidemicModeSystemState").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("epidemic").addMarker("mode").addMarker("state").addMarker("his").addMarker("sp").setEnums("off,prepurge,postpurge,enhancedventilation").setTz(tz).build();
+            Point epidemicModeSystemState = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "epidemicModeSystemState")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("epidemic").addMarker("mode").addMarker("state").addMarker("his").addMarker("sp").setEnums("off,prepurge,postpurge,enhancedventilation").setTz(tz).build();
             String epidemicModeSystemStateId = CCUHsApi.getInstance().addPoint(epidemicModeSystemState);
             CCUHsApi.getInstance().writeHisValById(epidemicModeSystemStateId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and prePurge and enabled",equipref)) {
-            Point smartPrePurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPrePurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            Point smartPrePurgePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemPrePurgeEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
             CCUHsApi.getInstance().writePointForCcuUser(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and postPurge and enabled",equipref)) {
-            Point smartPostPurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPostPurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            Point smartPostPurgePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemPostPurgeEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
             CCUHsApi.getInstance().writePointForCcuUser(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
         }
 
         if(!verifyPointsAvailability("userIntent and enhanced and ventilation and enabled",equipref)) {
-            Point enhancedVentilationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemEnhancedVentilationEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            Point enhancedVentilationPoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemEnhancedVentilationEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
             CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
@@ -562,7 +562,7 @@ public abstract class SystemProfile
     private void createOutsideTempLockoutPoints(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
                                                 String tz) {
         if(!verifyPointsAvailability("config and outsideTemp and cooling and lockout",equipref)) {
-            Point useOutsideTempLockoutCooling = new Point.Builder().setDisplayName(equipDis + "-" + "useOutsideTempLockoutCooling")
+            Point useOutsideTempLockoutCooling = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "useOutsideTempLockoutCooling"))
                                                                 .setSiteRef(siteRef)
                                                                 .setEquipRef(equipref)
                                                                 .addMarker("sp").addMarker("system").setHisInterpolate("cov")
@@ -577,8 +577,8 @@ public abstract class SystemProfile
         }
     
         if(!verifyPointsAvailability("config and outsideTemp and heating and lockout",equipref)) {
-            Point useOutsideTempLockoutHeating = new Point.Builder().setDisplayName(equipDis + "-" +
-                                                                                    "useOutsideTempLockoutHeating")
+            Point useOutsideTempLockoutHeating = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" +
+                                                                                    "useOutsideTempLockoutHeating"))
                                                                     .setSiteRef(siteRef)
                                                                     .setEquipRef(equipref)
                                                                     .addMarker("sp").addMarker("system").setHisInterpolate("cov")
@@ -592,8 +592,8 @@ public abstract class SystemProfile
         }
     
         if(!verifyPointsAvailability("mechanical and cooling and available",equipref)) {
-            Point mechanicalCoolingAvailablePoint = new Point.Builder().setDisplayName(equipDis + "-" +
-                                                                                    "mechanicalCoolingAvailable")
+            Point mechanicalCoolingAvailablePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" +
+                                                                                    "mechanicalCoolingAvailable"))
                                                                     .setSiteRef(siteRef)
                                                                     .setEquipRef(equipref)
                                                                     .addMarker("sp").addMarker("system").setHisInterpolate("cov")
@@ -604,8 +604,8 @@ public abstract class SystemProfile
             hayStack.writeHisValueByIdWithoutCOV(mechanicalCoolingAvailableId, 0.0);
         }
         if(!verifyPointsAvailability("mechanical and heating and available",equipref)) {
-            Point mechanicalHeatingAvailablePoint = new Point.Builder().setDisplayName(equipDis + "-" +
-                                                                                  "mechanicalHeatingAvailable")
+            Point mechanicalHeatingAvailablePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" +
+                                                                                  "mechanicalHeatingAvailable"))
                                                                   .setSiteRef(siteRef)
                                                                   .setEquipRef(equipref)
                                                                   .addMarker("sp").addMarker("system").setHisInterpolate("cov")

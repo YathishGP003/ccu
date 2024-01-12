@@ -11,7 +11,7 @@ fun createReheatTempOffsetTuner(hayStack : CCUHsApi, siteRef : String, equipRef 
                                 tz : String, defaultTag : String, roomRef : String?, floorRef : String?) {
 
     val reheatTempOffset = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheatTempOffset")
+        .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-DAB-reheatTempOffset"))
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
@@ -39,7 +39,7 @@ fun createRelayActivationHysteresisTuner(hayStack : CCUHsApi, siteRef : String, 
                                 tz : String, defaultTag : String, roomRef : String?, floorRef : String?) {
 
     val relayActivationHysteresis = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheatRelayActivationHysteresis")
+        .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-DAB-reheatRelayActivationHysteresis"))
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
@@ -69,7 +69,7 @@ fun createTemperatureProportionalRangeTuner(hayStack : CCUHsApi, siteRef : Strin
                                          tz : String, defaultTag : String, roomRef : String?, floorRef : String?) {
 
     val temperatureProportionalRange = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheatTemperatureProportionalRange")
+        .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-DAB-reheatTemperatureProportionalRange"))
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
@@ -98,7 +98,7 @@ fun createTemperatureIntegralTimeTuner(hayStack : CCUHsApi, siteRef : String, eq
                                             tz : String, defaultTag : String, roomRef : String?, floorRef : String?) {
 
     val temperatureIntegralTime = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheatTemperatureIntegralTime")
+        .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-DAB-reheatTemperatureIntegralTime"))
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
@@ -128,7 +128,7 @@ fun createKFactorTuner(hayStack : CCUHsApi, siteRef : String, equipRef : String,
 
     val typeName = if (type == "igain")  "Integral" else "Proportional";
     val temperatureIntegralTime = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheat${typeName}KFactor")
+        .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-DAB-reheat${typeName}KFactor"))
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)

@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -284,6 +285,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                     } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating1Activate - 1))) {
                         updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
                         relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
+                    } else if(hayStack.readHisValById(logicalPointsList[port]!!) == 1.0) {
+                        relayStages[ Pipe2RelayAssociation.AUX_HEATING_STAGE1.name] = 1
                     }
                 }else{
                     updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
@@ -301,6 +304,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                     } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating2Activate - 1))) {
                         updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
                         relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
+                    } else if(hayStack.readHisValById(logicalPointsList[port]!!) == 1.0) {
+                        relayStages[ Pipe2RelayAssociation.AUX_HEATING_STAGE2.name] = 1
                     }
                 }else{
                     updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)

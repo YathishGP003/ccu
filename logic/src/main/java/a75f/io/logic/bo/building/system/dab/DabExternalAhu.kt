@@ -184,9 +184,6 @@ class DabExternalAhu : DabSystemProfile() {
             hayStack,
             externalSpList,
             loopRunningDirection,
-            dabConfig.coolingLoop.toDouble(),
-            dabConfig.heatingLoop.toDouble(),
-            Tags.DAB
         )
         calculateDSPSetPoints(
             systemEquip,
@@ -194,7 +191,10 @@ class DabExternalAhu : DabSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            analogFanMultiplier
+            dabConfig,
+            analogFanMultiplier,
+            dabConfig.coolingLoop.toDouble(),
+            conditioningMode
         )
         setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
         operateDamper(

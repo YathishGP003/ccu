@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.logic.tuners.SystemTuners
 import a75f.io.logic.tuners.TunerConstants
 import java.util.*
 
@@ -20,7 +21,8 @@ fun addBackFillDurationPointIfNotExists(ccuHsApi: CCUHsApi) {
     val equipDis = Objects.requireNonNull(siteMap["dis"]).toString() + "-SystemEquip"
     if (verifyBackFillPointAvailability(equipRef)) {
         val backFillDurationPoint = Point.Builder().setDisplayName(
-            "$equipDis-backFillDuration"
+            SystemTuners.getDisplayNameFromVariation(
+            "$equipDis-backFillDuration")
         )
             .setSiteRef(siteRef).setEquipRef(equipRef).addMarker("sp").addMarker("system")
             .addMarker("backfill").addMarker("writable").addMarker("config")

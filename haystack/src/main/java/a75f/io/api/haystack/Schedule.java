@@ -109,6 +109,10 @@ public class Schedule extends Entity
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DATE, 1);
         }
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
         return calendar.getTime();
     }
 
@@ -141,8 +145,9 @@ public class Schedule extends Entity
             int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
 
             Date weekStartDate = getWeekStartDate();
+            Date weekEndDate = getWeekEndDate();
             Calendar calendar = Calendar.getInstance();
-            while(weekStartDate.before(getWeekEndDate())){
+            while(weekStartDate.before(weekEndDate)){
                 calendar.setTime(weekStartDate);
                 DateTime currentDateTime = new DateTime(weekStartDate);
                 calendar.add(Calendar.DATE, 1);

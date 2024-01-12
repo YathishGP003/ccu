@@ -51,19 +51,20 @@ public class NamedScheduleUnoccupiedDailog extends DialogFragment {
 
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
         ArrayList<String> DAYS = new ArrayList<>();
-        DAYS.add("MONDAY");
-        DAYS.add("TUESDAY");
-        DAYS.add("WEDNESDAY");
-        DAYS.add("THURSDAY");
-        DAYS.add("FRIDAY");
-        DAYS.add("SATURDAY");
-        DAYS.add("SUNDAY");
+        DAYS.add("Monday");
+        DAYS.add("Tuesday");
+        DAYS.add("Wednesday");
+        DAYS.add("Thursday");
+        DAYS.add("Friday");
+        DAYS.add("Saturday");
+        DAYS.add("Sunday");
 
         title.setText(DAYS.get(getArguments().getInt(PARAM_DAY))+" | ");
         if(isCelsiusTunerAvailableStatus()){
             unOccupied.setText((int)UnitUtils.fahrenheitToCelsiusRelative(schedule.getUnoccupiedZoneSetback()) + "\u00B0C");
         }else {
-            unOccupied.setText(schedule.getUnoccupiedZoneSetback().toString() + "\u00B0F");
+            long value= Math.round(schedule.getUnoccupiedZoneSetback());
+            unOccupied.setText(value + "\u00B0F");
         }
 
         return new AlertDialog.Builder(requireActivity(), R.style.NewDialogStyle)

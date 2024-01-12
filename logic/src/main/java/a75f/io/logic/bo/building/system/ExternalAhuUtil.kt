@@ -297,17 +297,11 @@ fun calculateSATSetPoints(
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
     loopRunningDirection: TempDirection,
-    coolingLoop: Double,
-    heatingLoop: Double,
-    profile: String
 ) {
     val isSetPointEnabled = isConfigEnabled(systemEquip, satSetpointControlEnable)
     if (!isSetPointEnabled) {
         logIt("satSetpointControl disabled")
         return
-    }
-    L.ccu().oaoProfile?.let {
-        checkOaoLoop(basicConfig, conditioningMode, coolingLoop, heatingLoop, profile)
     }
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {
@@ -372,33 +366,6 @@ fun calculateSATSetPoints(
 
 }
 
-fun checkOaoLoop(
-    basicConfig: BasicConfig,
-    conditioningMode: SystemMode,
-    systemCoolingLoopOp: Double,
-    systemHeatingLoopOp: Double,
-    profile: String
-) {
-    val tempDirection = getTempDirection(basicConfig.heatingLoop)
-    if (tempDirection == TempDirection.COOLING &&
-        (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)
-    ) {
-        val smartPurgeFanLoopOp: Double = TunerUtil.readTunerValByQuery(
-            "system and purge and $profile and fan and loop and output",
-            L.ccu().oaoProfile.equipRef
-        )
-        if (L.ccu().oaoProfile.isEconomizingAvailable) {
-            val economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery(
-                "oao and economizing and main and cooling and loop and map",
-                L.ccu().oaoProfile.equipRef
-            )
-            basicConfig.coolingLoop =
-                (systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap).coerceAtLeast(
-                    systemHeatingLoopOp
-                ).coerceAtLeast(smartPurgeFanLoopOp).toInt()
-        }
-    }
-}
 
 fun calculateDSPSetPoints(
     systemEquip: Equip,
@@ -406,22 +373,56 @@ fun calculateDSPSetPoints(
     externalEquipId: String?,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
-    analogFanMultiplier: Double
+    basicConfig: BasicConfig,
+    analogFanMultiplier: Double,
+    coolingLoop: Double,
+    conditioningMode: SystemMode
 ) {
     if (!isConfigEnabled(systemEquip, staticPressureSetpointControlEnable)) {
         logIt("StaticPressureSp is disabled")
         return
     }
-    val fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
+
+    val tempDirection = getTempDirection(basicConfig.heatingLoop)
+    var fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
+    logIt("System Fan loop $fanLoop")
+    if (isFanLoopUpdateRequired(tempDirection, conditioningMode)) {
+        fanLoop = checkOaoLoop(coolingLoop)
+        logIt("After OAO economization  Fan loop $fanLoop")
+    }
+
     val min = Domain.getPointByDomain(systemEquip, systemStaticPressureMinimum)
     val max = Domain.getPointByDomain(systemEquip, systemStaticPressureMaximum)
-    val dspSetPoint: Double = mapToSetPoint(min, max, fanLoop).coerceAtMost(max)
+    var dspSetPoint: Double = mapToSetPoint(min, max, fanLoop).coerceAtMost(max)
+    dspSetPoint = (dspSetPoint * 100.0).roundToInt() / 100.0
     updatePointValue(systemEquip, ductStaticPressureSetpoint, dspSetPoint)
     updatePointValue(systemEquip, fanLoopOutput, fanLoop)
     externalEquipId?.let {
         pushDuctStaticPressure(haystack, externalEquipId, dspSetPoint, externalSpList)
     }
     logIt("DSP Min: $min DSP Max: $max analogFanMultiplier: $analogFanMultiplier ductStaticPressureSetPoint: $dspSetPoint")
+}
+
+fun isFanLoopUpdateRequired(tempDirection: TempDirection, conditioningMode: SystemMode): Boolean {
+    return ( tempDirection == TempDirection.COOLING
+            && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)
+            && (L.ccu().oaoProfile != null)
+            && (L.ccu().oaoProfile.isEconomizingAvailable)
+            )
+}
+
+fun checkOaoLoop(systemCoolingLoopOp: Double): Double {
+
+    val economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery(
+        "oao and economizing and main and cooling and loop and map",
+        L.ccu().oaoProfile.equipRef
+    )
+    logIt("OAO profile is available isEconomizingAvailable ? = ${L.ccu().oaoProfile.isEconomizingAvailable}")
+
+    val updatedFanLoop =
+        (systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap).coerceIn(0.0, 100.0)
+    logIt("economizingToMainCoolingLoopMap = $economizingToMainCoolingLoopMap updatedFanLoop = $updatedFanLoop ")
+    return updatedFanLoop
 }
 
 fun handleHumidityOperation(
@@ -748,7 +749,7 @@ fun getModbusPointValue(query: String): String {
     val value = CCUHsApi.getInstance().readHisValById(pointId)
     val unit = point["unit"]
 
-    return "$value $unit"
+    return " $value $unit"
 }
 
 fun getConfigValue(domainName: String, modelName: String): Boolean {
@@ -761,17 +762,17 @@ fun getSetPoint(domainName: String): String {
     if (point.isEmpty()) return ""
     val unit = Objects.requireNonNull(point["unit"]).toString()
     val value = CCUHsApi.getInstance().readHisValById(point["id"].toString())
-    return (" $value  $unit")
+    return (" $value $unit")
 }
 
 fun getOperatingMode(equipName: String): String {
     val systemEquip = Domain.getSystemEquipByDomainName(equipName)
     val mode = getDefaultValueByDomain(systemEquip!!, operatingMode).toInt()
     return when (SystemController.State.values()[mode]) {
-        SystemController.State.COOLING -> "Cooling"
-        SystemController.State.HEATING -> "Heating"
+        SystemController.State.COOLING -> " Cooling"
+        SystemController.State.HEATING -> " Heating"
         else -> {
-            "OFF"
+            " Off"
         }
     }
 

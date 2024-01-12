@@ -4,6 +4,8 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.BuildConfig
+import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
@@ -65,7 +67,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     override fun buildPoint(pointConfig: PointBuilderConfig): Point {
 
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${pointConfig.modelDef.name}")
+        val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)
             .setEquipRef(pointConfig.equipRef)
             .setFloorRef(pointConfig.configuration?.floorRef)
@@ -113,12 +115,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach { tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }
         }
-        pointConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach { tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
@@ -142,5 +144,20 @@ open class DefaultEquipBuilder : EquipBuilder {
             pointBuilder.setEnums(enums)
         }
         return pointBuilder.build()
+    }
+
+    private fun getDisplayNameFromVariation(dis: String): String? {
+        var displayName = ""
+        displayName =
+            if (BuildConfig.BUILD_TYPE.equals(
+                    "carrier_prod",
+                    ignoreCase = true
+                )
+            ) {
+                dis.replace("(?i)-DAB-".toRegex(), "-VVT-")
+            } else {
+                dis
+            }
+        return displayName
     }
 }

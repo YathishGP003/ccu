@@ -616,6 +616,13 @@ public class SmartNode
             case SENSOR_ILLUMINANCE: return "illuminanceSensor";
             case SENSOR_OCCUPANCY: return "occupancySensor";
             case SENSOR_PRESSURE: return "pressureSensor";
+
+            case SENSOR_SOUND: return "soundSensor";
+            case SENSOR_CO: return "coSensor";
+            case SENSOR_NO: return "noSensor";
+            case SENSOR_CO2_EQUIVALENT: return "co2EquivalentSensor";
+            case SENSOR_PM2P5: return "pm25Sensor";
+
             case RSSI: return "rssi";
             default: return null;
         }
@@ -625,6 +632,15 @@ public class SmartNode
         switch(p) {
             case SENSOR_CO2: return DomainName.zoneCO2;
             case SENSOR_VOC: return DomainName.zoneVoc;
+            case SENSOR_ILLUMINANCE: return DomainName.zoneIlluminance;
+            case SENSOR_SOUND: return DomainName.zoneSound;
+            case SENSOR_PM2P5: return DomainName.zonePm25;
+            case SENSOR_CO: return DomainName.zoneCo;
+            case SENSOR_NO: return DomainName.zoneNo;
+            case SENSOR_UVI: return DomainName.zoneUvi;
+            case SENSOR_CO2_EQUIVALENT: return DomainName.zoneCo2Equivalent;
+            case SENSOR_OCCUPANCY: return DomainName.zoneOccupancy;
+
             default: return null;
         }
     }

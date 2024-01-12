@@ -318,7 +318,7 @@ public class Pulse
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {
-				if (isDomainEquip && (p.equals(SENSOR_CO2) || p.equals(SENSOR_VOC))) {
+				if (isDomainEquip) {
 					sp = node.addDomainEquipSensorFromRawPoint(sp, p);
 				} else {
 					sp = node.addEquipSensorFromRawPoint(sp, p);

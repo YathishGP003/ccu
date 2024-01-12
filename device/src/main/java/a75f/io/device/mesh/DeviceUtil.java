@@ -17,12 +17,17 @@ import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 import static a75f.io.logic.bo.building.definitions.Port.RSSI;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2_EQUIVALENT;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_ILLUMINANCE;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_NO;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_OCCUPANCY;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PM2P5;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PRESSURE;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RH;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RT;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_SOUND;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_UVI;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_VOC;
 import static a75f.io.logic.bo.building.definitions.Port.TH1_IN;
@@ -379,6 +384,13 @@ public class DeviceUtil {
             case "illuminanceSensor": return SENSOR_ILLUMINANCE;
             case "uviSensor": return SENSOR_UVI;
             case "pressureSensor": return SENSOR_PRESSURE;
+
+            case "soundSensor": return SENSOR_SOUND;
+            case "coSensor": return SENSOR_CO;
+            case "noSensor": return SENSOR_NO;
+            case "co2EquivalentSensor": return SENSOR_CO2_EQUIVALENT;
+            case "pm25Sensor": return SENSOR_PM2P5;
+
             case "rssi": return RSSI;
             default: return null;
         }

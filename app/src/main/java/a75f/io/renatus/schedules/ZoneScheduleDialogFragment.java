@@ -626,6 +626,34 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             public void onNothingSelected(AdapterView<?> parentView) {
             }
         });
+        heatingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        coolingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         buttonCancel.setOnClickListener(view12 ->{
             mListener.onClickCancel(mSchedule.getId());

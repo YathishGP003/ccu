@@ -5,6 +5,7 @@ import a75f.io.domain.api.Point
 
 class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
 
+    val CARRIER_PROD = "carrier_prod"
     val zoneTemperatureDeadLeeway = Point(DomainName.zoneTemperatureDeadLeeway, equipRef)
     val heartBeatsToSkip = Point(DomainName.heartBeatsToSkip, equipRef)
     val humidityCompensationOffset = Point(DomainName.humidityCompensationOffset, equipRef)
@@ -136,34 +137,34 @@ class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
     val standaloneAnalogFanSpeedMultiplier = Point(DomainName.standaloneAnalogFanSpeedMultiplier, equipRef)
     val standaloneStage2HeatingUpperOffset = Point(DomainName.standaloneStage2HeatingUpperOffset, equipRef)
 
-    val dabStageDownTimerCounter = Point(DomainName.dabStageDownTimerCounter, equipRef)
-    val dabIntegralKFactor = Point(DomainName.dabIntegralKFactor, equipRef)
-    val dabModeChangeoverHysteresis = Point(DomainName.dabModeChangeoverHysteresis, equipRef)
-    val dabAnalogFanSpeedMultiplier = Point(DomainName.dabAnalogFanSpeedMultiplier, equipRef)
-    val dabZonePrioritySpread = Point(DomainName.dabZonePrioritySpread, equipRef)
-    val dabHeatingDeadbandMultiplier = Point(DomainName.dabHeatingDeadbandMultiplier, equipRef)
-    val dabTemperatureProportionalRange = Point(DomainName.dabTemperatureProportionalRange, equipRef)
-    val dabRelayDeactivationHysteresis = Point(DomainName.dabRelayDeactivationHysteresis, equipRef)
-    val dabZoneVOCTarget = Point(DomainName.dabZoneVOCTarget, equipRef)
-    val dabZoneVOCThreshold = Point(DomainName.dabZoneVOCThreshold, equipRef)
-    val dabTargetCumulativeDamper = Point(DomainName.dabTargetCumulativeDamper, equipRef)
-    val dabStageUpTimerCounter = Point(DomainName.dabStageUpTimerCounter, equipRef)
-    val dabZoneCO2Target = Point(DomainName.dabZoneCO2Target, equipRef)
-    val dabProportionalKFactor = Point(DomainName.dabProportionalKFactor, equipRef)
-    val dabZonePriorityMultiplier = Point(DomainName.dabZonePriorityMultiplier, equipRef)
-    val dabTemperatureIntegralTime = Point(DomainName.dabTemperatureIntegralTime, equipRef)
-    val dabCoolingDeadband = Point(DomainName.dabCoolingDeadband, equipRef)
-    val dabZoneCO2Threshold = Point(DomainName.dabZoneCO2Threshold, equipRef)
-    val dabHeatingDeadband = Point(DomainName.dabHeatingDeadband, equipRef)
-    val dabCoolingDeadbandMultiplier = Point(DomainName.dabCoolingDeadbandMultiplier, equipRef)
-    val dabOutsideTempHeatingLockout = Point(DomainName.dabOutsideTempHeatingLockout, equipRef)
-    val dabHumidityHysteresis = Point(DomainName.dabHumidityHysteresis, equipRef)
-    val dabOutsideTempCoolingLockout = Point(DomainName.dabOutsideTempCoolingLockout, equipRef)
-    val dabReheatRelayActivationHysteresis = Point(DomainName.dabReheatRelayActivationHysteresis, equipRef)
-    val dabReheatTemperatureIntegralTime = Point(DomainName.dabReheatTemperatureIntegralTime, equipRef)
+    val dabStageDownTimerCounter = Point(getDisplayNameFromVariation(DomainName.dabStageDownTimerCounter), equipRef)
+    val dabIntegralKFactor = Point(getDisplayNameFromVariation(DomainName.dabIntegralKFactor), equipRef)
+    val dabModeChangeoverHysteresis = Point(getDisplayNameFromVariation(DomainName.dabModeChangeoverHysteresis), equipRef)
+    val dabAnalogFanSpeedMultiplier = Point(getDisplayNameFromVariation(DomainName.dabAnalogFanSpeedMultiplier), equipRef)
+    val dabZonePrioritySpread = Point(getDisplayNameFromVariation(DomainName.dabZonePrioritySpread), equipRef)
+    val dabHeatingDeadbandMultiplier = Point(getDisplayNameFromVariation(DomainName.dabHeatingDeadbandMultiplier), equipRef)
+    val dabTemperatureProportionalRange = Point(getDisplayNameFromVariation(DomainName.dabTemperatureProportionalRange), equipRef)
+    val dabRelayDeactivationHysteresis = Point(getDisplayNameFromVariation(DomainName.dabRelayDeactivationHysteresis), equipRef)
+    val dabZoneVOCTarget = Point(getDisplayNameFromVariation(DomainName.dabZoneVOCTarget), equipRef)
+    val dabZoneVOCThreshold = Point(getDisplayNameFromVariation(DomainName.dabZoneVOCThreshold), equipRef)
+    val dabTargetCumulativeDamper = Point(getDisplayNameFromVariation(DomainName.dabTargetCumulativeDamper), equipRef)
+    val dabStageUpTimerCounter = Point(getDisplayNameFromVariation(DomainName.dabStageUpTimerCounter), equipRef)
+    val dabZoneCO2Target = Point(getDisplayNameFromVariation(DomainName.dabZoneCO2Target), equipRef)
+    val dabProportionalKFactor = Point(getDisplayNameFromVariation(DomainName.dabProportionalKFactor), equipRef)
+    val dabZonePriorityMultiplier = Point(getDisplayNameFromVariation(DomainName.dabZonePriorityMultiplier), equipRef)
+    val dabTemperatureIntegralTime = Point(getDisplayNameFromVariation(DomainName.dabTemperatureIntegralTime), equipRef)
+    val dabCoolingDeadband = Point(getDisplayNameFromVariation(DomainName.dabCoolingDeadband), equipRef)
+    val dabZoneCO2Threshold = Point(getDisplayNameFromVariation(DomainName.dabZoneCO2Threshold), equipRef)
+    val dabHeatingDeadband = Point(getDisplayNameFromVariation(DomainName.dabHeatingDeadband), equipRef)
+    val dabCoolingDeadbandMultiplier = Point(getDisplayNameFromVariation(DomainName.dabCoolingDeadbandMultiplier), equipRef)
+    val dabOutsideTempHeatingLockout = Point(getDisplayNameFromVariation(DomainName.dabOutsideTempHeatingLockout), equipRef)
+    val dabHumidityHysteresis = Point(getDisplayNameFromVariation(DomainName.dabHumidityHysteresis), equipRef)
+    val dabOutsideTempCoolingLockout = Point(getDisplayNameFromVariation(DomainName.dabOutsideTempCoolingLockout), equipRef)
+    val dabReheatRelayActivationHysteresis = Point(getDisplayNameFromVariation(DomainName.dabReheatRelayActivationHysteresis), equipRef)
+    val dabReheatTemperatureIntegralTime = Point(getDisplayNameFromVariation(DomainName.dabReheatTemperatureIntegralTime), equipRef)
     val reheatTempOffset = Point(DomainName.reheatTempOffset, equipRef)
-    val dabReheatTemperatureProportionalRange = Point(DomainName.dabReheatTemperatureProportionalRange, equipRef)
-    val dabReheatIntegralKFactor = Point(DomainName.dabReheatIntegralKFactor, equipRef)
+    val dabReheatTemperatureProportionalRange = Point(getDisplayNameFromVariation(DomainName.dabReheatTemperatureProportionalRange), equipRef)
+    val dabReheatIntegralKFactor = Point(getDisplayNameFromVariation(DomainName.dabReheatIntegralKFactor), equipRef)
     val reheatProportionalKFactor = Point(DomainName.reheatProportionalKFactor, equipRef)
 
     //TI
@@ -194,9 +195,9 @@ class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
     val enthalpyDuctCompensationOffset = Point(DomainName.enthalpyDuctCompensationOffset, equipRef)
     val systemPostPurgeFanSpeedTuner = Point(DomainName.systemPostPurgeFanSpeedTuner, equipRef)
     val systemPostPurgeOccupiedTimeOffsetTuner = Point(DomainName.systemPostPurgeOccupiedTimeOffsetTuner, equipRef)
-    val systemPurgeDabDamperMinOpenMultiplier = Point(DomainName.systemPurgeDabDamperMinOpenMultiplier, equipRef)
+    val systemPurgeDabDamperMinOpenMultiplier = Point(getDisplayNameFromVariation(DomainName.systemPurgeDabDamperMinOpenMultiplier), equipRef)
     val systemPurgeVavMinFanLoopOutput = Point(DomainName.systemPurgeVavMinFanLoopOutput, equipRef)
-    val systemPurgeDabMinFanLoopOutput = Point(DomainName.systemPurgeDabMinFanLoopOutput, equipRef)
+    val systemPurgeDabMinFanLoopOutput = Point(getDisplayNameFromVariation(DomainName.systemPurgeDabMinFanLoopOutput), equipRef)
     val systemPurgeVavDamperMinOpenMultiplier = Point(DomainName.systemPurgeVavDamperMinOpenMultiplier, equipRef)
     val economizingDryBulbThreshold = Point(DomainName.economizingDryBulbThreshold, equipRef)
 
@@ -289,4 +290,17 @@ class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
     val heatingDeadband = Point(DomainName.heatingDeadband, equipRef)
     val unoccupiedZoneSetback = Point(DomainName.unoccupiedZoneSetback, equipRef)
     val coolingDeadband = Point(DomainName.coolingDeadband, equipRef)
+
+    private fun getDisplayNameFromVariation(dis: String): String {
+        var displayName: String = if (BuildConfig.BUILD_TYPE.equals(
+                    CARRIER_PROD,
+                    ignoreCase = true
+                )
+            ) {
+                dis.replace("(?i)-DAB-".toRegex(), "-VVT-").replace("(?i)DAB".toRegex(), "VVT")
+            } else {
+                dis
+            }
+        return displayName
+    }
 }

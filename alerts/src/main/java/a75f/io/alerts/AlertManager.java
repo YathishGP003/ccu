@@ -232,7 +232,7 @@ public class AlertManager
         if (! repoCheck()) return;
 
         for (Alert a: repo.getActiveDeviceDeadAlerts()){
-            if (a.mMessage.contains(address)){
+            if (a.mMessage.split(",")[a.mMessage.split(",").length-1].contains(address)){
                 fixAlert(a);
             }
         }

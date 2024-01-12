@@ -101,6 +101,8 @@ public class PreferenceUtil {
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
     public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration";
 
+    public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -822,5 +824,13 @@ public class PreferenceUtil {
 
     public static void setZoneEquipConfigPointMigrationDone() {
         setBooleanPreference(ZONE_EQUIP_CONFIG_POINT_MIGRATION, true);
+    }
+
+    public static boolean getCarrierDabToVvtMigration() {
+        return getBooleanPreference(CARRIER_POINT_MIGRATION_DAB_TO_VVT);
+    }
+
+    public static void setCarrierDabToVvtMigrationDone() {
+        setBooleanPreference(CARRIER_POINT_MIGRATION_DAB_TO_VVT, true);
     }
 }

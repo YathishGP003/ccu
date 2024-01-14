@@ -270,7 +270,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
-            vavEquip.getReheatCmd().writeHisVal(damperPos);
+            vavEquip.getReheatCmd().writeHisVal(0);
             vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead : "+getFanStatusMessage());
             vavEquip.getSeriesFanCmd().writeHisVal(0);

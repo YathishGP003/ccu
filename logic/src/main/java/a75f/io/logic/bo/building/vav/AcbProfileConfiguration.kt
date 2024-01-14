@@ -70,6 +70,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
         minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
 
+        if (!(maxCFMCooling.currentVal > 0.0)) maxCFMCooling.currentVal = 250.0
+        if (!(minCFMCooling.currentVal > 0.0)) minCFMCooling.currentVal = 50.0
+        if (!(maxCFMReheating.currentVal > 0.0)) maxCFMReheating.currentVal = 250.0
+        if (!(minCFMReheating.currentVal > 0.0)) minCFMReheating.currentVal = 50.0
+
         isDefault = true
 
         return this
@@ -123,6 +128,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)
             maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
             minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
+
+            if (!(maxCFMCooling.currentVal > 0.0)) maxCFMCooling.currentVal = 250.0
+            if (!(minCFMCooling.currentVal > 0.0)) minCFMCooling.currentVal = 50.0
+            if (!(maxCFMReheating.currentVal > 0.0)) maxCFMReheating.currentVal = 250.0
+            if (!(minCFMReheating.currentVal > 0.0)) minCFMReheating.currentVal = 50.0
         }
 
 

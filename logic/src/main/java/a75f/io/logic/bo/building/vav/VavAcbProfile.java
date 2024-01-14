@@ -182,7 +182,7 @@ public class VavAcbProfile extends VavProfile
             vavEquip.getDamperCmd().writeHisVal(damperPos);
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
             ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(0.0);
-            ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(damperPos);
+            ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(0.0);
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }

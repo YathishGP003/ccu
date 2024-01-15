@@ -571,7 +571,7 @@ public class VavSystemController extends SystemController
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and (space or current) and temp and equipRef == \"" + q.getId() + "\"") > 0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and (space or current) and temp and sensor and equipRef == \"" + q.getId() + "\"") > 0;
         } catch (Exception e) {
             return false;
         }
@@ -617,7 +617,7 @@ public class VavSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and (current or space) and equipRef == \""+equipRef+"\"");
     }
     
     @Override

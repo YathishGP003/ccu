@@ -233,12 +233,14 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
+        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} heat ${basicConfig.heatingLoop}")
         if (basicConfig.coolingLoop > 0)
             loopRunningDirection = TempDirection.COOLING
         if (basicConfig.heatingLoop > 0)
             loopRunningDirection = TempDirection.HEATING
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
+        logIt("Changed direction $loopRunningDirection ");
     }
 
     private fun getBasicDabConfigData() =

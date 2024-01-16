@@ -82,7 +82,7 @@ configurations {
 /***
  * domainLibVersion domain modeler JSON Library version please update when there is update in library
  */
-def domainLibVersion = "20240110.1-qa"
+def domainLibVersion = "20240111.2-qa"
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
     customImplementation('io.seventyfivef:domain-modeler-lib:'+domainLibVersion)  {

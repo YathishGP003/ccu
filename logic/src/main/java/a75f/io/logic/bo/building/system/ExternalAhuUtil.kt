@@ -217,7 +217,6 @@ fun mapModbusPoint(
     val point = haystack.readEntity("$query and equipRef == \"$equipId\"")
     if (point.isNotEmpty()) {
         val pointId = point[Tags.ID].toString()
-        logIt("External ${setPointsList.contains(pointId)} ${point["shortDis"]}")
         if (!setPointsList.contains(pointId))
             setPointsList.add(pointId)
         val currentHisValue = haystack.readHisValById(pointId)
@@ -240,29 +239,39 @@ fun updateDefaultSetPoints(
     return when (conditioningMode) {
         SystemMode.AUTO, SystemMode.OFF -> {
             if (!isDualSetPointEnabled) {
-                Domain.getPointByDomain(systemEquip, systemSATMinimum)
+                when (lastLoopDirection) {
+                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
+                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
+                }
             } else {
                 when (lastLoopDirection) {
                     TempDirection.COOLING -> Domain.getPointByDomain(
                         systemEquip,
                         systemCoolingSATMaximum
                     )
-
                     else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
                 }
             }
         }
 
         SystemMode.HEATONLY -> {
-            if (!isDualSetPointEnabled)
-                Domain.getPointByDomain(systemEquip, systemSATMinimum)
+            if (!isDualSetPointEnabled) {
+                when (lastLoopDirection) {
+                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
+                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
+                }
+            }
             else
                 Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
         }
 
         SystemMode.COOLONLY -> {
-            if (!isDualSetPointEnabled)
-                Domain.getPointByDomain(systemEquip, systemSATMaximum)
+            if (!isDualSetPointEnabled) {
+                when (lastLoopDirection) {
+                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
+                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
+                }
+            }
             else
                 Domain.getPointByDomain(systemEquip, systemCoolingSATMaximum)
         }
@@ -345,7 +354,7 @@ fun calculateSATSetPoints(
                     " coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue"
         )
     } else {
-        val satSetPointLimits = getSingleSetPointMinMax(systemEquip, basicConfig.heatingLoop)
+        val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
         val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0)
             updateDefaultSetPoints(conditioningMode, systemEquip, loopRunningDirection)
         else
@@ -359,7 +368,7 @@ fun calculateSATSetPoints(
             haystack
         )
         logIt(
-            "Single SP  min (${satSetPointLimits.first}, ${satSetPointLimits.second})" +
+            "Single SP Direction $loopRunningDirection min (${satSetPointLimits.first}, ${satSetPointLimits.second})" +
                     " setpoint $satSetPointValue"
         )
     }
@@ -586,7 +595,7 @@ fun setOccupancyMode(
     externalSpList: ArrayList<String>,
 ) {
     val occupancyMode = when (occupancy) {
-        Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
+        Occupancy.UNOCCUPIED, Occupancy.VACATION, Occupancy.PRECONDITIONING -> 0.0
         else -> 1.0
     }
 
@@ -624,15 +633,14 @@ private fun calculateDamperOperationPercent(
 }
 
 
-fun getSingleSetPointMinMax(equip: Equip, heatingLoop: Int): Pair<Double, Double> {
-    return when (getTempDirection(heatingLoop)) {
+fun getSingleSetPointMinMax(equip: Equip, tempDirection: TempDirection): Pair<Double, Double> {
+    return when (tempDirection) {
         TempDirection.COOLING -> {
             Pair(
                 Domain.getPointByDomain(equip, systemSATMaximum),
                 Domain.getPointByDomain(equip, systemSATMinimum)
             )
         }
-
         TempDirection.HEATING -> {
             Pair(
                 Domain.getPointByDomain(equip, systemSATMinimum),

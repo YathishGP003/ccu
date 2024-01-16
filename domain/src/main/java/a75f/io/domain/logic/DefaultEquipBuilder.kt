@@ -9,6 +9,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -100,6 +101,12 @@ open class DefaultEquipBuilder : EquipBuilder {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
+        }
+
+        if (pointConfig.modelDef is SeventyFiveFTunerPointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
         }
 
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {

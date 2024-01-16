@@ -297,7 +297,7 @@ public class InstallerOptions extends Fragment {
             addressBand.add(String.valueOf(addr));
         }
 
-        ArrayList<HashMap> equipments = CCUHsApi.getInstance().readAll("equip and zone");
+        ArrayList<HashMap> equipments = CCUHsApi.getInstance().readAll("equip and zone or equip and oao");
         if (equipments.size() == 0)
             getRegisteredAddressBand(); // doing this when no equips available
         else

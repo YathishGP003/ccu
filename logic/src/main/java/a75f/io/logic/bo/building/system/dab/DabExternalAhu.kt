@@ -149,7 +149,8 @@ class DabExternalAhu : DabSystemProfile() {
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateSystemStatusPoints(systemEquip.id, scheduleStatus, equipScheduleStatus)
         CcuLog.d(
-            L.TAG_CCU_SYSTEM, "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
+            L.TAG_CCU_SYSTEM,
+            "systemStatusMessage: $statusMessage ScheduleStatus $scheduleStatus"
         )
     }
 
@@ -231,16 +232,21 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
-        if (basicConfig.coolingLoop > 0) loopRunningDirection = TempDirection.COOLING
-        if (basicConfig.heatingLoop > 0) loopRunningDirection = TempDirection.HEATING
+        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} heat ${basicConfig.heatingLoop}")
+        if (basicConfig.coolingLoop > 0)
+            loopRunningDirection = TempDirection.COOLING
+        if (basicConfig.heatingLoop > 0)
+            loopRunningDirection = TempDirection.HEATING
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
+        logIt("Changed direction $loopRunningDirection ");
     }
 
-    private fun getBasicDabConfigData() = BasicConfig(
-        coolingLoop = if (dabSystem.coolingSignal <= 0) 0 else dabSystem.coolingSignal,
-        heatingLoop = if (dabSystem.heatingSignal <= 0) 0 else dabSystem.heatingSignal,
-        loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
-        weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
-    )
+    private fun getBasicDabConfigData() =
+        BasicConfig(
+            coolingLoop = if (dabSystem.coolingSignal <= 0 ) 0 else dabSystem.coolingSignal,
+            heatingLoop = if (dabSystem.heatingSignal <= 0 ) 0 else dabSystem.heatingSignal,
+            loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
+            weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
+        )
 }

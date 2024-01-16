@@ -50,6 +50,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.RxjavaUtil
@@ -734,6 +735,9 @@ fun addSystemEquip(
     )
     systemProfile.updateAhuRef(equipId)
     ControlMote(equipId)
+    if (systemProfile is VavExternalAhu) {
+        systemProfile.initTRSystem()
+    }
 }
 
 fun getModbusPointValue(query: String): String {

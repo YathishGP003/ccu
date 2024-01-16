@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system.vav
 
+import a75.io.algos.vav.VavTRSystem
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
@@ -112,8 +113,16 @@ class VavExternalAhu : VavSystemProfile() {
     }
 
     override fun doSystemControl() {
+        if (trSystem != null) {
+            trSystem.processResetResponse()
+        }
         VavSystemController.getInstance().runVavSystemControlAlgo()
         updateSystemPoints()
+        setTrTargetVals()
+    }
+
+    fun initTRSystem() {
+        trSystem = VavTRSystem()
     }
 
     override fun addSystemEquip() {
@@ -126,6 +135,7 @@ class VavExternalAhu : VavSystemProfile() {
                 hayStack.deleteEntityTree(equip[Tags.ID].toString())
             }
         }
+        initTRSystem()
     }
 
     @Synchronized
@@ -184,9 +194,6 @@ class VavExternalAhu : VavSystemProfile() {
             hayStack,
             externalSpList,
             loopRunningDirection,
-            vavConfig.coolingLoop.toDouble(),
-            vavConfig.heatingLoop.toDouble(),
-            Tags.VAV
         )
         calculateDSPSetPoints(
             systemEquip,
@@ -194,7 +201,10 @@ class VavExternalAhu : VavSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            analogFanMultiplier
+            vavConfig,
+            analogFanMultiplier,
+            vavConfig.loopOutput,
+            conditioningMode
         )
         setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
         operateDamper(

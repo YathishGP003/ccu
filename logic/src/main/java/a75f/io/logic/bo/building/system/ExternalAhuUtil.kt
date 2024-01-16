@@ -312,10 +312,11 @@ fun calculateSATSetPoints(
         logIt("satSetpointControl disabled")
         return
     }
+    logIt("Cooling lockout ${L.ccu().systemProfile.isCoolingLockoutActive} heating lockout ${L.ccu().systemProfile.isHeatingLockoutActive}")
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {
         val satSetPointLimits = getDualSetPointMinMax(systemEquip)
-        val coolingSatSetPointValue = if (basicConfig.coolingLoop.toDouble() == 0.0)
+        val coolingSatSetPointValue = if (basicConfig.coolingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isCoolingLockoutActive)
             updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.COOLING)
         else
             mapToSetPoint(
@@ -324,7 +325,7 @@ fun calculateSATSetPoints(
                 basicConfig.coolingLoop.toDouble()
             )
 
-        val heatingSatSetPointValue = if (basicConfig.heatingLoop.toDouble() == 0.0)
+        val heatingSatSetPointValue = if (basicConfig.heatingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isHeatingLockoutActive)
             updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.HEATING)
         else
             mapToSetPoint(
@@ -355,7 +356,13 @@ fun calculateSATSetPoints(
         )
     } else {
         val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
-        val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0)
+        var isLockoutActive = false
+        if (loopRunningDirection == TempDirection.COOLING)
+            isLockoutActive = L.ccu().systemProfile.isCoolingLockoutActive
+        if (loopRunningDirection == TempDirection.HEATING)
+            isLockoutActive = L.ccu().systemProfile.isHeatingLockoutActive
+        logIt( "isLockoutActive:$isLockoutActive ")
+        val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0 || isLockoutActive)
             updateDefaultSetPoints(conditioningMode, systemEquip, loopRunningDirection)
         else
             mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, basicConfig.loopOutput)

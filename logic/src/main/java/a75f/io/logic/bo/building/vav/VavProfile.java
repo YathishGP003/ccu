@@ -744,21 +744,27 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     protected String getAcbStatusMessage() {
+        String message = "";
         if (profileType == ProfileType.VAV_ACB) {
             VavAcbEquip acbEquip = (VavAcbEquip)vavEquip;
             if (acbEquip.getCondensateNC().readHisVal() > 0.0 || acbEquip.getCondensateNO().readHisVal() > 0.0) {
-                return ", Condensate Detected";
-            } else if (acbEquip.getValveType().readPriorityVal() > 0.0) {
+                message += ", Condensate Detected";
+            }
+            if (acbEquip.getValveType().readPriorityVal() > 0.0) {
                 if (acbEquip.getChwValveCmd().readHisVal() > 0.0) {
-                    return ", CHW Valve ON";
+                    message += ", CHW Valve ON";
+                } else {
+                    message += ", CHW Valve OFF";
                 }
             } else {
                 if (acbEquip.getChwShutOffValve().readHisVal() > 0.0) {
-                    return ", CHW Valve ON";
+                    message += ", CHW Valve ON";
+                } else {
+                    message += ", CHW Valve OFF";
                 }
             }
         }
-        return "";
+        return message;
     }
 
     protected void updateDamperPosForTrueCfm(CCUHsApi hayStack, SystemController.State systemState) {

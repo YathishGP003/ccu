@@ -79,6 +79,8 @@ class HyperStatFragment : BaseDialogFragment() {
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
+    private lateinit var tvZoneCO2Threshold: TextView
+    private lateinit var llCO2Threshold:LinearLayout
     private lateinit var zoneCO2DamperOpeningRate: Spinner
     private lateinit var zoneCO2Threshold: Spinner
     private lateinit var zoneCO2Target: Spinner
@@ -277,6 +279,8 @@ class HyperStatFragment : BaseDialogFragment() {
 
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
+            tvZoneCO2Threshold=findViewById(R.id.zoneCO2Threshold)
+            llCO2Threshold=findViewById(R.id.lLC02Threshold)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
@@ -426,6 +430,7 @@ class HyperStatFragment : BaseDialogFragment() {
     private var pendingPmConfigChange : Boolean = true
     private var pendingDisplayChange : Boolean = true
 
+    @SuppressLint("SuspiciousIndentation")
     private fun setUpViewListeners() {
         tempOffsetSelector.setOnValueChangedListener { _, _, newVal ->
             viewModel.tempOffsetSelected(newVal)
@@ -637,6 +642,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
         pendingDisplayChange = false
     }
+    @SuppressLint("ResourceType")
     private fun renderRelayAndAnalogOutEnabled(viewState: ViewState) {
         var isCoolingStage1Enabled = false
         var isCoolingStage2Enabled = false
@@ -766,6 +772,25 @@ class HyperStatFragment : BaseDialogFragment() {
             }
             zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
             tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+            //Linear layout of C02Threshold
+            val paramsLlCO2Threshold = llCO2Threshold.layoutParams as LinearLayout.LayoutParams
+            //TextView of C02Threshold
+            val paramsTvCO2Threshold = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+
+            if (isDampSelected) {
+                // If isDampSelected is true, set the margin to start: 10dp, end: 10dp
+                paramsLlCO2Threshold.setMargins(resources.getDimensionPixelSize(R.dimen.start_margin), 0, resources.getDimensionPixelSize(R.dimen.end_margin), 0)
+                // If isDampSelected is true, set the margin end: -48dp
+                paramsTvCO2Threshold.setMargins(0,0,-48,0)
+            } else {
+                // Otherwise, set the margin to end: 250dp
+                paramsLlCO2Threshold.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.large_end_margin), 0)
+                // If isDampSelected is true, set the margin end: 25dp
+                paramsTvCO2Threshold.setMargins(0,0,25,0)
+            }
+            //set the margins
+            llCO2Threshold.layoutParams = paramsLlCO2Threshold
+            tvZoneCO2Threshold.layoutParams=paramsTvCO2Threshold
         }
         pendingAnalogOutChange = false
         pendingRelayChange = false

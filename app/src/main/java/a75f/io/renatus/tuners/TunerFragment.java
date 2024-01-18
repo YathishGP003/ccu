@@ -715,8 +715,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
-        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system");
+        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and not default");
+        HashMap<Object,Object> buildingEquip = CCUHsApi.getInstance().readEntity("equip and building");
         ArrayList<HashMap> moduleTuners = new ArrayList<>();
+
+        String buildingEquipRef = buildingEquip.get("id").toString();
 
 
         ArrayList<Equip> equipArrayList = new ArrayList<>();
@@ -733,8 +736,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             moduleTuners.addAll(CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + equip.getId() + "\""));
         }
 
+
         for (HashMap m : systemTuners) {
-            if (!m.get("dis").toString().contains("Building")) {
+            // check for equipref for system and do for module
+            if (!(m.get("equipRef").toString().equals(buildingEquipRef))) {
                 tuners.add(m);
            }
         }

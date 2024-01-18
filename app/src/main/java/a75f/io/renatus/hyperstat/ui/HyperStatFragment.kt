@@ -79,6 +79,8 @@ class HyperStatFragment : BaseDialogFragment() {
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
+    private lateinit var tvZoneCO2Threshold: TextView
+    private lateinit var llCO2Threshold:LinearLayout
     private lateinit var zoneCO2DamperOpeningRate: Spinner
     private lateinit var zoneCO2Threshold: Spinner
     private lateinit var zoneCO2Target: Spinner
@@ -277,6 +279,8 @@ class HyperStatFragment : BaseDialogFragment() {
 
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
+            tvZoneCO2Threshold=findViewById(R.id.zoneCO2Threshold)
+            llCO2Threshold=findViewById(R.id.lLC02Threshold)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
             tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
@@ -426,6 +430,7 @@ class HyperStatFragment : BaseDialogFragment() {
     private var pendingPmConfigChange : Boolean = true
     private var pendingDisplayChange : Boolean = true
 
+    @SuppressLint("SuspiciousIndentation")
     private fun setUpViewListeners() {
         tempOffsetSelector.setOnValueChangedListener { _, _, newVal ->
             viewModel.tempOffsetSelected(newVal)
@@ -637,6 +642,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
         pendingDisplayChange = false
     }
+    @SuppressLint("ResourceType")
     private fun renderRelayAndAnalogOutEnabled(viewState: ViewState) {
         var isCoolingStage1Enabled = false
         var isCoolingStage2Enabled = false
@@ -647,46 +653,6 @@ class HyperStatFragment : BaseDialogFragment() {
         var isStagedFanEnabled = false
         var isDampSelected = false
 
-
-        viewState.relays.forEachIndexed { index, relayState ->
-            with(relayUIs[index]) {
-                switch.isChecked = relayState.enabled
-                selector.isEnabled = relayState.enabled
-                selector.setSelection(relayState.association)
-
-                if (relayState.enabled) {
-                    when (relayState.association) {
-                        CpuRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
-                        CpuRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
-                        CpuRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
-                    }
-                }
-                if (isViewModelCPUViewModel(viewModel)) {
-                    makeStagedFanVisible(
-                        isCoolingStage1Enabled,
-                        isCoolingStage2Enabled,
-                        isCoolingStage3Enabled,
-                        isHeatingStage1Enabled,
-                        isHeatingStage2Enabled,
-                        isHeatingStage3Enabled,
-                        isStagedFanEnabled
-                    )
-                } else {
-                    makeStagedFanVisible(
-                        isCoolingStage1Enabled = false,
-                        isCoolingStage2Enabled = false,
-                        isCoolingStage3Enabled = false,
-                        isHeatingStage1Enabled = false,
-                        isHeatingStage2Enabled = false,
-                        isHeatingStage3Enabled = false,
-                        false
-                    )
-                }
-            }
-        }
         viewState.analogOutUis.forEachIndexed { index, analogOutState ->
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
@@ -766,6 +732,66 @@ class HyperStatFragment : BaseDialogFragment() {
             }
             zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
             tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+            //Linear layout of C02Threshold
+            val paramsLlCO2Threshold = llCO2Threshold.layoutParams as LinearLayout.LayoutParams
+            //TextView of C02Threshold
+            val paramsTvCO2Threshold = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+
+            if (isDampSelected) {
+                // If isDampSelected is true, set the margin to start: 10dp, end: 10dp
+                paramsLlCO2Threshold.setMargins(resources.getDimensionPixelSize(R.dimen.start_margin), 0, resources.getDimensionPixelSize(R.dimen.end_margin), 0)
+                // If isDampSelected is true, set the margin end: -48dp
+                paramsTvCO2Threshold.setMargins(0,0,-48,0)
+            } else {
+                // Otherwise, set the margin to end: 250dp
+                paramsLlCO2Threshold.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.large_end_margin), 0)
+                // If isDampSelected is true, set the margin end: 25dp
+                paramsTvCO2Threshold.setMargins(0,0,25,0)
+            }
+            //set the margins
+            llCO2Threshold.layoutParams = paramsLlCO2Threshold
+            tvZoneCO2Threshold.layoutParams=paramsTvCO2Threshold
+        }
+
+
+        viewState.relays.forEachIndexed { index, relayState ->
+            with(relayUIs[index]) {
+                switch.isChecked = relayState.enabled
+                selector.isEnabled = relayState.enabled
+                selector.setSelection(relayState.association)
+
+                if (relayState.enabled) {
+                    when (relayState.association) {
+                        CpuRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
+                    }
+                }
+                if (isViewModelCPUViewModel(viewModel)) {
+                    makeStagedFanVisible(
+                        isCoolingStage1Enabled,
+                        isCoolingStage2Enabled,
+                        isCoolingStage3Enabled,
+                        isHeatingStage1Enabled,
+                        isHeatingStage2Enabled,
+                        isHeatingStage3Enabled,
+                        isStagedFanEnabled
+                    )
+                } else {
+                    makeStagedFanVisible(
+                        isCoolingStage1Enabled = false,
+                        isCoolingStage2Enabled = false,
+                        isCoolingStage3Enabled = false,
+                        isHeatingStage1Enabled = false,
+                        isHeatingStage2Enabled = false,
+                        isHeatingStage3Enabled = false,
+                        false
+                    )
+                }
+            }
         }
         pendingAnalogOutChange = false
         pendingRelayChange = false

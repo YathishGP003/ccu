@@ -451,6 +451,7 @@ public class HSUtil
         markers.remove(Tags.HIS);
         markers.remove(Tags.SP);
         markers.remove(Tags.SYSTEM);
+        markers.remove(Tags.CUR);
         return markers;
     }
     

@@ -869,7 +869,7 @@ public class VavTuners {
                                .setRoomRef(roomRef)
                                .setFloorRef(floorRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                               .addMarker("pspread").addMarker("sp")
+                               .addMarker("pspread").addMarker("sp").addMarker("temp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
@@ -884,7 +884,7 @@ public class VavTuners {
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                    .addMarker("itimeout").addMarker("sp")
+                                    .addMarker("itimeout").addMarker("sp").addMarker("temp")
                                     .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                     .setUnit("m")
                                     .setTz(tz)

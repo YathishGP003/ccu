@@ -251,7 +251,7 @@ class SchedulabeLimits {
             hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0)
             hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK)
             if(!isBuilding){
-                val buildingPoint: HashMap<Any, Any> = hayStack.readEntity("schedulable and unoccupied and zone and setback " +
+                val buildingPoint: HashMap<Any, Any> = hayStack.readEntity("schedulable and unoccupied and setback " +
                         "and default")
                 val pointVal = HSUtil.getPriorityLevelVal(buildingPoint["id"].toString(), 16)
                 if (pointVal > 0)

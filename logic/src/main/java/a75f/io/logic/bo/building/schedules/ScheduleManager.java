@@ -445,6 +445,9 @@ public class ScheduleManager {
                             }
                         }
                     }
+                } else {
+                        clearLevel10(roomRef);
+                        clearUnoccupiedSetbackChange(roomRef);
                 }
             } else if (equipSchedule.getMarkers().contains("specialschedule")) {
                 Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
@@ -1082,5 +1085,11 @@ public class ScheduleManager {
         HashMap<Object, Object> deadBand =
                 CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
         CCUHsApi.getInstance().clearPointArrayLevel(deadBand.get("id").toString(),HayStackConstants.USER_APP_WRITE_LEVEL,false);
+    }
+
+    private void clearUnoccupiedSetbackChange(String roomRef) {
+        HashMap<Object, Object> unoccupiedZoneSetback =
+                CCUHsApi.getInstance().readEntity("schedulable and point and setback and unoccupied and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().clearPointArrayLevel(unoccupiedZoneSetback.get("id").toString(), HayStackConstants.USER_APP_WRITE_LEVEL, false);
     }
 }

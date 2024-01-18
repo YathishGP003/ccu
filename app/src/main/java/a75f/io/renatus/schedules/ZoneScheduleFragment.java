@@ -513,11 +513,6 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
                 }
             }
-            CCUHsApi ccuApi = CCUHsApi.getInstance();
-            String zoneSetbackPointId = ccuApi.getInstance().readEntity("setback and unoccupied and zone and roomRef==\""+schedule.getRoomRef()+"\"").get("id").toString();
-            if(ccuApi.readPoint(zoneSetbackPointId).get(HayStackConstants.USER_APP_WRITE_LEVEL - 1).get("val")!=null) {
-                ccuApi.clearPointArrayLevel(zoneSetbackPointId, HayStackConstants.USER_APP_WRITE_LEVEL, false);
-            }
         }
 
         if (position != ZoneScheduleDialogFragment.NO_REPLACE) {

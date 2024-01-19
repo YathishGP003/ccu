@@ -197,4 +197,17 @@ public class CCUUiUtil {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
     }
+
+    public static boolean isValidMacAddress(String ip) {
+        //String regex = "^(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})$";
+        String regex = "^[a-fA-F0-9]{2}(.[a-fA-F0-9]{2}){5}$";
+        Pattern p = Pattern.compile(regex);
+        if (ip == null) {
+            return false;
+        }
+        //pattern class contains matcher() method to find matching between given Mac address and regular expression.
+        Matcher m = p.matcher(ip);
+        // Return if the mac address matched the ReGex
+        return m.matches();
+    }
 }

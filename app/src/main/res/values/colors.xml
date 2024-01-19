@@ -100,4 +100,7 @@
     <color name="lite_pink">#1AE24301</color>
     <color name ="config_color">#212121</color>
     <color name="ctaOrange">#E5561A</color>
+    <color name="resp_header_bg">#EBECED</color>
+    <color name="resp_header_title_bg">#666666</color>
+
 </resources>

@@ -285,6 +285,7 @@ dependencies {
     implementation 'com.instabug.library:instabug:12.1.0'
     implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
 
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
 }
 

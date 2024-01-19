@@ -63,6 +63,14 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         context.sendBroadcast(intent)
     }
 
+    fun sendBroadCast(context: Context, intentAction: String, message: String, deviceId: String) {
+        Log.i("sendBroadCast", ""+intentAction)
+        val intent = Intent(intentAction)
+        intent.putExtra("message", message)
+        intent.putExtra("deviceId", deviceId)
+        context.sendBroadcast(intent)
+    }
+
     fun populateBacnetConfigurationObject() : JSONObject {
 
         val configObject = JSONObject();

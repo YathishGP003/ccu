@@ -1206,7 +1206,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.8"
                         android:inputType="number"
-                        android:maxLength="2"
+                        android:maxLength="3"
                         android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
@@ -1386,6 +1386,7 @@
                     </LinearLayout>
 
                     <TextView
+                        android:visibility="gone"
                         android:id="@+id/tvFdAdd"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"

@@ -19,7 +19,7 @@
             android:textStyle="bold" />
 
         <LinearLayout
-            android:id="@+id/container_property"
+            android:id="@+id/container_network_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_25"
@@ -102,8 +102,92 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:id="@+id/label_destination_mac_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/lato_regular"
+                        android:paddingTop="8dp"
+                        android:text="@string/label_destination_mac_address"
+                        android:textColor="#333333"
+                        android:textSize="@dimen/sp_22"
+                        android:textStyle="normal" />
+
+                    <EditText
+                        android:maxLines="2"
+                        android:id="@+id/et_destination_mac"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="text"
+                        android:maxLength="40"
+                        android:text="00.00.00.00.00.01"
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:id="@+id/label_dnet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dp_100"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/lato_regular"
+                        android:text="@string/label_dnet"
+                        android:textColor="#333333"
+                        android:textSize="@dimen/sp_22"
+                        android:textStyle="normal" />
+
+
+                    <EditText
+                        android:id="@+id/etDnet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin_40"
+                        android:layout_weight="1"
+                        android:digits="0123456789."
+                        android:inputType="number"
+                        android:maxLength="15"
+                        android:text="2"
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
+                </LinearLayout>
+
+            </LinearLayout>
+
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_below="@+id/container_network_data"
+            android:id="@+id/container_property"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_25"
+            android:orientation="vertical"/>
 
         <Button
             android:id="@+id/btnAddObject"
@@ -142,6 +226,39 @@
             android:text="@string/txt_read_property"
             android:textColor="?orange_75f"
             android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/label_response"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnReadProperty"
+            android:layout_marginTop="@dimen/margin_40"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/label_response"
+            android:textColor="#333333"
+            android:textSize="@dimen/sp_24"
+            android:textStyle="bold" />
+
+        <include
+            android:id="@+id/bac_resp_header"
+            layout="@layout/lyt_bac_resp_header_multi_read"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/label_response"
+            android:layout_marginStart="@dimen/dp_25"
+            android:layout_marginTop="@dimen/dp_12"
+            android:layout_marginEnd="@dimen/dp_25" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bac_resp_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/bac_resp_header"
+            android:layout_marginStart="@dimen/dp_25"
+            android:layout_marginTop="@dimen/dp_12"
+            tools:listitem="@layout/lyt_bac_resp_row_multi_read_item_"
+            tools:itemCount="5"
+            android:layout_marginEnd="@dimen/dp_25" />
     </RelativeLayout>
 
 </androidx.core.widget.NestedScrollView>

@@ -67,10 +67,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
+import java.util.Enumeration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import a75f.io.api.haystack.Tags;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
@@ -192,6 +196,9 @@ public class Communication extends Fragment {
 
     @BindView(R.id.bbmdInputViews)
     LinearLayout bbmdInputViews;
+
+    @BindView(R.id.iv_refresh_ip)
+    ImageView ivRefreshView;
 
     SharedPreferences sharedPreferences;
     JSONObject config;
@@ -358,6 +365,14 @@ public class Communication extends Fragment {
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        ivRefreshView.setOnClickListener(view12 -> {
+            if(!UtilityApplication.isBACnetIntialized()){
+                getIpAddress();
+            }else{
+                Toast.makeText(requireContext(), "Disable bacnet to fetch ip", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -915,5 +930,34 @@ public class Communication extends Fragment {
         if (executorService != null) {
             executorService.shutdown();
         }
+    }
+    private void getIpAddress() {
+        String deviceIpAddress = "";
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                // filters out 127.0.0.1 and inactive interfaces
+                if (iface.isLoopback() || !iface.isUp()) {
+                    continue;
+                }
+                if (iface.getName().startsWith("wlan") || iface.getName().startsWith("eth")) {
+                    Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
+                            Log.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
+                            deviceIpAddress = addr.getHostAddress();
+                            if(iface.getName().startsWith("eth")){
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ipAddress.setText(deviceIpAddress);
     }
 }

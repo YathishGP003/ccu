@@ -222,7 +222,7 @@ public class TunerUtil
     
     public static double getProportionalGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap pgain = hayStack.read("point and tuner and pgain and not trueCFM and equipRef == \""+equipRef+"\"");
+        HashMap pgain = hayStack.read("point and tuner and pgain and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
         if (!pgain.isEmpty()) {
             ArrayList values = hayStack.readPoint(pgain.get("id").toString());
             if (values != null && values.size() > 0) {
@@ -239,7 +239,7 @@ public class TunerUtil
     
     public static double getIntegralGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap integralGain = hayStack.read("point and tuner and igain and not trueCFM and equipRef == \""+equipRef+"\"");
+        HashMap integralGain = hayStack.read("point and tuner and igain and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
         
         if (!integralGain.isEmpty()) {
             ArrayList values = hayStack.readPoint(integralGain.get("id").toString());
@@ -257,7 +257,7 @@ public class TunerUtil
     
     public static double getProportionalSpread(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and not trueCFM and equipRef == \""+equipRef+"\"");
+        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
         
         if (!proportionalSpread.isEmpty()) {
             ArrayList values = hayStack.readPoint(proportionalSpread.get("id").toString());
@@ -275,7 +275,7 @@ public class TunerUtil
     
     public static double getIntegralTimeout(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap itimeout = hayStack.read("point and tuner and itimeout and not trueCFM and equipRef == \""+equipRef+"\"");
+        HashMap itimeout = hayStack.read("point and tuner and itimeout and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
         
         if (!itimeout.isEmpty()) {
             ArrayList values = hayStack.readPoint(itimeout.get("id").toString());

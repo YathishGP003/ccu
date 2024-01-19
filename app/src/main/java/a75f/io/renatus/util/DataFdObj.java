@@ -6,13 +6,13 @@ import java.util.ArrayList;
 
 public class DataFdObj {
     @SerializedName("register_fd")
-    private ArrayList<DataFd> listOfDataFd;
+    private DataFd dataFd;
 
-    public DataFdObj() {
-        this.listOfDataFd = new ArrayList<>();
+    public DataFd getDataFd() {
+        return dataFd;
     }
 
-    public void addItem(DataFd item) {
-        listOfDataFd.add(item);
+    public void setDataFd(DataFd dataFd) {
+        this.dataFd = dataFd;
     }
 }

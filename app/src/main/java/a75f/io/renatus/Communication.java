@@ -78,6 +78,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
+import a75f.io.renatus.util.DataFd;
+import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
@@ -326,7 +328,9 @@ public class Communication extends Fragment {
 
                         Log.d(TAG_CCU_BACNET, "fd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
                                 etBbmdPort.getText().toString() + "<--time-->" + etBbmdMask.getText().toString());
-                        dataFdObj.addItem(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+//                        dataFdObj.addItem(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+//                                Integer.parseInt(etBbmdMask.getText().toString())));
+                        dataFdObj.setDataFd(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
                                 Integer.parseInt(etBbmdMask.getText().toString())));
                     }
 
@@ -417,10 +421,14 @@ public class Communication extends Fragment {
                 etBbmdIp.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
-                etBbmdPort.setError(getString(R.string.txt_error_port));
+            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+                etBbmdPort.setError(getString(R.string.txt_valid_number));
                 return false;
             }
+//            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
+//                etBbmdPort.setError(getString(R.string.txt_error_port));
+//                return false;
+//            }
             if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
@@ -443,10 +451,10 @@ public class Communication extends Fragment {
                 etBbmdIp.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
+            /*if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
                 etBbmdPort.setError(getString(R.string.txt_error_port));
                 return false;
-            }
+            }*/
             if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
@@ -923,7 +931,7 @@ public class Communication extends Fragment {
             hideView(etOffsetValues, tvOffsetValue);
             startRestServer();
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
-            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App");
+            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
             performConfigFileBackup();
         }
     }

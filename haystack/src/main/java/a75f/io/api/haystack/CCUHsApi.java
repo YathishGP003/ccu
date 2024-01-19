@@ -2,6 +2,9 @@ package a75f.io.api.haystack;
 
 import static android.widget.Toast.LENGTH_LONG;
 
+import static a75f.io.api.haystack.Tags.DEVICE;
+import static a75f.io.api.haystack.Tags.SYSTEM;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.Context;
@@ -390,6 +393,18 @@ public class CCUHsApi
         if(!isBuildingTunerEquip){
             q.setCcuRef(getCcuId());
         }
+        if(!isBuildingTunerEquip(q)) {
+            if (q.getMarkers() != null && q.getMarkers().contains(SYSTEM)) {
+                q.setBacnetId(0);
+                q.setBacnetType(DEVICE);
+            } else if (q.getRoomRef() != null) {
+                q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
+                q.setBacnetType(DEVICE);
+            }
+        }
+
+
+
         q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());

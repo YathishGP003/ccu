@@ -88,6 +88,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class CCUTagsDb extends HServer {
 
+    static final String DEVICE = "device";
+    static final String SYSTEM = "system";
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
@@ -676,6 +678,16 @@ public class CCUTagsDb extends HServer {
             equip.add("capacity", q.getCapacity());
         }
 
+        if (q.getBacnetType() != null) {
+            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
+                equip.add(Tags.BACNET_ID, 0);
+                equip.add(Tags.BACNET_TYPE, DEVICE);
+            }else if(q.getRoomRef() != null){
+                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup()));
+                equip.add(Tags.BACNET_TYPE, DEVICE);
+            }
+        }
+
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -750,6 +762,19 @@ public class CCUTagsDb extends HServer {
         if (q.getCapacity() != null) {
             equip.add("capacity", q.getCapacity());
         }
+
+        if (q.getBacnetType() != null) {
+            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
+                equip.add(Tags.BACNET_ID, 0);
+                equip.add(Tags.BACNET_TYPE, DEVICE);
+            }else if(q.getRoomRef() != null){
+                equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup()));
+                equip.add(Tags.BACNET_TYPE, DEVICE);
+            }
+        }
+
+
+
         for (String m : q.getMarkers()) {
             equip.add(m);
         }

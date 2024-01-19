@@ -89,6 +89,8 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  DAB External AHU Controller</item>
+        <item>  VAV External AHU Controller</item>
     </string-array>
 
     <string-array name="system_profile_select_daikin">
@@ -102,6 +104,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  DAB External AHU Controller</item>
         <item>  Daikin IE RTU</item>
     </string-array>
 
@@ -1641,6 +1644,14 @@
     <string name="txt_remove">REMOVE</string>
     <string name="txt_mask">Mask <font color="#e5561a">*</font></string>
     <string name="txt_mask_hint">Recommended 0 to 32</string>
+    <string name="supply_airflow_temp">Supply Airflow Temperature:</string>
+    <string name="duct_static_pressure">Duct Static pressure:</string>
+    <string name="current">Current </string>
+    <string name="setpoint">Setpoint </string>
+    <string name="heating_setpoint">Heating Setpoint </string>
+    <string name="cooling_setpoint">Cooling Setpoint </string>
+    <string name="operating_mode">Operating Mode </string>
+
     <string name="txt_dynamic_airflow_balancing">Dynamic Airflow Balancing</string>
     <string name="txt_variable_volume_and_temperature">Variable Volume &amp; Temperature</string>
     <string name="txt_vvtc">VVT-C</string>

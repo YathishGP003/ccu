@@ -1,13 +1,15 @@
 package a75f.io.logic.bo.building.schedules;
 
+import static a75f.io.domain.api.DomainName.coolingPreconditioningRate;
+import static a75f.io.domain.api.DomainName.heatingPreconditioningRate;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.NONE;
-import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NONE;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
@@ -52,30 +54,19 @@ import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.ZoneTempState;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
-import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 
 public class ScheduleManager {
     
@@ -649,14 +640,13 @@ public class ScheduleManager {
                 if (L.ccu().systemProfile.getSystemController()
                                          .getConditioningForecast(nextOccupied) == SystemController.State.COOLING) {
                     if(preconRate == 0)
-                        preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate",
-                                                                   L.ccu().systemProfile.getSystemEquipRef());
+                        preconRate = getCoolingPreconditioningRate();
                     preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
                 } else if (L.ccu().systemProfile.getSystemController()
                                                 .getConditioningForecast(nextOccupied) == SystemController.State.HEATING) {
                     if(preconRate == 0)
-                        preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate",
-                                                                   L.ccu().systemProfile.getSystemEquipRef());
+                        preconRate = getHeatingPreconditioningRate();
+
                     preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
                 }
             }
@@ -1024,7 +1014,7 @@ public class ScheduleManager {
     }
     
     public double getSystemCoolingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getCoolingVal() + setback : currentOccupiedInfo.getCoolingVal();
@@ -1035,7 +1025,7 @@ public class ScheduleManager {
     }
     
     public double getSystemHeatingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unoccupied and setback");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         currentOccupiedInfo.getHeatingVal() - setback : currentOccupiedInfo.getHeatingVal();
@@ -1089,5 +1079,26 @@ public class ScheduleManager {
         HashMap<Object, Object> deadBand =
                 CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
         CCUHsApi.getInstance().clearPointArrayLevel(deadBand.get("id").toString(),HayStackConstants.USER_APP_WRITE_LEVEL,false);
+    }
+
+
+    private static double getCoolingPreconditioningRate() {
+        if (L.ccu().systemProfile instanceof DabExternalAhu
+                || L.ccu().systemProfile instanceof VavExternalAhu) {
+            return getPointByDomain(coolingPreconditioningRate);
+        } else {
+            return TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+        }
+    }
+    private static double getHeatingPreconditioningRate() {
+        if (L.ccu().systemProfile instanceof DabExternalAhu
+                || L.ccu().systemProfile instanceof VavExternalAhu) {
+            return getPointByDomain(heatingPreconditioningRate);
+        } else {
+            return TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+        }
+    }
+    private static double getPointByDomain(String domainName) {
+        return  TunerUtil.readTunerValByQuery("domainName == \""+domainName+"\"", L.ccu().systemProfile.getSystemEquipRef());
     }
 }

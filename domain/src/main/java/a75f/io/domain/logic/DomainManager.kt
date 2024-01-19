@@ -22,6 +22,14 @@ object DomainManager {
             Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
         }
         site?.let { Domain.site = Site(site.displayName, site.id) }
+
+        val ccu =  hayStack.ccu
+        ccu?.let {
+            Domain.site?.addCcu(it)
+            addSystemEquip(hayStack, it["id"].toString())
+            addSystemDevice(hayStack, it["id"].toString())
+        }
+
         val floors = hayStack.readAllEntities("floor")
         floors.forEach{ floor ->
             val floorId = floor["id"]
@@ -43,6 +51,42 @@ object DomainManager {
         }
     }
 
+    private fun addSystemEquip(hayStack: CCUHsApi, ccuId: String) {
+        val systemEquip = hayStack.readAllEntities("system and equip")
+        systemEquip.forEach { equip->
+            val equipId = equip["id"]
+            equipId?.let {
+                Domain.site?.ccus?.get(ccuId)?.addEquip(equip)
+                val points =
+                    hayStack.readAllEntities("point and equipRef == \"$equipId\"")
+                points.forEach { point ->
+                    val domainName = point["domainName"]
+                    domainName?.let {
+                        Domain.site?.ccus?.get(ccuId)?.equips?.get(equipId.toString())?.addPoint(point)
+
+                    }
+                }
+            }
+        }
+    }
+    private fun addSystemDevice(hayStack: CCUHsApi,ccuId: String) {
+        val devices = hayStack.readAllEntities("device and roomRef == \"SYSTEM\"")
+        devices.forEach { device ->
+            val deviceId = device["id"]
+            deviceId?.let {
+                Domain.site?.ccus?.get(ccuId)?.addDevice(device)
+                val points =
+                    hayStack.readAllEntities("point and deviceRef == \"$deviceId\"")
+                points.forEach { point ->
+                    val domainName = point["domainName"]
+                    domainName?.let {
+                        Domain.site?.ccus?.get(ccuId)?.devices?.get(deviceId)?.addPoint(point)
+                    }
+                }
+            }
+        }
+    }
+
     private fun addEquips(hayStack: CCUHsApi, floorId : String, roomId : String) {
         val equips = hayStack.readAllEntities("equip and roomRef == \"$roomId\"")
         equips.forEach { equip ->
@@ -57,7 +101,6 @@ object DomainManager {
                         Domain.site?.floors?.get(floorId)?.rooms
                             ?.get(roomId)?.equips?.get(equipId.toString())?.addPoint(point)
                     }
-
                 }
             }
         }

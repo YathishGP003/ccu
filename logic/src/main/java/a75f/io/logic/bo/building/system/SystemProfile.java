@@ -8,11 +8,13 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -33,6 +35,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxjavaUtil;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -679,7 +682,7 @@ public abstract class SystemProfile
         }
 
         if (externalTemp != 0) {
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
             CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
         }
     }
@@ -720,9 +723,31 @@ public abstract class SystemProfile
         hayStack.writeHisValByQuery("system and config and outsideTemp and heating and lockout", enabled ?
                                                                                                      1.0 : 0);
     }
+
+
+    public void setCoolingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                "and cooling and lockout and equipRef ==\""
+                +ccu().systemProfile.getSystemEquipRef()+"\"");
+        if (!coolingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
+                    HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
+    }
+
+    public void setHeatingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                "and heating and lockout and equipRef ==\""
+                +ccu().systemProfile.getSystemEquipRef()+"\"");
+
+        if (!heatingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
+                    HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
+    }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {
-        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp");
+        double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp and not lockout");
         if (outsideAirTemp == 0 && ccu().oaoProfile != null) {
             //We could be here when weather API fails or the device is offline and oao is paired.
             //Try to read LocalOAT fed by the thermistor.
@@ -778,5 +803,20 @@ public abstract class SystemProfile
     public void writeSystemLoopOutputValue(String state, double value){
         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
+    }
+
+    public void removeSystemEquipModbus() {
+        // TODO if it has modbus Equip Revisit when we add Bacnet support
+        HashMap modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
+        if (modbusEquip != null && !modbusEquip.isEmpty()) {
+            CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusEquip.get("id")).toString());
+            HashMap modbusDevice = CCUHsApi.getInstance().readEntity("modbus and device and equipRef == \"" + Objects.requireNonNull(modbusEquip.get("id")) + "\"");
+            if (modbusDevice != null && !modbusEquip.isEmpty()) {
+                CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusDevice.get("id")).toString());
+            }
+
+        }
+
+
     }
 }

@@ -940,8 +940,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
-
+        p.getTags().forEach(b::add);
         HRef ref = (HRef) b.get("id");
         HDict dict = b.toDict();
         if (!insertEntity(dict, id)) {
@@ -994,7 +993,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
+        p.getTags().forEach(b::add);
         HRef id = (HRef) b.get("id");
         HDict hDict = b.toDict();
 

@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import org.projecthaystack.HDict
 
 @SuppressLint("StaticFieldLeak")
@@ -65,10 +64,9 @@ object Domain {
     fun getEquipDetailsByDomain(domainName: String): List<Equip> {
         DomainManager.buildDomain(CCUHsApi.getInstance())
         val equips = mutableListOf<Equip>()
-        assert(Domain.site?.floors?.size  == 1)
-        Domain.site?.floors?.entries?.forEach{
+        assert(site?.floors?.size  == 1)
+        site?.floors?.entries?.forEach{
             val floor = it.value
-            assert(floor.rooms.size == 1)
             floor.rooms.entries.forEach { r ->
                 val room =  r.value
                 room.equips.forEach { (_, equip) ->
@@ -79,6 +77,46 @@ object Domain {
             }
         }
         return equips
+    }
+
+    fun getSystemEquipByDomainName(domainName: String): Equip? {
+        DomainManager.buildDomain(CCUHsApi.getInstance())
+        site?.ccus?.entries?.forEach {
+            it.value.equips.forEach { (_,equip)->
+                if (equip.domainName == domainName){
+                    return equip
+                }
+            }
+        }
+        return null
+    }
+
+
+    fun getPointByDomain(equip: Equip, domainName: String): Double {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readDefaultVal() }
+        return 0.0
+    }
+
+    fun getHisByDomain(equip: Equip, domainName: String): Double {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readHisVal() }
+        return 0.0
+    }
+
+    private fun getIdByDomain(equip: Equip, domainName: String): String? {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        return point?.id
+    }
+
+    fun writePointByDomain(equip: Equip, domainName: String, value: Any) {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let {
+            it.writeDefaultVal(value)
+            if (value is Double) {
+                it.writeHisVal(value)
+            }
+        }
     }
 
     @JvmStatic
@@ -99,5 +137,33 @@ object Domain {
     @JvmStatic
     fun readPointOnEquip(domainName: String, equipRef : String) : Map<Any,Any> {
         return hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+    fun readPointValueByDomainName(domainName: String, equipRef : String): Double {
+        return hayStack.readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+    fun readStrPointValueByDomainName(domainName: String, equipRef : String): String {
+        return hayStack.readDefaultStrVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+    @JvmStatic
+    fun readDefaultValByDomain(domainName: String): Double {
+        return hayStack.readDefaultVal("point and domainName == \"$domainName\"")
+    }
+    @JvmStatic
+    fun writeDefaultValByDomain(domainName: String, value: Double) {
+        return hayStack.writeDefaultVal("point and domainName == \"$domainName\"", value)
+    }
+    @JvmStatic
+    fun writeHisValByDomain(domainName: String, value: Double) {
+        return hayStack.writeHisValByQuery("point and domainName == \"$domainName\"", value)
+    }
+
+    @JvmStatic
+    fun writeHisValByDomain(domainName: String, value: Double, equipRef: String) {
+        return hayStack.writeHisValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
+    }
+
+    @JvmStatic
+    fun writeDefaultValByDomain(domainName: String, value: String, equipRef: String) {
+        return hayStack.writeDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
     }
 }

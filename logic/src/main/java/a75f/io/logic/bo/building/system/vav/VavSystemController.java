@@ -20,12 +20,15 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.domain.api.DomainName.averageHumidity;
+import static a75f.io.domain.api.DomainName.averageTemperature;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
@@ -236,9 +239,14 @@ public class VavSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-        
-        systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
-        systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+
+        if (L.ccu().systemProfile instanceof VavExternalAhu) {
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
+        } else {
+            systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
+            systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+        }
 
     }
     

@@ -82,7 +82,7 @@ public class MeshNetwork extends DeviceNetwork
                     for(Device d : HSUtil.getDevices(zone.getId())) {
 
                         if (d.getMarkers().contains("modbus")) {
-                            continue;
+                          continue;
                         }
                         NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))

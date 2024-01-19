@@ -15,11 +15,16 @@ import a75f.io.domain.api.EntityConfig
  * A UI config like autoForcedEnabled would be the simplest with an enabled status and associated value.
  */
 open class BaseConfig (val domainName : String) {
+    lateinit var disName : String
 }
 
 open class EnableConfig (domainName: String, var enabled: Boolean = false) : BaseConfig(domainName)
 
-open class ValueConfig (domainName: String, var currentVal: Double = 0.0) : BaseConfig(domainName)
+open class ValueConfig (domainName: String, var currentVal: Double = 0.0) : BaseConfig(domainName) {
+    var minVal : Double = 0.0
+    var maxVal : Double = 0.0
+    var incVal : Double = 0.0
+}
 
 /**
  * A generic port config without anu specific actuator specified.
@@ -52,3 +57,7 @@ fun <T : BaseConfig> List<T>.containsConfig(domainName : String) : Boolean {
 fun <T : BaseConfig> List<T>.getConfig(domainName : String) : T? {
     return this.find {it.domainName == domainName}
 }
+fun <T : AssociationConfig> List<T>.getConfig(domainName : String) : T? {
+    return this.find {it.domainName == domainName}
+}
+

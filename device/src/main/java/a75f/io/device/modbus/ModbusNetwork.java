@@ -18,9 +18,13 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.ModbusMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 
@@ -32,6 +36,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
 
     public ModbusNetwork() {
         UpdatePointHandler.setModbusWritableDataInterface(this);
+        DabExternalAhu.Companion.getInstance().setModbusWritableDataInterface(this);
     }
     @Override
     public void sendMessage() {
@@ -39,6 +44,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
         LModbus.SERIAL_COMM_TIMEOUT_MS = preferences.getInt("serialCommTimeOut", 300);
         int registerRequestCount = preferences.getInt("registerRequestCount", 3);
@@ -60,6 +66,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         if(count++ >= registerRequestCount && !LModbus.IS_MODBUS_DATA_RECEIVED)
                             break;
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
+
                         CcuLog.d(L.TAG_CCU_MODBUS,
                                 "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
                                         ", count: "+count+
@@ -88,6 +95,44 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
     
     public void sendSystemControl() {
 
+    }
+
+    public void writeSystemModbusRegister(String equipRef, ArrayList<String> registerList) {
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
+        if (equip.getEquipRef() != null) {
+            EquipmentDevice parentEquip = buildModbusModelByEquipRef(equip.getEquipRef());
+            if (!parentEquip.getEquips().isEmpty()) {
+                modbusSubEquipList.addAll(parentEquip.getEquips());
+            }
+        } else {
+            modbusSubEquipList.add(buildModbusModelByEquipRef(equip.getId()));
+        }
+        for (String registerId : registerList) {
+            HashMap<Object, Object> writablePoint = CCUHsApi.getInstance().readMapById(registerId);
+            if (writablePoint.isEmpty()) {
+                CcuLog.e(L.TAG_CCU_MODBUS, "Cant find the point to update "+registerId);
+                return;
+            }
+            short groupId = Short.parseShort(writablePoint.get("group").toString());
+            HashMap<Object, Object> physicalPoint = CCUHsApi.getInstance()
+                    .readEntity("point and pointRef == \"" + writablePoint.get("id").toString() + "\"");
+
+            if (!physicalPoint.isEmpty()) {
+                for (EquipmentDevice modbusDevice : modbusSubEquipList) {
+                    for (Register register : modbusDevice.getRegisters()) {
+                        if (Integer.parseInt(physicalPoint.get("registerAddress").toString())
+                                == register.getRegisterAddress()) {
+                            float priorityVal = (float) HSUtil.getPriorityVal(registerId);
+                            CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
+                                    + register.getRegisterAddress() + " val " + priorityVal);
+                            LModbus.writeRegister(groupId, register, priorityVal);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void writeRegister(String id ) {
@@ -123,9 +168,9 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         int priorityVal = (int) HSUtil.getPriorityVal(id);
                         CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                 + register.getRegisterAddress() + " val " + priorityVal);
-                        if (LSerial.getInstance().isModbusConnected()) {
-                            LModbus.writeRegister(groupId, register, priorityVal);
-                        }
+
+                        LModbus.writeRegister(groupId, register, priorityVal);
+
                     }
                 }
             }

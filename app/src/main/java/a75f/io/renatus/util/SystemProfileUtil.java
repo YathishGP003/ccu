@@ -16,7 +16,10 @@ public class SystemProfileUtil {
     public static void setUserIntentBackground(String query, double val) {
         executeBackground(() -> TunerUtil.writeSystemUserIntentVal(query, val));
     }
-    
+    public static void setUserIntentByDomain(String domainName, double val) {
+        executeBackground(() -> TunerUtil.writeSystemUserIntentVal("domainName == \""+domainName+"\"", val));
+    }
+
     public static void showConditioningDisabledDialog(Activity context, SystemMode mode) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, getDialogStyle());
         String str = "Conditioning Mode changed from '" + mode.name() + "' to '" + SystemMode.OFF.name() + "' based " +

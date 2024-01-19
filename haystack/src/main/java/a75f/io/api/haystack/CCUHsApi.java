@@ -1958,6 +1958,14 @@ public class CCUHsApi
         return null;
     }
 
+    public @Nullable HashMap getCcu() {
+        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        if (ccu.size() > 0) {
+            return ccu;
+        } else {
+            return null;
+        }
+    }
     public @Nullable String getCcuName() {
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         if (ccu.size() > 0) {
@@ -2422,7 +2430,7 @@ public class CCUHsApi
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
                 return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
             } else {
-                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
             }
         }
         return 0;

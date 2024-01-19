@@ -18,23 +18,10 @@ public interface FileBackupService {
             @Part MultipartBody.Part file
     );
 
-    @Multipart
-    @PUT("/files/side-loaded-jsons/{siteId}/{fileId}")
-    public Call<ResponseBody> backupModbusSideLoadedJsons(
-            @Path("siteId") String siteId,
-            @Path("fileId") String fileId,
-            @Part MultipartBody.Part file
-    );
-
     @GET("/files/ccu-local-configs/{siteId}/{fileId}")
     public Call<ResponseBody> getConfigFiles(
             @Path("siteId") String siteId,
             @Path("fileId") String fileId
     );
 
-    @GET("/files/side-loaded-jsons/{siteId}/{fileId}")
-    public Call<ResponseBody> getModbusSideLoadedJsons(
-            @Path("siteId") String siteId,
-            @Path("fileId") String fileId
-    );
 }

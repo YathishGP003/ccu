@@ -46,6 +46,11 @@ import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.ccu.CazProfile;
+import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -396,7 +401,11 @@ public class ScheduleManager {
             if(schedulableOfTheRoom.size() > 7) {
                 SchedulableMigrationKt.deleteDuplicateLimits(roomRef);
             }
-            if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
+            if (profile instanceof ModbusProfile
+                    || profile instanceof HyperStatMonitoringProfile
+                    || profile instanceof PlcProfile
+                    || profile instanceof EmrProfile
+            ) {
                 continue;
             }
 

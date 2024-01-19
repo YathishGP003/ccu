@@ -129,15 +129,16 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
-        return true;
+        CcuLog.w(L.TAG_CCU_MESSAGING, "Do not attempt to reconnect here, The MessagingAckJob will attempt to reconnect.");
+        return false;
     }
 
     @Override
     public boolean onRetryError(ServerSentEvent sse, Throwable throwable, Response response) {
         int responseCode = response != null ? response.code() : 0;
-        CcuLog.w(L.TAG_CCU_MESSAGING, "SSE connection error: [" + responseCode + "]. Attempting to reconnect", throwable);
-        //We will simply request to retry here, assuming the error ie recoverable.
-        return true;
+        CcuLog.w(L.TAG_CCU_MESSAGING, "Do not attempt to reconnect here, The MessagingAckJob will attempt to reconnect." +
+                " SSE connection error: [" + responseCode + "]", throwable);
+        return false;
     }
 
     @Override

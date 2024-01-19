@@ -78,8 +78,8 @@ public class PreferenceUtil {
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
     private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
-    private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
-    private static final String CCUREF_TAG_MIGRATION_DIAG = "ccuRefTagMigrationDiag";
+    private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration1";
+    private static final String CCUREF_TAG_MIGRATION_DIAG = "ccuRefTagMigrationDiag1";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
     private static final String SCHEDULES_MIGRATION = "schedulesMigration";
 

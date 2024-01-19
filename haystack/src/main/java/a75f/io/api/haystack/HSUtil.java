@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.Tags.BACNET_ID;
+
 import android.util.Log;
 
 import com.google.gson.internal.LinkedTreeMap;
@@ -451,6 +453,7 @@ public class HSUtil
         markers.remove(Tags.HIS);
         markers.remove(Tags.SP);
         markers.remove(Tags.SYSTEM);
+        markers.remove(Tags.CUR);
         return markers;
     }
     
@@ -642,5 +645,48 @@ public class HSUtil
 
         }
         return b.toDict();
+    }
+
+    public static int generateBacnetId(String zoneID) {
+        int bacnetID = 1;
+        boolean isBacnetIDUsed = true;
+        try {
+            HashMap currentRoom = CCUHsApi.getInstance().readMapById(zoneID);
+            if (currentRoom!= null && currentRoom.size()>0 && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
+                double bacnetID2 = Double.parseDouble(currentRoom.get(BACNET_ID).toString() + "");
+                Log.d(Tags.BACNET, "Already have bacnetID $bacnetID2");
+                return (int) bacnetID2;
+            }
+            ArrayList<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
+            ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
+            ArrayList<HashMap<Object, Object>> allEntities = new ArrayList<>();
+            allEntities.addAll(rooms);
+            allEntities.addAll(equips);
+            if (allEntities.size() == 0) {
+                Log.d(Tags.BACNET, "rooms size : 0 ");
+                return bacnetID;
+            }
+            while (isBacnetIDUsed) {
+
+                for (HashMap<Object, Object> room : allEntities) {
+                    if (room.containsKey(BACNET_ID)
+                            && Double.parseDouble(room.get(BACNET_ID).toString()) != 0
+                            && Double.parseDouble(room.get(BACNET_ID).toString() + "") == bacnetID
+                    ) {
+                        Log.d(Tags.BACNET, "In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room");
+                        bacnetID += 1;
+                        isBacnetIDUsed = true;
+                        break;
+                    } else {
+                        isBacnetIDUsed = false;
+                    }
+                }
+            }
+            Log.d(Tags.BACNET, "Generated bacnetID: $bacnetID");
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        return Integer.parseInt(zoneID + bacnetID);
     }
 }

@@ -12,7 +12,6 @@ import a75f.io.messaging.client.MessagingClient;
 public class MessagingAckJob {
     private final String ccuId;
     private final MessagingService messagingService;
-
     public MessagingAckJob(String ccuId, String messagingUrl) {
         this.ccuId = ccuId;
         this.messagingService = new ServiceGenerator().createService(messagingUrl);
@@ -30,8 +29,8 @@ public class MessagingAckJob {
         CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
 
         if (!MessagingClient.getInstance().isSubscribed()) {
-            CcuLog.d(L.TAG_CCU_MESSAGING, "Not subscribed , reset connection");
-            MessagingClient.getInstance().resetMessagingConnection();
+            CcuLog.d(L.TAG_CCU_MESSAGING, "Not subscribed , trying to reset the connection");
+            MessagingClient.getInstance().resetMessagingConnection(false);
             return;
         }
         doMessageAck();

@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.util.ResponsesKt.retrieveLevelValues;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -63,10 +65,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import a75f.io.api.haystack.util.BaseResponse;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.ReadAllResponse;
 import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.entities.DatabaseHelper;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -100,6 +104,8 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
     private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
+
+    private static final String BROADCAST_BACNET_POINT_UPDATED = "a75f.io.renatus.BACNET_POINT_UPDATED";
     private static final String TAG_CCU_BACNET = "CCU_BACNET";
     private static final String PREFS_HAS_MIGRATED_ROOM_DB = "hasMigratedRoomDb";
 
@@ -1509,6 +1515,10 @@ public class CCUTagsDb extends HServer {
         }else{
             WritableArrayDBUtilKt.update(writableArray, this.appContext);
         }
+
+        if(isBacNetEnabled()){
+            shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+        }
     }
 
     private a75f.io.data.WriteArray fillValuesFromArray(WriteArray array) {
@@ -1564,7 +1574,9 @@ public class CCUTagsDb extends HServer {
         WritableArray writableArray = new WritableArray(key, data);
         WritableArrayDBUtilKt.update(writableArray, this.appContext);
 
-
+        if (isBacNetEnabled()) {
+            //shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+        }
     }
     
     public HDict getConfig() {
@@ -1903,5 +1915,23 @@ public class CCUTagsDb extends HServer {
                                 .map( h -> h.getValue())
                                 .filter( v -> v.syncStatus == false)
                                 .collect(Collectors.toList());
+    }
+	
+	public boolean isBacNetEnabled() {
+        return PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean("isBACnetinitialized", false);
+    }
+    public void shareUpdatedPointWithBacApp(String id, int level, String val){
+        // check if point has bacnet id
+        boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(id.replace("@","")).containsKey("bacnetId");
+        if(isBacnetPoint){
+            Log.d("CCU_BACNET", "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
+            Intent intent = new Intent(BROADCAST_BACNET_POINT_UPDATED);
+            intent.putExtra("pointId", id);
+            intent.putExtra("level", level);
+            intent.putExtra("val", val);
+            appContext.sendBroadcast(intent);
+        }else{
+            Log.d("CCU_BACNET", "this is not a bacnet point");
+        }
     }
 }

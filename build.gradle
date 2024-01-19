@@ -48,8 +48,8 @@ buildscript {
                 name 'renatus'
                 credentials {
                     username "Azure DevOps Services"
-                    //password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : azureToken
-                    password "monvrqjjkbx3dxcqw6ysty5jrkc7ruayuhawlfxpggqbzs6qeoxq"
+                    password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : azureToken
+                    //password "monvrqjjkbx3dxcqw6ysty5jrkc7ruayuhawlfxpggqbzs6qeoxq"
                 }
             }
         }

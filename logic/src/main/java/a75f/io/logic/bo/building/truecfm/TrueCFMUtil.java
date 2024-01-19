@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavEquip;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
@@ -69,8 +72,10 @@ public class TrueCFMUtil {
     }
     
     public static boolean isTrueCfmEnabled(CCUHsApi hayStack, String equipRef) {
-        return hayStack.readDefaultVal("config and (trueCfm or trueCFM) and enable and equipRef ==\""
-                                                                +equipRef+"\"").intValue() > 0;
+        if (HSUtil.isDomainEquip(equipRef, hayStack)) {
+            return hayStack.readDefaultVal("domainName == \"" + DomainName.enableCFMControl + "\" and equipRef == \"" + equipRef + "\"").intValue() > 0;
+        }
+        return hayStack.readDefaultVal("config and (trueCfm or trueCFM) and enable and equipRef ==\"" +equipRef+"\"").intValue() > 0;
     }
     
     public static double calculateAndUpdateCfm(CCUHsApi hayStack, String equipRef, String damperOrder) {
@@ -131,18 +136,30 @@ public class TrueCFMUtil {
     }
 
     public static double getMaxCFMCooling(CCUHsApi hayStack, String equipId) {
+        if (HSUtil.isDomainEquip(equipId, hayStack)) {
+            return hayStack.readDefaultVal("point and domainName == \"" + DomainName.maxCFMCooling + "\" and equipRef == \"" + equipId + "\"");
+        }
         return hayStack.readDefaultVal("config and max and (trueCfm or trueCFM) and cooling and equipRef == \""+equipId+"\"");
     }
     
     public static double getMinCFMCooling(CCUHsApi hayStack, String equipId) {
+        if (HSUtil.isDomainEquip(equipId, hayStack)) {
+            return hayStack.readDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \"" + equipId + "\"");
+        }
         return hayStack.readDefaultVal("config and min and (trueCfm or trueCFM) and cooling and equipRef == \""+equipId+"\"");
     }
     
     public static double getMaxCFMReheating(CCUHsApi hayStack, String equipId) {
+        if (HSUtil.isDomainEquip(equipId, hayStack)) {
+            return hayStack.readDefaultVal("point and domainName == \"" + DomainName.maxCFMReheating + "\" and equipRef == \"" + equipId + "\"");
+        }
         return hayStack.readDefaultVal("config and max and (trueCfm or trueCFM) and (heating or reheat) and equipRef == \""+equipId+"\"");
     }
     
     public static double getMinCFMReheating(CCUHsApi hayStack, String equipId) {
+        if (HSUtil.isDomainEquip(equipId, hayStack)) {
+            return hayStack.readDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \"" + equipId + "\"");
+        }
         return hayStack.readDefaultVal("config and min and (trueCfm or trueCFM) and (heating or reheat) and equipRef == \""+equipId+"\"");
     }
     

@@ -643,4 +643,11 @@ public class HSUtil
         }
         return b.toDict();
     }
+
+    public static boolean isDomainEquip(String equipRef, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.read("equip and id == " + equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        return equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+    }
+
 }

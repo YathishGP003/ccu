@@ -443,6 +443,8 @@ public class ScheduleManager {
                             }
                         }
                     }
+                } else {
+                    clearLevel10(roomRef);
                 }
             } else if (equipSchedule.getMarkers().contains("specialschedule")) {
                 Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().

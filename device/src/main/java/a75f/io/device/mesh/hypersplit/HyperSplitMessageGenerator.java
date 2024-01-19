@@ -335,7 +335,7 @@ public class HyperSplitMessageGenerator {
 
     private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap collingDeadband = hayStack.read("point and deadband and cooling and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
+        HashMap collingDeadband = hayStack.read("point and deadband and cooling and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
         } catch (NullPointerException e) {
@@ -348,7 +348,7 @@ public class HyperSplitMessageGenerator {
     public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
-                hayStack.read("point and deadband and heating and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
+                hayStack.read("point and deadband and heating and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
                         "\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());

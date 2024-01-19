@@ -180,7 +180,6 @@ public class VavReheatProfile extends VavProfile
     }
     
     private void initLoopVariables() {
-        vavEquip = new VavEquip(equipRef);
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits( (short) nodeAddr, damper);

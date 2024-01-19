@@ -33,6 +33,7 @@ import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -234,8 +235,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
            }
             if (L.isSimulation())
             {
-                showDialogFragment(FragmentVAVConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+                showDialogFragment(VavProfileConfigFragment.Companion
+                                           .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
             }
             else
             {

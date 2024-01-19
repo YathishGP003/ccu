@@ -23,18 +23,24 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
+import a75f.io.device.serial.CondensateSensor_t;
 import a75f.io.device.serial.DamperActuator_t;
+import a75f.io.device.serial.DamperShape_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
+import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -165,11 +171,26 @@ public class LSmartNode
             settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
-        
-        settings.temperatureOffset.set((short)getTempOffset(address));
+
+        settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         
         if(profile == null)
             profile = "dab";
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        if (equip.getProfile().equals("VAV_ACB")) {
+            profile = "acb";
+        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString()) || equip.getProfile().equals(DomainName.vavReheatNoFan)) {
+            profile = "vavNoFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatParallelFan)) {
+            profile = "vavParallelFan";
+        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatSeriesFan)) {
+            profile = "vavSeriesFan";
+        } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
+            profile = "dualDuct";
+        }
+
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
@@ -186,6 +207,26 @@ public class LSmartNode
                 break;
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
+                break;
+            case "vavNoFan":
+                settings.profileBitmap.reserved.set((short)1);
+                setupDamperType(address, settings);
+                break;
+            case "vavSeriesFan":
+                settings.profileBitmap.reserved.set((short)2);
+                setupDamperType(address, settings);
+                break;
+            case "vavParallelFan":
+                settings.profileBitmap.reserved.set((short)3);
+                setupDamperType(address, settings);
+                break;
+            case "acb":
+                settings.profileBitmap.reserved.set((short)4);
+                setupDamperType(address, settings);
+                break;
+            case "dualDuct":
+                settings.profileBitmap.reserved.set((short)5);
+                setupDamperType(address, settings);
                 break;
 
         }
@@ -222,6 +263,49 @@ public class LSmartNode
         }
     }
 
+    public static CcuToCmOverUsbSnSettings2Message_t getSettings2Message(Zone zone, short address, String equipRef, String profile)
+    {
+        CcuToCmOverUsbSnSettings2Message_t settingsMessage =
+                new CcuToCmOverUsbSnSettings2Message_t();
+        settingsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS2);
+        settingsMessage.smartNodeAddress.set(address);
+        fillSmartNodeSettings2(settingsMessage.settings2,zone,address,equipRef, profile);
+        return settingsMessage;
+    }
+    private static void fillSmartNodeSettings2(SmartNodeSettings2_t settings2, Zone zone, short address, String equipRef, String profile) {
+
+        int kFactor = 200;
+        int minCFMCooling = 50;
+        int maxCFMCooling = 250;
+        int minCFMReheating = 50;
+        int maxCFMReheating = 250;
+        DamperShape_t damperShape = DamperShape_t.DAMPER_SHAPE_ROUND;
+        CondensateSensor_t condensateSensor = CondensateSensor_t.CONDENSATE_SENSOR_NORMALLY_OPEN;
+        int damperSize = 4;
+        int airflowCFMProportionalRange = 200;
+        int airflowCFMProportionalKFactor = 50;
+        int airflowCFMIntegralTime = 30;
+        int airflowCFMIntegralKFactor = 50;
+        int enableCFM = 0;
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        settings2.kFactor.set(enableCFM > 0 ? kFactor : 200);
+        settings2.minCFMCooling.set(enableCFM > 0 ? minCFMCooling : 50);
+        settings2.maxCFMCooling.set(enableCFM > 0 ? maxCFMCooling : 250);
+        settings2.minCFMReheating.set(enableCFM > 0 ? minCFMReheating : 50);
+        settings2.maxCFMReheating.set(enableCFM > 0 ? maxCFMReheating : 250);
+        settings2.damperShape.set(damperShape);
+        settings2.condensateSensor.set(condensateSensor);
+        settings2.damperSize.set((short)damperSize);
+        settings2.airflowCFMProportionalRange.set(enableCFM > 0 ? airflowCFMProportionalRange : 200);
+        settings2.airflowCFMProportionalKFactor.set(enableCFM > 0 ? (short)airflowCFMProportionalKFactor : (short)50);
+        settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
+        settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
+        settings2.enableCFM.set((short)enableCFM);
+
+    }
 
     public static void setupDamperType(short address, SmartNodeSettings_t settings){
         CCUHsApi hsApi = CCUHsApi.getInstance();
@@ -234,7 +318,8 @@ public class LSmartNode
         } else if (equip.getMarkers().contains("vav")) {
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
             int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
-            setupDamperActuator(settings, damperConfig, 0, reheatConfig, "vav");
+            // With DM integration, reheatType enum is incremented by 1. ("notInstalled" was -1, now it's zero). This is why we are subtracting 1 from the value here.
+            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
         }
     }
 
@@ -243,13 +328,13 @@ public class LSmartNode
             SmartNodeSettings_t settings,
             int damperConfig, int damper2Config, int reheatConfig, String profileType
     ){
-
         Map<DamperType, DamperActuator_t> damperTypeMap = new HashMap<>();
         damperTypeMap.put(DamperType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
         damperTypeMap.put(DamperType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
         damperTypeMap.put(DamperType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
         damperTypeMap.put(DamperType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
         damperTypeMap.put(DamperType.MAT, DamperActuator_t.DAMPER_ACTUATOR_MAT);
+        damperTypeMap.put(DamperType.ZeroToFiveV, DamperActuator_t.DAMPER_ACTUATOR_0_5V);
 
         Map<ReheatType, DamperActuator_t> reheatTypeMap = new HashMap<>();
         reheatTypeMap.put(ReheatType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
@@ -298,6 +383,12 @@ public class LSmartNode
             if (damperType == DamperType.TenToZeroV && reheatConfig == ReheatType.TwoStage.ordinal()) {
                 return DamperActuator_t.DAMPER_ACTUATOR_10_0V_REHEAT_TWO_STAGE;
             }
+            if (damperType == DamperType.ZeroToFiveV && reheatConfig == ReheatType.OneStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_5V_REHEAT_ONE_STAGE;
+            }
+            if (damperType == DamperType.ZeroToFiveV && reheatConfig == ReheatType.TwoStage.ordinal()) {
+                return DamperActuator_t.DAMPER_ACTUATOR_0_5V_REHEAT_TWO_STAGE;
+            }
             ReheatType config = ReheatType.values()[reheatConfig];
             if (damperType == DamperType.MAT ) {
                 switch (config) {
@@ -344,13 +435,13 @@ public class LSmartNode
                     {
                         //In case of vav - series/paralle fan, relay-2 maps to fan
                         if (isEquipType("series", node) || isEquipType("parallel", node)) {
-                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                                                  mapDigitalOut(p.getType(), logicalVal > 0)
                             );
                         } else {
                             //In case of vav - no fan, relay-2 maps to stage-2
-                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                                 mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                                 mapDigitalOut(p.getType(), isRelayTwo(p) ?
                                                                                             logicalVal > 50 : logicalVal > 0)
                             );
                         }
@@ -360,15 +451,15 @@ public class LSmartNode
                         mappedVal = mapSSEDigitalOut(p.getType(), logicalVal > 0);
                     } else if (isEquipType("dab", node)) {
                         double relay2Threshold = 50;
-                        if (p.getPort().equals(RELAY_TWO)) {
+                        if (isRelayTwo(p)) {
                             double relayActivationHysteresis = TunerUtil.readTunerValByQuery("relay and activation and hysteresis", equipRef);
                             if (hayStack.readHisValById(p.getId()) == 0) {
                                 relay2Threshold = 50 + relayActivationHysteresis;
                             }
                         }
 
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                            mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                            mapDigitalOut(p.getType(), isRelayTwo(p) ?
                                                              logicalVal > relay2Threshold : logicalVal > 0));
                         //Analog2 on DAB profile could be mapped to reheat or damper2. When damper 2 is MAT, type is not configured via
                         //analog.
@@ -381,15 +472,15 @@ public class LSmartNode
                         }
 
                     } else {
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
                     }
 
                     //TODo -MAT is currently configured on analog2 , what if reheat is also configured.
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal >= 0) {
+                    if (isAnalog(p) && p.getType().equals(MAT) && logicalVal >= 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
@@ -403,14 +494,14 @@ public class LSmartNode
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                    LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
+                    LSmartNode.getSmartNodePort(controls_t, p).set(mappedVal);
 
                 }  else {
                     //Disabled output port should reset its val
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controls_t.setTemperature.set((short) (getSetTemp(equipRef) * 2));
+            controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
     
         }
@@ -424,24 +515,44 @@ public class LSmartNode
     public static double getTempOffset(short addr) {
         try
         {
-            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and temperature and offset and group == \"" + addr + "\"");
+            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and (temp or temperature) and offset and group == \"" + addr + "\"");
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
         }
     }
-    
-    public static boolean isAnalog(String port) {
-        switch (port) {
-            case ANALOG_OUT_ONE:
-            case ANALOG_OUT_TWO:
-            case ANALOG_IN_ONE:
-            case ANALOG_IN_TWO:
-                return true;
+
+    public static boolean isAnalog(RawPoint point) {
+        String port = point.getPort();
+        if (port != null) {
+            return port.equals(ANALOG_OUT_ONE)
+                    || port.equals(ANALOG_OUT_TWO)
+                    || port.equals(ANALOG_IN_ONE)
+                    || port.equals(ANALOG_IN_TWO);
+        }
+        String domainName = point.getDomainName();
+        if (domainName != null) {
+            return domainName.equals(DomainName.analog1Out)
+                    || domainName.equals(DomainName.analog2Out)
+                    || domainName.equals(DomainName.analog1In)
+                    || domainName.equals(DomainName.analog2In);
+        }
+
+        return false;
+    }
+
+    public static boolean isRelayTwo(RawPoint point) {
+        String port = point.getPort();
+        if (port != null) {
+            return port == RELAY_TWO;
+        }
+        String domainName = point.getDomainName();
+        if (domainName != null) {
+            return domainName.equals(DomainName.relay2);
         }
         return false;
     }
-    
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -456,6 +567,8 @@ public class LSmartNode
                 return (short) (20 + scaleAnalog(val, 80));
             case "10-2v":
                 return (short) (100 - scaleAnalog(val, 80));
+            case "0-5v":
+                return (short) (scaleAnalog(val, 50));
             default:
                 String [] arrOfStr = type.split("-");
                 if (arrOfStr.length == 2)
@@ -526,7 +639,41 @@ public class LSmartNode
                 return null;
         }
     }
-    
+
+    public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls, RawPoint p) {
+        String port = p.getPort();
+        if (port != null) {
+            switch (port)
+            {
+                case ANALOG_OUT_ONE:
+                    return controls.analogOut1;
+                case ANALOG_OUT_TWO:
+                    return controls.analogOut2;
+                case RELAY_ONE:
+                    return controls.digitalOut1;
+                case RELAY_TWO:
+                    return controls.digitalOut2;
+                default:
+                    return null;
+            }
+        }
+
+        String domainName = p.getDomainName();
+        if (domainName != null) {
+            switch (domainName) {
+                case DomainName.analog1Out:
+                    return controls.analogOut1;
+                case DomainName.analog2Out:
+                    return controls.analogOut2;
+                case DomainName.relay1:
+                    return controls.digitalOut1;
+                case DomainName.relay2:
+                    return controls.digitalOut2;
+            }
+        }
+
+        return null;
+    }
     
     public static double getDesiredTemp(short node)
     {
@@ -565,13 +712,35 @@ public class LSmartNode
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
-            Log.d("CCU","DamperLimit: Invalid point Send Default");
-            return minMax.equals("max") ? 100 : 40 ;
+            ArrayList domainPoints = CCUHsApi.getInstance().readAll("point and domainName == \"" + getDamperLimitDomainName(coolHeat, minMax) + "\" and group == \""+nodeAddr+"\"");
+            if (domainPoints.size() == 0) {
+                Log.d("CCU","DamperLimit: Invalid point Send Default");
+                return minMax.equals("max") ? 100 : 40 ;
+            } else {
+                String id = ((HashMap)domainPoints.get(0)).get("id").toString();
+                return CCUHsApi.getInstance().readPointPriorityVal(id);
+            }
         }
         String id = ((HashMap)points.get(0)).get("id").toString();
         return CCUHsApi.getInstance().readDefaultValById(id);
     }
-    
+
+    public static String getDamperLimitDomainName(String coolHeat, String minMax) {
+        if (coolHeat.equals("heating")) {
+            if (minMax.equals("min")) {
+                return DomainName.minHeatingDamperPos;
+            } else {
+                return DomainName.maxHeatingDamperPos;
+            }
+        } else {
+            if (minMax.equals("min")) {
+                return DomainName.minCoolingDamperPos;
+            } else {
+                return DomainName.maxCoolingDamperPos;
+            }
+        }
+    }
+
     public static double getStatus(short nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
@@ -624,16 +793,16 @@ public class LSmartNode
                     if (isEquipType("vav", Short.parseShort(node)))
                     {
                         //IN case of vav , relay-2 maps to stage-2
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), isRelayTwo(p) ? logicalVal > 50 : logicalVal > 0));
                     } else {
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                        mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
                     }
 
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                    if (isAnalog(p) && p.getType().equals(MAT) && logicalVal > 0) {
                         controlsMessage.controls.damperPosition.set(mappedVal);
                         mappedVal = 0;
                     }
@@ -652,7 +821,7 @@ public class LSmartNode
                 }
             }
             Equip equip = HSUtil.getEquipForModule(Short.valueOf((device.get("addr").toString())));
-            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
+            controlsMessage.controls.setTemperature.set((short)(getSetTemp(equip.getId()) > 0 ? (getSetTemp(equip.getId()) * 2) : 144));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

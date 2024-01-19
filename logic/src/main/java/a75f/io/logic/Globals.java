@@ -28,6 +28,8 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.domain.util.ModelCache;
@@ -236,7 +238,6 @@ public class Globals {
     }
 
     public void startTimerTask(){
-        Log.d(L.TAG_CCU_JOB, " running after db is done");
        // CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
 
         new RestoreCCUHsApi();
@@ -246,20 +247,22 @@ public class Globals {
                 .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band
-        String addrBand = getSmartNodeBand();
-        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        try {
+            String addrBand = getSmartNodeBand();
+            L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        } catch ( NumberFormatException e) {
+            CcuLog.i(L.TAG_CCU_INIT, "Failerd to read device address band ", e);
+            L.ccu().setSmartNodeAddressBand((short)1000);
+        }
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
         DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
-
         updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
-        CcuLog.i(L.TAG_CCU_INIT,"Initialize completed");
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -416,7 +419,7 @@ public class Globals {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
-            switch (ProfileType.valueOf(eq.getProfile())) {
+            switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     L.ccu().systemProfile = new VavFullyModulatingRtu();
                     break;
@@ -472,18 +475,15 @@ public class Globals {
                     CcuLog.d(L.TAG_CCU, "Load Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
-                            VavReheatProfile vr = new VavReheatProfile();
-                            vr.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavReheatProfile vr = new VavReheatProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vr);
                             break;
                         case VAV_SERIES_FAN:
-                            VavSeriesFanProfile vsf = new VavSeriesFanProfile();
-                            vsf.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavSeriesFanProfile vsf = new VavSeriesFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vsf);
                             break;
                         case VAV_PARALLEL_FAN:
-                            VavParallelFanProfile vpf = new VavParallelFanProfile();
-                            vpf.addLogicalMap(Short.parseShort(eq.getGroup()));
+                            VavParallelFanProfile vpf = new VavParallelFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
                             break;
                         case DAB:
@@ -644,13 +644,29 @@ public class Globals {
         }
     }
 
+    private String getDomainSafeProfile(String profile) {
+        switch (profile) {
+            case DomainName.vavReheatNoFan:
+                return ProfileType.VAV_REHEAT.name();
+            case DomainName.vavReheatParallelFan:
+                return ProfileType.VAV_PARALLEL_FAN.name();
+            case DomainName.vavReheatSeriesFan:
+                return ProfileType.VAV_SERIES_FAN.name();
+            default:
+                return profile;
+        }
+    }
+
+
     public String getSmartNodeBand() {
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr");
+        CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
         } else {
             HashMap<Object,Object> band = CCUHsApi.getInstance().readEntity("point and snband");
+            CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
             if (band != null && band.size() > 0 && band.get("val") != null) {
                 return band.get("val").toString();
             }

@@ -510,7 +510,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
                                     int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
                                     if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
-                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
+                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);
                                     } else {
                                         noTempSensor++;
@@ -815,7 +815,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + avgTempEquip.getId() + "\"");
 
             double heatDB = TunerUtil.getZoneHeatingDeadband(avgTempEquip.getRoomRef());
             double coolDB = TunerUtil.getZoneCoolingDeadband(avgTempEquip.getRoomRef());
@@ -1256,7 +1256,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
 
-        Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);
+        Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband+ ", "+heatingDesired+","+coolingDesired);
 
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband+" modeType"+modeType);
@@ -1320,7 +1320,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             double curAvgDt = (coolingDesiredTemp + heatingDesiredTemp) / 2.0;
                             HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                            HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and average and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                            HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and (avg or average) and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             setPointVal(coolDT.get("id").toString(), curCoolDt, heatDT.get("id").toString(), curHeatDt, avgDT.get("id").toString(), curAvgDt);
                         }
                     }
@@ -1979,7 +1979,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+p.getId()+"\"").intValue();
         if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
-            currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+            currentTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + p.getId() + "\"");
         }
 
 
@@ -4215,7 +4215,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double curTemp= 0;
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + avgTempEquip.getId() + "\"");
             currentAverageTemp = (currentAverageTemp + avgTemp);
         }
 

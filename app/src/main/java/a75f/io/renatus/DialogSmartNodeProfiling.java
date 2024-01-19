@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
@@ -27,6 +28,7 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -373,6 +375,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavNoFan)
     void onVAVNoFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
@@ -381,6 +388,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavSeriesFan)
     void onVAVSeriesFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,
@@ -394,6 +406,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavParallelFan)
     void onVAVParallelFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,

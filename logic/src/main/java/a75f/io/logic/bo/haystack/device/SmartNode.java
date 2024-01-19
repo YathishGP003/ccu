@@ -10,12 +10,19 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
+import a75f.io.domain.config.ProfileConfiguration;
+import a75f.io.domain.util.PointsUtil;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by samjithsadasivan on 9/5/18.
@@ -251,6 +258,7 @@ public class SmartNode
         switch (p){
             case SENSOR_NO:
             case SENSOR_CO2_EQUIVALENT:
+            case SENSOR_CO2:
             case SENSOR_CO:
                 sensorUnit = "ppm";
                 break;
@@ -322,13 +330,119 @@ public class SmartNode
         
         return deviceSensor;
     }
-    
+
+    public RawPoint addEquipSensorFromRawPoint(RawPoint deviceSensor, Port p) {
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \""+smartNodeAddress+"\"")).build();
+        String sensorUnit = "";
+        boolean isOccupancySensor = false;
+        switch (p){
+            case SENSOR_NO:
+            case SENSOR_CO2_EQUIVALENT:
+            case SENSOR_CO2:
+            case SENSOR_CO:
+                sensorUnit = "ppm";
+                break;
+            case SENSOR_ILLUMINANCE:
+                sensorUnit = "lux";
+                break;
+            case SENSOR_PRESSURE:
+                sensorUnit = Consts.PRESSURE_UNIT;
+                break;
+            case SENSOR_SOUND:
+                sensorUnit = "dB";
+                break;
+            case SENSOR_VOC:
+                sensorUnit = "ppb";
+                break;
+            case SENSOR_OCCUPANCY:
+                isOccupancySensor = true;
+                break;
+            default:
+                break;
+        }
+
+
+        Point equipSensor;
+        String pointRef;
+        if(isOccupancySensor) {
+
+            equipSensor = new Point.Builder()
+                    .setDisplayName(q.getDisplayName() + "-" + p.getPortSensor()+"Sensor")
+                    .setEquipRef(q.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .setDomainName(getEquipDomainNameFromPort(p))
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical")
+                    .setEnums("off,on")
+                    .setGroup(String.valueOf(smartNodeAddress))
+                    .setTz(tz)
+                    .build();
+            pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+        }else {
+            equipSensor = new Point.Builder()
+                    .setDisplayName(q.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(q.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .setDomainName(getEquipDomainNameFromPort(p))
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical")
+                    .setUnit(sensorUnit)
+                    .setGroup(String.valueOf(smartNodeAddress))
+                    .setTz(tz)
+                    .build();
+            pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+        }
+
+        updatePhysicalPointRef(smartNodeAddress, p, pointRef);
+
+        CCUHsApi.getInstance().scheduleSync();
+
+        return deviceSensor;
+    }
+
+    public RawPoint addDomainEquipSensorFromRawPoint(RawPoint deviceSensor, Port p) {
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \""+smartNodeAddress+"\"")).build();
+
+        PointsUtil pointsUtil = new PointsUtil(CCUHsApi.getInstance());
+        String pointRef = pointsUtil.createDynamicSensorEquipPoint(q, getEquipDomainNameFromPort(p), getConfigurationFromEquip(q, pointsUtil));
+        updatePhysicalPointRef(smartNodeAddress, p, pointRef);
+
+        CCUHsApi.getInstance().scheduleSync();
+
+        return deviceSensor;
+    }
+
+    private ProfileConfiguration getConfigurationFromEquip(Equip equip, PointsUtil pointsUtil) {
+        if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatNoFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatParallelFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)) {
+            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else {
+            return null;
+        }
+    }
+
     public RawPoint getRawPoint(Port p) {
         HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                                                      +" and port == \""+p.toString()+"\"");
+        if (sensorPoint.size() > 0) {
+            return new RawPoint.Builder().setHashMap(sensorPoint).build();
+        }
+
+        sensorPoint = CCUHsApi.getInstance().read("point and domainName == \"" + getDomainNameFromPort(p) + "\" and deviceRef == \"" + deviceRef + "\"");
         return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
     }
-    
+
     public void addPointsToDb() {
         CCUHsApi.getInstance().addPoint(analog1In);
         CCUHsApi.getInstance().addPoint(analog2In);
@@ -361,6 +475,24 @@ public class SmartNode
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
     }
+
+    public static void updateDomainPhysicalPointType(int addr, String domainName, String type) {
+        Log.d("CCU"," Update Physical point "+domainName+" "+type);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        if (point.get("analogType" ) == null || !point.get("analogType" ).equals(type))
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setType(type);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+        }
+    }
     
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
         Log.d("CCU"," Update Physical point "+port);
@@ -377,6 +509,27 @@ public class SmartNode
         CCUHsApi.getInstance().updatePoint(p,p.getId());
        
     }
+
+    public static void updatePhysicalPointRef(int addr, Port port, String pointRef) {
+        Log.d("CCU"," Update Physical point "+port);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+
+        if (point.isEmpty()) {
+            point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+getDomainNameFromPort(port)+"\"");
+        }
+
+        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        p.setPointRef(pointRef);
+        CCUHsApi.getInstance().updatePoint(p,p.getId());
+
+    }
     
     public static void setPointEnabled(int addr, String port, boolean enabled) {
         Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
@@ -388,6 +541,25 @@ public class SmartNode
         }
         
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+        }
+    }
+
+    public static void setDomainPointEnabled(int addr, String domainName, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+domainName+" "+enabled);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
         if (point != null && point.size() > 0)
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
@@ -411,6 +583,66 @@ public class SmartNode
             return new RawPoint.Builder().setHashMap(point).build();
         }
         return null;
+    }
+
+    public static String getDomainNameFromPort(Port p) {
+        switch(p) {
+            case ANALOG_OUT_ONE: return "analog1Out";
+            case ANALOG_OUT_TWO: return "analog2Out";
+            case ANALOG_OUT_THREE: return "analog3Out";
+            case ANALOG_OUT_FOUR: return "analog4Out";
+            case RELAY_ONE: return "relay1";
+            case RELAY_TWO: return "relay2";
+            case RELAY_THREE: return "relay3";
+            case RELAY_FOUR: return "relay4";
+            case RELAY_FIVE: return "relay5";
+            case RELAY_SIX: return "relay6";
+            case RELAY_SEVEN: return "relay7";
+            case RELAY_EIGHT: return "relay8";
+
+            case TH1_IN: return "th1In";
+            case TH2_IN: return "th2In";
+
+            case ANALOG_IN_ONE: return "analog1In";
+            case ANALOG_IN_TWO: return "analog2In";
+
+            case SENSOR_RT: return "currentTemp";
+            case SENSOR_RH: return "humiditySensor";
+            case DESIRED_TEMP: return "desiredTemp";
+
+            case SENSOR_CO2: return "co2Sensor";
+            case SENSOR_VOC: return "vocSensor";
+            case SENSOR_UVI: return "uviSensor";
+            case SENSOR_ILLUMINANCE: return "illuminanceSensor";
+            case SENSOR_OCCUPANCY: return "occupancySensor";
+            case SENSOR_PRESSURE: return "pressureSensor";
+
+            case SENSOR_SOUND: return "soundSensor";
+            case SENSOR_CO: return "coSensor";
+            case SENSOR_NO: return "noSensor";
+            case SENSOR_CO2_EQUIVALENT: return "co2EquivalentSensor";
+            case SENSOR_PM2P5: return "pm25Sensor";
+
+            case RSSI: return "rssi";
+            default: return null;
+        }
+    }
+
+    public static String getEquipDomainNameFromPort(Port p) {
+        switch(p) {
+            case SENSOR_CO2: return DomainName.zoneCO2;
+            case SENSOR_VOC: return DomainName.zoneVoc;
+            case SENSOR_ILLUMINANCE: return DomainName.zoneIlluminance;
+            case SENSOR_SOUND: return DomainName.zoneSound;
+            case SENSOR_PM2P5: return DomainName.zonePm25;
+            case SENSOR_CO: return DomainName.zoneCo;
+            case SENSOR_NO: return DomainName.zoneNo;
+            case SENSOR_UVI: return DomainName.zoneUvi;
+            case SENSOR_CO2_EQUIVALENT: return DomainName.zoneCo2Equivalent;
+            case SENSOR_OCCUPANCY: return DomainName.zoneOccupancy;
+
+            default: return null;
+        }
     }
 
 }

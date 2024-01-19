@@ -907,6 +907,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 
         if(p.getBacnetType() != null)
@@ -1801,6 +1802,7 @@ public class CCUTagsDb extends HServer {
     public void updateHisItemSynced(List<HisItem> hisItems) {
         hisItems.forEach(item -> item.syncStatus = true);
         hisBox.put(hisItems);
+        CcuLog.i("TEST_SAM", "updateHisItemSynced");
     }
 
     public void updateHisItems(List<HisItem> hisItems) {

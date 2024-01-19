@@ -51,7 +51,6 @@ import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
-import a75f.io.renatus.FragmentVAVConfiguration;
 import a75f.io.renatus.HyperStatMonitoringFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
@@ -59,6 +58,7 @@ import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -401,8 +401,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case VAV_REHEAT:
                     case VAV_SERIES_FAN:
                     case VAV_PARALLEL_FAN:
-                        showDialogFragment(FragmentVAVConfiguration
-                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+                        showDialogFragment(VavProfileConfigFragment.Companion
+                                                   .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
                         break;
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration

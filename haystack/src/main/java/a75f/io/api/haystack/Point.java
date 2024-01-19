@@ -82,6 +82,9 @@ public class Point extends Entity
     {
         return group;
     }
+    public void setGroup(String group) {
+        this.group = group;
+    }
     public String getRoomRef()
     {
         return roomRef;

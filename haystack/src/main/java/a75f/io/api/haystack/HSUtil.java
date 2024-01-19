@@ -149,13 +149,13 @@ public class HSUtil
     }
     
     public static Equip getEquipFromZone(String roomRef) {
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and roomRef == \""+roomRef+"\"");
-        return new Equip.Builder().setHashMap(equip).build();
+        HDict equip = CCUHsApi.getInstance().readHDict("equip and roomRef == \""+roomRef+"\"");
+        return new Equip.Builder().setHDict(equip).build();
     }
     
     public static String getZoneIdFromEquipId(String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip equip = new Equip.Builder().setHDict(equipDict).build();
         return equip.getRoomRef();
     }
     public static Equip getEquipInfo(String equipId) {
@@ -163,8 +163,8 @@ public class HSUtil
     }
     
     public static Equip getEquip(CCUHsApi hayStack, String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        return new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        return new Equip.Builder().setHDict(equipDict).build();
     }
     public static HDict mapToHDict(Map<String, Object> m)
     {
@@ -391,22 +391,22 @@ public class HSUtil
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.ENABLE))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.VAV)));
+        return ((pointEntity.containsKey(Tags.ENABLE)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.VAV)));
     }
 
     public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
             HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-            return (pointEntity.containsKey(Tags.ENABLE) && pointEntity.containsKey(Tags.CFM) && pointEntity.containsKey(Tags.DAB));
+            return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
         }
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.COOLING)));
+        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.COOLING)));
     }
 
     public static boolean isMaxCFMReheatingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.HEATING)));
+        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.HEATING)));
     }
 
     public static double getSystemUserIntentVal(String tags)
@@ -647,6 +647,11 @@ public class HSUtil
         return b.toDict();
     }
 
+    public static boolean isDomainEquip(String equipRef, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.read("equip and id == " + equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        return equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+    }
     public static int generateBacnetId(String zoneID) {
         int bacnetID = 1;
         boolean isBacnetIDUsed = true;

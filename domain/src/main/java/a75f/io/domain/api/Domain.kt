@@ -2,7 +2,12 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildingEquip
+import a75f.io.domain.DomainEquip
+import a75f.io.domain.VavEquip
 import a75f.io.domain.logic.DomainManager
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import android.annotation.SuppressLint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,11 +18,13 @@ import org.projecthaystack.HDict
 object Domain {
 
     const val LOG_TAG = "CCU_DOMAIN"
+    const val LOG_TAG_TUNER = "CCU_DOMAIN_TUNER"
+
     val domainScope = CoroutineScope(Dispatchers.IO + Job())
     val hayStack: CCUHsApi = CCUHsApi.getInstance()
     var site: Site? = null
     lateinit var buildingEquip : BuildingEquip
-
+    var equips = mutableMapOf<String, DomainEquip>()
     /**
      * Retrieve the domain object of a point by it id and equipRef.
      */
@@ -135,8 +142,58 @@ object Domain {
     }
 
     @JvmStatic
-    fun readPointOnEquip(domainName: String, equipRef : String) : Map<Any,Any> {
+    fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
         return hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+
+    /*
+        For Numeric points, this method re-loads some values from the model (minVal, maxVal, incrementVal)
+        that are already present in the ValueConfig for the point.
+
+        This is because for Enum points, the enum range is only present in the PointDef. So the Numeric points
+        pull their range directly from the PointDef as well for consistency.
+
+        There is a performance penalty, but this design is cleaner and (in my opinion) is what is called for in ADR-0043.
+    */
+    fun getListByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : List<String> {
+        val valuesList : MutableList<String> = mutableListOf()
+        val point = model.points.find { it.domainName == domainName }
+
+        if (point?.valueConstraint is MultiStateConstraint) {
+
+            (point?.valueConstraint as MultiStateConstraint).allowedValues.forEach{ state ->
+                valuesList.add(state.value)
+            }
+
+        } else if (point?.valueConstraint is NumericConstraint) {
+
+            val minVal = (point?.valueConstraint as NumericConstraint).minValue
+            val maxVal = (point?.valueConstraint as NumericConstraint).maxValue
+            val incVal = point?.presentationData?.get("tagValueIncrement").toString().toDouble()
+
+            var it = minVal
+            while (it <= maxVal && incVal > 0.0) {
+                valuesList.add(getStringFormat(it, incVal))
+                it += incVal
+            }
+
+        }
+        return valuesList
+    }
+
+    private fun getStringFormat(itVal: Double, incVal: Double): String {
+        var decimalPlaces = 0
+        var i : Double = incVal
+        while (i < 1) {
+            i *= 10
+            decimalPlaces += 1
+        }
+        val formattedString = ("%." + decimalPlaces.toString() + "f").format(itVal)
+        return if (formattedString.toDouble() != 0.0) formattedString else ("%." + decimalPlaces.toString() + "f").format(0.0)
+    }
+
+    fun getDomainEquip(equipId : String) : DomainEquip? {
+        return equips[equipId]
     }
     fun readPointValueByDomainName(domainName: String, equipRef : String): Double {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")

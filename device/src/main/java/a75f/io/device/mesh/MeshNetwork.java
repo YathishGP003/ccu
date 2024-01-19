@@ -33,6 +33,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
@@ -110,6 +111,11 @@ public class MeshNetwork extends DeviceNetwork
                                     if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings2=====================");
+                                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
+                                    if (sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings=====================");
                                     CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
@@ -122,6 +128,11 @@ public class MeshNetwork extends DeviceNetwork
                                     if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
                                         controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
                                         sendStructToNodes(controlsMessage);
+                                    }
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings2=====================");
+                                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
+                                    if (sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
                                 }
                                 break;

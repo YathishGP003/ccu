@@ -29,7 +29,7 @@ class ProfileEquipBuilderTest {
     fun testCreateEquip() {
 
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
         val equip = mockHayStack.readAllEntities("equip")
         assert(equip.size == 1)
 
@@ -42,7 +42,7 @@ class ProfileEquipBuilderTest {
     fun testCreatePoints() {
 
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
 
         val points = mockHayStack.readAllEntities("point")
         assert(points.size == 5)
@@ -57,7 +57,7 @@ class ProfileEquipBuilderTest {
     fun testUpdatePoints() {
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
 
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
 
         val points = mockHayStack.readAllEntities("point")
         points.forEach{
@@ -66,7 +66,7 @@ class ProfileEquipBuilderTest {
         }
 
         val profile = HyperStat2PfcuUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef", "TestEquip")
 
         val dcwbValveLoopOp = mockHayStack.readEntity("domainName == \"dcwbValveLoopOutput\"")
         assert(dcwbValveLoopOp.isEmpty())
@@ -90,7 +90,7 @@ class ProfileEquipBuilderTest {
     fun testUpdatePointsDomain() {
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
 
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
         val points = mockHayStack.readAllEntities("point")
         points.forEach{
             println(it)
@@ -98,7 +98,7 @@ class ProfileEquipBuilderTest {
         }
 
         val profile = HyperStat2PfcuUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(profile, dmModel, "@TestSiteRef", "TestEquip")
 
         val dcwbValveLoopOp = mockHayStack.readEntity("domainName == \"dcwbValveLoopOutput\"")
         assert(dcwbValveLoopOp.isEmpty())
@@ -121,7 +121,7 @@ class ProfileEquipBuilderTest {
     fun testVerifyEquipTagValType() {
 
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
         val equipDict = mockHayStack.readHDict("equip")
 
         val equip = Equip.Builder().setHDict(equipDict).build()
@@ -134,7 +134,7 @@ class ProfileEquipBuilderTest {
     @Test
     fun testVerifyPointTagValType() {
         val equipBuilder = ProfileEquipBuilder(mockHayStack)
-        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel, "@TestSiteRef", "TestEquip")
         val pointDict = mockHayStack.readHDict("point and domainName == \"coolingStage1"+"\"")
 
         val point = Point.Builder().setHDict(pointDict).build()

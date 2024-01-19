@@ -273,7 +273,7 @@ public class EquipScheduleHandler implements Schedulable {
     
     private String getAverageDesiredTempId() {
         HashMap<Object, Object> desiredTemp = hayStack.readEntity("temp and desired and " +
-                                                                  "average and sp and equipRef == \"" + equipRef +"\"");
+                                                                  "(avg or average) and sp and equipRef == \"" + equipRef +"\"");
         if (desiredTemp.isEmpty()) {
             return null;
         }

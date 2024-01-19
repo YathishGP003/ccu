@@ -8,18 +8,15 @@ data class BaseResponse<T>(val data: T? = null, val error: String? = null)
 
 data class LevelData(val pointId: String, val levelArray: ArrayList<String?>?)
 
-
-fun retrieveLevelValues(id: String): MutableList<LevelData> {
+fun retrieveLevelValues(id: String): ArrayList<String?> {
     val arrayList = ArrayList<String?>()
-    val listOfMap =  CCUHsApi.getInstance().readPoint(id)
-    for(i in listOfMap){
-        if(i["val"] == null){
-            arrayList.add(null)
-        }else{
-            arrayList.add("val : ${i["val"].toString()}")
+    val listOfMap = CCUHsApi.getInstance().readPoint(id)
+    listOfMap.forEachIndexed { index, hashMap ->
+        run {
+            if (hashMap["val"] != null) {
+                arrayList.add("$index : ${hashMap["val"].toString()}")
+            }
         }
     }
-    val mutableList = mutableListOf<LevelData>()
-    mutableList.add(LevelData(id, arrayList))
-    return mutableList
+    return arrayList
 }

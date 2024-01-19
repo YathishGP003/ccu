@@ -1,6 +1,9 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.LevelData
+import a75f.io.api.haystack.util.ReadAllResponse
+import a75f.io.api.haystack.util.retrieveLevelValues
 import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.device.bacnet.readExternalBacnetJsonFile
 import a75f.io.device.bacnet.updateBacnetHeartBeat
@@ -26,7 +29,6 @@ import kotlinx.coroutines.launch
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
-import org.projecthaystack.HVal
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 
@@ -117,15 +119,19 @@ class HttpServer {
                     val query = call.parameters["query"]
                     CcuLog.i(HTTP_SERVER, " query: $query")
                     if (query != null) {
+//                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query))
+//                        CcuLog.i(HTTP_SERVER, " response: $response")
+//                        call.respond(HttpStatusCode.OK, BaseResponse(response))
+
                         val tempGrid = CCUHsApi.getInstance().getHSClient().readAll(query)
                         val response = HZincWriter.gridToString(tempGrid)
                         if(query.contains("point")){
-                            val levelData = retrieveLevelValues(tempGrid)
+                            val levelData =  getLevelValues(tempGrid)
                             val fullResponse = ReadAllResponse(response, levelData)
-                            CcuLog.i(HTTP_SERVER, " fullResponse: $fullResponse")
+                            CcuLog.i(HTTP_SERVER, " fullResponse: ${BaseResponse(fullResponse)}")
                             call.respond(HttpStatusCode.OK, BaseResponse(fullResponse))
                         }else {
-                            CcuLog.i(HTTP_SERVER, " response: $response")
+                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(response)}")
                             call.respond(HttpStatusCode.OK, BaseResponse(response))
                         }
                     } else {
@@ -236,39 +242,13 @@ class HttpServer {
         }
     }
 
-    private fun retrieveLevelValues(tempGrid : HGrid): MutableList<LevelData> {
+    private fun getLevelValues(tempGrid: HGrid): MutableList<LevelData> {
         val mutableList = mutableListOf<LevelData>()
-        for(row in tempGrid){
+        for (row in tempGrid) {
             val id = (row as HRow).get("id")
-            val v = CCUHsApi.getInstance().tagsDb.writeArrays[id.toString().replace("@", "")]?.`val`
-            mutableList.add(LevelData(id.toString(), v))
+            mutableList.add(LevelData(id.toString(), retrieveLevelValues(id.toString())))
         }
         return mutableList
-    }
-
-    data class ReadAllResponse(val points : String, val levelData: MutableList<LevelData>)
-
-    data class LevelData(val pointId: String, val levelArray: Array<HVal>?) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as LevelData
-
-            if (pointId != other.pointId) return false
-            if (levelArray != null) {
-                if (other.levelArray == null) return false
-                if (!levelArray.contentEquals(other.levelArray)) return false
-            } else if (other.levelArray != null) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = pointId.hashCode()
-            result = 31 * result + (levelArray?.contentHashCode() ?: 0)
-            return result
-        }
     }
 
     private fun retrieveGridFromRequest(response: String): HGrid? {

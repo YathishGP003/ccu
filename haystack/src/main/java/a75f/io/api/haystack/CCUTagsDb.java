@@ -1916,7 +1916,7 @@ public class CCUTagsDb extends HServer {
                                 .filter( v -> v.syncStatus == false)
                                 .collect(Collectors.toList());
     }
-	
+
 	public boolean isBacNetEnabled() {
         return PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean("isBACnetinitialized", false);
     }
@@ -1924,14 +1924,12 @@ public class CCUTagsDb extends HServer {
         // check if point has bacnet id
         boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(id.replace("@","")).containsKey("bacnetId");
         if(isBacnetPoint){
-            Log.d("CCU_BACNET", "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
+            Log.d(TAG_CCU_BACNET, "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
             Intent intent = new Intent(BROADCAST_BACNET_POINT_UPDATED);
             intent.putExtra("pointId", id);
             intent.putExtra("level", level);
             intent.putExtra("val", val);
             appContext.sendBroadcast(intent);
-        }else{
-            Log.d("CCU_BACNET", "this is not a bacnet point");
         }
     }
 }

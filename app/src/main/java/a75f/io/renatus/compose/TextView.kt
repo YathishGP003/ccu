@@ -198,7 +198,7 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
                 if (enableClick)
                     onClick()
             }),
-        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
+        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black, textAlign = TextAlign.Left),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Red,
             unfocusedIndicatorColor = Color.Gray,
@@ -240,5 +240,25 @@ fun TextViewCompose(text: String) {
                 modifier = Modifier.size(24.dp)
             )
         },
+    )
+}
+
+
+
+
+@Composable
+fun HeaderCenterLeftAlignedTextView(text: String) {
+    Text(
+        modifier = Modifier
+            .width(250.dp)
+            .padding(5.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
     )
 }

@@ -363,7 +363,7 @@ public class MasterControlUtil {
 
                     Double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();
                     if (unoccupiedZoneSetBackval == null) {
-                        String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unoccupied and setback and roomRef == \"" + zone.get("id").toString() + "\"");
+                        String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unocc and setback and roomRef == \"" + zone.get("id").toString() + "\"");
                         unoccupiedZoneSetBackval = CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
                     }
                     if (schedule.getMarkers().contains("followBuilding")) {

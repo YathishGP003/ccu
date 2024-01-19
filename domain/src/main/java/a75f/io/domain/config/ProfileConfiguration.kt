@@ -1,6 +1,5 @@
 package a75f.io.domain.config
 
-import a75f.io.domain.DomainEquip
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -39,7 +38,7 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      * Get a list of domainNames of all dependencies
      *
      */
-    //abstract fun getDependencies() : List<ProfileConfig>
+    abstract fun getDependencies() : List<ValueConfig>
 
     open fun getValueConfigs() : List<ValueConfig> {
         return emptyList()

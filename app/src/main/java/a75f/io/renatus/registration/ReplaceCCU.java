@@ -428,8 +428,6 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.CONFIG_FILES, ReplaceStatus.RUNNING.toString());
         Map<String, Integer> modbusConfigs = new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@"
                 , ""), ccu.getCcuId().replaceFirst("@", ""), bacnet_pref);
-        new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
-                ccu.getCcuId().replaceFirst("@", ""));
         updateModbusConfigValues(modbusConfigs);
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.CONFIG_FILES, ReplaceStatus.COMPLETED.toString());

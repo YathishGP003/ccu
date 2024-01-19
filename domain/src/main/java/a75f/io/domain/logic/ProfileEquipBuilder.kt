@@ -9,10 +9,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
-import a75f.io.domain.cutover.BuildingEquipCutOverMapping
-import a75f.io.domain.cutover.findDisFromDomainName
 import a75f.io.domain.cutover.getDomainNameFromDis
-import a75f.io.domain.cutover.pointWithDomainNameExists
 import a75f.io.domain.util.TunerUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -117,12 +114,14 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
                     hayStack.writeHisValById(pointId, 0.0)
                 }
-
                 DomainManager.addPoint(hayStackPoint)
             }
         }
     }
 
+    private fun isItTunerPoint(mutableList: MutableList<String>): Boolean {
+        return mutableList.contains(Tags.TUNER)
+    }
     private fun updatePoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
@@ -153,9 +152,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
                 }
-                DomainManager.addPoint(hayStackPoint)
             }
-
         }
     }
 
@@ -240,5 +237,4 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         updateEquip(equipRef, modelDef, equipDis)
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
-
 }

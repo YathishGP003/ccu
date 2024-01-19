@@ -58,11 +58,13 @@ import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -451,16 +453,21 @@ public class Globals {
                 case SYSTEM_DAB_HYBRID_RTU:
                     L.ccu().systemProfile = new DabAdvancedHybridRtu();
                     break;
+                case dabExternalAHUController:
+                    L.ccu().systemProfile = new DabExternalAhu();
+                    break;
+                case vavExternalAHUController:
+                    L.ccu().systemProfile = new VavExternalAhu();
+                    break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
                     isDefaultSystem = true;
                     break;
             }
         } else {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
+            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Default System Profile");
             L.ccu().systemProfile = new DefaultSystem();
             isDefaultSystem = true;
-
         }
         if(!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();

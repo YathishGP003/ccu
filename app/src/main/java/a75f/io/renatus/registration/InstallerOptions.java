@@ -544,9 +544,9 @@ public class InstallerOptions extends Fragment {
         spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    setCoolingLockoutVal(hayStack, Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()))));
+                    ccu().systemProfile.setCoolingLockoutVal(hayStack, Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()))));
                 } else {
-                    setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+                    ccu().systemProfile.setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
                 }
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {
@@ -568,10 +568,10 @@ public class InstallerOptions extends Fragment {
         spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    setHeatingLockoutVal(hayStack,
+                    ccu().systemProfile.setHeatingLockoutVal(hayStack,
                             Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()))));
                 } else {
-                    setHeatingLockoutVal(hayStack,
+                    ccu().systemProfile.setHeatingLockoutVal(hayStack,
                             Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
                 }
             }
@@ -606,27 +606,6 @@ public class InstallerOptions extends Fragment {
     private void updateHeatingLockoutUIVisibility(boolean isVisible) {
         textHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
         spinnerHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
-    }
-
-    private void setCoolingLockoutVal(CCUHsApi hayStack, double val) {
-        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
-                                                                          "and cooling and lockout and equipRef ==\""
-                                                                          +ccu().systemProfile.getSystemEquipRef()+"\"");
-        if (!coolingLockoutPoint.isEmpty()) {
-            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
-                                                                       HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
-        }
-    }
-    
-    private void setHeatingLockoutVal(CCUHsApi hayStack, double val) {
-        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
-                                                                          "and heating and lockout and equipRef ==\""
-                                                                          +ccu().systemProfile.getSystemEquipRef()+"\"");
-        
-        if (!heatingLockoutPoint.isEmpty()) {
-            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
-                                                                            HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
-        }
     }
 
     // initial master control values

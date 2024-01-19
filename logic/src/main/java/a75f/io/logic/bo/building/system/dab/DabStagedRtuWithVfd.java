@@ -52,6 +52,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());
@@ -171,6 +172,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)

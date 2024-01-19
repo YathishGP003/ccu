@@ -5,7 +5,7 @@ import a75f.io.domain.config.*
 
 class HyperStat2pfcuConfiguration(nodeAddress: Int,
                                       nodeType: String, priority: Int, roomRef : String, floorRef : String
-) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, "HSCPU",floorRef ) {
+) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef, "HS2PIPE" ) {
 
 
     var temperatureOffset = ValueConfig("temperatureOffset", 0.0)
@@ -70,9 +70,13 @@ class HyperStat2pfcuConfiguration(nodeAddress: Int,
     var dcwbEnabled = EnableConfig( "dcwbEnabled",true)
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
-        var associations = mutableListOf<AssociationConfig>()
+        val associations = mutableListOf<AssociationConfig>()
         associations.add(AssociationConfig("relay1Association", 0))
         return associations
+    }
+
+    override fun getDependencies(): List<ValueConfig> {
+        return mutableListOf()
     }
 
     override fun getEnableConfigs() : List<EnableConfig> {

@@ -167,6 +167,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         return mutableListOf<AssociationConfig>().apply {
         }
     }
+
+    override fun getDependencies(): List<ValueConfig> {
+        TODO("Not yet implemented")
+    }
+
     override fun getEnableConfigs() : List<EnableConfig> {
         return mutableListOf<EnableConfig>().apply {
             add(condensateSensorType)

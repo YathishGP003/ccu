@@ -212,6 +212,7 @@ class AcbProfileViewModel : ViewModel() {
 
         } else {
             updateEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
+            acbProfile.init()
             setOutputTypes(profileConfiguration)
         }
 

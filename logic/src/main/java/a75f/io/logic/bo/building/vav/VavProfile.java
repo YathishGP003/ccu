@@ -134,23 +134,6 @@ public abstract class VavProfile extends ZoneProfile {
         spResetRequest = new TrimResponseRequest();
         hwstResetRequest = new TrimResponseRequest();
 
-        switch (profileType) {
-            case VAV_REHEAT:
-                vavUnit = new VavUnit();
-                vavEquip = new VavEquip(equipRef);
-                break;
-            case VAV_SERIES_FAN:
-                vavUnit = new SeriesFanVavUnit();
-                vavEquip = new VavEquip(equipRef);
-                break;
-            case VAV_PARALLEL_FAN:
-                vavUnit = new ParallelFanVavUnit();
-                vavEquip = new VavEquip(equipRef);
-                break;
-            case VAV_ACB:
-                vavUnit = new VavAcbUnit();
-                vavEquip = new VavAcbEquip(equipRef);
-        }
         nodeAddr = addr;
 
         //createHaystackPoints();
@@ -172,6 +155,24 @@ public abstract class VavProfile extends ZoneProfile {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
+
+        switch (profileType) {
+            case VAV_REHEAT:
+                vavUnit = new VavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_SERIES_FAN:
+                vavUnit = new SeriesFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_PARALLEL_FAN:
+                vavUnit = new ParallelFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_ACB:
+                vavUnit = new VavAcbUnit();
+                vavEquip = new VavAcbEquip(equipRef);
+        }
 
         if (equipMap != null && equipMap.size() > 0) {
             String equipId = equipMap.get("id").toString();

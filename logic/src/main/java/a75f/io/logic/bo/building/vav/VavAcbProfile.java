@@ -169,13 +169,12 @@ public class VavAcbProfile extends VavProfile
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+nodeAddr+" roomTemp : "+vavEquip.getCurrentTemp().readHisVal());
         state = TEMPDEAD;
         if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", "Zone Temp Dead");
-            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
                                                 : vavEquip.getMinCoolingDamperPos().readDefaultVal());
             double damperMax = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
                                                 : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
             double damperPos = (damperMax+damperMin)/2;
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if(systemMode == SystemMode.OFF) {
                 damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
@@ -183,8 +182,8 @@ public class VavAcbProfile extends VavProfile
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
             ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(0.0);
             ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(0.0);
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", (double) TEMPDEAD.ordinal());
-        }
+            vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
+            vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");}
     }
 
     private double getShutOffValveCmd() {
@@ -199,24 +198,10 @@ public class VavAcbProfile extends VavProfile
     }
     
     private void initLoopVariables() {
-        
-       /* vavDevice = vavDeviceMap.get(node);
-        coolingLoop = vavDevice.getCoolingLoop();
-        heatingLoop = vavDevice.getHeatingLoop();
-        co2Loop = vavDeviceMap.get(node).getCo2Loop();
-        vocLoop = vavDeviceMap.get(node).getVOCLoop();
-        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
-        valveController = vavDevice.getValveController();
-        setTempCooling = vavDevice.getDesiredTempCooling();
-        setTempHeating = vavDevice.getDesiredTempHeating();
-        VavUnit vavUnit = vavDevice.getVavUnit();
-        damper = vavUnit.vavDamper;
-        valve = vavUnit.reheatValve;*/
-        vavEquip = new VavAcbEquip(equipRef);
-        setDamperLimits( (short) nodeAddr, damper);
         chwValve = ((VavAcbUnit)vavUnit).chwValve;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+        setDamperLimits( (short) nodeAddr, damper);
     }
     
     private void handleCoolingChangeOver() {

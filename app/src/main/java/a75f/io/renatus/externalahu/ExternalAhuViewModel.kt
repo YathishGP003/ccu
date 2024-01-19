@@ -224,8 +224,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 },
                 {
                     if (L.ccu().systemProfile != null) {
-                        if (L.ccu().systemProfile.profileType != ProfileType.dabExternalAHUController
-                            || L.ccu().systemProfile.profileType != ProfileType.vavExternalAHUController) {
+                        if (profileType != L.ccu().systemProfile.profileType ) {
                             L.ccu().systemProfile!!.deleteSystemEquip()
                             L.ccu().systemProfile = null
                             addEquip()

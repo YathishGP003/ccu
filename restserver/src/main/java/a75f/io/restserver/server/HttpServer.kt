@@ -210,14 +210,18 @@ class HttpServer {
                     CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
                     val id = call.parameters["id"]
                     val level = call.parameters["level"]
-                    val value = call.parameters["val"]
+                    var value = call.parameters["val"]
                     val who = call.parameters["who"]
-                    val duration = call.parameters["duration"]
+                    var duration : String? = call.parameters["duration"]
 
-                    if(id == null || level == null || value == null || who == null || duration == null) {
+                    if(id == null || level == null || who == null || duration == null) {
                         call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
                     }else{
-                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value.toDouble(), duration.toInt())
+                        // if level is coming null ie. user wanted to reset level
+                        if(value == "null"){
+                            duration = "1"
+                        }
+                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value!!.toDouble(), duration!!.toInt())
                         if (pointGrid != null) {
                             if(!pointGrid.isEmpty || !pointGrid.isErr)
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK));

@@ -18,6 +18,9 @@ import a75f.io.logger.CcuLog;
 
 public class Equip extends Entity
 {
+
+    private int            bacnetId;
+    private String            bacnetType;
     private String            displayName;
     private HashSet<String> markers;
     private String siteRef;
@@ -69,6 +72,22 @@ public class Equip extends Entity
 
     public void setPipeRef(String pipeRef) {
         this.pipeRef = pipeRef;
+    }
+
+    public int getBacnetId() {
+        return bacnetId;
+    }
+
+    public void setBacnetId(int bacnetId) {
+        this.bacnetId = bacnetId;
+    }
+
+    public String getBacnetType() {
+        return bacnetType;
+    }
+
+    public void setBacnetType(String bacnetType) {
+        this.bacnetType = bacnetType;
     }
 
     private String vendor;
@@ -208,6 +227,12 @@ public class Equip extends Entity
         private String pipeRef;
         private String cell;
         private String capacity;
+
+        private int            bacnetId;
+        private String            bacnetType;
+
+
+
         public Builder setAhuRef(String ahuRef)
         {
             this.ahuRef = ahuRef;
@@ -346,6 +371,16 @@ public class Equip extends Entity
             return this;
         }
 
+        public Builder setBacnetId(int bacnetId) {
+            this.bacnetId = bacnetId;
+            return this;
+        }
+
+        public Builder setBacnetType(String bacnetType) {
+            this.bacnetType = bacnetType;
+            return this;
+        }
+
         public Builder setPipeRef(String pipeRef){
             this.pipeRef = pipeRef;
             return this;
@@ -380,6 +415,8 @@ public class Equip extends Entity
             q.pipeRef = this.pipeRef;
             q.cell= this.cell;
             q.capacity = this.capacity;
+            q.bacnetType = this.bacnetType;
+            q.bacnetId = this.bacnetId;
             return q;
         }
         
@@ -389,7 +426,7 @@ public class Equip extends Entity
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                //System.out.println(pair.getKey() + " = " + pair.getValue());
+
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -487,8 +524,13 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("capacity")) {
                     this.capacity = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("version")) {
+                else if (pair.getKey().equals("version") || pair.getKey().equals("modelVersion")
+                        || pair.getKey().equals("modelId")) {
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                } else if (pair.getKey().equals(Tags.BACNET_ID)) {
+                    this.bacnetId = (int) Double.parseDouble(pair.getValue().toString());
+                } else if (pair.getKey().equals(Tags.BACNET_TYPE)) {
+                    this.bacnetType = pair.getValue().toString();
                 }
                 else if (pair.getKey().equals("modelId")) {
                     this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));

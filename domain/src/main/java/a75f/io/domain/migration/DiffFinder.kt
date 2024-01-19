@@ -23,7 +23,7 @@ class DiffFinder {
 
     /**
      * @param domainName it main model equipName
-     * @param entityConfiguration diff detilas to add delete and update
+     * @param entityConfiguration diff details to add delete and update
      * @param diffType type of change
      */
     private fun updateEntityConfiguration(domainName: String?, entityConfiguration: EntityConfiguration, diffType: DiffType){

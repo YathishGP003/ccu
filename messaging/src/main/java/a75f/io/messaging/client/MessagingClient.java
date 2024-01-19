@@ -1,11 +1,14 @@
 package a75f.io.messaging.client;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +34,8 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
     private final PriorityBlockingQueue<MessageToAck> messagesToAck = new PriorityBlockingQueue<>();
 
     private OkSse okSse = null;
+
+    private long lastConnectedTime;
 
     private MessagingClient() {
         BearerTokenManager.getInstance().setOnBearerTokenRefreshListener(this);
@@ -104,19 +109,39 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
      * Connection will not be opened before complete registration, or if
      * the CCU loses authentication (i.e. expired bearer token)
      */
-    public void resetMessagingConnection() {
+    public void resetMessagingConnection(boolean isTokenRefreshed) {
         this.closeMessagingConnection();
         String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
         String ccuId = CCUHsApi.getInstance().getCcuId();
 
-        if (ccuId != null && CCUHsApi.getInstance().getAuthorised()) {
+        if (ccuId == null) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, "ccuId is null, Hence messaging connection opening process skipped.");
+        } else if (!CCUHsApi.getInstance().getAuthorised()) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, "JWT is empty or not exist. Hence messaging connection opening process skipped.");
+        }else if(isTokenRefreshed){
+            /*
+         * If token is refreshed, then no need to wait for 5 minutes hence opening the connection immediately
+         */
             this.openMessagingConnection(siteId.substring(1), ccuId.substring(1));
-        }
+        }else {
+            long timeSinceLastConnection = System.currentTimeMillis() - lastConnectedTime;
 
+            if (timeSinceLastConnection >= 300000) {
+                CcuLog.i(L.TAG_CCU_MESSAGING, "Attempting to reconnect to messaging. "+
+                        "Last connected time: "+new Date(lastConnectedTime)+
+                        ", milliseconds since the last connection:"+timeSinceLastConnection);
+
+                this.openMessagingConnection(siteId.substring(1), ccuId.substring(1));
+            } else {
+                CcuLog.i(L.TAG_CCU_MESSAGING, "Messaging connection opening process skipped " +
+                        "because "+timeSinceLastConnection+" milliseconds not more than 5 minutes");
+            }
+        }
     }
 
     private void openMessagingConnection(String siteId, String ccuId) {
-        CcuLog.i(L.TAG_CCU_MESSAGING, "Opening Messaging Connection");
+        lastConnectedTime = System.currentTimeMillis();
+        CcuLog.i(L.TAG_CCU_MESSAGING, "Opening Messaging Connection, lastConnectedTime: "+new Date(lastConnectedTime));
 
         if (sse != null) {
             return;
@@ -159,7 +184,7 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
     @Override
     public void onTokenRefresh() {
         CcuLog.i(L.TAG_CCU_MESSAGING, "BearerToken refreshed. Reset messaging connection.");
-        resetMessagingConnection();
+        resetMessagingConnection(true);
     }
 
     private class MessageToAck implements Comparable<MessageToAck> {

@@ -89,6 +89,8 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  DAB External AHU Controller</item>
+        <item>  VAV External AHU Controller</item>
     </string-array>
 
     <string-array name="system_profile_select_daikin">
@@ -102,6 +104,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  DAB External AHU Controller</item>
         <item>  Daikin IE RTU</item>
     </string-array>
 
@@ -1611,8 +1614,11 @@
     <string name="label_neither">Neither</string>
     <string name="label_configure_service">Configure Service</string>
     <string name="label_destination_ip_address">Destination IP Address <font color="#e5561a">*</font></string>
+    <string name="label_destination_mac_address">Destination Mac Address</string>
     <string name="label_port">Port <font color="#e5561a">*</font></string>
+    <string name="label_dnet">Dnet</string>
     <string name="label_object_type">Object Type <font color="#e5561a">*</font></string>
+    <string name="label_object_type_2">Object Type</string>
     <string name="label_object_id">Object ID <font color="#e5561a">*</font></string>
     <string name="label_array_index">Array Index</string>
     <string name="label_property">Property <font color="#e5561a">*</font></string>
@@ -1641,8 +1647,21 @@
     <string name="txt_remove">REMOVE</string>
     <string name="txt_mask">Mask <font color="#e5561a">*</font></string>
     <string name="txt_mask_hint">Recommended 0 to 32</string>
+    <string name="supply_airflow_temp">Supply Airflow Temperature:</string>
+    <string name="duct_static_pressure">Duct Static pressure:</string>
+    <string name="current">Current </string>
+    <string name="setpoint">Setpoint </string>
+    <string name="heating_setpoint">Heating Setpoint </string>
+    <string name="cooling_setpoint">Cooling Setpoint </string>
+    <string name="operating_mode">Operating Mode </string>
+
     <string name="txt_dynamic_airflow_balancing">Dynamic Airflow Balancing</string>
     <string name="txt_variable_volume_and_temperature">Variable Volume &amp; Temperature</string>
     <string name="txt_vvtc">VVT-C</string>
     <string name="txt_vvtc_dual_duct">VVT-C Dual Duct</string>
+    <string name="txt_time_to_live_hint">Recommended: 0 to 65536 (Seconds)</string>
+    <string name="label_response">Response</string>
+    <string name="label_property_type">Property Type</string>
+    <string name="label_property_value">Property Value</string>
+    <string name="txt_valid_input">Please provide valid input</string>
 </resources>

@@ -3,10 +3,14 @@ package a75f.io.renatus.modbus.util
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.logger.CcuLog
+import a75f.io.renatus.R
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
 import com.google.gson.Gson
 import java.util.Objects
@@ -67,8 +71,8 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
 fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     var isAllSelected = true
     if (equipDevice.registers.isNotEmpty()) {
-        equipDevice.registers[0].parameters.forEach {
-            if (!it.isDisplayInUI)
+        equipDevice.registers.forEach {
+            if (!it.parameters[0].isDisplayInUI)
                 isAllSelected = false
         }
     }
@@ -86,7 +90,10 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
 }
 
  fun showToast(text: String, context: Context){
-    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+     Handler(Looper.getMainLooper()).post(kotlinx.coroutines.Runnable {
+         Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+     })
+
 }
 fun log(msg: String) {
     CcuLog.i("DMModbus",msg)
@@ -110,6 +117,8 @@ const val LOADING = "Loading Modbus Models"
 const val SLAVE_ID = "Slave Id"
 const val SELECT_ALL = "Select All Parameters"
 const val SET = "SET"
+const val SAVE = "SAVE"
+const val CANCEL = "CANCEL"
 const val PARAMETER = "PARAMETER"
 const val SAME_AS_PARENT = "Same As Parent"
 const val DISPLAY_UI = "DISPLAY UI"
@@ -122,3 +131,22 @@ const val WARNING = "Warning"
 const val OK = "Ok"
 const val SEARCH_MODEL = "Search model"
 const val SEARCH_SLAVE_ID = "Search Slave Id"
+
+fun getSlaveIds(isParent: Boolean): List<String> {
+    val slaveAddress: ArrayList<String> = ArrayList()
+    if (!isParent) slaveAddress.add(SAME_AS_PARENT)
+    for (i in 1..247) slaveAddress.add(i.toString())
+    return slaveAddress
+}
+
+fun showErrorDialog(context: Context, message: String) {
+    val builder = AlertDialog.Builder(context)
+    builder.setTitle(WARNING)
+    builder.setIcon(R.drawable.ic_warning)
+    builder.setMessage(message)
+    builder.setCancelable(false)
+    builder.setPositiveButton(OK) { dialog, _ ->
+        dialog.dismiss()
+    }
+    builder.create().show()
+}

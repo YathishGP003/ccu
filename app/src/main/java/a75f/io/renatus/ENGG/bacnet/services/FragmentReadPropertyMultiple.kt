@@ -1,8 +1,15 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
+import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logic.reportNull
+import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
+import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
+import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication
+import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +21,20 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
+import java.lang.Exception
+import java.net.ConnectException
+import java.net.SocketTimeoutException
 
 
 class FragmentReadPropertyMultiple : Fragment() {
@@ -25,6 +43,7 @@ class FragmentReadPropertyMultiple : Fragment() {
     private lateinit var btnReadProperty: Button
     private lateinit var btnAddObject: Button
     private lateinit var containerObject: ViewGroup
+    private lateinit var rvResponseMultiRead : RecyclerView
 
     private val objectTypeArray = BacNetConstants.ObjectType.values()
     private val propertyTypeArray = BacNetConstants.PropertyType.values()
@@ -33,7 +52,15 @@ class FragmentReadPropertyMultiple : Fragment() {
 
     private lateinit var etDestinationIp: EditText
     private lateinit var etPort: EditText
+    private lateinit var service : CcuService
+    private var ipAddress = "192.168.1.1"
+    private var port = 47808
+    private var deviceId = "1000"
 
+    private val data = ArrayList<ItemsViewModel>()
+    private lateinit var adapter : CustomAdapterMultipleRead
+    private lateinit var etMacAddress: EditText
+    private lateinit var etDnet: EditText
 
     override fun onCreateView(
         inflator: LayoutInflater,
@@ -46,6 +73,25 @@ class FragmentReadPropertyMultiple : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+        if (confString != null) {
+            try {
+                val config = JSONObject(confString)
+                val networkObject = config.getJSONObject("network")
+                ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
+                port = networkObject.getInt(BacnetConfigConstants.PORT)
+                service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                val deviceObject = config.getJSONObject("device")
+                deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+
+        etMacAddress = view.findViewById(R.id.et_destination_mac)
+        etDnet = view.findViewById(R.id.etDnet)
+
         containerObject = view.findViewById(R.id.container_property);
 
         btnAddObject = view.findViewById(R.id.btnAddObject)
@@ -54,22 +100,28 @@ class FragmentReadPropertyMultiple : Fragment() {
         }
 
         etDestinationIp = view.findViewById(R.id.et_destination_ip)
+        etDestinationIp.setText(ipAddress)
         etPort = view.findViewById(R.id.etPort)
+        etPort.setText(port.toString())
 
         btnReadProperty = view.findViewById(R.id.btnReadProperty)
         btnReadProperty.setOnClickListener {
             Log.d(TAG, "total objects -> ${containerObject.childCount}")
-            if(!validateData()){
+           /* if(!validateData()){
                 return@setOnClickListener
             }
+            if(!validateNetworkData()){
+                return@setOnClickListener
+            }*/
+
 
             val destination =
-                Destination(etDestinationIp.text.toString(), etPort.text.toString().toInt())
+                DestinationMultiRead(etDestinationIp.text.toString(), etPort.text.toString(), deviceId, etDnet.text.toString(), etMacAddress.text.toString())
             val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
 
 
             val totalObjectCount = containerObject.childCount - 1
-            for (i in 1..totalObjectCount) {
+            for (i in 0..totalObjectCount) {
                 val chileView = containerObject.getChildAt(i)
                 val objectIdentifier = getDetailsFromObjectLayout(chileView, i)
                 val propertyReference = getDetailsOfProperties(chileView, i)
@@ -84,14 +136,23 @@ class FragmentReadPropertyMultiple : Fragment() {
             val rpmRequest = RpmRequest(readAccessSpecification)
             val readRequestMultiple =
                 Gson().toJson(BacnetReadRequestMultiple(destination, rpmRequest)).toString()
+
+            sendRequest(BacnetReadRequestMultiple(destination, rpmRequest))
+
             Log.d(TAG, "readRequestMultiple-->$readRequestMultiple")
         }
+
+        rvResponseMultiRead = view.findViewById(R.id.bac_resp_rv)
+        rvResponseMultiRead.layoutManager = LinearLayoutManager(requireContext())
+
+        adapter = CustomAdapterMultipleRead(data)
+        rvResponseMultiRead.adapter = adapter
     }
 
     private fun validateData(): Boolean {
         var isDataFilled = true
-        val totalObjectCount = containerObject.childCount - 1
-        for (i in 1..totalObjectCount) {
+        val totalObjectCount = containerObject.childCount -1
+        for (i in 0..totalObjectCount) {
             val childView = containerObject.getChildAt(i)
             val etObjectId = childView.findViewById<EditText>(R.id.etObjectId)
             if (etObjectId.text.toString().isEmpty()) {
@@ -104,6 +165,38 @@ class FragmentReadPropertyMultiple : Fragment() {
         return isDataFilled
     }
 
+    private fun validateNetworkData() : Boolean{
+        if (etMacAddress.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidMacAddress(
+                etMacAddress.text.toString().trim { it <= ' ' })
+        ) {
+            etMacAddress.error = "Please input valid mac address"
+            return false
+        }
+        if (etDnet.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                etDnet.text.toString().toInt(), 0, Int.MAX_VALUE, 1
+            )
+        ) {
+            etDnet.error = "Please input valid d net"
+            return false
+        }
+        if (etDestinationIp.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidIPAddress(
+                etDestinationIp.text.toString().trim { it <= ' ' })
+        ) {
+            etDestinationIp.error = "Please input valid ip address"
+            return false
+        }
+
+        if (etPort.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                etPort.text.toString().toInt(), 4069, 65535, 1
+            )
+        ) {
+            etPort.error = "Please input valid port"
+            return false
+        }
+
+        return true
+    }
+
     private fun getDetailsFromObjectLayout(childView: View, i: Int): ObjectIdentifierBacNet {
         Log.d(TAG, "--------------------checking object-->$i<------------------------------- ->")
         val spin = childView.findViewById(R.id.sp_object_types) as Spinner
@@ -114,7 +207,7 @@ class FragmentReadPropertyMultiple : Fragment() {
         )
         return ObjectIdentifierBacNet(
             BacNetConstants.ObjectType.valueOf(spin.selectedItem.toString()).value,
-            objectId.text.toString().toInt()
+            objectId.text.toString()
         )
     }
 
@@ -218,5 +311,77 @@ class FragmentReadPropertyMultiple : Fragment() {
         )
         aa.setDropDownViewResource(R.layout.spinner_item_type_2)
         spin.adapter = aa
+    }
+
+
+    private fun sendRequest(rpmRequest: BacnetReadRequestMultiple) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.d(TAG, "--------------service.multiread--------------------")
+                val response = service.multiread(rpmRequest)
+                Log.d(TAG, "--------------service.multiread response--------------------")
+                val resp = BaseResponse(response)
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        Log.d(TAG, "received response->${readResponse}")
+                        CoroutineScope(Dispatchers.Main).launch {
+                            //Log.d(TAG, "--null response--${readResponse!!.rpResponse.listOfItems.size}")
+                            updateUi(readResponse)
+                        }
+                    } else {
+                        Log.d(TAG, "--null response--")
+                    }
+                } else {
+                    Log.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                showToastMessage("SocketTimeoutException")
+            } catch (e: ConnectException) {
+                Log.d(TAG, "--ConnectException--${e.message}")
+                showToastMessage("ConnectException")
+            } catch (e: Exception) {
+                Log.d(TAG, "--connection time out--${e.message}")
+            }
+        }
+    }
+
+    private fun showToastMessage(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateUi(readResponse: MultiReadResponse?) {
+        data.clear()
+        if (readResponse != null) {
+            if (readResponse.error != null) {
+                //showToastMessage("error code->${readResponse.error.errorCode}--error class->${readResponse.error.errorClass}")
+                val errorCode = BacNetConstants.BacnetErrorCodes.from(readResponse.error.errorCode.toInt())
+                val errorClass = BacNetConstants.BacnetErrorClasses.from(readResponse.error.errorClass.toInt())
+                showToastMessage("error code->${errorCode}--error class->${errorClass}")
+            } else if(readResponse.errorAbort != null){
+                showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(readResponse.errorAbort.abortReason.toInt())}")
+            }else if(readResponse.errorBacApp != null){
+                showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(readResponse.errorBacApp.abortReason.toInt())}")
+            }else if(readResponse.errorReject != null){
+                showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(readResponse.errorReject.abortReason.toInt())}")
+            }else if(readResponse.errorASide != null){
+                showToastMessage("abort reason->${readResponse.errorASide.abortReason}")
+            }else {
+                for (item in readResponse.rpResponse.listOfItems) {
+                    data.add(
+                        ItemsViewModel(
+                            BacNetConstants.PropertyType.from(item.results[0].propertyIdentifier.toInt()).toString(),
+                            item.results[0].propertyValue.value,
+                            BacNetConstants.ObjectType.from(item.objectIdentifier.objectType.toInt()).toString()
+                        )
+                    )
+                }
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 }

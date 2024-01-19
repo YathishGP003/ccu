@@ -1,10 +1,14 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
+import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
+import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -16,9 +20,19 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.damper_details.damperSizeTv2
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
+import java.lang.Exception
+import java.net.ConnectException
+import java.net.SocketTimeoutException
 
 
 class FragmentWriteProperty : Fragment() {
@@ -46,14 +60,39 @@ class FragmentWriteProperty : Fragment() {
     private lateinit var btnReadProperty: Button
     private lateinit var etArrayindex: EditText
 
+    private lateinit var etMacAddress: EditText
+    private lateinit var etDnet: EditText
+
     private var selectedObjectType = objectTypeArray[0].value
     private var selectedPropertyType = propertyTypeArray[0].value
     private var selectedDataType = BacNetConstants.DataTypes.valueOf(dataTypeArray[0].name).ordinal
+
+    private lateinit var service : CcuService
+
+    private var ipAddress = "192.168.1.1"
+    private var port = 47808
+    private var deviceId = "1000"
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "--onViewCreated--")
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+        if (confString != null) {
+            try {
+                val config = JSONObject(confString)
+                val networkObject = config.getJSONObject("network")
+                ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
+                port = networkObject.getInt(BacnetConfigConstants.PORT)
+                service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                val deviceObject = config.getJSONObject("device")
+                deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
 
         configureObjectTypeSpinner(view)
         configurePropertySpinner(view)
@@ -75,8 +114,67 @@ class FragmentWriteProperty : Fragment() {
             generateRequest()
         }
 
+        etMacAddress = view.findViewById(R.id.et_destination_mac)
+        /*etMacAddress.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                if (etMacAddress.text.toString().trim { it <= ' ' }.isNotEmpty()) {
+                    if (!CCUUiUtil.isValidMacAddress(etMacAddress.text.toString())) {
+                        etMacAddress.error = getString(R.string.txt_valid_input)
+                        disableReadButton()
+                    } else {
+                        etMacAddress.error = null
+                        if (validateEntries()) {
+                            enableReadButton()
+                        } else {
+                            disableReadButton()
+                        }
+                    }
+                } else {
+                    //etMacAddress.error = null
+                    etMacAddress.error = getString(R.string.txt_valid_input)
+                    disableReadButton()
+                }
+            }
+        })*/
+        etDnet = view.findViewById(R.id.etDnet)
+        /*etDnet.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                if (etDnet.text.toString().trim { it <= ' ' }.isNotEmpty()) {
+                    if (etDnet.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                            etDnet.text.toString().toInt(), 0, Int.MAX_VALUE, 1
+                        )
+                    ) {
+                        etDnet.error = getString(R.string.txt_valid_number)
+                        disableReadButton()
+                    } else {
+                        etDnet.error = null
+                        if (validateEntries()) {
+                            enableReadButton()
+                        } else {
+                            disableReadButton()
+                        }
+                    }
+                } else {
+                    etDnet.error = getString(R.string.txt_valid_number)
+                    disableReadButton()
+                }
+            }
+        })*/
+
         etPriority = view.findViewById(R.id.etPriority)
-        etPriority.addTextChangedListener(object : TextWatcher {
+        /*etPriority.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -100,14 +198,16 @@ class FragmentWriteProperty : Fragment() {
                         }
                     }
                 } else {
-                    etPriority.error = null
+                    //etPriority.error = null
+                    etPriority.error = getString(R.string.txt_valid_number)
+                    disableReadButton()
                 }
             }
-        })
+        })*/
 
 
         etValue = view.findViewById(R.id.etValue)
-        etValue.addTextChangedListener(object : TextWatcher {
+        /*etValue.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -116,11 +216,9 @@ class FragmentWriteProperty : Fragment() {
 
             override fun afterTextChanged(p0: Editable?) {
                 if (etValue.text.toString().trim { it <= ' ' }.isNotEmpty()) {
-                    if (etValue.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
-                            etValue.text.toString().toInt(), 0, Int.MAX_VALUE, 1
-                        )
+                    if (etValue.text.toString() == BacnetConfigConstants.EMPTY_STRING
                     ) {
-                        etValue.error = getString(R.string.txt_valid_number)
+                        etValue.error = getString(R.string.txt_valid_input)
                         disableReadButton()
                     } else {
                         etValue.error = null
@@ -131,13 +229,16 @@ class FragmentWriteProperty : Fragment() {
                         }
                     }
                 } else {
-                    etValue.error = null
+                    //etValue.error = null
+                    etValue.error = getString(R.string.txt_valid_input)
+                    disableReadButton()
                 }
             }
-        })
+        })*/
 
         etPort = view.findViewById(R.id.etPort)
-        etPort.addTextChangedListener(object : TextWatcher {
+        etPort.setText(port.toString())
+        /*etPort.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -161,13 +262,15 @@ class FragmentWriteProperty : Fragment() {
                         }
                     }
                 } else {
-                    etPort.error = null
+                    //etPort.error = null
+                    etPort.error = getString(R.string.txt_error_port)
+                    disableReadButton()
                 }
             }
-        })
+        })*/
 
         etObjectId = view.findViewById(R.id.etObjectId)
-        etObjectId.addTextChangedListener(object : TextWatcher {
+        /*etObjectId.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -184,15 +287,15 @@ class FragmentWriteProperty : Fragment() {
                         disableReadButton()
                     }
                 } else {
-                    //etObjectId.error = null
                     etObjectId.error = getString(R.string.txt_error_object_id)
                     disableReadButton()
                 }
             }
-        })
+        })*/
 
         etDestinationIp = view.findViewById(R.id.et_destination_ip)
-        etDestinationIp.addTextChangedListener(object : TextWatcher {
+        etDestinationIp.setText(ipAddress)
+        /*etDestinationIp.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -216,13 +319,13 @@ class FragmentWriteProperty : Fragment() {
                     etDestinationIp.error = null
                 }
             }
-        })
-
-        if (validateEntries()) {
+        })*/
+        enableReadButton()
+        /*if (validateEntries()) {
             enableReadButton()
         } else {
             disableReadButton()
-        }
+        }*/
     }
 
     private fun generateRequest() {
@@ -231,22 +334,26 @@ class FragmentWriteProperty : Fragment() {
         } else {
             null
         }
-
-        val request = Gson().toJson(
-            BacnetWriteRequest(
-                Destination(etDestinationIp.text.toString(), etPort.text.toString().toInt()),
-                WriteRequest(
-                    ObjectIdentifierBacNet(
-                        selectedObjectType,
-                        etObjectId.text.toString().toInt()
-                    ),
-                    PropertyValueBacNet(selectedDataType, etValue.text.toString().toInt()),
-                    etPriority.text.toString().toInt(),
-                    selectedPropertyType,
-                    arrayIndex
-                )
+        // increasing index, bcoz index in bacnet starts from 1 not 0
+        selectedDataType
+        val dataTypeCompatibleWithBacNet = selectedDataType + 1
+        val bacnetWriteRequest = BacnetWriteRequest(
+            DestinationMultiRead(etDestinationIp.text.toString(), etPort.text.toString(), deviceId, etDnet.text.toString(), etMacAddress.text.toString()),
+            WriteRequest(
+                ObjectIdentifierBacNet(
+                    selectedObjectType,
+                    etObjectId.text.toString()
+                ),
+                PropertyValueBacNet(dataTypeCompatibleWithBacNet, etValue.text.toString()),
+                etPriority.text.toString(),
+                selectedPropertyType,
+                arrayIndex
             )
         )
+        val request = Gson().toJson(
+            bacnetWriteRequest
+        )
+        sendRequest(bacnetWriteRequest)
         Log.d(TAG, "this is the request-->$request")
     }
 
@@ -270,6 +377,13 @@ class FragmentWriteProperty : Fragment() {
     }
 
     private fun validateEntries(): Boolean {
+        if (etMacAddress.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidMacAddress(
+                etMacAddress.text.toString().trim { it <= ' ' })
+        ) return false
+        if (etDnet.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                etDnet.text.toString().toInt(), 0, Int.MAX_VALUE, 1
+            )
+        ) return false
         if (etDestinationIp.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidIPAddress(
                 etDestinationIp.text.toString().trim { it <= ' ' })
         ) return false
@@ -279,6 +393,8 @@ class FragmentWriteProperty : Fragment() {
             )
         ) return false
         if (etObjectId.text.toString() == BacnetConfigConstants.EMPTY_STRING) return false
+        if (etPriority.text.toString() == BacnetConfigConstants.EMPTY_STRING) return false
+        if (etValue.text.toString() == BacnetConfigConstants.EMPTY_STRING) return false
         return true
     }
 
@@ -348,5 +464,67 @@ class FragmentWriteProperty : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(TAG, "--onDestroyView--")
+    }
+
+    private fun sendRequest(bacnetWriteRequest: BacnetWriteRequest) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = service.write(bacnetWriteRequest)
+                val resp = BaseResponse(response)
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        Log.d(TAG, "received response->${readResponse}")
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (readResponse != null) {
+
+                                if (readResponse.error != null) {
+                                    //showToastMessage("error code->${readResponse.error.errorCode}--error class->${readResponse.error.errorClass}")
+                                    val errorCode = BacNetConstants.BacnetErrorCodes.from(readResponse.error.errorCode.toInt())
+                                    val errorClass = BacNetConstants.BacnetErrorClasses.from(readResponse.error.errorClass.toInt())
+                                    showToastMessage("error code->${errorCode}--error class->${errorClass}")
+                                } else if(readResponse.errorAbort != null){
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetAbortErrors.from(readResponse.errorAbort.abortReason.toInt())}")
+                                }else if(readResponse.errorBacApp != null){
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetAppErrors.from(readResponse.errorBacApp.abortReason.toInt())}")
+                                }else if(readResponse.errorReject != null){
+                                    showToastMessage("abort reason->${BacNetConstants.BacnetRejectErrors.from(readResponse.errorReject.abortReason.toInt())}")
+                                }else if(readResponse.errorASide != null){
+                                    showToastMessage("abort reason->${readResponse.errorASide.abortReason}")
+                                }else {
+                                    showToastMessage("Success")
+                                }
+
+                                /*if(readResponse.error == null){
+                                    showToastMessage("Success")
+                                }else{
+                                    val errorMessage = "error code->${readResponse.error.errorCode}--error class--${readResponse.error.errorClass}"
+                                    showToastMessage(errorMessage)
+                                }*/
+                            }
+                        }
+                    } else {
+                        Log.d(TAG, "--null response--")
+                    }
+                } else {
+                    Log.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                showToastMessage("SocketTimeoutException")
+            } catch (e: ConnectException) {
+                Log.d(TAG, "--ConnectException--${e.message}")
+                showToastMessage("ConnectException")
+            } catch (e: Exception) {
+                Log.d(TAG, "--connection time out--${e.message}")
+            }
+        }
+    }
+
+    private fun showToastMessage(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

@@ -1,10 +1,14 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
+import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
+import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
 import a75f.io.renatus.R
 import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -16,10 +20,21 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_modbusconfig.etIP
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
+import java.lang.Exception
+import java.lang.NumberFormatException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
 
 
 @AndroidEntryPoint
@@ -52,10 +67,32 @@ class FragmentWhoIs : Fragment() {
     private lateinit var btnReadProperty: Button
     private lateinit var etLowLimit: EditText
     private lateinit var etHighLimit: EditText
+    private lateinit var service : CcuService
+
+    private var ipAddress = "192.168.1.1"
+    private var port = 47808
+    private var deviceId = "1000"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "--onViewCreated--")
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+        if (confString != null) {
+            try {
+                val config = JSONObject(confString)
+                val networkObject = config.getJSONObject("network")
+                ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
+                port = networkObject.getInt(BacnetConfigConstants.PORT)
+                service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                val deviceObject = config.getJSONObject("device")
+                deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+
         configureObjectTypeSpinner(view)
 
         etLowLimit = view.findViewById(R.id.etLowLimit)
@@ -72,11 +109,15 @@ class FragmentWhoIs : Fragment() {
         )
 
         btnReadProperty.setOnClickListener {
+//            if(!validateRequestEntries()){
+//                return@setOnClickListener
+//            }
             generateRequest()
         }
 
         etPort = view.findViewById(R.id.etPort)
-        etPort.addTextChangedListener(object : TextWatcher {
+        etPort.setText(port.toString())
+        /*etPort.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -100,13 +141,16 @@ class FragmentWhoIs : Fragment() {
                         }
                     }
                 } else {
-                    etPort.error = null
+                    etPort.error = getString(R.string.txt_error_port)
+                    disableReadButton()
+                    //etPort.error = null
                 }
             }
-        })
+        })*/
 
         etDestinationIp = view.findViewById(R.id.et_destination_ip)
-        etDestinationIp.addTextChangedListener(object : TextWatcher {
+        etDestinationIp.setText(ipAddress)
+        /*etDestinationIp.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -127,42 +171,65 @@ class FragmentWhoIs : Fragment() {
                         }
                     }
                 } else {
-                    etDestinationIp.error = null
+                    //etDestinationIp.error = null
+                    etDestinationIp.error = getString(R.string.error_ip_address)
+                    disableReadButton()
                 }
             }
-        })
-
-        if (validateEntries()) {
+        })*/
+        enableReadButton()
+        /*if (validateEntries()) {
             enableReadButton()
         } else {
             disableReadButton()
-        }
+        }*/
     }
 
     private fun generateRequest() {
         if (selectedObjectType == OBJ_ANALOG_INPUT) {
-            val request = Gson().toJson(
-                BacnetWhoIsRequest(
+            try {
+                val bacnetWhoIsRequest = BacnetWhoIsRequest(
                     WhoIsRequest(
-                        etLowLimit.text.toString().toInt(),
-                        etHighLimit.text.toString().toInt()
+                        etLowLimit.text.toString(),
+                        etHighLimit.text.toString()
                     ),
-                    Destination(etDestinationIp.text.toString(), etPort.text.toString().toInt()),
+                    BroadCast("unicast"),
+                    etPort.text.toString(),
+                    etDestinationIp.text.toString()
+                    //DestinationWhoIs(etPort.text.toString(), ipAddress),
                 )
-            )
-            Log.d(TAG, "this is the unicast request-->$request")
+                val request = Gson().toJson(
+                    bacnetWhoIsRequest
+                )
+                Log.d(TAG, "this is the unicast request-->$request")
+                sendRequest(bacnetWhoIsRequest)
+            }catch (e : NumberFormatException){
+                Log.d(TAG, "please provide valid input - ${e.message}")
+            }
         } else {
-            val request = Gson().toJson(
-                BacnetWhoIsRequest(
+            try {
+                val broadCastValue = if (selectedObjectType == OBJ_ANALOG_OUTPUT) {
+                    "local"
+                } else {
+                    "global"
+                }
+                val bacnetWhoIsRequest = BacnetWhoIsRequest(
                     WhoIsRequest(
-                        etLowLimit.text.toString().toInt(),
-                        etHighLimit.text.toString().toInt()
+                        etLowLimit.text.toString(),
+                        etHighLimit.text.toString()
                     ),
-                    null,
-                    BroadCast(selectedObjectType),
+                    BroadCast(broadCastValue),
+                    etPort.text.toString(),
+                    etDestinationIp.text.toString()
                 )
-            )
-            Log.d(TAG, "this is the broadcast request-->$request")
+                val request = Gson().toJson(
+                    bacnetWhoIsRequest
+                )
+                Log.d(TAG, "this is the broadcast request-->$request")
+                sendRequest(bacnetWhoIsRequest)
+            }catch (e : NumberFormatException){
+                Log.d(TAG, "please provide valid input - ${e.message}")
+            }
         }
 
     }
@@ -198,6 +265,27 @@ class FragmentWhoIs : Fragment() {
         return true
     }
 
+    private fun validateRequestEntries(): Boolean {
+        if (etLowLimit.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                etLowLimit.text.toString().toInt(), 0, Int.MAX_VALUE, 1
+            )
+        ) {
+            etLowLimit.error = getString(R.string.txt_valid_input)
+            return false
+        }
+        if (etHighLimit.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+                etHighLimit.text.toString().toInt(), 0, Int.MAX_VALUE, 1
+            )
+        ) {
+            etHighLimit.error = getString(R.string.txt_valid_input)
+            return false
+        }
+
+        etLowLimit.error = null
+        etHighLimit.error = null
+        return true
+    }
+
     private fun configureObjectTypeSpinner(view: View) {
 
         val spin = view.findViewById(R.id.sp_object_types) as Spinner
@@ -222,5 +310,44 @@ class FragmentWhoIs : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(TAG, "--onDestroyView--")
+    }
+
+    private fun sendRequest(bacnetWhoIsRequest: BacnetWhoIsRequest) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = service.whois(bacnetWhoIsRequest)
+                val resp = BaseResponse(response)
+                if (response.isSuccessful) {
+                    val result = resp.data
+                    if (result != null) {
+                        val readResponse = result.body()
+                        Log.d(TAG, "received response->${readResponse}")
+                        CoroutineScope(Dispatchers.Main).launch {
+                            //updateUi(readResponse)
+                            val responseText = Gson().toJson(readResponse)
+                            showToastMessage("success-->$responseText")
+                        }
+                    } else {
+                        Log.d(TAG, "--null response--")
+                    }
+                } else {
+                    Log.d(TAG, "--error--${resp.error}")
+                }
+            } catch (e: SocketTimeoutException) {
+                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                showToastMessage("SocketTimeoutException")
+            } catch (e: ConnectException) {
+                Log.d(TAG, "--ConnectException--${e.message}")
+                showToastMessage("ConnectException")
+            } catch (e: Exception) {
+                Log.d(TAG, "--connection time out--${e.message}")
+            }
+        }
+    }
+
+    private fun showToastMessage(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

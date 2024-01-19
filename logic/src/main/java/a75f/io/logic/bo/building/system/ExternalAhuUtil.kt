@@ -232,6 +232,30 @@ fun mapModbusPoint(
 }
 
 fun updateDefaultSetPoints(
+    systemEquip: Equip,
+    lastLoopDirection: TempDirection
+): Double {
+    val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
+
+    return if (isDualSetPointEnabled) {
+        when (lastLoopDirection) {
+            TempDirection.COOLING -> Domain.getPointByDomain(
+                systemEquip,
+                systemCoolingSATMaximum
+            )
+            else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
+        }
+
+    } else {
+        when (lastLoopDirection) {
+            TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
+            else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
+        }
+    }
+}
+
+/*
+fun updateDefaultSetPoints(
     conditioningMode: SystemMode,
     systemEquip: Equip,
     lastLoopDirection: TempDirection
@@ -256,13 +280,28 @@ fun updateDefaultSetPoints(
         }
 
         SystemMode.HEATONLY -> {
+
+            if (isDualSetPointEnabled) {
+                when (lastLoopDirection) {
+                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemCoolingSATMaximum)
+                    else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
+                }
+            } else {
+                when (lastLoopDirection) {
+                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
+                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
+                }
+            }
+
             if (!isDualSetPointEnabled) {
                 when (lastLoopDirection) {
                     TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
                     else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
                 }
             }
-            else
+            else {
+
+            }
                 Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
         }
 
@@ -278,6 +317,7 @@ fun updateDefaultSetPoints(
         }
     }
 }
+*/
 
 fun getTunerByDomainName(systemEquip: Equip, domainName: String): Double =
     TunerUtil.readTunerValByQuery("domainName == \"$domainName\"", systemEquip.id)
@@ -318,7 +358,7 @@ fun calculateSATSetPoints(
     if (isDualSetPointEnabled) {
         val satSetPointLimits = getDualSetPointMinMax(systemEquip)
         val coolingSatSetPointValue = if (basicConfig.coolingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isCoolingLockoutActive)
-            updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.COOLING)
+            updateDefaultSetPoints(systemEquip, TempDirection.COOLING)
         else
             mapToSetPoint(
                 satSetPointLimits.first.first,
@@ -327,7 +367,7 @@ fun calculateSATSetPoints(
             )
 
         val heatingSatSetPointValue = if (basicConfig.heatingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isHeatingLockoutActive)
-            updateDefaultSetPoints(conditioningMode, systemEquip, TempDirection.HEATING)
+            updateDefaultSetPoints(systemEquip, TempDirection.HEATING)
         else
             mapToSetPoint(
                 satSetPointLimits.second.first,
@@ -364,7 +404,7 @@ fun calculateSATSetPoints(
             isLockoutActive = L.ccu().systemProfile.isHeatingLockoutActive
         logIt( "isLockoutActive:$isLockoutActive ")
         val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0 || isLockoutActive)
-            updateDefaultSetPoints(conditioningMode, systemEquip, loopRunningDirection)
+            updateDefaultSetPoints(systemEquip, loopRunningDirection)
         else
             mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, basicConfig.loopOutput)
         updateSetPoint(

@@ -102,7 +102,6 @@ public class VavParallelFanProfile extends VavProfile
     }
     
     private void initLoopVariables(int node) {
-        vavEquip = new VavEquip(equipRef);
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits((short) node, damper);

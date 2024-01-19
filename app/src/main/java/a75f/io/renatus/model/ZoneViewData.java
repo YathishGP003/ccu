@@ -8,6 +8,7 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.domain.VavEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.logic.DomainManager;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -117,10 +118,13 @@ public class ZoneViewData {
 
         String equipStatusPoint = vavEquip.getEquipStatusMessage().readDefaultStrVal();
         double damperPosPoint = vavEquip.getNormalizedDamperCmd().readHisVal();
+        double valvePoint = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.chilledWaterValve + "\" and equipRef == \""+equipID+"\"");
         double reheatPoint = vavEquip.getReheatCmd().readHisVal();
         double enteringAirPoint = vavEquip.getEnteringAirTemp().readHisVal();
         double dischargePoint = vavEquip.getDischargeAirTemp().readHisVal();
         double airflowCFM =  vavEquip.getAirFlowSensor().readHisVal();
+        double condensateNC = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNC + "\" and equipRef == \""+equipID+"\"");
+        double condensateNO = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNO + "\" and equipRef == \""+equipID+"\"");
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {
@@ -136,7 +140,9 @@ public class ZoneViewData {
         }
         if (reheatPoint  > 0)
         {
-            vavPoints.put("Reheat Coil",reheatPoint+"% Open");
+            vavPoints.put("Reheat Coil",(int)reheatPoint+"% Open");
+        } else if (valvePoint > 0) {
+            vavPoints.put("Reheat Coil",(int)valvePoint+"% Open");
         }else{
             vavPoints.put("Reheat Coil",0);
         }
@@ -158,12 +164,19 @@ public class ZoneViewData {
         }else{
             vavPoints.put("Airflow CFM",0);
         }
-        
+        if (condensateNC > 0.0 || condensateNO > 0.0) {
+            vavPoints.put("Condensate","Condensate Sensed");
+        } else {
+            vavPoints.put("Condensate", 0);
+        }
+
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
         if (equip.containsKey("series")) {
             vavPoints.put("Profile","VAV Series Fan");
         } else if (equip.containsKey("parallel")){
             vavPoints.put("Profile","VAV Parallel Fan");
+        } else if (equip.containsKey("chilledBeam")) {
+            vavPoints.put("Profile", "Active Chilled Beams + DOAS");
         } else {
             vavPoints.put("Profile", "VAV Reheat - No Fan");
         }

@@ -3,7 +3,7 @@ package a75f.io.domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 
-class VavEquip (equipRef : String) : DomainEquip(equipRef){
+open class VavEquip (equipRef : String) : DomainEquip(equipRef){
 
     val heartBeat = Point(DomainName.heartBeat, equipRef)
 

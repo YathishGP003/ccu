@@ -142,6 +142,12 @@ public class Pulse
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+			boolean isAcb = isDomainEquip ? (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) : false;
+
+			boolean isCondensateNc = false;
+			if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") != null) {
+				if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") > 0.0) { isCondensateNc = true; }
+			}
 
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
@@ -192,6 +198,15 @@ public class Pulse
 							if (isTh2Enabled && isSse) {
 								th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+							} else if (isTh2Enabled && isAcb) {
+								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
+								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
+								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
+								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+								if (oldCondensateSensor != curCondensateSensor) {
+									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
+								}
+
 							} else {
 								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);

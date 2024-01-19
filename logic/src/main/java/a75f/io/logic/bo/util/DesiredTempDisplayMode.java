@@ -64,6 +64,9 @@ public class DesiredTempDisplayMode {
             }else if (mEquip.getProfile().equalsIgnoreCase(SMARTSTAT_FOUR_PIPE_FCU.name())) {
                 TemperatureMode temperatureMode = getTemperatureModeForSSFCU(mEquip);
                 temperatureModes.add(temperatureMode);
+            }else if (mEquip.getProfile().equalsIgnoreCase(ProfileType.VAV_ACB.name())) {
+                TemperatureMode temperatureMode = getTemperatureModeForAcbProfile(mEquip, ccuHsApi);
+                temperatureModes.add(temperatureMode);
             }else if (mEquip.getMarkers().contains(Tags.VAV)) {
                 TemperatureMode temperatureMode = getTemperatureModeForVavProfile(mEquip, ccuHsApi);
                 temperatureModes.add(temperatureMode);
@@ -141,6 +144,14 @@ public class DesiredTempDisplayMode {
             // For Default system profile we show both heating and cooling
             return TemperatureMode.DUAL;
         }
+    }
+
+    private static TemperatureMode getTemperatureModeForAcbProfile(Equip mEquip, CCUHsApi ccuHsApi) {
+        boolean isCooling = VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
+                TemperatureMode.COOLING);
+        boolean isHeating = VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
+                TemperatureMode.HEATING);
+        return getTemperatureModeForSystemProfile(isCooling, isHeating, false);
     }
 
     private static TemperatureMode getTemperatureModeForVavProfile(Equip mEquip, CCUHsApi ccuHsApi) {

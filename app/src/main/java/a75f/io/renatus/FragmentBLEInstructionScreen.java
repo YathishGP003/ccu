@@ -33,6 +33,7 @@ import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -237,6 +238,32 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             {
                 showDialogFragment(VavProfileConfigFragment.Companion
                                            .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
+            } else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.VAV_ACB)
+        {
+            if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
+                    ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
+                Toast.makeText(getActivity(),"Set System Profile to VAV and try",Toast.LENGTH_LONG).show();
+                dismiss();
+                return;
+            }
+            ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+            for (Equip equip: zoneEquips){
+                if(equip.getProfile().contains("DAB")) {
+                    Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                    dismiss();
+                    return;
+                }
+            }
+            if (L.isSimulation())
+            {
+                showDialogFragment(AcbProfileConfigFragment.Companion
+                        .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), AcbProfileConfigFragment.Companion.getID());
             }
             else
             {

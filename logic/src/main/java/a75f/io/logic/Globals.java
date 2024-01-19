@@ -69,6 +69,9 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+
+
+import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -473,7 +476,7 @@ public class Globals {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
                     CcuLog.d(L.TAG_CCU, "Load Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
-                    switch (ProfileType.valueOf(eq.getProfile())) {
+                    switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vr);
@@ -485,6 +488,10 @@ public class Globals {
                         case VAV_PARALLEL_FAN:
                             VavParallelFanProfile vpf = new VavParallelFanProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
+                            break;
+                        case VAV_ACB:
+                            VavAcbProfile acb = new VavAcbProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(acb);
                             break;
                         case DAB:
                             DabProfile dab = new DabProfile();
@@ -652,11 +659,12 @@ public class Globals {
                 return ProfileType.VAV_PARALLEL_FAN.name();
             case DomainName.vavReheatSeriesFan:
                 return ProfileType.VAV_SERIES_FAN.name();
+            case DomainName.activeChilledBeam:
+                return ProfileType.VAV_ACB.name();
             default:
                 return profile;
         }
     }
-
 
     public String getSmartNodeBand() {
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr");

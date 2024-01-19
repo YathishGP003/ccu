@@ -46,9 +46,11 @@ class PointsUtil(private val hayStack : CCUHsApi) {
             DomainName.smartnodeVAVReheatNoFan -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatParallelFan -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatSeriesFan -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+            DomainName.smartnodeActiveChilledBeam -> ModelLoader.getSmartNodeVavAcbModelDef() as SeventyFiveFProfileDirective
             DomainName.helionodeVAVReheatNoFan -> ModelLoader.getHelioNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
             DomainName.helionodeVAVReheatParallelFan -> ModelLoader.getHelioNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
             DomainName.helionodeVAVReheatSeriesFan -> ModelLoader.getHelioNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
+            DomainName.helionodeActiveChilledBeam -> ModelLoader.getHelioNodeVavAcbModelDef() as SeventyFiveFProfileDirective
             else -> null
         }
     }

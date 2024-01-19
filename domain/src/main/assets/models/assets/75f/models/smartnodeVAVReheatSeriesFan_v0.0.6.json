@@ -1,7 +1,7 @@
 {
-  "id": "6519a8e5951f37007b7956ea",
-  "domainName": "smartnodeVAVReheatParallelFan",
-  "name": "smartnodeVAVReheatParallelFan",
+  "id": "65198813951f37007b7956e9",
+  "domainName": "smartnodeVAVReheatSeriesFan",
+  "name": "smartnodeVAVReheatSeriesFan",
   "tags": [
     {
       "name": "ccuRef",
@@ -46,12 +46,6 @@
       "valueEnum": []
     },
     {
-      "name": "parallel",
-      "kind": "MARKER",
-      "defaultValue": null,
-      "valueEnum": []
-    },
-    {
       "name": "priorityLevel",
       "kind": "STR",
       "defaultValue": null,
@@ -60,7 +54,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "vavReheatParallelFan",
+      "defaultValue": "vavReheatSeriesFan",
       "valueEnum": []
     },
     {
@@ -72,6 +66,12 @@
     {
       "name": "roomRef",
       "kind": "REF",
+      "defaultValue": null,
+      "valueEnum": []
+    },
+    {
+      "name": "series",
+      "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []
     },
@@ -108,11 +108,11 @@
     "floorRef",
     "group",
     "id",
-    "parallel",
     "priorityLevel",
     "profile",
     "reheat",
     "roomRef",
+    "series",
     "siteRef",
     "smartnode",
     "vav",
@@ -13722,8 +13722,8 @@
     },
     {
       "id": "636e435ade227179a68504ed",
-      "name": "Parallel Fan",
-      "domainName": "parallelFanCmd",
+      "name": "Series Fan",
+      "domainName": "seriesFanCmd",
       "tags": [
         {
           "name": "bacnetId",
@@ -13840,12 +13840,6 @@
           "valueEnum": []
         },
         {
-          "name": "parallel",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "point",
           "kind": "MARKER",
           "defaultValue": null,
@@ -13859,6 +13853,12 @@
         },
         {
           "name": "run",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "series",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -13894,7 +13894,7 @@
         "his",
         "floorRef",
         "zone",
-        "parallel",
+        "series",
         "roomRef",
         "bacnetId",
         "equipRef",
@@ -14014,13 +14014,13 @@
           "valueEnum": []
         },
         {
-          "name": "parallel",
+          "name": "run",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
-          "name": "run",
+          "name": "series",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -14981,7 +14981,7 @@
       "defaultValue": null,
       "defaultUnit": "",
       "isGpc36": false,
-      "hisInterpolate": "COV",
+      "hisInterpolate": "NONE",
       "configuration": {
         "configType": "BASE"
       },
@@ -22579,12 +22579,6 @@
       "valueEnum": []
     },
     {
-      "name": "parallel",
-      "kind": "MARKER",
-      "defaultValue": null,
-      "valueEnum": []
-    },
-    {
       "name": "priorityLevel",
       "kind": "STR",
       "defaultValue": null,
@@ -22593,11 +22587,17 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "vavReheatParallelFan",
+      "defaultValue": "vavReheatSeriesFan",
       "valueEnum": []
     },
     {
       "name": "reheat",
+      "kind": "MARKER",
+      "defaultValue": null,
+      "valueEnum": []
+    },
+    {
+      "name": "series",
       "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []

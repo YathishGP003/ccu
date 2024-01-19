@@ -22,6 +22,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavEquip;
@@ -37,6 +38,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
@@ -44,28 +46,12 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import io.seventyfivef.domainmodeler.client.ModelDirective;
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
-
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
-import static a75f.io.logic.bo.building.system.SystemController.*;
-
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.*;
 
 import org.projecthaystack.HDict;
 
@@ -148,17 +134,6 @@ public abstract class VavProfile extends ZoneProfile {
         spResetRequest = new TrimResponseRequest();
         hwstResetRequest = new TrimResponseRequest();
 
-        switch (profileType) {
-            case VAV_REHEAT:
-                vavUnit = new VavUnit();
-                break;
-            case VAV_SERIES_FAN:
-                vavUnit = new SeriesFanVavUnit();
-                break;
-            case VAV_PARALLEL_FAN:
-                vavUnit = new ParallelFanVavUnit();
-                break;
-        }
         nodeAddr = addr;
 
         //createHaystackPoints();
@@ -181,7 +156,23 @@ public abstract class VavProfile extends ZoneProfile {
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
 
-        vavEquip = new VavEquip(equipRef);
+        switch (profileType) {
+            case VAV_REHEAT:
+                vavUnit = new VavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_SERIES_FAN:
+                vavUnit = new SeriesFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_PARALLEL_FAN:
+                vavUnit = new ParallelFanVavUnit();
+                vavEquip = new VavEquip(equipRef);
+                break;
+            case VAV_ACB:
+                vavUnit = new VavAcbUnit();
+                vavEquip = new VavAcbEquip(equipRef);
+        }
 
         if (equipMap != null && equipMap.size() > 0) {
             String equipId = equipMap.get("id").toString();
@@ -714,18 +705,28 @@ public abstract class VavProfile extends ZoneProfile {
 
         String message;
         if (emergency) {
-            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
+            if (profileType.equals(ProfileType.VAV_ACB)) {
+                message = (status == 1 ? "Emergency Cooling" : "Recirculating Air");
+            } else {
+                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
+            }
         } else
         {
             if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else
             {
-                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+                if (profileType.equals(ProfileType.VAV_ACB)) {
+                    message = (status == 1 ? "Cooling Space" : "Recirculating Air");
+                } else {
+                    message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+                }
+
             }
         }
 
         message += getFanStatusMessage();
+        message += getAcbStatusMessage();
 
         String curStatus = vavEquip.getEquipStatusMessage().readDefaultStrVal();
         CcuLog.i(L.TAG_CCU_ZONE, "setStatus "+status+" : "+message);
@@ -741,6 +742,30 @@ public abstract class VavProfile extends ZoneProfile {
             return vavEquip.getParallelFanCmd().readHisVal() > 0 ? ", Fan ON" : ", Fan OFF";
         }
         return "";
+    }
+
+    protected String getAcbStatusMessage() {
+        String message = "";
+        if (profileType == ProfileType.VAV_ACB) {
+            VavAcbEquip acbEquip = (VavAcbEquip)vavEquip;
+            if (acbEquip.getCondensateNC().readHisVal() > 0.0 || acbEquip.getCondensateNO().readHisVal() > 0.0) {
+                message += ", Condensate Detected";
+            }
+            if (acbEquip.getValveType().readPriorityVal() > 0.0) {
+                if (acbEquip.getChwValveCmd().readHisVal() > 0.0) {
+                    message += ", CHW Valve ON";
+                } else {
+                    message += ", CHW Valve OFF";
+                }
+            } else {
+                if (acbEquip.getChwShutOffValve().readHisVal() > 0.0) {
+                    message += ", CHW Valve ON";
+                } else {
+                    message += ", CHW Valve OFF";
+                }
+            }
+        }
+        return message;
     }
 
     protected void updateDamperPosForTrueCfm(CCUHsApi hayStack, SystemController.State systemState) {

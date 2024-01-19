@@ -59,6 +59,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
+import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -403,6 +404,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case VAV_PARALLEL_FAN:
                         showDialogFragment(VavProfileConfigFragment.Companion
                                                    .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), VavProfileConfigFragment.Companion.getID());
+                        break;
+                    case VAV_ACB:
+                        showDialogFragment(AcbProfileConfigFragment.Companion
+                                .newInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType), AcbProfileConfigFragment.Companion.getID());
                         break;
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration

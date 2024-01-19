@@ -33,6 +33,7 @@ import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -179,7 +180,7 @@ public class LSmartNode
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (equip.getProfile().equals("VAV_ACB")) {
+        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString()) || equip.getProfile().equals(DomainName.activeChilledBeam)) {
             profile = "acb";
         } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString()) || equip.getProfile().equals(DomainName.vavReheatNoFan)) {
             profile = "vavNoFan";
@@ -291,6 +292,23 @@ public class LSmartNode
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
+        if (equip.getProfile().equals("VAV_ACB")) {
+            VavAcbEquip acbEquip = new VavAcbEquip(equipRef);
+            kFactor = (int)(100 * acbEquip.getKFactor().readPriorityVal());
+            minCFMCooling = (int)(acbEquip.getMinCFMCooling().readPriorityVal());
+            maxCFMCooling = (int)(acbEquip.getMaxCFMCooling().readPriorityVal());
+            minCFMReheating = (int)(acbEquip.getMinCFMReheating().readPriorityVal());
+            maxCFMReheating = (int)(acbEquip.getMaxCFMReheating().readPriorityVal());
+            damperShape = DamperShape_t.values()[(int)(acbEquip.getDamperShape().readPriorityVal())];
+            condensateSensor = CondensateSensor_t.values()[(int)(acbEquip.getThermistor2Type().readPriorityVal())];
+            damperSize = getDamperSizeInInches((int)(acbEquip.getDamperSize().readPriorityVal()));
+            airflowCFMProportionalRange = (int)(acbEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
+            airflowCFMProportionalKFactor = (int)(100 * acbEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
+            airflowCFMIntegralTime = (int)(acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
+            airflowCFMIntegralKFactor = (int)(100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
+            enableCFM = (int)(acbEquip.getEnableCFMControl().readPriorityVal());
+        }
+
         settings2.kFactor.set(enableCFM > 0 ? kFactor : 200);
         settings2.minCFMCooling.set(enableCFM > 0 ? minCFMCooling : 50);
         settings2.maxCFMCooling.set(enableCFM > 0 ? maxCFMCooling : 250);
@@ -304,7 +322,32 @@ public class LSmartNode
         settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
         settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
-
+    }
+    private static int getDamperSizeInInches(int index) {
+        switch (index) {
+            case 0:
+                return 4;
+            case 1:
+                return 6;
+            case 2:
+                return 8;
+            case 3:
+                return 10;
+            case 4:
+                return 12;
+            case 5:
+                return 14;
+            case 6:
+                return 16;
+            case 7:
+                return 18;
+            case 8:
+                return 20;
+            case 9:
+                return 22;
+            default:
+                return 0;
+        }
     }
 
     public static void setupDamperType(short address, SmartNodeSettings_t settings){
@@ -317,7 +360,14 @@ public class LSmartNode
             setupDamperActuator(settings, damperConfig, damper2Config, reheatConfig, "dab");
         } else if (equip.getMarkers().contains("vav")) {
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
-            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
+
+            int reheatConfig;
+            if (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
+                reheatConfig = hsApi.readDefaultVal("point and domainName == \"" + DomainName.valveType + "\" and group == \""+address+"\"").intValue();
+            } else {
+                reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
+            }
+
             // With DM integration, reheatType enum is incremented by 1. ("notInstalled" was -1, now it's zero). This is why we are subtracting 1 from the value here.
             setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
         }
@@ -438,11 +488,15 @@ public class LSmartNode
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                                                  mapDigitalOut(p.getType(), logicalVal > 0)
                             );
+                        } else if (isEquipType("chilledBeam", node)) {
+                            // In case of vav - acb, relay-1 maps to shut-off valve. No relay 2.
+                            mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                    mapDigitalOut(p.getType(), (logicalVal > 0)));
                         } else {
                             //In case of vav - no fan, relay-2 maps to stage-2
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                                 mapDigitalOut(p.getType(), isRelayTwo(p) ?
-                                                                                            logicalVal > 50 : logicalVal > 0)
+                                    mapDigitalOut(p.getType(), isRelayTwo(p) ?
+                                            logicalVal > 50 : logicalVal > 0)
                             );
                         }
                     }else if (isEquipType("sse", node))

@@ -1,11 +1,17 @@
 {
-  "id": "6519a8e5951f37007b7956ea",
-  "domainName": "smartnodeVAVReheatParallelFan",
-  "name": "smartnodeVAVReheatParallelFan",
+  "id": "651d53a3951f37007b795703",
+  "domainName": "smartnodeActiveChilledBeam",
+  "name": "smartnodeActiveChilledBeam",
   "tags": [
     {
       "name": "ccuRef",
       "kind": "REF",
+      "defaultValue": null,
+      "valueEnum": []
+    },
+    {
+      "name": "chilledBeam",
+      "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []
     },
@@ -17,12 +23,6 @@
     },
     {
       "name": "equip",
-      "kind": "MARKER",
-      "defaultValue": null,
-      "valueEnum": []
-    },
-    {
-      "name": "fan",
       "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []
@@ -46,12 +46,6 @@
       "valueEnum": []
     },
     {
-      "name": "parallel",
-      "kind": "MARKER",
-      "defaultValue": null,
-      "valueEnum": []
-    },
-    {
       "name": "priorityLevel",
       "kind": "STR",
       "defaultValue": null,
@@ -60,13 +54,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "vavReheatParallelFan",
-      "valueEnum": []
-    },
-    {
-      "name": "reheat",
-      "kind": "MARKER",
-      "defaultValue": null,
+      "defaultValue": "activeChilledBeam",
       "valueEnum": []
     },
     {
@@ -102,16 +90,14 @@
   ],
   "tagNames": [
     "ccuRef",
+    "chilledBeam",
     "dis",
     "equip",
-    "fan",
     "floorRef",
     "group",
     "id",
-    "parallel",
     "priorityLevel",
     "profile",
-    "reheat",
     "roomRef",
     "siteRef",
     "smartnode",
@@ -6518,320 +6504,6 @@
       ]
     },
     {
-      "id": "63510a3107f88c1a0ce49378",
-      "name": "Entering Air Temp",
-      "domainName": "enteringAirTemp",
-      "tags": [
-        {
-          "name": "air",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetId",
-          "kind": "NUMBER",
-          "defaultValue": "76",
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetType",
-          "kind": "STR",
-          "defaultValue": "AnalogValue",
-          "valueEnum": [
-            "Accumulator",
-            "Loop",
-            "BinaryInput",
-            "MultiStateInput",
-            "Device",
-            "AnalogInput",
-            "BinaryOutput",
-            "Calendar",
-            "BinaryValue",
-            "NotificationClass",
-            "AnalogValue",
-            "CharacterStringValue",
-            "StructuredView",
-            "NetworkPort",
-            "MuliStateValue",
-            "Schedule",
-            "TrendLog",
-            "MultiStateOutput",
-            "AnalogOutput",
-            "EventEnrollment",
-            "File"
-          ]
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "entering",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "logical",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sensor",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "temp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "cur",
-        "bacnetType",
-        "his",
-        "floorRef",
-        "zone",
-        "roomRef",
-        "bacnetId",
-        "equipRef",
-        "vav",
-        "logical",
-        "group",
-        "air",
-        "dis",
-        "entering",
-        "id",
-        "kind",
-        "point",
-        "sensor",
-        "siteRef",
-        "temp",
-        "tz"
-      ],
-      "rootTagNames": [
-        "air",
-        "entering",
-        "sensor",
-        "temp"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "minValue": 0,
-        "maxValue": 100,
-        "constraintType": "NUMERIC"
-      },
-      "presentationData": {
-        "tagValueIncrement": 1
-      },
-      "defaultValue": null,
-      "defaultUnit": "°F",
-      "isGpc36": false,
-      "hisInterpolate": "COV",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "devicePointAssociation": {
-        "deviceId": "64e258c5cb3df279a3608efa",
-        "devicePointDomainName": "th2In"
-      },
-      "descriptiveTags": [
-        {
-          "name": "air",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetId",
-          "kind": "NUMBER",
-          "defaultValue": "76",
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetType",
-          "kind": "STR",
-          "defaultValue": "AnalogValue",
-          "valueEnum": [
-            "Accumulator",
-            "Loop",
-            "BinaryInput",
-            "MultiStateInput",
-            "Device",
-            "AnalogInput",
-            "BinaryOutput",
-            "Calendar",
-            "BinaryValue",
-            "NotificationClass",
-            "AnalogValue",
-            "CharacterStringValue",
-            "StructuredView",
-            "NetworkPort",
-            "MuliStateValue",
-            "Schedule",
-            "TrendLog",
-            "MultiStateOutput",
-            "AnalogOutput",
-            "EventEnrollment",
-            "File"
-          ]
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "entering",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "logical",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sensor",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "temp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
       "id": "62ded58cb877ba4d67083cd4",
       "name": "Pressure Sensor",
       "domainName": "pressureSensor",
@@ -8780,532 +8452,6 @@
         },
         {
           "name": "trueCFM",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
-      "id": "62ded591b877ba4d67083cea",
-      "name": "Reheat Pos",
-      "domainName": "reheatCmd",
-      "tags": [
-        {
-          "name": "bacnetId",
-          "kind": "NUMBER",
-          "defaultValue": "71",
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetType",
-          "kind": "STR",
-          "defaultValue": "AnalogValue",
-          "valueEnum": [
-            "Accumulator",
-            "Loop",
-            "BinaryInput",
-            "MultiStateInput",
-            "Device",
-            "AnalogInput",
-            "BinaryOutput",
-            "Calendar",
-            "BinaryValue",
-            "NotificationClass",
-            "AnalogValue",
-            "CharacterStringValue",
-            "StructuredView",
-            "NetworkPort",
-            "MuliStateValue",
-            "Schedule",
-            "TrendLog",
-            "MultiStateOutput",
-            "AnalogOutput",
-            "EventEnrollment",
-            "File"
-          ]
-        },
-        {
-          "name": "cmd",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "logical",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "reheat",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "cur",
-        "bacnetType",
-        "his",
-        "floorRef",
-        "zone",
-        "roomRef",
-        "bacnetId",
-        "equipRef",
-        "vav",
-        "logical",
-        "group",
-        "cmd",
-        "dis",
-        "id",
-        "kind",
-        "point",
-        "reheat",
-        "siteRef",
-        "tz"
-      ],
-      "rootTagNames": [
-        "cmd",
-        "reheat"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "minValue": 0,
-        "maxValue": 100,
-        "constraintType": "NUMERIC"
-      },
-      "presentationData": {
-        "tagValueIncrement": 1
-      },
-      "defaultValue": null,
-      "defaultUnit": "%",
-      "isGpc36": false,
-      "hisInterpolate": "COV",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "devicePointAssociation": {
-        "deviceId": "64e258c5cb3df279a3608efa",
-        "devicePointDomainName": "analog2Out"
-      },
-      "descriptiveTags": [
-        {
-          "name": "bacnetId",
-          "kind": "NUMBER",
-          "defaultValue": "71",
-          "valueEnum": []
-        },
-        {
-          "name": "bacnetType",
-          "kind": "STR",
-          "defaultValue": "AnalogValue",
-          "valueEnum": [
-            "Accumulator",
-            "Loop",
-            "BinaryInput",
-            "MultiStateInput",
-            "Device",
-            "AnalogInput",
-            "BinaryOutput",
-            "Calendar",
-            "BinaryValue",
-            "NotificationClass",
-            "AnalogValue",
-            "CharacterStringValue",
-            "StructuredView",
-            "NetworkPort",
-            "MuliStateValue",
-            "Schedule",
-            "TrendLog",
-            "MultiStateOutput",
-            "AnalogOutput",
-            "EventEnrollment",
-            "File"
-          ]
-        },
-        {
-          "name": "cmd",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "his",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "logical",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "reheat",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ]
-    },
-    {
-      "id": "630681dcd756706908573fa2",
-      "name": "Reheat Type",
-      "domainName": "reheatType",
-      "tags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "dis",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "equipRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "floorRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "id",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "kind",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": [
-            "Marker",
-            "Bool",
-            "NA",
-            "Number",
-            "Str",
-            "Uri",
-            "Ref",
-            "DateTime",
-            "Coord",
-            "XStr",
-            "List",
-            "Dict",
-            "Grid"
-          ]
-        },
-        {
-          "name": "point",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "reheat",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "roomRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "siteRef",
-          "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "type",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "tz",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "writable",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "zone",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        }
-      ],
-      "tagNames": [
-        "floorRef",
-        "zone",
-        "roomRef",
-        "equipRef",
-        "vav",
-        "type",
-        "config",
-        "group",
-        "dis",
-        "id",
-        "kind",
-        "point",
-        "reheat",
-        "siteRef",
-        "sp",
-        "tz",
-        "writable"
-      ],
-      "rootTagNames": [
-        "reheat",
-        "sp",
-        "writable"
-      ],
-      "kind": "NUMBER",
-      "valueConstraint": {
-        "allowedValues": [
-          {
-            "index": 0,
-            "value": "notInstalled"
-          },
-          {
-            "index": 1,
-            "value": "0-10v"
-          },
-          {
-            "index": 2,
-            "value": "2-10v"
-          },
-          {
-            "index": 3,
-            "value": "10-2v"
-          },
-          {
-            "index": 4,
-            "value": "10-0v"
-          },
-          {
-            "index": 5,
-            "value": "pulsedElectric"
-          },
-          {
-            "index": 6,
-            "value": "stage1"
-          }
-        ],
-        "constraintType": "MULTI_STATE"
-      },
-      "presentationData": {},
-      "defaultValue": 0,
-      "defaultUnit": "",
-      "isGpc36": false,
-      "hisInterpolate": "NONE",
-      "configuration": {
-        "configType": "BASE"
-      },
-      "devicePointAssociation": null,
-      "descriptiveTags": [
-        {
-          "name": "config",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "group",
-          "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "reheat",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "sp",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "type",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -13721,14 +12867,14 @@
       ]
     },
     {
-      "id": "636e435ade227179a68504ed",
-      "name": "Parallel Fan",
-      "domainName": "parallelFanCmd",
+      "id": "64ee42f48bb8d804b7046def",
+      "name": "N/O Condensation Sensor",
+      "domainName": "condensateNO",
       "tags": [
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": "78",
+          "defaultValue": "92",
           "valueEnum": []
         },
         {
@@ -13760,7 +12906,7 @@
           ]
         },
         {
-          "name": "cmd",
+          "name": "condensate",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -13780,12 +12926,6 @@
         {
           "name": "equipRef",
           "kind": "REF",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "fan",
-          "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
@@ -13834,13 +12974,7 @@
           ]
         },
         {
-          "name": "logical",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "parallel",
+          "name": "normallyOpen",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -13858,7 +12992,7 @@
           "valueEnum": []
         },
         {
-          "name": "run",
+          "name": "sensor",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -13889,43 +13023,41 @@
         }
       ],
       "tagNames": [
-        "cur",
         "bacnetType",
         "his",
         "floorRef",
         "zone",
-        "parallel",
         "roomRef",
         "bacnetId",
         "equipRef",
         "vav",
-        "logical",
+        "normallyOpen",
         "group",
-        "cmd",
+        "condensate",
+        "cur",
         "dis",
-        "fan",
         "id",
         "kind",
         "point",
-        "run",
+        "sensor",
         "siteRef",
         "tz"
       ],
       "rootTagNames": [
-        "cmd",
-        "fan",
-        "run"
+        "condensate",
+        "cur",
+        "sensor"
       ],
       "kind": "NUMBER",
       "valueConstraint": {
         "allowedValues": [
           {
             "index": 0,
-            "value": "off"
+            "value": "normal"
           },
           {
             "index": 1,
-            "value": "on"
+            "value": "fault"
           }
         ],
         "constraintType": "MULTI_STATE"
@@ -13936,17 +13068,20 @@
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
-        "configType": "BASE"
+        "domainName": "thermistor2Type",
+        "value": 0,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
       },
       "devicePointAssociation": {
         "deviceId": "64e258c5cb3df279a3608efa",
-        "devicePointDomainName": "relay2"
+        "devicePointDomainName": "th2In"
       },
       "descriptiveTags": [
         {
           "name": "bacnetId",
           "kind": "NUMBER",
-          "defaultValue": "78",
+          "defaultValue": "92",
           "valueEnum": []
         },
         {
@@ -13978,19 +13113,13 @@
           ]
         },
         {
-          "name": "cmd",
+          "name": "condensate",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
           "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "fan",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -14008,25 +13137,1415 @@
           "valueEnum": []
         },
         {
-          "name": "logical",
+          "name": "normallyOpen",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
-          "name": "parallel",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "run",
+          "name": "sensor",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
           "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "636e435cde227179a68504fa",
+      "name": "Chilled Water Control Valve",
+      "domainName": "chilledWaterValveCoolCmdPoint",
+      "tags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "80",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "AnalogValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "chilled",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cmd",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cool",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "modulating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "water",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "bacnetType",
+        "roomRef",
+        "cool",
+        "bacnetId",
+        "vav",
+        "water",
+        "modulating",
+        "his",
+        "floorRef",
+        "zone",
+        "chilled",
+        "equipRef",
+        "group",
+        "cmd",
+        "dis",
+        "id",
+        "kind",
+        "point",
+        "siteRef",
+        "tz",
+        "valve"
+      ],
+      "rootTagNames": [
+        "cmd",
+        "valve"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "minValue": 0,
+        "maxValue": 100,
+        "constraintType": "NUMERIC"
+      },
+      "presentationData": {
+        "tagValueIncrement": 1
+      },
+      "defaultValue": null,
+      "defaultUnit": "%",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "devicePointAssociation": {
+        "deviceId": "64e258c5cb3df279a3608efa",
+        "devicePointDomainName": "analog2Out"
+      },
+      "descriptiveTags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "80",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "AnalogValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "chilled",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cmd",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cool",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "modulating",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "water",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "62ded564b877ba4d67083aef",
+      "name": "Chilled Water Shut-off Valve",
+      "domainName": "chilledWaterValveIsolationCmdPoint",
+      "tags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "94",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "BinaryValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "chilled",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cmd",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "isolation",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "water",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "cur",
+        "bacnetType",
+        "his",
+        "floorRef",
+        "zone",
+        "roomRef",
+        "bacnetId",
+        "equipRef",
+        "vav",
+        "group",
+        "chilled",
+        "cmd",
+        "dis",
+        "id",
+        "isolation",
+        "kind",
+        "point",
+        "siteRef",
+        "tz",
+        "valve",
+        "water"
+      ],
+      "rootTagNames": [
+        "chilled",
+        "cmd",
+        "isolation",
+        "valve",
+        "water"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "off"
+          },
+          {
+            "index": 1,
+            "value": "on"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "presentationData": {},
+      "defaultValue": null,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "devicePointAssociation": {
+        "deviceId": "64e258c5cb3df279a3608efa",
+        "devicePointDomainName": "relay1"
+      },
+      "descriptiveTags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "94",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "BinaryValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "chilled",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cmd",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "isolation",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "water",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "651d8043951f37007b795705",
+      "name": "Valve Type",
+      "domainName": "valveType",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "type",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "floorRef",
+        "zone",
+        "roomRef",
+        "equipRef",
+        "vav",
+        "valve",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "point",
+        "siteRef",
+        "sp",
+        "type",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "sp",
+        "type",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "notInstalled"
+          },
+          {
+            "index": 1,
+            "value": "0-10v"
+          },
+          {
+            "index": 2,
+            "value": "2-10v"
+          },
+          {
+            "index": 3,
+            "value": "10-2v"
+          },
+          {
+            "index": 4,
+            "value": "10-0v"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "presentationData": {},
+      "defaultValue": 0,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "NONE",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "devicePointAssociation": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "type",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "valve",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "64ee42f48bb8d804b7046def",
+      "name": "N/C Condensation Sensor",
+      "domainName": "condensateNC",
+      "tags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "97",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "BinaryValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "condensate",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "normallyClosed",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sensor",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "bacnetType",
+        "his",
+        "floorRef",
+        "zone",
+        "normallyClosed",
+        "roomRef",
+        "bacnetId",
+        "vav",
+        "equipRef",
+        "group",
+        "condensate",
+        "cur",
+        "dis",
+        "id",
+        "kind",
+        "point",
+        "sensor",
+        "siteRef",
+        "tz"
+      ],
+      "rootTagNames": [
+        "condensate",
+        "cur",
+        "sensor"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "normal"
+          },
+          {
+            "index": 1,
+            "value": "fault"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "presentationData": {},
+      "defaultValue": null,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "COV",
+      "configuration": {
+        "domainName": "thermistor2Type",
+        "value": 1,
+        "comparisonType": "EQUALS",
+        "configType": "DEPENDENT"
+      },
+      "devicePointAssociation": {
+        "deviceId": "64e258c5cb3df279a3608efa",
+        "devicePointDomainName": "th2In"
+      },
+      "descriptiveTags": [
+        {
+          "name": "bacnetId",
+          "kind": "NUMBER",
+          "defaultValue": "97",
+          "valueEnum": []
+        },
+        {
+          "name": "bacnetType",
+          "kind": "STR",
+          "defaultValue": "BinaryValue",
+          "valueEnum": [
+            "Accumulator",
+            "Loop",
+            "BinaryInput",
+            "MultiStateInput",
+            "Device",
+            "AnalogInput",
+            "BinaryOutput",
+            "Calendar",
+            "BinaryValue",
+            "NotificationClass",
+            "AnalogValue",
+            "CharacterStringValue",
+            "StructuredView",
+            "NetworkPort",
+            "MuliStateValue",
+            "Schedule",
+            "TrendLog",
+            "MultiStateOutput",
+            "AnalogOutput",
+            "EventEnrollment",
+            "File"
+          ]
+        },
+        {
+          "name": "condensate",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "cur",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "normallyClosed",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sensor",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ]
+    },
+    {
+      "id": "651d8043951f37007b795705",
+      "name": "Thermistor 2 Type",
+      "domainName": "thermistor2Type",
+      "tags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "dis",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "equipRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "floorRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "id",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "kind",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": [
+            "Marker",
+            "Bool",
+            "NA",
+            "Number",
+            "Str",
+            "Uri",
+            "Ref",
+            "DateTime",
+            "Coord",
+            "XStr",
+            "List",
+            "Dict",
+            "Grid"
+          ]
+        },
+        {
+          "name": "point",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "roomRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "siteRef",
+          "kind": "REF",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "th",
+          "kind": "STR",
+          "defaultValue": "2",
+          "valueEnum": []
+        },
+        {
+          "name": "type",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "tz",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "zone",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        }
+      ],
+      "tagNames": [
+        "floorRef",
+        "th",
+        "zone",
+        "roomRef",
+        "vav",
+        "equipRef",
+        "group",
+        "config",
+        "dis",
+        "id",
+        "kind",
+        "point",
+        "siteRef",
+        "sp",
+        "type",
+        "tz",
+        "writable"
+      ],
+      "rootTagNames": [
+        "config",
+        "sp",
+        "type",
+        "writable"
+      ],
+      "kind": "NUMBER",
+      "valueConstraint": {
+        "allowedValues": [
+          {
+            "index": 0,
+            "value": "N/O Condensation Sensor"
+          },
+          {
+            "index": 1,
+            "value": "N/C Condensation Sensor"
+          }
+        ],
+        "constraintType": "MULTI_STATE"
+      },
+      "presentationData": {},
+      "defaultValue": 0,
+      "defaultUnit": "",
+      "isGpc36": false,
+      "hisInterpolate": "NONE",
+      "configuration": {
+        "configType": "BASE"
+      },
+      "devicePointAssociation": null,
+      "descriptiveTags": [
+        {
+          "name": "config",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "group",
+          "kind": "STR",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "th",
+          "kind": "STR",
+          "defaultValue": "2",
+          "valueEnum": []
+        },
+        {
+          "name": "type",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "vav",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "writable",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -14902,14 +15421,14 @@
       "tagNames": [
         "mode",
         "cur",
-        "floorRef",
         "his",
+        "floorRef",
         "zone",
         "roomRef",
         "equipRef",
         "vav",
-        "group",
         "writable",
+        "group",
         "dis",
         "id",
         "kind",
@@ -21206,24 +21725,18 @@
       ]
     },
     {
-      "id": "6351225f07f88c1a0ce49385",
-      "name": "Fan Control On Fixed Time Delay",
-      "domainName": "fanControlOnFixedTimeDelay",
+      "id": "62e8bd06a841cb7abb47053c",
+      "name": "Relay Activation Hysteresis",
+      "domainName": "relayActivationHysteresis",
       "tags": [
         {
-          "name": "controls",
+          "name": "activation",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
           "name": "cur",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "delay",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -21241,12 +21754,6 @@
           "valueEnum": []
         },
         {
-          "name": "fan",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "floorRef",
           "kind": "REF",
           "defaultValue": null,
@@ -21254,6 +21761,12 @@
         },
         {
           "name": "his",
+          "kind": "MARKER",
+          "defaultValue": null,
+          "valueEnum": []
+        },
+        {
+          "name": "hysteresis",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -21291,6 +21804,12 @@
           "valueEnum": []
         },
         {
+          "name": "relay",
+          "kind": "STR",
+          "defaultValue": "0",
+          "valueEnum": []
+        },
+        {
           "name": "roomRef",
           "kind": "REF",
           "defaultValue": null,
@@ -21309,12 +21828,6 @@
           "valueEnum": []
         },
         {
-          "name": "time",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "tuner",
           "kind": "MARKER",
           "defaultValue": null,
@@ -21323,18 +21836,12 @@
         {
           "name": "tunerGroup",
           "kind": "STR",
-          "defaultValue": "vav",
+          "defaultValue": "generic",
           "valueEnum": []
         },
         {
           "name": "tz",
           "kind": "STR",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
@@ -21353,48 +21860,41 @@
       ],
       "tagNames": [
         "cur",
-        "his",
-        "zone",
-        "equipRef",
-        "vav",
-        "controls",
-        "delay",
-        "dis",
-        "fan",
         "floorRef",
+        "his",
+        "tuner",
+        "zone",
+        "relay",
+        "roomRef",
+        "equipRef",
+        "activation",
+        "tunerGroup",
+        "dis",
+        "hysteresis",
         "id",
         "kind",
         "point",
-        "roomRef",
         "siteRef",
         "sp",
-        "time",
-        "tuner",
-        "tunerGroup",
         "tz",
         "writable"
       ],
       "rootTagNames": [
-        "controls",
-        "delay",
-        "fan",
+        "hysteresis",
         "sp",
-        "time",
-        "tuner",
-        "tunerGroup",
         "writable"
       ],
       "kind": "NUMBER",
       "valueConstraint": {
         "minValue": 0,
-        "maxValue": 10,
+        "maxValue": 100,
         "constraintType": "NUMERIC"
       },
       "presentationData": {
         "tagValueIncrement": 1
       },
-      "defaultValue": 1,
-      "defaultUnit": "min",
+      "defaultValue": 10,
+      "defaultUnit": "%",
       "isGpc36": false,
       "hisInterpolate": "COV",
       "configuration": {
@@ -21403,7 +21903,7 @@
       "devicePointAssociation": null,
       "descriptiveTags": [
         {
-          "name": "controls",
+          "name": "activation",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -21415,31 +21915,25 @@
           "valueEnum": []
         },
         {
-          "name": "delay",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
-          "name": "fan",
-          "kind": "MARKER",
-          "defaultValue": null,
-          "valueEnum": []
-        },
-        {
           "name": "his",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
-          "name": "sp",
+          "name": "hysteresis",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
         },
         {
-          "name": "time",
+          "name": "relay",
+          "kind": "STR",
+          "defaultValue": "0",
+          "valueEnum": []
+        },
+        {
+          "name": "sp",
           "kind": "MARKER",
           "defaultValue": null,
           "valueEnum": []
@@ -21453,13 +21947,7 @@
         {
           "name": "tunerGroup",
           "kind": "STR",
-          "defaultValue": "vav",
-          "valueEnum": []
-        },
-        {
-          "name": "vav",
-          "kind": "MARKER",
-          "defaultValue": null,
+          "defaultValue": "generic",
           "valueEnum": []
         },
         {
@@ -22555,7 +23043,7 @@
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 11
+    "patch": 10
   },
   "modelType": "PROFILE",
   "namespace": "bms75f",
@@ -22567,7 +23055,7 @@
       "valueEnum": []
     },
     {
-      "name": "fan",
+      "name": "chilledBeam",
       "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []
@@ -22575,12 +23063,6 @@
     {
       "name": "group",
       "kind": "STR",
-      "defaultValue": null,
-      "valueEnum": []
-    },
-    {
-      "name": "parallel",
-      "kind": "MARKER",
       "defaultValue": null,
       "valueEnum": []
     },
@@ -22593,13 +23075,7 @@
     {
       "name": "profile",
       "kind": "STR",
-      "defaultValue": "vavReheatParallelFan",
-      "valueEnum": []
-    },
-    {
-      "name": "reheat",
-      "kind": "MARKER",
-      "defaultValue": null,
+      "defaultValue": "activeChilledBeam",
       "valueEnum": []
     },
     {

@@ -73,6 +73,7 @@ import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -582,6 +583,8 @@ public class FloorPlanFragment extends Fragment {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
             } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
             }
         } else if (equip.getMarkers().contains("helionode")) {
             RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
@@ -592,6 +595,8 @@ public class FloorPlanFragment extends Fragment {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
             } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
                 RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
             }
         }
 
@@ -1463,6 +1468,13 @@ public class FloorPlanFragment extends Fragment {
                     NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
                     showDialogFragment(VavProfileConfigFragment.Companion
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeType, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
+                    break;
+                case VAV_ACB:
+                    Equip equipHN = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipHN.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeTypeHN = equipHN.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(AcbProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

@@ -90,6 +90,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
@@ -2565,6 +2566,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddress + "\"");
         Equip updatedEquip = new Equip.Builder().setHashMap(equip).build();
+        boolean isACB = updatedEquip.getProfile().equals(ProfileType.VAV_ACB.name());
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -2592,7 +2594,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
         textViewValue1.setText(vavPoints.get("Damper").toString());
-        textViewLabel2.setText("Reheat Coil : ");
+        textViewLabel2.setText(isACB ? "CHW Valve : " : "Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
@@ -2608,7 +2610,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
-        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") != -1) {
+        if (displayValve(nodeAddress, isACB)) {
             textViewValue2.setVisibility(View.VISIBLE);
             textViewLabel2.setVisibility(View.VISIBLE);
         } else {
@@ -2639,7 +2641,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }else {
             viewPointRow2.setPadding(0, 0, 0, 40);
         }
+        if (isACB) {
+            textViewLabel4.setVisibility(View.GONE);
+            textViewValue4.setVisibility(View.GONE);
+        } else {
+            textViewLabel4.setVisibility(View.VISIBLE);
+            textViewValue4.setVisibility(View.VISIBLE);
+        }
     }
+
+    private boolean displayValve(String nodeAddress, boolean isACB) {
+        return isACB ?
+                CCUHsApi.getInstance().readDefaultVal("domainName == \"" + DomainName.valveType + "\" and group == \""+nodeAddress+"\"") > 0.0 :
+                CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0.0;
+    }
+
     public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);

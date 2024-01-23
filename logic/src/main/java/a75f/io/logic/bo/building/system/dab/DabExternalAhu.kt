@@ -182,7 +182,6 @@ class DabExternalAhu : DabSystemProfile() {
             systemEquip,
             dabConfig,
             externalEquipId,
-            conditioningMode,
             hayStack,
             externalSpList,
             loopRunningDirection,

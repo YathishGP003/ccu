@@ -56,7 +56,7 @@ class ModelDiffTest {
 
     @Test
     fun getVersionDetailsTest(){
-        val version = ResourceHelper.getModelVersion(DiffManger.NEW_VERSION)
+        val version = ResourceHelper.getModelVersion(""/*DiffManger.NEW_VERSION*/)
         println(version.toString())
         version!!.keys().forEach {
             //println(it)

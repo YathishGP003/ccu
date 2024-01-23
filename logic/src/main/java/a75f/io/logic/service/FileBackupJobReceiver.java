@@ -22,11 +22,7 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (ConnectionUtil.isNetworkConnected()) {
-            RxTask.executeAsync (() -> {
-                performConfigFileBackup();
-                performModbusSideLoadedJsonsBackup();
-            });
-
+            RxTask.executeAsync (FileBackupJobReceiver::performConfigFileBackup);
         }
     }
     public static void performConfigFileBackup(){
@@ -36,7 +32,6 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
                 return;
             }
             String siteId =getSiteId();
-            
             if (Strings.isNullOrEmpty(siteId)) {
                 return;
             }
@@ -49,26 +44,7 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
             e.printStackTrace();
         }
     }
-    public static void performModbusSideLoadedJsonsBackup(){
-        try {
-            String ccuId = getCcuId();
-            if (Strings.isNullOrEmpty(ccuId)) {
-                return;
-            }
-            String siteId = getSiteId();
-            Log.i(TAG_CCU_BACKUP," File backup service invoked  for side-loaded modbus json files "+ccuId);
-            FileOperationsUtil.zipFolder(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH, ccuId);
-            File file = new File(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH + ccuId  + ".zip");
-            if(file.exists()) {
-                new FileBackupManager().uploadModbusSideLoadedJsonsFiles(file, siteId, ccuId);
-            }
-            else{
-                Log.i(TAG_CCU_BACKUP,"Side-loaded modbus json files are not present to backup "+ccuId);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
     private static String getCcuId(){
         String ccuId = CCUHsApi.getInstance().getCcuId();
         return (!Strings.isNullOrEmpty(ccuId) && ccuId.startsWith("@")) ? ccuId.substring(1) : ccuId;

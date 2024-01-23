@@ -8,6 +8,7 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+import static a75f.io.logic.bo.building.definitions.Port.*;
 
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.alerts.AlertManager;
@@ -35,6 +37,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
@@ -45,6 +48,7 @@ import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -104,6 +108,7 @@ public class Pulse
 		}
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+		CcuLog.d(L.TAG_CCU_DEVICE, "Found device "+device);
 		if (device != null && device.size() > 0)
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
@@ -133,6 +138,17 @@ public class Pulse
 			if (Globals.getInstance().isTemporaryOverrideMode()) {
 				return;
 			}
+
+			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
+			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+			boolean isAcb = isDomainEquip ? (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) : false;
+
+			boolean isCondensateNc = false;
+			if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") != null) {
+				if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") > 0.0) { isCondensateNc = true; }
+			}
+
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
 			String logicalCurTempPoint = "";
@@ -140,7 +156,9 @@ public class Pulse
 			double th2TempVal = 0.0;
 			boolean isTh2Enabled = false;
 			for(HashMap phyPoint : phyPoints) {
+				CcuLog.d(L.TAG_CCU_DEVICE, "Physical point "+phyPoint);
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					CcuLog.d(L.TAG_CCU_DEVICE, "No logical point for "+phyPoint);
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
@@ -151,8 +169,9 @@ public class Pulse
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
-				Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+Port.valueOf(phyPoint.get("port").toString()));
-				switch (Port.valueOf(phyPoint.get("port").toString())){
+				Port currentPort = getPhysicalPointPort(phyPoint);
+				Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
+				switch (currentPort){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
 						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
@@ -179,6 +198,15 @@ public class Pulse
 							if (isTh2Enabled && isSse) {
 								th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+							} else if (isTh2Enabled && isAcb) {
+								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
+								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
+								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
+								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+								if (oldCondensateSensor != curCondensateSensor) {
+									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
+								}
+
 							} else {
 								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
@@ -249,7 +277,7 @@ public class Pulse
 			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
-				handleSensorEvents(sensorReadings, nodeAddr ,deviceInfo);
+				handleSensorEvents(sensorReadings, nodeAddr, deviceInfo, isDomainEquip);
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -281,7 +309,7 @@ public class Pulse
 			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
 	}
 
-	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device, boolean isDomainEquip) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
 
@@ -304,6 +332,12 @@ public class Pulse
 			if (sp == null) {
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+			} else if (sp.getPointRef() == null) {
+				if (isDomainEquip) {
+					sp = node.addDomainEquipSensorFromRawPoint(sp, p);
+				} else {
+					sp = node.addEquipSensorFromRawPoint(sp, p);
+				}
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {
@@ -1432,6 +1466,8 @@ public class Pulse
 				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
 				MeshUtil.sendStructToCM(seedMessage);
+				CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
+				MeshUtil.sendStructToCM(settings2Message);
 				LSerial.getInstance().setNodeSeeding(false);
 				break;
 			case SMART_STAT:
@@ -1456,5 +1492,12 @@ public class Pulse
 			return CCUHsApi.getInstance().readDefaultVal("point and pid and config and setpoint and sensor and offset and group == \"" + nodeAddr + "\"");
 		else
 			return 0;
+	}
+	private static Port getPhysicalPointPort(Map<Object, Object> physicalPoint) {
+		CcuLog.d(L.TAG_CCU_DEVICE, "getPhysicalPort "+physicalPoint);
+		if (physicalPoint.get("domainName") != null) {
+			return DeviceUtil.getPortFromDomainName(physicalPoint.get("domainName").toString());
+		}
+		return Port.valueOf(physicalPoint.get("port").toString());
 	}
 }

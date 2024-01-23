@@ -126,7 +126,12 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             specialScheduleStatusText.setText(specialScheduleStatus);
             scheduleStatus.setText(status);
             String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
-            mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+            if (scheduleTypeId != null) {
+                mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+            } else {
+                CcuLog.e(L.TAG_CCU_UI, "Equip does not have scheduleType point.");
+                mScheduleType = 1;
+            }
     
             mSchedule = Schedule.getScheduleByEquipId(equipId);
 

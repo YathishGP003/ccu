@@ -91,7 +91,7 @@ class TunerInitializationTest {
         val profileConfig = getTestProfileConfig()
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
-        equipBuilder.buildEquipAndPoints(profileConfig, dmModel, "@TestSiteRef")
+        equipBuilder.buildEquipAndPoints(profileConfig, dmModel, "@TestSiteRef", "TestEquip")
         TestUtil.dumpDomain()
         val testTunerPoint = hayStack.readEntity("point and domainName == \"testTuner\" and roomRef == \"$zoneRef\"")
         val testTunerDb = hayStack.readPoint(testTunerPoint["id"].toString())

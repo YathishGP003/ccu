@@ -13,16 +13,17 @@ open class EntityConfig(val domainName: String)
 class Site(domainName : String, val id : String) : Entity(domainName) {
 
     val floors = mutableMapOf<String, Floor>()
-    val ccus = mutableMapOf<String, Device>()
+    val ccus = mutableMapOf<String, Ccu>()
     fun addFloor(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         floors[id] = Floor(domainName, id)
     }
     fun addCcu(entityMap : HashMap<Any, Any>) {
-        val domainName = entityMap["domainName"].toString()
+        // Revisit CCU don't have domain name
+        val domainName = entityMap["dis"].toString()
         val id = entityMap["id"].toString()
-        ccus[id] = Device(domainName, id)
+        ccus[id] = Ccu(domainName, id)
     }
 }
 class Floor(domainName : String, val id : String) : Entity(domainName) {
@@ -53,7 +54,7 @@ class Equip(domainName : String, val id : String) : Entity(domainName) {
     val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
-        val id = entityMap["id"].toString()
+       // val id = entityMap["id"].toString()
         points[domainName] = Point(domainName, id)
     }
 
@@ -70,6 +71,22 @@ class Device(domainName : String, val id : String) : Entity(domainName) {
     }
     fun getPoint(domainName: String) : Point? {
         return points[domainName]
+    }
+}
+class Ccu(domainName : String, id : String) : Entity(domainName) {
+    val equips = mutableMapOf<String, Equip>()
+    val devices = mutableMapOf<String, Device>()
+
+    fun addEquip(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        equips[id] = Equip(domainName, id)
+    }
+
+    fun addDevice(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        devices[id] = Device(domainName, id)
     }
 }
 open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
@@ -97,7 +114,6 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readPriorityVal() : Double {
         requireId()
-        CcuLog.i(Domain.LOG_TAG, "Point "+Domain.hayStack.readMapById(id))
         return Domain.hayStack.readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {
@@ -114,7 +130,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readDefaultStrVal() : String {
         requireId()
-        return Domain.hayStack.readDefaultStrVal(id)
+        return Domain.hayStack.readDefaultStrValById(id)
     }
 
     fun writeVal(level: Int, value : Double) {

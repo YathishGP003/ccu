@@ -22,61 +22,6 @@ import a75f.io.logic.tuners.BuildingTuners;
 
 public class SystemProfileUtil {
 
-    public static void createSystemProfile() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        boolean isDefaultSystem = false;
-        if (equip != null && equip.size() > 0) {
-            BuildingTuners.getInstance().addBuildingTunerEquip();
-            SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-            Equip eq = new Equip.Builder().setHashMap(equip).build();
-            CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
-            switch (ProfileType.valueOf(eq.getProfile())) {
-                case SYSTEM_VAV_ANALOG_RTU:
-                    L.ccu().systemProfile = new VavFullyModulatingRtu();
-                    break;
-                case SYSTEM_VAV_STAGED_RTU:
-                    L.ccu().systemProfile = new VavStagedRtu();
-                    break;
-                case SYSTEM_VAV_STAGED_VFD_RTU:
-                    L.ccu().systemProfile = new VavStagedRtuWithVfd();
-                    break;
-                case SYSTEM_VAV_HYBRID_RTU:
-                    L.ccu().systemProfile = new VavAdvancedHybridRtu();
-                    break;
-                case SYSTEM_VAV_IE_RTU:
-                    L.ccu().systemProfile = new VavIERtu();
-                    break;
-                case SYSTEM_VAV_BACNET_RTU:
-                    L.ccu().systemProfile = new VavBacnetRtu();
-                    break;
-                case SYSTEM_DAB_ANALOG_RTU:
-                    L.ccu().systemProfile = new DabFullyModulatingRtu();
-                    break;
-                case SYSTEM_DAB_STAGED_RTU:
-                    L.ccu().systemProfile = new DabStagedRtu();
-                    break;
-                case SYSTEM_DAB_STAGED_VFD_RTU:
-                    L.ccu().systemProfile = new DabStagedRtuWithVfd();
-                    break;
-                case SYSTEM_DAB_HYBRID_RTU:
-                    L.ccu().systemProfile = new DabAdvancedHybridRtu();
-                    break;
-                default:
-                    L.ccu().systemProfile = new DefaultSystem();
-                    isDefaultSystem = true;
-                    break;
-            }
-        }
-        else {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
-            L.ccu().systemProfile = new DefaultSystem();
-            isDefaultSystem = true;
-
-        }
-        if(!isDefaultSystem) {
-            L.ccu().systemProfile.addSystemEquip();
-        }
-    }
     public static String isHumidifierOn(){
         HashMap<Object, Object> humidifier = CCUHsApi.getInstance().readEntity("humidifier and cmd");
         double isHumidifierOn = CCUHsApi.getInstance().readHisValByQuery("humidifier and cmd");

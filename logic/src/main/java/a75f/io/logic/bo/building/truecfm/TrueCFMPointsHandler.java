@@ -12,7 +12,6 @@ import a75f.io.api.haystack.Units;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMPointsHandler {
     
@@ -194,31 +193,6 @@ public class TrueCFMPointsHandler {
 
         hayStack.writeHisValById(airVelocityId, 0.0);
     }
-    
-    public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,
-                                                    VavProfileConfiguration vavProfileConfiguration, String fanType) {
-        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-
-        String maxValueForMinCfmCooling = String.valueOf(vavProfileConfiguration.nuMaxCFMCooling);
-
-        String maxValueForMinCfmHeating = String.valueOf(vavProfileConfiguration.numMaxCFMReheating);
-
-
-
-        createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor, fanType);
-    
-        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling, fanType, maxValueForMinCfmCooling);
-    
-        createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.nuMaxCFMCooling, fanType);
-    
-        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating, fanType, maxValueForMinCfmHeating);
-    
-        createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating, fanType);
-    
-        createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanType);
-    }
-
     public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
                                               DabProfileConfiguration dabProfileConfiguration) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
@@ -261,59 +235,5 @@ public class TrueCFMPointsHandler {
         if (!damperMinHeating.isEmpty()) {
             hayStack.deleteWritablePoint(damperMinHeating.get("id").toString());
         }
-    }
-
-    public static void createNonCfmDamperConfigPoints(CCUHsApi hayStack, Equip equip, VavProfileConfiguration config,
-                                               String fanMarker) {
-        Point damperMinCooling = new Point.Builder()
-                .setDisplayName(equip.getDisplayName()+"-minCoolingDamperPos")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
-                .addMarker("cooling").addMarker("pos")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(equip.getGroup()))
-                .setUnit("%")
-                .setTz(equip.getTz())
-                .build();
-        String damperMinCoolingId = hayStack.addPoint(damperMinCooling);
-        hayStack.writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
-        hayStack.writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
-
-        Point damperMaxCooling = new Point.Builder()
-                .setDisplayName(equip.getDisplayName()+"-maxCoolingDamperPos")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("max")
-                .addMarker("cooling").addMarker("pos")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(equip.getGroup()))
-                .setUnit("%")
-                .setTz(equip.getTz())
-                .build();
-        String damperMaxCoolingId = hayStack.addPoint(damperMaxCooling);
-        hayStack.writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
-        hayStack.writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
-
-        Point damperMinHeating = new Point.Builder()
-                .setDisplayName(equip.getDisplayName()+"-minHeatingDamperPos")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
-                .addMarker("heating").addMarker("pos")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(equip.getGroup()))
-                .setUnit("%")
-                .setTz(equip.getTz())
-                .build();
-        String damperMinHeatingId = hayStack.addPoint(damperMinHeating);
-        hayStack.writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
-        hayStack.writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
     }
 }

@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.Tags.BACNET_ID;
+
 import android.util.Log;
 
 import com.google.gson.internal.LinkedTreeMap;
@@ -147,13 +149,13 @@ public class HSUtil
     }
     
     public static Equip getEquipFromZone(String roomRef) {
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and roomRef == \""+roomRef+"\"");
-        return new Equip.Builder().setHashMap(equip).build();
+        HDict equip = CCUHsApi.getInstance().readHDict("equip and roomRef == \""+roomRef+"\"");
+        return new Equip.Builder().setHDict(equip).build();
     }
     
     public static String getZoneIdFromEquipId(String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip equip = new Equip.Builder().setHDict(equipDict).build();
         return equip.getRoomRef();
     }
     public static Equip getEquipInfo(String equipId) {
@@ -161,8 +163,8 @@ public class HSUtil
     }
     
     public static Equip getEquip(CCUHsApi hayStack, String equipId) {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        return new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        return new Equip.Builder().setHDict(equipDict).build();
     }
     public static HDict mapToHDict(Map<String, Object> m)
     {
@@ -389,22 +391,22 @@ public class HSUtil
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.ENABLE))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.VAV)));
+        return ((pointEntity.containsKey(Tags.ENABLE)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.VAV)));
     }
 
     public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
             HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-            return (pointEntity.containsKey(Tags.ENABLE) && pointEntity.containsKey(Tags.CFM) && pointEntity.containsKey(Tags.DAB));
+            return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
         }
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.COOLING)));
+        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.COOLING)));
     }
 
     public static boolean isMaxCFMReheatingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.HEATING)));
+        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.HEATING)));
     }
 
     public static double getSystemUserIntentVal(String tags)
@@ -451,6 +453,7 @@ public class HSUtil
         markers.remove(Tags.HIS);
         markers.remove(Tags.SP);
         markers.remove(Tags.SYSTEM);
+        markers.remove(Tags.CUR);
         return markers;
     }
     
@@ -642,5 +645,53 @@ public class HSUtil
 
         }
         return b.toDict();
+    }
+
+    public static boolean isDomainEquip(String equipRef, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.read("equip and id == " + equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        return equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
+    }
+    public static int generateBacnetId(String zoneID) {
+        int bacnetID = 1;
+        boolean isBacnetIDUsed = true;
+        try {
+            HashMap currentRoom = CCUHsApi.getInstance().readMapById(zoneID);
+            if (currentRoom!= null && currentRoom.size()>0 && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
+                double bacnetID2 = Double.parseDouble(currentRoom.get(BACNET_ID).toString() + "");
+                Log.d(Tags.BACNET, "Already have bacnetID $bacnetID2");
+                return (int) bacnetID2;
+            }
+            ArrayList<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
+            ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
+            ArrayList<HashMap<Object, Object>> allEntities = new ArrayList<>();
+            allEntities.addAll(rooms);
+            allEntities.addAll(equips);
+            if (allEntities.size() == 0) {
+                Log.d(Tags.BACNET, "rooms size : 0 ");
+                return bacnetID;
+            }
+            while (isBacnetIDUsed) {
+
+                for (HashMap<Object, Object> room : allEntities) {
+                    if (room.containsKey(BACNET_ID)
+                            && Double.parseDouble(room.get(BACNET_ID).toString()) != 0
+                            && Double.parseDouble(room.get(BACNET_ID).toString() + "") == bacnetID
+                    ) {
+                        Log.d(Tags.BACNET, "In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room");
+                        bacnetID += 1;
+                        isBacnetIDUsed = true;
+                        break;
+                    } else {
+                        isBacnetIDUsed = false;
+                    }
+                }
+            }
+            Log.d(Tags.BACNET, "Generated bacnetID: $bacnetID");
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        return Integer.parseInt(zoneID + bacnetID);
     }
 }

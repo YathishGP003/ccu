@@ -8,8 +8,10 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -19,6 +21,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -26,19 +29,30 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
+import org.projecthaystack.UnknownRecException;
+
 /**
  * Created by samjithsadasivan on 8/23/18.
  */
 
 public class VavReheatProfile extends VavProfile
 {
-  
+
+    public VavReheatProfile(String equipRef, Short nodeAddress) {
+        super(equipRef, nodeAddress, ProfileType.VAV_REHEAT);
+    }
+
+
+    //TODO - Only for backward compatibility during development. Should be removed.
+    public VavReheatProfile() {
+        super(null, null, ProfileType.VAV_REHEAT);
+    }
     @Override
     public ProfileType getProfileType()
     {
         return ProfileType.VAV_REHEAT;
     }
-    
+
     //VAV damper and reheat coil control logic is implemented according to section 1.3.E.6 of
     //ASHRAE RP-1455: Advanced Control Sequences for HVAC Systems Phase I, Air Distribution and Terminal Systems
     @Override
@@ -48,144 +62,127 @@ public class VavReheatProfile extends VavProfile
         {
             mInterface.refreshView();
         }
-        
-        for (short node : vavDeviceMap.keySet())
-        {
-            if (vavDeviceMap.get(node) == null) {
-                addLogicalMap(node);
-                CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
-                continue;
-            }
-            if (isZoneDead()) {
-                updateZoneDead(node);
-                continue;
-            }
-            
-            initLoopVariables(node);
-            
-            double roomTemp = vavDevice.getCurrentTemp();
-            double averageDesiredTemp = (setTempCooling+setTempHeating)/2;
-            if (averageDesiredTemp != vavDevice.getDesiredTemp()) {
-                vavDevice.setDesiredTemp(averageDesiredTemp);
-            }
-            
-            int loopOp = 0;
-            //If supply air temperature from air handler is greater than room temperature, Cooling shall be
-            //locked out.
-            SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            Equip vavEquip = new Equip.Builder()
-                      .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + node + "\"")).build();
-    
-            if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
-                //Zone is in Cooling
-                if (state != COOLING) {
-                    handleCoolingChangeOver();
-                }
-                if (conditioning == SystemController.State.COOLING) {
-                    loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
-                }
-            } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
-                //Zone is in heating
-                if (state != HEATING) {
-                    handleHeatingChangeOver();
-                }
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                if (conditioning == SystemController.State.COOLING) {
-                    updateReheatDuringSystemCooling(heatingLoopOp, roomTemp, vavEquip.getId());
-                    loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
-                } else if (conditioning == SystemController.State.HEATING) {
-                    loopOp = heatingLoopOp;
-                }
-            } else {
-                //Zone is in deadband
-                if (state != DEADBAND) {
-                    handleDeadband();
-                }
-            }
-            
-            updateIaqCompensatedMinDamperPos(node, vavEquip);
-            CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
-    
-            damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
-            
-            if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
-                valve.currentPosition = 0;
-            }
-    
-            //When in the system is in heating, REHEAT control does not follow RP-1455.
-            if (conditioning == SystemController.State.HEATING && state == HEATING) {
-                updateReheatDuringSystemHeating(vavEquip);
-            }
-
-            valve.applyLimits();
-            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
-
-            vavDevice.setDamperPos(damper.currentPosition);
-            vavDevice.setReheatPos(valve.currentPosition);
-
-            logLoopParams(node, roomTemp, loopOp);
-
-            updateTRResponse(node);
-
-            CcuLog.d(L.TAG_CCU_ZONE, "buildingLimitMaxBreached "+buildingLimitMaxBreached()+" buildingLimitMinBreached "+buildingLimitMinBreached());
-            
-            vavDevice.setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
-                                                         : state == COOLING ? buildingLimitMaxBreached() : false));
-            vavDevice.updateLoopParams();
+        CcuLog.i(L.TAG_CCU_ZONE, "--->VavReheatProfile<--- "+nodeAddr);
+        /*if (vavDeviceMap.get(node) == null) {
+            addLogicalMap(node);
+            CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
+            continue;
+        }*/
+        if (isZoneDead()) {
+            updateZoneDead();
+            return;
         }
+        initLoopVariables();
+        double roomTemp = getCurrentTemp();
+
+        int loopOp = 0;
+        //If supply air temperature from air handler is greater than room temperature, Cooling shall be
+        //locked out.
+        SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
+        SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        Equip equip = new Equip.Builder()
+                .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
+        CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
+                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode);
+        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
+            //Zone is in Cooling
+            if (state != COOLING) {
+                handleCoolingChangeOver();
+            }
+            if (conditioning == SystemController.State.COOLING) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+            }
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+            //Zone is in heating
+            if (state != HEATING) {
+                handleHeatingChangeOver();
+            }
+            int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            if (conditioning == SystemController.State.COOLING) {
+                updateReheatDuringSystemCooling(heatingLoopOp, roomTemp, vavEquip.getId());
+                loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavEquip.getDischargeAirTemp().readHisVal(), equip);
+            } else if (conditioning == SystemController.State.HEATING) {
+                loopOp = heatingLoopOp;
+            }
+        } else {
+            //Zone is in deadband
+            if (state != DEADBAND) {
+                handleDeadband();
+            }
+        }
+        try {
+            updateIaqCompensatedMinDamperPos(nodeAddr, equip);
+        } catch (UnknownRecException e) {
+            CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
+        }
+        damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
+        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
+
+        if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
+            valve.currentPosition = 0;
+        }
+
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), vavEquip.getId())) {
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+        }
+
+        //When in the system is in heating, REHEAT control does not follow RP-1455.
+        if (conditioning == SystemController.State.HEATING && state == HEATING) {
+            updateReheatDuringSystemHeating(equip);
+        }
+
+        valve.applyLimits();
+
+        vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
+        vavEquip.getReheatCmd().writeHisVal(valve.currentPosition);
+
+        logLoopParams(nodeAddr, roomTemp, loopOp);
+
+        updateTRResponse((short)nodeAddr);
+
+        CcuLog.d(L.TAG_CCU_ZONE, "buildingLimitMaxBreached "+buildingLimitMaxBreached()+" buildingLimitMinBreached "+buildingLimitMinBreached());
+
+        setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
+                : state == COOLING ? buildingLimitMaxBreached() : false));
+        updateLoopParams();
     }
     
-    private void logLoopParams(short node, double roomTemp, int loopOp) {
+    private void logLoopParams(int node, double roomTemp, int loopOp) {
         
-        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling+
-                                " Op: "+coolingLoop.getLoopOutput());
+        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
         coolingLoop.dump();
-        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating+
-                                " Op: "+heatingLoop.getLoopOutput());
+        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop Op: "+heatingLoop.getLoopOutput());
         heatingLoop.dump();
         CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                  +", valve:"+valve.currentPosition);
     }
     
-    private void updateZoneDead(Short node) {
+    private void updateZoneDead() {
         
-        CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+        CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+nodeAddr+" roomTemp : "+vavEquip.getCurrentTemp().readHisVal());
         state = TEMPDEAD;
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-        
-        if (!curStatus.equals("Zone Temp Dead")) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
-            VavEquip vavDevice = vavDeviceMap.get(node);
-            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
-            double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
+        if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
+            double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
+                                                : vavEquip.getMinCoolingDamperPos().readDefaultVal());
+            double damperMax = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
+                                                : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
             double damperPos = (damperMax+damperMin)/2;
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if(systemMode == SystemMode.OFF) {
-                damperPos = vavDevice.getDamperPos() > 0 ? vavDevice.getDamperPos() : damperMin;
+                damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
-            vavDevice.setDamperPos(damperPos);
-            vavDevice.setNormalizedDamperPos(damperPos);
-            vavDevice.setReheatPos(0);
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+            vavEquip.getDamperCmd().writeHisVal(damperPos);
+            vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
+            vavEquip.getReheatCmd().writeHisVal(0);
+            vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
+            vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
         }
     }
     
-    private void initLoopVariables(short node) {
-        
-        vavDevice = vavDeviceMap.get(node);
-        coolingLoop = vavDevice.getCoolingLoop();
-        heatingLoop = vavDevice.getHeatingLoop();
-        co2Loop = vavDeviceMap.get(node).getCo2Loop();
-        vocLoop = vavDeviceMap.get(node).getVOCLoop();
-        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
-        valveController = vavDevice.getValveController();
-        setTempCooling = vavDevice.getDesiredTempCooling();
-        setTempHeating = vavDevice.getDesiredTempHeating();
-        VavUnit vavUnit = vavDevice.getVavUnit();
-        damper = vavUnit.vavDamper;
-        valve = vavUnit.reheatValve;
-        setDamperLimits(node, damper);
+    private void initLoopVariables() {
+        setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
+        setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+        setDamperLimits( (short) nodeAddr, damper);
     }
     
     private void handleCoolingChangeOver() {
@@ -212,12 +209,12 @@ public class VavReheatProfile extends VavProfile
         coolingLoop.setDisabled();
     }
     
-    private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp, String vavEquip) {
+    private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp, String vavEquipId) {
         Log.i(TAG, "updateReheatDuringSystemCooling: ");
-        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", vavEquip);
-        double heatingLoopOffset = TunerUtil.readTunerValByQuery("offset  and discharge and air and temp", vavEquip);
-        double dischargeTemp = vavDevice.getDischargeTemp();
-        double supplyAirTemp = vavDevice.getSupplyAirTemp();
+        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", vavEquipId);
+        double heatingLoopOffset = TunerUtil.readTunerValByQuery("offset  and discharge and air and temp", vavEquipId);
+        double dischargeTemp = vavEquip.getDischargeAirTemp().readHisVal();
+        double supplyAirTemp = vavEquip.getEnteringAirTemp().readHisVal();
         double datMax = Math.min((roomTemp + heatingLoopOffset), maxDischargeTemp);
         
         if (!isSupplyAirTempValid(supplyAirTemp)) {
@@ -227,7 +224,7 @@ public class VavReheatProfile extends VavProfile
         double dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * Math.min(heatingLoopOp, 50) / 50;
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valveController.dump();
-        vavDevice.setDischargeSp(dischargeSp);
+        vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
         int valvePosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
     
         CcuLog.d(L.TAG_CCU_ZONE,
@@ -246,11 +243,11 @@ public class VavReheatProfile extends VavProfile
         return !(sat < 0) && !(sat > 200);
     }
     
-    private void updateReheatDuringSystemHeating(Equip vavEquip) {
+    private void updateReheatDuringSystemHeating(Equip equip) {
         
-        double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
-        double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
-        double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
+        double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+equip.getId()+"\"");
+        double maxHeatingPos = vavEquip.getMaxHeatingDamperPos().readDefaultVal();
+        double minHeatingPos = vavEquip.getMinHeatingDamperPos().readDefaultVal();
         double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
         CcuLog.d(L.TAG_CCU_ZONE," valveStartDamperPercent "+valveStartDamperPercent+" valveStart "+valveStart );
         if (damper.currentPosition > valveStart) {
@@ -260,14 +257,12 @@ public class VavReheatProfile extends VavProfile
         }
     }
     
-    private void updateIaqCompensatedMinDamperPos(Short node, Equip vavEquip) {
+    private void updateIaqCompensatedMinDamperPos(Integer node, Equip equip) {
     
-        double co2 = vavDeviceMap.get(node).getCO2();
-        double voc = vavDeviceMap.get(node).getVOC();
-        
-        boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
-        boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
-        String zoneId = HSUtil.getZoneIdFromEquipId(vavEquip.getId());
+
+        boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
+        boolean  enabledIAQControl = vavEquip.getEnableIAQControl().readDefaultVal() > 0;
+        String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied())
                            || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
@@ -281,19 +276,19 @@ public class VavReheatProfile extends VavProfile
             damper.iaqCompensatedMinPos = damper.minPosition;
         }
         //CO2 loop output from 0-50% modulates damper min position.
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
+        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(vavEquip.getZoneCO2().readHisVal()) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
         }
-    
+
         //VOC loop output from 0-50% modulates damper min position.
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
+        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(vavEquip.getZoneVoc().readHisVal()) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
         }
         
     }
-    
+
     @Override
     public ZoneState getState() {
         return state;

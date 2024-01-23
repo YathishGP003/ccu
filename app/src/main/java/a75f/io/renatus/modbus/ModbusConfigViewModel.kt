@@ -158,6 +158,8 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 ProgressDialogUtils.hideProgressDialog()
             }
 
+
+
             override fun onErrorResponse(response: String?) {
                 showErrorDialog(context, NO_INTERNET, true)
                 ProgressDialogUtils.hideProgressDialog()

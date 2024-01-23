@@ -36,11 +36,11 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun HeaderTextView(text: String) {
+fun HeaderTextView(text: String, padding : Int = 5) {
     Text(
         modifier = Modifier
             .wrapContentSize()
-            .padding(5.dp),
+            .padding(padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
@@ -80,6 +80,19 @@ fun LabelTextView(text: String) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun StyledTextView(text: String, fontSize : Int) {
+    Text(
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
             color = Color.Black
         ),
         text = text
@@ -185,7 +198,7 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
                 if (enableClick)
                     onClick()
             }),
-        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
+        textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black, textAlign = TextAlign.Left),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Red,
             unfocusedIndicatorColor = Color.Gray,
@@ -227,5 +240,25 @@ fun TextViewCompose(text: String) {
                 modifier = Modifier.size(24.dp)
             )
         },
+    )
+}
+
+
+
+
+@Composable
+fun HeaderCenterLeftAlignedTextView(text: String) {
+    Text(
+        modifier = Modifier
+            .width(250.dp)
+            .padding(5.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
     )
 }

@@ -23,7 +23,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
  */
 class MigrationHandler(var haystack: CCUHsApi) {
 
-    fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String) {
+    fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String, profileName: String) {
         if (newModel is SeventyFiveFTunerDirective) {
             CcuLog.printLongMessage(Domain.LOG_TAG,
                 "Building equip model upgrade detected : Run migration to $newModel"
@@ -34,13 +34,13 @@ class MigrationHandler(var haystack: CCUHsApi) {
             tunerEquipBuilder.updateBackendBuildingTuner(siteRef, haystack)
         } else {
             val equipDetails = getEquipDetailsByDomain(newModel.domainName)
-            addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef)
+            addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef, profileName)
             removeEntityData(entityData.tobeDeleted, newModel, equipDetails)
-            updateEntityData(entityData.tobeUpdated, newModel, equipDetails, siteRef)
+            updateEntityData(entityData.tobeUpdated, newModel, equipDetails, siteRef, profileName)
         }
     }
     private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: ModelDirective,
-                              equips: List<a75f.io.domain.api.Equip>, siteRef : String) {
+                              equips: List<a75f.io.domain.api.Equip>, siteRef : String, profileName: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeAdded.forEach { diffDomain ->
@@ -74,7 +74,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
     }
 
     private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: ModelDirective,
-                                 equips: List<a75f.io.domain.api.Equip>, siteRef: String) {
+                                 equips: List<a75f.io.domain.api.Equip>, siteRef: String, profileName: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
         val profileConfiguration = getTestProfileConfig()
         tobeUpdate.forEach { diffDomain ->

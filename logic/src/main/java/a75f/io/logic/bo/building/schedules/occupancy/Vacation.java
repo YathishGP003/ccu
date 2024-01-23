@@ -12,7 +12,7 @@ public class Vacation implements OccupancyTrigger{
     
     public Vacation(CCUHsApi hayStack, String equipRef) {
         this.hayStack = hayStack;
-        equip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef))
+        equip = new Equip.Builder().setHDict(hayStack.readHDictById(equipRef))
                                    .build();
     }
     public boolean isEnabled() {

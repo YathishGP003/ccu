@@ -37,6 +37,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
+import a75f.io.domain.VavEquip;
+import a75f.io.domain.api.Domain;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
@@ -71,7 +73,6 @@ import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.vav.VavProfile;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 
@@ -141,8 +142,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 damperTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, damperTypes);
                 damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 VavProfile mVavProfile = (VavProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                VavProfileConfiguration mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
-                int damperPosition = damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName);
+                VavEquip equip = (VavEquip) Domain.INSTANCE.getDomainEquip(mVavProfile.getEquip().getId());
+                //VavProfileConfiguration mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                int damperPosition = damperTypesAdapter.getPosition(DamperType.values()[(int)equip.getDamperType().readDefaultVal()].displayName);
 
                 ArrayAdapter<String> reheatTypesAdapter;
                 ArrayList<String> reheatTypes = new ArrayList<>();
@@ -151,7 +153,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 reheatTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, reheatTypes);
                 reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName);
+                int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[(int)equip.getReheatType().readDefaultVal()].displayName);
                 if (damperPosition == 0) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog1",profile+"-type-0-10v");
@@ -1646,12 +1648,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
     private String getVavRelayMapping(String pointname, String listTitle) {
         VavProfile vavProfile = (VavProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-        VavProfileConfiguration vavProfileConfig =
-            (VavProfileConfiguration) vavProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
-    
-        if (pointname.equals("relay1") && vavProfileConfig.isOpConfigured(Port.RELAY_ONE)) {
+        VavEquip equip = (VavEquip) Domain.INSTANCE.getDomainEquip(vavProfile.getEquip().getId());
+        if (pointname.equals("relay1") && ( equip.getReheatType().readDefaultVal() == 6 || equip.getReheatType().readDefaultVal() == 7)) {
             return "Electric Reheat Stage 1";
-        } else if (pointname.equals("relay2") && vavProfileConfig.isOpConfigured(Port.RELAY_TWO)) {
+        } else if (pointname.equals("relay2") && equip.getReheatType().readDefaultVal() == 7) {
             return "Electric Reheat Stage 2";
         }
         return "Not Used";

@@ -1,0 +1,229 @@
+From fabf8ed11cea8bcc13badb599668fe970cd74ad5 Mon Sep 17 00:00:00 2001
+From: Samjith Sadasivan <samjith@75f.io>
+Date: Tue, 31 Oct 2023 16:02:06 -0500
+Subject: [PATCH] Instabug ANR reporting
+
+---
+ app/build.gradle                              |  2 ++
+ .../a75f/io/renatus/ENGG/DevSettings.java     | 20 +++++++++++++++-
+ .../main/java/a75f/io/renatus/RenatusApp.java | 24 ++++++++++++++++++-
+ .../layout-xlarge/fragment_dev_settings.xml   | 22 +++++++++++++++++
+ .../main/res/layout/fragment_dev_settings.xml | 23 ++++++++++++++++++
+ .../java/a75f/io/device/DeviceUpdateJob.java  |  4 ----
+ 6 files changed, 89 insertions(+), 6 deletions(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 7296cac54..04e131094 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -245,6 +245,8 @@ dependencies {
+     kapt 'androidx.hilt:hilt-compiler:1.0.0'
+     implementation "androidx.activity:activity-ktx:1.5.0"
+     kapt 'com.jakewharton:butterknife-compiler:10.2.0'
++
++    implementation 'com.instabug.library:instabug:12.1.0'
+ }
+ 
+ 
+diff --git a/app/src/main/java/a75f/io/renatus/ENGG/DevSettings.java b/app/src/main/java/a75f/io/renatus/ENGG/DevSettings.java
+index cc071c309..86d32ffbd 100644
+--- a/app/src/main/java/a75f/io/renatus/ENGG/DevSettings.java
++++ b/app/src/main/java/a75f/io/renatus/ENGG/DevSettings.java
+@@ -31,6 +31,9 @@ import androidx.annotation.Nullable;
+ import androidx.appcompat.app.AlertDialog;
+ import androidx.fragment.app.Fragment;
+ 
++import com.instabug.crash.CrashReporting;
++import com.instabug.library.Feature;
++
+ import org.projecthaystack.HDict;
+ import org.projecthaystack.HDictBuilder;
+ import org.projecthaystack.HRef;
+@@ -130,6 +133,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
+     public @BindView(R.id.saveRegisterRequestCount) Button btnregisterRequestCount;
+ 
+     public @BindView(R.id.cacheSyncFrequency) Spinner cacheSyncFrequency;
++
++    public @BindView(R.id.anrReportBtn) ToggleButton anrReporting;
++
+     SharedPreferences spDefaultPrefs = null;
+ 
+     private final CompositeDisposable disposable = new CompositeDisposable();
+@@ -314,7 +320,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
+ 
+         if (BuildConfig.BUILD_TYPE.equals("local")
+             || BuildConfig.BUILD_TYPE.equals("dev")
+-            || BuildConfig.BUILD_TYPE.equals("qa")) {
++            || BuildConfig.BUILD_TYPE.equals("qa")
++            || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+ 
+             crashButton.setVisibility(View.VISIBLE);
+             crashButton.setOnClickListener(view1 -> {
+@@ -440,6 +447,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
+                 Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
+             }
+         });
++
++        anrReporting.setChecked(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
++                , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
++        anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
++
++            CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
++            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);
++            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
++                    .edit().putBoolean("anr_reporting_enabled", b).apply();
++        });
+     }
+ 
+ 
+@@ -542,4 +559,5 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
+             e.printStackTrace();
+         }
+     }
++
+ }
+\ No newline at end of file
+diff --git a/app/src/main/java/a75f/io/renatus/RenatusApp.java b/app/src/main/java/a75f/io/renatus/RenatusApp.java
+index 65dc0c2ef..25505b3e2 100644
+--- a/app/src/main/java/a75f/io/renatus/RenatusApp.java
++++ b/app/src/main/java/a75f/io/renatus/RenatusApp.java
+@@ -8,6 +8,7 @@ import android.content.pm.ApplicationInfo;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.logger.CcuLog;
++import a75f.io.logic.Globals;
+ import a75f.io.renatus.util.Prefs;
+ import dagger.hilt.android.HiltAndroidApp;
+ 
+@@ -16,6 +17,11 @@ import androidx.appcompat.app.AppCompatDelegate;
+ import android.util.Log;
+ 
+ 
++import com.instabug.crash.CrashReporting;
++import com.instabug.library.Feature;
++import com.instabug.library.Instabug;
++import com.instabug.library.invocation.InstabugInvocationEvent;
++
+ import java.io.BufferedReader;
+ import java.io.DataOutputStream;
+ import java.io.File;
+@@ -39,9 +45,25 @@ public class RenatusApp extends UtilityApplication
+ 		super.onCreate();
+ 		mContext = getApplicationContext();
+ 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+-		//Fabric.with(this, new Crashlytics());
++
++		initInstabug();
+ 	}
+ 
++	private void initInstabug() {
++		new Instabug.Builder(this, "a92457eeb44e965eabf019b4373e8216")
++				.setInvocationEvents(InstabugInvocationEvent.NONE)
++				.build();
++
++		boolean anrReporting = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
++				, Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false);
++		if (anrReporting) {
++			CrashReporting.setAnrState(Feature.State.ENABLED);
++			CrashReporting.setState(Feature.State.ENABLED);
++		} else {
++			CrashReporting.setAnrState(Feature.State.DISABLED);
++			CrashReporting.setState(Feature.State.DISABLED);
++		}
++	}
+ 	public static Context getAppContext() {
+ 		return mContext;
+ 	}
+diff --git a/app/src/main/res/layout-xlarge/fragment_dev_settings.xml b/app/src/main/res/layout-xlarge/fragment_dev_settings.xml
+index e9fcd8a62..caf7e9330 100644
+--- a/app/src/main/res/layout-xlarge/fragment_dev_settings.xml
++++ b/app/src/main/res/layout-xlarge/fragment_dev_settings.xml
+@@ -34,6 +34,28 @@
+ 
+             </LinearLayout>
+ 
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:orientation="horizontal">
++
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_margin="10dp"
++                    android:text="Enable ANR Reporting"
++                    android:textSize="20sp"
++                    android:textStyle="bold" />
++
++
++                <ToggleButton
++                    android:id="@+id/anrReportBtn"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_margin="10dp" />
++
++            </LinearLayout>
++
+             <a75f.io.renatus.ENGG.LocalConnectionView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+diff --git a/app/src/main/res/layout/fragment_dev_settings.xml b/app/src/main/res/layout/fragment_dev_settings.xml
+index 7a2ac8b2f..c97a60fb9 100644
+--- a/app/src/main/res/layout/fragment_dev_settings.xml
++++ b/app/src/main/res/layout/fragment_dev_settings.xml
+@@ -34,6 +34,29 @@
+ 
+             </LinearLayout>
+ 
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:orientation="horizontal">
++
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_margin="10dp"
++                    android:text="Enable ANR Reporting"
++                    android:textSize="20sp"
++                    android:textStyle="bold" />
++
++
++                <ToggleButton
++                    android:id="@+id/anrReportBtn"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_margin="10dp" />
++
++            </LinearLayout>
++
++
+             <a75f.io.renatus.ENGG.LocalConnectionView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+diff --git a/device/src/main/java/a75f/io/device/DeviceUpdateJob.java b/device/src/main/java/a75f/io/device/DeviceUpdateJob.java
+index 5af520850..a6e57f2e2 100644
+--- a/device/src/main/java/a75f/io/device/DeviceUpdateJob.java
++++ b/device/src/main/java/a75f/io/device/DeviceUpdateJob.java
+@@ -1,8 +1,6 @@
+ package a75f.io.device;
+ 
+-import java.util.ArrayList;
+ import java.util.HashMap;
+-import java.util.Random;
+ import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.locks.Lock;
+ import java.util.concurrent.locks.ReentrantLock;
+@@ -10,9 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.device.bacnet.BacnetUtilKt;
+ import a75f.io.device.mesh.MeshNetwork;
+-import a75f.io.device.mesh.Pulse;
+ import a75f.io.device.modbus.ModbusNetwork;
+-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.Globals;
+                             import a75f.io.logic.L;
+-- 
+2.39.2 (Apple Git-143)
+

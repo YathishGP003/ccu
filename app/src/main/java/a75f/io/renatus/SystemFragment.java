@@ -1,7 +1,24 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModelByEquipRef;
+import static a75f.io.domain.api.DomainName.airTempCoolingSp;
+import static a75f.io.domain.api.DomainName.airTempHeatingSp;
+import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
+import static a75f.io.domain.api.DomainName.dcvDamperControlEnable;
+import static a75f.io.domain.api.DomainName.dualSetpointControlEnable;
+import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
+import static a75f.io.domain.api.DomainName.operatingMode;
+import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
+import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
+import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
+import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DISCHARGE_AIR_TEMP;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.DUCT_STATIC_PRESSURE_SENSOR;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
+import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
@@ -68,13 +85,17 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
@@ -92,6 +113,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.OaoArc;
+
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -99,7 +121,6 @@ import a75f.io.renatus.views.OaoArc;
 public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface,
 		IntrinsicScheduleListener, CloudConnectivityListener
 {
-	private static final String TAG = "SystemFragment";
 	private static IntrinsicScheduleListener intrinsicScheduleListener;
 	SeekBar  sbComfortValue;
 	private static final long TOOLTIP_TIME = 3000;
@@ -195,7 +216,26 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private Drawable mDrawableBreakLineRight;
 
 	Schedule schedule;
+	RecyclerView externalModbusParams;
+	TextView externalModbusModelDetails;
+	private TextView externalModbusStatus;
+	private TextView externalModbusLastUpdated;
+	private TextView external_last_updated;
 
+	LinearLayout setPointConfig;
+	LinearLayout dcv_config;
+	LinearLayout dual_config;
+	LinearLayout singleSatConfig;
+	LinearLayout dualSatConfig;
+	TextView satSetPoint;
+	TextView satCurrent;
+	TextView dualSatCurrent;
+	TextView dspSetPoint;
+	TextView dspCurrent;
+	TextView opMode;
+	TextView coolingSp;
+	TextView heatingSp;
+	TextView external_damper;
 
 	public SystemFragment()
 	{
@@ -763,6 +803,29 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
 		configBTUMeterDetails(view);
 
+		setPointConfig = view.findViewById(R.id.setpoint_config);
+		satSetPoint = view.findViewById(R.id.sat_setpoint);
+		dspSetPoint = view.findViewById(R.id.dsp_setpoint);
+		satCurrent = view.findViewById(R.id.sat_current);
+		dualSatCurrent = view.findViewById(R.id.sat_dual_cur);
+		dspCurrent = view.findViewById(R.id.dsp_current);
+		external_damper = view.findViewById(R.id.external_damper);
+		dcv_config = view.findViewById(R.id.dcv_config);
+		singleSatConfig = view.findViewById(R.id.single_sat_config);
+		dualSatConfig = view.findViewById(R.id.dual_sat_config);
+		dual_config = view.findViewById(R.id.dual_config);
+		opMode = view.findViewById(R.id.sat_operatingmode);
+		coolingSp = view.findViewById(R.id.sat_coolingsp);
+		heatingSp = view.findViewById(R.id.sat_heatingsp);
+
+		externalModbusParams = view.findViewById(R.id.external_modbus_device);
+		externalModbusModelDetails = view.findViewById(R.id.external_device_details);
+		externalModbusStatus = view.findViewById(R.id.external_device_status);
+		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
+		external_last_updated = view.findViewById(R.id.external_last_updated);
+		showExternalModbusDevice();
+
+
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -834,32 +897,58 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		tbSmartPrePurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemPrePurgeEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				}
 			}
 		});
 		tbSmartPostPurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemPostPurgeEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				}
+
 			}
 		});
 		tbEnhancedVentilation.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				if (isExternalAhu()) {
+					SystemProfileUtil.setUserIntentByDomain(systemEnhancedVentilationEnable, b ? 1 : 0);
+				} else {
+					SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				}
+
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
-
 	}
+
+	private boolean isExternalAhu(){
+		return (L.ccu().systemProfile instanceof DabExternalAhu
+				|| L.ccu().systemProfile instanceof VavExternalAhu);
+	}
+
+
 
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null) {
 			oaoArc.setVisibility(View.VISIBLE);
 			purgeLayout.setVisibility(View.VISIBLE);
-			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-			tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+			if (isExternalAhu()) {
+				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
+				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
+				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
+			} else {
+				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+			}
 			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
@@ -939,9 +1028,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-					tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-					tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
+					if (isExternalAhu()) {
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
+					} else {
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
+					}
 					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 					sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
@@ -950,14 +1045,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					targetMinInsideHumidity.setSelection(humidityAdapter
 							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 
-					if(L.ccu().systemProfile instanceof VavIERtu){
+					if(L.ccu().systemProfile instanceof VavIERtu) {
 						IEGatewayDetail.setVisibility(View.VISIBLE);
 						IEGatewayOccupancyStatus.setText(getOccStatus());
 						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
+					} else {
+						configureExternalAhu();
 					}
-				
 				}
-				
 				if (L.ccu().systemProfile != null) {
 					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}
@@ -965,6 +1060,75 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		
 	}
+
+	private void configureExternalAhu() {
+		if(L.ccu().systemProfile instanceof DabExternalAhu ||
+				L.ccu().systemProfile instanceof VavExternalAhu) {
+			if (L.ccu().systemProfile instanceof DabExternalAhu) {
+				setCurrentAndSetPoints (
+						getSetPoint(supplyAirflowTemperatureSetpoint),
+						getSetPoint(ductStaticPressureSetpoint),
+						getModbusPointValue(DISCHARGE_AIR_TEMP),
+						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
+						getConfigValue(dcvDamperControlEnable, ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(dcvDamperCalculatedSetpoint),
+						getConfigValue(dualSetpointControlEnable,ModelNames.DAB_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(airTempCoolingSp),
+						getSetPoint(airTempHeatingSp),
+						getOperatingMode(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
+				);
+			} else {
+				setCurrentAndSetPoints (
+						getSetPoint(supplyAirflowTemperatureSetpoint),
+						getSetPoint(ductStaticPressureSetpoint),
+						getModbusPointValue(DISCHARGE_AIR_TEMP),
+						getModbusPointValue(DUCT_STATIC_PRESSURE_SENSOR),
+						getConfigValue(dcvDamperControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(dcvDamperCalculatedSetpoint),
+						getConfigValue(dualSetpointControlEnable,ModelNames.VAV_EXTERNAL_AHU_CONTROLLER),
+						getSetPoint(airTempCoolingSp),
+						getSetPoint(airTempHeatingSp),
+						getOperatingMode(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
+				);
+			}
+		} else {
+			setPointConfig.setVisibility(View.GONE);
+		}
+	}
+
+	private void setCurrentAndSetPoints(
+			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,
+			String dcvSp, boolean dualEnabled, String coolingSpVal, String heatingSpVal,
+			String operationMode
+	) {
+		setPointConfig.setVisibility(View.VISIBLE);
+		satSetPoint.setText(satSp);
+		dspSetPoint.setText(dspSp);
+		satCurrent.setText(satCur);
+		dualSatCurrent.setText(satCur);
+		dspCurrent.setText(dspCur);
+		coolingSp.setText(coolingSpVal);
+		heatingSp.setText(heatingSpVal);
+		opMode.setText(operationMode);
+
+		if (dcvEnabled) {
+			external_damper.setText(dcvSp);
+			dcv_config.setVisibility(View.VISIBLE);
+		} else {
+			dcv_config.setVisibility(View.GONE);
+		}
+
+		if (dualEnabled) {
+			dual_config.setVisibility(View.VISIBLE);
+			dualSatConfig.setVisibility(View.VISIBLE);
+			singleSatConfig.setVisibility(View.GONE);
+		} else {
+			dual_config.setVisibility(View.GONE);
+			dualSatConfig.setVisibility(View.GONE);
+			singleSatConfig.setVisibility(View.VISIBLE);
+		}
+	}
+
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)
@@ -1118,5 +1282,36 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshData() {
 		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
 	}
+	private void showExternalModbusDevice() {
+		if (L.ccu().systemProfile instanceof DabExternalAhu || L.ccu().systemProfile instanceof VavExternalAhu) {
+			HashMap<Object, Object>  modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
+			if (!modbusEquip.isEmpty()) {
+				externalModbusParams.setVisibility(View.VISIBLE);
+				externalModbusModelDetails.setVisibility(View.VISIBLE);
+				externalModbusStatus.setVisibility(View.VISIBLE);
+				externalModbusLastUpdated.setVisibility(View.VISIBLE);
+				external_last_updated.setVisibility(View.VISIBLE);
 
+				EquipmentDevice externalModbusEquip = buildModbusModelByEquipRef(Objects.requireNonNull(modbusEquip.get("id")).toString());
+				List<Parameter> parameterList = new ArrayList<>();
+
+				List<Parameter> allParamList = UtilSourceKt.getParametersList(externalModbusEquip);
+				allParamList.forEach(parameter -> {
+					if (parameter.isDisplayInUI())
+						parameterList.add(parameter);
+				});
+
+				String nodeAddress = String.valueOf(externalModbusEquip.getSlaveId());
+				externalModbusModelDetails.setText(externalModbusEquip.getName()+ "("+externalModbusEquip.getEquipType().toUpperCase() + nodeAddress + ")");
+				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+				externalModbusParams.setLayoutManager(gridLayoutManager);
+				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
+						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
+				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
+				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);
+			}
+
+		}
+	}
 }

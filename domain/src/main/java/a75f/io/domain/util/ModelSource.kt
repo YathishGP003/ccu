@@ -1,7 +1,11 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import java.io.FileNotFoundException
 
 /**
@@ -14,6 +18,7 @@ class ModelSource {
         private const val MODEL_PATH = "assets/assets/75f/models/"
 
         fun getModelByProfileName(profileName: String): ModelDirective? {
+            CcuLog.i(Domain.LOG_TAG, " getModelByProfileName $profileName")
             try {
                 val modelId = getModelId(profileName)
                 return ResourceHelper.loadModelDefinition("${MODEL_PATH}${modelId}.json")
@@ -22,6 +27,7 @@ class ModelSource {
             } catch (e: JsonParseException) {
                 e.printStackTrace()
             }
+            CcuLog.i(Domain.LOG_TAG, "Model load failed")
             return null
         }
 
@@ -40,5 +46,30 @@ class ModelSource {
             }
             return modelId
         }
+
+        fun getDeviceModelByFileName(modelName: String) : SeventyFiveFDeviceDirective? {
+            try {
+                return ResourceHelper.loadDeviceModelDefinition("${MODEL_PATH}${modelName}.json")
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            } catch (e: JsonParseException) {
+                e.printStackTrace()
+            }
+            CcuLog.i(Domain.LOG_TAG, "Can't load device model")
+            return null
+        }
+
+        fun getProfileModelByFileName(modelName: String) : SeventyFiveFProfileDirective? {
+            try {
+                return ResourceHelper.loadProfileModelDefinition("${MODEL_PATH}${modelName}.json")
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            } catch (e: JsonParseException) {
+                e.printStackTrace()
+            }
+            CcuLog.i(Domain.LOG_TAG, "Can't load profile model")
+            return null
+        }
+
     }
 }

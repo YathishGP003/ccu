@@ -181,6 +181,7 @@ android {
 
 dependencies {
     implementation project(path: ':modbusbox')
+    implementation project(path: ':domain')
     testImplementation 'junit:junit:4.13.1'
     implementation project(':algos')
 
@@ -201,6 +202,8 @@ dependencies {
     implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
     implementation 'com.github.heremaps:oksse:0.9.0'
 
     testImplementation "io.mockk:mockk:1.10.2"
@@ -211,8 +214,14 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation project(':data')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.16-SNAPSHOT')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
+    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
 
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.15-SNAPSHOT')
     implementation project(':domain')
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"

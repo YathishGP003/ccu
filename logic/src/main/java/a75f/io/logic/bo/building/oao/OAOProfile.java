@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.oao;
 
+import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
+import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
+import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
+
 import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -14,7 +18,9 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
@@ -159,14 +165,25 @@ public class OAOProfile
         }
         oaoEquip.setHisVal("mat and available", isMatThrottle() ? 1 : 0);
     }
+    private boolean isExternalAhu(){
+        return (L.ccu().systemProfile instanceof DabExternalAhu
+                || L.ccu().systemProfile instanceof VavExternalAhu);
+    }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
         if(systemMode != SystemMode.OFF) {
             Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
             switch (systemOccupancy) {
                 case UNOCCUPIED:
-                    boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
-                    boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
+                    boolean isSmartPrePurge;
+                    boolean isSmartPostPurge;
+                    if (isExternalAhu()) {
+                        isSmartPrePurge = TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0;
+                        isSmartPostPurge = TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0;
+                    } else {
+                        isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
+                        isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
+                    }
                     if (isSmartPrePurge) {
                         handleSmartPrePurgeControl();
                     }
@@ -177,7 +194,12 @@ public class OAOProfile
                 case OCCUPIED:
                 case FORCEDOCCUPIED:
                 case OCCUPANCYSENSING:
-                    boolean isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
+                    boolean isEnhancedVentilation;
+                    if (isExternalAhu())
+                        isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0;
+                    else
+                        isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
+
                     if (isEnhancedVentilation)
                         handleEnhancedVentilationControl();
                     break;
@@ -191,7 +213,7 @@ public class OAOProfile
     }
     public void doEconomizing() {
     
-        double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+        double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
         double externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
         
         double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);

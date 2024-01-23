@@ -35,6 +35,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 
@@ -1032,6 +1033,40 @@ public class Schedule extends Entity
                 }
                 
                 
+            }
+        }
+        if(!daysSorted.isEmpty() && !daysIntervals.isEmpty() && daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh())
+        {
+            //overnight scenario
+            Interval iv = daysIntervals.get(daysIntervals.size()-1);
+            DateTime startInterval = iv.getStart();
+            int dayOfWeek = startInterval.getDayOfWeek()-1;
+            DateTime nextDay = startInterval.plusDays(1);
+            int nextDayofWeek = nextDay.getDayOfWeek() - 1;
+            int monthNext = nextDay.getMonthOfYear();
+            int yearNext = nextDay.getYear();
+            int dayNext = nextDay.getDayOfYear();
+            BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
+            List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
+            BuildingOccupancy.Days individualDay = null;
+            for (int i = 0; i < tempDayList.size(); i++) {
+                if (nextDayofWeek == tempDayList.get(i).getDay()) {
+                    individualDay = tempDayList.get(i);
+                }
+            }
+            if (individualDay != null) {
+                int startHr = individualDay.getSthh();
+                int startMin = individualDay.getStmm();
+                int endHr = individualDay.getEthh();
+                int endMin = individualDay.getEtmm();
+                if (endHr == 24) {
+                    endHr = 23;
+                    endMin = 59;
+                }
+                DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
+                DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
+                Interval nextDayInterval = new Interval(startNext, endNext);
+                daysIntervals.add(nextDayInterval);
             }
         }
         for(Interval i : daysIntervals) {

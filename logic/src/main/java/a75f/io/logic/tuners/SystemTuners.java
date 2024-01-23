@@ -11,9 +11,11 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT;
 
@@ -29,7 +31,7 @@ public class SystemTuners {
         String equipDis = equip.get("dis").toString();
         String siteRef = equip.get("siteRef").toString();
         Point propGain = new Point.Builder()
-                             .setDisplayName(equipDis+"-"+"proportionalKFactor")
+                             .setDisplayName(getDisplayNameFromVariation(equipDis+"-"+"proportionalKFactor"))
                              .setSiteRef(siteRef)
                              .setEquipRef(equipRef)
                              .setHisInterpolate("cov")
@@ -43,7 +45,7 @@ public class SystemTuners {
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
     
         Point integralGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+"integralKFactor")
+                                 .setDisplayName(getDisplayNameFromVariation(equipDis+"-"+"integralKFactor"))
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .setHisInterpolate("cov")
@@ -57,7 +59,7 @@ public class SystemTuners {
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
     
         Point propSpread = new Point.Builder()
-                               .setDisplayName(equipDis+"-"+"temperatureProportionalRange")
+                               .setDisplayName(getDisplayNameFromVariation(equipDis+"-"+"temperatureProportionalRange"))
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef)
                                .setHisInterpolate("cov")
@@ -69,9 +71,9 @@ public class SystemTuners {
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(propSpread), hayStack);
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
-    
+
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-"+"temperatureIntegralTime")
+                                    .setDisplayName(getDisplayNameFromVariation(equipDis+"-"+"temperatureIntegralTime"))
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef)
                                     .setHisInterpolate("cov")
@@ -89,8 +91,11 @@ public class SystemTuners {
     
     private static String addCoolingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
                                               String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+
+        String displayName = getDisplayNameFromVariation(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempCoolingLockout");
+
         Point.Builder outsideTempCoolingLockout  =
-            new Point.Builder().setDisplayName(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempCoolingLockout")
+            new Point.Builder().setDisplayName(displayName)
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef)
                                .setHisInterpolate("cov")
@@ -153,8 +158,10 @@ public class SystemTuners {
     
     private static String addHeatingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
                                                      String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+        String displayName = getDisplayNameFromVariation(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempHeatingLockout");
+
         Point.Builder outsideTempHeatingLockout  =
-            new Point.Builder().setDisplayName(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempHeatingLockout")
+            new Point.Builder().setDisplayName(displayName)
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef)
                                .setHisInterpolate("cov")
@@ -211,5 +218,15 @@ public class SystemTuners {
             hayStack.writeHisValById(outsideTempHeatingLockoutId, HSUtil.getPriorityVal(outsideTempHeatingLockoutId));
         }
         return outsideTempHeatingLockoutId;
+    }
+
+    public static String getDisplayNameFromVariation(String dis) {
+        String displayName = "";
+        if (BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)) {
+            displayName = dis.replaceAll("(?i)-DAB-", "-VVT-").replaceAll("(?i)DAB", "VVT");
+        } else {
+            displayName = dis;
+        }
+        return displayName;
     }
 }

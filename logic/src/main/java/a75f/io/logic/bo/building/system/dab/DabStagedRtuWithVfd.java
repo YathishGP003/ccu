@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
@@ -51,6 +52,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());
@@ -64,7 +66,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String siteDis = (String) siteMap.get("dis");
         Equip systemEquip= new Equip.Builder()
                                    .setSiteRef(siteRef)
-                                   .setDisplayName(siteDis+"-SystemEquip")
+                                   .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-SystemEquip"))
                                    .setProfile(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("dab")
                                    .setTz(siteMap.get("tz").toString())
@@ -170,6 +172,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)
@@ -180,7 +183,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String tz = siteMap.get("tz").toString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         
-        Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
+        Point analog2OutputEnabled = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "analog2OutputEnabled"))
                                                         .setSiteRef(siteRef).setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                                         .setEnums("false,true").setTz(tz).build();
@@ -188,7 +191,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
         
         Point analog2AtEconomizer = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog2AtEconomizer")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog2AtEconomizer"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog2")
@@ -199,7 +202,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String analog2AtEconomizerId = hayStack.addPoint(analog2AtEconomizer);
         hayStack.writeDefaultValById(analog2AtEconomizerId, 7.0 );
         Point analog2AtRecirculate = new Point.Builder()
-                                             .setDisplayName(equipDis+"-"+"analog2AtRecirculate")
+                                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog2AtRecirculate"))
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog2")
@@ -211,7 +214,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         hayStack.writeDefaultValById(analog2AtRecirculateId, 4.0 );
     
         Point analog2Default = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"analog2Default")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog2Default"))
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .addMarker("system").addMarker("config").addMarker("analog2")
@@ -242,7 +245,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String tz = siteMap.get("tz").toString();
         
         Point analog2 = new Point.Builder()
-                                .setDisplayName(equipDis+"-"+name)
+                                .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+name))
                                 .setSiteRef(siteRef)
                                 .setEquipRef(equipref)
                                 .addMarker("system").addMarker("config").addMarker("analog2")
@@ -275,7 +278,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point analogSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd")
+        Point analogSignal = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "FanSignal")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd")
                 .setBacnetId(BacnetIdKt.FANSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
         String fansignalCmdPt = CCUHsApi.getInstance().addPoint(analogSignal);
         CCUHsApi.getInstance().writeHisValById(fansignalCmdPt,0.0);

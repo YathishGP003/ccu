@@ -2,10 +2,8 @@ package a75f.io.renatus.schedules;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToPointFive;
 import static a75f.io.logic.schedule.SpecialSchedule.getInt;
@@ -48,8 +46,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.TimeUtils;
@@ -358,6 +354,36 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             public void onNothingSelected(AdapterView<?> parentView) {
             }
         });
+
+        heatingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        coolingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         try {
             Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
             method.setAccessible(true);

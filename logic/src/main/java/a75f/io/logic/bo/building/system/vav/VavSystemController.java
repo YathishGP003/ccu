@@ -20,12 +20,15 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
+import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.domain.api.DomainName.averageHumidity;
+import static a75f.io.domain.api.DomainName.averageTemperature;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
@@ -236,9 +239,14 @@ public class VavSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-        
-        systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
-        systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+
+        if (L.ccu().systemProfile instanceof VavExternalAhu) {
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
+            CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
+        } else {
+            systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
+            systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+        }
 
     }
     
@@ -543,7 +551,7 @@ public class VavSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == " +
+        return CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == " +
                                                         "\""+equipRef+"\""
         );
     }
@@ -571,7 +579,7 @@ public class VavSystemController extends SystemController
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId() + "\"") > 0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and (space or current) and temp and sensor and equipRef == \"" + q.getId() + "\"") > 0;
         } catch (Exception e) {
             return false;
         }
@@ -617,7 +625,7 @@ public class VavSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and (current or space) and equipRef == \""+equipRef+"\"");
     }
     
     @Override
@@ -632,7 +640,7 @@ public class VavSystemController extends SystemController
 
         for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and (current or space) " +
                                                                 "and equipRef == \""+equip.get("id")+"\""
             );
     
@@ -685,7 +693,7 @@ public class VavSystemController extends SystemController
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
-                    "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
+                    "temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!isZoneDead(equip.getId()) && (tempVal > 0)) {

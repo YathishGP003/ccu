@@ -81,7 +81,7 @@ public abstract class VavSystemProfile extends SystemProfile
     
     public void setSystemLoopOp(String loop, double val)
     {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and " + loop, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and not purge and " + loop, val);
     }
     
     public void addVavSystemTuners(String equipref)
@@ -102,19 +102,19 @@ public abstract class VavSystemProfile extends SystemProfile
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavAnalogFanSpeedMultiplier, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(analogFanSpeedMultiplierId, DomainName.vavAnalogFanSpeedMultiplier, hayStack);
 
         Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavHumidityHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(humidityHysteresisId, DomainName.vavHumidityHysteresis, hayStack);
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        TunerUtil.copyDefaultBuildingTunerVal(targetCumulativeDamperId, DomainName.vavRelayDeactivationHysteresis, hayStack);
+        TunerUtil.copyDefaultBuildingTunerVal(relayDeactivationHysteresisId, DomainName.vavRelayDeactivationHysteresis, hayStack);
         
         addNewTunerPoints(equipref);
         SystemTuners.addPITuners(equipref, TunerConstants.VAV_TUNER_GROUP, Tags.VAV, CCUHsApi.getInstance());

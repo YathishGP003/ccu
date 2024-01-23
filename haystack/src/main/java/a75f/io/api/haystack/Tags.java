@@ -147,8 +147,8 @@ public class Tags
     public static final String HEATING_USER_LIMIT_MAX = "heatingUserLimitMax";
     public static final String COOLING_USER_LIMIT_MIN = "coolingUserLimitMin";
     public static final String COOLING_USER_LIMIT_MAX = "coolingUserLimitMax";
-    public static final String COOLING_DEADBAND = "coolingDeadband";
-    public static final String HEATING_DEADBAND = "heatingDeadband";
+    public static final String COOLING_DEADBAND = "coolingDeadBand";
+    public static final String HEATING_DEADBAND = "heatingDeadBand";
     public static final String UNOCCUPIED_ZONE_SETBACK = "unoccupiedZoneSetback";
     public static final String FOLLOW_BUILDING = "followBuilding";
     public static final String COOLVAL = "coolVal";
@@ -221,4 +221,6 @@ public class Tags
     public static final String MAX_VAL = "maxVal";
 
     public static final String DOMAIN_NAME = "domainName";
+
+    public static final String BACNET = "bacnet";
 }

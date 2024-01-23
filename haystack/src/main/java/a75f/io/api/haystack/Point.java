@@ -82,6 +82,9 @@ public class Point extends Entity
     {
         return group;
     }
+    public void setGroup(String group) {
+        this.group = group;
+    }
     public String getRoomRef()
     {
         return roomRef;
@@ -496,6 +499,9 @@ public class Point extends Entity
                 else if (pair.getKey().equals("curStatus"))
                 {
                     this.curStatus = pair.getValue().toString();
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
                 }
             }
             return this;

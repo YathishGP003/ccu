@@ -96,7 +96,7 @@ public abstract class SystemController
 
     public boolean isZoneDead(String equipRef) {
 
-        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef == \""+equipRef+"\"");
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equipRef+"\"");
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
@@ -109,7 +109,7 @@ public abstract class SystemController
             }
         }
 
-        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and temp and sensor and equipRef == \"" + equipRef + "\"");
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipRef + "\"");
 
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();

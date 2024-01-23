@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
@@ -27,6 +28,7 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -62,6 +64,10 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @Nullable
     @BindView(R.id.rl_vav_head)
     RelativeLayout rlVAVHead;
+
+    @Nullable
+    @BindView(R.id.rl_acb)
+    RelativeLayout rlACB;
 
     @Nullable
     @BindView(R.id.rl_dabTitle)
@@ -211,6 +217,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @BindView(R.id.textParallelDesc)
     TextView textParallelDesc;
 
+    @Nullable
+    @BindView(R.id.textACB)
+    TextView textACB;
+
+    @Nullable
+    @BindView(R.id.textACBdesc)
+    TextView textACBdesc;
+
     @BindView(R.id.textTitleFragment)
     TextView     textTitleFragment;
 
@@ -267,7 +281,19 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             }
         }
     }
-    
+
+    @Optional
+    @OnClick(R.id.rl_acb)
+    void onACBOnClick()
+    {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
+        }
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_ACB, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
+    }
+
     @Optional
     @OnClick(R.id.rl_dabTitle)
     void onDabOnClick()
@@ -373,6 +399,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavNoFan)
     void onVAVNoFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
@@ -381,6 +412,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavSeriesFan)
     void onVAVSeriesFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,
@@ -394,6 +430,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavParallelFan)
     void onVAVParallelFanOnClick()
     {
+        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
+        } else {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
+        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,
@@ -450,12 +491,13 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         /*Code to disable VAV profiles if DAB is selected*/
         if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.dabExternalAHUController){
             //rlVAV.setEnabled(false);
             //lt_VAVProfile.setEnabled(false);
             rlVAVNoFan.setEnabled(false);
             rlVAVSeriesFan.setEnabled(false);
             rlVAVParallelFan.setEnabled(false);
+            rlACB.setEnabled(false);
 
             textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
             textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
@@ -466,6 +508,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
             textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
             textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -484,7 +528,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.vavExternalAHUController){
             rlDabSingleDuct.setEnabled(false);
             rlDabDualDuct.setEnabled(false);
             textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
@@ -511,6 +556,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             rlVAVNoFan.setEnabled(false);
             rlVAVSeriesFan.setEnabled(false);
             rlVAVParallelFan.setEnabled(false);
+            rlACB.setEnabled(false);
 
             textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
             textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
@@ -521,6 +567,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
             textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
             textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
+            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;

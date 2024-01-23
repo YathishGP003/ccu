@@ -1,6 +1,10 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.LevelData
+import a75f.io.api.haystack.util.ReadAllResponse
+import a75f.io.api.haystack.util.retrieveLevelValues
+import a75f.io.api.haystack.HisItem
 import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
 import a75f.io.device.bacnet.readExternalBacnetJsonFile
 import a75f.io.device.bacnet.updateBacnetHeartBeat
@@ -10,23 +14,37 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.util.Log
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.gson.*
-import io.ktor.http.*
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.CORS
+import io.ktor.features.CallLogging
+import io.ktor.features.Compression
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.gzip
+import io.ktor.gson.gson
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.websocket.*
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.get
+import io.ktor.routing.post
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.joda.time.DateTime
+import org.projecthaystack.HDateTime
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
+import java.util.concurrent.TimeUnit
 
 class HttpServer {
 
@@ -104,9 +122,47 @@ class HttpServer {
                     CcuLog.i(HTTP_SERVER," hisRead: "+call.parameters["query"])
                     val query = call.parameters["query"]
                     if (query != null) {
-                        call.respond(HttpStatusCode.OK, BaseResponse(CCUHsApi.getInstance()
+                        val isHeartBeatPoint = isHeartBeatPoint("heartbeat", query)
+                        if (isHeartBeatPoint) {
+                            CcuLog.i(HTTP_SERVER, "this is hearbeat point")
+                            val hisItem = getHisItemByIdAndRange(query, "current")
+                            if (hisItem != null) {
+                                CcuLog.i(HTTP_SERVER, "his item is present")
+                                val lastModifiedTimeInMillis = hisItem.dateInMillis
+                                val currentTimeInMillis = System.currentTimeMillis()
+                                val diffTime =
+                                    TimeUnit.MILLISECONDS.toMinutes(currentTimeInMillis - lastModifiedTimeInMillis)
+                                CcuLog.i(
+                                    HTTP_SERVER,
+                                    " currentTimeInMillis:==> $currentTimeInMillis <--lastmodified-->$lastModifiedTimeInMillis --diff-- $diffTime"
+                                )
+                                if (diffTime > 15) {
+                                    call.respond(
+                                        HttpStatusCode.OK, BaseResponse(
+                                            0
+                                        )
+                                    )
+                                } else {
+                                    call.respond(
+                                        HttpStatusCode.OK, BaseResponse(
+                                            hisItem.`val`
+                                        )
+                                    )
+                                }
+                            } else {
+                                CcuLog.i(HTTP_SERVER, "his item not present")
+                                call.respond(
+                                    HttpStatusCode.OK, BaseResponse(
+                                        CCUHsApi.getInstance()
+                                            .readHisValById(query)
+                                    )
+                                )
+                            }
+                        } else {
+                            call.respond(HttpStatusCode.OK, BaseResponse(CCUHsApi.getInstance()
                                 .readHisValById(query)))
-                    }  else {
+                        }
+                    }else{
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
@@ -115,9 +171,21 @@ class HttpServer {
                     val query = call.parameters["query"]
                     CcuLog.i(HTTP_SERVER, " query: $query")
                     if (query != null) {
-                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query));
-                        CcuLog.i(HTTP_SERVER, " response: $response")
-                        call.respond(HttpStatusCode.OK, BaseResponse(response))
+//                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query))
+//                        CcuLog.i(HTTP_SERVER, " response: $response")
+//                        call.respond(HttpStatusCode.OK, BaseResponse(response))
+
+                        val tempGrid = CCUHsApi.getInstance().getHSClient().readAll(query)
+                        val response = HZincWriter.gridToString(tempGrid)
+                        if(query.contains("point")){
+                            val levelData =  getLevelValues(tempGrid)
+                            val fullResponse = ReadAllResponse(response, levelData)
+                            CcuLog.i(HTTP_SERVER, " fullResponse: ${BaseResponse(fullResponse)}")
+                            call.respond(HttpStatusCode.OK, BaseResponse(fullResponse))
+                        }else {
+                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(response)}")
+                            call.respond(HttpStatusCode.OK, BaseResponse(response))
+                        }
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
@@ -200,14 +268,18 @@ class HttpServer {
                     CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
                     val id = call.parameters["id"]
                     val level = call.parameters["level"]
-                    val value = call.parameters["val"]
+                    var value = call.parameters["val"]
                     val who = call.parameters["who"]
-                    val duration = call.parameters["duration"]
+                    var duration : String? = call.parameters["duration"]
 
-                    if(id == null || level == null || value == null || who == null || duration == null) {
+                    if(id == null || level == null || who == null || duration == null) {
                         call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
                     }else{
-                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value.toDouble(), duration.toInt())
+                        // if level is coming null ie. user wanted to reset level
+                        if(value == "null"){
+                            duration = "1"
+                        }
+                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value!!.toDouble(), duration!!.toInt())
                         if (pointGrid != null) {
                             if(!pointGrid.isEmpty || !pointGrid.isErr)
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK));
@@ -222,8 +294,34 @@ class HttpServer {
         }
     }
 
+    private fun getLevelValues(tempGrid: HGrid): MutableList<LevelData> {
+        val mutableList = mutableListOf<LevelData>()
+        for (row in tempGrid) {
+            val id = (row as HRow).get("id")
+            mutableList.add(LevelData(id.toString(), retrieveLevelValues(id.toString())))
+        }
+        return mutableList
+    }
+
     private fun retrieveGridFromRequest(response: String): HGrid? {
         val zReader = HZincReader(response)
         return zReader.readGrid()
+    }
+
+    private fun isHeartBeatPoint(filterKey : String, pointId : String): Boolean {
+        val pointMap = CCUHsApi.getInstance().readMapById(pointId)
+        if(pointMap != null && pointMap[filterKey] != null){
+            return true
+        }
+        return false
+    }
+
+    private fun getHisItemByIdAndRange(pointId: String, range: String): HisItem? {
+        var hisItem: HisItem? = null
+        val list = CCUHsApi.getInstance().hisRead(pointId, range)
+        if (list != null && list.size >= 1) {
+            hisItem = list[0]
+        }
+        return hisItem
     }
 }

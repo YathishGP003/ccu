@@ -146,41 +146,6 @@ public class FileBackupManager {
         }
     }
 
-    public void getModbusSideLoadedJsonsFiles(String siteId, String ccuId){
-        Retrofit retrofit = getRetrofitForFileStorageService();
-        Call<ResponseBody> call = retrofit.create(FileBackupService.class).getModbusSideLoadedJsons(siteId, ccuId);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_REPLACE, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_REPLACE,
-                            "Error while Retrieving Modbus side loaded JSON files for Site ID " + siteId +" and CCU" +
-                                    " ID " + ccuId);
-                    return;
-                }
-                try {
-                    File dir = new File(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH);
-                    if (!dir.exists()) {
-                        dir.mkdirs();
-                    }
-                    String fileName = FileConstants.MODBUS_SIDE_LOADED_JSON_PATH + ccuId + ".zip";
-                    FileOperationsUtil.zipBytes(fileName, response.body().bytes());
-                    FileOperationsUtil.unzipFile(fileName, FileConstants.MODBUS_SIDE_LOADED_JSON_PATH);
-                    deleteZipFileFromCCU(new File(fileName));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
-                CcuLog.e(TAG_CCU_REPLACE, t.getStackTrace().toString());
-            }
-        });
-    }
-
     public void uploadBackupConfigFiles(File file, String siteId, String ccuId){
         RequestBody requestBody =RequestBody.create(MediaType.parse("application/zip"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
@@ -209,37 +174,6 @@ public class FileBackupManager {
                 t.printStackTrace();
                 CcuLog.e(TAG_CCU_BACKUP, t.getStackTrace().toString());
                 CcuLog.e(TAG_CCU_BACKUP, "CCU Config files back up upload error: "+t.getMessage(), t);
-                deleteZipFileFromCCU(file);
-            }
-        });
-    }
-
-    public void uploadModbusSideLoadedJsonsFiles(File file, String siteId, String ccuId){
-        RequestBody requestBody =RequestBody.create(MediaType.parse("application/zip"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
-        Retrofit retrofit = getRetrofitForFileStorageService();
-        Call<ResponseBody> call = retrofit.create(FileBackupService.class).backupModbusSideLoadedJsons(siteId, ccuId, body);
-        call.enqueue(new Callback<ResponseBody>() {
-
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_BACKUP, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_BACKUP, "Modbus side loaded json back up " + file.getAbsolutePath() +" Upload " +
-                            "failed");
-                    deleteZipFileFromCCU(file);
-                    return;
-                }
-                CcuLog.i(TAG_CCU_BACKUP, "Modbus side loaded json back up " + file.getAbsolutePath() +" Upload " +
-                        "successfully");
-                deleteZipFileFromCCU(file);
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
-                CcuLog.e(TAG_CCU_BACKUP, t.getStackTrace().toString());
-                CcuLog.e(TAG_CCU_BACKUP, "Modbus side loaded json back up error: "+t.getMessage(), t);
                 deleteZipFileFromCCU(file);
             }
         });

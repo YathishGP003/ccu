@@ -168,7 +168,7 @@ public class MeshUtil
         }else if(temperatureMode == TemperatureMode.COOLING){
             point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equipRef+"\"");
         }else {
-            point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and average and sp and equipRef == \""+equipRef+"\"");
+            point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and (avg or average) and sp and equipRef == \""+equipRef+"\"");
         }
         if (point.isEmpty()) {
             Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");

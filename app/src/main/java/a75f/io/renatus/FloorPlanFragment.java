@@ -60,27 +60,28 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
-import a75f.io.renatus.util.BackFillViewModel;
+import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -565,10 +566,40 @@ public class FloorPlanFragment extends Fragment {
         ArrayList<String> arrayList = new ArrayList<>();
 
         for (Equip e : equips) {
+            preLoadEquipModel(e);
             arrayList.add(e.getGroup());
 
         }
         return arrayList;
+    }
+
+    private void preLoadEquipModel(Equip equip) {
+        if (equip.getMarkers().contains("smartnode")) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
+
+            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
+            }
+        } else if (equip.getMarkers().contains("helionode")) {
+            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
+
+            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
+            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
+                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
+            }
+        }
+
     }
 
     private void enableFloorButton() {
@@ -857,7 +888,6 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-
             if (floorToRename != null) {
                 isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
             } else {
@@ -1200,7 +1230,8 @@ public class FloorPlanFragment extends Fragment {
                 hsZone.setId(zoneId);
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                 String zoneSchedule = DefaultSchedules.generateDefaultSchedule(true, zoneId);
-                HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
+                hsZone.setScheduleRef(zoneSchedule);
+                /*HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
                         ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
 
                 if(defaultNamedSchedule.isEmpty()){
@@ -1210,7 +1241,7 @@ public class FloorPlanFragment extends Fragment {
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
 
-                }
+                }*/
 
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();
@@ -1432,9 +1463,18 @@ public class FloorPlanFragment extends Fragment {
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
-                    VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
-                    showDialogFragment(FragmentVAVConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+                    Equip equip = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equip.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(VavProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeType, profile.getProfileType()), VavProfileConfigFragment.Companion.getID());
+                    break;
+                case VAV_ACB:
+                    Equip equipHN = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipHN.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeTypeHN = equipHN.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(AcbProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration

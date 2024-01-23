@@ -20,6 +20,7 @@ import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.OAOTuners;
+import a75f.io.logic.tuners.SystemTuners;
 
 public class OAOEquip
 {
@@ -62,7 +63,7 @@ public class OAOEquip
         {
             ahuRef = systemEquip.get("id").toString();
         }
-        Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis)
+        Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis))
                 .setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name())
                 .addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE)
                 .addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz)
@@ -88,7 +89,7 @@ public class OAOEquip
         hayStack.addPoint(insideEnthalpy);
     
         Point outsideEnthalpy = new Point.Builder()
-                                       .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideEnthalpy")
+                                       .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-outsideEnthalpy"))
                                        .setEquipRef(equipRef)
                                        .setSiteRef(siteRef)
                                        .setRoomRef(roomRef)
@@ -101,7 +102,7 @@ public class OAOEquip
         hayStack.addPoint(outsideEnthalpy);
     
         Point economizingAvailable = new Point.Builder()
-                                        .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-economizingAvailable")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-economizingAvailable"))
                                         .setEquipRef(equipRef)
                                         .setSiteRef(siteRef)
                                         .setRoomRef(roomRef)
@@ -119,7 +120,7 @@ public class OAOEquip
                 siteDis, siteRef, roomRef, equipRef, nodeAddr, floorRef,tz, "mat"));
     
         Point economizingLoopOutput = new Point.Builder()
-                                             .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-economizingLoopOutput")
+                                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-economizingLoopOutput"))
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
@@ -132,7 +133,7 @@ public class OAOEquip
         hayStack.addPoint(economizingLoopOutput);
     
         Point outsideAirCalculatedMinDamper = new Point.Builder()
-                                             .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirCalculatedMinDamper")
+                                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-outsideAirCalculatedMinDamper"))
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
@@ -145,7 +146,7 @@ public class OAOEquip
         hayStack.addPoint(outsideAirCalculatedMinDamper);
         
         Point outsideAirFinalLoopOutput = new Point.Builder()
-                                             .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirFinalLoopOutput")
+                                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-outsideAirFinalLoopOutput"))
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
@@ -159,7 +160,7 @@ public class OAOEquip
     
     
         Point returnAirCO2 = new Point.Builder()
-                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-returnAirCO2")
+                                              .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-returnAirCO2"))
                                               .setEquipRef(equipRef)
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
@@ -172,7 +173,7 @@ public class OAOEquip
         String returnAirCO2Id = hayStack.addPoint(returnAirCO2);
     
         Point rtuCurrentTransformer = new Point.Builder()
-                                     .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-rtuCurrentTransformer")
+                                     .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-rtuCurrentTransformer"))
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
                                      .setRoomRef(roomRef)
@@ -185,7 +186,7 @@ public class OAOEquip
         String rtuCurrentTransformerId = hayStack.addPoint(rtuCurrentTransformer);
     
         Point outsideAirTemperature = new Point.Builder()
-                                     .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirTemperature")
+                                     .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-outsideAirTemperature"))
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
                                      .setRoomRef(roomRef)
@@ -198,7 +199,7 @@ public class OAOEquip
         String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
     
         Point weatherOutsideTemp = new Point.Builder()
-                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideTemp")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideTemp"))
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
@@ -211,7 +212,7 @@ public class OAOEquip
         String weatherOutsideTempId = hayStack.addPoint(weatherOutsideTemp);
     
         Point weatherOutsideHumidity = new Point.Builder()
-                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideHumidity")
+                                              .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideHumidity"))
                                               .setEquipRef(equipRef)
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
@@ -224,7 +225,7 @@ public class OAOEquip
         String weatherOutsideHumidityId = hayStack.addPoint(weatherOutsideHumidity);
     
         Point supplyAirTemperature = new Point.Builder()
-                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-supplyAirTemperature")
+                                              .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-supplyAirTemperature"))
                                               .setEquipRef(equipRef)
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
@@ -237,7 +238,7 @@ public class OAOEquip
         String supplyAirTemperatureId = hayStack.addPoint(supplyAirTemperature);
     
         Point mixedAirTemperature = new Point.Builder()
-                                             .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-mixedAirTemperature")
+                                             .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-mixedAirTemperature"))
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
@@ -250,7 +251,7 @@ public class OAOEquip
         String mixedAirTemperatureId = hayStack.addPoint(mixedAirTemperature);
     
         Point mixedAirHumidity = new Point.Builder()
-                                            .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-mixedAirHumidity")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-mixedAirHumidity"))
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef)
                                             .setRoomRef(roomRef)
@@ -263,7 +264,7 @@ public class OAOEquip
         String mixedAirHumidityId = hayStack.addPoint(mixedAirHumidity);
     
         Point outsideAirDamper = new Point.Builder()
-                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirDamper")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-outsideAirDamper"))
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
@@ -275,7 +276,7 @@ public class OAOEquip
                                          .build();
         String outsideAirDamperId = hayStack.addPoint(outsideAirDamper);
         Point returnAirDamper = new Point.Builder()
-                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-returnAirDamper")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-returnAirDamper"))
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
@@ -288,7 +289,7 @@ public class OAOEquip
         String returnAirDamperId = hayStack.addPoint(returnAirDamper);
     
         Point exhaustFanStage1 = new Point.Builder()
-                                        .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage1")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage1"))
                                         .setEquipRef(equipRef)
                                         .setSiteRef(siteRef)
                                         .setRoomRef(roomRef)
@@ -299,7 +300,7 @@ public class OAOEquip
                                         .build();
         String exhaustFanStage1Id = hayStack.addPoint(exhaustFanStage1);
         Point exhaustFanStage2 = new Point.Builder()
-                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage2")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage2"))
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
@@ -311,7 +312,7 @@ public class OAOEquip
         String exhaustFanStage2Id = hayStack.addPoint(exhaustFanStage2);
     
         Point co2WA = new Point.Builder()
-                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-co2WeightedAverage")
+                                         .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-co2WeightedAverage"))
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
@@ -401,7 +402,7 @@ public class OAOEquip
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis + "-OAO-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
-        Point outsideDamperAtMinDrive  = new Point.Builder().setDisplayName(equipDis + "-outsideDamperAtMinDrive")
+        Point outsideDamperAtMinDrive  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperAtMinDrive"))
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
                                                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("drive").addMarker("sp")
@@ -410,7 +411,7 @@ public class OAOEquip
         String outsideDamperAtMinDriveId = CCUHsApi.getInstance().addPoint(outsideDamperAtMinDrive );
         hayStack.writeDefaultValById(outsideDamperAtMinDriveId, config.outsideDamperAtMinDrive);
     
-        Point outsideDamperAtMaxDrive  = new Point.Builder().setDisplayName(equipDis + "-outsideDamperAtMaxDrive")
+        Point outsideDamperAtMaxDrive  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperAtMaxDrive"))
                                                             .setEquipRef(equipRef)
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("max").addMarker("drive").addMarker("sp")
@@ -420,7 +421,7 @@ public class OAOEquip
         hayStack.writeDefaultValById(outsideDamperAtMaxDriveId, config.outsideDamperAtMaxDrive);
     
     
-        Point outsideDamperMinOpen   = new Point.Builder().setDisplayName(equipDis + "-outsideDamperMinOpen")
+        Point outsideDamperMinOpen   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpen"))
                                                             .setEquipRef(equipRef)
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("sp")
@@ -430,7 +431,7 @@ public class OAOEquip
         hayStack.writeDefaultValById(outsideDamperMinOpenId, config.outsideDamperMinOpen);
         
     
-        Point returnDamperAtMinDrive  = new Point.Builder().setDisplayName(equipDis + "-returnDamperAtMinDrive")
+        Point returnDamperAtMinDrive  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-returnDamperAtMinDrive"))
                                                             .setEquipRef(equipRef)
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("min").addMarker("drive").addMarker("sp")
@@ -439,7 +440,7 @@ public class OAOEquip
         String returnDamperAtMinDriveId = CCUHsApi.getInstance().addPoint(returnDamperAtMinDrive );
         hayStack.writeDefaultValById(returnDamperAtMinDriveId, config.returnDamperAtMinDrive);
     
-        Point returnDamperAtMaxDrive  = new Point.Builder().setDisplayName(equipDis + "-returnDamperAtMaxDrive")
+        Point returnDamperAtMaxDrive  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-returnDamperAtMaxDrive"))
                                                             .setEquipRef(equipRef)
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("max").addMarker("drive").addMarker("sp")
@@ -448,7 +449,7 @@ public class OAOEquip
         String returnDamperAtMaxDriveId = CCUHsApi.getInstance().addPoint(returnDamperAtMaxDrive);
         hayStack.writeDefaultValById(returnDamperAtMaxDriveId, config.returnDamperAtMaxDrive);
     
-        Point returnDamperMinOpen  = new Point.Builder().setDisplayName(equipDis + "-returnDamperMinOpen")
+        Point returnDamperMinOpen  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-returnDamperMinOpen"))
                                                            .setEquipRef(equipRef)
                                                            .setSiteRef(siteRef)
                                                            .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("min").addMarker("open").addMarker("sp")
@@ -457,7 +458,7 @@ public class OAOEquip
         String returnDamperMinOpenId = CCUHsApi.getInstance().addPoint(returnDamperMinOpen );
         hayStack.writeDefaultValById(returnDamperMinOpenId, config.returnDamperMinOpen);
     
-        Point exhaustFanStage1Threshold  = new Point.Builder().setDisplayName(equipDis + "-exhaustFanStage1Threshold")
+        Point exhaustFanStage1Threshold  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-exhaustFanStage1Threshold"))
                                                         .setEquipRef(equipRef)
                                                         .setSiteRef(siteRef)
                                                         .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("stage1").addMarker("threshold").addMarker("sp")
@@ -466,7 +467,7 @@ public class OAOEquip
         String exhaustFanStage1ThresholdId = CCUHsApi.getInstance().addPoint(exhaustFanStage1Threshold );
         hayStack.writeDefaultValById(exhaustFanStage1ThresholdId, config.exhaustFanStage1Threshold);
     
-        Point exhaustFanStage2Threshold  = new Point.Builder().setDisplayName(equipDis + "-exhaustFanStage2Threshold")
+        Point exhaustFanStage2Threshold  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-exhaustFanStage2Threshold"))
                                                               .setEquipRef(equipRef)
                                                               .setSiteRef(siteRef)
                                                               .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("stage2").addMarker("threshold").addMarker("sp")
@@ -475,7 +476,7 @@ public class OAOEquip
         String exhaustFanStage2ThresholdId = CCUHsApi.getInstance().addPoint(exhaustFanStage2Threshold );
         hayStack.writeDefaultValById(exhaustFanStage2ThresholdId, config.exhaustFanStage2Threshold);
     
-        Point currentTranformerType  = new Point.Builder().setDisplayName(equipDis + "-currentTranformerType")
+        Point currentTranformerType  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-currentTranformerType"))
                                                               .setEquipRef(equipRef)
                                                               .setSiteRef(siteRef)
                                                               .addMarker("config").addMarker("oao").addMarker("writable").addMarker("current").addMarker("transformer").addMarker("type").addMarker("sp")
@@ -484,7 +485,7 @@ public class OAOEquip
         String currentTranformerTypeId = CCUHsApi.getInstance().addPoint(currentTranformerType );
         hayStack.writeDefaultValById(currentTranformerTypeId, config.currentTranformerType);
     
-        Point co2Threshold  = new Point.Builder().setDisplayName(equipDis + "-co2Threshold")
+        Point co2Threshold  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-co2Threshold"))
                                                           .setEquipRef(equipRef)
                                                           .setSiteRef(siteRef).setHisInterpolate("cov")
                                                           .addMarker("config").addMarker("oao").addMarker("writable").addMarker("co2").addMarker("threshold").addMarker("sp").addMarker("his")
@@ -494,7 +495,7 @@ public class OAOEquip
         hayStack.writeDefaultValById(co2ThresholdId, config.co2Threshold);
         hayStack.writeHisValById(co2ThresholdId,config.co2Threshold);
     
-        Point exhaustFanHysteresis  = new Point.Builder().setDisplayName(equipDis + "-exhaustFanHysteresis")
+        Point exhaustFanHysteresis  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-exhaustFanHysteresis"))
                                                           .setEquipRef(equipRef)
                                                           .setSiteRef(siteRef)
                                                           .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("hysteresis").addMarker("sp")
@@ -503,7 +504,7 @@ public class OAOEquip
         String exhaustFanHysteresisId = CCUHsApi.getInstance().addPoint(exhaustFanHysteresis );
         hayStack.writeDefaultValById(exhaustFanHysteresisId, config.exhaustFanHysteresis);
     
-        Point usePerRoomCO2Sensing  = new Point.Builder().setDisplayName(equipDis + "-usePerRoomCO2Sensing")
+        Point usePerRoomCO2Sensing  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-usePerRoomCO2Sensing"))
                                                          .setEquipRef(equipRef)
                                                          .setSiteRef(siteRef).setHisInterpolate("cov")
                                                          .addMarker("config").addMarker("oao").addMarker("writable").addMarker("co2").addMarker("sensing").addMarker("sp").addMarker("his")
@@ -514,7 +515,7 @@ public class OAOEquip
         hayStack.writeHisValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
 
 
-        Point smartPurgeMinDamperOpen  = new Point.Builder().setDisplayName(equipDis + "-systemPurgeOutsideDamperMinPos")
+        Point smartPurgeMinDamperOpen  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemPurgeOutsideDamperMinPos"))
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("cov")
                 .addMarker("config").addMarker("oao").addMarker("writable").addMarker("purge").addMarker("damper").addMarker("sp").addMarker("his")
@@ -527,7 +528,7 @@ public class OAOEquip
         hayStack.writeHisValById(smartPurgeMinDamperOpenId, config.smartPurgeMinDamperOpen);
 
 
-        Point enhancedVentilationMinDamperOpen  = new Point.Builder().setDisplayName(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos")
+        Point enhancedVentilationMinDamperOpen  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos"))
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("cov")
                 .addMarker("config").addMarker("oao").addMarker("writable").addMarker("enhanced").addMarker("ventilation").addMarker("damper").addMarker("sp").addMarker("his")
@@ -542,7 +543,7 @@ public class OAOEquip
     public void updateNewConfigParams(String siteRef,String equipRef, String equipDis, String tz){
         ArrayList<HashMap> purgePoints = CCUHsApi.getInstance().readAll("point and userIntent and oao and purge and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
         if (purgePoints == null || purgePoints.size() == 0) {
-            Point smartPurgeMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemPurgeOutsideDamperMinPos")
+            Point smartPurgeMinDamperOpen = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemPurgeOutsideDamperMinPos"))
                     .setEquipRef(equipRef)
                     .setSiteRef(siteRef).setHisInterpolate("cov")
                     .addMarker("config").addMarker("oao").addMarker("writable").addMarker("purge").addMarker("damper").addMarker("sp").addMarker("his")
@@ -556,7 +557,7 @@ public class OAOEquip
         }
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and userIntent and oao and enhanced and ventilation and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
         if (points == null || points.size() == 0) {
-            Point enhancedVentilationMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos")
+            Point enhancedVentilationMinDamperOpen = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos"))
                     .setEquipRef(equipRef)
                     .setSiteRef(siteRef).setHisInterpolate("cov")
                     .addMarker("config").addMarker("oao").addMarker("writable").addMarker("enhanced").addMarker("ventilation").addMarker("damper").addMarker("sp").addMarker("his")
@@ -644,12 +645,14 @@ public class OAOEquip
             case SYSTEM_DAB_HYBRID_RTU:
             case SYSTEM_DAB_STAGED_RTU:
             case SYSTEM_DAB_STAGED_VFD_RTU:
+            case dabExternalAHUController:
                 return "dab";
             case SYSTEM_VAV_ANALOG_RTU:
             case SYSTEM_VAV_HYBRID_RTU:
             case SYSTEM_VAV_IE_RTU:
             case SYSTEM_VAV_STAGED_RTU:
             case SYSTEM_VAV_STAGED_VFD_RTU:
+            case vavExternalAHUController:
                 return "vav";
         }
         return "default";

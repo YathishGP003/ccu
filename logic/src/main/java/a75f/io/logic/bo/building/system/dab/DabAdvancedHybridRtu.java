@@ -13,6 +13,7 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.SystemTuners;
 
 import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
@@ -54,6 +55,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());
@@ -67,7 +69,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String siteDis = (String) siteMap.get("dis");
         Equip systemEquip= new Equip.Builder()
                                    .setSiteRef(siteRef)
-                                   .setDisplayName(siteDis+"-SystemEquip")
+                                   .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-SystemEquip"))
                                    .setProfile(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("dab")
                                    .setTz(siteMap.get("tz").toString())
@@ -269,6 +271,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addAnalogConfigPoints(String equipref)
@@ -278,27 +281,27 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point analog1OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog1OutputEnabled")
+        Point analog1OutputEnabled = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "analog1OutputEnabled"))
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog1").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                                         .setEnums("false,true").setTz(tz).build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0);
-        Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
+        Point analog2OutputEnabled = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "analog2OutputEnabled"))
                                                         .setSiteRef(siteRef).setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                                         .setEnums("false,true").setTz(tz).build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
-        Point analog3OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog3OutputEnabled")
+        Point analog3OutputEnabled = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "analog3OutputEnabled"))
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog3").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                                         .setEnums("false,true").setTz(tz).build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0);
-        Point analog4OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog4OutputEnabled")
+        Point analog4OutputEnabled = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "analog4OutputEnabled"))
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog4").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
@@ -307,7 +310,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0);
         
         Point analog1AtMinCooling = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog1AtMinCooling"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog1")
@@ -319,7 +322,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog1AtMinCoolingId, 2.0 );
         
         Point analog1AtMaxCooling = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog1AtMaxCooling"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog1")
@@ -331,7 +334,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog1AtMaxCoolingId, 10.0 );
         
         Point analog2AtMinFan = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog2AtMinFan"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("system").addMarker("config").addMarker("analog2")
@@ -343,7 +346,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog2AtMinFanId, 2.0 );
         
         Point analog2AtMaxFan = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"analog2AtMaxFan")
+                                        .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog2AtMaxFan"))
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("system").addMarker("config").addMarker("analog2")
@@ -355,7 +358,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog2AtMaxFanId, 10.0 );
         
         Point analog3AtMinHeating = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog3AtMinHeating")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog3AtMinHeating"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog3")
@@ -367,7 +370,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog3AtMinHeatingId, 2.0 );
         
         Point analog3AtMaxHeating = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog3AtMaxHeating")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog3AtMaxHeating"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog3")
@@ -379,7 +382,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog3AtMaxHeatingId, 10.0 );
         
         Point analog4AtMinCooling = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog4AtMinCooling")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog4AtMinCooling"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog4")
@@ -391,7 +394,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog4AtMinCoolingId, 7.0 );
         
         Point analog4AtMaxCooling = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog4AtMaxCooling")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog4AtMaxCooling"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog4")
@@ -403,7 +406,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog4AtMaxCoolingId, 10.0 );
         
         Point analog4AtMinHeating = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog4AtMinHeating")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog4AtMinHeating"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog4")
@@ -415,7 +418,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         hayStack.writeDefaultValById(analog4AtMinHeatingId, 5.0 );
         
         Point analog4AtMaxHeating = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"analog4AtMaxHeating")
+                                            .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis+"-"+"analog4AtMaxHeating"))
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("analog4")
@@ -448,7 +451,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "coolingSignal")
+        Point coolingSignal = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "coolingSignal"))
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.COOLINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his")
@@ -456,14 +459,14 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String coolingSignalId = CCUHsApi.getInstance().addPoint(coolingSignal);
         CCUHsApi.getInstance().writeHisValById(coolingSignalId, 0.0);
         
-        Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
+        Point heatingSignal = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "heatingSignal"))
                                                  .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.HEATINGSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his")
                                                  .setUnit("%").setTz(tz).build();
         String heatingSignalId = CCUHsApi.getInstance().addPoint(heatingSignal);
         CCUHsApi.getInstance().writeHisValById(heatingSignalId, 0.0);
         
-        Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
+        Point fanSignal = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "fanSignal"))
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref).setHisInterpolate("cov").setBacnetId(BacnetIdKt.FANSIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)
                                              .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his")
@@ -471,7 +474,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         String fanSignalId = CCUHsApi.getInstance().addPoint(fanSignal);
         CCUHsApi.getInstance().writeHisValById(fanSignalId, 0.0);
         
-        Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
+        Point compositeSignal = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "CompositeSignal"))
                                                    .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his")
                 .setBacnetId(BacnetIdKt.COMPOSITESIGNALID).setBacnetType(BacnetUtilKt.ANALOG_VALUE)

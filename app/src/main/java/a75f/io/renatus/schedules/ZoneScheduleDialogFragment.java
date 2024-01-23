@@ -519,7 +519,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
 
             Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
             Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
-            Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
+            Double unoccupiedZoneSetback = Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
             Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
@@ -624,6 +624,34 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
+            }
+        });
+        heatingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        coolingDeadBand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (isCelsiusTunerAvailableStatus()) {
+                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                } else {
+                    rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
 

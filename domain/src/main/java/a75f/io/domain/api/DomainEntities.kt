@@ -114,7 +114,6 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readPriorityVal() : Double {
         requireId()
-        CcuLog.i(Domain.LOG_TAG, "Point "+Domain.hayStack.readMapById(id))
         return Domain.hayStack.readPointPriorityVal(id)
     }
     fun writeDefaultVal(defaultVal : Any) {
@@ -131,7 +130,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun readDefaultStrVal() : String {
         requireId()
-        return Domain.hayStack.readDefaultStrVal(id)
+        return Domain.hayStack.readDefaultStrValById(id)
     }
 
     fun writeVal(level: Int, value : Double) {

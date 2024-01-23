@@ -46,6 +46,7 @@ Thumbs.db
 
 .idea
 haystack/objectbox-test/
+domain/src/main/assets/
 create_version.sh
 add_version_to_task.sh
 deploy.sh

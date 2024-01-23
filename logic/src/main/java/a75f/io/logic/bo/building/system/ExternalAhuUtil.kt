@@ -326,7 +326,7 @@ fun isConfigEnabled(systemEquip: Equip, domainName: String): Boolean =
     Domain.getPointByDomain(systemEquip, domainName) == 1.0
 
 fun writePointForCcuUser(hayStack: CCUHsApi, domainName: String, value: Double) {
-    val point = Domain.readPointOnEquip(domainName, L.ccu().systemProfile.systemEquipRef)
+    val point = Domain.readPointForEquip(domainName, L.ccu().systemProfile.systemEquipRef)
     if (point.isNotEmpty()) {
         RxjavaUtil.executeBackground {
             hayStack.writePointForCcuUser(
@@ -787,7 +787,7 @@ fun addSystemEquip(
     val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
     val equipId = profileEquipBuilder.buildEquipAndPoints(
         config!!, definition!!,
-        CCUHsApi.getInstance().site!!.id
+        CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+definition.name
     )
     systemProfile.updateAhuRef(equipId)
     ControlMote(equipId)

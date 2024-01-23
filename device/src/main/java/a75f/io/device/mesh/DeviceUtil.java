@@ -1,6 +1,37 @@
 package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_TWO;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_FOUR;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.bo.building.definitions.Port.DESIRED_TEMP;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_EIGHT;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_FIVE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_FOUR;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_SEVEN;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
+import static a75f.io.logic.bo.building.definitions.Port.RSSI;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2_EQUIVALENT;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_ILLUMINANCE;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_NO;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_OCCUPANCY;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PM2P5;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PRESSURE;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RH;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RT;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_SOUND;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_UVI;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_VOC;
+import static a75f.io.logic.bo.building.definitions.Port.TH1_IN;
+import static a75f.io.logic.bo.building.definitions.Port.TH2_IN;
 
 import android.util.Log;
 
@@ -322,7 +353,48 @@ public class DeviceUtil {
 
     }
 
+    public static Port getPortFromDomainName(String domainName) {
+        switch (domainName) {
+            case "analog1Out": return ANALOG_OUT_ONE;
+            case "analog2Out": return ANALOG_OUT_TWO;
+            case "analog3Out": return ANALOG_OUT_THREE;
+            case "analog4Out": return ANALOG_OUT_FOUR;
+            case "relay1": return RELAY_ONE;
+            case "relay2": return RELAY_TWO;
+            case "relay3": return RELAY_THREE;
+            case "relay4": return RELAY_FOUR;
+            case "relay5": return RELAY_FIVE;
+            case "relay6": return RELAY_SIX;
+            case "relay7": return RELAY_SEVEN;
+            case "relay8": return RELAY_EIGHT;
 
+            case "th1In": return TH1_IN;
+            case "th2In": return TH2_IN;
+
+            case "analog1In": return ANALOG_IN_ONE;
+            case "analog2In": return ANALOG_IN_TWO;
+
+            case "currentTemp": return SENSOR_RT;
+            case "humiditySensor": return SENSOR_RH;
+            case "desiredTemp": return DESIRED_TEMP;
+
+            case "co2Sensor": return SENSOR_CO2;
+            case "vocSensor": return SENSOR_VOC;
+            case "occupancySensor": return SENSOR_OCCUPANCY;
+            case "illuminanceSensor": return SENSOR_ILLUMINANCE;
+            case "uviSensor": return SENSOR_UVI;
+            case "pressureSensor": return SENSOR_PRESSURE;
+
+            case "soundSensor": return SENSOR_SOUND;
+            case "coSensor": return SENSOR_CO;
+            case "noSensor": return SENSOR_NO;
+            case "co2EquivalentSensor": return SENSOR_CO2_EQUIVALENT;
+            case "pm25Sensor": return SENSOR_PM2P5;
+
+            case "rssi": return RSSI;
+            default: return null;
+        }
+    }
 
 
 }

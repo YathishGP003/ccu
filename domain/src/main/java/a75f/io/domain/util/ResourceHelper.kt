@@ -15,6 +15,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.common.ConstraintDeserializer
 import io.seventyfivef.domainmodeler.common.ModelDirectiveDeserializer
 import io.seventyfivef.domainmodeler.common.PointConfigurationDeserializer
@@ -91,6 +92,13 @@ object ResourceHelper {
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFProfileDirective
     }
 
+    fun loadDeviceModelDefinition(fileName: String) : SeventyFiveFDeviceDirective {
+        @Nullable val modelData: String? = loadString(fileName)
+
+        val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
+        return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFDeviceDirective
+    }
+
     fun getModelVersion(fileName: String): JSONObject {
         @Nullable val version: String? = loadString(fileName)
         if (version != null){
@@ -121,7 +129,7 @@ object ResourceHelper {
         val inputStream = context.assets.open(fileName)
         CcuLog.i("CCU_DM", "loadModel stream $inputStream")
         @Nullable val modelData: String? = loadString(inputStream)
-        CcuLog.i("CCU_DM", "loadModel modelString $modelData")
+        CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

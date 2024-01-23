@@ -107,7 +107,7 @@ public class ModbusPulse {
                 hayStack.readAllEntities("equip and modbus and group == \"" + slaveId +
                         "\"");
         for(HashMap<Object, Object> equip : equipList) {
-            HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and heartbeat and equipRef == " +
+            HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and (heartBeat or heartbeat) and equipRef == " +
                     "\""+equip.get("id")+ "\"");
             if(heartBeatPoint.size() > 0){
                 hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);

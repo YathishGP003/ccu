@@ -28,13 +28,13 @@ public class OccupancyUtil {
     }
     
     public Occupancy getCurrentOccupiedMode() {
-        int occupiedMode =  hayStack.readHisValByQuery("occupancy and his and " +
+        int occupiedMode =  hayStack.readHisValByQuery("(occupancy or occupied) and his and " +
                                                        "mode and equipRef  == \"" + equipRef + "\"").intValue();
         return Occupancy.values()[occupiedMode];
     }
     
     public void setOccupancyMode(Occupancy mode) {
-        hayStack.writeHisValByQuery("occupancy and mode and equipRef == \""+equipRef+"\"", (double) mode.ordinal());
+        hayStack.writeHisValByQuery("(occupied or occupancy) and mode and equipRef == \""+equipRef+"\"", (double) mode.ordinal());
     }
     
     public double getAutoAwayTime() {

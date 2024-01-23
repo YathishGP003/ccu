@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 9/4/18.
  */
@@ -163,6 +165,11 @@ public class Equip extends Entity
     public String getDisplayName()
     {
         return displayName;
+    }
+
+    public void setDisplayName(String displayName)
+    {
+        this.displayName = displayName;
     }
     public HashSet<String> getMarkers()
     {
@@ -525,8 +532,18 @@ public class Equip extends Entity
                 } else if (pair.getKey().equals(Tags.BACNET_TYPE)) {
                     this.bacnetType = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("modelId")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                }
+                else if (pair.getKey().equals("modelVersion")) {
+                    this.tags.put(pair.getKey().toString(), HStr.make(pair.getValue().toString()));
+                }
                 else {
-                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                    try {
+                        this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                    } catch (Exception e) {
+                        CcuLog.e("CCU", "Failed to add tag " + (pair.getKey().toString() + " to equip"));
+                    }
                 }
             }
             return this;

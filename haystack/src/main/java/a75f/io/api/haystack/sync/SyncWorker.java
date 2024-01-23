@@ -111,7 +111,7 @@ public class SyncWorker extends Worker {
             HGrid gridData = unsyncedEntities.next(ENTITY_SYNC_BATCH_SIZE);
             String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
-            CcuLog.d(TAG, "AddEntity Response : "+response);
+            CcuLog.printLongMessage(TAG, "AddEntity Response : "+response);
             if (response != null) {
                 updateSyncStatus(response, true);
             } else {

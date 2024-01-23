@@ -13,6 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +38,46 @@ fun ToggleButton(
         Switch(
             checked = defaultSelection,
             onCheckedChange = {
+                onEnabled(it)
+            },
+            thumbContent = {
+                Icon(
+                    imageVector = if (defaultSelection) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            )
+        )
+    }
+}
+
+/**
+ * Manages the mutableState within the composable.
+ */
+@Composable
+fun ToggleButtonStateful(
+    defaultSelection : Boolean,
+    onEnabled: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = Modifier.wrapContentSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        var checked by remember { mutableStateOf(defaultSelection) }
+        Switch(
+            checked = checked,
+            onCheckedChange = {
+                checked = it
                 onEnabled(it)
             },
             thumbContent = {

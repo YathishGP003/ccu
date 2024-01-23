@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -57,7 +58,9 @@ public abstract class ZoneProfile
         return mProfileConfiguration;
     }
     
-    
+    public ProfileConfiguration getDomainProfileConfiguration() {
+        return null;
+    }
     public void setProfileConfiguration(HashMap<Short, BaseProfileConfiguration> baseProfileConfiguration)
     {
         this.mProfileConfiguration = baseProfileConfiguration;
@@ -89,7 +92,7 @@ public abstract class ZoneProfile
             return true;
         }
 
-        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.getId()+"\"");
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
@@ -112,7 +115,8 @@ public abstract class ZoneProfile
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
 
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and temp and equipRef == \""+equip.getId()+"\"");
+
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("sensor and (current or space) and temp and equipRef == \""+equip.getId()+"\"");
 
         if (currentTemp > (buildingLimitMax + tempDeadLeeway)
                 || currentTemp < (buildingLimitMin - tempDeadLeeway)) {

@@ -1383,6 +1383,7 @@
                     </LinearLayout>
 
                     <TextView
+		        android:visibility="gone"
                         android:id="@+id/tvFdAdd"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"
@@ -1395,8 +1396,6 @@
                         android:textAllCaps="true"
                         android:textColor="?orange_75f"
                         android:textSize="22sp" />
-                        <include layout="@layout/lyt_fd_view"/>
-                    </LinearLayout>
 
                     <TextView
                         android:layout_marginTop="12dp"
@@ -1412,6 +1411,7 @@
                         android:textAllCaps="true"
                         android:textColor="?orange_75f"
                         android:textSize="22sp" />
+                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

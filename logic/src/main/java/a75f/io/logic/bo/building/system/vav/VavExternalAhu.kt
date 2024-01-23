@@ -190,7 +190,6 @@ class VavExternalAhu : VavSystemProfile() {
             systemEquip,
             vavConfig,
             externalEquipId,
-            conditioningMode,
             hayStack,
             externalSpList,
             loopRunningDirection,

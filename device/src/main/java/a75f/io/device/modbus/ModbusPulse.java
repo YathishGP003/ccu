@@ -215,9 +215,15 @@ public class ModbusPulse {
                 }
             }
 
-            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
-                double multiplierValue= Double.parseDouble(register.multiplier);
-                respVal=respVal*multiplierValue;
+            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")
+                    &&!register.getParameterDefinitionType().equals("binary")){
+                double multiplierValue = Double.parseDouble(register.multiplier);
+                if(register.getParameters().get(0).getLogicalPointTags().stream().anyMatch
+                        (it -> it.getTagName().equals("writable"))){
+                    respVal = respVal / multiplierValue;
+                }else {
+                    respVal = respVal * multiplierValue;
+                }
             }
         }
         

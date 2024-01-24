@@ -109,4 +109,7 @@ public class LRUCache<K, V> {
             return value;
         }
     }
+    public void removeHisItem(K key) {
+        CACHE.remove(key);
+    }
 }

@@ -62,7 +62,9 @@ public class HisItemCache
 	{
 		return mCache.get(id);
 	}
-
+	public void delete(String id) {
+		mCache.removeHisItem(id);
+	}
 	public LRUCache<String, HisItem> getCache() {
 		return mCache;
 	}

@@ -116,11 +116,11 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     fun readPriorityVal() : Double {
         try {
             requireId()
-            return Domain.hayStack.readDefaultValById(id)
+            return Domain.hayStack.readPointPriorityVal(id)
         }
         catch (e:UnknownRecException) {
             requireId()
-            return Domain.hayStack.readDefaultValById(id)
+            return Domain.hayStack.readPointPriorityVal(id)
         }
     }
     fun writeDefaultVal(defaultVal : Any) {

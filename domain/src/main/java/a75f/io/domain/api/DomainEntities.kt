@@ -1,6 +1,5 @@
 package a75f.io.domain.api
 
-import a75f.io.logger.CcuLog
 import org.projecthaystack.UnknownRecException
 
 /**
@@ -119,7 +118,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
             return Domain.hayStack.readPointPriorityVal(id)
         }
         catch (e:UnknownRecException) {
-            requireId()
+            id = domainName.readPoint(equipRef)["id"].toString()
             return Domain.hayStack.readPointPriorityVal(id)
         }
     }

@@ -1,6 +1,7 @@
 package a75f.io.domain.api
 
 import a75f.io.logger.CcuLog
+import org.projecthaystack.UnknownRecException
 
 /**
  * An entity definition that binds its domainName to database UUID.
@@ -125,8 +126,15 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         }
     }
     fun readDefaultVal() : Double {
-        requireId()
-        return Domain.hayStack.readDefaultValById(id)
+
+        try {
+            requireId()
+            return Domain.hayStack.readDefaultValById(id)
+        }
+        catch (e:UnknownRecException) {
+            requireId()
+            return Domain.hayStack.readDefaultValById(id)
+        }
     }
     fun readDefaultStrVal() : String {
         requireId()

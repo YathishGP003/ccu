@@ -312,8 +312,8 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 alert.show();
                             }
                         } else {
-                            buildingOccupancy.getDays().addAll(daysList);
-                            doScheduleUpdate(false);
+                            String warningMessageNull = "Internet Connection Issue:: Error while fetching the Warning message. Please try again.";
+                            Toast.makeText(getContext(), warningMessageNull, Toast.LENGTH_LONG);
                             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
                         }
                     });

@@ -1609,6 +1609,7 @@ public class Schedule extends Entity
         if (o == null || getClass() != o.getClass()) return false;
         
         Schedule s = (Schedule) o;
+        if (!this.mId.equals(s.getId())) return false;
         if (this.mDays.size() !=  s.mDays.size()) return false;
         
         for(Days day : this.mDays) {

@@ -1045,7 +1045,7 @@ public class Schedule extends Entity
             int nextDayofWeek = nextDay.getDayOfWeek() - 1;
             int monthNext = nextDay.getMonthOfYear();
             int yearNext = nextDay.getYear();
-            int dayNext = nextDay.getDayOfYear();
+            int dayNext = nextDay.getDayOfMonth();
             BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
             List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
             BuildingOccupancy.Days individualDay = null;

@@ -25,3 +25,12 @@ steps:
   inputs:
     PathtoPublish: '$(System.DefaultWorkingDirectory)\apk\qa'
     ArtifactName: qaApk
+- task: Gradle@2
+  displayName: 'gradlew assembleStaging'
+  inputs:
+    tasks: assembleStaging
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: StagingApk'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)\apk\Staging'
+    ArtifactName: StagingApk

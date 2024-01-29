@@ -10,14 +10,18 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: Gradle@2
+- task: JavaToolInstaller@0
   inputs:
-    workingDirectory: ''
-    gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    versionSpec: '11'
     jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'
-    tasks: 'build'
+    jdkSourceOption: 'PreInstalled'
+
+- task: Gradle@2
+  displayName: 'gradlew assembleQA'
+  inputs:
+    tasks: assembleQA
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: qaApk'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)\apk\qa'
+    ArtifactName: qaApk

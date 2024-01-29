@@ -20,6 +20,10 @@ steps:
   displayName: 'gradlew assembleQA'
   inputs:
     tasks: assembleQA
+- task: CopyFiles@2
+  inputs:
+    Contents: '**'
+    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\*.apk'
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: qaApk'
   inputs:

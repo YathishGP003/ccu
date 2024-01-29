@@ -51,7 +51,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +77,6 @@ import a75f.io.renatus.StatusPagerAdapter;
 import a75f.io.renatus.ZoneFragmentNew;
 import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
-import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -142,8 +140,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private RecyclerView specialScheduleRecycler;
     FrameLayout frameLayout;
 
-    private Handler scheduleFragmentHandler;
-
     @Override
     public void onStop() {
         super.onStop();
@@ -161,7 +157,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
         if (isVisibleToUser) {
-            loadSchedule();
+            new Handler().post(() -> loadSchedule());
             UpdateScheduleHandler.setBuildingScheduleListener(this);
         } else {
             UpdateScheduleHandler.setBuildingScheduleListener(null);
@@ -234,7 +230,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_scheduler, container, false);
-        scheduleFragmentHandler = new Handler(Looper.getMainLooper());
 
         Typeface iconFont = FontManager.getTypeface(getActivity(), FontManager.FONTAWESOME);
 
@@ -358,30 +353,27 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
         //After they are measured d the schedule.
         ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
-        WeakReference<ConstraintLayout> constraintLayoutWeakReference = new WeakReference<>(constraintScheduler);
-        WeakReference<ArrayList<View>> viewTimeLinesWeakReference = new WeakReference<>(viewTimeLines);
-
-        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public boolean onPreDraw() {
-                ConstraintLayout constraintLayout = constraintLayoutWeakReference.get();
-                if(constraintLayout != null){
-                    constraintLayout.getViewTreeObserver().removeOnPreDrawListener(this);
-                    mPixelsBetweenADay = (float) constraintLayoutWeakReference.get().getHeight() / 7;
-                }
-                ArrayList<View> listOfView = viewTimeLinesWeakReference.get();
-                if(listOfView != null){
-                    View viewHourOne = listOfView.get(1);
-                    View viewHourTwo = listOfView.get(2);
-                    mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                }
+            public void onGlobalLayout() {
+                constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                View viewHourOne = viewTimeLines.get(1);
+                View viewHourTwo = viewTimeLines.get(2);
+
+                mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
+
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
+
+
                 loadSchedule();
                 drawCurrentTime();
-                return true;
+
             }
         });
+
     }
 
     private void loadSchedule()
@@ -415,18 +407,22 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void updateUI() {
         schedule.populateIntersections();
-        hasTextViewChildren();
-        ArrayList<Schedule.Days> days = schedule.getDays();
-        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
 
-        for (int i = 0; i < days.size(); i++) {
-            Schedule.Days daysElement = days.get(i);
-            drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                    daysElement.getSthh(), daysElement.getEthh(),
-                    daysElement.getStmm(), daysElement.getEtmm(),
-                    DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
-        }
+        new Handler(Looper.getMainLooper()).post(() -> {
+
+            hasTextViewChildren();
+            ArrayList<Schedule.Days> days = schedule.getDays();
+            Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+            Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+
+            for (int i = 0; i < days.size(); i++) {
+                Schedule.Days daysElement = days.get(i);
+                drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                        daysElement.getSthh(), daysElement.getEthh(),
+                        daysElement.getStmm(), daysElement.getEtmm(),
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+            }
+        });
     }
 
     private void hasTextViewChildren() {
@@ -533,8 +529,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             CCUHsApi.getInstance().saveTagsData();
                             ScheduleManager.getInstance().updateSchedules();
                             CCUHsApi.getInstance().syncEntityTree();
-                            SchedulerFragment.this.loadSpecialSchedules();
-                            ProgressDialogUtils.hideProgressDialog();
+
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                SchedulerFragment.this.loadSpecialSchedules();
+                                ProgressDialogUtils.hideProgressDialog();
+                            });
                         });
         specialScheduleDialogFragment.show(fragmentTransaction, "popup");
     }
@@ -571,11 +570,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 CCUHsApi.getInstance().saveTagsData();
                 ScheduleManager.getInstance().updateSchedules();
                 CCUHsApi.getInstance().syncEntityTree();
-                Runnable runnable = () -> {
+
+                new Handler().postDelayed(() -> {
                     loadVacations();
                     ProgressDialogUtils.hideProgressDialog();
-                };
-                scheduleFragmentHandler.postDelayed(runnable, 3000);
+                }, 3000);
 
                 return false;
             }
@@ -616,8 +615,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ScheduleManager.getInstance().updateSchedules();
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
-            SchedulerFragment.this.loadSpecialSchedules();
-            ProgressDialogUtils.hideProgressDialog();
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                SchedulerFragment.this.loadSpecialSchedules();
+                ProgressDialogUtils.hideProgressDialog();
+            });
         });
         alertDialog.show();
     }
@@ -638,11 +640,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
 
-            Runnable runnable = () -> {
+            new Handler().postDelayed(() -> {
                 loadVacations();
                 ProgressDialogUtils.hideProgressDialog();
-            };
-            scheduleFragmentHandler.postDelayed(runnable, 3000);
+            }, 3000);
         });
 
         alertDialog.show();
@@ -1442,8 +1443,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     @Override
     public void onResume() {
         super.onResume();
-        Runnable runnable = () -> loadSchedule();
-        scheduleFragmentHandler.postDelayed(runnable, 1500);
+        new Handler().postDelayed(() -> loadSchedule(),1500);
         UpdateScheduleHandler.setBuildingScheduleListener(this);
     }
     
@@ -1456,17 +1456,5 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        scheduleFragmentHandler.removeCallbacksAndMessages(null);
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        scheduleFragmentHandler = null;
-        super.onDestroy();
     }
 }

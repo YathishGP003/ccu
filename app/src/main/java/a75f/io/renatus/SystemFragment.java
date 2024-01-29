@@ -72,7 +72,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -150,8 +149,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
-
-	private Handler systemFragmentHandler;
 
 	View rootView;
 	TextView ccuName;
@@ -475,7 +472,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void updateUI() {
 		schedule.populateIntersections();
-		Runnable runnable = () -> {
+
+		new Handler(Looper.getMainLooper()).post(() -> {
+
 			hasTextViewChildren();
 			ArrayList<Schedule.Days> days = schedule.getDays();
 			Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
@@ -486,8 +485,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				drawSchedule(i, daysElement.getSthh(), daysElement.getEthh(), daysElement.getStmm(), daysElement.getEtmm(),
 						DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
 			}
-		};
-		systemFragmentHandler.post(runnable);
+		});
 	}
 
 	private void hasTextViewChildren() {
@@ -633,7 +631,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					.setGravity(Gravity.TOP)
 					.setText(toolTipValue)
 					.show();
-			systemFragmentHandler.postDelayed(intrinsicScheduleToolTip::dismiss, TOOLTIP_TIME);
+			new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, TOOLTIP_TIME);
 		});
 	}
 	private String convertIntHourMinsToString(int hour, int minute){
@@ -662,7 +660,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
-		systemFragmentHandler = new Handler(Looper.getMainLooper());
 
 		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
 		//After they are measured d the schedule.
@@ -741,19 +738,20 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		systemModePicker.setOnScrollListener((numberPicker, scrollState) -> {
 			if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
 				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
-				Runnable myRunnable = () -> {
-
-					WeakReference<NumberPicker> numberPickerReference = new WeakReference<>(numberPicker);
-					NumberPicker currentNumberPicker = numberPickerReference.get();
-
-					if (currentNumberPicker != null && currentNumberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode")) {
-						SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(currentNumberPicker.getValue())).ordinal());
-						if (L.ccu().systemProfile != null) {
-							L.ccu().systemProfile.reset();
+				new Handler().postDelayed(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode"))
+						{
+							SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
+							if (L.ccu().systemProfile != null) {
+								L.ccu().systemProfile.reset();
+							}
 						}
 					}
-				};
-				systemFragmentHandler.postDelayed(myRunnable, 100);
+				}, 100);
 			}
 		});
 
@@ -1166,17 +1164,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			if (getActivity() != null){
 				getActivity().unregisterReceiver(occupancyReceiver);
 			}
-			systemFragmentHandler.removeCallbacksAndMessages(null);
 		}catch (Exception e){
 			e.printStackTrace();
 		}
 		super.onDestroyView();
-	}
-
-	@Override
-	public void onDestroy() {
-		systemFragmentHandler = null;
-		super.onDestroy();
 	}
 
 	private final BroadcastReceiver occupancyReceiver = new BroadcastReceiver() {

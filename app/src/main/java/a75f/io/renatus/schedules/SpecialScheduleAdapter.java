@@ -32,8 +32,8 @@ import a75f.io.renatus.util.FontManager;
 public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialScheduleAdapter.ViewHolder>{
 
     private List<HashMap<Object, Object>> specialSchedules;
-    private final ImageButton.OnClickListener editOnClickListener;
-    private final ImageButton.OnClickListener deleteOnClickListener;
+    private ImageButton.OnClickListener editOnClickListener;
+    private ImageButton.OnClickListener deleteOnClickListener;
     private static final DateTimeFormatter OUTPUT_DATE_FORMAT = DateTimeFormat.forPattern("dd MMM YYYY | HH:mm");
     private static final DateTimeFormatter OUTPUT_DATE_FORMAT_1 = DateTimeFormat.forPattern("dd MMM YYYY | ");
     private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");

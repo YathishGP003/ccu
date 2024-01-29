@@ -449,6 +449,7 @@ public class MigrationUtil {
             writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
         }
         migrateRemoteAccess();
+        correctPhysicalAndAnalogMappingForSSE(ccuHsApi);
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
@@ -462,6 +463,26 @@ public class MigrationUtil {
 
         ccuHsApi.scheduleSync();
     }
+
+    private static void correctPhysicalAndAnalogMappingForSSE(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> sseEquips = ccuHsApi.readAllEntities("equip and sse");
+        for (HashMap<Object, Object> equip : sseEquips) {
+            HashMap<Object, Object> transformerPoint = ccuHsApi.readEntity("(transformer or" +
+                    " transformer20 or transformer50) and equipRef == \"" + equip.get("id") + "\"");
+            HashMap<Object, Object> dev = ccuHsApi.readEntity("device and equipRef == \"" + equip.get("id") + "\"");
+            ArrayList<HashMap<Object, Object>> phyPoints = CCUHsApi.getInstance().readAllEntities("point and physical" +
+                    " and sensor and deviceRef == \"" + dev.get("id") + "\"" +" and port == \""+Port.ANALOG_IN_ONE.toString()+"\"");
+            for(HashMap<Object, Object> ha :phyPoints){
+                if(ha.get("port").toString().equals((Port.ANALOG_IN_ONE).toString()) && transformerPoint.size() > 0){
+                    if(!ha.get("pointRef").toString().equals(transformerPoint.get("id").toString())){
+                        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.get("group").toString()),
+                                Port.ANALOG_IN_ONE.name(), transformerPoint.get("id").toString());
+                    }
+                }
+            }
+        }
+    }
+
 
     private static void removeHisTagForEquipStatusMessage(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip " +

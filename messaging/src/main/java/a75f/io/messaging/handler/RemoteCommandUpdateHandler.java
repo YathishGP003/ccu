@@ -34,7 +34,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     public static final String OTA_UPDATE_CM = "ota_update_CM";
     public static final String OTA_UPDATE_HN = "ota_update_helioNode";
-    public static final String OTA_UPDATE_CONNECT = "ota_update_connect";
+    public static final String OTA_UPDATE_CONNECT = "ota_update_connectModule";
     public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;

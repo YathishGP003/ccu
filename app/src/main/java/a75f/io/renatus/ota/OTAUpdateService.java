@@ -420,7 +420,7 @@ public class OTAUpdateService extends IntentService {
         }else if(firmwareVersion.startsWith("CM_")){
             mFirmwareDeviceType = FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
-        }else if(firmwareVersion.startsWith("ConnectModule_")){
+        }else if(firmwareVersion.startsWith("ConnectModule_") || firmwareVersion.startsWith("connect_module_")){
             mFirmwareDeviceType = FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
         }else{
@@ -606,7 +606,7 @@ public class OTAUpdateService extends IntentService {
         if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) {
             if (!device.getMarkers().contains(Tags.HYPERSTAT)) return true;
         } else if (mFirmwareDeviceTypeFromMeta == FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE) {
-            if (!device.getMarkers().contains(Tags.HYPERSTATSPLIT)) return true;
+            if (!(device.getMarkers().contains(Tags.HYPERSTATSPLIT) || device.getMarkers().contains(Tags.HYPERSTAT))) return true;
         }
 
         return false;
@@ -857,7 +857,9 @@ public class OTAUpdateService extends IntentService {
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
         message.lwMeshAddress.set(mCurrentLwMeshAddress);
 
-        message.metadata.deviceType.set(firmware);
+        FirmwareComponentType_t deviceTypeToSend = (firmware.equals(FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) && mFirmwareDeviceTypeFromMeta.equals(FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE)) ? mFirmwareDeviceTypeFromMeta : firmware;
+        message.metadata.deviceType.set(deviceTypeToSend);
+
         message.metadata.majorVersion.set(mVersionMajor);
         message.metadata.minorVersion.set(mVersionMinor);
         message.metadata.lengthInBytes.set(mUpdateLength);

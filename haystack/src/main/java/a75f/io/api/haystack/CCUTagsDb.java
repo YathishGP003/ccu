@@ -1698,12 +1698,8 @@ public class CCUTagsDb extends HServer {
             syncedHisItem.syncStatus = true;
             HisItemCache.getInstance().add(syncedHisItem.rec, syncedHisItem);
         });
-
-        List<HisItem> diagPointItems = syncedHisItems.stream()
-                        .filter(item -> isDiagPoint(item.rec))
-                                .collect(Collectors.toList());
-        CcuLog.i("CCU_HS_SYNC"," UpdateDiagPointHisItems "+diagPointItems.size()+" All "+syncedHisItems.size());
-        hisBox.put(diagPointItems);
+        CcuLog.i("CCU_HS_SYNC","All "+syncedHisItems.size());
+        hisBox.put(syncedHisItems);
     }
 
 

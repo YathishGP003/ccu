@@ -22,7 +22,7 @@ steps:
     tasks: assembleQA
 - task: CopyFiles@2
   inputs:
-    Contents: '**'
+    Contents: '.apk'
     TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\*.apk'
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: qaApk'

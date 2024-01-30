@@ -333,10 +333,10 @@ public class SingleStageEquip {
 
         String analogIn1Id = CCUHsApi.getInstance().addPoint(analogIn);
         CCUHsApi.getInstance().writeDefaultValById(analogIn1Id, (config.analogIn1 ? 1.0 : 0));
-
+        Point AnalogInLogicalPoint = null;
         if (config.analogIn1) {
-            Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddr, config.analogInAssociation.ordinal());
-            CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
+            AnalogInLogicalPoint = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddr, config.analogInAssociation.ordinal());
+            CCUHsApi.getInstance().writeDefaultValById(AnalogInLogicalPoint.getId(), 0.0);
         }
 
         ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
@@ -369,7 +369,9 @@ public class SingleStageEquip {
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
         device.analog1In.setEnabled(config.analogIn1);
-        device.analog1In.setPointRef(analogIn1Id);
+        if(AnalogInLogicalPoint != null) {
+            device.analog1In.setPointRef(AnalogInLogicalPoint.getId());
+        }
         if (config.analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
             device.analog1In.setType(String.valueOf(10));
         } else if (config.analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {

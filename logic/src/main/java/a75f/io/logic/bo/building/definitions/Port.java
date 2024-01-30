@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.definitions;
 
+import a75f.io.domain.api.DomainName;
+
 /**
  * Created by Yinten isOn 8/17/2017.
  */
@@ -15,8 +17,7 @@ public enum Port
 	SENSOR_NO2, SENSOR_PM2P5, SENSOR_PM10, ANALOG_OUT_THREE, ANALOG_OUT_FOUR, RSSI;
 	
 	public String getPortSensor() {
-		switch (this)
-		{
+		switch (this) {
 			case SENSOR_RH:
 				return "humidity";
 			case SENSOR_CO2:
@@ -66,6 +67,6 @@ public enum Port
 			default:
 				return name();
 		}
-		
+
 	}
 }

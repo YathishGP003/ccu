@@ -621,32 +621,50 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                     }
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Zone Schedule is outside building occupancy currently set. " +
-                        "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
-                        .setCancelable(false)
-                        .setTitle("Schedule Errors")
-                        .setIcon(R.drawable.ic_dialog_alert)
-                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                showDialog(position, daysArrayList);
-                            }
-                        })
-                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                schedule.getDays().addAll(daysArrayList);
-                                if (schedule.isZoneSchedule()) {
-                                    ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
-                                } else {
-                                    ScheduleUtil.trimZoneSchedules(spillsMap);
+                if(startTimeHour>endTimeHour)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("Zone Schedule is outside building occupancy currently set. " +
+                                    "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
+                            .setCancelable(false)
+                            .setTitle("Schedule Errors")
+                            .setIcon(R.drawable.ic_dialog_alert)
+                            .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    showDialog(position, daysArrayList);
                                 }
-                                zoneScheduleViewModel.doScheduleUpdate(schedule);
-                                updateUI();
-                            }
-                        });
+                            });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+                else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("Zone Schedule is outside building occupancy currently set. " +
+                                    "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
+                            .setCancelable(false)
+                            .setTitle("Schedule Errors")
+                            .setIcon(R.drawable.ic_dialog_alert)
+                            .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    showDialog(position, daysArrayList);
+                                }
+                            })
+                            .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    schedule.getDays().addAll(daysArrayList);
+                                    if (schedule.isZoneSchedule()) {
+                                        ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
+                                    } else {
+                                        ScheduleUtil.trimZoneSchedules(spillsMap);
+                                    }
+                                    zoneScheduleViewModel.doScheduleUpdate(schedule);
+                                    updateUI();
+                                }
+                            });
 
-                AlertDialog alert = builder.create();
-                alert.show();
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
             }
             return true;
         }

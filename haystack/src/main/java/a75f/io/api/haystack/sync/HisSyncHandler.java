@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Observable;
@@ -173,17 +174,18 @@ public class HisSyncHandler
         HDict[] hDicts = hDictListToArray(hDictList);
 
         EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(null, hDicts);
-
-        CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
-        if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
-            try {
-                ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
-            } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
-                CcuLog.e(TAG, "Failed to update HisItem !", e);
+        if (response != null) {
+            CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
+            if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
+                try {
+                    ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
+                } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
+                    CcuLog.e(TAG, "Failed to update HisItem !", e);
+                }
+            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                CcuLog.e(TAG, "His write failed! , Trying to handle the error");
+                EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
             }
-        } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
-            CcuLog.e(TAG, "His write failed! , Trying to handle the error");
-            EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
         }
     }
 
@@ -333,7 +335,18 @@ public class HisSyncHandler
                              "There are no unsynced historized items for point " + pointID +  "-" +pointToSync.get("dis")+
                                             " :resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
                 } else {
-                    CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis"));
+                    HisItem hisItem = new HisItem();
+                    hisItem.setDate(new Date(System.currentTimeMillis()));
+                    hisItem.setRec(pointID);
+                    hisItem.setVal(ccuHsApi.readPointPriorityVal(pointID));
+                    HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0)
+                            : HNum.make(hisItem.getVal());
+                    long pointTimestamp = hisItem.getDateInMillis();
+                    HDict hDict = buildHDict(pointID, pointTimezone, pointValue, pointTimestamp);
+                    hDictList.add(hDict);
+                    HisItemCache.getInstance().add(pointID, hisItem);
+                    CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis")+" and value" +
+                            " is retrieved from writable array "+hisItem.getVal());
                 }
             }
             totalHisItemCount = totalHisItemCount + hisItemsToSyncForDeviceOrEquip.size();

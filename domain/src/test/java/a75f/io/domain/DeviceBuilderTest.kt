@@ -67,10 +67,10 @@ class DeviceBuilderTest {
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
 
-        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef", "TestEquip")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
-        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef", "TestSite-SN-1000")
         TestUtil.dumpDomain()
         val device = mockHayStack.readAllEntities("device")
         assert(device.size == 1)
@@ -121,10 +121,10 @@ class DeviceBuilderTest {
         profileConfig.floorRef = floorRef
         profileConfig.roomRef = zoneRef
 
-        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef")
+        val equipId = equipBuilder.buildEquipAndPoints(profileConfig, profileModel, "@TestSiteRef", "TestEquip")
 
         val deviceBuilder = DeviceBuilder(mockHayStack, entityMapper)
-        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef")
+        deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId, "@TestSiteRef", "TestSite-SN-1000")
 
         TestUtil.dumpDomain()
 
@@ -132,8 +132,8 @@ class DeviceBuilderTest {
         println(relay1)
 
         val updatedConfig = HyperStat2PfcuDeviceUpdateConfiguration(1000,"HS",0, "","")
-        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel, "@TestSiteRef")
-        deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId, "@TestSiteRef")
+        equipBuilder.updateEquipAndPoints(updatedConfig, profileModel, "@TestSiteRef", "TestEquip")
+        deviceBuilder.updateDeviceAndPoints(updatedConfig, dmModel, equipId, "@TestSiteRef", "TestSite-SN-1000")
 
         val relay1Op = mockHayStack.readEntity("point and domainName == \"relay1Output\"")
         println(relay1Op)

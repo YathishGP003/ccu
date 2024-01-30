@@ -94,6 +94,7 @@ public class DabStagedRtu extends DabSystemProfile
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());
@@ -660,6 +661,7 @@ public class DabStagedRtu extends DabSystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     public void addCmdPoints(String equipref) {

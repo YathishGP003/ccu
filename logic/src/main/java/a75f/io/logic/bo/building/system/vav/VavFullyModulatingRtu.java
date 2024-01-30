@@ -411,6 +411,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());
@@ -451,6 +452,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addCmdPoints(String equipref) {

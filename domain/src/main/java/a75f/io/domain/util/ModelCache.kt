@@ -18,9 +18,10 @@ object ModelCache {
     fun init(hayStack : CCUHsApi, context: Context) {
         this.context = context
         if (!hayStack.isCCURegistered) {
+            CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
             val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
-            CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
             modelContainer["657739fbd1743f797c4c2ca4"] = buildingEquipModel
+            CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
         }
     }
 

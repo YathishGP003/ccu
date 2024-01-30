@@ -614,7 +614,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
             @Override
             public boolean isEnabled(int position) {
-                if (position < DamperType.MAT.ordinal()) {
+                if (position != DamperType.MAT.ordinal()) {
                     return reheatSpinner.getSelectedItemPosition() == 0 ||
                             reheatSpinner.getSelectedItemPosition() > ReheatType.OneStage.ordinal() ;
                 }
@@ -629,7 +629,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
                 TextView view = (TextView)super.getDropDownView(position, convertView, parent);
-                if (position < DamperType.MAT.ordinal()
+                if (position != DamperType.MAT.ordinal()
                         && reheatSpinner.getSelectedItemPosition() > 0
                         && reheatSpinner.getSelectedItemPosition() <= ReheatType.OneStage.ordinal()) {
                     view.setTextColor(Color.LTGRAY);

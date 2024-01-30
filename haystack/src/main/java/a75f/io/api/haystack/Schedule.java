@@ -35,6 +35,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 
@@ -67,23 +68,23 @@ public class Schedule extends Entity
 
     public static String getZoneIdByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
         return equip.getRoomRef();
     }
 
     public static Schedule getScheduleByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
     }
 
     public static Schedule getVacationByEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);
+        Equip   equip        = new Equip.Builder().setHDict(equipDict).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), true);
 
@@ -169,8 +170,8 @@ public class Schedule extends Entity
                                 .add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MIN).toString())))
                                 .add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MAX).toString())))
                                 .add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MIN).toString())))
-                                .add(Tags.COOLING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.COOLING_DEADBAND).toString())))
-                                .add(Tags.HEATING_DEADBAND, HNum.make(Double.parseDouble(range.get(Tags.HEATING_DEADBAND).toString())));
+                                .add(Tags.COOLING_DEADBAND, HNum.make(Double.parseDouble(range.get("coolingDeadband") != null ? range.get("coolingDeadband").toString() : "2.0")))
+                                .add(Tags.HEATING_DEADBAND, HNum.make(Double.parseDouble(range.get("heatingDeadband") != null ? range.get("heatingDeadband").toString() : "2.0")));
                         daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
                     }else{
                         HDictBuilder hDictDay = new HDictBuilder()
@@ -586,7 +587,7 @@ public class Schedule extends Entity
     }
     public static Zone getZoneforEquipId(String equipId)
     {
-        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equipHashMap  = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
         HashMap<Object, Object> zoneHashMap  = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
@@ -1032,6 +1033,40 @@ public class Schedule extends Entity
                 }
                 
                 
+            }
+        }
+        if(!daysSorted.isEmpty() && !daysIntervals.isEmpty() && daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh())
+        {
+            //overnight scenario
+            Interval iv = daysIntervals.get(daysIntervals.size()-1);
+            DateTime startInterval = iv.getStart();
+            int dayOfWeek = startInterval.getDayOfWeek()-1;
+            DateTime nextDay = startInterval.plusDays(1);
+            int nextDayofWeek = nextDay.getDayOfWeek() - 1;
+            int monthNext = nextDay.getMonthOfYear();
+            int yearNext = nextDay.getYear();
+            int dayNext = nextDay.getDayOfYear();
+            BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
+            List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
+            BuildingOccupancy.Days individualDay = null;
+            for (int i = 0; i < tempDayList.size(); i++) {
+                if (nextDayofWeek == tempDayList.get(i).getDay()) {
+                    individualDay = tempDayList.get(i);
+                }
+            }
+            if (individualDay != null) {
+                int startHr = individualDay.getSthh();
+                int startMin = individualDay.getStmm();
+                int endHr = individualDay.getEthh();
+                int endMin = individualDay.getEtmm();
+                if (endHr == 24) {
+                    endHr = 23;
+                    endMin = 59;
+                }
+                DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
+                DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
+                Interval nextDayInterval = new Interval(startNext, endNext);
+                daysIntervals.add(nextDayInterval);
             }
         }
         for(Interval i : daysIntervals) {
@@ -1510,7 +1545,7 @@ public class Schedule extends Entity
                 else if (pair.getKey().equals("vacation"))
                 {
                     this.mIsVacation = true;
-                } else if (pair.getKey().equals("kind"))
+                } else if (pair.getKey().equals("kind") && pair.getValue() != null)
                 {
                     this.mKind = pair.getValue().toString();
                 } else if (pair.getKey().equals("unit"))
@@ -1558,7 +1593,7 @@ public class Schedule extends Entity
                 } else if (pair.getKey().equals("etdt"))
                 {
                     this.mEndDate = new DateTime(((HDateTime) schedule.get("etdt")).millisDefaultTZ());
-                } else if (pair.getValue().toString().equals("marker"))
+                } else if (pair.getValue() != null && pair.getValue().toString().equals("marker"))
                 {
                     this.mMarkers.add(pair.getKey().toString());
                 }
@@ -1795,12 +1830,12 @@ public class Schedule extends Entity
             days.mVal = hDict.has("curVal") ? hDict.getDouble("curVal") : null;
             days.mCoolingVal = hDict.has("coolVal") ? hDict.getDouble("coolVal") : null;
             days.mHeatingVal = hDict.has("heatVal") ? hDict.getDouble("heatVal") : null;
-            days.heatingUserLimitMin = hDict.has(Tags.HEATING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MIN) : null;
-            days.heatingUserLimitMax = hDict.has(Tags.HEATING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MAX) : null;
-            days.coolingUserLimitMin = hDict.has(Tags.COOLING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MIN) : null;
-            days.coolingUserLimitMax = hDict.has(Tags.COOLING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MAX) : null;
-            days.coolingDeadBand = hDict.has(Tags.COOLING_DEADBAND) ? hDict.getDouble(Tags.COOLING_DEADBAND) : null;
-            days.heatingDeadBand = hDict.has(Tags.HEATING_DEADBAND) ? hDict.getDouble(Tags.HEATING_DEADBAND) : null;
+            days.heatingUserLimitMin = hDict.has(Tags.HEATING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MIN) : 67;
+            days.heatingUserLimitMax = hDict.has(Tags.HEATING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.HEATING_USER_LIMIT_MAX) : 72;
+            days.coolingUserLimitMin = hDict.has(Tags.COOLING_USER_LIMIT_MIN) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MIN) : 72;
+            days.coolingUserLimitMax = hDict.has(Tags.COOLING_USER_LIMIT_MAX) ? hDict.getDouble(Tags.COOLING_USER_LIMIT_MAX) : 77;
+            days.coolingDeadBand = hDict.has(Tags.COOLING_DEADBAND) ? hDict.getDouble(Tags.COOLING_DEADBAND) : 2;
+            days.heatingDeadBand = hDict.has(Tags.HEATING_DEADBAND) ? hDict.getDouble(Tags.HEATING_DEADBAND) : 2;
 
             return days;
         }

@@ -5,10 +5,10 @@ import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.BuildConfig
-import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.api.Domain
 import a75f.io.domain.util.TagsUtil
-import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.ModelPointDef
+import a75f.io.logger.CcuLog
+import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
@@ -17,6 +17,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
+import java.util.Locale
 
 /**
  * A common implementation of EquipBuilder interface with a generic equip/point build support.
@@ -25,40 +26,52 @@ open class DefaultEquipBuilder : EquipBuilder {
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
 
-        val equipBuilder = Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${getDisplayNameFromVariation(equipConfig.modelDef.name)}")
-            .setDomainName(equipConfig.modelDef.domainName)
-            .setFloorRef(equipConfig.profileConfiguration?.floorRef)
-            .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
-            .setSiteRef(equipConfig.siteRef)
+        val equipBuilder =
+            Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
+                .setDomainName(equipConfig.modelDef.domainName)
+                .setFloorRef(equipConfig.profileConfiguration?.floorRef)
+                .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+                .setSiteRef(equipConfig.siteRef)
+                .setProfile(equipConfig.profileConfiguration?.profileType)
+                .setDomainName(equipConfig.modelDef.domainName)
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
-
-        equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
-        equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }
+            .forEach { tag -> equipBuilder.addMarker(tag.name) }
+        equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach { tag ->
             tag.defaultValue?.let {
-                equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                //TODO- Temp Sam : This should be removed in future when profile models consistent with profile tag.
+                // We will stick with old profileType enum till then
+                if (tag.name != "profile") {
+                    equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                }
             }
         }
-        equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach { tag ->
             TagsUtil.getTagDefHVal(tag)?.let { equipBuilder.addTag(tag.name, it) }
         }
-        equipConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
+        equipConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach { tag ->
             tag.defaultValue?.let {
                 equipBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
 
         equipBuilder.addTag("modelId", HStr.make(equipConfig.modelDef.id))
-        equipBuilder.addTag("modelVersion", HStr.make("${equipConfig.modelDef.version?.major}" +
-                ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"))
+        equipBuilder.addTag(
+            "modelVersion", HStr.make(
+                "${equipConfig.modelDef.version?.major}" +
+                        ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"
+            )
+        )
         equipBuilder.setTz(equipConfig.tz)
         return equipBuilder.build()
     }
 
-    override fun buildPoint(pointConfig : PointBuilderConfig) : Point {
-
+    @SuppressLint("SuspiciousIndentation")
+    override fun buildPoint(pointConfig: PointBuilderConfig): Point {
+        CcuLog.i(Domain.LOG_TAG, "buildPoint ${pointConfig.modelDef.domainName}")
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)
@@ -69,18 +82,27 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setGroup(pointConfig.configuration?.nodeAddress.toString())
             .setSiteRef(pointConfig.siteRef)
 
+        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(
+                    pointConfig.modelDef.hisInterpolate.name.lowercase(Locale.ROOT)
+                )
+            }
+        }
+
         if (pointConfig.configuration?.roomRef != null) {
             pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
         }
 
-        if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.NUMERIC) {
+        if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.NUMERIC) {
             val constraint = pointConfig.modelDef.valueConstraint as NumericConstraint
             pointBuilder.setMaxVal(constraint.maxValue.toString())
             pointBuilder.setMinVal(constraint.minValue.toString())
 
-            val incrementValTag = pointConfig.modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
+            val incrementValTag =
+                pointConfig.modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
             incrementValTag?.let { pointBuilder.setIncrementVal(it.value.toString()) }
-        }  else if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+        } else if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
@@ -99,12 +121,13 @@ open class DefaultEquipBuilder : EquipBuilder {
         }
 
         //TODO - Support added for currently used tag types. Might need updates in future.
-        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz"}.forEach{ pointBuilder.addMarker(it.name)}
-        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz" }
+            .forEach { pointBuilder.addMarker(it.name) }
+        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach { tag ->
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }
@@ -114,9 +137,24 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
             }
         }
+        pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
         pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
-        pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz))}
 
+        var enums = ""
+        if (pointConfig.modelDef.valueConstraint.constraintType.name.contentEquals("MULTI_STATE")) {
+            (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value ->
+                enums = if (enums.isNotEmpty()) {
+                    "$enums$index=${value.value},"
+                } else {
+                    "$index=${value.value},"
+                }
+            }
+        }
+        if (enums.isNotEmpty()) {
+            if (enums.endsWith(","))
+                enums = enums.substring(0, enums.length - 1)
+            pointBuilder.setEnums(enums)
+        }
         return pointBuilder.build()
     }
 

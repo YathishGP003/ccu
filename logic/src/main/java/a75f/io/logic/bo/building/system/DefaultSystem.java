@@ -66,6 +66,7 @@ public class DefaultSystem extends SystemProfile
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DEFAULT.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 return;
             }
@@ -117,6 +118,7 @@ public class DefaultSystem extends SystemProfile
         if (equip.get("profile").equals(ProfileType.SYSTEM_DEFAULT.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     @Override

@@ -2,6 +2,9 @@ package a75f.io.api.haystack;
 
 import static android.widget.Toast.LENGTH_LONG;
 
+import static a75f.io.api.haystack.Tags.DEVICE;
+import static a75f.io.api.haystack.Tags.SYSTEM;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.Context;
@@ -390,6 +393,18 @@ public class CCUHsApi
         if(!isBuildingTunerEquip){
             q.setCcuRef(getCcuId());
         }
+        if(!isBuildingTunerEquip(q)) {
+            if (q.getMarkers() != null && q.getMarkers().contains(SYSTEM)) {
+                q.setBacnetId(0);
+                q.setBacnetType(DEVICE);
+            } else if (q.getRoomRef() != null) {
+                q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
+                q.setBacnetType(DEVICE);
+            }
+        }
+
+
+
         q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
@@ -1309,6 +1324,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
+        HisItemCache.getInstance().delete(id);
     }
 
     /**
@@ -1321,6 +1337,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
+        HisItemCache.getInstance().delete(id);
     }
 
     public void deleteEntityLocally(String id) {
@@ -1958,6 +1975,14 @@ public class CCUHsApi
         return null;
     }
 
+    public @Nullable HashMap getCcu() {
+        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        if (ccu.size() > 0) {
+            return ccu;
+        } else {
+            return null;
+        }
+    }
     public @Nullable String getCcuName() {
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         if (ccu.size() > 0) {
@@ -2422,7 +2447,7 @@ public class CCUHsApi
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
                 return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
             } else {
-                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
             }
         }
         return 0;

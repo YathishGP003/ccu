@@ -48,7 +48,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
                 createPoint(PointBuilderConfig(modelPointDef, null, equipRef, siteRef, tz, equipDis))
-                CcuLog.i(Domain.LOG_TAG," Created Tuner point ${point.domainName}")
             }
         }
     }

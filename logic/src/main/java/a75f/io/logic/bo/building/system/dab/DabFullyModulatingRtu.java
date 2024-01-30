@@ -168,6 +168,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
+                removeSystemEquipModbus();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());
@@ -203,9 +204,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public synchronized void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
+        if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
+        removeSystemEquipModbus();
     }
     
     private void addCmdPoints(String equipref) {

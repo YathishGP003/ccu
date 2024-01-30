@@ -1,5 +1,8 @@
 package a75f.io.renatus.schedules;
 
+import android.util.Log;
+
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HList;
@@ -37,6 +40,26 @@ public class ZoneScheduleViewModel {
             }
 
             ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals(daysArrayList);
+
+            int size = zoneIntervals.size();
+            if(!daysArrayList.isEmpty() && daysArrayList.get(0).getSthh() > daysArrayList.get(0).getEthh()) {
+               for(int i =0; i<size; i++){
+                    Interval it = zoneIntervals.get(i);
+                    DateTime initialEnding = it.getStart().withTime(23,59,59, 0);
+                    DateTime subsequentStart = it.getEnd().withTime(0,0,0,0);
+                    Interval iStart = new Interval(it.getStart(),initialEnding);
+                    Interval iEnd = new Interval(subsequentStart,it.getEnd());
+                    zoneIntervals.set(i, iStart);
+                    zoneIntervals.add(iEnd);
+                }
+
+                Collections.sort(zoneIntervals, new Comparator<Interval>() {
+                            public int compare(Interval p1, Interval p2) {
+                                return Long.compare(p1.getStartMillis(), p2.getStartMillis());
+                            }
+                        }
+                );
+            }
 
             for (Interval v : zoneIntervals) {
                 CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);

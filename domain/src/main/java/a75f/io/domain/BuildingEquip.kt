@@ -3,10 +3,8 @@ package a75f.io.domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 
-class BuildingEquip (val equipRef : String) {
-    fun getId() : String {
-        return equipRef
-    }
+class BuildingEquip (equipRef : String) : DomainEquip(equipRef) {
+
     val CARRIER_PROD = "carrier_prod"
     val zoneTemperatureDeadLeeway = Point(DomainName.zoneTemperatureDeadLeeway, equipRef)
     val heartBeatsToSkip = Point(DomainName.heartBeatsToSkip, equipRef)

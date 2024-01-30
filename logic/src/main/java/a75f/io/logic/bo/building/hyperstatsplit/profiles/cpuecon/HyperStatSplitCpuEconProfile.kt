@@ -365,7 +365,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     private fun doEconomizing(equip: HyperStatSplitCpuEconEquip) {
 
-        val externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp")
+        val externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout")
         val externalHumidity =
             CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity")
 

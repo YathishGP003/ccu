@@ -312,7 +312,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 alert.show();
                             }
                         } else {
-                            String warningMessageNull = "Internet Connection Issue:: Error while fetching the Warning message. Please try again.";
+                            String warningMessageNull = "Building Occupancy cannot be edited when CCU is offline. Please connect to network.";
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                             builder.setMessage(warningMessageNull)
                                     .setCancelable(false)

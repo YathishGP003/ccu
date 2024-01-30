@@ -231,7 +231,7 @@ public class BuildingOccupancyViewModel {
             for (Zone zone:zoneList) {
                 for (Schedule schedule: scheduleList) {
                     if((schedule.getId().replace("@","")).equals(zone.getScheduleRef().replace("@",""))){
-                        activeScheduleList.putIfAbsent(schedule.getId(), schedule);
+                        activeScheduleList.put(schedule.getId(), schedule);
                     }
                 }
             }

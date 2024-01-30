@@ -360,7 +360,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitRelativeChange(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingDeadBand(roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C")))));
                 } else {
                     rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
                 }
@@ -374,7 +374,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitRelativeChange(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingDeadBand(roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C")))));
                 } else {
                     rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
                 }

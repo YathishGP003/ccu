@@ -91,6 +91,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var tvZoneCO2DamperOpeningRate: TextView
     lateinit var tvZoneCO2Threshold: TextView
     lateinit var tvZoneCO2Target: TextView
+    lateinit var llCo2Target: LinearLayout
+    lateinit var llCo2Threshold: LinearLayout
 
     lateinit var outsideDamperMinOpen: Spinner
     lateinit var tvOutsideDamperMinOpen: TextView
@@ -330,6 +332,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
+            llCo2Target = findViewById(R.id.lLC02Target)
+            llCo2Threshold = findViewById(R.id.lLC02Threshold)
 
             cancelButton = findViewById(R.id.cancelButton)
             setButton = findViewById(R.id.setButton)
@@ -986,35 +990,40 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             )
         }
 
+        val llZoneCo2TargetParams = llCo2Target.layoutParams as LinearLayout.LayoutParams
         val co2ThresholdParams = zoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
         val co2TargetParams = zoneCO2Target.layoutParams as LinearLayout.LayoutParams
         val tvCo2ThresholdParams = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
         val tvCo2TargetParams = tvZoneCO2Target.layoutParams as LinearLayout.LayoutParams
         if (isDampSelected) {
 
+            llZoneCo2TargetParams.marginStart = 0
+            llCo2Target.layoutParams = llZoneCo2TargetParams
+
             tvCo2ThresholdParams.weight = 1f
             tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
 
-            co2ThresholdParams.marginEnd = 0
-            co2ThresholdParams.weight = 1f
+            co2ThresholdParams.weight = 0.5f
             zoneCO2Threshold.layoutParams = co2ThresholdParams
 
             tvCo2TargetParams.weight = 1f
             tvZoneCO2Target.layoutParams = tvCo2TargetParams
 
-            co2TargetParams.weight = 1f
+            co2TargetParams.weight = 0.5f
             zoneCO2Target.layoutParams = co2TargetParams
 
         } else {
 
-            tvCo2ThresholdParams.weight = 2f
+            llZoneCo2TargetParams.marginStart = 250
+            llCo2Target.layoutParams = llZoneCo2TargetParams
+
+            tvCo2ThresholdParams.weight = 1f
             tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
 
-            co2ThresholdParams.marginEnd = 96
             co2ThresholdParams.weight = 1f
             zoneCO2Threshold.layoutParams = co2ThresholdParams
 
-            tvCo2TargetParams.weight = 2f
+            tvCo2TargetParams.weight = 1f
             tvZoneCO2Target.layoutParams = tvCo2TargetParams
 
             co2TargetParams.weight = 1f
@@ -1037,10 +1046,10 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         var vocLayoutParams = vocConfig.layoutParams as ViewGroup.MarginLayoutParams
 
         if (isDampSelected) {
-            vocLayoutParams.setMargins(0,24,0,10)
+            vocLayoutParams.topMargin = 15
             vocConfig.layoutParams = vocLayoutParams
         } else {
-            vocLayoutParams.setMargins(0,0,0,10)
+            vocLayoutParams.topMargin = 0
             vocConfig.layoutParams = vocLayoutParams
         }
 

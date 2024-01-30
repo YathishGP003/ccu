@@ -4,6 +4,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
+import android.os.Build;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
@@ -999,7 +1000,44 @@ public class Schedule extends Entity
     public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
         ArrayList<Interval> daysIntervals = new ArrayList<Interval>();
         ArrayList<Interval> allIntervals = getScheduledIntervals(getDaysSorted());
-        for (Interval i : allIntervals)
+        if(!daysSorted.isEmpty() && daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh()) {
+            if(daysSorted.get(daysSorted.size()-1).getDay()==6) {
+
+                //overnight scenario
+                Interval iv = allIntervals.get(allIntervals.size() - 1);
+                DateTime startInterval = iv.getStart();
+                DateTime nextDay = startInterval.plusDays(1);
+                int nextDayofWeek = nextDay.getDayOfWeek() - 1;
+                int monthNext = nextDay.getMonthOfYear();
+                int yearNext = nextDay.getYear();
+                int dayNext = nextDay.getDayOfMonth();
+                BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
+                List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
+                BuildingOccupancy.Days individualDay = null;
+                for (int i = 0; i < tempDayList.size(); i++) {
+                    if (nextDayofWeek == tempDayList.get(i).getDay()) {
+                        individualDay = tempDayList.get(i);
+                    }
+                }
+                if (individualDay != null) {
+                    int startHr = individualDay.getSthh();
+                    int startMin = individualDay.getStmm();
+                    int endHr = individualDay.getEthh();
+                    int endMin = individualDay.getEtmm();
+                    if (endHr == 24) {
+                        endHr = 23;
+                        endMin = 59;
+                    }
+                    DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
+                    DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
+                    Interval nextDayInterval = new Interval(startNext, endNext);
+                    allIntervals.add(nextDayInterval);
+                }
+            }
+            return allIntervals;
+        }
+
+            for (Interval i : allIntervals)
         {
             for (Days d : daysSorted)
             {
@@ -1033,40 +1071,6 @@ public class Schedule extends Entity
                 }
                 
                 
-            }
-        }
-        if(!daysSorted.isEmpty() && !daysIntervals.isEmpty() && daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh())
-        {
-            //overnight scenario
-            Interval iv = daysIntervals.get(daysIntervals.size()-1);
-            DateTime startInterval = iv.getStart();
-            int dayOfWeek = startInterval.getDayOfWeek()-1;
-            DateTime nextDay = startInterval.plusDays(1);
-            int nextDayofWeek = nextDay.getDayOfWeek() - 1;
-            int monthNext = nextDay.getMonthOfYear();
-            int yearNext = nextDay.getYear();
-            int dayNext = nextDay.getDayOfMonth();
-            BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
-            List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
-            BuildingOccupancy.Days individualDay = null;
-            for (int i = 0; i < tempDayList.size(); i++) {
-                if (nextDayofWeek == tempDayList.get(i).getDay()) {
-                    individualDay = tempDayList.get(i);
-                }
-            }
-            if (individualDay != null) {
-                int startHr = individualDay.getSthh();
-                int startMin = individualDay.getStmm();
-                int endHr = individualDay.getEthh();
-                int endMin = individualDay.getEtmm();
-                if (endHr == 24) {
-                    endHr = 23;
-                    endMin = 59;
-                }
-                DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
-                DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
-                Interval nextDayInterval = new Interval(startNext, endNext);
-                daysIntervals.add(nextDayInterval);
             }
         }
         for(Interval i : daysIntervals) {

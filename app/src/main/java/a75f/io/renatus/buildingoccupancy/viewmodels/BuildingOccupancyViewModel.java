@@ -164,7 +164,7 @@ public class BuildingOccupancyViewModel {
         LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ArrayList<Schedule> scheduleList = new ArrayList<>();
-        ArrayList<Schedule> activeScheduleList = new ArrayList<>();
+        Map<String, Schedule> activeScheduleList = new LinkedHashMap<>();
         ArrayList<Zone> zoneList = new ArrayList<>();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -231,10 +231,7 @@ public class BuildingOccupancyViewModel {
             for (Zone zone:zoneList) {
                 for (Schedule schedule: scheduleList) {
                     if((schedule.getId().replace("@","")).equals(zone.getScheduleRef().replace("@",""))){
-                        if(activeScheduleList.size() == 0)
-                            activeScheduleList.add(schedule);
-                        else if(!activeScheduleList.contains((schedule)))
-                            activeScheduleList.add(schedule);
+                        activeScheduleList.putIfAbsent(schedule.getId(), schedule);
                     }
                 }
             }
@@ -242,7 +239,7 @@ public class BuildingOccupancyViewModel {
 
 
 
-               for (Schedule schedule : activeScheduleList) {
+               for (Schedule schedule : activeScheduleList.values()) {
                     ArrayList<Interval> intervalSpills = new ArrayList<>();
                     ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
 

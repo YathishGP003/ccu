@@ -313,8 +313,15 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                             }
                         } else {
                             String warningMessageNull = "Internet Connection Issue:: Error while fetching the Warning message. Please try again.";
-                            Toast.makeText(getContext(), warningMessageNull, Toast.LENGTH_LONG);
-                            buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setMessage(warningMessageNull)
+                                    .setCancelable(false)
+                                    .setIcon(R.drawable.ic_dialog_alert)
+                                    .setPositiveButton("OK", (dialog, id) -> {
+                                        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+                                    });
+                            alert = builder.create();
+                            alert.show();
                         }
                     });
         }else{

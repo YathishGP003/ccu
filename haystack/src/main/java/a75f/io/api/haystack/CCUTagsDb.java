@@ -1684,11 +1684,11 @@ public class CCUTagsDb extends HServer {
             if (isDiagPoint(rec.id().toString())) {
                 HisItem curCacheItem = HisItemCache.getInstance().get(rec.id().toString());
                 if (curCacheItem != null && curCacheItem.syncStatus == false) {
-                    CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString());
+                    CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString()+"; hisItem:- "+curCacheItem);
                     hisBox.put(curCacheItem);
                 }
             }
-            CcuLog.d(TAG_CCU_HS,"Write historized value to local Cache for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
+            CcuLog.d(TAG_CCU_HS,"Write historized value to local Cache for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString()+"; hisItem:- "+hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
     }
@@ -1754,11 +1754,11 @@ public class CCUTagsDb extends HServer {
         if (isDiagPoint(id)) {
             HisItem curCacheItem = HisItemCache.getInstance().get(id);
             if (curCacheItem != null && curCacheItem.syncStatus == false) {
-                CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val);
+                CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val+"; hisItem: "+curCacheItem);
                 hisBox.put(curCacheItem);
             }
         }
-        CcuLog.d(TAG_CCU_HS, "Write historized value to local Cache for point ID " + id + "; value "  + val);
+        CcuLog.d(TAG_CCU_HS, "Write historized value to local Cache for point ID " + id + "; value "  + val+"; hisItem: "+hisItem);
         HisItemCache.getInstance().add(id, hisItem);
     }
 

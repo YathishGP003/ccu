@@ -10,6 +10,7 @@ import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
     private static int registerIndex = 0;
+    private static Map<Integer, Long> lastHisItemMap = new HashMap<>();
 
     public static void handleModbusPulseData(byte[] data, int slaveid){
         if(UsbModbusUtils.validSlaveId(slaveid) ) {
@@ -109,8 +111,14 @@ public class ModbusPulse {
         for(HashMap<Object, Object> equip : equipList) {
             HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and (heartBeat or heartbeat) and equipRef == " +
                     "\""+equip.get("id")+ "\"");
-            if(heartBeatPoint.size() > 0){
+            long current_millis = System.currentTimeMillis();
+            if(!lastHisItemMap.containsKey(slaveId))
+            {
                 hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+                lastHisItemMap.put(slaveId, current_millis);
+            }else if((current_millis - lastHisItemMap.get(slaveId)) > 40000){
+                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+                lastHisItemMap.put(slaveId, current_millis);
             }
         }
     }

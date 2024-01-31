@@ -42,3 +42,42 @@ steps:
   inputs:
     PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\staging\*.apk'
     ArtifactName: StagingApk
+- task: Gradle@2
+  displayName: 'gradlew assembleProd'
+  inputs:
+    tasks: assembleProd
+- task: CopyFiles@2
+  inputs:
+    Contents: '.apk'
+    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\prod\*.apk'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: ProdApk'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\prod\*.apk'
+    ArtifactName: ProdApk
+- task: Gradle@2
+  displayName: 'gradlew assembleDaikin_prod'
+  inputs:
+    tasks: assembleDaikin_prod
+- task: CopyFiles@2
+  inputs:
+    Contents: '.apk'
+    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\daikin_prod\*.apk'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Daikin_prodApk'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\daikin_prod\*.apk'
+    ArtifactName: Daikin_prodApk
+- task: Gradle@2
+  displayName: 'gradlew assembleCarrier_prod'
+  inputs:
+    tasks: assembleCarrier_prod
+- task: CopyFiles@2
+  inputs:
+    Contents: '.apk'
+    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\carrier_prod\*.apk'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Carrier_prodApk'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\carrier_prod\*.apk'
+    ArtifactName: Carrier_prodApk

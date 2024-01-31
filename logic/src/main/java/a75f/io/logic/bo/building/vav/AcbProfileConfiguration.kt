@@ -93,6 +93,8 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         damperSize.currentVal = vavEquip.damperSize.readDefaultVal()
         damperShape.currentVal = vavEquip.damperShape.readDefaultVal()
         valveType.currentVal = vavEquip.valveType.readDefaultVal()
+        // Zone Priority needs to use readPriorityVal() because portals can write to it at Level 10
+        // Other config points are only written to at Level 8 (via CCU or remote access), so readDefaultVal() is appropriate
         zonePriority.currentVal = vavEquip.zonePriority.readPriorityVal()
         condensateSensorType.enabled = vavEquip.thermistor2Type.readDefaultVal() > 0
 

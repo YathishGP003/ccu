@@ -5,23 +5,22 @@
 
 trigger:
 - master
+
 jobs:
 - job: Job_1
   displayName: Build APK NON-PROD
-pool:
-  vmImage: ubuntu-latest
+  pool:
+    vmImage: ubuntu-latest
   steps:
   - task: JavaToolInstaller@0
     inputs:
       versionSpec: '11'
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
-
   - task: Gradle@2
     displayName: 'gradlew assembleQA'
     inputs:
       tasks: assembleQA
-
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: qaApk'
     inputs:
@@ -36,9 +35,9 @@ pool:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/staging/'
       ArtifactName: StagingApk
-
 - job: Job_2
   displayName: Build APK PROD
+  steps:
   - task: Gradle@2
     displayName: 'gradlew assembleProd'
     inputs:

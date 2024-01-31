@@ -61,7 +61,7 @@ object DomainManager {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
                 when{
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
-                    it.contains("dab") -> TODO()
+                        //  it.contains("dab") -> TODO()
                 }
             }
         Domain.equips.forEach {
@@ -72,7 +72,7 @@ object DomainManager {
     fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
-            equip.markers.contains("dab") -> TODO()
+            // equip.markers.contains("dab") -> TODO()
         }
     }
 

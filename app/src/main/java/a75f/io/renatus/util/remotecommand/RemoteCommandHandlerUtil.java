@@ -18,6 +18,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -38,11 +40,13 @@ import java.util.concurrent.TimeoutException;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
@@ -93,6 +97,7 @@ public class RemoteCommandHandlerUtil {
                 new Thread() {
                     @Override
                     public void run() {
+                        saveImportantDataBeforeSaveLogs();
                         UploadLogs.instanceOf().saveCcuLogs();
                     }
                 }.start();
@@ -179,6 +184,46 @@ public class RemoteCommandHandlerUtil {
                 setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessAppName, remoteAccessAppName));
                 break;
         }
+    }
+
+    private static void saveImportantDataBeforeSaveLogs() {
+        try{
+            SharedPreferences sharedPreferences = PreferenceManager
+                    .getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+            sharedPreferences.edit()
+                    .putLong("SAVE_LOG_TIMESTAMP", System.currentTimeMillis())
+                    .putLong("HIS_BOX_SIZE", CCUHsApi.getInstance().tagsDb.getBoxStore().boxFor(HisItem.class).count())
+                    .putLong("ALERT_BOX_SIZE", CCUHsApi.getInstance().tagsDb.getBoxStore().boxFor(Alert.class).count()).apply();
+            PackageManager packageManager = Globals.getInstance().getApplicationContext().getPackageManager();
+            ApplicationInfo appInfo = packageManager
+                    .getApplicationInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
+            String dataDir = appInfo.dataDir;
+            File dataDirectory = new File(dataDir);
+            long dataSize =getDirectorySize(dataDirectory);
+            sharedPreferences.edit().putLong("APP_DATA_SIZE", (dataSize/1024)/1024).apply();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private static long getDirectorySize(File directory) {
+        long size = 0;
+
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        size += getDirectorySize(file);
+                    } else {
+                        size += file.length();
+                    }
+                }
+            }
+        }
+
+        return size;
     }
 
     private static void setDownloadIdBacApp(long downLoadId){

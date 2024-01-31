@@ -1516,6 +1516,19 @@ public class CCUTagsDb extends HServer {
         }else{
             WritableArrayDBUtilKt.update(writableArray, this.appContext);
         }
+        //        This is needed to pass null to bacnet for clearing value in yabe bacnet
+        String idTemp = rec.id().toVal();
+        boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(idTemp.replace("@","")).containsKey("bacnetId");
+        if(isBacNetEnabled() && (isBacnetPoint)){
+            if(isNewPoint){
+                for(int j=1;j<=16;j++){
+                    if(j==level){
+                        shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+                    }
+                    else   shareUpdatedPointWithBacApp(rec.id().toVal(), j, "null");
+                }
+            }
+        }
 
         if(isBacNetEnabled()){
             shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());

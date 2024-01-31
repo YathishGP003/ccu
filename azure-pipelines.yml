@@ -5,87 +5,64 @@
 
 trigger:
 - master
-
+jobs:
+- job: Job_1
+  displayName: Build APK NON-PROD
 pool:
   vmImage: ubuntu-latest
+  steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
 
-steps:
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '11'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
+  - task: Gradle@2
+    displayName: 'gradlew assembleQA'
+    inputs:
+      tasks: assembleQA
 
-- task: Gradle@2
-  displayName: 'gradlew assembleQA'
-  inputs:
-    tasks: assembleQA
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: qaApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/'
+      ArtifactName: qaApk
+  - task: Gradle@2
+    displayName: 'gradlew assembleStaging'
+    inputs:
+      tasks: assembleStaging
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: StagingApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/staging/'
+      ArtifactName: StagingApk
 
-# - task: CopyFiles@2
-#   inputs:
-#     Contents: '**/*.apk'
-#     TargetFolder: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/*.apk'
-
-- task: Bash@3
-  displayName: 'search-apk'
-  inputs:
-    targetType: 'inline'
-    script: find "$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/" -name '*.apk'
-    
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: qaApk'
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/'
-    ArtifactName: qaApk
-- task: Gradle@2
-  displayName: 'gradlew assembleStaging'
-  inputs:
-    tasks: assembleStaging
-- task: CopyFiles@2
-  inputs:
-    Contents: '**/*.apk'
-    TargetFolder: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/staging/*.apk'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: StagingApk'
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\staging\*.apk'
-    ArtifactName: StagingApk
-- task: Gradle@2
-  displayName: 'gradlew assembleProd'
-  inputs:
-    tasks: assembleProd
-- task: CopyFiles@2
-  inputs:
-    Contents: '.apk'
-    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\prod\*.apk'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: ProdApk'
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\prod\*.apk'
-    ArtifactName: ProdApk
-- task: Gradle@2
-  displayName: 'gradlew assembleDaikin_prod'
-  inputs:
-    tasks: assembleDaikin_prod
-- task: CopyFiles@2
-  inputs:
-    Contents: '.apk'
-    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\daikin_prod\*.apk'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Daikin_prodApk'
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\daikin_prod\*.apk'
-    ArtifactName: Daikin_prodApk
-- task: Gradle@2
-  displayName: 'gradlew assembleCarrier_prod'
-  inputs:
-    tasks: assembleCarrier_prod
-- task: CopyFiles@2
-  inputs:
-    Contents: '.apk'
-    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\carrier_prod\*.apk'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Carrier_prodApk'
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\carrier_prod\*.apk'
-    ArtifactName: Carrier_prodApk
+- job: Job_2
+  displayName: Build APK PROD
+  - task: Gradle@2
+    displayName: 'gradlew assembleProd'
+    inputs:
+      tasks: assembleProd
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: ProdApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/prod/'
+      ArtifactName: ProdApk
+  - task: Gradle@2
+    displayName: 'gradlew assembleDaikin_prod'
+    inputs:
+      tasks: assembleDaikin_prod
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Daikin_prodApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/daikin_prod/'
+      ArtifactName: Daikin_prodApk
+  - task: Gradle@2
+    displayName: 'gradlew assembleCarrier_prod'
+    inputs:
+      tasks: assembleCarrier_prod
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Carrier_prodApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/carrier_prod/'
+      ArtifactName: Carrier_prodApk

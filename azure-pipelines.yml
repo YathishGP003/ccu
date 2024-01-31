@@ -35,7 +35,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: qaApk'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\apk\qa'
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/apk/qa'
     ArtifactName: qaApk
 - task: Gradle@2
   displayName: 'gradlew assembleStaging'

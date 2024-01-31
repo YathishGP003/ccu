@@ -489,51 +489,10 @@ public abstract class UtilityApplication extends Application {
         return this.isRoomDbReady;
     }
 
-    public static String ShellExecuter(String command) {
-        Log.i(LOG_PREFIX, "Shell Command:" + command);
-        StringBuffer output = new StringBuffer();
-        Process p;
-        try {
-            p = Runtime.getRuntime().exec(command);
-            p.waitFor();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = "";
-            while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String response = output.toString();
-        return response;
-    }
-    public static boolean CheckEthernet() {
-        boolean isEthernetConnected = false;
-        String checkEthernetConnected = ShellExecuter("cat /sys/class/net/eth0/operstate");
-        if (checkEthernetConnected.contains("up")) {
-            isEthernetConnected = true;
-        } else if (checkEthernetConnected.contains("down")) {
-            isEthernetConnected = false;
-        }
-        return isEthernetConnected;
-    }
-
     public static boolean CheckWifi() {
         ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return (networkInfo != null && networkInfo.isConnected());
-    }
-    public boolean checkNetworkConnected() {
-        Log.i(LOG_PREFIX, "checkNetworkConnected():CheckWifi:" +CheckWifi());
-        Log.i(LOG_PREFIX, "checkNetworkConnected():CheckEthernet:" +CheckEthernet());
-        if(CheckEthernet()){
-            Log.i(LOG_PREFIX, "checkNetworkConnected():CheckEthernet:" +CheckEthernet());
-            return true;
-        }else{
-            Log.i(LOG_PREFIX, "checkNetworkConnected():CheckWifi:" +CheckWifi());
-            return CheckWifi();
-        }
     }
 
     private void initMessaging() {

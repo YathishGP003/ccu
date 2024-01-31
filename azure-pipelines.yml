@@ -20,10 +20,17 @@ steps:
   displayName: 'gradlew assembleQA'
   inputs:
     tasks: assembleQA
+
 - task: CopyFiles@2
   inputs:
     Contents: '**'
     TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\*.apk'
+
+- task: Bash@3
+  displayName: 'search-apk'
+  inputs:
+    targetType: 'inline'
+    script: 'find $(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\ -name ''CCU*.apk'''
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: qaApk'
   inputs:

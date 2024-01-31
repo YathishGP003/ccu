@@ -23,8 +23,8 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    Contents: '**'
-    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\*.apk'
+    Contents: '*.apk'
+    TargetFolder: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/*.apk'
 
 - task: Bash@3
   displayName: 'search-apk'

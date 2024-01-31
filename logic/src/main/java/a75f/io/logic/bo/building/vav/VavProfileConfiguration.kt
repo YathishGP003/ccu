@@ -89,7 +89,7 @@ class VavProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         damperSize.currentVal = vavEquip.damperSize.readDefaultVal()
         damperShape.currentVal = vavEquip.damperShape.readDefaultVal()
         reheatType.currentVal = vavEquip.reheatType.readDefaultVal()
-        zonePriority.currentVal = vavEquip.zonePriority.readDefaultVal()
+        zonePriority.currentVal = vavEquip.zonePriority.readPriorityVal()
 
         autoAway.enabled = vavEquip.autoAway.readDefaultVal() > 0
         autoForceOccupied.enabled = vavEquip.autoForceOccupied.readDefaultVal() > 0

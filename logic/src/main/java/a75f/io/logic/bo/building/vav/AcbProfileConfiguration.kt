@@ -93,7 +93,7 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         damperSize.currentVal = vavEquip.damperSize.readDefaultVal()
         damperShape.currentVal = vavEquip.damperShape.readDefaultVal()
         valveType.currentVal = vavEquip.valveType.readDefaultVal()
-        zonePriority.currentVal = vavEquip.zonePriority.readDefaultVal()
+        zonePriority.currentVal = vavEquip.zonePriority.readPriorityVal()
         condensateSensorType.enabled = vavEquip.thermistor2Type.readDefaultVal() > 0
 
         autoAway.enabled = vavEquip.autoAway.readDefaultVal() > 0

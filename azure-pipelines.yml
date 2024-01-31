@@ -23,7 +23,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    Contents: '*.apk'
+    Contents: '**/*.apk'
     TargetFolder: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/*.apk'
 
 - task: Bash@3
@@ -35,7 +35,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: qaApk'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\qa\*.apk'
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/*.apk'
     ArtifactName: qaApk
 - task: Gradle@2
   displayName: 'gradlew assembleStaging'
@@ -43,8 +43,8 @@ steps:
     tasks: assembleStaging
 - task: CopyFiles@2
   inputs:
-    Contents: '.apk'
-    TargetFolder: '$(System.DefaultWorkingDirectory)\app\build\outputs\apk\staging\*.apk'
+    Contents: '**/*.apk'
+    TargetFolder: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/staging/*.apk'
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: StagingApk'
   inputs:

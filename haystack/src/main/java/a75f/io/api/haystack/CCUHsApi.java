@@ -1324,6 +1324,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
+        HisItemCache.getInstance().delete(id);
     }
 
     /**
@@ -1336,6 +1337,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
+        HisItemCache.getInstance().delete(id);
     }
 
     public void deleteEntityLocally(String id) {
@@ -2895,7 +2897,7 @@ public class CCUHsApi
     }
 
     public void trimObjectBoxHisStore() {
-        hisSyncHandler.doPurge(true);
+        hisSyncHandler.doPurge();
     }
 
 

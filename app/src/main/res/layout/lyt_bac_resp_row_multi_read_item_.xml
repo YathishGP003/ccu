@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="4">
+
+    <TextView
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:id="@+id/tv_object_type_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="marquee"
+        android:fontFamily="@font/lato_regular"
+        android:gravity="left"
+        android:maxLength="20"
+        android:maxLines="1"
+        android:paddingTop="@dimen/dp_16"
+        android:paddingBottom="@dimen/dp_16"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_20"
+        tools:text="OBJECT_NOTIFICATION_FORWARDER" />
+
+    <TextView
+        android:paddingStart="15dp"
+        android:paddingEnd="5dp"
+        android:maxLines="1"
+        android:maxLength="20"
+        android:ellipsize="marquee"
+        android:id="@+id/tv_property_type_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="@font/lato_regular"
+        android:gravity="left"
+        android:paddingTop="@dimen/dp_16"
+        android:paddingBottom="@dimen/dp_16"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_20"
+        tools:text="PROP_APDU_SEGMENT_TIMEOUT" />
+
+    <TextView
+        android:paddingStart="@dimen/dp_2"
+        android:maxLines="1"
+        android:maxLength="50"
+        android:ellipsize="marquee"
+        android:id="@+id/tv_property_value_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:fontFamily="@font/lato_regular"
+        android:gravity="left"
+        android:paddingTop="@dimen/dp_16"
+        android:paddingBottom="@dimen/dp_16"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_20"
+        tools:text="site49501-hyperstatcpu-1000-coolingLoopOutput" />
+
+</LinearLayout>

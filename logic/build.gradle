@@ -214,8 +214,7 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation project(':data')
-
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.15-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.16-SNAPSHOT')
     implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
@@ -223,7 +222,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.3'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
 
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.0.1-SNAPSHOT')
     implementation project(':domain')
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"

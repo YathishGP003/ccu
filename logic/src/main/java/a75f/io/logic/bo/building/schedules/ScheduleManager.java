@@ -46,18 +46,15 @@ import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.ZoneState;
-import a75f.io.logic.bo.building.ccu.CazProfile;
-import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.plc.PlcProfile;
-import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
+import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -444,7 +441,8 @@ public class ScheduleManager {
                         }
                     }
                 } else {
-                    clearLevel10(roomRef);
+                        clearLevel10(roomRef);
+                        clearUnoccupiedSetbackChange(roomRef);
                 }
             } else if (equipSchedule.getMarkers().contains("specialschedule")) {
                 Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
@@ -1081,6 +1079,12 @@ public class ScheduleManager {
         HashMap<Object, Object> deadBand =
                 CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
         CCUHsApi.getInstance().clearPointArrayLevel(deadBand.get("id").toString(),HayStackConstants.USER_APP_WRITE_LEVEL,false);
+    }
+
+    private void clearUnoccupiedSetbackChange(String roomRef) {
+        HashMap<Object, Object> unoccupiedZoneSetback =
+                CCUHsApi.getInstance().readEntity("schedulable and point and setback and unoccupied and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().clearPointArrayLevel(unoccupiedZoneSetback.get("id").toString(), HayStackConstants.USER_APP_WRITE_LEVEL, false);
     }
 
 

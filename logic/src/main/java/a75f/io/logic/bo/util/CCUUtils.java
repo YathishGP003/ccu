@@ -47,7 +47,7 @@ public class CCUUtils
 
     public static Date getLastReceivedTimeForRssi(String nodeAddr){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap point = CCUHsApi.getInstance().read("point and heartbeat and group == \""+nodeAddr+"\"");
+        HashMap point = CCUHsApi.getInstance().read("point and (heartBeat or heartbeat) and group == \""+nodeAddr+"\"");
         if(point.size() == 0){
             return null;
         }
@@ -64,7 +64,7 @@ public class CCUUtils
         }
         for( HashMap<Object, Object> equip : equipList){
             HashMap<Object, Object> heartBeatPoint =
-                    hayStack.readEntity("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
+                    hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.get("id")+ "\"");
             if(heartBeatPoint.size() > 0){
                 HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
                 return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();

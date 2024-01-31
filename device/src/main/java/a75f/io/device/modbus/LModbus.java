@@ -13,6 +13,8 @@ import com.x75f.modbus4j.msg.WriteRegisterRequest;
 import com.x75f.modbus4j.msg.WriteRegistersRequest;
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
 
+import java.util.Objects;
+
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
@@ -82,6 +84,10 @@ public class LModbus {
     public static synchronized void writeRegister(int slaveId, Register register, int writeValue) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
+            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
+                int multiplierValue = (int) Double.parseDouble(register.multiplier);
+                writeValue = writeValue * multiplierValue;
+            }
             ModbusRequest request;
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
                 request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
@@ -152,6 +158,10 @@ public class LModbus {
     public static synchronized void writeRegister(int slaveId, Register register, float writeValue) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
+            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
+                float multiplierValue =  Float.parseFloat(register.multiplier);
+                writeValue = writeValue * multiplierValue;
+            }
             ModbusRequest request;
             short[] shortValues = ModbusConversions.floatToRegisters(writeValue);
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {

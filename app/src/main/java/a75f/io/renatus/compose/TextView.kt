@@ -36,11 +36,11 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun HeaderTextView(text: String) {
+fun HeaderTextView(text: String, padding : Int = 5) {
     Text(
         modifier = Modifier
             .wrapContentSize()
-            .padding(5.dp),
+            .padding(padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
@@ -80,6 +80,19 @@ fun LabelTextView(text: String) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun StyledTextView(text: String, fontSize : Int) {
+    Text(
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
             color = Color.Black
         ),
         text = text

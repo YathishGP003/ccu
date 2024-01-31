@@ -2,11 +2,13 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildingEquip
+import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
+import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
 
 
@@ -48,6 +50,29 @@ object DomainManager {
                 }
             }
 
+        }
+        addDomainEquips(hayStack)
+
+    }
+
+    private fun addDomainEquips(hayStack: CCUHsApi) {
+        hayStack.readAllEntities("zone and equip")
+            .forEach {
+                CcuLog.i(Domain.LOG_TAG, "Build domain $it")
+                when{
+                    it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
+                        //  it.contains("dab") -> TODO()
+                }
+            }
+        Domain.equips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Added equip to domain ${it.key}")
+        }
+    }
+
+    fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {
+        when {
+            equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
+            // equip.markers.contains("dab") -> TODO()
         }
     }
 
@@ -133,7 +158,6 @@ object DomainManager {
         Domain.site?.floors?.get(hayStackEquip.floorRef)?.
         rooms?.get(hayStackEquip.roomRef)?.equips?.put(hayStackEquip.id, Equip(hayStackEquip.domainName, hayStackEquip.id))
     }
-
     fun addPoint(hayStackPoint : a75f.io.api.haystack.Point) {
         if (Domain.site == null) {
             return

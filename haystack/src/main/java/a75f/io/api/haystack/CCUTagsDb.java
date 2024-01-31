@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.util.ResponsesKt.retrieveLevelValues;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -63,10 +65,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import a75f.io.api.haystack.util.BaseResponse;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.ReadAllResponse;
 import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.entities.DatabaseHelper;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -100,6 +104,8 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
     private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
+
+    private static final String BROADCAST_BACNET_POINT_UPDATED = "a75f.io.renatus.BACNET_POINT_UPDATED";
     private static final String TAG_CCU_BACNET = "CCU_BACNET";
     private static final String PREFS_HAS_MIGRATED_ROOM_DB = "hasMigratedRoomDb";
 
@@ -901,6 +907,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 
         if(p.getBacnetType() != null)
@@ -1509,6 +1516,23 @@ public class CCUTagsDb extends HServer {
         }else{
             WritableArrayDBUtilKt.update(writableArray, this.appContext);
         }
+        //        This is needed to pass null to bacnet for clearing value in yabe bacnet
+        String idTemp = rec.id().toVal();
+        boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(idTemp.replace("@","")).containsKey("bacnetId");
+        if(isBacNetEnabled() && (isBacnetPoint)){
+            if(isNewPoint){
+                for(int j=1;j<=16;j++){
+                    if(j==level){
+                        shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+                    }
+                    else   shareUpdatedPointWithBacApp(rec.id().toVal(), j, "null");
+                }
+            }
+        }
+
+        if(isBacNetEnabled()){
+            shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+        }
     }
 
     private a75f.io.data.WriteArray fillValuesFromArray(WriteArray array) {
@@ -1564,7 +1588,9 @@ public class CCUTagsDb extends HServer {
         WritableArray writableArray = new WritableArray(key, data);
         WritableArrayDBUtilKt.update(writableArray, this.appContext);
 
-
+        if (isBacNetEnabled()) {
+            //shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+        }
     }
     
     public HDict getConfig() {
@@ -1671,11 +1697,11 @@ public class CCUTagsDb extends HServer {
             if (isDiagPoint(rec.id().toString())) {
                 HisItem curCacheItem = HisItemCache.getInstance().get(rec.id().toString());
                 if (curCacheItem != null && curCacheItem.syncStatus == false) {
-                    CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString());
+                    CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString()+"; hisItem:- "+curCacheItem);
                     hisBox.put(curCacheItem);
                 }
             }
-            CcuLog.d(TAG_CCU_HS,"Write historized value to local Cache for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
+            CcuLog.d(TAG_CCU_HS,"Write historized value to local Cache for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString()+"; hisItem:- "+hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
     }
@@ -1685,12 +1711,8 @@ public class CCUTagsDb extends HServer {
             syncedHisItem.syncStatus = true;
             HisItemCache.getInstance().add(syncedHisItem.rec, syncedHisItem);
         });
-
-        List<HisItem> diagPointItems = syncedHisItems.stream()
-                        .filter(item -> isDiagPoint(item.rec))
-                                .collect(Collectors.toList());
-        CcuLog.i("CCU_HS_SYNC"," UpdateDiagPointHisItems "+diagPointItems.size()+" All "+syncedHisItems.size());
-        hisBox.put(diagPointItems);
+        CcuLog.i("CCU_HS_SYNC","All "+syncedHisItems.size());
+        hisBox.put(syncedHisItems);
     }
 
 
@@ -1745,11 +1767,11 @@ public class CCUTagsDb extends HServer {
         if (isDiagPoint(id)) {
             HisItem curCacheItem = HisItemCache.getInstance().get(id);
             if (curCacheItem != null && curCacheItem.syncStatus == false) {
-                CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val);
+                CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val+"; hisItem: "+curCacheItem);
                 hisBox.put(curCacheItem);
             }
         }
-        CcuLog.d(TAG_CCU_HS, "Write historized value to local Cache for point ID " + id + "; value "  + val);
+        CcuLog.d(TAG_CCU_HS, "Write historized value to local Cache for point ID " + id + "; value "  + val+"; hisItem: "+hisItem);
         HisItemCache.getInstance().add(id, hisItem);
     }
 
@@ -1789,6 +1811,7 @@ public class CCUTagsDb extends HServer {
     public void updateHisItemSynced(List<HisItem> hisItems) {
         hisItems.forEach(item -> item.syncStatus = true);
         hisBox.put(hisItems);
+        CcuLog.i("TEST_SAM", "updateHisItemSynced");
     }
 
     public void updateHisItems(List<HisItem> hisItems) {
@@ -1903,5 +1926,21 @@ public class CCUTagsDb extends HServer {
                                 .map( h -> h.getValue())
                                 .filter( v -> v.syncStatus == false)
                                 .collect(Collectors.toList());
+    }
+
+	public boolean isBacNetEnabled() {
+        return PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean("isBACnetinitialized", false);
+    }
+    public void shareUpdatedPointWithBacApp(String id, int level, String val){
+        // check if point has bacnet id
+        boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(id.replace("@","")).containsKey("bacnetId");
+        if(isBacnetPoint){
+            Log.d(TAG_CCU_BACNET, "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
+            Intent intent = new Intent(BROADCAST_BACNET_POINT_UPDATED);
+            intent.putExtra("pointId", id);
+            intent.putExtra("level", level);
+            intent.putExtra("val", val);
+            appContext.sendBroadcast(intent);
+        }
     }
 }

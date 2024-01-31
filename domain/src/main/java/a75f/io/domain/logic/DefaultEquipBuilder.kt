@@ -5,8 +5,9 @@ import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.BuildConfig
-import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.api.Domain
 import a75f.io.domain.util.TagsUtil
+import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
@@ -41,7 +42,11 @@ open class DefaultEquipBuilder : EquipBuilder {
             .forEach { tag -> equipBuilder.addMarker(tag.name) }
         equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach { tag ->
             tag.defaultValue?.let {
-                equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                //TODO- Temp Sam : This should be removed in future when profile models consistent with profile tag.
+                // We will stick with old profileType enum till then
+                if (tag.name != "profile") {
+                    equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                }
             }
         }
         equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach { tag ->
@@ -66,7 +71,7 @@ open class DefaultEquipBuilder : EquipBuilder {
 
     @SuppressLint("SuspiciousIndentation")
     override fun buildPoint(pointConfig: PointBuilderConfig): Point {
-
+        CcuLog.i(Domain.LOG_TAG, "buildPoint ${pointConfig.modelDef.domainName}")
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)
@@ -97,7 +102,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             val incrementValTag =
                 pointConfig.modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
             incrementValTag?.let { pointBuilder.setIncrementVal(it.value.toString()) }
-        }  else if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+        } else if (pointConfig.modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
             val constraint = pointConfig.modelDef.valueConstraint as MultiStateConstraint
             val enumString = constraint.allowedValues.joinToString { it.value }
             pointBuilder.setEnums(enumString)
@@ -122,7 +127,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
             }

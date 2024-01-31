@@ -78,7 +78,11 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
+import a75f.io.renatus.util.DataFd;
+import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.util.DataFd;
+import a75f.io.renatus.util.DataFdObj;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -182,13 +186,11 @@ public class Communication extends Fragment {
 
     @BindView(R.id.bbmdInputContainer) View bbmdInputContainer;
 
-    @BindView(R.id.etFdIP) EditText etFdIp;
-
-    @BindView(R.id.etFdPort) EditText etFdPort;
-
-    @BindView(R.id.etFdTime) EditText etFdTime;
+    @BindView(R.id.tvFdAdd) View tvfDAdd;
 
     @BindView(R.id.tvFdSubmit) View tvFdSubmit;
+
+    @BindView(R.id.fdInputViews) LinearLayout fdInputViews;
 
     @BindView(R.id.tvBbmdAdd) View tvBbmdAdd;
 
@@ -312,18 +314,49 @@ public class Communication extends Fragment {
         bbmdInputContainer.setVisibility(View.GONE);
 
         fdInputView.setVisibility(View.GONE);
+
         tvFdSubmit.setOnClickListener(view1 -> {
             if (validateFdData()) {
                 Toast.makeText(context, "device configured as fd", Toast.LENGTH_SHORT).show();
-                RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
-                String label = radioButton.getText().toString();
-                Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
-                intent.putExtra("message", label);
-                intent.putExtra("ip", etFdIp.getText().toString().trim());
-                intent.putExtra("port", etFdPort.getText().toString().trim());
-                intent.putExtra("time", etFdTime.getText().toString().trim());
-                context.sendBroadcast(intent);
+                try {
+                    DataFdObj dataFdObj = new DataFdObj();
+                    for (int i = 0; i < fdInputViews.getChildCount(); i++) {
+                        View childView = fdInputViews.getChildAt(i);
+                        EditText etBbmdIp = childView.findViewById(R.id.etFdIp);
+                        EditText etBbmdPort = childView.findViewById(R.id.etFdPort);
+                        EditText etBbmdMask = childView.findViewById(R.id.etFdTime);
+
+                        Log.d(TAG_CCU_BACNET, "fd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
+                                etBbmdPort.getText().toString() + "<--time-->" + etBbmdMask.getText().toString());
+//                        dataFdObj.addItem(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+//                                Integer.parseInt(etBbmdMask.getText().toString())));
+                        dataFdObj.setDataFd(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+                                Integer.parseInt(etBbmdMask.getText().toString())));
+                    }
+
+                    String jsonString = new Gson().toJson(dataFdObj);
+                    Log.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
+
+                    RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
+                    String label = radioButton.getText().toString();
+                    Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
+                    intent.putExtra("message", label);
+                    intent.putExtra("data", jsonString);
+                    context.sendBroadcast(intent);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
+        });
+
+        tvfDAdd.setOnClickListener(view1 -> {
+            Log.d(TAG_CCU_BACNET, "add fd config");
+            View fdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_fd_view, null);
+            fdView.findViewById(R.id.tvfDRemove).setOnClickListener(view2 -> {
+                View parent = fdView.findViewById(R.id.fdViewContainer);
+                fdInputViews.removeView(parent);
+            });
+            fdInputViews.addView(fdView);
         });
 
         tvBbmdAdd.setOnClickListener(view1 -> {
@@ -378,21 +411,32 @@ public class Communication extends Fragment {
     }
 
     private boolean validateFdData() {
-        if (etFdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etFdIp.getText().toString().trim()))) {
-            etFdIp.setError(getString(R.string.error_ip_address));
-            return false;
+        for (int i = 0; i < fdInputViews.getChildCount(); i++) {
+            View childView = fdInputViews.getChildAt(i);
+            EditText etBbmdIp = childView.findViewById(R.id.etFdIp);
+            EditText etBbmdPort = childView.findViewById(R.id.etFdPort);
+            EditText etBbmdMask = childView.findViewById(R.id.etFdTime);
+
+            if (etBbmdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etBbmdIp.getText().toString().trim()))) {
+                etBbmdIp.setError(getString(R.string.error_ip_address));
+                return false;
+            }
+            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+                etBbmdPort.setError(getString(R.string.txt_valid_number));
+                return false;
+            }
+//            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
+//                etBbmdPort.setError(getString(R.string.txt_error_port));
+//                return false;
+//            }
+            if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+                etBbmdMask.setError(getString(R.string.txt_valid_number));
+                return false;
+            }
+            etBbmdIp.setError(null);
+            etBbmdPort.setError(null);
+            etBbmdMask.setError(null);
         }
-        if (etFdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFdPort.getText().toString()), 4069, 65535, 1))) {
-            etFdPort.setError(getString(R.string.txt_error_port));
-            return false;
-        }
-        if (etFdTime.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFdTime.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
-            etFdTime.setError(getString(R.string.txt_valid_number));
-            return false;
-        }
-        etFdIp.setError(null);
-        etFdPort.setError(null);
-        etFdTime.setError(null);
         return true;
     }
 
@@ -407,10 +451,10 @@ public class Communication extends Fragment {
                 etBbmdIp.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
+            /*if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
                 etBbmdPort.setError(getString(R.string.txt_error_port));
                 return false;
-            }
+            }*/
             if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
@@ -887,7 +931,7 @@ public class Communication extends Fragment {
             hideView(etOffsetValues, tvOffsetValue);
             startRestServer();
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
-            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App");
+            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
             performConfigFileBackup();
         }
     }

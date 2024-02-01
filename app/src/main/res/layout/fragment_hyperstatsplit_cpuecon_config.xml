@@ -1425,7 +1425,8 @@
 
                 <Spinner
                     android:id="@+id/ao1AtFanLowSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao1AtMediumFanLabel"
@@ -1434,7 +1435,8 @@
 
                 <Spinner
                     android:id="@+id/ao1AtFanMediumSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao1AtHighFanLabel"
@@ -1443,7 +1445,8 @@
 
                 <Spinner
                     android:id="@+id/ao1AtFanHighSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
 
             </LinearLayout>
@@ -1462,7 +1465,8 @@
 
                 <Spinner
                     android:id="@+id/ao2AtFanLowSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao2AtMediumFanLabel"
@@ -1471,7 +1475,8 @@
 
                 <Spinner
                     android:id="@+id/ao2AtFanMediumSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao2AtHighFanLabel"
@@ -1480,7 +1485,8 @@
 
                 <Spinner
                     android:id="@+id/ao2AtFanHighSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
 
             </LinearLayout>
@@ -1499,7 +1505,8 @@
 
                 <Spinner
                     android:id="@+id/ao3AtFanLowSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao3AtMediumFanLabel"
@@ -1508,7 +1515,8 @@
 
                 <Spinner
                     android:id="@+id/ao3AtFanMediumSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao3AtHighFanLabel"
@@ -1517,7 +1525,8 @@
 
                 <Spinner
                     android:id="@+id/ao3AtFanHighSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
 
             </LinearLayout>
@@ -1536,7 +1545,8 @@
 
                 <Spinner
                     android:id="@+id/ao4AtFanLowSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao4AtMediumFanLabel"
@@ -1545,7 +1555,8 @@
 
                 <Spinner
                     android:id="@+id/ao4AtFanMediumSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
                 <TextView
                     android:id="@+id/ao4AtHighFanLabel"
@@ -1554,7 +1565,8 @@
 
                 <Spinner
                     android:id="@+id/ao4AtFanHighSpinner"
-                    style="@style/FanPositionSpinner_HyperStat" />
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:layout_width="120dp"/>
 
 
             </LinearLayout>
@@ -1570,24 +1582,37 @@
                 <TextView
                     android:id="@+id/outsideDamperMinOpen"
                     style="@style/FanPositionLabel_HyperStat"
+                    android:layout_weight="1"
                     android:text="@string/label_oadamper_min_open"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="0dp"
+                    android:layout_gravity="center_vertical"
                     android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/outsideDamperMinOpenSpinner"
                     style="@style/Damper_HyperStat"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="70dp"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/exhaustFanStage1Threshold"
                     style="@style/FanPositionLabel_HyperStat"
-                    android:layout_marginStart="96dp"
+                    android:layout_marginLeft="96dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:paddingLeft="15dp"
+                    android:layout_marginBottom="0dp"
                     android:text="@string/label_exfan_stage1_threshold"
                     android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/exhaustFanStage1ThresholdSpinner"
                     style="@style/Damper_HyperStat"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_width="70dp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -1604,23 +1629,38 @@
                     android:id="@+id/exhaustFanStage2Threshold"
                     style="@style/FanPositionLabel_HyperStat"
                     android:text="@string/label_exfan_stage2_threshold"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="0dp"
+                    android:layout_weight="1"
                     android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/exhaustFanStage2ThresholdSpinner"
                     style="@style/Damper_HyperStat"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="70dp"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/exhaustFanHysteresis"
                     style="@style/FanPositionLabel_HyperStat"
-                    android:layout_marginStart="96dp"
+                    android:layout_marginLeft="110dp"
+                    android:layout_height="match_parent"
+                    android:layout_width="150dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="0dp"
+                    android:gravity="center_vertical"
                     android:text="@string/label_exfan_hysteresis"
                     android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/exhaustFanHysteresisSpinner"
+                    android:layout_gravity="center_vertical|end"
                     style="@style/Damper_HyperStat"
+                    android:layout_width="70dp"
+                    android:layout_marginLeft="110dp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -1630,95 +1670,103 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="34dp"
-                android:layout_marginEnd="48dp"
-                android:layout_marginBottom="10dp">
+                android:layout_marginEnd="48dp">
+                <!-- ... CO2 DamperOpening ... -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/zoneCO2DamperOpeningRate"
-                    style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/zoneCO2DamperOpeningRate"
-                    android:layout_weight="1"
-                    android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/zoneCO2DamperOpeningRate"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:layout_weight="1"
+                        android:text="CO2 Damper Opening Rate"
+                        android:visibility="gone"/>
 
-                <Spinner
-                    android:id="@+id/zoneCO2DamperOpeningRateSpinner"
-                    style="@style/Damper_HyperStat"
-                    android:visibility="gone"
-                    android:layout_weight="1"
-                    android:dropDownWidth="wrap_content" />
+                    <Spinner
+                        android:id="@+id/zoneCO2DamperOpeningRateSpinner"
+                        android:layout_marginStart="10dp"
+                        style="@style/ThresoldSpinner"
+                        android:visibility="gone"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:id="@+id/lLC02Threshold"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/zoneCO2Threshold"
-                    style="@style/FanPositionLabel_HyperStat"
-                    android:layout_weight="1"
-                    android:text="@string/zoneCO2Threshold" />
+                    <TextView
+                        android:id="@+id/zoneCO2Threshold"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="CO2 Threshold"/>
 
-                <Spinner
-                    android:id="@+id/zoneCO2ThresholdSpinner"
-                    style="@style/Damper_HyperStat"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="96dp"
-                    android:dropDownWidth="wrap_content" />
-
-                <TextView
-                    android:id="@+id/zoneCO2Target"
-                    style="@style/FanPositionLabel_HyperStat"
-                    android:layout_weight="1"
-                    android:text="@string/zoneCO2Target" />
-
-                <Spinner
-                    android:id="@+id/zoneCO2TargetSpinner"
-                    style="@style/Damper_HyperStat"
-                    android:layout_weight="1"
-                    android:dropDownWidth="wrap_content" />
+                    <Spinner
+                        android:id="@+id/zoneCO2ThresholdSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
 
+                    <TextView
+                        android:id="@+id/zoneCO2Target"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="CO2 Target" />
+
+                    <Spinner
+                        android:id="@+id/zoneCO2TargetSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
-
                 android:id="@+id/vocConfig"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:layout_marginStart="34dp"
                 android:layout_marginEnd="48dp"
-                android:layout_marginBottom="10dp">
+                >
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="250dp"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/zoneVocThreshold"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/zoneVocThreshold"
+                        android:layout_weight="1"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="VOC Threshold" />
+
+                    <Spinner
+                        android:id="@+id/zoneVocThresholdSpinner"
+                        android:layout_weight="0.5"
+                        style="@style/FanPositionSpinner_HyperStat" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="start"
-                    android:text="@string/zoneVocThreshold"
-                    android:textAppearance="@style/label_values"
-                    android:textColor="@drawable/label_textselector" />
+                    android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/zoneVocThresholdSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5" />
+                    <TextView
+                        android:id="@+id/zoneVocTarget"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="20dp"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:gravity="center_vertical"
+                        android:text="VOC Target" />
 
-                <TextView
-                    android:id="@+id/zoneVocTarget"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="start"
-                    android:layout_marginStart="96dp"
-                    android:text="@string/zoneVocTarget"
-                    android:textAppearance="@style/label_values"
-                    android:textColor="@drawable/label_textselector" />
-
-                <Spinner
-                    android:id="@+id/zoneVocTargetSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5" />
-
-
+                    <Spinner
+                        android:id="@+id/zoneVocTargetSpinner"
+                        android:layout_weight="0.5"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -1727,8 +1775,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="34dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginEnd="48dp"
-                android:weightSum="3"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="54dp"
+                android:weightSum="4"
                 android:layout_marginBottom="10dp">
 
                 <TextView
@@ -1736,7 +1785,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="start"
+                    android:gravity="center_vertical"
                     android:text="@string/zonepmTarget"
                     android:textAppearance="@style/label_values"
                     android:textColor="@drawable/label_textselector" />
@@ -1744,9 +1793,10 @@
                 <Spinner
                     android:id="@+id/zonepmTargetSpinner"
                     android:layout_width="0dp"
+                    android:gravity="center_vertical"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:layout_marginEnd="96dp"/>
+                    android:layout_weight="0.8"
+                    android:layout_marginEnd="130dp"/>
 
 
             </LinearLayout>
@@ -1873,7 +1923,7 @@
                     android:fontFamily="@font/lato_regular"
                     android:text="@string/button_cancel"
                     android:textAllCaps="true"
-                    android:textColor="@color/renatus_75f_primary"
+                    android:textColor="?orange_75f"
                     android:textSize="19.5dp"
                     tools:ignore="SpUsage" />
 
@@ -1891,7 +1941,7 @@
                     android:fontFamily="@font/lato_regular"
                     android:text="@string/button_save"
                     android:textAllCaps="true"
-                    android:textColor="@color/renatus_75f_primary"
+                    android:textColor="?orange_75f"
                     android:textSize="19.5dp"
                     tools:ignore="SpUsage" />
             </RelativeLayout>

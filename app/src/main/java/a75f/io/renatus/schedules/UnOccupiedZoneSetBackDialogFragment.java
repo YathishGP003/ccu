@@ -30,6 +30,7 @@ import a75f.io.domain.BuildingEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.RangeBarView;
 
 
@@ -73,6 +74,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         Double buildingLimitMax =  Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
         Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
 
+        CCUUiUtil.setSpinnerDropDownColor(unOccupiedZoneSetBack,this.getContext());
         zoneScheduleViewModel = new ZoneScheduleViewModel();
         buttonSave.setOnClickListener(v ->{
             StringBuilder heatingLimitWarning = new StringBuilder();

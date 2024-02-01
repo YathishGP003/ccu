@@ -20,6 +20,7 @@ import a75f.io.renatus.hyperstatsplit.SensorBusWidgets
 import a75f.io.renatus.hyperstatsplit.StagedFanWidgets
 import a75f.io.renatus.hyperstatsplit.UniversalInWidgets
 import a75f.io.renatus.hyperstatsplit.viewModels.*
+import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
@@ -91,6 +92,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var tvZoneCO2DamperOpeningRate: TextView
     lateinit var tvZoneCO2Threshold: TextView
     lateinit var tvZoneCO2Target: TextView
+    lateinit var llCO2Threshold:LinearLayout
 
     lateinit var outsideDamperMinOpen: Spinner
     lateinit var tvOutsideDamperMinOpen: TextView
@@ -171,7 +173,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         bindViews()
         setUpSpinners()
         setUpViewListeners()
-
+        setSpinnerDropDownIconColor()
         disposables.add(
             viewModel.getState()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -330,6 +332,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
+            llCO2Threshold=findViewById(R.id.lLC02Threshold)
 
             cancelButton = findViewById(R.id.cancelButton)
             setButton = findViewById(R.id.setButton)
@@ -549,6 +552,12 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.updateFanConfigSelected(3, index, position)
             }
 
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanLow, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMaxDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMinDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanHigh, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanMedium, context)
         }
 
         sensorBusTemps.forEachIndexed { index, widgets ->
@@ -560,6 +569,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.sensorBusTempMappingSelected(index, position)
                 pendingSensorBusTempChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         sensorBusPress.forEachIndexed { index, widgets ->
@@ -571,6 +581,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.sensorBusPressMappingSelected(index, position)
                 pendingSensorBusPressChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         universalInUIs.forEachIndexed { index, widgets ->
@@ -582,6 +593,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 position -> viewModel.universalInMappingSelected(index, position)
                 pendingUniversalInChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         outsideDamperMinOpen.setOnItemSelected {
@@ -632,6 +644,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             stagedFanWidgets.selector.setOnItemSelected {
                     position -> viewModel.voltageAtStagedFanSelected(index, position)
             }
+            CCUUiUtil.setSpinnerDropDownColor(stagedFanWidgets.selector, context)
         }
 
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
@@ -871,6 +884,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
         pendingRelayChange = false
+
+
     }
 
     private fun renderAnalogOuts(viewState: ViewState) {
@@ -1060,6 +1075,23 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
         pendingAnalogOutChange = false
+
+        //Linear layout of C02Threshold
+        val paramsLlCO2Threshold = llCO2Threshold.layoutParams as LinearLayout.LayoutParams
+        //TextView of C02Threshold
+        val paramsTvCO2Threshold = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+
+        if (isDampSelected) {
+            // If isDampSelected is true, set the margin to start: 10dp, end: 10dp
+            paramsLlCO2Threshold.setMargins(resources.getDimensionPixelSize(R.dimen.start_margin), 0, resources.getDimensionPixelSize(R.dimen.end_margin), 0)
+            // If isDampSelected is true, set the margin end: -48dp
+            paramsTvCO2Threshold.setMargins(0,0,-48,0)
+        } else {
+            // Otherwise, set the margin to end: 250dp
+            paramsLlCO2Threshold.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.large_end_margin_hsSplit), 0)
+            // If isDampSelected is true, set the margin end: 25dp
+            paramsTvCO2Threshold.setMargins(0,0,25,0)
+        }
     }
 
     /**
@@ -1317,14 +1349,33 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
                 it.selector.tag = relayPos++
+                CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
         }
         analogOutUIs.forEach {
                 analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping
+                 CCUUiUtil.setSpinnerDropDownColor(analogOutWidgets.selector, context)
         }
     }
 
     private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
         return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+    }
+
+    private fun setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(analogOut1Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut2Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut3Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut4Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2DamperOpeningRate, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Target, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(zonePMTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCThreshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanHysteresis, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage1Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage2Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpen, context)
     }
 
 }

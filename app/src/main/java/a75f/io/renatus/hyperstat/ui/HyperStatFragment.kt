@@ -20,6 +20,7 @@ import a75f.io.renatus.hyperstat.AnalogOutWidgets
 import a75f.io.renatus.hyperstat.RelayWidgets
 import a75f.io.renatus.hyperstat.StagedFanWidgets
 import a75f.io.renatus.hyperstat.viewModels.*
+import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
@@ -163,7 +164,7 @@ class HyperStatFragment : BaseDialogFragment() {
         bindViews()
         setUpSpinners()
         setUpViewListeners()
-
+        setSpinnerDropDownIconColor()
         disposables.add(
             viewModel.getState()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -491,6 +492,12 @@ class HyperStatFragment : BaseDialogFragment() {
                 viewModel.updateFanConfigSelected(3, index, position)
             }
 
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanLow, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMaxDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMinDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanHigh, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanMedium, context)
 
         }
         airflowSensorSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -507,6 +514,7 @@ class HyperStatFragment : BaseDialogFragment() {
                 pendingSwitchChange = true
             }
             widgets.selector.setOnItemSelected { position -> viewModel.analogInMappingSelected(index, position) }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector,context)
         }
 
         zoneCO2DamperOpeningRate.setOnItemSelected {
@@ -543,6 +551,7 @@ class HyperStatFragment : BaseDialogFragment() {
             stagedFanWidgets.selector.setOnItemSelected {
                 position -> viewModel.voltageAtStagedFanSelected(index, position)
             }
+            CCUUiUtil.setSpinnerDropDownColor(stagedFanWidgets.selector, context)
         }
 
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
@@ -1044,9 +1053,11 @@ class HyperStatFragment : BaseDialogFragment() {
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
                 it.selector.tag = relayPos++
+                CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
         }
         analogOutUIs.forEach {
                 analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping
+                CCUUiUtil.setSpinnerDropDownColor(analogOutWidgets.selector, context)
         }
     }
 
@@ -1054,5 +1065,17 @@ class HyperStatFragment : BaseDialogFragment() {
         return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
     }
 
+    private fun setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(analogOut1Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut2Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut3Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2DamperOpeningRate, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Target, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(zonePMTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zonePMThreshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCThreshold, context)
+    }
 }
 

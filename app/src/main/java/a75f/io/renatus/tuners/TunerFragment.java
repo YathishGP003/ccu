@@ -148,6 +148,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         editChangeReason = view.findViewById(R.id.editChangeReason);
         editTunerSearch = view.findViewById(R.id.editTunerSearch);
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        CCUUiUtil.setSpinnerDropDownColor(spinnerSelection,this.getContext());
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         //TODO: revert building tuners

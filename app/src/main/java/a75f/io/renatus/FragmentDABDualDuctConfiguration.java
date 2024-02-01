@@ -336,6 +336,9 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         CCUUiUtil.setSpinnerDropDownColor(ao2MaxDamperHeatingSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(ao2MinDamperCoolingSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(ao2MaxDamperCoolingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog1OutSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2OutSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(thermistor2Spinner,getContext());
 
     }
     

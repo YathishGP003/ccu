@@ -1115,10 +1115,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
-            CCUUiUtil.setSpinnerDropDownColor(spinner_override_value,mActivity.getApplicationContext());
-            CCUUiUtil.setSpinnerDropDownColor(spinner_analog_out1,mActivity.getApplicationContext());
-            CCUUiUtil.setSpinnerDropDownColor(spinner_analog_out2,mActivity.getApplicationContext());
-            CCUUiUtil.setSpinnerDropDownColor(spinner_relay,mActivity.getApplicationContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_override_value, mFragment.getContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_analog_out1, mFragment.getContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_analog_out2, mFragment.getContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_analog_out3, mFragment.getContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_relay, mFragment.getContext());
         }
 
         return convertView;

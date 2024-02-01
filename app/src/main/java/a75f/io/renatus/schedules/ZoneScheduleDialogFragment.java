@@ -197,6 +197,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         coolingDeadBand.setDropDownWidth(70);
         followBuilding = view.findViewById(R.id.following_building_toggle);
 
+        setSpinnerDropDownIconColor();
         if (mDay != null || mDays != null){
             checkBoxMonday.setEnabled(false);
             checkBoxTuesday.setEnabled(false);
@@ -884,5 +885,14 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         if (dialog != null) {
             dialog.getWindow().setLayout(1165, 646);
         }
+    }
+
+    private void setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(coolingUserLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingUserLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingDeadBand, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingUserLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingUserLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDeadBand, this.getContext());
     }
 }

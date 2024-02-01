@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -166,9 +167,13 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
         modifier = modifier.height(50.dp),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.Center),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Red,
-            unfocusedIndicatorColor = Color.Gray,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
             containerColor = Color.White,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
@@ -176,7 +181,8 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(primaryColor)
             )
         },
     )
@@ -200,17 +206,22 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
             }),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black, textAlign = TextAlign.Left),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Red,
-            unfocusedIndicatorColor = Color.Gray,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
             containerColor = Color.White,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
         trailingIcon  = {
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
+                colorFilter = ColorFilter.tint(primaryColor),
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         },
     )
@@ -227,9 +238,13 @@ fun TextViewCompose(text: String) {
         modifier = Modifier.width(100.dp),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = primaryColor,
-            unfocusedIndicatorColor = Color.Gray,
             containerColor = Color.White,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
@@ -237,7 +252,8 @@ fun TextViewCompose(text: String) {
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(primaryColor)
             )
         },
     )

@@ -741,7 +741,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 idMap.put(id, value1);
                             }
                         } else if (expandedListText.startsWith("relay") || expandedListText.startsWith("Relay")) {
-                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getThermistorIndex(expandedListText));
+                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getRelayIndex(expandedListText));
                             String relayMapped = getZoneMapping("relay" + getRelayIndex(expandedListText), listPosition, convertView);
                             if (!relayMapped.equals(""))
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + getRelayIndex(expandedListText) + "\n(" + relayMapped + ")");
@@ -1051,7 +1051,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         setPointValForRelay(idMap.get(tunerName), Double.parseDouble(String.valueOf(spinner_relay.getSelectedItemId())),
                                 "relay" + expandedListText.substring(5, 6));
                         idMap.put(idMap.get(tunerName), spinner_relay.getSelectedItem().toString());
-                        TempOverRiddenValue.getInstance().addOverRiddenValues(equipId+expandedListText.substring(5, 6), selectedSpinnerItem);
+                        TempOverRiddenValue.getInstance().addOverRiddenValues(equipId+getRelayIndex(expandedListText), selectedSpinnerItem);
                     }
                 }
 
@@ -1085,7 +1085,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointValForThermistor(idMap.get(tunerName),
                                         Double.parseDouble(selectedSpinnerItem), Integer.parseInt(parseGroup(listTitle)), listTitle);
                                 idMap.put(idMap.get(tunerName), selectedSpinnerItem);
-                                TempOverRiddenValue.getInstance().addOverRiddenValues(equipId + expandedListText.substring(2, 3), selectedSpinnerItem);
+                                TempOverRiddenValue.getInstance().addOverRiddenValues(equipId + getThermistorIndex(expandedListText), selectedSpinnerItem);
                             }
                         }
                     }, 5000);

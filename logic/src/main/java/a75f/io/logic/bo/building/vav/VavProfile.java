@@ -807,8 +807,8 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     protected void updateLoopParams() {
-        vavEquip.getHeatingLoopOutput().writeHisVal(heatingLoop.getLoopOutput());
-        vavEquip.getCoolingLoopOutput().writeHisVal(coolingLoop.getLoopOutput());
+        vavEquip.getHeatingLoopOutput().writeHisVal(Math.min(heatingLoop.getLoopOutput(), 100));
+        vavEquip.getCoolingLoopOutput().writeHisVal(Math.min(coolingLoop.getLoopOutput(), 100));
         vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
         vavEquip.getSatRequestPercentage().writeHisVal(satResetRequest.cumulativeRequestHoursPercent);
         vavEquip.getCo2RequestPercentage().writeHisVal(co2ResetRequest.cumulativeRequestHoursPercent);

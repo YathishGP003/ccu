@@ -6,14 +6,18 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.getConfig
+import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.getDomainNameFromDis
 import a75f.io.domain.util.TunerUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -50,17 +54,29 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * configuration - Updated profile configuration.
      * modelDef - Model instance for profile.
      */
-    fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String, equipDis: String) : String{
-        CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration")
+    fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String, equipDis: String,
+                             isReconfiguration : Boolean = false) : String{
+        CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration isReconfiguration $isReconfiguration")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
-        val entityConfiguration = ReconfigHandler
-            .getEntityReconfiguration(configuration.nodeAddress, hayStack, entityMapper.getEntityConfiguration(configuration))
-
-        val equip = hayStack.readEntity(
-            "equip and group == \"${configuration.nodeAddress}\"")
+        val equip = if (configuration.nodeAddress == 0) {
+            hayStack.readEntity(
+                "equip and system and not modbus")
+        } else {
+            hayStack.readEntity(
+                "equip and group == \"${configuration.nodeAddress}\"")
+        }
 
         val equipId =  equip["id"].toString()
+
+        val entityConfiguration = if (isReconfiguration) {
+            ReconfigHandler.getEntityReconfiguration(
+                equipId, hayStack,
+                entityMapper.getEntityConfiguration(configuration), configuration
+            )
+        } else {
+            getEntityUpdateConfiguration(equipId, hayStack,entityMapper.getEntityConfiguration(configuration))
+        }
 
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
         val systemEquip = hayStack.readEntity("system and equip and not modbus")
@@ -77,13 +93,44 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         //TODO - Fix crash
         //DomainManager.addEquip(hayStackEquip)
         createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
-        updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        if (isReconfiguration) {
+            updatePointValues(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        } else {
+            updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        }
         deletePoints(entityConfiguration, equipId)
         return equipId
     }
 
+    private fun getEntityUpdateConfiguration(equipRef: String, hayStack: CCUHsApi,
+                                             config : EntityConfiguration) : EntityConfiguration {
+
+        val existingEntityList = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+            .map { it["domainName"].toString() }
+        CcuLog.i(Domain.LOG_TAG, "Equip currently has ${existingEntityList.size} points")
+        val newEntityConfig = EntityConfiguration()
+
+        existingEntityList.forEach{ entityName ->
+            if (config.tobeAdded.find { it.domainName == entityName} == null) {
+                if (entityName != "null") {
+                    newEntityConfig.tobeDeleted.add(EntityConfig(entityName))
+                } else {
+                    CcuLog.i(Domain.LOG_TAG, "Invalid point found in equip $equipRef")
+                }
+            }
+        }
+        config.tobeAdded.forEach{
+            if (existingEntityList.contains(it.domainName)) {
+                newEntityConfig.tobeUpdated.add(it)
+            } else {
+                newEntityConfig.tobeAdded.add(it)
+            }
+        }
+        return newEntityConfig;
+    }
+
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,
-                                        equipRef: String, siteRef: String, equipDis: String) {
+                             equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
         entityConfiguration.tobeAdded.forEach { point ->
             CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
@@ -110,7 +157,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
                 else if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
                     initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
-                } else if (modelPointDef.tagNames.contains("his") && !(modelPointDef.domainName.equals(DomainName.heartBeat))) {
+                } else if (modelPointDef.tagNames.contains("his") && !(modelPointDef.domainName.equals(
+                        DomainName.heartBeat))) {
                     // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
                     hayStack.writeHisValById(pointId, 0.0)
                 }
@@ -156,11 +204,54 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
+    private fun updatePointValues(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
+                                  entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
+        val tz = hayStack.timeZone
+        entityConfiguration.tobeUpdated.forEach { point ->
+            CcuLog.i(Domain.LOG_TAG, "updatePointValues - ${point.domainName}")
+            val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
+            val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
+            modelPointDef?.run {
+                var configVal = getConfigValue(profileConfiguration, modelPointDef , point.domainName)
+                if (configVal == null) {
+                    if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
+                        configVal = modelPointDef.defaultValue as Double
+                    }
+                }
+                configVal?.let {
+                    val currentVal = hayStack.readDefaultValById(existingPoint["id"].toString())
+                    if (configVal != currentVal) {
+                        hayStack.writeDefaultValById(existingPoint["id"].toString(), configVal)
+                    }
+                }
+                if (existingPoint.contains("his")) {
+                    val priorityVal = hayStack.readPointPriorityVal(existingPoint["id"].toString())
+                    hayStack.writeHisValById(existingPoint["id"].toString(), priorityVal)
+                }
+            }
+
+        }
+    }
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeDeleted.forEach { point ->
             CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
             hayStack.deleteEntity(existingPoint["id"].toString())
+        }
+    }
+
+    private fun getConfigValue(profileConfiguration: ProfileConfiguration, modelPoint : ModelPointDef, domainName : String) : Double? {
+        return if (profileConfiguration.getEnableConfigs().getConfig(domainName) != null) {
+            val enableConfig = profileConfiguration.getEnableConfigs().getConfig(domainName)
+            enableConfig?.enabled?.toDouble()
+        } else if (profileConfiguration.getAssociationConfigs().getConfig(domainName) != null) {
+            val associationConfig = profileConfiguration.getAssociationConfigs().getConfig(domainName)
+            associationConfig?.associationVal?.toDouble()
+        } else if (profileConfiguration.getValueConfigs().getConfig(domainName) != null) {
+            val valueConfig = profileConfiguration.getValueConfigs().getConfig(domainName)
+            valueConfig?.currentVal
+        } else {
+            return null
         }
     }
 
@@ -207,6 +298,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         //TODO-To be removed after testing is complete.
         var update = 0
         var delete = 0
+        var add = 0
+        var pass = 0
         equipPoints.filter { it["domainName"] == null}
             .forEach { dbPoint ->
                 val modelPointName = getDomainNameFromDis(dbPoint, mapping)
@@ -229,12 +322,36 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
             }
 
+        modelDef.points.forEach { modelPointDef ->
+
+            val displayName = BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
+            if (displayName == null && modelPointDef.configuration.configType == PointConfiguration.ConfigType.BASE) {
+                add++
+                //Point exists in model but not in mapping table or local db. create it.
+                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
+                //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
+                if (!pointWithDomainNameExists(equipPoints, modelPointDef.domainName)) {
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
+                    //createCutoverMigrationPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
+                }
+            } else {
+                //TODO- Need to consider the case when point exists in map but not in DB.
+                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration PASS $modelPointDef")
+                //println(" Cut-Over migration PASS $modelPointDef")
+                pass++
+            }
+        }
+
         CcuLog.e(
             Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
                     " Model: ${modelDef.points.size} Map: ${mapping.size} ")
-        CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update ")
+        CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
 
         updateEquip(equipRef, modelDef, equipDis)
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
+    }
+
+    private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{
+        return dbPoints.any { it["domainName"]?.toString().equals(domainName, true) }
     }
 }

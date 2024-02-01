@@ -81,4 +81,32 @@ class ExternalAhuConfiguration (profileType : String)
         enabled.add(dehumidifierControl)
         return enabled
     }
+
+    override fun getValueConfigs(): List<ValueConfig> {
+        return mutableListOf<ValueConfig>().apply {
+            add(satMin)
+            add(satMax)
+            add(heatingMinSp)
+            add(heatingMaxSp)
+            add(coolingMinSp)
+            add(coolingMaxSp)
+            add(fanMinSp)
+            add(fanMaxSp)
+            add(dcvMin)
+            add(dcvMax)
+            add(co2Threshold)
+            add(damperOpeningRate)
+            add(co2Target)
+        }
+    }
+
+    override fun toString(): String {
+        return "setPointControl ${setPointControl.enabled} dualSetPointControl ${dualSetPointControl.enabled} " +
+                "fanStaticSetPointControl ${fanStaticSetPointControl.enabled} dcvControl ${dcvControl.enabled} " +
+                "occupancyMode ${occupancyMode.enabled} humidifierControl ${humidifierControl.enabled} dehumidifierControl " +
+                "${dehumidifierControl.enabled} satMin ${satMin.currentVal} satMax ${satMax.currentVal} heatingMinSp ${heatingMinSp.currentVal} " +
+                "heatingMaxSp ${heatingMaxSp.currentVal} coolingMinSp ${coolingMinSp.currentVal} coolingMaxSp ${coolingMaxSp.currentVal} " +
+                "fanMinSp ${fanMinSp.currentVal} fanMaxSp ${fanMaxSp.currentVal} dcvMin ${dcvMin.currentVal} dcvMax ${dcvMax.currentVal} " +
+                "co2Threshold ${co2Threshold.currentVal} damperOpeningRate ${damperOpeningRate.currentVal} co2Target ${co2Target.currentVal}"
+    }
 }

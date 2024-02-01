@@ -339,7 +339,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
         profileEquipBuilder.updateEquipAndPoints(
             configModel.value.getConfiguration(profileType), profileModelDefinition,
-            CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+profileModelDefinition.name
+            CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+profileModelDefinition.name,
+            isReconfiguration = true
         )
         saveExternalEquip()
     }

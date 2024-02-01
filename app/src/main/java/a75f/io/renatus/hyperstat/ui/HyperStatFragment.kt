@@ -329,9 +329,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
              val spinnerSelectionListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (parent?.isPressed == true) {
-                        sendControl()
-                    }
+                    sendControl()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                 }

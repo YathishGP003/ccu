@@ -4,6 +4,7 @@ import org.javolution.io.Struct;
 
 public class SmartNodeSettings2_t extends Struct {
 
+    public final Enum16<ProfileMap_t> profileMap2 = new Enum16<>(ProfileMap_t.values()); // Refer to ProfileMap_t
     public final Unsigned16 kFactor = new Unsigned16(); ///< 1/100th of the value. Default - 200(2.00)
     public final Unsigned16 minCFMCooling = new Unsigned16(); ///< Ranges from 50-4000. Increments of 5. Default - 50
     public final Unsigned16 maxCFMCooling = new Unsigned16(); ///< Ranges from 50-4000. Increments of 5. Default - 250

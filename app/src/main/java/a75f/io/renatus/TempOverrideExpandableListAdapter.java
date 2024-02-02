@@ -1049,7 +1049,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     String selectedSpinnerItem = spinner_relay.getSelectedItem().toString();
                     if (!selectedSpinnerItem.equals("- - - -")) {
                         setPointValForRelay(idMap.get(tunerName), Double.parseDouble(String.valueOf(spinner_relay.getSelectedItemId())),
-                                "relay" + expandedListText.substring(5, 6));
+                                "relay" + getRelayIndex(expandedListText));
                         idMap.put(idMap.get(tunerName), spinner_relay.getSelectedItem().toString());
                         TempOverRiddenValue.getInstance().addOverRiddenValues(equipId+getRelayIndex(expandedListText), selectedSpinnerItem);
                     }
@@ -1111,7 +1111,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 public void afterTextChanged(Editable s)
                 {
                     thOver = s.toString();
-                    thEquipDetails = equipId + expandedListText.substring(2, 3);
+                    thEquipDetails = equipId + getThermistorIndex(expandedListText);
                 }
             });
 

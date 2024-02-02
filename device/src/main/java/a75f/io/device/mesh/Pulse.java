@@ -1466,6 +1466,7 @@ public class Pulse
 				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
 				MeshUtil.sendStructToCM(seedMessage);
+				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SETTINGS2====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
 				MeshUtil.sendStructToCM(settings2Message);
 				LSerial.getInstance().setNodeSeeding(false);

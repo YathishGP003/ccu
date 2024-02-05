@@ -161,7 +161,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
         if (isVisibleToUser) {
-            loadSchedule();
+            new Handler().post(() -> loadSchedule());
             UpdateScheduleHandler.setBuildingScheduleListener(this);
         } else {
             UpdateScheduleHandler.setBuildingScheduleListener(null);

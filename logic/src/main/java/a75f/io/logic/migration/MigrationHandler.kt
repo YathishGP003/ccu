@@ -2,6 +2,7 @@ package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.logic.EquipBuilder
@@ -123,6 +124,40 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val equipDis = "${site?.displayName}-${it["group"]}-${model.name}"
             equipBuilder.doCutOverMigration(it["id"].toString(), model as SeventyFiveFProfileDirective,
                                     equipDis, VavZoneProfileCutOverMapping.entries )
+
+            val vavEquip = VavEquip(it["id"].toString())
+
+            // damperSize point changed from a literal to an enum
+            val newDamperSize = getDamperSizeEnum(vavEquip.damperSize.readDefaultVal())
+            vavEquip.damperSize.writeDefaultVal(newDamperSize)
+            vavEquip.damperSize.writeHisVal(newDamperSize)
+
+            // reheatType now starts at 0 instead of -1
+            val newReheatType = vavEquip.reheatType.readDefaultVal() + 1.0
+            vavEquip.reheatType.writeDefaultVal(newReheatType)
+            vavEquip.reheatType.writeHisVal(newReheatType)
+
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+            vavEquip.temperatureOffset.writeHisVal(newTempOffset)
+
+        }
+    }
+
+    private fun getDamperSizeEnum(size: Double) : Double {
+        return when (size) {
+            6.0 -> 1.0
+            8.0 -> 2.0
+            10.0 -> 3.0
+            12.0 -> 4.0
+            14.0 -> 5.0
+            16.0 -> 6.0
+            18.0 -> 7.0
+            20.0 -> 8.0
+            22.0 -> 9.0
+            24.0 -> 10.0
+            else -> 0.0
         }
     }
 

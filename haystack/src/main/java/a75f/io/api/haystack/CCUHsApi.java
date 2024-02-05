@@ -2897,7 +2897,7 @@ public class CCUHsApi
     }
 
     public void trimObjectBoxHisStore() {
-        hisSyncHandler.doPurge(true);
+        hisSyncHandler.doPurge();
     }
 
 

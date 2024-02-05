@@ -20,6 +20,7 @@ import a75f.io.renatus.hyperstatsplit.SensorBusWidgets
 import a75f.io.renatus.hyperstatsplit.StagedFanWidgets
 import a75f.io.renatus.hyperstatsplit.UniversalInWidgets
 import a75f.io.renatus.hyperstatsplit.viewModels.*
+import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
@@ -173,7 +174,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         bindViews()
         setUpSpinners()
         setUpViewListeners()
-
+        setSpinnerDropDownIconColor()
         disposables.add(
             viewModel.getState()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -382,9 +383,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
              val spinnerSelectionListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (parent?.isPressed == true) {
-                        sendControl()
-                    }
+                    sendControl()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                 }
@@ -555,6 +554,12 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.updateFanConfigSelected(3, index, position)
             }
 
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanLow, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMaxDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMinDamperSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanHigh, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanMedium, context)
         }
 
         sensorBusTemps.forEachIndexed { index, widgets ->
@@ -566,6 +571,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.sensorBusTempMappingSelected(index, position)
                 pendingSensorBusTempChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         sensorBusPress.forEachIndexed { index, widgets ->
@@ -577,6 +583,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 viewModel.sensorBusPressMappingSelected(index, position)
                 pendingSensorBusPressChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         universalInUIs.forEachIndexed { index, widgets ->
@@ -588,6 +595,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 position -> viewModel.universalInMappingSelected(index, position)
                 pendingUniversalInChange = true
             }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
         outsideDamperMinOpen.setOnItemSelected {
@@ -638,6 +646,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             stagedFanWidgets.selector.setOnItemSelected {
                     position -> viewModel.voltageAtStagedFanSelected(index, position)
             }
+            CCUUiUtil.setSpinnerDropDownColor(stagedFanWidgets.selector, context)
         }
 
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
@@ -877,6 +886,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
 
         pendingRelayChange = false
+
+
     }
 
     private fun renderAnalogOuts(viewState: ViewState) {
@@ -1328,14 +1339,33 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
                 it.selector.tag = relayPos++
+                CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
         }
         analogOutUIs.forEach {
                 analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping
+                 CCUUiUtil.setSpinnerDropDownColor(analogOutWidgets.selector, context)
         }
     }
 
     private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
         return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+    }
+
+    private fun setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(analogOut1Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut2Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut3Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(analogOut4Test, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2DamperOpeningRate, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Target, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneCO2Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(zonePMTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(zoneVOCThreshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanHysteresis, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage1Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage2Threshold, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpen, context)
     }
 
 }

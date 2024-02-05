@@ -56,19 +56,19 @@
 
 
     <!--75F Smart Color   -->
-    <color name="renatus_75f_primary">#E24301</color>
-    <color name="renatus_75F_accent">#e24725</color>
-    <color name="renatus_75f_secondary">#1AE24301</color>
+    <color name="renatus_75f_primary">#E5561A</color>
+    <color name="renatus_75F_accent">#E5561A</color>
+    <color name="renatus_75f_secondary">#1AE5561A</color>
 
     <!--DAIKIN Theme Color-->
-    <color name="daikin_75f">#FF0097E0</color>
-    <color name="accentDaikin_75f">#CC0097E0</color>
-    <color name="daikin_75f_secondary">#1891F680</color>
+    <color name="daikin_75f">#0097E0</color>
+    <color name="accentDaikin_75f">#0097E0</color>
+    <color name="daikin_75f_secondary">#1A0097E0</color>
 
     <!--Carrier Theme Color-->
-    <color name="carrier_75f">#152C73</color>
-    <color name="accentCarrier_75f">#CC152C73</color>
-    <color name="carrier_75f_secondary">#152C7380</color>
+    <color name="carrier_75f">#1891F6</color>
+    <color name="accentCarrier_75f">#1891F6</color>
+    <color name="carrier_75f_secondary">#1A1891F6</color>
 
     <color name="min_temp">#E24301</color>
     <color name="max_temp">#5990B4</color>

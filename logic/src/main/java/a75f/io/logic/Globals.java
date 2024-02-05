@@ -1,14 +1,9 @@
 package a75f.io.logic;
-
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.Display;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +86,7 @@ import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
@@ -266,8 +262,8 @@ public class Globals {
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
+        CCUProxySettings.setUpProxySettingsIfExists();
     }
-
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             HeartbeatMigration.initHeartbeatMigration();

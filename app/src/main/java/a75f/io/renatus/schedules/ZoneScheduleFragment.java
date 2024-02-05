@@ -51,7 +51,6 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;

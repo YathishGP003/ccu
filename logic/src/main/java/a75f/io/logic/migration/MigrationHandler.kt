@@ -93,7 +93,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val version = pi.versionName.substring(
                 pi.versionName.lastIndexOf('_') + 1,
-                pi.versionName.length - 2
+                pi.versionName.length
             )
             return version
         } catch (e: PackageManager.NameNotFoundException) {
@@ -116,11 +116,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         vavEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
             val model = when {
-                it.containsKey("series") -> ModelLoader.getSmartNodeVavSeriesModelDef()
-                it.containsKey("parallel") -> ModelLoader.getSmartNodeVavParallelFanModelDef()
+                it.containsKey("series") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeVavSeriesModelDef()
+                it.containsKey("parallel") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeVavParallelFanModelDef()
+                it.containsKey("series") && it.containsKey("helionode") -> ModelLoader.getHelioNodeVavSeriesModelDef()
+                it.containsKey("parallel") && it.containsKey("helionode") -> ModelLoader.getHelioNodeVavParallelFanModelDef()
+                it.containsKey("helionode") -> ModelLoader.getHelioNodeVavNoFanModelDef()
                 else -> ModelLoader.getSmartNodeVavNoFanModelDef()
             }
-            val equipDis = "${site?.displayName}-${it["group"]}-${model.name}"
+            val equipDis = "${site?.displayName}-VAV-${it["group"]}"
             equipBuilder.doCutOverMigration(it["id"].toString(), model as SeventyFiveFProfileDirective,
                                     equipDis, VavZoneProfileCutOverMapping.entries )
         }

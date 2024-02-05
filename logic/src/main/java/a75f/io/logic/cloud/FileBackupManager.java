@@ -1,6 +1,7 @@
 package a75f.io.logic.cloud;
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
 import a75f.io.modbusbox.EquipsManager;

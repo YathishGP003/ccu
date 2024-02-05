@@ -322,8 +322,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                            FragmentBLEInstructionScreen.ID
         );
     }
-    
-    
+
     @Optional
     @OnClick(R.id.rl_dabDualDuct)
     void onDabDualDuctOnClick()
@@ -520,10 +519,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             iv_vavNoFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             iv_vavNoFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavSeriesFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavParallelFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavNoFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }/*Code to disable DAB profiles if VAV is selected*/
         else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
@@ -548,9 +543,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             ivDabDualDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             ivDabDualDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            ivDabSingleDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            ivDabDualDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }/*Code to disable VAV as well as DAB profiles if Default System Profile is selected*/
         else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
             rlVAVNoFan.setEnabled(false);
@@ -579,10 +571,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             iv_vavNoFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             iv_vavNoFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavSeriesFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavParallelFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            iv_vavNoFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
 
 
             rlDabSingleDuct.setEnabled(false);
@@ -603,9 +591,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             ivDabDualDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             ivDabDualDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            ivDabSingleDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
-            ivDabDualDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }
         setTitle();
     }

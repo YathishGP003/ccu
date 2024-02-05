@@ -28,8 +28,6 @@ import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
-
 public class CongratsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -113,8 +111,10 @@ public class CongratsFragment extends Fragment {
         mContext = getContext().getApplicationContext();
 
         if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
-            TextView viewById = rootView.findViewById(R.id.textSuccess);
-            viewById.setText(R.string.title_success_carrier);
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_carrier);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_carrier);
         }
 
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();

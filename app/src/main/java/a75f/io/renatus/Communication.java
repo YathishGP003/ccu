@@ -622,6 +622,7 @@ public class Communication extends Fragment {
             public void onClick(View v) {
                 if(!isZoneToVirtualDeviceErrorShowing)
                 {
+                    zvdmHint.setVisibility(View.GONE);
                     tvzvdmHint.setError("Enabled: Zone is represented as a virtual device and" +
                             " each endpoint is mapped to the respective " +
                             "BACnet Object.\n\n" +
@@ -629,6 +630,7 @@ public class Communication extends Fragment {
                             " as a flat list.");
                     isZoneToVirtualDeviceErrorShowing = true;
                 }else{
+                    zvdmHint.setVisibility(View.VISIBLE);
                     tvzvdmHint.setError(null);
                     isZoneToVirtualDeviceErrorShowing = false;
                 }

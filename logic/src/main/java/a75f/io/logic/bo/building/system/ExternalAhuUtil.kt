@@ -596,7 +596,12 @@ private fun shouldOperateDamper(
     mode: Occupancy,
     systemCO2Threshold: Double
 ): Boolean =
-    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (mode == Occupancy.OCCUPIED || mode == Occupancy.AUTOFORCEOCCUPIED)
+    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (mode == Occupancy.OCCUPIED
+            || mode == Occupancy.AUTOFORCEOCCUPIED
+            || mode == Occupancy.AUTOAWAY
+            || mode == Occupancy.EMERGENCY_CONDITIONING
+            || mode == Occupancy.PRECONDITIONING
+            || mode == Occupancy.FORCEDOCCUPIED)
 
 private fun shouldResetDamper(
     sensorCO2: Double,

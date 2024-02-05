@@ -397,7 +397,8 @@ public class LSmartNode
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
-        if (profileType.equals("vav") && reheatConfig != -1){
+        //ReheatType migration should address this, but the value can be -2 or -1 based on this code runs before or after migration.
+        if (profileType.equals("vav") && reheatConfig >= 0){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));

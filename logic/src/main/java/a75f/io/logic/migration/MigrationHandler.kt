@@ -93,7 +93,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val version = pi.versionName.substring(
                 pi.versionName.lastIndexOf('_') + 1,
-                pi.versionName.length - 2
+                pi.versionName.length
             )
             return version
         } catch (e: PackageManager.NameNotFoundException) {

@@ -115,6 +115,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val site = hayStack.site
         vavEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+            val reheatType = hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
+            if (reheatType.isNotEmpty()) {
+                val reheatTypeVal = hayStack.readDefaultValById(reheatType["id"].toString())
+                CcuLog.i(Domain.LOG_TAG, "Update reheatType for $it - current $reheatTypeVal")
+                hayStack.writeDefaultValById(reheatType["id"].toString(), reheatTypeVal + 1)
+            }
             val model = when {
                 it.containsKey("series") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeVavSeriesModelDef()
                 it.containsKey("parallel") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeVavParallelFanModelDef()

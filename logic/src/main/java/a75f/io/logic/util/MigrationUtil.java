@@ -536,29 +536,42 @@ public class MigrationUtil {
                     " and deadband and roomRef == \""+roomRef+"\"");
             HashMap<Object, Object> heatingDeadBand = ccuHsApi.readEntity("schedulable and heating" +
                     " and deadband and roomRef == \""+roomRef+"\"");
-            if(HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+
+            if (coolingUpperLimit != null && !coolingUpperLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+            if (heatingUpperLimit != null && !heatingUpperLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+            if (coolingLowerLimit != null && !coolingLowerLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+            if (heatingLowerLimit != null && !heatingLowerLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+            if (coolingDeadBand != null && !coolingDeadBand.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+            if (heatingDeadBand != null && !heatingDeadBand.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+                }
             }
         });
     }

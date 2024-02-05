@@ -174,11 +174,18 @@ class VavProfileViewModel : ViewModel() {
             }
 
             withContext(Dispatchers.Main) {
-                ProgressDialogUtils.hideProgressDialog()
-                _isDialogOpen.value = false
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                 showToast("VAV Configuration saved successfully", context)
                 CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+            }
+
+            // This check is needed because the dialog sometimes fails to close inside the coroutine.
+            // We don't know why this happens.
+            if (ProgressDialogUtils.isDialogShowing()) {
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
             }
         }
 

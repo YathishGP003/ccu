@@ -417,6 +417,8 @@ public abstract class VavProfile extends ZoneProfile {
         return nodeSet;
     }
 
+    // This method does not look like it would work post-DM migration.
+    // As far as I can see, it's not used anywhere? This should be investigated further.
     @Override
     public ZonePriority getPriority() {
         ZonePriority priority = NONE;
@@ -823,7 +825,7 @@ public abstract class VavProfile extends ZoneProfile {
         Equip equip = getEquip();
         NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
         return new VavProfileConfiguration(nodeAddr, nodeType.name(),
-                (int) vavEquip.getZonePriority().readDefaultVal(),
+                (int) vavEquip.getZonePriority().readPriorityVal(),
                 equip.getRoomRef(),
                 equip.getFloorRef() ,
                 profileType,

@@ -302,8 +302,6 @@ public class LSmartNode
             return ProfileMap_t.PROFILE_MAP_VAV_PARALLEL_FAN;
         } else if (profString.equals(ProfileType.VAV_ACB.name())) {
             return ProfileMap_t.PROFILE_MAP_VAV_ACTIVE_CHILLED_BEAM;
-        } else if (profString.equals(ProfileType.DUAL_DUCT.name())) {
-            return ProfileMap_t.PROFILE_MAP_VAV_DUAL_DUCT;
         } else if (profString.equals(ProfileType.PLC.name())) {
             return ProfileMap_t.PROFILE_MAP_GENERIC_PI_CONTROL;
         } else if (profString.equals(ProfileType.SSE.name())) {

@@ -440,7 +440,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             if (buildingTuner.get("domainName") != null) {
                                 String buildTunerDisPriorToDM = BuildingEquipCutOverMapping.INSTANCE
                                         .findDisFromDomainName(buildingTuner.get("domainName").toString());
-                                if (!buildTunerDisPriorToDM.isEmpty()) {
+                                if (buildTunerDisPriorToDM != null && !buildTunerDisPriorToDM.isEmpty()) {
                                     buildingTunerShortDisDM = buildTunerDisPriorToDM.substring(buildTunerDisPriorToDM.lastIndexOf("-") + 1).trim();
                                 } else {
                                     CcuLog.e(L.TAG_CCU_TUNER, "buildTunerDisPriorToDM is invalid for "+buildingTuner);

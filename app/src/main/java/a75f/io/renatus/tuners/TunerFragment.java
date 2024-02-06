@@ -687,12 +687,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         WeakReference<TunerFragment> weakReference = new WeakReference<>(TunerFragment.this);
         TunerFragment tunerFragment = weakReference.get();
 
-        if (tunerFragment != null && !tunerFragment.isAdded()) {
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(null,
+        if (tunerFragment != null && tunerFragment.isAdded()) {
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(()->{},
                     () -> {
                         processData(id, level, val, reason);
                     },
-                    null
+                    ()->{}
             ));
         }
     }
@@ -713,7 +713,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
         } else {
-            CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0, reason);
+            CCUHsApi.getInstance().writeTunerPointForCcuUser(id, level, val, 0, reason);
             CCUHsApi.getInstance().writeHisValById(id, val);
         }
     }

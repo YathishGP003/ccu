@@ -365,6 +365,7 @@ public class Globals {
                     //TODO - Find the right place..For now just doing if registered already
                     if (CCUHsApi.getInstance().isCCURegistered()) {
                         DiffManger diffManger = new DiffManger(getApplicationContext());
+                        diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
                         diffManger.processModelMigration(site.get("id").toString());
                     }
                 }  catch ( Exception e) {

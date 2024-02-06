@@ -71,7 +71,6 @@ object Domain {
     fun getEquipDetailsByDomain(domainName: String): List<Equip> {
         DomainManager.buildDomain(CCUHsApi.getInstance())
         val equips = mutableListOf<Equip>()
-        assert(site?.floors?.size  == 1)
         site?.floors?.entries?.forEach{
             val floor = it.value
             floor.rooms.entries.forEach { r ->
@@ -222,5 +221,9 @@ object Domain {
     @JvmStatic
     fun writeDefaultValByDomain(domainName: String, value: String, equipRef: String) {
         return hayStack.writeDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
+    }
+
+    fun readEquip(modelId: String) : Map<Any,Any> {
+        return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
 }

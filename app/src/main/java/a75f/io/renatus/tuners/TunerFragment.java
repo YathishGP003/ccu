@@ -338,7 +338,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                         textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                         String val = getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString());
-                        if (newTunerValueItem.containsKey("unit") && !val.equals("-") && !newTunerValueItem.containsKey("displayUnit")){
+                        if (newTunerValueItem.containsKey("unit")
+                                && !val.equals("-")
+                                && !newTunerValueItem.containsKey("displayUnit")
+                                && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                                || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                     val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -370,7 +374,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                     textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                     String val = getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString());
-                    if ((newTunerValueItem.containsKey("unit") && !val.equals("-")) && !newTunerValueItem.containsKey("displayUnit")){
+                    if ((newTunerValueItem.containsKey("unit")
+                            && !val.equals("-"))
+                            && !newTunerValueItem.containsKey("displayUnit")
+                            && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                            || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
                         if (isCelsiusTunerAvailableStatus()) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                 val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -413,7 +421,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     try {
                         if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit") && tunerVal != null) {
                             if (isCelsiusTunerAvailableStatus()) {
-                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                                        || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
                                     if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                         tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
                                     } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)) {
@@ -423,8 +432,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     }
                                 }
                             }
-
-
                         }
                     }catch (NumberFormatException numberFormatException) {
                         numberFormatException.toString();

@@ -794,7 +794,7 @@ public class Pulse
 				}
 			}
 		}
-		HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");
+		HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and (current or space)");
 		if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
 
 			double val = cmRegularUpdateMessage_t.roomTemperature.get();

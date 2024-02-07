@@ -432,7 +432,7 @@ public class MigrationUtil {
             UpdateFloorRefRoomRefForConfigPoints(CCUHsApi.getInstance());
             PreferenceUtil.setZoneEquipConfigPointMigrationDone();
         }
-        CCUHsApi.getInstance().removeAllNamedSchedule();
+
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateUserIntentMarker();

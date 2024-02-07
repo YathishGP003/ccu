@@ -1018,6 +1018,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 							.getPosition(0.0), false);
 					targetMinInsideHumidity.setSelection(humidityAdapter
 							.getPosition(0.0), false);
+					setPointConfig.setVisibility(View.GONE);
+
 				} else {
 					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 

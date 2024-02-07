@@ -238,7 +238,6 @@ class DabExternalAhu : DabSystemProfile() {
             SystemController.State.HEATING -> TempDirection.HEATING
             else -> TempDirection.COOLING
         }
-
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
         logIt("Changed direction $loopRunningDirection ")

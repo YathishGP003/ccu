@@ -104,8 +104,9 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
-        <item>  DAB External AHU Controller</item>
         <item>  Daikin IE RTU</item>
+        <item>  DAB External AHU Controller</item>
+        <item>  VAV External AHU Controller</item>
     </string-array>
 
     <string-array name="system_profile_select_carrier">
@@ -119,6 +120,8 @@
         <item>  VVT-C Fully Modulating AHU</item>
         <item>  VVT-C Staged RTU with VFD Fan</item>
         <item>  VVT-C Advanced Hybrid AHU</item>
+        <item>  VVT-C External AHU Controller</item>
+        <item>  VAV External AHU Controller</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">

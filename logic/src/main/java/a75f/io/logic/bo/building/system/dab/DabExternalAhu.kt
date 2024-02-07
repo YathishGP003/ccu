@@ -17,6 +17,7 @@ import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
+import a75f.io.logic.BuildConfig
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
@@ -48,6 +49,7 @@ class DabExternalAhu : DabSystemProfile() {
 
     companion object {
         const val PROFILE_NAME = "DAB External AHU Controller"
+        const val CARRIER_PROFILE_NAME = "VVT-C External AHU Controller"
         const val SYSTEM_ON = "System ON"
         const val SYSTEM_OFF = "System OFF"
         const val SYSTEM_MODBUS = "equip and system and not modbus"
@@ -64,7 +66,13 @@ class DabExternalAhu : DabSystemProfile() {
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
 
-    override fun getProfileName(): String = PROFILE_NAME
+    override fun getProfileName(): String {
+        return if (BuildConfig.BUILD_TYPE == "carrier_prod") {
+            CARRIER_PROFILE_NAME
+        } else {
+            PROFILE_NAME
+        }
+    }
 
     override fun getProfileType(): ProfileType = ProfileType.dabExternalAHUController
 

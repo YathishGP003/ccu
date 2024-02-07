@@ -10,3 +10,5 @@ data class ModelMeta(val modelId: String,val version: Version)
 const val MAJOR = "major"
 const val MINOR = "minor"
 const val PATCH = "patch"
+const val ID = "id"
+const val MODEL_VERSION = "version"

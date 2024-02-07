@@ -25,12 +25,9 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.renatus.util.CCUUiUtil;
 
 public class MasterControlUtil {
 

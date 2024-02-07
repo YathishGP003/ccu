@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavReheatProfile
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
+import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -173,11 +174,18 @@ class VavProfileViewModel : ViewModel() {
             }
 
             withContext(Dispatchers.Main) {
-                ProgressDialogUtils.hideProgressDialog()
-                _isDialogOpen.value = false
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                 showToast("VAV Configuration saved successfully", context)
                 CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+            }
+
+            // This check is needed because the dialog sometimes fails to close inside the coroutine.
+            // We don't know why this happens.
+            if (ProgressDialogUtils.isDialogShowing()) {
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
             }
         }
 
@@ -214,12 +222,14 @@ class VavProfileViewModel : ViewModel() {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
+            setScheduleType(profileConfiguration)
             L.ccu().zoneProfiles.add(vavProfile)
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
             vavProfile.init()
             setOutputTypes(profileConfiguration)
+            setScheduleType(profileConfiguration)
         }
 
     }
@@ -323,6 +333,18 @@ class VavProfileViewModel : ViewModel() {
         var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build(), analogOut2.get("id").toString())
 
+    }
+
+    private fun setScheduleType(config: VavProfileConfiguration) {
+        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
+        val scheduleTypeId = scheduleTypePoint.get("id").toString()
+
+        val roomSchedule = getSchedule(zoneRef, floorRef)
+        if(roomSchedule.isZoneSchedule) {
+            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
+        } else {
+            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        }
     }
 
     // This logic will break if the "damperType" point enum is changed

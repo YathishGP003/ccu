@@ -19,24 +19,24 @@ class ModelValidator {
         /**
          * Validate all the domain models
          */
-        fun validateAllDomainModels(metaDetails: List<ModelMeta>): List<String> {
+        fun validateAllDomainModels(metaDetails: List<ModelMeta>, path: String): List<String> {
             val inValidModels = mutableListOf<String>()
-             /*   val newVersionFiles = diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
-            // TODO I think no need to validate the current models.
-            // val versionFiles = diffManger.getModelFileVersionDetails(DiffManger.VERSION)*/
+            /*   val newVersionFiles = diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
+           // TODO I think no need to validate the current models.
+           // val versionFiles = diffManger.getModelFileVersionDetails(DiffManger.VERSION)*/
             metaDetails.forEach {
-                val isValidDefinition = isValidaModel(it.modelId)
+                val isValidDefinition = isValidaModel(it.modelId, path)
                 if (!isValidDefinition) {
                     inValidModels.add(it.modelId)
                     Log.i(Domain.LOG_TAG, "Invalid Model "+it.modelId)
                 }
             }
-          return inValidModels
+            return inValidModels
         }
 
-        fun isValidaModel(modelId: String): Boolean {
+        fun isValidaModel(modelId: String, path: String): Boolean {
             try {
-                val originalModel = getModelDirective("${DiffManger.NEW_FILE_PATH}$modelId.json")
+                val originalModel = getModelDirective("$path$modelId.json")
 
                 if (originalModel != null) {
                     when (originalModel) {

@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
@@ -139,7 +140,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
             mOTNProfile = new OTNProfile();
             mZonePriority.setSelection(2);
         }
-
+        CCUUiUtil.setSpinnerDropDownColor(mZonePriority,this.getContext());
     }
 
     @OnClick(R.id.setBtn)

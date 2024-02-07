@@ -49,6 +49,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBarView;
@@ -169,7 +170,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         ArrayList<String> coolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
-
+        setSpinnerDropDownIconColor();
 
         if(isCelsiusTunerAvailableStatus()){
             coolingLimitMin.setDropDownWidth(150);
@@ -621,5 +622,13 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         if (dialog != null) {
             dialog.getWindow().setLayout(1165, 646);
         }
+    }
+    private void setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(coolingLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingDeadBand, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDeadBand, this.getContext());
     }
 }

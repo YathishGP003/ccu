@@ -126,6 +126,8 @@
                     android:layout_weight="6.5"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
+                    android:backgroundTint="?orange_75f"
+                    android:backgroundTintMode="src_atop"
                     android:layout_marginTop="1dp" />
 
                 <Button

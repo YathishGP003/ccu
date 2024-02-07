@@ -178,13 +178,22 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                    Row {
-                        HeaderTextView(text = "Thermistor-1")
-                        Spacer(modifier = Modifier.width(60.dp))
+                    Row() {
+                        HeaderTextView(text = "Thermistor 1")
+                        Spacer(modifier = Modifier.width(20.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
+                    Row(horizontalArrangement = Arrangement.End) {
+                        HeaderTextView(text = "Relay 1")
+                        Spacer(modifier = Modifier.width(20.dp))
+                        LabelTextView(text = "Shut-Off Valve")
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Row (modifier = Modifier.fillMaxWidth()){
+                    Spacer(modifier = Modifier.width(15.dp))
                     DropDownWithLabel(
-                        label = "Thermistor-2",
+                        label = "Thermistor 2",
                         list = viewModel.condensateSensorTypesList,
                         previewWidth = 100,
                         expandedWidth = 120,

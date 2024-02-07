@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+
 import android.app.AlertDialog;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -312,12 +314,16 @@ public class InstallerOptions extends Fragment {
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
                         HashMap band = CCUHsApi.getInstance().read("point and snband");
+                        if(!addressBandSelected.equals(band.get("val").toString()) && regAddressBands.contains(addressBandSelected)) {
+                            Toast.makeText(getApplicationContext(), "This address band is already been used by another CCU.", Toast.LENGTH_LONG).show();
+                        }
                         SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(band);
                         sp.setVal(addressBandSelected);
                         SettingPoint snBand = sp.build();
 
                         CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
-
+                        regAddressBands.remove(band.get("val"));
+                        regAddressBands.add(addressBandSelected);
                         try {
                             String confString = prefs.getString(BACNET_CONFIGURATION);
                             JSONObject config = new JSONObject(confString);
@@ -332,7 +338,6 @@ public class InstallerOptions extends Fragment {
 
                     }
                 }
-
             }
 
             @Override
@@ -1072,7 +1077,7 @@ public class InstallerOptions extends Fragment {
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
+                    HDict tDict = new HDictBuilder().add("filter", "snband and siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
                         Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
@@ -1085,22 +1090,12 @@ public class InstallerOptions extends Fragment {
                     while (it.hasNext())
                     {
                         HRow r = (HRow) it.next();
-                        if (r.getStr("group") != null) {
-                            regAddressBands.add(r.getStr("group"));
+                        if (r.getStr("val") != null) {
+                            regAddressBands.add(r.getStr("val"));
                         }
                     }
                 },
                 ()->{
-                    for(int i = 0; i < regAddressBands.size(); i++)
-                    {
-                        for(int j = 0; j < addressBand.size(); j++)
-                        {
-                            if(regAddressBands.get(i).equals(addressBand.get(j)))
-                            {
-                                addressBand.remove(regAddressBands.get(i));
-                            }
-                        }
-                    }
                     setNodeAddress();
                 }
         );

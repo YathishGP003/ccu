@@ -35,6 +35,8 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -112,9 +114,12 @@ public class RegisterCCUToExistingSite extends DialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
             {
                 Log.d("CCU","AddressBandSelected : "+addressBandSpinner.getSelectedItem());
-                if (i > 0)
+                if (i >= 0)
                 {
                     addressBandSelected = addressBandSpinner.getSelectedItem().toString();
+                    if(regAddressBands.contains(addressBandSelected)) {
+                        Toast.makeText(getApplicationContext(), "This address band is already been used by another CCU.", Toast.LENGTH_LONG).show();
+                    }
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                 }
             }
@@ -230,7 +235,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
+                    HDict tDict = new HDictBuilder().add("filter", "snband and  siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
                         Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
@@ -242,27 +247,32 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     while (it.hasNext())
                     {
                         HRow r = (HRow) it.next();
-                        if (r.getStr("group") != null) {
-                            regAddressBands.add(r.getStr("group"));
+                        if (r.getStr("val") != null) {
+                            regAddressBands.add(r.getStr("val"));
                         }
                     }
                 },
                 ()->{
+                    Collections.sort(regAddressBands, new Comparator<String>() {
+                        @Override
+                        public int compare(String s, String t1) {
+                            return Integer.compare(Integer.parseInt(s), Integer.parseInt(t1));
+                        }
+                    });
+                    int selectedIndex = 0;
                     for(int i = 0; i < regAddressBands.size(); i++)
                     {
-                        for(int j = 0; j < addressBand.size(); j++)
-                        {
-                            if(regAddressBands.get(i).equals(addressBand.get(j)))
-                            {
-                                addressBand.remove(regAddressBands.get(i));
-                            }
-                        }
+                        if(regAddressBands.get(i).equals(addressBand.get(selectedIndex))) {
+                            selectedIndex++;
+                        } else if(regAddressBands.get(i).compareTo(addressBand.get(selectedIndex))>0)
+                            break;
                     }
                     ArrayAdapter<String> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, addressBand);
                     analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                     addressBandSpinner.setAdapter(analogAdapter);
-                    addressBandSelected = addressBand.get(0);
+                    addressBandSelected = addressBand.get(selectedIndex);
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                    addressBandSpinner.setSelection(selectedIndex);
                 }
         );
     }

@@ -130,7 +130,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
         String listTitle = (String) getGroup(listPosition);
         if (!listTitle.equals("CM-device")) {
-            HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
+            HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + parseGroup(listTitle) + "\"");
             String profile = equipGroup.get("profile").toString();
 
             if (profile.equals("VAV_REHEAT") || profile.equals("VAV_SERIES_FAN") || profile.equals("VAV_PARALLEL_FAN")) {
@@ -141,9 +141,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 damperTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, damperTypes);
                 damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                VavProfile mVavProfile = (VavProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+                VavProfile mVavProfile = (VavProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
                 VavEquip equip = (VavEquip) Domain.INSTANCE.getDomainEquip(mVavProfile.getEquip().getId());
-                //VavProfileConfiguration mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                //VavProfileConfiguration mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 int damperPosition = damperTypesAdapter.getPosition(DamperType.values()[(int)equip.getDamperType().readDefaultVal()].displayName);
 
                 ArrayAdapter<String> reheatTypesAdapter;
@@ -153,7 +153,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 reheatTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, reheatTypes);
                 reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[(int)equip.getReheatType().readDefaultVal()].displayName);
+                int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[(int)equip.getReheatType().readDefaultVal()-1].displayName);
                 if (damperPosition == 0) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog1",profile+"-type-0-10v");
@@ -217,8 +217,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             }
             else if (profile.equals("DAB")) {
-                DabProfile mDabProfile = (DabProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                DabProfileConfiguration mProfileConfig = (DabProfileConfiguration) mDabProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                DabProfile mDabProfile = (DabProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                DabProfileConfiguration mProfileConfig = (DabProfileConfiguration) mDabProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 ;
                 int damper1Position = mProfileConfig.damper1Type;
                 int damper2Position = mProfileConfig.damper2Type;
@@ -472,7 +472,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             value = value * 0.1;
                     }
 
-                    if (expandedListText.startsWith("Analog1In")) {
+                    if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog 1 In")) {
                         String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
                         if (!analogIn1Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
@@ -485,7 +485,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_override_value.setAdapter(targetValAdapter);
                         spinner_override_value.setSelection(0);
                         spinner_override_value.setSelection(0,false);
-                    } else if (expandedListText.toLowerCase().startsWith("analog1out")) {
+                    } else if (expandedListText.toLowerCase().startsWith("analog1out") || expandedListText.startsWith("Analog 1 Out")) {
                         String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
                         if (!analogOut1Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
@@ -497,7 +497,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_analog_out1.setAdapter(analogOut1Adapter);
                         spinner_analog_out1.setSelection(0);
                         spinner_analog_out1.setSelection(0,false);
-                    } else if (expandedListText.startsWith("Analog2In")) {
+                    } else if (expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog 2 In")) {
                         String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                         if (!analogIn2Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
@@ -510,7 +510,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_override_value.setAdapter(targetValAdapter);
                         spinner_override_value.setSelection(0);
                         spinner_override_value.setSelection(0,false);
-                    } else if (expandedListText.toLowerCase().startsWith("analog2out")) {
+                    } else if (expandedListText.toLowerCase().startsWith("analog2out") || expandedListText.startsWith("Analog 2 Out")) {
                         String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
                         if (!analogOut2Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
@@ -522,7 +522,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_analog_out2.setAdapter(analogOut2Adapter);
                         spinner_analog_out2.setSelection(0);
                         spinner_analog_out2.setSelection(0,false);
-                    } else if (expandedListText.toLowerCase().startsWith("analog3out")) {
+                    } else if (expandedListText.toLowerCase().startsWith("analog3out") || expandedListText.startsWith("Analog 3 Out")) {
                         String analogOut3Mapped = getZoneMapping("Analog-out3", listPosition, convertView);
                         if (!analogOut3Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3" + "\n(" + analogOut3Mapped + ")");
@@ -534,12 +534,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_analog_out3.setAdapter(analogOut3Adapter);
                         spinner_analog_out3.setSelection(0);
                         spinner_analog_out3.setSelection(0,false);
-                    }else if (expandedListText.startsWith("relay")) {
-                        String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
+                    }else if (expandedListText.startsWith("relay") || expandedListText.startsWith("Relay")) {
+                        String relayMapped = getZoneMapping("relay" + getRelayIndex(expandedListText), listPosition, convertView);
                         if (!relayMapped.equals(""))
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + getRelayIndex(expandedListText) + "\n(" + relayMapped + ")");
                         else
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + getRelayIndex(expandedListText));
                         txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                         spinner_relay.setVisibility(View.VISIBLE);
                         spinner_relay.setAdapter(relayValAdapter);
@@ -547,11 +547,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
                         value = value * 0.001;
-                        String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
+                        String thermistorMapped = getZoneMapping("Thermistor" + getThermistorIndex(expandedListText), listPosition, convertView);
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + getThermistorIndex(expandedListText) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");
                         etThermistor.setVisibility(View.VISIBLE);
-                        if (!Strings.isNullOrEmpty(thOver) && thEquipDetails.equals(equipId + expandedListText.substring(2, 3)))
+                        if (!Strings.isNullOrEmpty(thOver) && thEquipDetails.equals(equipId + getThermistorIndex(expandedListText)))
                             etThermistor.setText(thOver);
                         else etThermistor.getText().clear();
                     } else if (expandedListText.startsWith(siteName)) {
@@ -641,7 +641,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 val = val * 0.1;
                         }
 
-                        if (expandedListText.startsWith("Analog1In")) {
+                        if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog 1 In")) {
                             String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
                             String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
                             if (!analogIn1Mapped.equals(""))
@@ -661,7 +661,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointVal(id, val);
                                 idMap.put(id, value1);
                             }
-                        } else if (expandedListText.toLowerCase().startsWith("analog1out")) {
+                        } else if (expandedListText.toLowerCase().startsWith("analog1out") || expandedListText.startsWith("Analog 1 Out")) {
                             String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
                             String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
 
@@ -681,7 +681,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointVal(id, val);
                                 idMap.put(id, value1);
                             }
-                        } else if (expandedListText.startsWith("Analog2In")) {
+                        } else if (expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog 2 In")) {
                             String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
                             String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                             if (!analogIn2Mapped.equals(""))
@@ -700,7 +700,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointVal(id, val);
                                 idMap.put(id, value1);
                             }
-                        } else if (expandedListText.toLowerCase().startsWith("analog2out")) {
+                        } else if (expandedListText.toLowerCase().startsWith("analog2out") || expandedListText.startsWith("Analog 2 Out")) {
                             String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
                             String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
                             if (!analogOut2Mapped.equals(""))
@@ -720,7 +720,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointVal(id, val);
                                 idMap.put(id, value1);
                             }
-                        }else if (expandedListText.toLowerCase().startsWith("analog3out")) {
+                        }else if (expandedListText.toLowerCase().startsWith("analog3out") || expandedListText.startsWith("Analog 3 Out")) {
                             String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
                             String analogOut3Mapped = getZoneMapping("Analog-out3", listPosition, convertView);
                             if (!analogOut3Mapped.equals(""))
@@ -740,13 +740,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 setPointVal(id, val);
                                 idMap.put(id, value1);
                             }
-                        } else if (expandedListText.startsWith("relay")) {
-                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(5, 6));
-                            String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
+                        } else if (expandedListText.startsWith("relay") || expandedListText.startsWith("Relay")) {
+                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getRelayIndex(expandedListText));
+                            String relayMapped = getZoneMapping("relay" + getRelayIndex(expandedListText), listPosition, convertView);
                             if (!relayMapped.equals(""))
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + getRelayIndex(expandedListText) + "\n(" + relayMapped + ")");
                             else
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + getRelayIndex(expandedListText));
                             txt_calculated_output.setText(value1.equals("1.0") ? "ON" : "OFF");
                             spinner_relay.setVisibility(View.VISIBLE);
                             relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -760,16 +760,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 idMap.put(id, value1);
                             }
                         } else if (expandedListText.startsWith("Th")) {
-                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(2, 3));
-                            String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
+                            String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getThermistorIndex(expandedListText));
+                            String thermistorMapped = getZoneMapping("Thermistor" + getThermistorIndex(expandedListText), listPosition, convertView);
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + getThermistorIndex(expandedListText) + "\n(" + thermistorMapped + ")");
                             expandedListTextVal.setText("" + val + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                             etThermistor.setVisibility(View.VISIBLE);
                             if(!Strings.isNullOrEmpty(overridenData)) {
                                 etThermistor.setText(overridenData);
                             }
                             else{
-                                setPointValForThermistor(id, val, Integer.parseInt(listTitle.substring(3)), listTitle);
+                                setPointValForThermistor(id, val, Integer.parseInt(parseGroup(listTitle)), listTitle);
                                 idMap.put(id, value1);
                             }
                         } else if (expandedListText.startsWith(siteName)) {
@@ -844,7 +844,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
                             } else if (NewexpandedListText.startsWith("relay")) {
-                                String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(5, 6));
+                                String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getThermistorIndex(expandedListText));
                                 String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
                                 if (getConfigEnabled("relay" + relayPos) > 0) {
                                     String relayMapped = getRelayMapping("relay" + relayPos, convertView);
@@ -1049,9 +1049,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     String selectedSpinnerItem = spinner_relay.getSelectedItem().toString();
                     if (!selectedSpinnerItem.equals("- - - -")) {
                         setPointValForRelay(idMap.get(tunerName), Double.parseDouble(String.valueOf(spinner_relay.getSelectedItemId())),
-                                "relay" + expandedListText.substring(5, 6));
+                                "relay" + getRelayIndex(expandedListText));
                         idMap.put(idMap.get(tunerName), spinner_relay.getSelectedItem().toString());
-                        TempOverRiddenValue.getInstance().addOverRiddenValues(equipId+expandedListText.substring(5, 6), selectedSpinnerItem);
+                        TempOverRiddenValue.getInstance().addOverRiddenValues(equipId+getRelayIndex(expandedListText), selectedSpinnerItem);
                     }
                 }
 
@@ -1083,9 +1083,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             String selectedSpinnerItem = etThermistor.getText().toString();
                             if (!selectedSpinnerItem.equals("- - - -")) {
                                 setPointValForThermistor(idMap.get(tunerName),
-                                        Double.parseDouble(selectedSpinnerItem), Integer.parseInt(listTitle.substring(3)), listTitle);
+                                        Double.parseDouble(selectedSpinnerItem), Integer.parseInt(parseGroup(listTitle)), listTitle);
                                 idMap.put(idMap.get(tunerName), selectedSpinnerItem);
-                                TempOverRiddenValue.getInstance().addOverRiddenValues(equipId + expandedListText.substring(2, 3), selectedSpinnerItem);
+                                TempOverRiddenValue.getInstance().addOverRiddenValues(equipId + getThermistorIndex(expandedListText), selectedSpinnerItem);
                             }
                         }
                     }, 5000);
@@ -1111,7 +1111,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 public void afterTextChanged(Editable s)
                 {
                     thOver = s.toString();
-                    thEquipDetails = equipId + expandedListText.substring(2, 3);
+                    thEquipDetails = equipId + getThermistorIndex(expandedListText);
                 }
             });
 
@@ -1123,6 +1123,24 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         }
 
         return convertView;
+    }
+
+    private static String getRelayIndex(String titleStr) {
+        if (titleStr.contains(" ")) {
+            String[] strList = titleStr.split(" ");
+            return strList[1];
+        } else {
+            return titleStr.substring(5,6);
+        }
+    }
+
+    private static String getThermistorIndex(String titleStr) {
+        if (titleStr.contains(" ")) {
+            String[] strList = titleStr.split(" ");
+            return strList[1];
+        } else {
+            return titleStr.substring(2,3);
+        }
     }
 
     public static float mapAnalogOut(String type, float val) {
@@ -1202,9 +1220,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         String profile = getProfileName(listTitle);
         switch (profile){
             case "SSE":
-                SingleStageProfile mSSEProfile = (SingleStageProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                SingleStageConfig sseProfileConfig = (SingleStageConfig) mSSEProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
-                int relaypos = (int)getConfigNumVal("enable and "+pointname, Integer.parseInt(listTitle.substring(3)));
+                SingleStageProfile mSSEProfile = (SingleStageProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                SingleStageConfig sseProfileConfig = (SingleStageConfig) mSSEProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
+                int relaypos = (int)getConfigNumVal("enable and "+pointname, Integer.parseInt(parseGroup(listTitle)));
                 if (pointname.equals("relay1")){
                     if (sseProfileConfig.isOpConfigured(Port.RELAY_ONE)) {
                         if (relaypos == 1)
@@ -1282,8 +1300,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Supply Airflow";
                 break;
             case "SMARTSTAT_CONVENTIONAL_PACK_UNIT":
-                ConventionalUnitProfile mCPUProfile = (ConventionalUnitProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                ConventionalUnitConfiguration cpuProfileConfig = (ConventionalUnitConfiguration) mCPUProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                ConventionalUnitProfile mCPUProfile = (ConventionalUnitProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                ConventionalUnitConfiguration cpuProfileConfig = (ConventionalUnitConfiguration) mCPUProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
 
                 if (pointname.equals("relay1")) {
                     if (cpuProfileConfig.isOpConfigured(Port.RELAY_ONE))
@@ -1337,9 +1355,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Not Used";
                 break;
             case "PLC":
-                PlcProfile mPlcProfile = (PlcProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                PlcProfileConfiguration plcProfileConfig = (PlcProfileConfiguration) mPlcProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
-                HashMap equip = CCUHsApi.getInstance().read("equip and pid and group == \"" + listTitle.substring(3) + "\"");
+                PlcProfile mPlcProfile = (PlcProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                PlcProfileConfiguration plcProfileConfig = (PlcProfileConfiguration) mPlcProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
+                HashMap equip = CCUHsApi.getInstance().read("equip and pid and group == \"" + parseGroup(listTitle) + "\"");
                 String equipRef = equip.get("id").toString();
                 if (pointname.equals("Analog1In")){
                     ArrayList<String> analog1InArr = new ArrayList<>();
@@ -1383,8 +1401,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "SMARTSTAT_HEAT_PUMP_UNIT":
-                HeatPumpUnitProfile mHPUProfile = (HeatPumpUnitProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));;
-                HeatPumpUnitConfiguration hpuProfileConfig = (HeatPumpUnitConfiguration) mHPUProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));;
+                HeatPumpUnitProfile mHPUProfile = (HeatPumpUnitProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));;
+                HeatPumpUnitConfiguration hpuProfileConfig = (HeatPumpUnitConfiguration) mHPUProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));;
                 if (pointname.equals("relay1")) {
                     if (hpuProfileConfig.isOpConfigured(Port.RELAY_ONE))
                         return "Compressor Stage 1";
@@ -1429,8 +1447,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Not Used";
                 break;
             case "SMARTSTAT_TWO_PIPE_FCU":
-                TwoPipeFanCoilUnitProfile twoPfcuProfile = (TwoPipeFanCoilUnitProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));;
-                TwoPipeFanCoilUnitConfiguration twopfcuProfileConfig = (TwoPipeFanCoilUnitConfiguration) twoPfcuProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));;
+                TwoPipeFanCoilUnitProfile twoPfcuProfile = (TwoPipeFanCoilUnitProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));;
+                TwoPipeFanCoilUnitConfiguration twopfcuProfileConfig = (TwoPipeFanCoilUnitConfiguration) twoPfcuProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));;
                 if (pointname.equals("relay1")) {
                     if (twopfcuProfileConfig.isOpConfigured(Port.RELAY_ONE))
                         return "Fan medium speed";
@@ -1467,9 +1485,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "SMARTSTAT_FOUR_PIPE_FCU":
-                FourPipeFanCoilUnitProfile fourPfcuProfile = (FourPipeFanCoilUnitProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));;
+                FourPipeFanCoilUnitProfile fourPfcuProfile = (FourPipeFanCoilUnitProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));;
                 FourPipeFanCoilUnitConfiguration fourPFCUProfileConfig = (FourPipeFanCoilUnitConfiguration) fourPfcuProfile
-                        .getProfileConfiguration(Short.parseShort(listTitle.substring(3)));;
+                        .getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));;
                 if (pointname.equals("relay1")) {
                     if (fourPFCUProfileConfig.isOpConfigured(Port.RELAY_ONE)) return "Fan medium speed";
                     else return "Not Enabled";
@@ -1506,8 +1524,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Damper2 Type";
                 break;
             case "DUAL_DUCT":
-                DualDuctProfile mDualDuctProfile = (DualDuctProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                DualDuctProfileConfiguration mProfileConfig = (DualDuctProfileConfiguration) mDualDuctProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                DualDuctProfile mDualDuctProfile = (DualDuctProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                DualDuctProfileConfiguration mProfileConfig = (DualDuctProfileConfiguration) mDualDuctProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 if (pointname.equals("Thermistor1"))
                     return "Discharge Airflow\n Temp";
                 else if (pointname.equals("Thermistor2"))
@@ -1537,8 +1555,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_MONITORING":
-                HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                HyperStatMonitoringConfiguration monitoringConfiguration = (HyperStatMonitoringConfiguration) monitoringProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                HyperStatMonitoringConfiguration monitoringConfiguration = (HyperStatMonitoringConfiguration) monitoringProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 ArrayList<String> analogArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                     analogArr.add(r.sensorName + " " + r.engineeringUnit);
@@ -1569,8 +1587,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT":
-                HyperStatCpuProfile mHSCpuProfile = (HyperStatCpuProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
-                HyperStatCpuConfiguration mHSCpuConfig = (HyperStatCpuConfiguration) mHSCpuProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                HyperStatCpuProfile mHSCpuProfile = (HyperStatCpuProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                HyperStatCpuConfiguration mHSCpuConfig = (HyperStatCpuConfiguration) mHSCpuProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 List<String> analogCpuArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                     analogCpuArr.add(r.sensorName + " " + r.engineeringUnit);
@@ -1648,7 +1666,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     private String getVavRelayMapping(String pointname, String listTitle) {
-        VavProfile vavProfile = (VavProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+        VavProfile vavProfile = (VavProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
         VavEquip equip = (VavEquip) Domain.INSTANCE.getDomainEquip(vavProfile.getEquip().getId());
         if (pointname.equals("relay1") && ( equip.getReheatType().readDefaultVal() == 6 || equip.getReheatType().readDefaultVal() == 7)) {
             return "Electric Reheat Stage 1";
@@ -1659,7 +1677,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
     
     private String getProfileName(String listTitle) {
-        HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
+        HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + parseGroup(listTitle) + "\"");
         String profile = equipGroup.get("profile").toString();
         return profile;
     }
@@ -1739,12 +1757,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     public String getZoneTitle(int listPosition) {
         if (listPosition != 0) {
             String listTitle = (String) getGroup(listPosition);
-            HashMap roomMap = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3, listTitle.length()) + "\"");
+            HashMap roomMap = CCUHsApi.getInstance().read("equip and group == \"" + parseGroup(listTitle) + "\"");
             Zone zone = HSUtil.getZone(roomMap.get("roomRef").toString(), roomMap.get("floorRef").toString());
             return zone.getDisplayName() + "-" + listTitle.substring(3, listTitle.length());
         }
         else
             return null;
+    }
+
+    private String parseGroup(String title) {
+        String[] splitTitle = title.split("-");
+        return splitTitle[splitTitle.length-1];
     }
 
     @Override

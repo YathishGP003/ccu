@@ -17,7 +17,7 @@ object VavZoneProfileCutOverMapping {
         "minHeatingDamperPos" to "minHeatingDamperPos",
         "maxHeatingDamperPos" to "maxHeatingDamperPos",
         "maxCoolingDamperPos" to "maxCoolingDamperPos",
-        "emperatureOffset" to "temperatureOffset",
+        "temperatureOffset" to "temperatureOffset",
 
         "zonePriorityMultiplier" to "vavZonePriorityMultiplier",
         "zonePrioritySpread" to "vavZonePrioritySpread",

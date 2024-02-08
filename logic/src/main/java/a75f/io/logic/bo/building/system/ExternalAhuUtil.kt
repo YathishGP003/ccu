@@ -718,6 +718,7 @@ fun addSystemEquip(
     definition: SeventyFiveFProfileDirective?,
     systemProfile: SystemProfile
 ) {
+    CcuLog.i(L.TAG_CCU_SYSTEM, "Adding system equip "+definition?.name)
     val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
     val equipId = profileEquipBuilder.buildEquipAndPoints(
         config!!, definition!!,

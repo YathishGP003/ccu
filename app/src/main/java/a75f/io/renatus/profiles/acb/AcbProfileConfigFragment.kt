@@ -135,8 +135,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.damperType.toInt(),
-                        spacerLimit=178
+                        defaultSelection = viewModel.viewState.damperType.toInt()
                     )
                     Spacer(modifier=Modifier.width(87.dp))
                     Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
@@ -148,8 +147,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperSize = selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damperSize.toInt(),
-                            spacerLimit=20
+                            defaultSelection = viewModel.viewState.damperSize.toInt()
                         )
 
                         Spacer(modifier = Modifier.width(45.dp))
@@ -162,8 +160,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damperShape.toInt(),
-                            spacerLimit = 23
+                            defaultSelection = viewModel.viewState.damperShape.toInt()
                         )
 
 
@@ -180,8 +177,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = {selectedIndex -> viewModel.viewState.valveType = selectedIndex.toDouble()},
-                        defaultSelection = viewModel.viewState.valveType.toInt(),
-                        spacerLimit = 205
+                        defaultSelection = viewModel.viewState.valveType.toInt()
                     )
                     Spacer(modifier=Modifier.width(87.dp))
                     DropDownWithLabel(
@@ -190,8 +186,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.zonePriority.toInt(),
-                        spacerLimit = 132
+                        defaultSelection = viewModel.viewState.zonePriority.toInt()
                     )
                 }
 
@@ -211,8 +206,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
-                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0 ,
-                        spacerLimit = 131
+                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0
                     )
                 }
 
@@ -292,9 +286,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                                 previewWidth = 100,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
-                                spacerLimit = 182,
-                                paddingLimit = 10
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
                             )
                         }
                     }

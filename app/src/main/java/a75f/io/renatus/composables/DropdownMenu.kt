@@ -37,13 +37,40 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DropDownWithLabel(
     label: String, list: List<String>, previewWidth: Int = 80, expandedWidth: Int = 100,
-    onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit: Int= 80,paddingLimit: Int=0) {
+    onSelected: (Int) -> Unit, defaultSelection: Int = 0) {
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
-            HeaderTextView(text = label, padding = paddingLimit)
+            if(label.equals("K-Factor")) {
+                HeaderTextView(text = label, padding = 10)
+            }
+            else{
+                HeaderTextView(text = label, padding = 0)
+            }
         }
-
-        Spacer(modifier = Modifier.width(spacerLimit.dp))
+        if(label.equals("Damper Type")){
+            Spacer(modifier = Modifier.width(178.0.dp))
+        }
+        else if(label.equals("Valve Type")){
+            Spacer(modifier = Modifier.width(205.0.dp))
+        }
+        else if(label.equals("Zone Priority")){
+            Spacer(modifier=Modifier.width(132.dp))
+        }
+        else if(label.equals("Size")){
+            Spacer(modifier=Modifier.width(20.dp))
+        }
+        else if(label.equals("Shape")){
+            Spacer(modifier=Modifier.width(23.dp))
+        }
+        else if(label.equals("K-Factor")){
+            Spacer(modifier=Modifier.width(182.dp))
+        }
+        else if(label.equals("Thermistor-2")){
+            Spacer(modifier=Modifier.width(131.dp))
+        }
+        else{
+            Spacer(modifier = Modifier.width(80.dp))
+        }
 
         var expanded by remember { mutableStateOf(false) }
         var selectedIndex by remember { mutableStateOf(defaultSelection) }

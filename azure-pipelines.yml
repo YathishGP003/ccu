@@ -8,7 +8,7 @@ trigger:
 
 jobs:
 - job: Job_1
-  displayName: Build QA
+  displayName: Build APK QA
   pool:
     vmImage: ubuntu-latest
   steps:

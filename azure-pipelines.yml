@@ -26,6 +26,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/'
       ArtifactName: qaApk
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
   - task: Gradle@2
     displayName: 'gradlew assembleStaging'
     inputs:
@@ -38,6 +43,11 @@ jobs:
 - job: Job_2
   displayName: Build APK PROD
   steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
   - task: Gradle@2
     displayName: 'gradlew assembleProd'
     inputs:
@@ -47,6 +57,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/prod/'
       ArtifactName: ProdApk
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
   - task: Gradle@2
     displayName: 'gradlew assembleDaikin_prod'
     inputs:
@@ -56,6 +71,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/daikin_prod/'
       ArtifactName: Daikin_prodApk
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
   - task: Gradle@2
     displayName: 'gradlew assembleCarrier_prod'
     inputs:

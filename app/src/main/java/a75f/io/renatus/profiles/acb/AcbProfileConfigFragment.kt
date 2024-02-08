@@ -135,7 +135,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.damperType.toInt()
+                        defaultSelection = viewModel.viewState.damperType.toInt(),
+                        spacerLimit=178
                     )
                     Spacer(modifier=Modifier.width(87.dp))
                     Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
@@ -147,7 +148,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperSize = selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damperSize.toInt()
+                            defaultSelection = viewModel.viewState.damperSize.toInt(),
+                            spacerLimit=20
                         )
 
                         Spacer(modifier = Modifier.width(45.dp))
@@ -160,7 +162,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damperShape.toInt()
+                            defaultSelection = viewModel.viewState.damperShape.toInt(),
+                            spacerLimit = 23
                         )
 
 
@@ -177,7 +180,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = {selectedIndex -> viewModel.viewState.valveType = selectedIndex.toDouble()},
-                        defaultSelection = viewModel.viewState.valveType.toInt()
+                        defaultSelection = viewModel.viewState.valveType.toInt(),
+                        spacerLimit = 205
                     )
                     Spacer(modifier=Modifier.width(87.dp))
                     DropDownWithLabel(
@@ -186,7 +190,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.zonePriority.toInt()
+                        defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        spacerLimit = 132
                     )
                 }
 
@@ -206,7 +211,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
-                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0
+                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0 ,
+                        spacerLimit = 131
                     )
                 }
 
@@ -286,7 +292,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                                 previewWidth = 100,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
+                                spacerLimit = 182,
+                                paddingLimit = 10
                             )
                         }
                     }

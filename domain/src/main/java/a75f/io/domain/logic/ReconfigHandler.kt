@@ -6,6 +6,8 @@ import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.logger.CcuLog
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import org.projecthaystack.UnknownNameException
 
 object ReconfigHandler {
@@ -43,7 +45,7 @@ object ReconfigHandler {
             .map { it -> it["domainName"].toString() }
     }*/
 
-    fun getEntityReconfiguration(equipGroup: Int, hayStack: CCUHsApi, config : EntityConfiguration) :
+    fun getEntityReconfiguration(equipGroup: Int, hayStack: CCUHsApi, config : EntityConfiguration, modelDef: SeventyFiveFProfileDirective) :
                                                                         EntityConfiguration {
         //val existingEntityMap = getAllConfig(equipGroup, hayStack)
 
@@ -53,7 +55,7 @@ object ReconfigHandler {
         val newEntityConfig = EntityConfiguration()
 
         existingEntityList.forEach{ entityName ->
-            if (config.tobeAdded.find { it.domainName == entityName} == null) {
+            if (config.tobeAdded.find { it.domainName == entityName} == null && !pointIsDynamicSensor(modelDef, entityName)) {
                 newEntityConfig.tobeDeleted.add(EntityConfig(entityName))
             }
         }
@@ -65,5 +67,11 @@ object ReconfigHandler {
             }
         }
         return newEntityConfig;
+    }
+
+    private fun pointIsDynamicSensor(modelDef: SeventyFiveFProfileDirective, entityName: String) : Boolean {
+        return modelDef.points.find {
+            it.domainName.equals(entityName) && it.configuration.configType.equals(PointConfiguration.ConfigType.DYNAMIC_SENSOR)
+        } != null
     }
 }

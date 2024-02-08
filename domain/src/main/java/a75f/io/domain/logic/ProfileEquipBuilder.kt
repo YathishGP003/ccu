@@ -55,7 +55,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
         val entityConfiguration = ReconfigHandler
-            .getEntityReconfiguration(configuration.nodeAddress, hayStack, entityMapper.getEntityConfiguration(configuration))
+            .getEntityReconfiguration(configuration.nodeAddress, hayStack, entityMapper.getEntityConfiguration(configuration), modelDef)
 
         val equip = hayStack.readEntity(
             "equip and group == \"${configuration.nodeAddress}\"")

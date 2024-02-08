@@ -1668,4 +1668,6 @@
     <string name="label_property_type">Property Type</string>
     <string name="label_property_value">Property Value</string>
     <string name="txt_valid_input">Please provide valid input</string>
+    <string name="Toast_Warning_Message">The selected pairing address is currently being used by another CCU.</string>
+    <string name="Toast_Warning_Title">Warning!</string>
 </resources>

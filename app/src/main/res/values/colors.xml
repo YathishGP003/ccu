@@ -102,5 +102,7 @@
     <color name="ctaOrange">#E5561A</color>
     <color name="resp_header_bg">#EBECED</color>
     <color name="resp_header_title_bg">#666666</color>
+    <color name="warning_toast_red">#FF3A42</color>
+    <color name="warning_toast_black_background">#CC000000</color>
 
 </resources>

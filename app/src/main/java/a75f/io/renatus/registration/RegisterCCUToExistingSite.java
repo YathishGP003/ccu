@@ -14,6 +14,7 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
     HashMap<Object, Object> site;
+    View toastWarning;
 
     public RegisterCCUToExistingSite() {
     }
@@ -101,6 +103,8 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
         mInstallerEmailET.setEnabled(ccuInstallerEmail.isEmpty());
 
+        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_warning));
+
         for (int addr = 1000; addr <= 10900; addr+=100) {
             addressBand.add(String.valueOf(addr));
         }
@@ -118,7 +122,11 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                 {
                     addressBandSelected = addressBandSpinner.getSelectedItem().toString();
                     if(regAddressBands.contains(addressBandSelected)) {
-                        Toast.makeText(getApplicationContext(), "This address band is already been used by another CCU.", Toast.LENGTH_LONG).show();
+                        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                        toast.setGravity(Gravity.BOTTOM, 50, 50);
+                        toast.setView(toastWarning);
+                        toast.setDuration(Toast.LENGTH_LONG);
+                        toast.show();
                     }
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                 }

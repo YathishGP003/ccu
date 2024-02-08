@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -186,6 +187,7 @@ public class InstallerOptions extends Fragment {
     private static final String TAG = InstallerOptions.class.getSimpleName();
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
+    private View toastWarning;
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
         imageTemp.setTempControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
 
@@ -289,6 +291,8 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
 
+        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
+
         setToggleCheck();
 
         if (ccuId != null) {
@@ -315,7 +319,11 @@ public class InstallerOptions extends Fragment {
                     if (!isFreshRegister){
                         HashMap band = CCUHsApi.getInstance().read("point and snband");
                         if(!addressBandSelected.equals(band.get("val").toString()) && regAddressBands.contains(addressBandSelected)) {
-                            Toast.makeText(getApplicationContext(), "This address band is already been used by another CCU.", Toast.LENGTH_LONG).show();
+                            Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                            toast.setGravity(Gravity.BOTTOM, 50, 50);
+                            toast.setView(toastWarning);
+                            toast.setDuration(Toast.LENGTH_LONG);
+                            toast.show();
                         }
                         SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(band);
                         sp.setVal(addressBandSelected);

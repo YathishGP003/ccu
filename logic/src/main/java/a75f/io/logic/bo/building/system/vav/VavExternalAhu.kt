@@ -256,6 +256,6 @@ class VavExternalAhu : VavSystemProfile() {
         coolingLoop = if (vavSystem.coolingSignal <= 0) 0 else vavSystem.coolingSignal,
         heatingLoop = if (vavSystem.heatingSignal <= 0) 0 else vavSystem.heatingSignal,
         loopOutput = if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble(),
-        weightedAverageCO2 = vavSystem.co2WeightedAverageSum,
+        weightedAverageCO2 = weightedAverageCO2,
     )
 }

@@ -116,6 +116,7 @@ public class VavReheatProfile extends VavProfile
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
+
         CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
@@ -131,6 +132,8 @@ public class VavReheatProfile extends VavProfile
             updateReheatDuringSystemHeating(equip);
         }
 
+        damper.currentPosition = Math.max(damper.currentPosition, damper.minPosition);
+        damper.currentPosition = Math.min(damper.currentPosition, damper.maxPosition);
         valve.applyLimits();
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);

@@ -104,6 +104,6 @@ public class HisItem
         CcuLog.d("CCU_HS Key:", "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus);
     }
     public String toString() {
-        return "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus;
+        return "id: " + id + ", rec: " + rec + ", timestamp: " + date + ", val: " + val + ", syncStatus: " + syncStatus+", date: "+getDate();
     }
 }

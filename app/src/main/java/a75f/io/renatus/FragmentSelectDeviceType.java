@@ -100,6 +100,9 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     @BindView(R.id.helioNodeId)
     ImageView helioNodeImage;
 
+    @BindView(R.id.hyperStatSplit)
+    ImageView hyperStatSplit;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -345,6 +348,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_image, null));
             smartNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.smartnode_device_image, null));
             helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
+            hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.image_hs_split_carrier,null));
+
         } else {
             hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_75f, null));
             ccu75Image.setVisibility(View.VISIBLE);

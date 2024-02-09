@@ -122,7 +122,7 @@ public class ZoneViewData {
         double reheatPoint = vavEquip.getReheatCmd().readHisVal();
         double enteringAirPoint = vavEquip.getEnteringAirTemp().readHisVal();
         double dischargePoint = vavEquip.getDischargeAirTemp().readHisVal();
-        double airflowCFM =  vavEquip.getAirFlowSensor().readHisVal();
+        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.airFlowSensor + "\" and equipRef == \""+equipID+"\"");
         double condensateNC = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNC + "\" and equipRef == \""+equipID+"\"");
         double condensateNO = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNO + "\" and equipRef == \""+equipID+"\"");
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);

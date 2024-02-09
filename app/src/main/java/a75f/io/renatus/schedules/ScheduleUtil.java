@@ -2,6 +2,7 @@ package a75f.io.renatus.schedules;
 
 import android.util.Log;
 
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.renatus.util.Marker;
 
 public class ScheduleUtil {
@@ -124,6 +126,56 @@ public class ScheduleUtil {
         }
 
         CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
+    }
+
+    public static Interval OverNightEnding(Interval Ending)
+    {
+        DateTime initialEnding = Ending.getStart().withTime(23, 59, 59, 0);
+        Interval iEnding = new Interval(Ending.getStart(), initialEnding);
+        return iEnding;
+    }
+    public static Interval OverNightStarting(Interval Start)
+    {
+        DateTime subsequentStart = Start.getEnd().withTime(0, 0, 0, 0);
+        Interval iStart = new Interval(subsequentStart, Start.getEnd());
+        return iStart;
+    }
+
+    public static Interval AddingNextWeekDayForOverNight(Schedule interval)
+    {
+        ArrayList<Interval> allIntervals = interval.getScheduledIntervals(interval.getDaysSorted());
+        Interval AddingNewData = null;
+        //overnight scenario
+        Interval iv = allIntervals.get(allIntervals.size() - 1);
+        DateTime startInterval = iv.getStart();
+        DateTime nextDay = startInterval.plusDays(1);
+        int nextDayofWeek = nextDay.getDayOfWeek() - 1;
+        int monthNext = nextDay.getMonthOfYear();
+        int yearNext = nextDay.getYear();
+        int dayNext = nextDay.getDayOfMonth();
+        BuildingOccupancy boTemp = CCUHsApi.getInstance().getBuildingOccupancy();
+        List<BuildingOccupancy.Days> tempDayList = boTemp.getDays();
+        BuildingOccupancy.Days individualDay = null;
+        for (int i = 0; i < tempDayList.size(); i++) {
+            if (nextDayofWeek == tempDayList.get(i).getDay()) {
+                individualDay = tempDayList.get(i);
+            }
+        }
+        if (individualDay != null) {
+            int startHr = individualDay.getSthh();
+            int startMin = individualDay.getStmm();
+            int endHr = individualDay.getEthh();
+            int endMin = individualDay.getEtmm();
+            if (endHr == 24) {
+                endHr = 23;
+                endMin = 59;
+            }
+            DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
+            DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
+            Interval nextDayInterval = new Interval(startNext, endNext);
+            AddingNewData = nextDayInterval;
+        }
+        return AddingNewData;
     }
 
     public static ArrayList<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {

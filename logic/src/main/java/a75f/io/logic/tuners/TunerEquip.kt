@@ -6,9 +6,11 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.migration.DiffManger
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.TunerSyncFailed
+import android.util.Log
 import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.launch
 import org.projecthaystack.HDict
@@ -21,7 +23,7 @@ import org.projecthaystack.HRow
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.client.HClient
 
-object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
+object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMigrationCompletedListener {
 
     /**
      * Must be called during every app restart.
@@ -219,5 +221,10 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener {
             return true
         }
         return false
+    }
+
+    override fun onMigrationCompletedCompleted(hsApi: CCUHsApi) {
+        Log.d(Domain.LOG_TAG, "invoking onMigrationCompletedCompleted")
+        syncBuildingTuners(hsApi)
     }
 }

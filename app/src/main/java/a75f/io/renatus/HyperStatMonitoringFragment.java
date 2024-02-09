@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -32,6 +34,7 @@ import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import butterknife.BindView;
@@ -130,7 +133,7 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
 
         hyperStatMonitoringProfile = (HyperStatMonitoringProfile) L.getProfile(mNodeAddress);
         setSpinnerListItem();
-
+        setSpinnerDropDownIconColor();
         /** Setting temperature offset limit */
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = offsetSpinnerValues(10,-10,0.1,true,"");
@@ -320,6 +323,12 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
     private int offsetIndexFromValue(int min, double inc, double offset) {
         int offsetFromZeroCount = (int)(min / inc);
         return (int)(offset / inc) - offsetFromZeroCount;
+    }
+    private void setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(mAnalog1Sp, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(mAnalog2Sp, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(mThermostat1Sp, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(mThermostat2Sp, this.getContext());
     }
 
 }

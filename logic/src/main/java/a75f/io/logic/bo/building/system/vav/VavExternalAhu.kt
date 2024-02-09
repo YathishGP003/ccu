@@ -45,39 +45,36 @@ import android.content.Intent
 
 class VavExternalAhu: VavSystemProfile() {
     override fun doSystemControl() {
-        TODO("Not yet implemented")
     }
 
     override fun addSystemEquip() {
-        TODO("Not yet implemented")
     }
 
     override fun deleteSystemEquip() {
-        TODO("Not yet implemented")
     }
 
     override fun isCoolingAvailable(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isHeatingAvailable(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isCoolingActive(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun isHeatingActive(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun getProfileType(): ProfileType {
-        TODO("Not yet implemented")
+        return ProfileType.vavExternalAHUController
     }
 
     override fun getStatusMessage(): String {
-        TODO("Not yet implemented")
+        return String()
     }
 
 }

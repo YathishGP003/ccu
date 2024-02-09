@@ -54,6 +54,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.tuners.TunerEquip;
+import a75f.io.logic.util.RxTask;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -89,7 +90,10 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.deleteHis)
     Button deleteHis;
-    
+
+    @BindView(R.id.clearHisData)
+    Button clearHisData;
+
     @BindView(R.id.forceSyncBtn)
     Button forceSyncBtn;
     
@@ -253,7 +257,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     }
             ));
         });
-    
+
+        clearHisData.setOnClickListener(view15 -> {
+            Log.d("CCU"," Clear History data(Respecting Backfill time) ");
+            RxTask.executeAsync(() -> CCUHsApi.getInstance().trimObjectBoxHisStore());
+        });
+
         forceSyncBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override

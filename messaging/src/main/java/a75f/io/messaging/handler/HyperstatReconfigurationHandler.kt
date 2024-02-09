@@ -33,6 +33,19 @@ class HyperstatReconfigurationHandler {
                     return
                 }
 
+                if (configPoint.markers.contains(Tags.USERINTENT)
+                        && configPoint.markers.contains(Tags.FAN)
+                        && configPoint.markers.contains(Tags.MODE)
+                ) {
+                    val configVal = msgObject["val"].asInt
+                    val cache = FanModeCacheStorage()
+                    if (configVal != 0 && configVal % 3 == 0) //Save only Fan occupied period mode alone, else no need.
+                        cache.saveFanModeInCache(
+                                configPoint.equipRef,
+                                configVal
+                        ) else cache.removeFanModeFromCache(configPoint.equipRef)
+                }
+
                 when {
                     configPoint.markers.contains(Tags.ENABLED) -> {
                         HyperStatReconfigureUtil.updateConfigPoint(msgObject, configPoint, hayStack)
@@ -61,18 +74,6 @@ class HyperstatReconfigurationHandler {
                 if((configPoint.markers.contains("analog1") || configPoint.markers.contains("analog2")
                             || configPoint.markers.contains("analog3")) && configPoint.markers.contains("output")) {
                     DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance());
-                }
-                if (configPoint.markers.contains(Tags.USERINTENT)
-                    && configPoint.markers.contains(Tags.FAN)
-                    && configPoint.markers.contains(Tags.MODE)
-                ) {
-                    val configVal = msgObject["val"].asInt
-                    val cache = FanModeCacheStorage()
-                    if (configVal != 0 && configVal % 3 == 0) //Save only Fan occupied period mode alone, else no need.
-                        cache.saveFanModeInCache(
-                            configPoint.equipRef,
-                            configVal
-                        ) else cache.removeFanModeFromCache(configPoint.equipRef)
                 }
             } catch (e: NullPointerException){
             e.printStackTrace()

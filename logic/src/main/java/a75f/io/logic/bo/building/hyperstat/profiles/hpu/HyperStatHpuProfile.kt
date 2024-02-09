@@ -269,15 +269,16 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         logIt( " $port: ${relayState.association}")
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCompressorStage(relayState)) -> {
-                if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                if (basicSettings.conditioningMode != StandaloneConditioningMode.OFF &&
+                        compressorLoopOutput != 0) {
                     runRelayForCompressor(relayState, port, config, tuner, relayStages)
                 } else {
                     resetPort(port)
                 }
             }
             (HyperStatAssociationUtil.isHpuRelayAuxHeatingStage1(relayState)) -> {
-                if( basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                if (heatingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO ||
+                            basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)) {
                     
                     if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating1Activate)) {
                         updateLogicalPointIdValue(logicalPointsList[port]!!, 1.0)
@@ -295,8 +296,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
 
             (HyperStatAssociationUtil.isHpuRelayAuxHeatingStage2(relayState)) -> {
-                if(basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                if(heatingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
+                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)) {
 
                     if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating2Activate)) {
                         updateLogicalPointIdValue(logicalPointsList[port]!!, 1.0)
@@ -313,11 +314,13 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
             }
             (HyperStatAssociationUtil.isHpuRelayAssociatedToFan(relayState)) -> {
-                runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
+                if(fanLoopOutput != 0) {
+                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
+                }
             }
             (HyperStatAssociationUtil.isHpuRelayChangeOverCooling(relayState)) -> {
-                if( basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                if(coolingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
+                    || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
                     val status = if (coolingLoopOutput > 0) 1.0 else 0.0
                     updateLogicalPointIdValue(
                         logicalPointsList[port]!!,

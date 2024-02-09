@@ -27,7 +27,7 @@ class ComposeUtil {
             if (CCUUiUtil.isDaikinEnvironment(Globals.getInstance().applicationContext))
                 primaryColor = Color(android.graphics.Color.parseColor("#FF0097E0"))
             if (CCUUiUtil.isCarrierThemeEnabled(Globals.getInstance().applicationContext))
-                primaryColor = Color(android.graphics.Color.parseColor("#152C73"))
+                primaryColor = Color(android.graphics.Color.parseColor("#1891F6"))
             return primaryColor
         }
     }

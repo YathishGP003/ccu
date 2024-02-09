@@ -42,6 +42,7 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
 import org.projecthaystack.io.HZincWriter;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +70,9 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
@@ -115,6 +118,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     ArrayList<HashMap> tuners = new ArrayList<>();
     String tunerGroupType = "Building";
     Prefs prefs;
+    private final CompositeDisposable disposable = new CompositeDisposable();
     public TunerFragment() {
     }
 
@@ -148,6 +152,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         editChangeReason = view.findViewById(R.id.editChangeReason);
         editTunerSearch = view.findViewById(R.id.editTunerSearch);
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        CCUUiUtil.setSpinnerDropDownColor(spinnerSelection,this.getContext());
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         //TODO: revert building tuners
@@ -333,7 +338,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                         textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                         String val = getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString());
-                        if (newTunerValueItem.containsKey("unit") && !val.equals("-") && !newTunerValueItem.containsKey("displayUnit")){
+                        if (newTunerValueItem.containsKey("unit")
+                                && !val.equals("-")
+                                && !newTunerValueItem.containsKey("displayUnit")
+                                && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                                || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                     val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -365,7 +374,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                     textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                     String val = getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString());
-                    if ((newTunerValueItem.containsKey("unit") && !val.equals("-")) && !newTunerValueItem.containsKey("displayUnit")){
+                    if ((newTunerValueItem.containsKey("unit")
+                            && !val.equals("-"))
+                            && !newTunerValueItem.containsKey("displayUnit")
+                            && (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                            || newTunerValueItem.get("unit").toString().equals("\u00B0C"))){
                         if (isCelsiusTunerAvailableStatus()) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                 val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
@@ -408,7 +421,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     try {
                         if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit") && tunerVal != null) {
                             if (isCelsiusTunerAvailableStatus()) {
-                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F")
+                                        || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
                                     if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                         tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
                                     } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)) {
@@ -418,8 +432,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     }
                                 }
                             }
-
-
                         }
                     }catch (NumberFormatException numberFormatException) {
                         numberFormatException.toString();
@@ -435,7 +447,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             if (buildingTuner.get("domainName") != null) {
                                 String buildTunerDisPriorToDM = BuildingEquipCutOverMapping.INSTANCE
                                         .findDisFromDomainName(buildingTuner.get("domainName").toString());
-                                if (!buildTunerDisPriorToDM.isEmpty()) {
+                                if (buildTunerDisPriorToDM != null && !buildTunerDisPriorToDM.isEmpty()) {
                                     buildingTunerShortDisDM = buildTunerDisPriorToDM.substring(buildTunerDisPriorToDM.lastIndexOf("-") + 1).trim();
                                 } else {
                                     CcuLog.e(L.TAG_CCU_TUNER, "buildTunerDisPriorToDM is invalid for "+buildingTuner);
@@ -664,7 +676,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         }
     }
 
-    public double getTuner(String id) {
+    public static double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
@@ -679,38 +691,39 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     }
 
     public void setTuner(String id, int level, Double val, String reason) {
+        WeakReference<TunerFragment> weakReference = new WeakReference<>(TunerFragment.this);
+        TunerFragment tunerFragment = weakReference.get();
 
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(final String... params) {
-                if (val == null){
-                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), (int) level,
-                            CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1),
-                            HDateTime.make(System.currentTimeMillis()));
-                    HDictBuilder b = new HDictBuilder()
-                            .add("id", HRef.copy(id))
-                            .add("level",level)
-                            .add("who",CCUHsApi.getInstance().getCCUUserName())
-                            .add("duration", HNum.make(0, "ms"))
-                            .add("val", (HVal) null)
-                            .add("reason", reason);
-                    HDict[] dictArr = {b.toDict()};
-                    HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-                    CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
-                } else {
-                    CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0, reason);
-                    CCUHsApi.getInstance().writeHisValById(id, val);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final Void result) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        if (tunerFragment != null && tunerFragment.isAdded()) {
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(()->{},
+                    () -> {
+                        processData(id, level, val, reason);
+                    },
+                    ()->{}
+            ));
+        }
     }
 
+    private void processData(String id, int level, Double val, String reason) {
+        if (val == null) {
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), level,
+                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1),
+                    HDateTime.make(System.currentTimeMillis()));
+            HDictBuilder b = new HDictBuilder()
+                    .add("id", HRef.copy(id))
+                    .add("level", level)
+                    .add("who", CCUHsApi.getInstance().getCCUUserName())
+                    .add("duration", HNum.make(0, "ms"))
+                    .add("val", (HVal) null)
+                    .add("reason", reason);
+            HDict[] dictArr = {b.toDict()};
+            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
+        } else {
+            CCUHsApi.getInstance().writeTunerPointForCcuUser(id, level, val, 0, reason);
+            CCUHsApi.getInstance().writeHisValById(id, val);
+        }
+    }
     private void getSystemTuners() {
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
@@ -759,17 +772,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     private void getBuildingTuners() {
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
-
-        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and not dualDuct");
-        for (HashMap m : buildingTuners) {
-            /*if (m.get("dis").toString().contains("Building")) {
-                tuners.add(m);
-            }*/
-
-            if (m.keySet().contains("default")) {
-                tuners.add(m);
-            }
-        }
+        String tunerId = CCUHsApi.getInstance().readId("tuner and equip");
+        tuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and not dualDuct and equipRef == \""+ tunerId +"\"");
 
         Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString().toUpperCase()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);

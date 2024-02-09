@@ -245,7 +245,15 @@ public class TempOverrideFragment extends Fragment {
             for (Map t : tuners) {
                 if (isExpandedTextBeginsWithAnalogType(t.get("dis").toString().toLowerCase()) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
-                    if (NewexpandedListText.toLowerCase().startsWith("analog")) {
+                    if (t.containsKey("domainName") && Objects.nonNull(t.get("domainName").toString())) {
+                        if (t.get("domainName").toString().startsWith(("analog"))) {
+                            tunerList.add(t.get("dis").toString());
+                        } else if (t.get("domainName").toString().startsWith(("relay"))) {
+                            tunerList.add(t.get("dis").toString());
+                        } else if (t.get("domainName").toString().startsWith(("th"))) {
+                            tunerList.add(t.get("dis").toString());
+                        }
+                    } else if (NewexpandedListText.toLowerCase().startsWith("analog")) {
                         tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("relay")) {
                         tunerList.add(t.get("dis").toString());
@@ -278,7 +286,7 @@ public class TempOverrideFragment extends Fragment {
 
                     newTunerList.clear();
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog1In")){
+                        if (point.toString().contains("Analog1In") || point.toString().contains("Analog 1 Input")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -287,7 +295,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog2In")){
+                        if (point.toString().contains("Analog2In") || point.toString().contains("Analog 2 Input")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -296,7 +304,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog3In")){
+                        if (point.toString().contains("Analog3In") || point.toString().contains("Analog 3 Input")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -305,7 +313,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog1Out") || point.toString().contains("analog1Out")){
+                        if (point.toString().contains("Analog1Out") || point.toString().contains("analog1Out") || point.toString().contains("Analog 1 Output")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -314,7 +322,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog2Out") || point.toString().contains("analog2Out")){
+                        if (point.toString().contains("Analog2Out") || point.toString().contains("analog2Out") || point.toString().contains("Analog 2 Output")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -323,7 +331,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog3Out") || point.toString().contains("analog3Out")){
+                        if (point.toString().contains("Analog3Out") || point.toString().contains("analog3Out") || point.toString().contains("Analog 3 Output")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -332,7 +340,7 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog4Out") || point.toString().contains("analog4Out")){
+                        if (point.toString().contains("Analog4Out") || point.toString().contains("analog4Out") || point.toString().contains("Analog 4 Output")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -340,16 +348,7 @@ public class TempOverrideFragment extends Fragment {
                         }
                     }
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Th1In")){
-                            if (!newTunerList.contains(point)) {
-
-                                newTunerList.add(point);
-                            }
-                        }
-                    }
-
-                    for(Object point : tunerList) {
-                        if (point.toString().contains("Th2In")){
+                        if (point.toString().contains("Th1In") || point.toString().contains("Thermistor 1 Input")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -358,7 +357,16 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("relay")){
+                        if (point.toString().contains("Th2In") || point.toString().contains("Thermistor 2 Input")){
+                            if (!newTunerList.contains(point)) {
+
+                                newTunerList.add(point);
+                            }
+                        }
+                    }
+
+                    for(Object point : tunerList) {
+                        if (point.toString().contains("relay") || point.toString().contains("Relay 1") || point.toString().contains("Relay 2")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
@@ -377,7 +385,7 @@ public class TempOverrideFragment extends Fragment {
             ArrayList<ZoneSorter> zoneNodesList = new ArrayList<>();
             for (int i = 0; i < expandableListTitle.size(); i++) {
                 if (!expandableListTitle.get(i).equals("CM-device")) {
-                    int nodeAddress = Integer.parseInt(expandableListTitle.get(i).substring(3));
+                    int nodeAddress = parseGroup(expandableListTitle.get(i));
                     ZoneProfile profile = L.getProfile(Short.parseShort(String.valueOf(nodeAddress)));
                     if (profile!=null) {
                         if (!profile.getProfileType().toString().equals("EMR") && !profile.getProfileType().toString().contains("MODBUS")) {
@@ -422,8 +430,13 @@ public class TempOverrideFragment extends Fragment {
         }
     }
 
+    private int parseGroup(String title) {
+        String[] splitTitle = title.split("-");
+        return Integer.parseInt(splitTitle[splitTitle.length-1]);
+    }
+
     public static boolean isExpandedTextBeginsWithAnalogType(String expandedListText) {
-        return (expandedListText.startsWith("analog1in") || expandedListText.startsWith("analog1out") || expandedListText.startsWith("analog2in")
+        return (expandedListText.startsWith("analog1in") || expandedListText.startsWith("analog1out") || expandedListText.startsWith("analog2in") || expandedListText.startsWith("analog 2") || expandedListText.startsWith("analog 1")
                 || expandedListText.startsWith("analog2out") || expandedListText.startsWith("analog3out") || expandedListText.startsWith("relay") || expandedListText.startsWith("th") ||
                 expandedListText.startsWith(siteName.toLowerCase()));
     }

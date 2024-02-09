@@ -1,5 +1,6 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
@@ -48,6 +49,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBarView;
@@ -168,7 +170,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         ArrayList<String> coolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
-
+        setSpinnerDropDownIconColor();
 
         if(isCelsiusTunerAvailableStatus()){
             coolingLimitMin.setDropDownWidth(150);
@@ -359,7 +361,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setHeatingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setHeatingDeadBand(roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(heatingDeadBand.getSelectedItem().toString(), "\u00B0C")))));
                 } else {
                     rangeSeekBarView.setHeatingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString()));
                 }
@@ -373,7 +375,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (isCelsiusTunerAvailableStatus()) {
-                    rangeSeekBarView.setCoolingDeadBand(celsiusToFahrenheitTuner(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C"))));
+                    rangeSeekBarView.setCoolingDeadBand(roundToPointFive(convertingDeadBandValueCtoF(Double.parseDouble(StringUtils.substringBefore(coolingDeadBand.getSelectedItem().toString(), "\u00B0C")))));
                 } else {
                     rangeSeekBarView.setCoolingDeadBand(MasterControlUtil.getAdapterFarhenheitVal(coolingDeadBand.getSelectedItem().toString()));
                 }
@@ -620,5 +622,13 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         if (dialog != null) {
             dialog.getWindow().setLayout(1165, 646);
         }
+    }
+    private void setSpinnerDropDownIconColor() {
+        CCUUiUtil.setSpinnerDropDownColor(coolingLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingDeadBand, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingLimitMax, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingLimitMin, this.getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDeadBand, this.getContext());
     }
 }

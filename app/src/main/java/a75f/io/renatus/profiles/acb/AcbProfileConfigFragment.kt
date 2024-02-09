@@ -7,7 +7,6 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
@@ -33,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -124,87 +124,125 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
         ) {
             item {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleTextView("Active Chilled Beams + DOAS")
+                    TitleTextView("ACTIVE CHILLED BEAMS + DOAS")
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(108.dp))
                     DropDownWithLabel(
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.damperType.toInt()
+                        defaultSelection = viewModel.viewState.damperType.toInt(),
+                        spacerLimit = 178
                     )
-                    DropDownWithLabel(
-                        label = "Damper Size",
-                        list = viewModel.damperSizesList,
-                        previewWidth = 60,
-                        expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.damperSize = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.damperSize.toInt()
-                    )
-                    DropDownWithLabel(
-                        label = "Damper Shape",
-                        list = viewModel.damperShapesList,
-                        previewWidth = 100,
-                        expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.damperShape = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.damperShape.toInt()
-                    )
+                    Spacer(modifier=Modifier.width(87.dp))
+                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        DropDownWithLabel(
+                            label = "Size",
+                            list = viewModel.damperSizesList,
+                            previewWidth = 60,
+                            expandedWidth = 120,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.damperSize = selectedIndex.toDouble()
+                            },
+                            defaultSelection = viewModel.viewState.damperSize.toInt(),
+                            spacerLimit = 20
+                        )
+
+                        Spacer(modifier = Modifier.width(45.dp))
+
+                        DropDownWithLabel(
+                            label = "Shape",
+                            list = viewModel.damperShapesList,
+                            previewWidth = 100,
+                            expandedWidth = 120,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.damperShape = selectedIndex.toDouble()
+                            },
+                            defaultSelection = viewModel.viewState.damperShape.toInt(),
+                            spacerLimit = 23
+                        )
+
+
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(108.dp))
                     DropDownWithLabel(
                         label = "Valve Type",
                         list = viewModel.valveTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = {selectedIndex -> viewModel.viewState.valveType = selectedIndex.toDouble()},
-                        defaultSelection = viewModel.viewState.valveType.toInt()
+                        defaultSelection = viewModel.viewState.valveType.toInt(),
+                        spacerLimit = 205
                     )
+                    Spacer(modifier=Modifier.width(87.dp))
                     DropDownWithLabel(
                         label = "Zone Priority",
                         list = viewModel.zonePrioritiesList,
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
-                        defaultSelection = viewModel.viewState.zonePriority.toInt()
+                        defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        spacerLimit = 132
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(108.dp))
                     Row {
-                        HeaderTextView(text = "Thermistor-1")
-                        Spacer(modifier = Modifier.width(60.dp))
+                        HeaderTextView(text = "Thermistor-1",padding=0)
+                        Spacer(modifier = Modifier.width(160.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
+                    Spacer(modifier=Modifier.width(65.dp))
                     DropDownWithLabel(
                         label = "Thermistor-2",
                         list = viewModel.condensateSensorTypesList,
                         previewWidth = 100,
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
-                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0
+                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
+                        spacerLimit = 131
                     )
                 }
+
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+
+                Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(108.dp))
+                    Row{
+                        HeaderTextView(text = "Relay 1",padding=0)
+                        Spacer(modifier = Modifier.width(260.dp))
+                        LabelTextView(text = "Shut-Off Valve")
+                    }
+                }
+
+                Spacer(modifier=Modifier.height(20.dp))
+
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(108.dp))
                     Row {
-                        HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName,padding=10)
+                        Spacer(modifier = Modifier.width(202.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoForceOccupied,
                             onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(102.dp))
                     Row {
-                        HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName, padding = 10)
+                        Spacer(modifier = Modifier.width(205.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoAway,
                             onEnabled = { it -> viewModel.viewState.autoAway = it }
@@ -213,18 +251,20 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(108.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName,padding=10)
+                        Spacer(modifier = Modifier.width(220.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableIAQControl,
                             onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(102.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName,padding=10)
+                        Spacer(modifier = Modifier.width(114.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
@@ -233,15 +273,17 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(108.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName,padding=10)
+                        Spacer(modifier = Modifier.width(210.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCFMControl,
                             onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(104.dp))
                     Row {
                         if (viewModel.viewState.enableCFMControl) {
                             DropDownWithLabel(
@@ -250,7 +292,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                                 previewWidth = 100,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
+                                paddingLimit = 10,
+                                spacerLimit = 182
                             )
                         }
                     }
@@ -261,9 +305,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start=135.dp,end=135.dp))) {
                     Picker(
-                        header = "Temperature\n    Offset",
+                        header = "Temperature\n  Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,
                         onChanged = { it: String -> viewModel.viewState.temperatureOffset = it.toDouble() },
@@ -289,7 +333,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
-                            header = "Min Damper Pos\n    Cooling",
+                            header = "Min Damper Pos\n   Cooling",
                             state = valuesPickerState,
                             items = viewModel.minCoolingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.minCoolingDamperPos = it.toDouble() },
@@ -303,7 +347,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                     } else {
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
-                            header = "Max CFM\n    Cooling",
+                            header = "Max CFM\n Cooling",
                             state = valuesPickerState,
                             items = viewModel.maxCFMCoolingList,
                             onChanged = { it: String -> viewModel.viewState.maxCFMCooling = it.toDouble() },
@@ -315,7 +359,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
-                            header = "Min CFM\n    Cooling",
+                            header = "Min CFM\n Cooling",
                             state = valuesPickerState,
                             items = viewModel.minCFMCoolingList,
                             onChanged = { it: String -> viewModel.viewState.minCFMCooling = it.toDouble() },
@@ -327,7 +371,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
-                            header = "Max CFM\n    Reheating",
+                            header = "Max CFM\nReheating",
                             state = valuesPickerState,
                             items = viewModel.maxCFMReheatingList,
                             onChanged = { it: String -> viewModel.viewState.maxCFMReheating = it.toDouble() },
@@ -339,7 +383,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
-                            header = "Min CFM\n    Reheating",
+                            header = "Min CFM\nReheating",
                             state = valuesPickerState,
                             items = viewModel.minCFMReheatingList,
                             onChanged = { it: String -> viewModel.viewState.minCFMReheating = it.toDouble() },
@@ -352,17 +396,40 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                     }
 
                     Spacer(modifier = Modifier.width(60.dp))
-                    Picker(
-                        header = "Max Damper Pos\n    Heating",
-                        state = valuesPickerState,
-                        items = viewModel.maxHeatingDamperPosList,
-                        onChanged = { it: String -> viewModel.viewState.maxHeatingDamperPos = it.toDouble() },
-                        startIndex = viewModel.maxHeatingDamperPosList.indexOf(viewModel.viewState.maxHeatingDamperPos.toInt().toString()),
-                        visibleItemsCount = 3,
-                        modifier = Modifier.weight(0.3f),
-                        textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    )
+                    if(!viewModel.viewState.enableCFMControl) {
+                        Picker(
+                            header = "Max Damper Pos\n   Heating",
+                            state = valuesPickerState,
+                            items = viewModel.maxHeatingDamperPosList,
+                            onChanged = { it: String ->
+                                viewModel.viewState.maxHeatingDamperPos = it.toDouble()
+                            },
+                            startIndex = viewModel.maxHeatingDamperPosList.indexOf(
+                                viewModel.viewState.maxHeatingDamperPos.toInt().toString()
+                            ),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                    }
+                    else{
+                        Picker(
+                            header = "Max Damper Pos Heating",
+                            state = valuesPickerState,
+                            items = viewModel.maxHeatingDamperPosList,
+                            onChanged = { it: String ->
+                                viewModel.viewState.maxHeatingDamperPos = it.toDouble()
+                            },
+                            startIndex = viewModel.maxHeatingDamperPosList.indexOf(
+                                viewModel.viewState.maxHeatingDamperPos.toInt().toString()
+                            ),
+                            visibleItemsCount = 3,
+                            modifier = Modifier.weight(0.3f),
+                            textModifier = Modifier.padding(8.dp),
+                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        )
+                    }
 
                     if (!viewModel.viewState.enableCFMControl) {
                         Spacer(modifier = Modifier.width(60.dp))
@@ -402,7 +469,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
         super.onStart()
         val dialog = dialog
         if (dialog != null) {
-            val width = 1165
+            val width = 1265
             val height = 672
             dialog.window!!.setLayout(width, height)
         }

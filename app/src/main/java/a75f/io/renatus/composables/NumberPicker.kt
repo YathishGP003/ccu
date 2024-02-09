@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,7 +95,7 @@ fun Picker(
 
     Box(modifier = modifier) {
         Box( modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            StyledTextView(text = header, fontSize = 18)
+            StyledTextView(text = header, fontSize = 16)
         }
         LazyColumn(
             state = listState,
@@ -123,13 +123,17 @@ fun Picker(
 
         Divider(
             color = dividerColor,
-            modifier = Modifier.offset(y = itemHeightDp * visibleItemsMiddle + 60.dp)
+            modifier = Modifier.offset(y = itemHeightDp * visibleItemsMiddle + 60.dp).width(50.dp).align(Alignment.TopCenter)
+
         )
 
         Divider(
             color = dividerColor,
-            modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1) + 60.dp)
+            modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1) + 60.dp).width(50.dp).align(Alignment.TopCenter)
         )
+
+
+
 
     }
 

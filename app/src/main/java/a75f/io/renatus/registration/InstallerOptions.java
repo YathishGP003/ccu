@@ -1043,6 +1043,7 @@ public class InstallerOptions extends Fragment {
     private void setBackFillTimeSpinner(View rootView) {
 
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
+        CCUUiUtil.setSpinnerDropDownColor(backFillTimeSpinner,this.getContext());
         this.backFillTimeSpinner.setAdapter(getBackFillTimeArrayAdapter(getContext()));
         this.backFillTimeSpinner.setSelection(backfieldTimeSelectedValue(getBackFillTimeArrayAdapter(getContext())));
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

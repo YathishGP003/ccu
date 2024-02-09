@@ -63,7 +63,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
     private fun updatePoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
         val hayStackPoint = buildPoint(pointConfig)
-        hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
+        hayStack.updateBuildingTunerPoint(hayStackPoint, existingPoint["id"].toString(), false)
         hayStackPoint.id = existingPoint["id"].toString()
         hayStack.writeDefaultTunerValById(hayStackPoint.id, pointConfig.modelDef.defaultValue.toString().toDouble())
         DomainManager.addPoint(hayStackPoint)
@@ -349,7 +349,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
 
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, site.id,
                                         hayStack.timeZone, site.displayName))
-        hayStack.updateEquip(hayStackEquip, equipRef)
+        hayStack.updateBuildingTunerEquip(hayStackEquip, equipRef, true)
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
         //Required to update backend points since local building tuners are no longer synced.
         updateBackendBuildingTuner(site.id, hayStack)

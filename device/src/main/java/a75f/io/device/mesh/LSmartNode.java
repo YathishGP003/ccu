@@ -29,6 +29,7 @@ import a75f.io.device.serial.CondensateSensor_t;
 import a75f.io.device.serial.DamperActuator_t;
 import a75f.io.device.serial.DamperShape_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.ProfileMap_t;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
@@ -178,20 +179,6 @@ public class LSmartNode
         if(profile == null)
             profile = "dab";
 
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (equip.getProfile().equals(ProfileType.VAV_ACB.toString()) || equip.getProfile().equals(DomainName.activeChilledBeam)) {
-            profile = "acb";
-        } else if (equip.getProfile().equals(ProfileType.VAV_REHEAT.toString()) || equip.getProfile().equals(DomainName.vavReheatNoFan)) {
-            profile = "vavNoFan";
-        } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatParallelFan)) {
-            profile = "vavParallelFan";
-        } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.toString()) || equip.getProfile().equals(DomainName.vavReheatSeriesFan)) {
-            profile = "vavSeriesFan";
-        } else if (equip.getProfile().equals(ProfileType.DUAL_DUCT.toString())) {
-            profile = "dualDuct";
-        }
-
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
@@ -208,26 +195,6 @@ public class LSmartNode
                 break;
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
-                break;
-            case "vavNoFan":
-                settings.profileBitmap.reserved.set((short)1);
-                setupDamperType(address, settings);
-                break;
-            case "vavSeriesFan":
-                settings.profileBitmap.reserved.set((short)2);
-                setupDamperType(address, settings);
-                break;
-            case "vavParallelFan":
-                settings.profileBitmap.reserved.set((short)3);
-                setupDamperType(address, settings);
-                break;
-            case "acb":
-                settings.profileBitmap.reserved.set((short)4);
-                setupDamperType(address, settings);
-                break;
-            case "dualDuct":
-                settings.profileBitmap.reserved.set((short)5);
-                setupDamperType(address, settings);
                 break;
 
         }
@@ -292,6 +259,8 @@ public class LSmartNode
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
+        settings2.profileMap2.set(getProfileMap2(equip.getProfile()));
+
         if (equip.getProfile().equals("VAV_ACB")) {
             VavAcbEquip acbEquip = new VavAcbEquip(equipRef);
             kFactor = (int)(100 * acbEquip.getKFactor().readPriorityVal());
@@ -323,6 +292,25 @@ public class LSmartNode
         settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
     }
+
+    private static ProfileMap_t getProfileMap2(String profString) {
+        if (profString.equals(ProfileType.VAV_REHEAT.name())) {
+            return ProfileMap_t.PROFILE_MAP_VAV_NO_FAN;
+        } else if (profString.equals(ProfileType.VAV_SERIES_FAN.name())) {
+            return ProfileMap_t.PROFILE_MAP_VAV_SERIES_FAN;
+        } else if (profString.equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+            return ProfileMap_t.PROFILE_MAP_VAV_PARALLEL_FAN;
+        } else if (profString.equals(ProfileType.VAV_ACB.name())) {
+            return ProfileMap_t.PROFILE_MAP_VAV_ACTIVE_CHILLED_BEAM;
+        } else if (profString.equals(ProfileType.PLC.name())) {
+            return ProfileMap_t.PROFILE_MAP_GENERIC_PI_CONTROL;
+        } else if (profString.equals(ProfileType.SSE.name())) {
+            return ProfileMap_t.PROFILE_MAP_SINGLE_STAGE_EQUIPMENT;
+        }
+
+        return ProfileMap_t.PROFILE_MAP_NOT_AVAILABLE;
+    }
+
     private static int getDamperSizeInInches(int index) {
         switch (index) {
             case 0:
@@ -397,7 +385,8 @@ public class LSmartNode
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
-        if (profileType.equals("vav") && reheatConfig != -1){
+        //ReheatType migration should address this, but the value can be -2 or -1 based on this code runs before or after migration.
+        if (profileType.equals("vav") && reheatConfig >= 0){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));
@@ -557,7 +546,6 @@ public class LSmartNode
             }
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
-    
         }
     }
 

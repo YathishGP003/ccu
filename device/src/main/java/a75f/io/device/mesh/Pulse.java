@@ -4,6 +4,8 @@ import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.device.mesh.DLog.LogdStructAsJson;
+import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
@@ -1463,10 +1465,13 @@ public class Pulse
 					snprofile = "lcm";
 				else if(d.getMarkers().contains("iftt"))
 					snprofile = "iftt";
-				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
+				CcuLog.d("CCU_SN_MESSAGES","=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
+				tempLogdStructAsJson(seedMessage);
 				MeshUtil.sendStructToCM(seedMessage);
+				CcuLog.d("CCU_SN_MESSAGES","=================NOW SENDING SN SETTINGS2====================="+zone.getDisplayName()+","+addr);
 				CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
+				tempLogdStructAsJson(settings2Message);
 				MeshUtil.sendStructToCM(settings2Message);
 				LSerial.getInstance().setNodeSeeding(false);
 				break;

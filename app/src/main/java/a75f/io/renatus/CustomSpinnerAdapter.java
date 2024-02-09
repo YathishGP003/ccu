@@ -57,7 +57,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
             TextView textView = row.findViewById(R.id.textView);
             ImageView imageView = row.findViewById(R.id.imageView);
             textView.setText(values.get(position));
-            imageView.setImageResource(R.drawable.icon_arrow_right);
+            imageView.setImageResource(R.drawable.image_right_arrow);
 
             if(position == selectedPosition)
                 imageView.setImageDrawable(null);

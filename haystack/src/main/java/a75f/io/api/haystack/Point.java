@@ -490,7 +490,7 @@ public class Point extends Entity
                 }
                 else if (pair.getKey().equals("bacnetId"))
                 {
-                    this.bacnetId = Integer.parseInt(pair.getValue().toString());
+                    this.bacnetId = (int) Double.parseDouble(pair.getValue().toString());
                 }
                 else if (pair.getKey().equals("bacnetType"))
                 {

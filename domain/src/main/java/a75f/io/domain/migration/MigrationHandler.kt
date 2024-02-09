@@ -15,34 +15,39 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 
 /**
  * Created by Manjunath K on 16-06-2023.
  */
-class MigrationHandler(var haystack: CCUHsApi) {
+class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrationCompletedListener) {
 
-    fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String, profileName: String) {
+    fun migrateModel(entityData: EntityConfiguration,newModel: ModelDirective, siteRef: String) {
         if (newModel is SeventyFiveFTunerDirective) {
             CcuLog.printLongMessage(Domain.LOG_TAG,
-                "Building equip model upgrade detected : Run migration to $newModel"
+                "Building equip model upgrade detected : Run migration to $newModel. modelId: ${newModel.id} "
             )
             val tunerEquipBuilder = TunerEquipBuilder(haystack)
-            tunerEquipBuilder.updateEquipAndPoints(newModel,entityData, siteRef )
-
+            tunerEquipBuilder.updateEquipAndPoints(newModel,entityData, siteRef)
             tunerEquipBuilder.updateBackendBuildingTuner(siteRef, haystack)
+            listener.onMigrationCompletedCompleted(haystack)
         } else {
             val equipDetails = getEquipDetailsByDomain(newModel.domainName)
-            addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef, profileName)
-            removeEntityData(entityData.tobeDeleted, newModel, equipDetails)
-            updateEntityData(entityData.tobeUpdated, newModel, equipDetails, siteRef, profileName)
+            val equipSize = equipDetails.size
+            CcuLog.printLongMessage(Domain.LOG_TAG,
+                "Equip model upgrade detected : Run migration to $newModel; equip size $equipSize"
+            )
+            if(equipSize > 0) {
+                addEntityData(entityData.tobeAdded, newModel, equipDetails, siteRef)
+                removeEntityData(entityData.tobeDeleted, newModel, equipDetails)
+                updateEntityData(entityData.tobeUpdated, newModel, equipDetails, siteRef)
+            }
         }
     }
     private fun addEntityData(tobeAdded: MutableList<EntityConfig>, newModel: ModelDirective,
-                              equips: List<a75f.io.domain.api.Equip>, siteRef : String, profileName: String) {
+                              equips: List<a75f.io.domain.api.Equip>, siteRef : String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
-        val profileConfiguration = getTestProfileConfig()
+        val profileConfiguration = getTestProfileConfig()   // need to revisit this line
         tobeAdded.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
@@ -74,9 +79,9 @@ class MigrationHandler(var haystack: CCUHsApi) {
     }
 
     private fun updateEntityData(tobeUpdate: MutableList<EntityConfig>, newModel: ModelDirective,
-                                 equips: List<a75f.io.domain.api.Equip>, siteRef: String, profileName: String) {
+                                 equips: List<a75f.io.domain.api.Equip>, siteRef: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
-        val profileConfiguration = getTestProfileConfig()
+        val profileConfiguration = getTestProfileConfig()   // need to revisit this line
         tobeUpdate.forEach { diffDomain ->
             // updated Equip
             if (diffDomain.domainName == newModel.domainName) {
@@ -96,7 +101,7 @@ class MigrationHandler(var haystack: CCUHsApi) {
                     val currentPoint = equip.points.filter { it.value.domainName == diffDomain.domainName }
                     val existingId = currentPoint[diffDomain.domainName]?.id
                     hayStackPoint.id = existingId
-                    haystack.updatePoint(hayStackPoint,existingId );
+                    haystack.updatePoint(hayStackPoint,existingId)
                     DomainManager.addPoint(hayStackPoint)
                 }
             }

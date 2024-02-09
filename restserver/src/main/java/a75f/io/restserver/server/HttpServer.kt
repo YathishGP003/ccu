@@ -277,7 +277,8 @@ class HttpServer {
                     }else{
                         // if level is coming null ie. user wanted to reset level
                         if(value == "null"){
-                            duration = "1"
+                            value = "0"
+                            duration = "1000"
                         }
                         val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value!!.toDouble(), duration!!.toInt())
                         if (pointGrid != null) {

@@ -646,8 +646,22 @@ public class CCUHsApi
         }
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateEquip(q, id);
-        if (syncStatusService.hasEntitySynced(id)) {
-            syncStatusService.addUpdatedEntity(id);
+        if(!isBuildingTunerEquip(q)){
+            if (syncStatusService.hasEntitySynced(id)) {
+                syncStatusService.addUpdatedEntity(id);
+            }
+        }
+    }
+
+    public void updateBuildingTunerEquip(Equip q, String id, boolean syncToServer)
+    {
+        CcuLog.e("CCU_DOMAIN", "invoking updateBuildingTunerEquip");
+        q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        tagsDb.updateEquip(q, id);
+        if(syncToServer){
+            if (syncStatusService.hasEntitySynced(id)) {
+                syncStatusService.addUpdatedEntity(id);
+            }
         }
     }
 
@@ -867,6 +881,11 @@ public class CCUHsApi
         pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration), reason);
     }
 
+    public void writeTunerPointForCcuUser(String id, int level, Double val, int duration, String reason)
+    {
+        tunerPointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration), reason);
+    }
+
     /**
      * Write to a 'writable' point
      */
@@ -956,6 +975,27 @@ public class CCUHsApi
         HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
 
         if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
+            String uid = id.toString();
+            if (dur.unit == null) {
+                dur = HNum.make(dur.val ,"ms");
+            }
+
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            if (StringUtils.isNotEmpty(reason)) {
+                b.add("reason", reason);
+            }
+
+            HDict[] dictArr  = {b.toDict()};
+            CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
+            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        }
+        return hGrid;
+    }
+
+    public HGrid tunerPointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
+        HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+
+        if (CCUHsApi.getInstance().isCCURegistered()) {
             String uid = id.toString();
             if (dur.unit == null) {
                 dur = HNum.make(dur.val ,"ms");
@@ -1324,6 +1364,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
+        HisItemCache.getInstance().delete(id);
     }
 
     /**
@@ -1336,6 +1377,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
+        HisItemCache.getInstance().delete(id);
     }
 
     public void deleteEntityLocally(String id) {
@@ -2661,8 +2703,8 @@ public class CCUHsApi
                 HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
                 if (!tunerEquip.isEmpty()) {
                     JSONObject tunerFiled = new JSONObject();
-                    tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
-                    tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                    tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.SOURCE_MODEL));
+                    tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.SOURCE_MODEL_VERSION));
                     tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, buildingTuneId);
                     ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
                 }
@@ -2895,7 +2937,7 @@ public class CCUHsApi
     }
 
     public void trimObjectBoxHisStore() {
-        hisSyncHandler.doPurge(true);
+        hisSyncHandler.doPurge();
     }
 
 
@@ -2953,7 +2995,7 @@ public class CCUHsApi
     public void resyncSiteTree() {
 
         markItemsUnSynced(readAllEntities(Tags.DEVICE+" and not "+Tags.CCU));
-        markItemsUnSynced(readAllEntities(Tags.EQUIP));
+        markItemsUnSynced(readAllEntities(Tags.EQUIP+" and not "+Tags.TUNER));
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));

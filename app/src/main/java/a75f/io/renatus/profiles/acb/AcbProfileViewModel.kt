@@ -18,6 +18,8 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavAcbProfile
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
+import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -166,13 +168,21 @@ class AcbProfileViewModel : ViewModel() {
             }
 
             withContext(Dispatchers.Main) {
-                ProgressDialogUtils.hideProgressDialog()
-                _isDialogOpen.value = false
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                 showToast("ACB Configuration saved successfully", context)
                 CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+            }
+
+            // This check is needed because the dialog sometimes fails to close inside the coroutine.
+            // We don't know why this happens.
+            if (ProgressDialogUtils.isDialogShowing()) {
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
             }
         }
+
 
         // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
         /*
@@ -208,12 +218,14 @@ class AcbProfileViewModel : ViewModel() {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
+            setScheduleType(profileConfiguration)
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
             updateEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             acbProfile.init()
             setOutputTypes(profileConfiguration)
+            setScheduleType(profileConfiguration)
         }
 
     }
@@ -320,6 +332,18 @@ class AcbProfileViewModel : ViewModel() {
         var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getValveTypeString(config)).build(), analogOut2.get("id").toString())
 
+    }
+
+    private fun setScheduleType(config: AcbProfileConfiguration) {
+        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
+        val scheduleTypeId = scheduleTypePoint.get("id").toString()
+
+        val roomSchedule = getSchedule(zoneRef, floorRef)
+        if(roomSchedule.isZoneSchedule) {
+            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
+        } else {
+            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        }
     }
 
     // This logic will break if the "damperType" point enum is changed

@@ -4,6 +4,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.BuildConfig
 import a75f.io.domain.api.Domain
 import a75f.io.domain.util.TagsUtil
@@ -25,15 +26,17 @@ import java.util.Locale
 open class DefaultEquipBuilder : EquipBuilder {
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
-
+        val siteDisName = hayStack.site?.displayName
         val equipBuilder =
-            Equip.Builder().setDisplayName("${equipConfig.disPrefix}-${equipConfig.modelDef.name}")
+            Equip.Builder().setDisplayName("$siteDisName-${equipConfig.modelDef.name}")
                 .setDomainName(equipConfig.modelDef.domainName)
                 .setFloorRef(equipConfig.profileConfiguration?.floorRef)
                 .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
                 .setSiteRef(equipConfig.siteRef)
                 .setProfile(equipConfig.profileConfiguration?.profileType)
                 .setDomainName(equipConfig.modelDef.domainName)
+
+        if (!equipConfig.modelDef.name.equals("buildingEquip")) { equipBuilder.setDisplayName(equipConfig.disPrefix) }
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
@@ -58,9 +61,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
-        equipBuilder.addTag("modelId", HStr.make(equipConfig.modelDef.id))
+        equipBuilder.addTag("sourceModel", HStr.make(equipConfig.modelDef.id))
         equipBuilder.addTag(
-            "modelVersion", HStr.make(
+            "sourceModelVersion", HStr.make(
                 "${equipConfig.modelDef.version?.major}" +
                         ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"
             )

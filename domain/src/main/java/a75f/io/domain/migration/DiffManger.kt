@@ -20,9 +20,12 @@ class DiffManger(var context: Context?) {
 
 
     companion object {
-        const val NEW_FILE_PATH = "assets/75f/models/"
+        const val NEW_FILE_PATH = "assets/assets/75f/models/"
         const val BACKUP_FIle_PATH = "assets/models/"
         const val VERSION = "versions.json"
+        const val ASSETS_VERSION_FILE_PATH = "assets/assets/75f/versions.json"
+        const val MODELS_VERSION_FILE_PATH = "assets/models/versions.json"
+        lateinit var  migrationCompletedListener: OnMigrationCompletedListener
     }
 
     /**
@@ -31,9 +34,11 @@ class DiffManger(var context: Context?) {
      */
     fun processModelMigration(siteRef: String) {
         Log.i(Domain.LOG_TAG, "processModelMigration")
-        val newVersionFiles : MutableList<ModelMeta> =  getModelFileVersionDetails("$NEW_FILE_PATH$VERSION")
-        Log.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} models at $NEW_FILE_PATH$VERSION")
-        val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles)
+        val newVersionFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(ASSETS_VERSION_FILE_PATH)
+        val backupFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(MODELS_VERSION_FILE_PATH)
+        Log.i(Domain.LOG_TAG, " Found ${backupFiles.size} old models at $BACKUP_FIle_PATH$VERSION")
+        Log.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} new models at $NEW_FILE_PATH$VERSION")
+        val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles, NEW_FILE_PATH)
         Log.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
 
         if (anyInvalidModels.isNotEmpty()) {
@@ -49,9 +54,9 @@ class DiffManger(var context: Context?) {
             Log.e(Domain.LOG_TAG, "No valid model found for migration ")
             return
         }
-        val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
+        val migrationHandler = MigrationHandler(CCUHsApi.getInstance(), migrationCompletedListener)
         val versionFiles = getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
-        updateEquipModels (newVersionFiles, versionFiles, migrationHandler, siteRef)
+        updateEquipModels(newVersionFiles, versionFiles, migrationHandler, siteRef)
     }
 
     fun updateEquipModels(
@@ -66,20 +71,45 @@ class DiffManger(var context: Context?) {
             if (currentModelMeta != null) {
                 CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
-                    CcuLog.i(Domain.LOG_TAG, " Model Updated  ${version.modelId}")
+                    CcuLog.i(Domain.LOG_TAG, "Model Update - Model ID: ${version.modelId}; " +
+                            "Current model version: ${currentModelMeta.version}, New model version: ${version.version}")
                     val originalModel = getModelDetective("$BACKUP_FIle_PATH${version.modelId}.json")
                     val newModel = getModelDetective("$NEW_FILE_PATH${version.modelId}.json")
-
-                    val entityConfiguration =
-                        originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
-                    if (entityConfiguration != null && newModel != null) {
-                        handler.migrateModel(entityConfiguration,newModel, siteRef,
-                            getProfileNameByDomainName()
-                        )
+                    //  Retrieve the current equip map by using modelID
+                    val currentEquipMap = Domain.readEquip(version.modelId);
+                    // Ensure that the current model JSON and new model JSON are not null
+                    if(originalModel != null && newModel != null
+                        && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)){
+                        // if block should be removed once modelVersion key migrated completely to sourceModelVersion
+                        if(currentEquipMap.containsKey("modelVersion") &&
+                            (version.version.toString() != (currentEquipMap["modelVersion"]).toString())) {
+                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
+                                    " current equipment version: ${currentEquipMap["modelVersion"]}")
+                            val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
+                            if (entityConfiguration != null) {
+                                handler.migrateModel(entityConfiguration, newModel, siteRef)
+                            }
+                        }else if(currentEquipMap.containsKey("sourceModelVersion") &&
+                            (version.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())){
+                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
+                                    " current equipment version: ${currentEquipMap["sourceModelVersion"]}")
+                            val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
+                            if (entityConfiguration != null) {
+                                handler.migrateModel(entityConfiguration, newModel, siteRef)
+                            }
+                        }else{
+                            CcuLog.i(Domain.LOG_TAG, "Ignoring migration for ${currentModelMeta.modelId}")
+                        }
+                    }else{
+                        CcuLog.i(Domain.LOG_TAG, "Model not updated; Current model: ${currentModelMeta}, New model: $version")
                     }
+                }else{
+                    CcuLog.i(Domain.LOG_TAG, "The model with ID ${version.modelId} is not updated, " +
+                            "as the current model version (${currentModelMeta.version})" +
+                            " is the same as the new model version (${version.version}).")
                 }
             } else {
-                // This version model is not found we need to add to current model
+                CcuLog.i(Domain.LOG_TAG, "Model not found for ${version.modelId}")
             }
         }
     }
@@ -100,13 +130,13 @@ class DiffManger(var context: Context?) {
         val versionDetails = ResourceHelper.getModelVersion(fileName)
         val models = mutableListOf<ModelMeta>()
         versionDetails.keys().forEach {
-            val versionModel = versionDetails.getJSONObject(it as String)
+            val versionModel = versionDetails.getJSONObject(it)
             models.add(
-                ModelMeta(modelId = it,
-                Version(
-                    major = versionModel.getInt(MAJOR),
-                    minor = versionModel.getInt(MINOR),
-                    patch = versionModel.getInt(PATCH)
+                ModelMeta(modelId = versionModel.getString(ID),
+                    Version(
+                        major = versionModel.getJSONObject(MODEL_VERSION).getInt(MAJOR),
+                        minor = versionModel.getJSONObject(MODEL_VERSION).getInt(MINOR),
+                        patch = versionModel.getJSONObject(MODEL_VERSION).getInt(PATCH)
                     )
                 )
             )
@@ -156,5 +186,13 @@ class DiffManger(var context: Context?) {
      */
     private fun getModelDetective(modelFile: String): ModelDirective? {
         return ResourceHelper.loadModelDefinition(modelFile)
+    }
+
+    interface OnMigrationCompletedListener {
+        fun onMigrationCompletedCompleted(hsApi: CCUHsApi)
+    }
+
+    fun registerOnMigrationCompletedListener(listener: OnMigrationCompletedListener) {
+        migrationCompletedListener = listener
     }
 }

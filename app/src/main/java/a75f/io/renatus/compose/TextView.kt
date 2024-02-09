@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,11 +41,11 @@ fun HeaderTextView(text: String, padding : Int = 5) {
     Text(
         modifier = Modifier
             .wrapContentSize()
-            .padding(padding.dp),
+            .padding(top=padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             color = Color.Black,
             textAlign = TextAlign.Center,
         ),
@@ -72,18 +73,18 @@ fun HeaderLeftAlignedTextView(text: String) {
 
 @Composable
 fun LabelTextView(text: String) {
-    Text(
-        modifier = Modifier
-            .padding(PaddingValues(top = 5.dp, start = 20.dp))
-            .width(450.dp),
-        style = TextStyle(
-            fontFamily = myFontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 18.sp,
-            color = Color.Black
-        ),
-        text = text
-    )
+        Text(
+            modifier = Modifier
+                .padding(PaddingValues(start = 20.dp))
+                .width(200.dp),
+            style = TextStyle(
+                fontFamily = myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                color = Color.Black
+            ),
+            text = text
+        )
 }
 
 @Composable
@@ -93,9 +94,10 @@ fun StyledTextView(text: String, fontSize : Int) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = fontSize.sp,
-            color = Color.Black
+            color = Color.Black,
+            textAlign = TextAlign.Center
         ),
-        text = text
+        text = text,
     )
 }
 
@@ -103,7 +105,7 @@ fun StyledTextView(text: String, fontSize : Int) {
 fun TitleTextView(text: String) {
     Text(
         modifier = Modifier
-            .padding(10.dp)
+            .padding(top=0.dp,start=10.dp,end=10.dp,bottom=10.dp)
             .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,
@@ -166,9 +168,13 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
         modifier = modifier.height(50.dp),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.Center),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Red,
-            unfocusedIndicatorColor = Color.Gray,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
             containerColor = Color.White,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
@@ -176,7 +182,8 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(primaryColor)
             )
         },
     )
@@ -200,17 +207,22 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
             }),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black, textAlign = TextAlign.Left),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Red,
-            unfocusedIndicatorColor = Color.Gray,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
             containerColor = Color.White,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
         trailingIcon  = {
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
+                colorFilter = ColorFilter.tint(primaryColor),
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         },
     )
@@ -227,9 +239,13 @@ fun TextViewCompose(text: String) {
         modifier = Modifier.width(100.dp),
         textStyle = TextStyle(fontFamily = myFontFamily,fontSize = 16.sp, color = Color.Black,textAlign = TextAlign.End),
         colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = primaryColor,
-            unfocusedIndicatorColor = Color.Gray,
             containerColor = Color.White,
+            focusedIndicatorColor = primaryColor,
+            textColor = primaryColor,
+            placeholderColor = primaryColor,
+            unfocusedIndicatorColor = primaryColor,
+            disabledIndicatorColor = primaryColor,
+            cursorColor = primaryColor,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black
         ),
@@ -237,7 +253,8 @@ fun TextViewCompose(text: String) {
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Custom Icon",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(primaryColor)
             )
         },
     )

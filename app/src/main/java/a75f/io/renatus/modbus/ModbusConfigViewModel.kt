@@ -230,6 +230,12 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun isValidConfiguration(): Boolean {
+
+        if (equipModel.value.parameters.isEmpty()) {
+            showToast(context.getString(R.string.no_device_paired), context)
+            return false
+        }
+
         if (equipModel.value.isDevicePaired)
             return true // If it is paired then will not allow the use to to edit slave id
 

@@ -432,7 +432,7 @@ public class MigrationUtil {
             UpdateFloorRefRoomRefForConfigPoints(CCUHsApi.getInstance());
             PreferenceUtil.setZoneEquipConfigPointMigrationDone();
         }
-        CCUHsApi.getInstance().removeAllNamedSchedule();
+
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
@@ -449,6 +449,7 @@ public class MigrationUtil {
             writeValuesToLevel17ForMissingScheduleAblePoints(ccuHsApi);
         }
         migrateRemoteAccess();
+        correctPhysicalAndAnalogMappingForSSE(ccuHsApi);
         L.saveCCUState();
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
@@ -459,9 +460,215 @@ public class MigrationUtil {
                 PreferenceUtil.setCarrierDabToVvtMigrationDone();
         }
         removeHisTagForEquipStatusMessage(ccuHsApi);
-
+        createMissingScheduleAblePoints(ccuHsApi);
         ccuHsApi.scheduleSync();
     }
+
+    private static void createMissingScheduleAblePoints(CCUHsApi ccuHsApi) {
+        Log.i("CCU_SCHEDULABLE","createMissingScheduleAblePoints");
+        List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        rooms.forEach(room -> {
+            List<ArrayList<HashMap<Object, Object>>> scheduleAbleLimits = new ArrayList<>();
+            scheduleAbleLimits.add(ccuHsApi.readAllEntities("schedulable and roomRef ==\""
+                    + room.get("id").toString() +"\""));
+            findMissingSchedulableLimits(ccuHsApi.readAllEntities("schedulable and roomRef ==\""
+                    + room.get("id").toString() +"\""), room.get("id").toString(), ccuHsApi);
+        });
+    }
+    private static void findMissingSchedulableLimits(ArrayList<HashMap<Object,
+            Object>> scheduleAbleLimits, String roomRef, CCUHsApi ccuHsApi) {
+        Log.i("CCU_SCHEDULABLE","findMissingSchedulableLimits roomRef "+roomRef);
+        HashMap<Object, Object> equipMap = ccuHsApi.readEntity(
+                "equip and roomRef == \""+ roomRef +"\"");
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "deadband")) {
+            Log.i("CCU_SCHEDULABLE","create Heating deadband");
+            createSchedulableDeadband(roomRef, ccuHsApi, equipMap, "heating");
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "deadband")) {
+            Log.i("CCU_SCHEDULABLE","create cooling deadband");
+            createSchedulableDeadband(roomRef, ccuHsApi, equipMap, "cooling");
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "unoccupied", "setback")) {
+            Log.i("CCU_SCHEDULABLE","create unoccupied setback");
+            createUnOccupiedSetBackPoint(roomRef, ccuHsApi, equipMap);
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "min")) {
+            Log.i("CCU_SCHEDULABLE","create Heating min");
+            createHeatingLimitMinPoint(roomRef, ccuHsApi, equipMap);
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "max")) {
+            Log.i("CCU_SCHEDULABLE","create Heating max");
+            createHeatingLimitMaxPoint(roomRef, ccuHsApi, equipMap);
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "max")) {
+            Log.i("CCU_SCHEDULABLE","create cooling max");
+            createCoolingLimitMaxPoint(roomRef, ccuHsApi, equipMap);
+        }
+        if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "min")) {
+            Log.i("CCU_SCHEDULABLE","create cooling min");
+            createCoolingLimitMinPoint(roomRef, ccuHsApi, equipMap);
+        }
+    }
+    private static void createCoolingLimitMaxPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap) {
+        Point coolingUserLimitMax = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+"-coolingUserLimitMax")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("schedulable").addMarker("writable").addMarker("his")
+                .addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                .setMinVal("50").setMaxVal("100").setIncrementVal("1").addMarker("cur")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String coolingUserLimitMaxId = ccuHsApi.addPoint(coolingUserLimitMax);
+        ccuHsApi.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+        ccuHsApi.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and cooling and user " +
+                "and limit and max and default");
+        double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal, 0);
+    }
+    private static void createCoolingLimitMinPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap) {
+        Point coolingUserLimitMin = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+"-coolingUserLimitMin")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("writable").addMarker("his").setMinVal("70").setMaxVal("77")
+                .setIncrementVal("1").addMarker("schedulable").addMarker("cur")
+                .addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                .setMinVal("50").setMaxVal("100").setIncrementVal("1")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String coolingUserLimitMinId = ccuHsApi.addPoint(coolingUserLimitMin);
+        ccuHsApi.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+        ccuHsApi.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and cooling and user " +
+                "and limit and min and default");
+        double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal, 0);
+    }
+    private static void createHeatingLimitMaxPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap) {
+        Point heatingUserLimitMax = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+"-heatingUserLimitMax")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
+                .addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                .setMinVal("50").setMaxVal("100").setIncrementVal("1")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String heatingUserLimitMaxId = ccuHsApi.addPoint(heatingUserLimitMax);
+        ccuHsApi.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+        ccuHsApi.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and heating and user " +
+                "and limit and max and default");
+        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal, 0);
+    }
+    private static void createHeatingLimitMinPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap) {
+        Point heatingUserLimitMin = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+"-heatingUserLimitMin")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
+                .addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                .setMinVal("50").setMaxVal("100").setIncrementVal("1")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String heatingUserLimitMinId = ccuHsApi.addPoint(heatingUserLimitMin);
+        ccuHsApi.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+        ccuHsApi.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and heating and user " +
+                "and limit and min and default");
+        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal, 0);
+    }
+    private static void createUnOccupiedSetBackPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap) {
+        Point unoccupiedZoneSetback = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+"-unoccupiedZoneSetback")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
+                .addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String unoccupiedZoneSetbackId = ccuHsApi.addPoint(unoccupiedZoneSetback);
+        ccuHsApi.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        ccuHsApi.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and unoccupied and setback " +
+                "and default");
+        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal , 0);
+    }
+    private static void createSchedulableDeadband(String roomRef, CCUHsApi ccuHsApi,
+                                                  HashMap<Object, Object> equipMap, String deadBand) {
+        Log.i("amardebug","createSchedulableDeadband");
+        Point deadBandPoint = new Point.Builder()
+                .setDisplayName(equipMap.get("dis").toString()+deadBand+"Deadband")
+                .setSiteRef(equipMap.get("siteRef").toString())
+                .setHisInterpolate("cov")
+                .addMarker("writable")
+                .addMarker("his")
+                .addMarker(deadBand).addMarker("deadband").addMarker("base")
+                .addMarker("sp").addMarker("schedulable").addMarker("cur")
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5")
+                .setUnit("\u00B0F")
+                .addMarker("zone").setRoomRef(roomRef)
+                .setTz(ccuHsApi.getTimeZone()).build();
+        String deadBandId = CCUHsApi.getInstance().addPoint(deadBandPoint);
+        ccuHsApi.writePointForCcuUser(deadBandId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+        ccuHsApi.writeHisValById(deadBandId, TunerConstants.VAV_COOLING_DB);
+        HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and "+
+                deadBand + " and deadband and default");
+        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+        if (pointVal > 0)
+            ccuHsApi.writePointForCcuUser(deadBandId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                    pointVal , 0);
+    }
+    private static boolean notContainsSchedulableLimits(ArrayList<HashMap<Object, Object>> listOfMaps,
+                                                        String tag1, String tag2) {
+        for (HashMap<Object, Object> map : listOfMaps) {
+            if (map.containsKey(tag1) && map.containsKey(tag2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void correctPhysicalAndAnalogMappingForSSE(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> sseEquips = ccuHsApi.readAllEntities("equip and sse");
+        for (HashMap<Object, Object> equip : sseEquips) {
+            HashMap<Object, Object> transformerPoint = ccuHsApi.readEntity("(transformer or" +
+                    " transformer20 or transformer50) and equipRef == \"" + equip.get("id") + "\"");
+            HashMap<Object, Object> dev = ccuHsApi.readEntity("device and equipRef == \"" + equip.get("id") + "\"");
+            ArrayList<HashMap<Object, Object>> phyPoints = CCUHsApi.getInstance().readAllEntities("point and physical" +
+                    " and sensor and deviceRef == \"" + dev.get("id") + "\"" +" and port == \""+Port.ANALOG_IN_ONE.toString()+"\"");
+            for(HashMap<Object, Object> ha :phyPoints){
+                if(ha.get("port").toString().equals((Port.ANALOG_IN_ONE).toString()) && transformerPoint.size() > 0){
+                    if(!ha.get("pointRef").toString().equals(transformerPoint.get("id").toString())){
+                        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.get("group").toString()),
+                                Port.ANALOG_IN_ONE.name(), transformerPoint.get("id").toString());
+                    }
+                }
+            }
+        }
+    }
+
 
     private static void removeHisTagForEquipStatusMessage(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip " +
@@ -515,29 +722,42 @@ public class MigrationUtil {
                     " and deadband and roomRef == \""+roomRef+"\"");
             HashMap<Object, Object> heatingDeadBand = ccuHsApi.readEntity("schedulable and heating" +
                     " and deadband and roomRef == \""+roomRef+"\"");
-            if(HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+
+            if (coolingUpperLimit != null && !coolingUpperLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingUpperLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingUpperLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+            if (heatingUpperLimit != null && !heatingUpperLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingUpperLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingUpperLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+            if (coolingLowerLimit != null && !coolingLowerLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingLowerLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingLowerLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+            if (heatingLowerLimit != null && !heatingLowerLimit.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingLowerLimit.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingLowerLimit.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+            if (coolingDeadBand != null && !coolingDeadBand.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(coolingDeadBand.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(coolingDeadBand.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
+                }
             }
-            if(HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0){
-                ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
-                        SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+            if (heatingDeadBand != null && !heatingDeadBand.isEmpty()) {
+                if (HSUtil.getPriorityLevelVal(heatingDeadBand.get("id").toString(), 17) == 0.0) {
+                    ccuHsApi.writePointForCcuUser(heatingDeadBand.get("id").toString(), TunerConstants.
+                            SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
+                }
             }
         });
     }

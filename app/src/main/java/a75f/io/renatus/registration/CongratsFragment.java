@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import static a75f.io.constants.CcuFieldConstants.SOURCE_MODEL_VERSION;
 
 import org.jsoup.helper.StringUtil;
 import org.projecthaystack.HDict;
@@ -27,8 +28,6 @@ import a75f.io.renatus.util.CCUUiUtil;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class CongratsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -113,8 +112,10 @@ public class CongratsFragment extends Fragment {
         mContext = getContext().getApplicationContext();
 
         if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
-            TextView viewById = rootView.findViewById(R.id.textSuccess);
-            viewById.setText(R.string.title_success_carrier);
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_carrier);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_carrier);
         }
 
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
@@ -185,7 +186,7 @@ public class CongratsFragment extends Fragment {
         mComfortSelector.setText("Maximum Comfort");
         mComfortSelector.setVisibility(View.GONE);
 
-        if (eqp.getTags().containsKey("modelVersion")) {
+        if (eqp.getTags().containsKey(SOURCE_MODEL_VERSION)) {
             buildingTunerVersion.setText("Building tuners have created from model version "+tuner.get("modelVersion").toString());
         }
 

@@ -168,6 +168,7 @@ public class BuildingOccupancyViewModel {
         ArrayList<Zone> zoneList = new ArrayList<>();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
+        Map<String, List<Zone>> zoneMap = new LinkedHashMap<>();
 
 
         LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
@@ -197,8 +198,14 @@ public class BuildingOccupancyViewModel {
                         Map.Entry entry = (Map.Entry) it.next();
                         map.put(entry.getKey().toString(), entry.getValue().toString());
                     }
-                    zoneList.add(new Zone.Builder().setHashMap(map).build());
+                    String floorRef = map.get("floorRef").toString();
+                    zoneMap.putIfAbsent(floorRef, new ArrayList<>());
+                    zoneMap.get(floorRef).add(new Zone.Builder().setHashMap(map).build());
                 }
+                for(List<Zone> zones: zoneMap.values()) {
+                    zoneList.addAll(zones);
+                }
+                zoneMap.clear();
             }
 
 

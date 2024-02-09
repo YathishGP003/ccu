@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import static a75f.io.constants.CcuFieldConstants.SOURCE_MODEL_VERSION;
 
 import org.jsoup.helper.StringUtil;
 import org.projecthaystack.HDict;
@@ -185,7 +186,7 @@ public class CongratsFragment extends Fragment {
         mComfortSelector.setText("Maximum Comfort");
         mComfortSelector.setVisibility(View.GONE);
 
-        if (eqp.getTags().containsKey("modelVersion")) {
+        if (eqp.getTags().containsKey(SOURCE_MODEL_VERSION)) {
             buildingTunerVersion.setText("Building tuners have created from model version "+tuner.get("modelVersion").toString());
         }
 

@@ -2703,8 +2703,8 @@ public class CCUHsApi
                 HashMap<Object, Object> tunerEquip = CCUHsApi.getInstance().readEntity("equip and tuner");
                 if (!tunerEquip.isEmpty()) {
                     JSONObject tunerFiled = new JSONObject();
-                    tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.MODEL_ID));
-                    tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.MODEL_VERSION));
+                    tunerFiled.put(CcuFieldConstants.MODEL_ID, tunerEquip.get(CcuFieldConstants.SOURCE_MODEL));
+                    tunerFiled.put(CcuFieldConstants.MODEL_VERSION, tunerEquip.get(CcuFieldConstants.SOURCE_MODEL_VERSION));
                     tunerFiled.put(CcuFieldConstants.BUILDING_TUNER_ID, buildingTuneId);
                     ccuJsonRequest.put(CcuFieldConstants.TUNER, tunerFiled);
                 }

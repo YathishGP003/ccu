@@ -8,11 +8,10 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
-import org.projecthaystack.UnknownNameException
 
 object ReconfigHandler {
     fun getEntityReconfiguration(equipRef: String, hayStack: CCUHsApi,
-                                 config : EntityConfiguration, profileConfig: ProfileConfiguration) :
+                                 config : EntityConfiguration, profileConfig: ProfileConfiguration, modelDef : SeventyFiveFProfileDirective) :
             EntityConfiguration {
         //val existingEntityMap = getAllConfig(equipGroup, hayStack)
 

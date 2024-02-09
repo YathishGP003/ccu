@@ -72,7 +72,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val entityConfiguration = if (isReconfiguration) {
             ReconfigHandler.getEntityReconfiguration(
                 equipId, hayStack,
-                entityMapper.getEntityConfiguration(configuration), configuration
+                entityMapper.getEntityConfiguration(configuration), configuration, modelDef
             )
         } else {
             getEntityUpdateConfiguration(equipId, hayStack,entityMapper.getEntityConfiguration(configuration))

@@ -41,11 +41,11 @@ fun HeaderTextView(text: String, padding : Int = 5) {
     Text(
         modifier = Modifier
             .wrapContentSize()
-            .padding(padding.dp),
+            .padding(top=padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             color = Color.Black,
             textAlign = TextAlign.Center,
         ),
@@ -73,18 +73,18 @@ fun HeaderLeftAlignedTextView(text: String) {
 
 @Composable
 fun LabelTextView(text: String) {
-    Text(
-        modifier = Modifier
-            .padding(PaddingValues(top = 5.dp, start = 20.dp))
-            .width(450.dp),
-        style = TextStyle(
-            fontFamily = myFontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 18.sp,
-            color = Color.Black
-        ),
-        text = text
-    )
+        Text(
+            modifier = Modifier
+                .padding(PaddingValues(start = 20.dp))
+                .width(200.dp),
+            style = TextStyle(
+                fontFamily = myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                color = Color.Black
+            ),
+            text = text
+        )
 }
 
 @Composable
@@ -94,9 +94,10 @@ fun StyledTextView(text: String, fontSize : Int) {
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = fontSize.sp,
-            color = Color.Black
+            color = Color.Black,
+            textAlign = TextAlign.Center
         ),
-        text = text
+        text = text,
     )
 }
 
@@ -104,7 +105,7 @@ fun StyledTextView(text: String, fontSize : Int) {
 fun TitleTextView(text: String) {
     Text(
         modifier = Modifier
-            .padding(10.dp)
+            .padding(top=0.dp,start=10.dp,end=10.dp,bottom=10.dp)
             .wrapContentSize(),
         style = TextStyle(
             textAlign = TextAlign.Center,

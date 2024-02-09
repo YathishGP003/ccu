@@ -226,7 +226,7 @@ class VavProfileViewModel : ViewModel() {
             L.ccu().zoneProfiles.add(vavProfile)
 
         } else {
-            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             vavProfile.init()
             setOutputTypes(profileConfiguration)
             setScheduleType(profileConfiguration)

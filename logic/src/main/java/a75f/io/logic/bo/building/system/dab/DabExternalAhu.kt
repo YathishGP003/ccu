@@ -17,10 +17,12 @@ import a75f.io.domain.api.DomainName.useOutsideTempLockoutHeating
 import a75f.io.domain.api.Equip
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
+import a75f.io.logic.BuildConfig
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.BasicConfig
+import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.TempDirection
 import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
@@ -47,6 +49,7 @@ class DabExternalAhu : DabSystemProfile() {
 
     companion object {
         const val PROFILE_NAME = "DAB External AHU Controller"
+        const val CARRIER_PROFILE_NAME = "VVT-C External AHU Controller"
         const val SYSTEM_ON = "System ON"
         const val SYSTEM_OFF = "System OFF"
         const val SYSTEM_MODBUS = "equip and system and not modbus"
@@ -63,7 +66,13 @@ class DabExternalAhu : DabSystemProfile() {
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
 
-    override fun getProfileName(): String = PROFILE_NAME
+    override fun getProfileName(): String {
+        return if (BuildConfig.BUILD_TYPE == "carrier_prod") {
+            CARRIER_PROFILE_NAME
+        } else {
+            PROFILE_NAME
+        }
+    }
 
     override fun getProfileType(): ProfileType = ProfileType.dabExternalAHUController
 
@@ -138,7 +147,6 @@ class DabExternalAhu : DabSystemProfile() {
 
     @Synchronized
     private fun updateSystemPoints() {
-
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.DAB_EXTERNAL_AHU_CONTROLLER)
         if (systemEquip == null) {
             logIt("DAB_EXTERNAL_AHU_CONTROLLER system equip is empty")
@@ -159,7 +167,6 @@ class DabExternalAhu : DabSystemProfile() {
         if (getBasicDabConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
 
     private fun calculateSetPoints(systemEquip: Equip) {
-
         val externalEquipId = getExternalEquipId()
         val dabConfig = getBasicDabConfigData()
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
@@ -168,21 +175,21 @@ class DabExternalAhu : DabSystemProfile() {
         val humidityHysteresis = getTunerByDomainName(systemEquip, dabHumidityHysteresis)
         val analogFanMultiplier = getTunerByDomainName(systemEquip, dabAnalogFanSpeedMultiplier)
         logIt(
-            " System is $occupancyMode conditioningMode : $conditioningMode" +
-                    " coolingLoop ${dabConfig.coolingLoop} heatingLoop ${dabConfig.heatingLoop}" +
-                    " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
+            " System is $occupancyMode conditioningMode : $conditioningMode" + " coolingLoop ${dabConfig.coolingLoop} heatingLoop ${dabConfig.heatingLoop}" + " weightedAverageCO2 ${dabConfig.weightedAverageCO2} loopOutput ${dabConfig.loopOutput}"
         )
         updateLoopDirection(dabConfig, systemEquip)
         updateOperatingMode(
-            systemEquip, dabSystem.systemState.ordinal.toDouble(),
-            operatingMode, externalSpList, externalEquipId, hayStack
+            systemEquip,
+            dabSystem.systemState.ordinal.toDouble(),
+            operatingMode,
+            externalSpList,
+            externalEquipId,
+            hayStack
         )
-
         calculateSATSetPoints(
             systemEquip,
             dabConfig,
             externalEquipId,
-            conditioningMode,
             hayStack,
             externalSpList,
             loopRunningDirection,
@@ -234,13 +241,14 @@ class DabExternalAhu : DabSystemProfile() {
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
         logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} heat ${basicConfig.heatingLoop}")
-        if (basicConfig.coolingLoop > 0)
-            loopRunningDirection = TempDirection.COOLING
-        if (basicConfig.heatingLoop > 0)
-            loopRunningDirection = TempDirection.HEATING
+        loopRunningDirection = when(dabSystem.systemState) {
+            SystemController.State.COOLING -> TempDirection.COOLING
+            SystemController.State.HEATING -> TempDirection.HEATING
+            else -> TempDirection.COOLING
+        }
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
-        logIt("Changed direction $loopRunningDirection ");
+        logIt("Changed direction $loopRunningDirection ")
     }
 
     private fun getBasicDabConfigData() =
@@ -248,6 +256,6 @@ class DabExternalAhu : DabSystemProfile() {
             coolingLoop = if (dabSystem.coolingSignal <= 0 ) 0 else dabSystem.coolingSignal,
             heatingLoop = if (dabSystem.heatingSignal <= 0 ) 0 else dabSystem.heatingSignal,
             loopOutput = if (dabSystem.coolingSignal > 0) dabSystem.coolingSignal.toDouble() else dabSystem.heatingSignal.toDouble(),
-            weightedAverageCO2 = dabSystem.co2WeightedAverageSum,
+            weightedAverageCO2 = weightedAverageCO2,
         )
 }

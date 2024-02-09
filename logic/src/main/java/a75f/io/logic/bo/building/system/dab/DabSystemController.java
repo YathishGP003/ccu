@@ -584,7 +584,7 @@ public class DabSystemController extends SystemController
         );
     }
     public double getCMCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and (current or space) and equipRef == \""
                                                         +equipRef+"\""
         );
     }

@@ -751,7 +751,7 @@ public abstract class VavProfile extends ZoneProfile {
         if (profileType == ProfileType.VAV_ACB) {
             VavAcbEquip acbEquip = (VavAcbEquip)vavEquip;
             if (acbEquip.getCondensateNC().readHisVal() > 0.0 || acbEquip.getCondensateNO().readHisVal() > 0.0) {
-                message += ", Condensate Detected";
+                message += ", Condensation Detected";
             }
             if (acbEquip.getValveType().readPriorityVal() > 0.0) {
                 if (acbEquip.getChwValveCmd().readHisVal() > 0.0) {

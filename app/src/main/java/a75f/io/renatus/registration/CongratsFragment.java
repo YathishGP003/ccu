@@ -187,7 +187,7 @@ public class CongratsFragment extends Fragment {
         mComfortSelector.setVisibility(View.GONE);
 
         if (eqp.getTags().containsKey(SOURCE_MODEL_VERSION)) {
-            buildingTunerVersion.setText("Building tuners have created from model version "+tuner.get("modelVersion").toString());
+            buildingTunerVersion.setText("Building tuners have created from model version "+tuner.get(SOURCE_MODEL_VERSION).toString());
         }
 
         return rootView;

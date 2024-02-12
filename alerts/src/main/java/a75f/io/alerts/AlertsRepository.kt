@@ -1,10 +1,20 @@
 package a75f.io.alerts
 
 import a75f.io.alerts.cloud.AlertsService
-import a75f.io.alerts.model.*
+import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.alerts.model.AlertDefProgress.Partial
+import a75f.io.alerts.model.AlertDefsMap
+import a75f.io.alerts.model.AlertDefsState
+import a75f.io.alerts.model.minus
+import a75f.io.alerts.model.plusAssign
+import a75f.io.alerts.model.remove
+import a75f.io.alerts.model.removeAll
+import a75f.io.alerts.model.toArrayList
 import a75f.io.api.haystack.Alert
+import a75f.io.api.haystack.Alert.AlertSeverity
+import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
 import android.util.Log
 import io.reactivex.rxjava3.core.Completable
@@ -235,6 +245,20 @@ class AlertsRepository(
       alertsStateChange.newlyFixedAlerts.forEach { alert ->
          Log.i("DEV_DEUG", "Hard Fix: $alert")
               fixAlert(alert)
+      }
+
+      val alertBox = hayStack.tagsDb.boxStore.boxFor(Alert::class.java)
+      if(alertBox.all.size > 5000) {
+         val query = alertBox.query()
+         query.`in`(Alert_.mSeverity, intArrayOf(
+            AlertSeverity.INTERNAL_INFO.ordinal,
+            AlertSeverity.INTERNAL_LOW.ordinal,
+            AlertSeverity.INTERNAL_MODERATE.ordinal,
+            AlertSeverity.INTERNAL_SEVERE.ordinal,
+            AlertSeverity.LOW.ordinal
+         ))
+         val alertList = query.build().find()
+         alertBox.remove(alertList)
       }
 
       // check for alert time-out

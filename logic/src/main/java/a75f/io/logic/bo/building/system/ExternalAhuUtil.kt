@@ -489,8 +489,7 @@ fun handleDeHumidityOperation(
     val currentStatus = Domain.getHisByDomain(systemEquip, dehumidifierEnable)
     var newStatus = 0.0
 
-    if (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF
-    ) {
+    if (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF) {
         updatePointValue(systemEquip, dehumidifierEnable, 0.0)
         externalEquipId?.let {
             pushDeHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)

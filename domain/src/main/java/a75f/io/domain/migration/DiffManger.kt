@@ -78,10 +78,21 @@ class DiffManger(var context: Context?) {
                     //  Retrieve the current equip map by using modelID
                     val currentEquipMap = Domain.readEquip(version.modelId);
                     // Ensure that the current model JSON and new model JSON are not null
-                    if(originalModel != null && newModel != null && currentEquipMap["modelVersion"] != null){
-                        CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
-                                " current equipment version: ${currentEquipMap["modelVersion"]}")
-                        if(version.version.toString() != (currentEquipMap["modelVersion"]).toString()){
+                    if(originalModel != null && newModel != null
+                        && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)){
+                        // if block should be removed once modelVersion key migrated completely to sourceModelVersion
+                        if(currentEquipMap.containsKey("modelVersion") &&
+                            (version.version.toString() != (currentEquipMap["modelVersion"]).toString())) {
+                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
+                                    " current equipment version: ${currentEquipMap["modelVersion"]}")
+                            val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
+                            if (entityConfiguration != null) {
+                                handler.migrateModel(entityConfiguration, newModel, siteRef)
+                            }
+                        }else if(currentEquipMap.containsKey("sourceModelVersion") &&
+                            (version.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())){
+                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
+                                    " current equipment version: ${currentEquipMap["sourceModelVersion"]}")
                             val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
                             if (entityConfiguration != null) {
                                 handler.migrateModel(entityConfiguration, newModel, siteRef)

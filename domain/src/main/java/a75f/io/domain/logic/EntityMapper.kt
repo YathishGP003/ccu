@@ -91,6 +91,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             profileConfig?.let {
                 if (associationEnabled) {
                     val constraint = def.valueConstraint as MultiStateConstraint
+                    enabledAssociations.add(def.domainName)
                     enabledAssociations.add(constraint.allowedValues[it.associationVal].value)
                 }
             }

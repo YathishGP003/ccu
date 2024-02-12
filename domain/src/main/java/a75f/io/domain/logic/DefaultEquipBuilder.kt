@@ -61,9 +61,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
-        equipBuilder.addTag("modelId", HStr.make(equipConfig.modelDef.id))
+        equipBuilder.addTag("sourceModel", HStr.make(equipConfig.modelDef.id))
         equipBuilder.addTag(
-            "modelVersion", HStr.make(
+            "sourceModelVersion", HStr.make(
                 "${equipConfig.modelDef.version?.major}" +
                         ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"
             )

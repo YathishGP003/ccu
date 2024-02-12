@@ -194,6 +194,8 @@ public class HisSyncHandler
                 CcuLog.e(TAG, "His write failed! , Trying to handle the error");
                 EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
             }
+        }else{
+            CcuLog.e(TAG, "null response");
         }
     }
 

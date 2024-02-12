@@ -36,7 +36,7 @@ public class TrueCFMVAVConfigHandler {
         equipBuilder.updateEquipAndPoints(config,
                 ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
                 equip.getSiteRef(),
-                equip.getDisplayName());
+                equip.getDisplayName(), true);
 
         //writePointFromJson(configPoint, msgObject, hayStack);
     }

@@ -14,6 +14,7 @@ import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
 import a75f.io.domain.config.ExternalAhuConfiguration
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,8 +65,8 @@ class ExternalAhuConfigModel {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
 
-    fun getConfiguration(): ExternalAhuConfiguration {
-        val config =  ExternalAhuConfiguration(ProfileType.dabExternalAHUController.name)
+    fun getConfiguration(profileType: ProfileType): ExternalAhuConfiguration {
+        val config =  ExternalAhuConfiguration(profileType.name)
 
         config.setPointControl.enabled = this.setPointControl
         config.dualSetPointControl.enabled = this.dualSetPointControl
@@ -89,7 +90,7 @@ class ExternalAhuConfigModel {
         config.co2Threshold.currentVal = this.co2Threshold.toDouble()
         config.co2Target.currentVal = this.co2Target.toDouble()
         config.damperOpeningRate.currentVal = this.damperOpeningRate.toDouble()
-
+        CcuLog.i("CCU_SYSTEM", "ExternalAhuConfigModel.getConfiguration() : $config")
         return config
     }
 

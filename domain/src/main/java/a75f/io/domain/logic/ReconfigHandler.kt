@@ -8,50 +8,26 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
-import org.projecthaystack.UnknownNameException
 
 object ReconfigHandler {
-
-    /**
-     * Get map of all profile configurations and its current val from haystack database.
-     * Map contains in domainName of config and rhw value in 8th level of point array.
-     */
-    /*private fun getAllConfig(equipRef : String, hayStack : CCUHsApi) : Map<String, Any> {
-        val domainNameMap = mutableMapOf<String, Double>()
-        val configPoints =
-            hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
-        configPoints.forEach {
-            CcuLog.i(Domain.LOG_TAG, "Config point $it")
-                try {
-                val pointVal = hayStack.readDefaultValById(it["id"].toString())
-                //TODO - handle string type val if there is any.
-                if (pointVal is Number) {
-                    domainNameMap[it["domainName"].toString()] = pointVal
-                }
-            } catch (e : UnknownNameException) {
-                CcuLog.i(Domain.LOG_TAG, "Invalid point in domainModel $it", e.cause)
-            }
-
-        }
-        return domainNameMap
-    }*/
-
-
-    /*private fun getAllConfig(equipGroup : Int, hayStack : CCUHsApi) : List<String> {
-        //val equip = hayStack.readEntity(
-        //    "equip and group == \"$equipGroup\"")
-        //return getAllConfig(equip["id"].toString(), hayStack)
-        return hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
-            .map { it -> it["domainName"].toString() }
-    }*/
-
-    fun getEntityReconfiguration(equipGroup: Int, hayStack: CCUHsApi, config : EntityConfiguration, modelDef: SeventyFiveFProfileDirective) :
-                                                                        EntityConfiguration {
+    fun getEntityReconfiguration(equipRef: String, hayStack: CCUHsApi,
+                                 config : EntityConfiguration, profileConfig: ProfileConfiguration, modelDef : SeventyFiveFProfileDirective) :
+            EntityConfiguration {
         //val existingEntityMap = getAllConfig(equipGroup, hayStack)
 
-        val existingEntityList = hayStack.readAllEntities("point and group == \"$equipGroup\"")
-                                .map { it["domainName"].toString() }
+        val existingEntityList = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+            .map { it["domainName"].toString() }
         CcuLog.i(Domain.LOG_TAG, "Equip currently has ${existingEntityList.size} points")
+        profileConfig.getEnableConfigs().forEach {
+            CcuLog.i(Domain.LOG_TAG, "Enable config ${it.domainName} ${it.enabled}")
+        }
+        profileConfig.getValueConfigs().forEach {
+            CcuLog.i(Domain.LOG_TAG, "Value config ${it.domainName} ${it.currentVal}")
+        }
+        profileConfig.getAssociationConfigs().forEach {
+            CcuLog.i(Domain.LOG_TAG, "Association config ${it.domainName} ${it.associationVal}")
+        }
+
         val newEntityConfig = EntityConfiguration()
 
         existingEntityList.forEach{ entityName ->
@@ -61,12 +37,21 @@ object ReconfigHandler {
         }
         config.tobeAdded.forEach{
             if (existingEntityList.contains(it.domainName)) {
-                newEntityConfig.tobeUpdated.add(it)
+                if (isConfigPoint(it.domainName, profileConfig )) {
+                    newEntityConfig.tobeUpdated.add(it)
+                }
             } else {
                 newEntityConfig.tobeAdded.add(it)
             }
         }
         return newEntityConfig;
+    }
+
+    private fun isConfigPoint (domainName : String, profileConfig: ProfileConfiguration) : Boolean {
+        return (profileConfig.getEnableConfigs() + profileConfig.getValueConfigs())
+            .find { it.domainName == domainName } != null ||
+                (profileConfig.getAssociationConfigs())
+                    .find { it.domainName == domainName } != null
     }
 
     private fun pointIsDynamicSensor(modelDef: SeventyFiveFProfileDirective, entityName: String) : Boolean {

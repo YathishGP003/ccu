@@ -131,7 +131,7 @@ public class DamperReheatTypeHandler {
                 equipBuilder.updateEquipAndPoints(config,
                         ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
                         equip.getSiteRef(),
-                        equip.getDisplayName());
+                        equip.getDisplayName(), true);
                 DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), hayStack);
             }
         }

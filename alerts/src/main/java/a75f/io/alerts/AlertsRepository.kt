@@ -22,6 +22,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /**
  * Gateway to Alerts and AlertDefinitions data, business logic processing, and backend alerservice.
@@ -246,21 +247,6 @@ class AlertsRepository(
          Log.i("DEV_DEUG", "Hard Fix: $alert")
               fixAlert(alert)
       }
-
-      val alertBox = hayStack.tagsDb.boxStore.boxFor(Alert::class.java)
-      if(alertBox.all.size > 5000) {
-         val query = alertBox.query()
-         query.`in`(Alert_.mSeverity, intArrayOf(
-            AlertSeverity.INTERNAL_INFO.ordinal,
-            AlertSeverity.INTERNAL_LOW.ordinal,
-            AlertSeverity.INTERNAL_MODERATE.ordinal,
-            AlertSeverity.INTERNAL_SEVERE.ordinal,
-            AlertSeverity.LOW.ordinal
-         ))
-         val alertList = query.build().find()
-         alertBox.remove(alertList)
-      }
-
       // check for alert time-out
       clearElapsedAlerts()
 
@@ -387,5 +373,27 @@ class AlertsRepository(
          }
       }
       saveDefs()
+   }
+   fun handleAlertBoxItemsExceedingThreshold() {
+      if(alertBoxSizeAboveThreshold()) {
+         val alertBox = hayStack.tagsDb.boxStore.boxFor(Alert::class.java)
+         val query = alertBox.query()
+         query.`in`(Alert_.mSeverity, intArrayOf(
+            AlertSeverity.INTERNAL_INFO.ordinal,
+            AlertSeverity.INTERNAL_LOW.ordinal,
+            AlertSeverity.INTERNAL_MODERATE.ordinal,
+            AlertSeverity.INTERNAL_SEVERE.ordinal,
+            AlertSeverity.LOW.ordinal
+         ))
+         thread(start = true, name = "clearAlertItems") {
+            val alertList = query.build().find()
+            alertBox.remove(alertList)
+         }
+      }
+   }
+
+   fun alertBoxSizeAboveThreshold() : Boolean {
+      val threshold = 15
+      return dataStore.getAllAlerts().size > threshold
    }
 }

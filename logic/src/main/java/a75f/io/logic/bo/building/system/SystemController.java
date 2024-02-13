@@ -46,7 +46,7 @@ public abstract class SystemController
         for (HashMap h : equips)
         {
             Equip q = new Equip.Builder().setHashMap(h).build();
-            double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and current and equipRef == \""+q.getId()+"\"");
+            double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and (current or space) and equipRef == \""+q.getId()+"\"");
             double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
                     ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
             if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway) && zonePriority!= 0) {
@@ -66,7 +66,7 @@ public abstract class SystemController
         for (HashMap h : equips)
         {
             Equip q = new Equip.Builder().setHashMap(h).build();
-            double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and current and equipRef == \""+q.getId()+"\"");
+            double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and (current or space) and equipRef == \""+q.getId()+"\"");
             double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
                     ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
             if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway) && zonePriority!=0) {

@@ -393,7 +393,7 @@ class AlertsRepository(
    }
 
    fun alertBoxSizeAboveThreshold() : Boolean {
-      val threshold = 15
+      val threshold = 5000
       return dataStore.getAllAlerts().size > threshold
    }
 }

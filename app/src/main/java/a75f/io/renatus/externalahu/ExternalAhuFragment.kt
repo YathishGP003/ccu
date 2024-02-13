@@ -109,8 +109,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 viewModel.configModel.value.setPointControl = it
                                 if (!viewModel.configModel.value.setPointControl) viewModel.configModel.value.dualSetPointControl =
                                     false
-                                viewModel.configModel.value.satMin = viewModel.getDefaultValByDomain(systemSATMinimum)
-                                viewModel.configModel.value.satMax = viewModel.getDefaultValByDomain(systemSATMaximum)
+                                //viewModel.configModel.value.satMin = viewModel.getDefaultValByDomain(systemSATMinimum)
+                                //viewModel.configModel.value.satMax = viewModel.getDefaultValByDomain(systemSATMaximum)
 
                                 viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
                                 viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
@@ -126,14 +126,14 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                     state = viewModel.configModel.value.dualSetPointControl
                                 ) {
                                     viewModel.configModel.value.dualSetPointControl = it
-                                    viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
+                                    /*viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
                                     viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
                                     viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
-                                    viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
+                                    viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)*/
                                 }
                             }
                         }
-                        Row {
+                        /*Row {
                             if (viewModel.configModel.value.setPointControl && !viewModel.configModel.value.dualSetPointControl) {
                                 Row {
                                     Column {
@@ -193,6 +193,116 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         }
                         Row {
                             if (viewModel.configModel.value.dualSetPointControl) {
+                                Row {
+                                    Column {
+                                        val satHeatingMin =
+                                            viewModel.configModel.value.getPointByDomainName(
+                                                viewModel.profileModelDefinition,
+                                                systemHeatingSATMinimum
+                                            )
+                                        val satHeatingMax =
+                                            viewModel.configModel.value.getPointByDomainName(
+                                                viewModel.profileModelDefinition,
+                                                systemHeatingSATMaximum
+                                            )
+                                        val satCoolingMin =
+                                            viewModel.configModel.value.getPointByDomainName(
+                                                viewModel.profileModelDefinition,
+                                                systemCoolingSATMinimum
+                                            )
+                                        val satCoolingMax =
+                                            viewModel.configModel.value.getPointByDomainName(
+                                                viewModel.profileModelDefinition,
+                                                systemCoolingSATMaximum
+                                            )
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+
+                                            if (satHeatingMin != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (satHeatingMin.valueConstraint as NumericConstraint).minValue,
+                                                    (satHeatingMin.valueConstraint as NumericConstraint).maxValue,
+                                                    (satHeatingMin.presentationData?.get(
+                                                        tagValueIncrement
+                                                    ) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    satHeatingMin.name,
+                                                    viewModel.configModel.value.heatingMinSp,
+                                                    items, satHeatingMin.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.heatingMinSp =
+                                                        selected
+                                                }
+                                            }
+                                            if (satHeatingMax != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (satHeatingMax.valueConstraint as NumericConstraint).minValue,
+                                                    (satHeatingMax.valueConstraint as NumericConstraint).maxValue,
+                                                    (satHeatingMax.presentationData?.get(
+                                                        tagValueIncrement
+                                                    ) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    satHeatingMax.name,
+                                                    viewModel.configModel.value.heatingMaxSp,
+                                                    items, satHeatingMax.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.heatingMaxSp =
+                                                        selected
+                                                }
+                                            }
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            if (satCoolingMin != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (satCoolingMin.valueConstraint as NumericConstraint).minValue,
+                                                    (satCoolingMin.valueConstraint as NumericConstraint).maxValue,
+                                                    (satCoolingMin.presentationData?.get(
+                                                        tagValueIncrement
+                                                    ) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    satCoolingMin.name,
+                                                    viewModel.configModel.value.coolingMinSp,
+                                                    items, satCoolingMin.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.coolingMinSp =
+                                                        selected
+                                                }
+                                            }
+                                            if (satCoolingMax != null) {
+                                                val items = viewModel.itemsFromMinMax(
+                                                    (satCoolingMax.valueConstraint as NumericConstraint).minValue,
+                                                    (satCoolingMax.valueConstraint as NumericConstraint).maxValue,
+                                                    (satCoolingMax.presentationData?.get(
+                                                        tagValueIncrement
+                                                    ) as Int).toDouble()
+                                                )
+                                                SetPointConfig(
+                                                    satCoolingMax.name,
+                                                    viewModel.configModel.value.coolingMaxSp,
+                                                    items, satCoolingMax.defaultUnit ?: EMPTY,
+                                                ) { selected ->
+                                                    viewModel.configModel.value.coolingMaxSp =
+                                                        selected
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }*/
+                        Row {
+                            if (viewModel.configModel.value.setPointControl) {
                                 Row {
                                     Column {
                                         val satHeatingMin =

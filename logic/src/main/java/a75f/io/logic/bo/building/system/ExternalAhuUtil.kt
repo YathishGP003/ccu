@@ -331,7 +331,8 @@ fun calculateSATSetPoints(
                     " coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue"
         )
     } else {
-        val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
+        //val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
+        val satSetPointLimits = getDualSetPointMinMax(systemEquip)
         var isLockoutActive = false
         if (loopRunningDirection == TempDirection.COOLING)
             isLockoutActive = L.ccu().systemProfile.isCoolingLockoutActive
@@ -341,7 +342,10 @@ fun calculateSATSetPoints(
         val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0 || isLockoutActive)
             updateDefaultSetPoints(systemEquip, loopRunningDirection)
         else
-            mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, basicConfig.loopOutput)
+            if (loopRunningDirection == TempDirection.COOLING)
+                mapToSetPoint(satSetPointLimits.first.first, satSetPointLimits.first.second, basicConfig.loopOutput)
+            else
+                mapToSetPoint(satSetPointLimits.second.first, satSetPointLimits.second.second, basicConfig.loopOutput)
         updateSetPoint(
             systemEquip,
             satSetPointValue,
@@ -682,8 +686,8 @@ fun getConfiguration(profileDomain: String, profileType: ProfileType): ExternalA
     config.dehumidifierControl.enabled =
         getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 
-    config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
-    config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
+    //config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
+    //config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
     config.heatingMinSp.currentVal =
         getConfigValue(systemHeatingSATMinimum, systemEquip)
     config.heatingMaxSp.currentVal =

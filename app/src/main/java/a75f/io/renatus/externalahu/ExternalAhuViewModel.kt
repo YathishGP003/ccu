@@ -197,8 +197,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         configModel.value.humidifierControl = config.humidifierControl.enabled
         configModel.value.dehumidifierControl = config.dehumidifierControl.enabled
 
-        configModel.value.satMin = config.satMin.currentVal.toString()
-        configModel.value.satMax = config.satMax.currentVal.toString()
+        //configModel.value.satMin = config.satMin.currentVal.toString()
+        //configModel.value.satMax = config.satMax.currentVal.toString()
         configModel.value.heatingMinSp = config.heatingMinSp.currentVal.toString()
         configModel.value.heatingMaxSp = config.heatingMaxSp.currentVal.toString()
         configModel.value.coolingMinSp = config.coolingMinSp.currentVal.toString()

@@ -39,7 +39,6 @@ public class AndroidHSClient extends HClient
     @Override
     public HGrid call(String opName, HGrid req)
     {
-        
         HServer db = db();
         HOp op = db.op(opName, false);
         if (op == null)

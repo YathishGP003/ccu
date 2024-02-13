@@ -26,7 +26,7 @@ public class EquipmentDevice {
     @SerializedName("modbusEquipId (_id)")
     @Expose
     private String modbusEquipIdId;
-    @SerializedName("name")
+    @SerializedName("displayName")
     @Expose
     private String name;
     @SerializedName("description")

@@ -8,7 +8,7 @@ package a75f.io.domain.cutover
  * migration.
  */
 object BuildingEquipCutOverMapping {
-    val entries = mapOf(
+    val entries = linkedMapOf(
         "BuildingTuner-zoneTemperatureDeadLeeway" to "zoneTemperatureDeadLeeway",
         "BuildingTuner-heartBeatsToSkip" to "heartBeatsToSkip",
         "BuildingTuner-humidityCompensationOffset" to "humidityCompensationOffset",
@@ -53,8 +53,8 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-auxHeating2Activate" to "auxHeating2Activate",
         "BuildingTuner-waterValveSamplingWaitTime" to "waterValveSamplingWaitTime",
         "BuildingTuner-waterValveSamplingOnTime" to "waterValveSamplingOnTime",
-        "BuildingTuner-waterValveSamplingLoopDeadbandOnTime" to "waterValveSamplingLoopDeadbandOnTime",
-        "BuildingTuner-waterValveSamplingLoopDeadbandWaitTime" to "waterValveSamplingLoopDeadbandWaitTime",
+        "BuildingTuner-waterValveSamplingDuringLoopDeadbandOnTime" to "waterValveSamplingLoopDeadbandOnTime",
+        "BuildingTuner-waterValveSamplingDuringLoopDeadbandWaitTime" to "waterValveSamplingLoopDeadbandWaitTime",
 
         "BuildingTuner-VAV-zonePrioritySpread" to "vavZonePrioritySpread",
         "BuildingTuner-VAV-zonePriorityMultiplier" to "vavZonePriorityMultiplier",
@@ -181,6 +181,7 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-DAB-reheatTemperatureProportionalRange" to "dabReheatTemperatureProportionalRange",
         "BuildingTuner-DAB-reheatIntegralKFactor" to "dabReheatIntegralKFactor",
         "BuildingTuner-DAB-reheatProportionalKFactor" to "dabReheatProportionalKFactor",
+        "BuildingTuner-DAB-modeChangeOverHysteresis" to "dabModeChangeOverHysteresis",
 
         "BuildingTuner-TI-heatingDeadbandMultiplier" to "tiHeatingDeadbandMultiplier",
         "BuildingTuner-TI-coolingDeadbandMultiplier" to "tiCoolingDeadbandMultiplier",
@@ -286,6 +287,8 @@ object BuildingEquipCutOverMapping {
 
         "BuildingTuner-2PipeFancoilHeatingThreshold" to "pipe2FancoilHeatingThreshold",
         "BuildingTuner-2PipeFancoilCoolingThreshold" to "pipe2FancoilCoolingThreshold",
+        "BuildingTuner-2PipeFancoilHeatingThreshold" to "hyperstatPipe2FancoilHeatingThreshold",
+        "BuildingTuner-2PipeFancoilCoolingThreshold" to "hyperstsatPipe2FancoilCoolingThreshold",
 
         "BuildingSchedulable-coolingUserLimitMin" to "coolingUserLimitMin",
         "BuildingSchedulable-buildingLimitMax" to "buildingLimitMax",
@@ -306,6 +309,21 @@ object BuildingEquipCutOverMapping {
     )
     fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
         val displayNme = point["dis"].toString()
+        //These two tuners are having same name but differs only on the tunerGroup
+        if (displayNme.contains("2PipeFancoilHeatingThreshold")) {
+            return when (point["tunerGroup"].toString()) {
+                "GENERIC" -> return "pipe2FancoilHeatingThreshold"
+                "HYPERSTAT" -> return "hyperstatPipe2FancoilHeatingThreshold"
+                else -> {"2PipeFancoilHeatingThreshold"}
+            }
+        } else if (displayNme.contains("2PipeFancoilCoolingThreshold")) {
+            return when (point["tunerGroup"].toString()) {
+                "GENERIC" -> return "pipe2FancoilCoolingThreshold"
+                "HYPERSTAT" -> return "hyperstsatPipe2FancoilCoolingThreshold"
+                else -> {"2PipeFancoilCoolingThreshold"}
+            }
+        }
+
         return entries.filterKeys { displayNme.replace("\\s".toRegex(),"").contains(it, true) }
             .map { it.value }
             .firstOrNull()

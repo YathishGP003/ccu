@@ -84,7 +84,7 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-VAV-coolingDeadbandMultiplier" to "vavCoolingDeadbandMultiplier",
         //"BuildingTuner-VAV-coolingDeadband" to "vavCoolingDeadband",
         //"BuildingTuner-VAV-heatingDeadband" to "vavHeatingDeadband",
-
+        "BuildingTuner-co2SPResMax" to "co2SPResMax",
         "BuildingTuner-co2SPTrim" to "co2SPTrim",
         "BuildingTuner-co2SPMax" to "co2SPMax",
         "BuildingTuner-co2IgnoreRequest" to "co2IgnoreRequest",
@@ -94,7 +94,7 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-co2SPMin" to "co2SPMin",
         "BuildingTuner-co2SPMin" to "co2SPMin",
         "BuildingTuner-co2TimeInterval" to "co2TimeInterval",
-        "BuildingTuner-co2SPResMax" to "co2SPResMax",
+
 
         "BuildingTuner-satIgnoreRequest" to "satIgnoreRequest",
         "BuildingTuner-satSPMax" to "satSPMax",
@@ -105,14 +105,13 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-satSPResMax" to "satSPResMax",
         "BuildingTuner-satTimeInterval" to "satTimeInterval",
         "BuildingTuner-satSPRes" to "satSPRes",
-
+        "BuildingTuner-staticPressureSPResMax" to "staticPressureSPResMax",
         "BuildingTuner-staticPressureSPMin" to "staticPressureSPMin",
         "BuildingTuner-staticPressureSPRes" to "staticPressureSPRes",
         "BuildingTuner-staticPressureSPMax" to "staticPressureSPMax",
         "BuildingTuner-staticPressureSPInit" to "staticPressureSPInit",
         "BuildingTuner-staticPressureTimeDelay" to "staticPressureTimeDelay",
         "BuildingTuner-staticPressureTimeInterval" to "staticPressureTimeInterval",
-        "BuildingTuner-staticPressureSPResMax" to "staticPressureSPResMax",
         "BuildingTuner-staticPressureSPTrim" to "staticPressureSPTrim",
         "BuildingTuner-staticPressureIgnoreRequest" to "staticPressureIgnoreRequest",
 

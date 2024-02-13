@@ -73,7 +73,7 @@ public class ModbusEquip {
             modbusEquipType = modbusEquipTypes.get(0);
         }
         String modbusName = equipmentInfo.getName();
-        String equipDis = modbusName;
+        String equipDis = modbusName + "-" + equipmentInfo.getSlaveId();
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());

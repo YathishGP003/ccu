@@ -235,22 +235,12 @@ fun updateDefaultSetPoints(
     systemEquip: Equip,
     lastLoopDirection: TempDirection
 ): Double {
-    val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
-
-    return if (isDualSetPointEnabled) {
-        when (lastLoopDirection) {
-            TempDirection.COOLING -> Domain.getPointByDomain(
-                systemEquip,
-                systemCoolingSATMaximum
-            )
-            else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
-        }
-
-    } else {
-        when (lastLoopDirection) {
-            TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-            else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-        }
+    return when (lastLoopDirection) {
+        TempDirection.COOLING -> Domain.getPointByDomain(
+            systemEquip,
+            systemCoolingSATMaximum
+        )
+        else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
     }
 }
 
@@ -577,11 +567,13 @@ fun setOccupancyMode(
     occupancy: Occupancy,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
+    operatingStatus : BasicConfig
 ) {
-    val occupancyMode = when (occupancy) {
-        Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
-        else -> 1.0
-    }
+    val occupancyMode = if (operatingStatus.loopOutput > 0) 1.0
+                        else when (occupancy) {
+                            Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
+                            else -> 1.0
+                        }
 
     if (isConfigEnabled(systemEquip, occupancyModeControl)) {
         logIt("Occupancy mode $occupancyMode")
@@ -620,24 +612,6 @@ private fun calculateDamperOperationPercent(
 ): Double {
     val damperSp = (sensorCO2 - threshold) / openingRate
     return (damperSp * 100.0).roundToInt() / 100.0
-}
-
-
-fun getSingleSetPointMinMax(equip: Equip, tempDirection: TempDirection): Pair<Double, Double> {
-    return when (tempDirection) {
-        TempDirection.COOLING -> {
-            Pair(
-                Domain.getPointByDomain(equip, systemSATMaximum),
-                Domain.getPointByDomain(equip, systemSATMinimum)
-            )
-        }
-        TempDirection.HEATING -> {
-            Pair(
-                Domain.getPointByDomain(equip, systemSATMinimum),
-                Domain.getPointByDomain(equip, systemSATMaximum)
-            )
-        }
-    }
 }
 
 fun getDualSetPointMinMax(

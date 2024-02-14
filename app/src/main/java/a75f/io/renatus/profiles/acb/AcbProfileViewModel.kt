@@ -38,6 +38,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
@@ -83,6 +84,7 @@ class AcbProfileViewModel : ViewModel() {
     lateinit var minCFMReheatingList: List<String>
 
     private val _isDialogOpen = MutableLiveData<Boolean>()
+    private var saveJob : Job? = null
 
     var modelLoaded by  mutableStateOf(false)
     val isDialogOpen: LiveData<Boolean>
@@ -149,62 +151,41 @@ class AcbProfileViewModel : ViewModel() {
     }
 
     fun saveConfiguration() {
+        if (saveJob == null) {
+            saveJob = viewModelScope.launch {
+                ProgressDialogUtils.showProgressDialog(context, "Saving ACB Configuration")
+                withContext(Dispatchers.IO) {
+                    CCUHsApi.getInstance().resetCcuReady()
 
-        viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Saving ACB Configuration")
-            withContext(Dispatchers.IO) {
-                CCUHsApi.getInstance().resetCcuReady()
+                    setUpAcbProfile()
+                    CcuLog.i(Domain.LOG_TAG, "AcbProfile Setup complete")
+                    L.saveCCUState()
 
-                setUpAcbProfile()
-                CcuLog.i(Domain.LOG_TAG, "AcbProfile Setup complete")
-                L.saveCCUState()
+                    hayStack.syncEntityTree()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance()
+                        .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                    CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
 
-                hayStack.syncEntityTree()
-                CCUHsApi.getInstance().setCcuReady()
-                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                LSerial.getInstance()
-                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
-                CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
-            }
+                    withContext(Dispatchers.Main) {
+                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                        showToast("ACB Configuration saved successfully", context)
+                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                        ProgressDialogUtils.hideProgressDialog()
+                        _isDialogOpen.value = false
+                    }
 
-            withContext(Dispatchers.Main) {
-                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                showToast("ACB Configuration saved successfully", context)
-                CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                ProgressDialogUtils.hideProgressDialog()
-                _isDialogOpen.value = false
-            }
-
-            // This check is needed because the dialog sometimes fails to close inside the coroutine.
-            // We don't know why this happens.
-            if (ProgressDialogUtils.isDialogShowing()) {
-                ProgressDialogUtils.hideProgressDialog()
-                _isDialogOpen.value = false
-            }
-        }
-
-
-        // TODO: Sam's original code. Some or all of this will be restored in a future cleanup operation.
-        /*
-        viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
-            withContext(Dispatchers.IO) {
-
-                viewState.updateConfigFromViewState(profileConfiguration)
-                val equipBuilder = ProfileEquipBuilder(hayStack)
-                if (profileConfiguration.isDefault) {
-                    equipBuilder.buildEquipAndPoints(profileConfiguration, model, hayStack.site!!.id)
-                } else {
-                    equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id)
                 }
 
-                withContext(Dispatchers.Main) {
+                // This check is needed because the dialog sometimes fails to close inside the coroutine.
+                // We don't know why this happens.
+                if (ProgressDialogUtils.isDialogShowing()) {
                     ProgressDialogUtils.hideProgressDialog()
-                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    _isDialogOpen.value = false
                 }
             }
         }
-         */
     }
 
     private fun setUpAcbProfile() {

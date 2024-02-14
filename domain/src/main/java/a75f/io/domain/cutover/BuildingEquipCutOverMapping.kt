@@ -306,6 +306,19 @@ object BuildingEquipCutOverMapping {
         //"BuildingTuner-VRV-coolingDeadband" to "vrvCoolingDeadband",
 
     )
+
+    val mandatoryPoints = listOf("standaloneEnthalpyDuctCompensationOffset",
+        "standaloneEconomizingToMainCoolingLoopMap",
+        "standaloneEconomizingMinTemperature",
+        "standaloneEconomizingMaxTemperature",
+        "standaloneEconomizingMinHumidity",
+        "standaloneEconomizingMaxHumidity",
+        "standaloneEconomizingDryBulbThreshold",
+        "standaloneOutsideDamperMixedAirTarget",
+        "standaloneOutsideDamperMixedAirMinimum",
+        "standaloneDuctTemperatureOffset"
+    )
+
     fun getDomainNameFromDis(point : Map<Any, Any>) : String? {
         val displayNme = point["dis"].toString()
         //These two tuners are having same name but differs only on the tunerGroup

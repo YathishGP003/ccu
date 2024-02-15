@@ -213,7 +213,8 @@ class DabExternalAhu : DabSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            conditioningMode
+            conditioningMode,
+            dabConfig
         )
         handleHumidityOperation(
             systemEquip,
@@ -223,7 +224,8 @@ class DabExternalAhu : DabSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            dabConfig
         )
         handleDeHumidityOperation(
             systemEquip,

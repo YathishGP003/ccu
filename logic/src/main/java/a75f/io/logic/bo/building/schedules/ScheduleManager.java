@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -82,6 +83,7 @@ public class ScheduleManager {
     //TODO-Schedules - To be moved
     private ZoneDataInterface scheduleDataInterface = null;
     private ZoneDataInterface zoneDataInterface     = null;
+    private BuildingScheduleListener buildingScheduleListener = null;
     
     public static ScheduleManager getInstance() {
         if (instance == null) {
@@ -98,8 +100,9 @@ public class ScheduleManager {
     public void setZoneDataInterface(ZoneDataInterface in){
         zoneDataInterface = in;
     }
-    
-    
+    public void setBuildingScheduleListener(BuildingScheduleListener in) {
+        buildingScheduleListener = in;
+    }
     public Occupied getOccupiedModeCache(String id) {
         return occupiedHashMap.get(id);
     }
@@ -195,7 +198,8 @@ public class ScheduleManager {
         Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
         updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
         updateDesiredTemp(zoneProfiles);
-
+        if(buildingScheduleListener!= null)
+            buildingScheduleListener.refreshScreen();
 
         ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
 

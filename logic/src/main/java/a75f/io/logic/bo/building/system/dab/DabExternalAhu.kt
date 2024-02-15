@@ -205,7 +205,7 @@ class DabExternalAhu : DabSystemProfile() {
             dabConfig.coolingLoop.toDouble(),
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
+        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList, dabConfig)
         operateDamper(
             systemEquip,
             dabConfig.weightedAverageCO2,

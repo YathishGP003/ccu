@@ -795,6 +795,28 @@ enum class TempDirection {
     COOLING, HEATING
 }
 
+fun getPreviousConditioningModeWhenOff(systemEquip: Equip, hayStack: CCUHsApi): Int {
+    //When only heating or cooling is available, we should move in that direction
+    val currentMode = Domain.getHisByDomain(systemEquip, conditioningMode)
+    CcuLog.d(L.TAG_CCU_SYSTEM, "Current conditioning mode: $currentMode")
+    if (currentMode.toInt() == SystemMode.HEATONLY.ordinal) {
+        return SystemController.State.HEATING.ordinal;
+    } else if (currentMode.toInt() == SystemMode.COOLONLY.ordinal) {
+        return SystemController.State.COOLING.ordinal;
+    }
+    //Otherwise fall back to the previous operating mode
+    val point = Domain.readPoint(operatingMode)
+    val hisItems = hayStack.getHisItems(point["id"].toString(), 0, 2)
+    if (hisItems.isEmpty()) {
+        return 0
+    }
+    CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: ${hisItems[0]} ${hisItems[1]}")
+    return if (hisItems.size > 1) {
+        hisItems[1].`val`.toInt()
+    } else {
+        hisItems[0].`val`.toInt()
+    }
+}
 fun logIt(msg: String) {
     Log.i(L.TAG_CCU_SYSTEM, msg)
 }

@@ -419,12 +419,13 @@ fun handleHumidityOperation(
     externalSpList: ArrayList<String>,
     humidityHysteresis: Double,
     currentHumidity: Double,
-    conditioningMode: SystemMode
+    conditioningMode: SystemMode,
+    dabConfig: BasicConfig
 ) {
     val currentStatus = Domain.getHisByDomain(systemEquip, humidifierEnable)
     var newStatus = 0.0
 
-    if (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF) {
+    if (dabConfig.loopOutput == 0.0 && (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF)) {
         updatePointValue(systemEquip, humidifierEnable, 0.0)
         externalEquipId?.let {
             pushHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
@@ -521,7 +522,8 @@ fun operateDamper(
     externalEquipId: String?,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
-    conditioningMode: SystemMode
+    conditioningMode: SystemMode,
+    dabConfig: BasicConfig
 ) {
     val isDcvControlEnabled = isConfigEnabled(systemEquip, dcvDamperControlEnable)
     Domain.writeHisValByDomain(co2WeightedAverage, co2, systemEquip.id)
@@ -538,7 +540,7 @@ fun operateDamper(
     var damperOperationPercent = 0.0
     if (conditioningMode == SystemMode.OFF)
         damperOperationPercent = 0.0
-    else if (shouldOperateDamper(co2, occupancyMode, co2Threshold))
+    else if (shouldOperateDamper(co2, occupancyMode, co2Threshold, dabConfig))
         damperOperationPercent =
             calculateDamperOperationPercent(co2, co2Threshold, damperOpeningRate)
     else if (shouldResetDamper(co2, occupancyMode, co2Threshold))
@@ -589,14 +591,15 @@ fun setOccupancyMode(
 private fun shouldOperateDamper(
     sensorCO2: Double,
     mode: Occupancy,
-    systemCO2Threshold: Double
+    systemCO2Threshold: Double,
+    dabConfig: BasicConfig
 ): Boolean =
-    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (mode == Occupancy.OCCUPIED
+    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (dabConfig.loopOutput > 0 || (mode == Occupancy.OCCUPIED
             || mode == Occupancy.AUTOFORCEOCCUPIED
             || mode == Occupancy.AUTOAWAY
             || mode == Occupancy.EMERGENCY_CONDITIONING
             || mode == Occupancy.PRECONDITIONING
-            || mode == Occupancy.FORCEDOCCUPIED)
+            || mode == Occupancy.FORCEDOCCUPIED))
 
 private fun shouldResetDamper(
     sensorCO2: Double,

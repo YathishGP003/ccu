@@ -6,6 +6,7 @@ import android.util.Log;
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
 
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -223,5 +224,15 @@ public class CCUUtils
 
     public static boolean isCarrierEnvironment(Context context){
         return BuildConfig.BUILD_TYPE.equalsIgnoreCase(context.getString(R.string.Carrier_Environment));
+    }
+    public static boolean isRecommendedVersionCheckIsNotFalse() {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method method = systemPropertiesClass.getMethod("get", String.class);
+            return !method.invoke(null, "recommended_version_check").equals("false");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
     }
 }

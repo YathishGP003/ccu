@@ -703,6 +703,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CCUHsApi.getInstance().setCcuReady();
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
+        if(PreferenceUtil.getIsCcuLaunched()) {
+            Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            PreferenceUtil.setIsCcuLaunched(false);
+        }
     }
 
     private int loadZone(View rootView, LinearLayout[] tablerowLayout, HashMap roomMap) {

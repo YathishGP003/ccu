@@ -56,7 +56,7 @@ public class StandaloneScheduler {
 
         double heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
         double coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \""+equip.getRoomRef()+"\"");
+        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and zone and unoccupied and setback and roomRef == \""+equip.getRoomRef()+"\"");
 
         occ.setUnoccupiedZoneSetback(setback);
         occ.setHeatingDeadBand(heatingDeadBand);

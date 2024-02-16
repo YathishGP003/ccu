@@ -327,7 +327,7 @@ class HyperStatSettingsUtil {
             val genericTuners = HyperStat.HyperStatTunersGeneric_t.newBuilder()
             val equip = CCUHsApi.getInstance().readHDictById(equipRef)
             genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery
-                ("zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
+                ("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
             genericTuners.relayActivationHysteresis =
                 TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =

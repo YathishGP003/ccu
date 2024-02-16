@@ -151,7 +151,7 @@ public class ScheduleManager {
         if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
             heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
             coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
-            setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \"" + equip.getRoomRef() + "\"");
+            setback = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.getRoomRef() + "\"");
         }else{
             heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
             coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());

@@ -633,7 +633,7 @@ fun getDualSetPointMinMax(
 }
 
 fun getConditioningMode(systemEquip: Equip) =
-    SystemMode.values()[Domain.getPointByDomain(systemEquip, conditioningMode).toInt()]
+    SystemMode.values()[Domain.getPointPriorityValByDomain(systemEquip, conditioningMode).toInt()]
 
 fun updatePointValue(equip: Equip, domainName: String, pointValue: Double) =
     Domain.writePointByDomain(equip, domainName, pointValue)

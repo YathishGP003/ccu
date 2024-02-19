@@ -206,7 +206,7 @@ class VavExternalAhu : VavSystemProfile() {
             vavConfig.loopOutput,
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
+        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList, vavConfig)
         operateDamper(
             systemEquip,
             vavConfig.weightedAverageCO2,
@@ -214,7 +214,8 @@ class VavExternalAhu : VavSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            conditioningMode
+            conditioningMode,
+            vavConfig
         )
         handleHumidityOperation(
             systemEquip,
@@ -224,7 +225,8 @@ class VavExternalAhu : VavSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            vavConfig
         )
         handleDeHumidityOperation(
             systemEquip,

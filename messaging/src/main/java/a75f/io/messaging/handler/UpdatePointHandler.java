@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
+import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -44,6 +45,7 @@ public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
     private static ZoneDataInterface zoneDataInterface = null;
+    private static IntrinsicScheduleListener intrinsicScheduleListener = null;
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
@@ -316,6 +318,8 @@ public class UpdatePointHandler implements MessageHandler
         if (updateZoneUi && zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
             zoneDataInterface.refreshScreen(luid, true);
+            if(intrinsicScheduleListener != null)
+                intrinsicScheduleListener.updateIntrinsicSchedule();
         }
         
         if (p.getMarkers().contains("modbus")){
@@ -345,6 +349,7 @@ public class UpdatePointHandler implements MessageHandler
 
     public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
+    public static void setIntrinsicScheduleListener(IntrinsicScheduleListener in){ intrinsicScheduleListener = in;}
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {

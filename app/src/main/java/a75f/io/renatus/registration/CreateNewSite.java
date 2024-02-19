@@ -4,6 +4,7 @@ import static java.lang.Thread.sleep;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
@@ -149,7 +150,8 @@ public class CreateNewSite extends Fragment {
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
 
-        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")
+                && isRecommendedVersionCheckIsNotFalse()) {
             if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()){
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction();
                 Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
@@ -530,7 +532,7 @@ public class CreateNewSite extends Fragment {
     }
     @Override
     public void onResume() {
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && isRecommendedVersionCheckIsNotFalse()) {
             if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
                 try {
                     FragmentTransaction ft = getParentFragmentManager().beginTransaction();

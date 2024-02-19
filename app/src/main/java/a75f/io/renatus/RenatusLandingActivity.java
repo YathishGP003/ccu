@@ -254,6 +254,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Created");
         populateBACnetConfiguration();
         intializeBACnet();
+        ccuLaunched();
     }
 
     @Override
@@ -457,6 +458,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        ccuLaunched();
         abortCCUDownloadProcess();
         try {
             if (mConnectionChangeReceiver != null) {
@@ -473,6 +475,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void appRestarted() {
         CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
+    }
+
+    private void ccuLaunched(){
+        PreferenceUtil.setIsCcuLaunched(true);
     }
 
     @Override

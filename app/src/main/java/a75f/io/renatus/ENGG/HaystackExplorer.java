@@ -405,7 +405,7 @@ public class HaystackExplorer extends Fragment
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
                     CcuLog.d(L.TAG_CCU_UI, "domainName "+p.getDomainName());
-                    if (p.getDomainName().equals("currentTemp")) {
+                    if (isCurrentTempPoint(p)) {
                         CcuLog.d(L.TAG_CCU_UI, "Set "+p.getDomainName()+" Equip "+p.getEquipRef());
                         Equip q = HSUtil.getEquipInfo(p.getEquipRef());
                         RxjavaUtil.executeBackground( () -> {
@@ -426,5 +426,12 @@ public class HaystackExplorer extends Fragment
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
+    private boolean isCurrentTempPoint(Point point) {
+        if (point.getDomainName() != null) {
+            return point.getDomainName().equals("currentTemp");
+        }
+        return point.getMarkers().contains("current") && point.getMarkers().contains("temp");
     }
 }

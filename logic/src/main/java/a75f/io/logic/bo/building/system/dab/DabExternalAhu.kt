@@ -205,7 +205,7 @@ class DabExternalAhu : DabSystemProfile() {
             dabConfig.coolingLoop.toDouble(),
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
+        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList, dabConfig)
         operateDamper(
             systemEquip,
             dabConfig.weightedAverageCO2,
@@ -213,7 +213,8 @@ class DabExternalAhu : DabSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            conditioningMode
+            conditioningMode,
+            dabConfig
         )
         handleHumidityOperation(
             systemEquip,
@@ -223,7 +224,8 @@ class DabExternalAhu : DabSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            dabConfig
         )
         handleDeHumidityOperation(
             systemEquip,

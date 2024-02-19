@@ -312,9 +312,16 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                 alert.show();
                             }
                         } else {
-                            buildingOccupancy.getDays().addAll(daysList);
-                            doScheduleUpdate(false);
-                            buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+                            String warningMessageNull = "Building Occupancy cannot be edited when CCU is offline. Please connect to network.";
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setMessage(warningMessageNull)
+                                    .setCancelable(false)
+                                    .setIcon(R.drawable.ic_dialog_alert)
+                                    .setPositiveButton("OK", (dialog, id) -> {
+                                        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+                                    });
+                            alert = builder.create();
+                            alert.show();
                         }
                     });
         }else{

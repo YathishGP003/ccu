@@ -15,5 +15,9 @@ public class CcuFieldConstants {
     public static final String MODEL_ID = "modelId";
 
     public static final String MODEL_VERSION = "modelVersion";
+
+    public static final String SOURCE_MODEL = "sourceModel";
+
+    public static final String SOURCE_MODEL_VERSION = "sourceModelVersion";
     public static final String BUILDING_TUNER_ID = "buildingTunerId";
 }

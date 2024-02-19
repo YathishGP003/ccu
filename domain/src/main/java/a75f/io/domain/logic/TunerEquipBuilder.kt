@@ -257,14 +257,15 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         return newEntityConfig
     }
 
-    private fun createCutoverMigrationPoint(pointConfig: PointBuilderConfig) {
+    private fun createCutoverMigrationPoint(pointConfig: PointBuilderConfig, syncRequired : Boolean) {
         val hayStackPoint = buildPoint(pointConfig)
-        val pointId = hayStack.addBuildingTunerPoint(hayStackPoint, true)
+        val pointId = hayStack.addBuildingTunerPoint(hayStackPoint, syncRequired)
         hayStackPoint.id = pointId
         hayStack.writeDefaultTunerValById(pointId, pointConfig.modelDef.defaultValue.toString().toDouble())
-        DomainManager.addPoint(hayStackPoint)
-        CcuLog.i(Domain.LOG_TAG," Created Tuner point ${pointConfig.modelDef.domainName}")
+        //DomainManager.addPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Created Tuner point ${pointConfig.modelDef.domainName} syncRequired $syncRequired")
     }
+
     private fun updateCutOverMigrationPoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
         val hayStackPoint = buildPoint(pointConfig)
         hayStack.updateBuildingTunerPoint(hayStackPoint, existingPoint["id"].toString(), true)
@@ -281,13 +282,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             return
         }
 
-        var fcuTuners = hayStack.readAllEntities("standalone and threshold and fcu and equipRef == \"$equipRef\"")
-        fcuTuners.forEach {
-            if (it["tunerGroup"] != null && it["tunerGroup"].toString() == "HYPERSTAT") {
-                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Clean up $it")
-                hayStack.deleteEntityTree(it["id"].toString())
-            }
-        }
         var tunerPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
 
@@ -347,6 +341,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
                 " Model: ${modelDef.points.size} Map: ${BuildingEquipCutOverMapping.entries.size} ")
         CcuLog.e(Domain.LOG_TAG, " Added $add Updated $update Deleted $delete Passed $pass")
 
+        handleMandatoryMigrationForOlderCCUs(modelDef)
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, site.id,
                                         hayStack.timeZone, site.displayName))
         hayStack.updateBuildingTunerEquip(hayStackEquip, equipRef, true)
@@ -354,6 +349,27 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         //Required to update backend points since local building tuners are no longer synced.
         updateBackendBuildingTuner(site.id, hayStack)
         hayStack.syncEntityTree();
+    }
+
+    private fun handleMandatoryMigrationForOlderCCUs(modelDef: ModelDirective) {
+        BuildingEquipCutOverMapping.mandatoryPoints.forEach { pointName ->
+            val haystackPoint = Domain.readPoint(pointName)
+            if (haystackPoint.isEmpty()) {
+                val point = modelDef.points.find { it.domainName.equals(pointName, true) }
+                if (point != null) {
+                    val equipRef = hayStack.readEntity("tuner and equip")["id"].toString()
+                    val siteRef = hayStack.site?.id!!
+                    val equipDis = hayStack.site?.displayName+"-"+modelDef.domainName
+                    val pointConfig = PointBuilderConfig(point, null, equipRef, siteRef, hayStack.timeZone, equipDis)
+                    createCutoverMigrationPoint(pointConfig, hayStack.isPrimaryCcu)
+                    CcuLog.i(Domain.LOG_TAG, " Custom migration point added : $pointName")
+                } else {
+                    CcuLog.i(Domain.LOG_TAG, " Custom migration point missing in Model : $pointName")
+                }
+            } else {
+                CcuLog.i(Domain.LOG_TAG, " Custom migration point exists in DB : $pointName")
+            }
+        }
     }
 
     fun updateBackendBuildingTuner(siteRef: String, hayStack: CCUHsApi) {

@@ -84,13 +84,13 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
         <item>  DAB External AHU Controller</item>
-        <item>  VAV External AHU Controller</item>
     </string-array>
 
     <string-array name="system_profile_select_daikin">
@@ -99,6 +99,7 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
@@ -114,11 +115,13 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  VVT-C Staged RTU </item>
         <item>  VVT-C Fully Modulating AHU</item>
         <item>  VVT-C Staged RTU with VFD Fan</item>
         <item>  VVT-C Advanced Hybrid AHU</item>
+        <item>  VVT-C External AHU Controller</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -284,10 +287,10 @@
     <string name="key_card_sensor"> Key Card Sensor </string>
     <string name="door_window_sensor_ai">  Door/Window Sensor</string>
 
-    <string name="filter_nc">  Filter Pressure (NC)</string>
-    <string name="filter_no">  Filter Pressure (NO)</string>
-    <string name="condensate_nc">  Condensate (NC)</string>
-    <string name="condensate_no">  Condensate (NO)</string>
+    <string name="filter_nc">  Filter Status (N/C)</string>
+    <string name="filter_no">  Filter Status (N/O)</string>
+    <string name="condensate_nc">  Condensate Overflow (N/C)</string>
+    <string name="condensate_no">  Condensate Overflow (N/O)</string>
 
     <string name="outside_air">  Outside Air Temp &amp; Humidity</string>
     <string name="supply_air">  Supply Air Temp &amp; Humidity</string>

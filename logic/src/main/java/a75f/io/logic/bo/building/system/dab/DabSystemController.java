@@ -356,7 +356,7 @@ public class DabSystemController extends SystemController
     private void updateWeightedAverageLoad() {
         
         co2LoopOpWeightedAverage = co2LoopWeightedAverageASum/prioritySum;
-        co2WeightedAverageSum = co2WeightedAverageSum/prioritySum;
+        co2WeightedAverage = co2WeightedAverageSum/prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
         
@@ -584,7 +584,7 @@ public class DabSystemController extends SystemController
         );
     }
     public double getCMCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and (current or space) and equipRef == \""
                                                         +equipRef+"\""
         );
     }

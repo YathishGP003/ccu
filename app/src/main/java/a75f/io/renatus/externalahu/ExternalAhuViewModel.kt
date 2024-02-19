@@ -121,7 +121,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             if (!equipModel.value.isDevicePaired)
                 equipModel.value.slaveId.value = 1
 
-            getModbusConfiguration()
+            getModbusConfiguration(profileType)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -135,7 +135,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     private fun isVAVExternal() =
         L.ccu().systemProfile.profileType == ProfileType.vavExternalAHUController
 
-    private fun getModbusConfiguration() {
+    private fun getModbusConfiguration(profileType: ProfileType) {
         CcuLog.i(TAG, "getModbusConfiguration")
         val modbusEquip =
             CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
@@ -144,7 +144,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             configType.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
             val address: Short = modbusEquip["group"].toString().toShort()
-            modbusProfile.addMbEquip(address, ProfileType.dabExternalAHUController)
+            modbusProfile.addMbEquip(address, profileType)
             selectedSlaveId = modbusProfile.slaveId
             val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
             val model = EquipModel()
@@ -197,8 +197,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         configModel.value.humidifierControl = config.humidifierControl.enabled
         configModel.value.dehumidifierControl = config.dehumidifierControl.enabled
 
-        configModel.value.satMin = config.satMin.currentVal.toString()
-        configModel.value.satMax = config.satMax.currentVal.toString()
+        //configModel.value.satMin = config.satMin.currentVal.toString()
+        //configModel.value.satMax = config.satMax.currentVal.toString()
         configModel.value.heatingMinSp = config.heatingMinSp.currentVal.toString()
         configModel.value.heatingMaxSp = config.heatingMaxSp.currentVal.toString()
         configModel.value.coolingMinSp = config.coolingMinSp.currentVal.toString()
@@ -224,7 +224,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 },
                 {
                     if (L.ccu().systemProfile != null) {
-                        if (L.ccu().systemProfile.profileType != ProfileType.dabExternalAHUController) {
+                        if (profileType != L.ccu().systemProfile.profileType ) {
                             L.ccu().systemProfile!!.deleteSystemEquip()
                             L.ccu().systemProfile = null
                             addEquip()
@@ -268,11 +268,11 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             CcuLog.i(TAG, "saveModbusConfiguration")
             populateSlaveId()
             CCUHsApi.getInstance().resetCcuReady()
-            setUpsModbusProfile()
+            setUpsModbusProfile(profileType)
         }
     }
 
-    private fun setUpsModbusProfile() {
+    private fun setUpsModbusProfile(profileType: ProfileType) {
         CcuLog.i(TAG, "setUpsModbusProfile")
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
@@ -291,7 +291,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 "SYSTEM",
                 equipModel.value.equipDevice.value,
                 getParametersList(equipModel.value.equipDevice.value),
-                ProfileType.dabExternalAHUController,
+                profileType,
                 subEquipmentDevices,
                 "system",
                 equipModel.value.version.value
@@ -338,8 +338,9 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         CcuLog.i(TAG, "updateSystemProfile")
         val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
         profileEquipBuilder.updateEquipAndPoints(
-            configModel.value.getConfiguration(), profileModelDefinition,
-            CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+profileModelDefinition.name
+            configModel.value.getConfiguration(profileType), profileModelDefinition,
+            CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+profileModelDefinition.name,
+            isReconfiguration = true
         )
         saveExternalEquip()
     }
@@ -350,7 +351,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             DabExternalAhu()
         else
             VavExternalAhu()
-        addSystemEquip(configModel.value.getConfiguration(), profileModelDefinition, systemProfile as SystemProfile)
+        addSystemEquip(configModel.value.getConfiguration(profileType), profileModelDefinition, systemProfile as SystemProfile)
         L.ccu().systemProfile = systemProfile
         systemProfile?.setOutsideTempCoolingLockoutEnabled( hayStack, L.ccu().oaoProfile != null)
         DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance())

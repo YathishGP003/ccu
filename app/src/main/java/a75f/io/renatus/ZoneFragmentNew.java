@@ -65,6 +65,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -125,6 +127,7 @@ import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.schedules.NamedSchedule;
+import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
@@ -700,6 +703,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CCUHsApi.getInstance().setCcuReady();
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
+        if(PreferenceUtil.getIsCcuLaunched()) {
+            Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            PreferenceUtil.setIsCcuLaunched(false);
+        }
     }
 
     private int loadZone(View rootView, LinearLayout[] tablerowLayout, HashMap roomMap) {
@@ -4032,6 +4039,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+        int size = zoneIntervals.size();
+
+        for (int i = 0; i < size; i++) {
+            Interval it = zoneIntervals.get(i);
+
+            LocalTime startTimeOfDay = it.getStart().toLocalTime();
+            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
+
+            // Check if the start time is after the end time and separating the overnight schedule
+            if (startTimeOfDay.isAfter(endTimeOfDay)) {
+                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
+                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
+            }
+        }
+        //sorting the zoneInterval
+        Collections.sort(zoneIntervals, new Comparator<Interval>() {
+                    public int compare(Interval p1, Interval p2) {
+                        return Long.compare(p1.getStartMillis(), p2.getStartMillis());
+                    }
+                }
+        );
+
+        Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size()-1);
+        LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
+        Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
+        LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
+        /** checking for overnight for sunday ,if it is has overnight sch for sunday
+         we need to add the building occupancy for next week monday also **/
+        if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
+        {
+            systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
+        }
 
         for (Interval z : zoneIntervals) {
             boolean add = true;

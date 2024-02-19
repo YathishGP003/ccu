@@ -163,8 +163,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if (isVisibleToUser) {
             new Handler().post(() -> loadSchedule());
             UpdateScheduleHandler.setBuildingScheduleListener(this);
+            ScheduleManager.getInstance().setBuildingScheduleListener(this);
         } else {
             UpdateScheduleHandler.setBuildingScheduleListener(null);
+            ScheduleManager.getInstance().setBuildingScheduleListener(null);
         }
     }
 
@@ -1445,12 +1447,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         Runnable runnable = () -> loadSchedule();
         scheduleFragmentHandler.postDelayed(runnable, 1500);
         UpdateScheduleHandler.setBuildingScheduleListener(this);
+        ScheduleManager.getInstance().setBuildingScheduleListener(this);
     }
     
     @Override
     public void onPause() {
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
+        ScheduleManager.getInstance().setBuildingScheduleListener(null);
     }
     public void refreshScreen() {
         if(getActivity() != null) {

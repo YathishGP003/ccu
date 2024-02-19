@@ -1,5 +1,6 @@
 package a75f.io.renatus.registration;
 
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -125,7 +126,7 @@ public class AddtoExisting extends Fragment {
             toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
             toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
             ccuUpdateToast = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
-            if(!CCUHsApi.getInstance().isCCURegistered()) {
+            if(!CCUHsApi.getInstance().isCCURegistered() && isRecommendedVersionCheckIsNotFalse()) {
                 if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
                     FragmentTransaction ft = getParentFragmentManager().beginTransaction();
                     Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
@@ -519,7 +520,7 @@ public class AddtoExisting extends Fragment {
     }
     @Override
     public void onResume() {
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && isRecommendedVersionCheckIsNotFalse()) {
             if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
                 try {
                     FragmentTransaction ft = getParentFragmentManager().beginTransaction();

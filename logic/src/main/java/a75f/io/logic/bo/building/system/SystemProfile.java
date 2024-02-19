@@ -701,32 +701,32 @@ public abstract class SystemProfile
     }
     
     public boolean isOutsideTempCoolingLockoutEnabled(CCUHsApi hayStack) {
-        return hayStack.readDefaultVal("system and config and outsideTemp and " +
+        return hayStack.readDefaultVal("system and config and " +
                                               "cooling and lockout") > 0;
     }
     
     public boolean isOutsideTempHeatingLockoutEnabled(CCUHsApi hayStack) {
-        return hayStack.readDefaultVal("system and config and outsideTemp and " +
+        return hayStack.readDefaultVal("system and config and " +
                                        "heating and lockout") > 0;
     }
     
     public void setOutsideTempCoolingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
-        hayStack.writeDefaultVal("system and config and outsideTemp and cooling and lockout", enabled ?
+        hayStack.writeDefaultVal("system and config and cooling and lockout", enabled ?
                                                                                                   1.0: 0);
-        hayStack.writeHisValByQuery("system and config and outsideTemp and cooling and lockout", enabled ?
+        hayStack.writeHisValByQuery("system and config and cooling and lockout", enabled ?
                                                                                                      1.0: 0);
     }
     
     public void setOutsideTempHeatingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
-        hayStack.writeDefaultVal("system and config and outsideTemp and heating and lockout", enabled ?
+        hayStack.writeDefaultVal("system and config and heating and lockout", enabled ?
                                                                                                   1.0 : 0);
-        hayStack.writeHisValByQuery("system and config and outsideTemp and heating and lockout", enabled ?
+        hayStack.writeHisValByQuery("system and config and heating and lockout", enabled ?
                                                                                                      1.0 : 0);
     }
 
 
     public void setCoolingLockoutVal(CCUHsApi hayStack, double val) {
-        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner " +
                 "and cooling and lockout and equipRef ==\""
                 +ccu().systemProfile.getSystemEquipRef()+"\"");
         if (!coolingLockoutPoint.isEmpty()) {
@@ -736,7 +736,7 @@ public abstract class SystemProfile
     }
 
     public void setHeatingLockoutVal(CCUHsApi hayStack, double val) {
-        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner " +
                 "and heating and lockout and equipRef ==\""
                 +ccu().systemProfile.getSystemEquipRef()+"\"");
 
@@ -771,7 +771,7 @@ public abstract class SystemProfile
         } else {
             mechanicalCoolingAvailable = true;
         }
-        hayStack.writeHisValByQuery("system and mechanical and cooling and available", mechanicalCoolingAvailable ?
+        hayStack.writeHisValByQuery("system and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
         if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
@@ -779,7 +779,7 @@ public abstract class SystemProfile
         } else {
             mechanicalHeatingAvailable = true;
         }
-        hayStack.writeHisValByQuery("system and mechanical and heating and available", mechanicalHeatingAvailable ?
+        hayStack.writeHisValByQuery("system and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
         CcuLog.i(L.TAG_CCU_SYSTEM,
                  "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+

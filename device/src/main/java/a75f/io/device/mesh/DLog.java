@@ -54,7 +54,36 @@ public class DLog
 			}
 		//}
 	}
-	
+
+	public static <T extends Struct>  void
+
+
+
+
+	tempLogdStructAsJson(T struct)
+	{
+		//CcuLog.d("CCU_SN_MESSAGES", "MSG: "+struct.toString());
+		//if (BuildConfig.DEBUG)
+		//{
+		String structString = null;
+
+		//We can bury this exception because when we log a struct to json, it is purely for loggin purposes
+		try
+		{
+			structString = JsonSerializer.toJson(struct, true);
+			CcuLog.d("CCU_SN_MESSAGES", structString+"\n\n");
+
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+		//}
+	}
 	
 	public static void logUSBServiceNotInitialized()
 	{

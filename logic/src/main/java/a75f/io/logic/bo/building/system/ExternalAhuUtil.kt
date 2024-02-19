@@ -50,6 +50,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleUtil
+import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.RxjavaUtil
@@ -234,89 +235,15 @@ fun updateDefaultSetPoints(
     systemEquip: Equip,
     lastLoopDirection: TempDirection
 ): Double {
-    val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
-
-    return if (isDualSetPointEnabled) {
-        when (lastLoopDirection) {
-            TempDirection.COOLING -> Domain.getPointByDomain(
-                systemEquip,
-                systemCoolingSATMaximum
-            )
-            else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
-        }
-
-    } else {
-        when (lastLoopDirection) {
-            TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-            else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-        }
+    return when (lastLoopDirection) {
+        TempDirection.COOLING -> Domain.getPointByDomain(
+            systemEquip,
+            systemCoolingSATMaximum
+        )
+        else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
     }
 }
 
-/*
-fun updateDefaultSetPoints(
-    conditioningMode: SystemMode,
-    systemEquip: Equip,
-    lastLoopDirection: TempDirection
-): Double {
-    val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
-    return when (conditioningMode) {
-        SystemMode.AUTO, SystemMode.OFF -> {
-            if (!isDualSetPointEnabled) {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-                }
-            } else {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(
-                        systemEquip,
-                        systemCoolingSATMaximum
-                    )
-                    else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
-                }
-            }
-        }
-
-        SystemMode.HEATONLY -> {
-
-            if (isDualSetPointEnabled) {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemCoolingSATMaximum)
-                    else -> Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
-                }
-            } else {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-                }
-            }
-
-            if (!isDualSetPointEnabled) {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-                }
-            }
-            else {
-
-            }
-                Domain.getPointByDomain(systemEquip, systemHeatingSATMinimum)
-        }
-
-        SystemMode.COOLONLY -> {
-            if (!isDualSetPointEnabled) {
-                when (lastLoopDirection) {
-                    TempDirection.COOLING -> Domain.getPointByDomain(systemEquip, systemSATMaximum)
-                    else -> Domain.getPointByDomain(systemEquip, systemSATMinimum)
-                }
-            }
-            else
-                Domain.getPointByDomain(systemEquip, systemCoolingSATMaximum)
-        }
-    }
-}
-*/
 
 fun getTunerByDomainName(systemEquip: Equip, domainName: String): Double =
     TunerUtil.readTunerValByQuery("domainName == \"$domainName\"", systemEquip.id)
@@ -342,7 +269,6 @@ fun calculateSATSetPoints(
     systemEquip: Equip,
     basicConfig: BasicConfig,
     externalEquipId: String?,
-    conditioningMode: SystemMode,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
     loopRunningDirection: TempDirection,
@@ -395,7 +321,8 @@ fun calculateSATSetPoints(
                     " coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue"
         )
     } else {
-        val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
+        //val satSetPointLimits = getSingleSetPointMinMax(systemEquip, loopRunningDirection)
+        val satSetPointLimits = getDualSetPointMinMax(systemEquip)
         var isLockoutActive = false
         if (loopRunningDirection == TempDirection.COOLING)
             isLockoutActive = L.ccu().systemProfile.isCoolingLockoutActive
@@ -405,7 +332,10 @@ fun calculateSATSetPoints(
         val satSetPointValue: Double = if (basicConfig.loopOutput == 0.0 || isLockoutActive)
             updateDefaultSetPoints(systemEquip, loopRunningDirection)
         else
-            mapToSetPoint(satSetPointLimits.first, satSetPointLimits.second, basicConfig.loopOutput)
+            if (loopRunningDirection == TempDirection.COOLING)
+                mapToSetPoint(satSetPointLimits.first.first, satSetPointLimits.first.second, basicConfig.loopOutput)
+            else
+                mapToSetPoint(satSetPointLimits.second.first, satSetPointLimits.second.second, basicConfig.loopOutput)
         updateSetPoint(
             systemEquip,
             satSetPointValue,
@@ -489,13 +419,13 @@ fun handleHumidityOperation(
     externalSpList: ArrayList<String>,
     humidityHysteresis: Double,
     currentHumidity: Double,
-    conditioningMode: SystemMode
+    conditioningMode: SystemMode,
+    dabConfig: BasicConfig
 ) {
     val currentStatus = Domain.getHisByDomain(systemEquip, humidifierEnable)
     var newStatus = 0.0
 
-    if ((occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.PRECONDITIONING ||
-                occupancyMode == Occupancy.VACATION) || conditioningMode == SystemMode.OFF) {
+    if (dabConfig.loopOutput == 0.0 && (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF)) {
         updatePointValue(systemEquip, humidifierEnable, 0.0)
         externalEquipId?.let {
             pushHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
@@ -554,9 +484,7 @@ fun handleDeHumidityOperation(
     val currentStatus = Domain.getHisByDomain(systemEquip, dehumidifierEnable)
     var newStatus = 0.0
 
-    if (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.PRECONDITIONING
-        || occupancyMode == Occupancy.VACATION || conditioningMode == SystemMode.OFF
-    ) {
+    if (occupancyMode == Occupancy.UNOCCUPIED || conditioningMode == SystemMode.OFF) {
         updatePointValue(systemEquip, dehumidifierEnable, 0.0)
         externalEquipId?.let {
             pushDeHumidifierCmd(haystack, externalEquipId, 0.0, externalSpList)
@@ -594,7 +522,8 @@ fun operateDamper(
     externalEquipId: String?,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
-    conditioningMode: SystemMode
+    conditioningMode: SystemMode,
+    dabConfig: BasicConfig
 ) {
     val isDcvControlEnabled = isConfigEnabled(systemEquip, dcvDamperControlEnable)
     Domain.writeHisValByDomain(co2WeightedAverage, co2, systemEquip.id)
@@ -611,7 +540,7 @@ fun operateDamper(
     var damperOperationPercent = 0.0
     if (conditioningMode == SystemMode.OFF)
         damperOperationPercent = 0.0
-    else if (shouldOperateDamper(co2, occupancyMode, co2Threshold))
+    else if (shouldOperateDamper(co2, occupancyMode, co2Threshold, dabConfig))
         damperOperationPercent =
             calculateDamperOperationPercent(co2, co2Threshold, damperOpeningRate)
     else if (shouldResetDamper(co2, occupancyMode, co2Threshold))
@@ -640,13 +569,16 @@ fun setOccupancyMode(
     occupancy: Occupancy,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
+    operatingStatus : BasicConfig
 ) {
-    val occupancyMode = when (occupancy) {
-        Occupancy.UNOCCUPIED, Occupancy.VACATION, Occupancy.PRECONDITIONING -> 0.0
-        else -> 1.0
-    }
+    val occupancyMode = if (operatingStatus.loopOutput > 0) 1.0
+                        else when (occupancy) {
+                            Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
+                            else -> 1.0
+                        }
 
     if (isConfigEnabled(systemEquip, occupancyModeControl)) {
+        logIt("Occupancy mode $occupancyMode")
         updatePointValue(systemEquip, systemOccupancyMode, occupancyMode)
         externalEquipId?.let {
             pushOccupancyMode(haystack, it, occupancyMode, externalSpList)
@@ -659,16 +591,22 @@ fun setOccupancyMode(
 private fun shouldOperateDamper(
     sensorCO2: Double,
     mode: Occupancy,
-    systemCO2Threshold: Double
+    systemCO2Threshold: Double,
+    dabConfig: BasicConfig
 ): Boolean =
-    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (mode == Occupancy.OCCUPIED || mode == Occupancy.AUTOFORCEOCCUPIED)
+    sensorCO2 > 0 && sensorCO2 > systemCO2Threshold && (dabConfig.loopOutput > 0 || (mode == Occupancy.OCCUPIED
+            || mode == Occupancy.AUTOFORCEOCCUPIED
+            || mode == Occupancy.AUTOAWAY
+            || mode == Occupancy.EMERGENCY_CONDITIONING
+            || mode == Occupancy.PRECONDITIONING
+            || mode == Occupancy.FORCEDOCCUPIED))
 
 private fun shouldResetDamper(
     sensorCO2: Double,
     mode: Occupancy,
     systemCO2Threshold: Double
 ): Boolean =
-    mode == Occupancy.UNOCCUPIED || mode == Occupancy.PRECONDITIONING || sensorCO2 < systemCO2Threshold
+    mode == Occupancy.UNOCCUPIED || mode == Occupancy.VACATION || sensorCO2 < systemCO2Threshold
 
 private fun calculateDamperOperationPercent(
     sensorCO2: Double,
@@ -677,24 +615,6 @@ private fun calculateDamperOperationPercent(
 ): Double {
     val damperSp = (sensorCO2 - threshold) / openingRate
     return (damperSp * 100.0).roundToInt() / 100.0
-}
-
-
-fun getSingleSetPointMinMax(equip: Equip, tempDirection: TempDirection): Pair<Double, Double> {
-    return when (tempDirection) {
-        TempDirection.COOLING -> {
-            Pair(
-                Domain.getPointByDomain(equip, systemSATMaximum),
-                Domain.getPointByDomain(equip, systemSATMinimum)
-            )
-        }
-        TempDirection.HEATING -> {
-            Pair(
-                Domain.getPointByDomain(equip, systemSATMinimum),
-                Domain.getPointByDomain(equip, systemSATMaximum)
-            )
-        }
-    }
 }
 
 fun getDualSetPointMinMax(
@@ -743,8 +663,8 @@ fun getConfiguration(profileDomain: String, profileType: ProfileType): ExternalA
     config.dehumidifierControl.enabled =
         getConfigByDomainName(systemEquip, dehumidifierOperationEnable)
 
-    config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
-    config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
+    //config.satMin.currentVal = getConfigValue(systemSATMinimum, systemEquip)
+    //config.satMax.currentVal = getConfigValue(systemSATMaximum, systemEquip)
     config.heatingMinSp.currentVal =
         getConfigValue(systemHeatingSATMinimum, systemEquip)
     config.heatingMaxSp.currentVal =
@@ -783,6 +703,7 @@ fun addSystemEquip(
     definition: SeventyFiveFProfileDirective?,
     systemProfile: SystemProfile
 ) {
+    CcuLog.i(L.TAG_CCU_SYSTEM, "Adding system equip "+definition?.name)
     val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
     val equipId = profileEquipBuilder.buildEquipAndPoints(
         config!!, definition!!,
@@ -790,6 +711,9 @@ fun addSystemEquip(
     )
     systemProfile.updateAhuRef(equipId)
     ControlMote(equipId)
+    if (systemProfile is VavExternalAhu) {
+        systemProfile.initTRSystem()
+    }
 }
 
 fun getModbusPointValue(query: String): String {

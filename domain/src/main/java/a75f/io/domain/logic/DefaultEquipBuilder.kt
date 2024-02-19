@@ -36,6 +36,8 @@ open class DefaultEquipBuilder : EquipBuilder {
                 .setProfile(equipConfig.profileConfiguration?.profileType)
                 .setDomainName(equipConfig.modelDef.domainName)
 
+        if (!equipConfig.modelDef.name.equals("buildingEquip")) { equipBuilder.setDisplayName(equipConfig.disPrefix) }
+
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
@@ -59,9 +61,9 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
-        equipBuilder.addTag("modelId", HStr.make(equipConfig.modelDef.id))
+        equipBuilder.addTag("sourceModel", HStr.make(equipConfig.modelDef.id))
         equipBuilder.addTag(
-            "modelVersion", HStr.make(
+            "sourceModelVersion", HStr.make(
                 "${equipConfig.modelDef.version?.major}" +
                         ".${equipConfig.modelDef.version?.minor}.${equipConfig.modelDef.version?.patch}"
             )

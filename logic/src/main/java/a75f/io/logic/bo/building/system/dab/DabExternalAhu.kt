@@ -250,8 +250,13 @@ class DabExternalAhu : DabSystemProfile() {
         loopRunningDirection = when(dabSystem.systemState) {
             SystemController.State.COOLING -> TempDirection.COOLING
             SystemController.State.HEATING -> TempDirection.HEATING
-            else -> if (getPreviousConditioningModeWhenOff(systemEquip, hayStack) == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+            else -> {
+                val previousState = getPreviousConditioningModeWhenOff(systemEquip, hayStack)
+                Domain.writeHisValByDomain(operatingMode, previousState.toDouble())
+                if (previousState == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+            }
         }
+
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
         logIt("Changed direction $loopRunningDirection ")

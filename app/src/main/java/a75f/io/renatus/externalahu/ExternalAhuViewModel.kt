@@ -8,6 +8,7 @@ import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
+import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames.DAB_EXTERNAL_AHU_CONTROLLER
 import a75f.io.domain.util.ModelNames.VAV_EXTERNAL_AHU_CONTROLLER
 import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
@@ -175,9 +176,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     private fun loadModel() {
         CcuLog.i(TAG, "loadModel")
         val def = if (profileType == ProfileType.dabExternalAHUController)
-            getModelByProfileName(DAB_EXTERNAL_AHU_CONTROLLER) else getModelByProfileName(
-            VAV_EXTERNAL_AHU_CONTROLLER
-        )
+            ModelLoader.getDabExternalAhuModel() else ModelLoader.getVavExternalAhuModel()
         if (def != null) {
             profileModelDefinition = def as SeventyFiveFProfileDirective
         }

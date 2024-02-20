@@ -55,6 +55,12 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DEVICE)
     }
 
+    fun getDabExternalAhuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_EXTERNAL_AHU_DAB)
+    }
+    fun getVavExternalAhuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_EXTERNAL_AHU_VAV)
+    }
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()

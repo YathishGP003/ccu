@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
 import a75f.io.logic.bo.building.system.getConditioningMode
 import a75f.io.logic.bo.building.system.getExternalEquipId
+import a75f.io.logic.bo.building.system.getPreviousConditioningModeWhenOff
 import a75f.io.logic.bo.building.system.getTunerByDomainName
 import a75f.io.logic.bo.building.system.handleDeHumidityOperation
 import a75f.io.logic.bo.building.system.handleHumidityOperation
@@ -247,7 +248,11 @@ class VavExternalAhu : VavSystemProfile() {
         loopRunningDirection = when(vavSystem.systemState) {
             SystemController.State.COOLING -> TempDirection.COOLING
             SystemController.State.HEATING -> TempDirection.HEATING
-            else -> TempDirection.COOLING
+            else -> {
+                val previousState = getPreviousConditioningModeWhenOff(systemEquip, hayStack)
+                Domain.writeHisValByDomain(operatingMode, previousState.toDouble())
+                if (previousState == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+            }
         }
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())

@@ -16,8 +16,9 @@ object ReconfigHandler {
         //val existingEntityMap = getAllConfig(equipGroup, hayStack)
 
         val existingEntityList = hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
+            .filter { it["domainName"] != null }
             .map { it["domainName"].toString() }
-        CcuLog.i(Domain.LOG_TAG, "Equip currently has ${existingEntityList.size} points")
+        CcuLog.i(Domain.LOG_TAG, "Reconfig -Equip currently has ${existingEntityList.size} points")
         profileConfig.getEnableConfigs().forEach {
             CcuLog.i(Domain.LOG_TAG, "Enable config ${it.domainName} ${it.enabled}")
         }

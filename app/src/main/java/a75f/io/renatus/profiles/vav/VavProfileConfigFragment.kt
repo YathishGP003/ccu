@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -126,114 +127,135 @@ class VavProfileConfigFragment : BaseDialogFragment() {
             item {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     when (viewModel.profileType) {
-                        ProfileType.VAV_SERIES_FAN -> TitleTextView("VAV Reheat - Series")
-                        ProfileType.VAV_PARALLEL_FAN -> TitleTextView("VAV Reheat - Parallel")
+                        ProfileType.VAV_SERIES_FAN -> TitleTextView("VAV REHEAT - SERIES")
+                        ProfileType.VAV_PARALLEL_FAN -> TitleTextView("VAV REHEAT - PARALLEL")
                         else -> TitleTextView("VAV - NO FAN")
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(78.dp))
                     DropDownWithLabel(
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
-                        onSelected = { selectedIndex -> viewModel.viewState.damperType =
-                            selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.damperType.toInt()
+                        onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
+                        defaultSelection = viewModel.viewState.damperType.toInt(),
+                        spacerLimit = 178,
+                        heightValue = 272
                     )
-                    DropDownWithLabel(
-                        label = "Damper Size",
-                        list = viewModel.damperSizesList,
-                        previewWidth = 60,
-                        expandedWidth = 120,
-                        onSelected = { selectedIndex -> viewModel.viewState.damperSize =
-                            selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.damperSize.toInt()
-                    )
-                    DropDownWithLabel(
-                        label = "Damper Shape",
-                        list = viewModel.damperShapesList,
-                        previewWidth = 100,
-                        expandedWidth = 120,
-                        onSelected = { selectedIndex -> viewModel.viewState.damperShape =
-                            selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.damperShape.toInt()
-                    )
+                    Spacer(modifier=Modifier.width(85.dp))
+                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        DropDownWithLabel(
+                            label = "Size",
+                            list = viewModel.damperSizesList,
+                            previewWidth = 60,
+                            expandedWidth = 120,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.damperSize = selectedIndex.toDouble()
+                            },
+                            defaultSelection = viewModel.viewState.damperSize.toInt(),
+                            spacerLimit = 20,
+                            heightValue = 268
+                        )
+
+                        Spacer(modifier = Modifier.width(42.dp))
+
+                        DropDownWithLabel(
+                            label = "Shape",
+                            list = viewModel.damperShapesList,
+                            previewWidth = 130,
+                            expandedWidth = 130,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.damperShape = selectedIndex.toDouble()
+                            },
+                            defaultSelection = viewModel.viewState.damperShape.toInt(),
+                            spacerLimit = 26,
+                            heightValue = 167
+                        )
+
+
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(78.dp))
                     DropDownWithLabel(
                         label = "Reheat Type",
                         list = viewModel.reheatTypesList,
                         previewWidth = 160,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex.toDouble()},
-                        defaultSelection = viewModel.viewState.reheatType.toInt()
+                        defaultSelection = viewModel.viewState.reheatType.toInt(),
+                        spacerLimit = 188,
+                        heightValue = 268
                     )
+                    Spacer(modifier=Modifier.width(85.dp))
                     DropDownWithLabel(
                         label = "Zone Priority",
                         list = viewModel.zonePrioritiesList,
-                        previewWidth = 100,
+                        previewWidth = 130,
                         expandedWidth = 120,
-                        onSelected = { selectedIndex -> viewModel.viewState.zonePriority =
-                            selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.zonePriority.toInt()
+                        onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
+                        defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        spacerLimit = 132,
+                        heightValue = 211
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start){
+                    Spacer(modifier=Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text = "Thermistor-1")
-                        Spacer(modifier = Modifier.width(60.dp))
+                        HeaderTextView(text = "Thermistor-1",padding=0)
+                        Spacer(modifier = Modifier.width(160.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
+                    Spacer(modifier=Modifier.width(60.dp))
                     Row {
-                        HeaderTextView(text = "Thermistor-2")
-                        Spacer(modifier = Modifier.width(60.dp))
+                        HeaderTextView(text = "Thermistor-2",padding=0)
+                        Spacer(modifier = Modifier.width(110.dp))
                         LabelTextView(text = "Supply Airflow")
                     }
                 }
+
                 Spacer(modifier = Modifier.height(20.dp))
-                if (viewModel.profileType != ProfileType.VAV_REHEAT) {
-                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                        Row {
-                            HeaderTextView(text = "Relay 1")
-                            Spacer(modifier = Modifier.width(60.dp))
-                            LabelTextView(text = "Stage Electric Heater")
-                        }
-                        Row {
-                            HeaderTextView(text = "Relay 2")
-                            Spacer(modifier = Modifier.width(60.dp))
-                            LabelTextView(text = when(viewModel.profileType) {
-                                ProfileType.VAV_SERIES_FAN -> "Series Fan"
-                                else -> "Parallel Fan"
-                            })
-                        }
+
+                Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(78.dp))
+                    Row{
+                        HeaderTextView(text = "Relay 1",padding=0)
+                        Spacer(modifier = Modifier.width(195.dp))
+                        LabelTextView(text = "Stage Electric Heater", widthValue = 250)
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier=Modifier.width(42.dp))
+                    Row{
+                        HeaderTextView(text="Relay 2",padding=0)
+                        Spacer(modifier=Modifier.width(204.dp))
+                        LabelTextView(text="Parallel Fan")
+                    }
                 }
 
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Spacer(modifier=Modifier.height(20.dp))
+
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text = viewModel.profileConfiguration.autoForceOccupied.disName,padding=10)
+                        Spacer(modifier = Modifier.width(220.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoForceOccupied,
                             onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(83.dp))
                     Row {
-                        HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName, padding = 10)
+                        Spacer(modifier = Modifier.width(250.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoAway,
                             onEnabled = { it -> viewModel.viewState.autoAway = it }
@@ -242,18 +264,20 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName,padding=10)
+                        Spacer(modifier = Modifier.width(238.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableIAQControl,
                             onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(83.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName,padding=10)
+                        Spacer(modifier = Modifier.width(158.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
@@ -262,24 +286,29 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                    Spacer(modifier=Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName)
-                        Spacer(modifier = Modifier.width(20.dp))
+                        HeaderTextView(text =  viewModel.profileConfiguration.enableCFMControl.disName,padding=10)
+                        Spacer(modifier = Modifier.width(228.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCFMControl,
                             onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
                         )
                     }
+                    Spacer(modifier=Modifier.width(85.dp))
                     Row {
                         if (viewModel.viewState.enableCFMControl) {
                             DropDownWithLabel(
                                 label = "K-Factor",
                                 list = viewModel.kFactorsList,
-                                previewWidth = 100,
+                                previewWidth = 130,
                                 expandedWidth = 120,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
-                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor))
+                                defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
+                                paddingLimit = 10,
+                                spacerLimit = 173,
+                                heightValue = 272
                             )
                         }
                     }
@@ -287,10 +316,11 @@ class VavProfileConfigFragment : BaseDialogFragment() {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+
                 val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start=135.dp,end=135.dp))) {
                     Picker(
                         header = "Temperature\n    Offset",
                         state = valuesPickerState,
@@ -382,7 +412,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
 
                     Spacer(modifier = Modifier.width(60.dp))
                     Picker(
-                        header = "Max Damper Pos\n    Heating",
+                        header = "Max Damper Pos Heating",
                         state = valuesPickerState,
                         items = viewModel.maxHeatingDamperPosList,
                         onChanged = { it: String -> viewModel.viewState.maxHeatingDamperPos = it.toDouble() },
@@ -431,7 +461,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         super.onStart()
         val dialog = dialog
         if (dialog != null) {
-            val width = 1165
+            val width = 1265
             val height = 672
             dialog.window!!.setLayout(width, height)
         }

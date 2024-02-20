@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DropDownWithLabel(
     label: String, list: List<String>, previewWidth: Int = 80, expandedWidth: Int = 100,
-    onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0) {
+    onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int=275) {
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
             HeaderTextView(text = label, padding = paddingLimit)
@@ -54,14 +54,10 @@ fun DropDownWithLabel(
                 Row {
                     Text(
                         list[defaultSelection],
-                        modifier = Modifier.width((previewWidth - 20).dp).height(30.dp)
+                        modifier = Modifier.width((previewWidth ).dp).height(35.dp)
                             .clickable(onClick = { expanded = true }),
                         fontSize = 22.sp,
                     )
-
-                    if(label.equals("Damper Type") || label.equals("Valve Type")){
-                        Spacer(modifier=Modifier.width(10.dp))
-                    }
 
                     Image(
                         painter = painterResource(id = R.drawable.angle_down_solid),
@@ -79,7 +75,7 @@ fun DropDownWithLabel(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .width(expandedWidth.dp)
-                    .height(275.dp)
+                    .height(heightValue.dp)
                 /*.background(
                     Color.Gray
                 )*/

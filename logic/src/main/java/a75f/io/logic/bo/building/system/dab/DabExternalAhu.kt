@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.dab
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName.coolingLoopOutput
@@ -23,11 +24,14 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.BasicConfig
 import a75f.io.logic.bo.building.system.SystemController
+import a75f.io.logic.bo.building.system.SystemMode
+import a75f.io.logic.bo.building.system.SystemState
 import a75f.io.logic.bo.building.system.TempDirection
 import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
 import a75f.io.logic.bo.building.system.getConditioningMode
 import a75f.io.logic.bo.building.system.getExternalEquipId
+import a75f.io.logic.bo.building.system.getPreviousConditioningModeWhenOff
 import a75f.io.logic.bo.building.system.getTunerByDomainName
 import a75f.io.logic.bo.building.system.handleDeHumidityOperation
 import a75f.io.logic.bo.building.system.handleHumidityOperation
@@ -246,8 +250,13 @@ class DabExternalAhu : DabSystemProfile() {
         loopRunningDirection = when(dabSystem.systemState) {
             SystemController.State.COOLING -> TempDirection.COOLING
             SystemController.State.HEATING -> TempDirection.HEATING
-            else -> TempDirection.COOLING
+            else -> {
+                val previousState = getPreviousConditioningModeWhenOff(systemEquip, hayStack)
+                Domain.writeHisValByDomain(operatingMode, previousState.toDouble())
+                if (previousState == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+            }
         }
+
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
         logIt("Changed direction $loopRunningDirection ")

@@ -26,7 +26,7 @@ object ModelCache {
 
         loadDeviceModels()
         loadVavZoneEquipModels()
-
+        loadSystemProfileModels()
     }
 
     private fun loadDeviceModels() {
@@ -62,7 +62,14 @@ object ModelCache {
         modelContainer[MODEL_HN_VAV_ACB] = getModelById(MODEL_HN_VAV_ACB)
         CcuLog.i(Domain.LOG_TAG, "helioNodeActiveChilledBeam equip model loaded")
     }
-    
+
+    private fun loadSystemProfileModels() {
+        modelContainer[MODEL_EXTERNAL_AHU_DAB] = getModelById(MODEL_EXTERNAL_AHU_DAB)
+        CcuLog.i(Domain.LOG_TAG, "externalAhuDab model loaded")
+
+        //modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
+        //CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
+    }
     /**
      * Could directly used in Unit tests without calling init() to set the context.
      */

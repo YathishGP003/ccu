@@ -436,7 +436,7 @@ fun handleHumidityOperation(
     val isHumidifierEnabled = isConfigEnabled(systemEquip, humidifierOperationEnable)
     if (isHumidifierEnabled) {
         val targetMinInsideHumidity =
-            Domain.getPointByDomain(systemEquip, systemtargetMinInsideHumidty)
+            Domain.getPointPriorityValByDomain(systemEquip, systemtargetMinInsideHumidty)
 
         if (currentHumidity > 0 && currentHumidity < targetMinInsideHumidity)
             newStatus = 1.0
@@ -495,7 +495,7 @@ fun handleDeHumidityOperation(
     val isDeHumidifierEnabled = isConfigEnabled(systemEquip, dehumidifierOperationEnable)
     if (isDeHumidifierEnabled) {
         val targetMaxInsideHumidity =
-            Domain.getPointByDomain(systemEquip, systemtargetMaxInsideHumidty)
+            Domain.getPointPriorityValByDomain(systemEquip, systemtargetMaxInsideHumidty)
 
         if (currentHumidity > 0 && currentHumidity > targetMaxInsideHumidity)
             newStatus = 1.0

@@ -417,7 +417,7 @@ public class HisSyncHandler
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
                 || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
-                || pointToSync.containsKey("sensor");
+                || pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus");
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

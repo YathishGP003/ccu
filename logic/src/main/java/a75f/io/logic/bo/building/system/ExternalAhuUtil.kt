@@ -800,9 +800,9 @@ fun getPreviousConditioningModeWhenOff(systemEquip: Equip, hayStack: CCUHsApi): 
     val currentMode = Domain.getHisByDomain(systemEquip, conditioningMode)
     CcuLog.d(L.TAG_CCU_SYSTEM, "Current conditioning mode: $currentMode")
     if (currentMode.toInt() == SystemMode.HEATONLY.ordinal) {
-        return SystemController.State.HEATING.ordinal;
+        return SystemController.State.HEATING.ordinal
     } else if (currentMode.toInt() == SystemMode.COOLONLY.ordinal) {
-        return SystemController.State.COOLING.ordinal;
+        return SystemController.State.COOLING.ordinal
     }
     //Otherwise fall back to the previous operating mode
     val point = Domain.readPoint(operatingMode)
@@ -812,9 +812,9 @@ fun getPreviousConditioningModeWhenOff(systemEquip: Equip, hayStack: CCUHsApi): 
     }
     CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: ${hisItems[0]} ${hisItems[1]}")
     return if (hisItems.size > 1) {
-        hisItems[1].`val`.toInt()
+        maxOf( hisItems[1].`val`.toInt(), 1)
     } else {
-        hisItems[0].`val`.toInt()
+        maxOf(hisItems[0].`val`.toInt(), 1)
     }
 }
 fun logIt(msg: String) {

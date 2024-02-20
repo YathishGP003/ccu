@@ -104,6 +104,12 @@ object Domain {
         return 0.0
     }
 
+    fun getPointPriorityValByDomain(equip: Equip, domainName: String): Double {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readPriorityVal() }
+        return 0.0
+    }
+
     fun getHisByDomain(equip: Equip, domainName: String): Double {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let { return point.readHisVal() }

@@ -3,7 +3,6 @@ package a75f.io.domain.api
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildingEquip
 import a75f.io.domain.DomainEquip
-import a75f.io.domain.VavEquip
 import a75f.io.domain.logic.DomainManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint

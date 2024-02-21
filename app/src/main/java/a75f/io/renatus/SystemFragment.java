@@ -299,6 +299,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
         }
 		UpdateScheduleHandler.setIntrinsicScheduleListener(this);
 		SystemFragment.setIntrinsicScheduleListener(this);
+		UpdatePointHandler.setIntrinsicScheduleListener(this);
 	}
 
 	@Override
@@ -309,6 +310,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		UpdateScheduleHandler.setIntrinsicScheduleListener(null);
 		SystemFragment.setIntrinsicScheduleListener(null);
+		UpdatePointHandler.setIntrinsicScheduleListener(null);
 	}
 
 	@Override
@@ -316,9 +318,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		super.setUserVisibleHint(isVisibleToUser);
 		if(isVisibleToUser) {
 			UpdatePointHandler.setSystemDataInterface(this);
+			UpdatePointHandler.setIntrinsicScheduleListener(this);
 			loadIntrinsicSchedule();
 		} else {
 			UpdatePointHandler.setSystemDataInterface(null);
+			UpdatePointHandler.setIntrinsicScheduleListener(null);
 		}
 	}
 	@Override
@@ -655,6 +659,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void updateIntrinsicSchedule() {
 		if(getActivity() != null) {
 			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
+			fetchPoints();
 		}
 	}
 

@@ -102,6 +102,7 @@ public class PreferenceUtil {
     public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration";
 
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
+    private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
 
     public static void setContext(Context c) {
         context= c;
@@ -832,5 +833,13 @@ public class PreferenceUtil {
 
     public static void setCarrierDabToVvtMigrationDone() {
         setBooleanPreference(CARRIER_POINT_MIGRATION_DAB_TO_VVT, true);
+    }
+
+    public static boolean getIsCcuLaunched() {
+        return getBooleanPreference(IS_CCU_LAUNCHED);
+    }
+
+    public static void setIsCcuLaunched(Boolean condition) {
+        setBooleanPreference(IS_CCU_LAUNCHED, condition);
     }
 }

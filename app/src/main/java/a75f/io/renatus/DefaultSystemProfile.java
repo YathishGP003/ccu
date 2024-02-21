@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -14,6 +15,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -45,8 +47,8 @@ public class DefaultSystemProfile extends Fragment
         }
         return rootView;
     }
-    
-    @Override
+
+    @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
             ButterKnife.bind(this, view);
             prefs = new Prefs(getContext().getApplicationContext());
@@ -54,6 +56,12 @@ public class DefaultSystemProfile extends Fragment
             } else {
 
                 new AsyncTask<String, Void, Void>() {
+
+                    @Override
+                    protected void onPreExecute() {
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
+                        super.onPreExecute();
+                    }
                     @Override
                     protected Void doInBackground(final String... params) {
                         if (systemProfile != null) {
@@ -70,6 +78,7 @@ public class DefaultSystemProfile extends Fragment
                     protected void onPostExecute(final Void result) {
                         CCUHsApi.getInstance().saveTagsData();
                         CCUHsApi.getInstance().syncEntityTree();
+                        ProgressDialogUtils.hideProgressDialog();
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }

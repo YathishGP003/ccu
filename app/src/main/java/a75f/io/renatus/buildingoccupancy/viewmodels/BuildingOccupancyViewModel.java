@@ -164,10 +164,11 @@ public class BuildingOccupancyViewModel {
         LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ArrayList<Schedule> scheduleList = new ArrayList<>();
-        ArrayList<Schedule> activeScheduleList = new ArrayList<>();
+        Map<String, Schedule> activeScheduleList = new LinkedHashMap<>();
         ArrayList<Zone> zoneList = new ArrayList<>();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
+        Map<String, List<Zone>> zoneMap = new LinkedHashMap<>();
 
 
         LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
@@ -197,8 +198,14 @@ public class BuildingOccupancyViewModel {
                         Map.Entry entry = (Map.Entry) it.next();
                         map.put(entry.getKey().toString(), entry.getValue().toString());
                     }
-                    zoneList.add(new Zone.Builder().setHashMap(map).build());
+                    String floorRef = map.get("floorRef").toString();
+                    zoneMap.putIfAbsent(floorRef, new ArrayList<>());
+                    zoneMap.get(floorRef).add(new Zone.Builder().setHashMap(map).build());
                 }
+                for(List<Zone> zones: zoneMap.values()) {
+                    zoneList.addAll(zones);
+                }
+                zoneMap.clear();
             }
 
 
@@ -231,10 +238,7 @@ public class BuildingOccupancyViewModel {
             for (Zone zone:zoneList) {
                 for (Schedule schedule: scheduleList) {
                     if((schedule.getId().replace("@","")).equals(zone.getScheduleRef().replace("@",""))){
-                        if(activeScheduleList.size() == 0)
-                            activeScheduleList.add(schedule);
-                        else if(!activeScheduleList.contains((schedule)))
-                            activeScheduleList.add(schedule);
+                        activeScheduleList.put(schedule.getId(), schedule);
                     }
                 }
             }
@@ -242,7 +246,7 @@ public class BuildingOccupancyViewModel {
 
 
 
-               for (Schedule schedule : activeScheduleList) {
+               for (Schedule schedule : activeScheduleList.values()) {
                     ArrayList<Interval> intervalSpills = new ArrayList<>();
                     ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
 

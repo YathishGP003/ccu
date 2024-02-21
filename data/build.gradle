@@ -229,4 +229,4 @@ task getExternalLibraryPaths {
         }
     }
 }
-preBuild.dependsOn getExternalLibraryPaths
+build.dependsOn getExternalLibraryPaths

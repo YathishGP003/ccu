@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="12dp"
+    android:layout_marginRight="20dp"
     android:orientation="horizontal">
 
         <TextView
@@ -10,38 +11,36 @@
             android:layout_marginStart="@dimen/dp_10"
             style="@style/label_black"
             android:layout_width="0dp"
-            android:layout_weight="5"
+            android:layout_weight="5.5"
+            android:gravity="center_vertical"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:textColor="@color/dark_gray"
-            android:textSize="18sp" />
+            android:textSize="22sp" />
 
-        <TextView
-            style="@style/label_black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="@color/dark_gray"
-            android:text=":" />
         <TextView
             android:id="@+id/tvParamValue"
             style="@style/label_grey"
             android:layout_width="0dp"
             android:gravity="start"
-            android:layout_weight="3"
+            android:layout_weight="2.5"
             android:textColor="@color/dark_gray"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginStart="10dp"
-            android:textSize="18sp" />
+            android:textSize="22sp" />
 
         <Spinner
             android:id="@+id/spValue"
             style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="0dp"
-            android:layout_weight="3"
+            android:layout_weight="2.5"
             android:textSize="18sp"
             android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_gravity="start|center"
+            android:gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"
             android:visibility="gone" />
+
 
 </TableRow>

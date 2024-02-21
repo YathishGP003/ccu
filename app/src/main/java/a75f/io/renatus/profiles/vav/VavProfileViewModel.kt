@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavReheatProfile
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -171,6 +172,8 @@ class VavProfileViewModel : ViewModel() {
                     CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
                     LSerial.getInstance()
                         .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
 
                     withContext(Dispatchers.Main) {

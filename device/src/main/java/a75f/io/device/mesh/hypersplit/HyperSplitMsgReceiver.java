@@ -665,7 +665,7 @@ public class HyperSplitMsgReceiver {
     }
 
     private static int getBits(int n, int start, int end) {
-        return n & (((1 << (end-start)) - 1) << start );
+        return n & (((1 << (end-start + 1)) - 1) << start );
     }
 
     private static void writeHumidityVal(RawPoint rawPoint, Point point,

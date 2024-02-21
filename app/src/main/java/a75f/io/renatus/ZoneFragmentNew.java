@@ -2514,11 +2514,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
 
                                 StringBuffer equipString = new StringBuffer();
+                                EquipmentDevice modbusDevice = modbusDevices.get(i);
                                 if(modbusDevices.get(i).usingDmDisplay) {
-                                    int equipNameIndex = modbusDevices.get(i).getName().lastIndexOf('-') + 1;
-                                    equipString.append(modbusDevices.get(i).getName().substring(equipNameIndex));
+                                    int equipNameIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+                                    equipString.append(modbusDevice.getName().substring(equipNameIndex));
                                 } else {
-                                    String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
+                                    String[] equipTypes = modbusDevice.getEquipType().split(",");
                                     for(String equipType : equipTypes){
                                         equipString.append(StringUtils.capitalize(equipType.trim()));
                                         equipString.append(" ");

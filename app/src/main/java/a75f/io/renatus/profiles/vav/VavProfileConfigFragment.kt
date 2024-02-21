@@ -228,15 +228,76 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier=Modifier.width(78.dp))
                     Row{
-                        HeaderTextView(text = "Relay 1",padding=0)
-                        Spacer(modifier = Modifier.width(195.dp))
-                        LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                        when(viewModel.viewState.reheatType){
+                            0.0->{
+                                HeaderTextView(text = "Relay 1",padding=0)
+                                Spacer(modifier=Modifier.width(195.dp))
+                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                            }
+                            1.0->{
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                            }
+                            2.0->{
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                            }
+                            3.0->{
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                            }
+                            4.0->{
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
+                            }
+                            5.0->{
+                                HeaderTextView(text = "Relay 1",padding=0)
+                                Spacer(modifier=Modifier.width(195.dp))
+                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                            }
+                            6.0->{
+                                HeaderTextView(text = "Relay 1",padding=0)
+                                Spacer(modifier=Modifier.width(195.dp))
+                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                            }
+                            7.0->{
+                                HeaderTextView(text = "Relay 1",padding=0)
+                                Spacer(modifier=Modifier.width(195.dp))
+                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                            }
+                        }
                     }
-                    Spacer(modifier=Modifier.width(42.dp))
+                    when(viewModel.viewState.reheatType)
+                    {
+                        0.0->Spacer(modifier=Modifier.width(42.dp))
+                        1.0->Spacer(modifier=Modifier.width(60.dp))
+                        2.0->Spacer(modifier=Modifier.width(60.dp))
+                        3.0->Spacer(modifier=Modifier.width(60.dp))
+                        4.0->Spacer(modifier=Modifier.width(60.dp))
+                        5.0->Spacer(modifier=Modifier.width(42.dp))
+                        6.0->Spacer(modifier=Modifier.width(42.dp))
+                        7.0->Spacer(modifier=Modifier.width(42.dp))
+                    }
                     Row{
-                        HeaderTextView(text="Relay 2",padding=0)
-                        Spacer(modifier=Modifier.width(204.dp))
-                        LabelTextView(text="Parallel Fan")
+                        when (viewModel.profileType){
+                            ProfileType.VAV_SERIES_FAN ->{
+                                HeaderTextView(text="Relay 2",padding=0)
+                                Spacer(modifier=Modifier.width(218.dp))
+                                LabelTextView(text = "Series Fan")
+                            }
+                            ProfileType.VAV_PARALLEL_FAN ->{
+                                HeaderTextView(text="Relay 2",padding=0)
+                                Spacer(modifier=Modifier.width(204.dp))
+                                LabelTextView(text="Parallel Fan")
+                            }
+                            else ->{
+
+                            }
+                        }
                     }
                 }
 
@@ -320,7 +381,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
-                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start=135.dp,end=135.dp))) {
+                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start = 135.dp, end = 135.dp))) {
                     Picker(
                         header = "Temperature\n    Offset",
                         state = valuesPickerState,

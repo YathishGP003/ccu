@@ -160,7 +160,7 @@ public class DesiredTempDisplayMode {
         boolean isHeating = VavSystemProfileRelayAssociationUtil.getDesiredTempDisplayMode(
                 TemperatureMode.HEATING);
         boolean isReheatEnabled = ccuHsApi.readDefaultVal("reheat and type and equipRef == \"" +
-                mEquip.getId() + "\"").intValue() != -1;
+                mEquip.getId() + "\"").intValue() > 0;
         return getTemperatureModeForSystemProfile(isCooling, isHeating, isReheatEnabled);
     }
 

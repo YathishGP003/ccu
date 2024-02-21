@@ -144,6 +144,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         if (unit != null && !unit.equals("")) {
                             viewHolder.tvParamLabel.append("(" + unit + ")");
                         }
+                        viewHolder.tvParamLabel.append(" : ");
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                             Point p = readPoint(modbusParam.get(position));
@@ -167,6 +168,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if (unit != null && !unit.equals(" ")) {
                                     viewHolder.tvParamLabel.append("(" + unit + ")");
                                 }
+                                viewHolder.tvParamLabel.append(" : ");
                             }
                         }
                     }
@@ -196,6 +198,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (unit != null && !unit.equals(" ")) {
                         viewHolder.tvParamLabel.append("(" + unit + ")");
                     }
+                    viewHolder.tvParamLabel.append(" : ");
                 }
                 
             }

@@ -88,6 +88,26 @@ fun isAllParamsSelected(equipDevice: EquipmentDevice) : Boolean {
     }
     return isAllSelected
 }
+fun isAllLeftParamsSelected(equipDevice: EquipmentDevice) : Boolean {
+    var isAllSelected = true
+    if (equipDevice.registers.isNotEmpty()) {
+        equipDevice.registers.forEachIndexed { index, it ->
+            if ((index%2 == 0) && (!it.parameters[0].isDisplayInUI))
+                isAllSelected = false
+        }
+    }
+    return isAllSelected
+}
+fun isAllRightParamsSelected(equipDevice: EquipmentDevice) : Boolean {
+    var isAllSelected = true
+    if (equipDevice.registers.isNotEmpty()) {
+        equipDevice.registers.forEachIndexed { index, it ->
+            if ((index%2 != 0) && (!it.parameters[0].isDisplayInUI))
+                isAllSelected = false
+        }
+    }
+    return isAllSelected
+}
 
  fun showToast(text: String, context: Context){
      Handler(Looper.getMainLooper()).post(kotlinx.coroutines.Runnable {
@@ -114,14 +134,14 @@ fun parseModbusDataFromString(json: String?): EquipmentDevice? {
 const val MODBUS = "MODBUS"
 const val EQUIP_TYPE = "Equipment Type"
 const val LOADING = "Loading Modbus Models"
-const val SLAVE_ID = "Slave Id"
+const val SLAVE_ID = "Slave ID"
 const val SELECT_ALL = "Select All Parameters"
 const val SET = "SET"
 const val SAVE = "SAVE"
 const val CANCEL = "CANCEL"
 const val PARAMETER = "PARAMETER"
 const val SAME_AS_PARENT = "Same As Parent"
-const val DISPLAY_UI = "DISPLAY UI"
+const val DISPLAY_UI = "DISPLAY IN UI"
 const val SAVING = "Saving Modbus configuration"
 const val SAVED = "Saved all the configuration"
 const val NO_MODEL_DATA_FOUND = "No model data found..!"

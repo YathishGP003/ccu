@@ -26,6 +26,7 @@ import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
+import a75f.io.renatus.modbus.models.RegisterItemForSubEquip
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS_DEVICE_LIST_NOT_FOUND
 import a75f.io.renatus.modbus.util.NO_INTERNET
@@ -34,7 +35,9 @@ import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.getSlaveIds
+import a75f.io.renatus.modbus.util.isAllLeftParamsSelected
 import a75f.io.renatus.modbus.util.isAllParamsSelected
+import a75f.io.renatus.modbus.util.isAllRightParamsSelected
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.modbus.util.showToast
@@ -151,7 +154,9 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             val model = EquipModel()
             model.equipDevice.value = equipmentDevice
 
-            model.selectAllParameters.value = isAllParamsSelected(equipmentDevice)
+           // model.selectAllParameters.value = isAllParamsSelected(equipmentDevice)
+            model.selectAllParameters_Left.value = isAllLeftParamsSelected(equipmentDevice)
+            model.selectAllParameters_Right.value = isAllRightParamsSelected(equipmentDevice)
             model.parameters = getParameters(equipmentDevice)
             val subDeviceList = mutableListOf<MutableState<EquipModel>>()
             equipModel.value = model
@@ -399,6 +404,49 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun onSelectAllLeft(isSelected: Boolean)
+    {
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEachIndexed { index, it ->
+                if(index%2 == 0) {
+                    it.displayInUi.value = isSelected
+                }
+            }
+        }
+    }
+    fun onSelectAllRight(isSelected: Boolean)
+    {
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEachIndexed { index, it ->
+                if(index%2 != 0) {
+                    it.displayInUi.value = isSelected
+                }
+            }
+        }
+    }
+
+    fun onSelectAllRight_subEquip(isSelected: Boolean,subEquip : MutableState<EquipModel>)
+    {
+        if (subEquip.value.parameters.isNotEmpty()) {
+            subEquip.value.parameters.forEachIndexed { index, it ->
+                if(index%2 != 0) {
+                    it.displayInUi.value = isSelected
+                }
+            }
+        }
+    }
+
+    fun onSelectAllLeft_subEquip(isSelected: Boolean,subEquip : MutableState<EquipModel>)
+    {
+        if (subEquip.value.parameters.isNotEmpty()) {
+            subEquip.value.parameters.forEachIndexed { index, it ->
+                if(index%2 != 0) {
+                    it.displayInUi.value = isSelected
+                }
+            }
+        }
+    }
+
     fun updateSelectAll() {
         var isAllSelected = true
         if (equipModel.value.parameters.isNotEmpty()) {
@@ -417,7 +465,55 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
         equipModel.value.selectAllParameters.value = isAllSelected
     }
+    fun updateSelectAll_Both() {
+        var isAllSelected1 = true
+        var isAllSelected2 = true
+        if (equipModel.value.parameters.isNotEmpty()) {
+            equipModel.value.parameters.forEachIndexed { index, it ->
+                if ((index%2 == 0) && (!it.displayInUi.value))
+                    isAllSelected1 = false
+                if ((index%2 != 0) && (!it.displayInUi.value))
+                    isAllSelected2 = false
+            }
+        }
+        else{
+            isAllSelected1 = false
+            isAllSelected2 = false
+        }
+        equipModel.value.selectAllParameters_Left.value = isAllSelected1
+        equipModel.value.selectAllParameters_Right.value = isAllSelected2
+    }
 
+    fun updateSelectAll_subEquipLeft(subEquip: MutableState<EquipModel>, index : Int) {
+        var isAllSelected = true
+        var data = equipModel.value.subEquips[index]
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            data.value.parameters.forEachIndexed { index, it ->
+                if ((index%2 == 0) && (!it.displayInUi.value))
+                    isAllSelected = false
+            }
+        }
+        else isAllSelected = false
+        if (equipModel.value.selectAllParameters_Left_subEquip.size <= index) {
+            equipModel.value.selectAllParameters_Left_subEquip.add(index, RegisterItemForSubEquip())
+        }
+        equipModel.value.selectAllParameters_Left_subEquip[index].displayInUi.value = isAllSelected
+    }
+    fun updateSelectAll_subEquipRight(subEquip: MutableState<EquipModel>, index : Int) {
+        var isAllSelected = true
+        var data = equipModel.value.subEquips[index]
+        if (equipModel.value.subEquips.isNotEmpty()) {
+            data.value.parameters.forEachIndexed { index, it ->
+                if ((index%2 != 0) && (!it.displayInUi.value))
+                    isAllSelected = false
+            }
+        }
+        else isAllSelected = false
+        if (equipModel.value.selectAllParameters_Right_subEquip.size <= index) {
+            equipModel.value.selectAllParameters_Right_subEquip.add(index, RegisterItemForSubEquip())
+        }
+        equipModel.value.selectAllParameters_Right_subEquip[index].displayInUi.value = isAllSelected
+    }
 
     enum class ConfigType {
         BACNET, MODBUS

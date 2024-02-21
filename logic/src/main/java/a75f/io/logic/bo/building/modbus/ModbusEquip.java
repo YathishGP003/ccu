@@ -72,8 +72,9 @@ public class ModbusEquip {
         } else {
             modbusEquipType = modbusEquipTypes.get(0);
         }
-        String modbusName = equipmentInfo.getName();
-        String equipDis = modbusName + "-" + equipmentInfo.getSlaveId();
+        String modbusName = equipmentInfo.getName().split(" ")[0];
+        String equipDisplayName = equipmentInfo.getEquipDisplayName();
+        String equipDis = siteDis + "-"+modbusName+"-"+equipDisplayName+"-"+ equipmentInfo.getSlaveId();
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
@@ -87,7 +88,7 @@ public class ModbusEquip {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
-                    .addMarker("equip").addMarker("modbus")
+                    .addMarker("equip").addMarker("modbus").addMarker("equipDisplayName")
                     .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {

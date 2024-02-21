@@ -2514,7 +2514,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
 
                                 StringBuffer equipString = new StringBuffer();
-                                equipString.append(modbusDevices.get(i).getName());
+                                if(modbusDevices.get(i).usingDmDisplay) {
+                                    equipString.append(modbusDevices.get(i).getName());
+                                } else {
+                                    String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
+                                    for(String equipType : equipTypes){
+                                        equipString.append(StringUtils.capitalize(equipType.trim()));
+                                        equipString.append(" ");
+                                    }
+                                }
                                 tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 if(isLastUpdatedTimeShowable(parentModbusEquip, modbusDevices, i)) {
                                     textViewModule.setVisibility(View.VISIBLE);

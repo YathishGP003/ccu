@@ -26,9 +26,12 @@ public class EquipmentDevice {
     @SerializedName("modbusEquipId (_id)")
     @Expose
     private String modbusEquipIdId;
-    @SerializedName("displayName")
+    @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("displayName")
+    @Expose
+    private String equipDisplayName;
     @SerializedName("description")
     @Expose
     private String description;
@@ -67,6 +70,7 @@ public class EquipmentDevice {
     public String floorRef = null;
     public String deviceEquipRef = null;
     public boolean isPaired;
+    public boolean usingDmDisplay = false;
     public EquipmentDevice(){
 
     }
@@ -85,6 +89,8 @@ public class EquipmentDevice {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getEquipDisplayName() { return equipDisplayName; }
 
     public int getSlaveId() {
         return slaveId;

@@ -32,7 +32,7 @@ fun ToggleButton(
     onEnabled: (Boolean) -> Unit,
 ) {
     Box(
-        modifier = Modifier.wrapContentSize(),
+        modifier = Modifier.wrapContentSize().padding(end = 30.dp),
         contentAlignment = Alignment.Center
     ) {
         Switch(

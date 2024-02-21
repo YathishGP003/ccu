@@ -16,3 +16,6 @@ class RegisterItem{
     val displayInUi = mutableStateOf(false)
 
 }
+class RegisterItemForSubEquip{
+    val displayInUi = mutableStateOf(false)
+}

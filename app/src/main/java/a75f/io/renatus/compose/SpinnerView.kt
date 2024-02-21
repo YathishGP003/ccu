@@ -23,7 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -44,16 +47,18 @@ fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, i
         )) {
         Column ( modifier = Modifier.width(200.dp).clickable(onClick = { expanded.value = true }) ) {
             Row {
-                Text( fontSize = 20.sp, modifier = Modifier.width(150.dp),text = "${selectedItem.value} $unit")
-                val drawableResource = R.drawable.ic_arrow_down
+                Text( fontSize = 20.sp, modifier = Modifier.width(150.dp), fontWeight = FontWeight.Normal,text = "${selectedItem.value} $unit")
 
                 Image(
-                    painter = painterResource(id = drawableResource),
+                    painter = painterResource(id = R.drawable.angle_down_solid),
                     contentDescription = "Custom Icon",
-                    modifier = Modifier.size(24.dp).width(30.dp)
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(PaddingValues(top = 8.dp)),
+                    colorFilter = ColorFilter.tint(ComposeUtil.primaryColor)
                 )
             }
-            Row {  Divider()  }
+            Row {  Divider(modifier = Modifier.width(180.dp))  }
         }
 
 
@@ -61,8 +66,8 @@ fun SpinnerElement(defaultSelection:String, items: List<String>, unit: String, i
             items.forEach { item ->
                 DropdownMenuItem(
                     modifier = Modifier.background(Color.White),
-                    text = {  Row { Text(fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp), text = item)
-                                    Text(fontSize = 20.sp,  text = unit) }
+                    text = {  Row { Text(fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp), fontWeight = FontWeight.Normal, text = item)
+                                    Text(fontSize = 20.sp,fontWeight = FontWeight.Normal, text = unit) }
                            }, onClick = {
                     selectedItem.value = item
                     expanded.value = false

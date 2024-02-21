@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SetPointControlCompose(title: String, state: Boolean,  onEnabled: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.padding(10.dp).width(500.dp)
+        modifier = Modifier.padding(top = 25.dp, bottom = 5.dp, start = 10.dp, end = 10.dp).width(505.dp)
     ) {
         Text(
             modifier = Modifier
@@ -31,7 +31,7 @@ fun SetPointControlCompose(title: String, state: Boolean,  onEnabled: (Boolean) 
                 .width(450.dp),
             style = TextStyle(
                 fontFamily = myFontFamily,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Left,
@@ -45,7 +45,7 @@ fun SetPointControlCompose(title: String, state: Boolean,  onEnabled: (Boolean) 
 @Composable
 fun SetPointConfig(title: String, defaultSelection:String, items: List<String>, unit: String, itemSelected: (String) -> Unit){
     Row(
-        modifier = Modifier.padding(10.dp).width(500.dp)
+        modifier = Modifier.padding(top = 5.dp, bottom = 10.dp, start = 10.dp, end = 20.dp).width(550.dp)
     ) {
         Text(
             modifier = Modifier

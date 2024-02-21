@@ -15,6 +15,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavAcbEquip;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -150,9 +151,9 @@ public class VavAcbProfile extends VavProfile
 
     private boolean getCondensate() {
         if (((VavAcbEquip)vavEquip).getThermistor2Type().readPriorityVal() > 0.0) {
-            return ((VavAcbEquip)vavEquip).getCondensateNC().readHisVal() > 0.0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + nodeAddr + "\"") > 0.0;
         } else {
-            return ((VavAcbEquip)vavEquip).getCondensateNO().readHisVal() > 0.0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + nodeAddr + "\"") > 0.0;
         }
     }
 

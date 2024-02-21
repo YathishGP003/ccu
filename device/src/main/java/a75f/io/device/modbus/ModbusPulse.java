@@ -254,6 +254,8 @@ public class ModbusPulse {
     
         if (Double.isNaN(formattedVal)) {
             formattedVal = 0;
+        } else {
+            formattedVal = Math.round(formattedVal * 100.0) / 100.0;
         }
         return formattedVal;
     }
@@ -269,6 +271,8 @@ public class ModbusPulse {
         
         if (Double.isNaN(formattedVal)) {
             formattedVal = 0;
+        } else {
+            formattedVal = Math.round(formattedVal * 100.0) / 100.0;
         }
         return formattedVal;
     }

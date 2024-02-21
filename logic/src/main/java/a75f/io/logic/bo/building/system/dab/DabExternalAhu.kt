@@ -31,7 +31,7 @@ import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
 import a75f.io.logic.bo.building.system.getConditioningMode
 import a75f.io.logic.bo.building.system.getExternalEquipId
-import a75f.io.logic.bo.building.system.getPreviousConditioningModeWhenOff
+import a75f.io.logic.bo.building.system.getPreviousOperatingModeFromDb
 import a75f.io.logic.bo.building.system.getTunerByDomainName
 import a75f.io.logic.bo.building.system.handleDeHumidityOperation
 import a75f.io.logic.bo.building.system.handleHumidityOperation
@@ -70,6 +70,7 @@ class DabExternalAhu : DabSystemProfile() {
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
 
+    private var previousOperationMode = SystemMode.OFF.ordinal
     override fun getProfileName(): String {
         return if (BuildConfig.BUILD_TYPE == "carrier_prod") {
             CARRIER_PROFILE_NAME
@@ -184,7 +185,7 @@ class DabExternalAhu : DabSystemProfile() {
         updateLoopDirection(dabConfig, systemEquip)
         updateOperatingMode(
             systemEquip,
-            dabSystem.systemState.ordinal.toDouble(),
+            getUpdatedOperatingMode().toDouble(),
             operatingMode,
             externalSpList,
             externalEquipId,
@@ -246,20 +247,34 @@ class DabExternalAhu : DabSystemProfile() {
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
-        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} heat ${basicConfig.heatingLoop}")
+        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} " +
+                        "heat ${basicConfig.heatingLoop} Mode $previousOperationMode")
         loopRunningDirection = when(dabSystem.systemState) {
-            SystemController.State.COOLING -> TempDirection.COOLING
-            SystemController.State.HEATING -> TempDirection.HEATING
+            SystemController.State.COOLING -> {
+                previousOperationMode = SystemController.State.COOLING.ordinal
+                TempDirection.COOLING
+            }
+            SystemController.State.HEATING -> {
+                previousOperationMode = SystemController.State.HEATING.ordinal
+                TempDirection.HEATING
+            }
             else -> {
-                val previousState = getPreviousConditioningModeWhenOff(systemEquip, hayStack)
-                Domain.writeHisValByDomain(operatingMode, previousState.toDouble())
-                if (previousState == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+                previousOperationMode = if (previousOperationMode == 0) getPreviousOperatingModeFromDb(systemEquip, hayStack) else previousOperationMode
+                if (previousOperationMode == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
             }
         }
 
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
         logIt("Changed direction $loopRunningDirection ")
+    }
+
+    private fun getUpdatedOperatingMode() : Int{
+        return when(dabSystem.systemState) {
+            SystemController.State.COOLING -> dabSystem.systemState.ordinal
+            SystemController.State.HEATING -> dabSystem.systemState.ordinal
+            else -> previousOperationMode
+        }
     }
 
     private fun getBasicDabConfigData() =

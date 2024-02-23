@@ -97,7 +97,9 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }*/
 
     private fun requireId() {
-        if (id.isEmpty()) {
+        // If a query returned null before, we want to search again for the point id next time (rather than accepting the null id)
+        // This matters for dynamic sensor points that could be queried before the point is actually created
+        if (id.isEmpty() || id.equals("null")) {
             id = domainName.readPoint(equipRef)["id"].toString()
         }
         if (id.isEmpty()) {
@@ -152,7 +154,9 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
 open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (domainName) {
     var id = ""
     private fun requireId() {
-        if (id.isEmpty()) {
+        // If a query returned null before, we want to search again for the point id next time (rather than accepting the null id)
+        // This matters for dynamic sensor points that could be queried before the point is actually created
+        if (id.isEmpty() || id.equals("null")) {
             id = domainName.readPhysicalPoint(deviceRef)["id"].toString()
         }
         if (id.isEmpty()) {

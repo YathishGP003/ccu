@@ -95,7 +95,6 @@ private fun getEquipByMap(equipMap: HashMap<Any, Any>, parentEquipRef: String?):
     equipDevice.isPaired = (equipDevice.deviceEquipRef == null)
     equipDevice.slaveId = equip.group.toInt()
     equipDevice.deviceEquipRef = equip.id
-    equipDevice.usingDmDisplay = equipMap.containsKey("equipDisplayName")
     return equipDevice
 }
 

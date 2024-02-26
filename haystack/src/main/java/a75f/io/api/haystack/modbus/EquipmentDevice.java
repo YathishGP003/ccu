@@ -70,7 +70,6 @@ public class EquipmentDevice {
     public String floorRef = null;
     public String deviceEquipRef = null;
     public boolean isPaired;
-    public boolean usingDmDisplay = false;
     public EquipmentDevice(){
 
     }

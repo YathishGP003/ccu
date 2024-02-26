@@ -2515,9 +2515,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                                 StringBuffer equipString = new StringBuffer();
                                 EquipmentDevice modbusDevice = modbusDevices.get(i);
-                                if(modbusDevices.get(i).usingDmDisplay) {
-                                    int equipNameIndex = modbusDevice.getName().lastIndexOf('-') + 1;
-                                    equipString.append(modbusDevice.getName().substring(equipNameIndex));
+                                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+                                String displayName = modbusDevice.getName().substring(displayIndex);
+                                if(!modbusDevice.getEquipType().contains(displayName)) {
+                                    equipString.append(displayName);
                                 } else {
                                     String[] equipTypes = modbusDevice.getEquipType().split(",");
                                     for(String equipType : equipTypes){

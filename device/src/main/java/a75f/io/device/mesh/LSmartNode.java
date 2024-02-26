@@ -662,25 +662,6 @@ public class LSmartNode
     {
         return (short) ((float) scale * ((float) analog / 100.0f));
     }
-    
-    
-    public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls,
-                                                    String port)
-    {
-        switch (port)
-        {
-            case ANALOG_OUT_ONE:
-                return controls.analogOut1;
-            case ANALOG_OUT_TWO:
-                return controls.analogOut2;
-            case RELAY_ONE:
-                return controls.digitalOut1;
-            case RELAY_TWO:
-                return controls.digitalOut2;
-            default:
-                return null;
-        }
-    }
 
     public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls, RawPoint p) {
         String port = p.getPort();
@@ -853,7 +834,7 @@ public class LSmartNode
                         hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                    Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p.getPort());
+                    Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p);
                     if(smartNodePort != null)
                         smartNodePort.set(mappedVal);
 

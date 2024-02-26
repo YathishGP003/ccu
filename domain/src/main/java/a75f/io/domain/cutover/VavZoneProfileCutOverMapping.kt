@@ -41,6 +41,9 @@ object VavZoneProfileCutOverMapping {
         "voc" to "zoneVoc",
         "pressure" to "pressureSensor",
         "occupancyDetection" to "occupancyDetection",
+        "uvi" to "zoneUvi",
+        "occupancySensor" to "zoneOccupancy",
+        "illuminance" to "zoneIlluminance",
 
 
         "damperPos" to "damperCmd",

@@ -391,7 +391,11 @@ public class HSUtil
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.ENABLE)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.VAV)));
+        if (pointEntity.containsKey("domainName")) {
+            return pointEntity.get("domainName").equals("enableCFMControl");
+        } else {
+            return ((pointEntity.containsKey(Tags.ENABLE)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.VAV)));
+        }
     }
 
     public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {

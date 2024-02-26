@@ -232,7 +232,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                             0.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
                                 Spacer(modifier=Modifier.width(195.dp))
-                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             1.0->{
                                 HeaderTextView(text = "Analog Out 2",padding=0)
@@ -257,17 +257,17 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                             5.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
                                 Spacer(modifier=Modifier.width(195.dp))
-                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             6.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
                                 Spacer(modifier=Modifier.width(195.dp))
-                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             7.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
                                 Spacer(modifier=Modifier.width(195.dp))
-                                LabelTextView(text = "Stage Electric Heater", widthValue = 250)
+                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                         }
                     }

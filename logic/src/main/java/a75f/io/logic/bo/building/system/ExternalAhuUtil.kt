@@ -33,8 +33,6 @@ import a75f.io.domain.api.DomainName.systemDCVDamperPosMinimum
 import a75f.io.domain.api.DomainName.systemHeatingSATMaximum
 import a75f.io.domain.api.DomainName.systemHeatingSATMinimum
 import a75f.io.domain.api.DomainName.systemOccupancyMode
-import a75f.io.domain.api.DomainName.systemSATMaximum
-import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.systemtargetMaxInsideHumidty
@@ -795,7 +793,7 @@ enum class TempDirection {
     COOLING, HEATING
 }
 
-fun getPreviousConditioningModeWhenOff(systemEquip: Equip, hayStack: CCUHsApi): Int {
+fun getPreviousOperatingModeFromDb(systemEquip: Equip, hayStack: CCUHsApi): Int {
     //When only heating or cooling is available, we should move in that direction
     val currentMode = Domain.getHisByDomain(systemEquip, conditioningMode)
     CcuLog.d(L.TAG_CCU_SYSTEM, "Current conditioning mode: $currentMode")
@@ -808,13 +806,13 @@ fun getPreviousConditioningModeWhenOff(systemEquip: Equip, hayStack: CCUHsApi): 
     val point = Domain.readPoint(operatingMode)
     val hisItems = hayStack.getHisItems(point["id"].toString(), 0, 2)
     if (hisItems.isEmpty()) {
-        return 0
+        return SystemController.State.COOLING.ordinal
     }
     CcuLog.d(L.TAG_CCU_SYSTEM, "getPreviousOperatingMode: ${hisItems[0]} ${hisItems[1]}")
     return if (hisItems.size > 1) {
-        maxOf( hisItems[1].`val`.toInt(), 1)
+        maxOf( hisItems[1].`val`.toInt(), SystemController.State.COOLING.ordinal)
     } else {
-        maxOf(hisItems[0].`val`.toInt(), 1)
+        maxOf(hisItems[0].`val`.toInt(), SystemController.State.COOLING.ordinal)
     }
 }
 fun logIt(msg: String) {

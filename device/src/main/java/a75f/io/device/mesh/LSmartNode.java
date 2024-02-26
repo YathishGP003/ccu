@@ -719,7 +719,7 @@ public class LSmartNode
     
     public static double getDesiredTemp(short node)
     {
-        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and (average or avg) and sp and group == \""+node+"\"");
         if (point == null || point.size() == 0) {
             Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
             return 0;

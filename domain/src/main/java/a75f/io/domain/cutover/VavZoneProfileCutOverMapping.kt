@@ -23,9 +23,7 @@ object VavZoneProfileCutOverMapping {
         "zonePrioritySpread" to "vavZonePrioritySpread",
         "zoneDeadTime" to "zoneDeadTime",
         "zonePriority" to "zonePriority",
-        "coolingAirflowTemp" to "coolingAirflowTemp",
         "abnormalCurTempRiseTrigger" to "abnormalCurTempRiseTrigger",
-        "heatingAirflowTemp" to "heatingAirflowTemp",
         "forcedOccupiedTime" to "forcedOccupiedTime",
         "autoAwayTime" to "autoAwayTime",
         "autoAwaySetback" to "autoAwaySetback",
@@ -44,7 +42,7 @@ object VavZoneProfileCutOverMapping {
         "uvi" to "zoneUvi",
         "occupancySensor" to "zoneOccupancy",
         "illuminance" to "zoneIlluminance",
-
+        "sound" to "zoneSound",
 
         "damperPos" to "damperCmd",
         "normalizedDamperPos" to "normalizedDamperCmd",

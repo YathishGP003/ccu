@@ -140,10 +140,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val newDamperSize = getDamperSizeEnum(vavEquip.damperSize.readDefaultVal())
             vavEquip.damperSize.writeDefaultVal(newDamperSize)
 
-            // reheatType now starts at 0 instead of -1
-            val newReheatType = vavEquip.reheatType.readDefaultVal() + 1.0
-            vavEquip.reheatType.writeDefaultVal(newReheatType)
-
             // temperature offset is now a literal (was multiplied by 10 before)
             val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
             vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)

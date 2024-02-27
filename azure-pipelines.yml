@@ -98,3 +98,23 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/carrier_prod/'
       ArtifactName: Carrier_prodApk
+
+- job: Job_5
+  displayName: Build APK Airoverse
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'       
+  - task: Gradle@2
+    displayName: 'gradlew assembleAiroverse_prod'
+    inputs:
+      tasks: assembleAiroverse_prod
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Airoverse_prodApk'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/airoverse_prod/'
+      ArtifactName: Airoverse_prodApk

@@ -89,7 +89,6 @@ public class ModbusEquip {
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
                     .addMarker("equip").addMarker("modbus")
-//                .addMarker("equipDisplayName")
                     .addTag("version", HStr.make(modelVersion))
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
         if (parentEquipId != null) {

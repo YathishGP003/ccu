@@ -4,19 +4,24 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
-import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -144,6 +149,34 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
             vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
 
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = when {
+                it.containsKey("series") -> ProfileType.VAV_SERIES_FAN
+                it.containsKey("parallel") -> ProfileType.VAV_PARALLEL_FAN
+                else -> ProfileType.VAV_REHEAT
+            }
+
+            val profileConfiguration = VavProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["zoneRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            deviceBuilder.doCutOverMigration(
+                device.get("id").toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
         }
     }
 

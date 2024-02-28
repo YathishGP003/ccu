@@ -61,7 +61,17 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setFloorRef(configuration.floorRef)
             .setAddr(configuration.nodeAddress)
             .setSiteRef(siteRef)
+
         modelDef.tags.forEach{ deviceBuilder.addMarker(it.name)}
+
+        deviceBuilder.addTag("sourceModel", HStr.make(modelDef.id))
+        deviceBuilder.addTag(
+            "sourceModelVersion", HStr.make(
+                "${modelDef.version?.major}" +
+                        ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+            )
+        )
+
         return deviceBuilder.build()
     }
 

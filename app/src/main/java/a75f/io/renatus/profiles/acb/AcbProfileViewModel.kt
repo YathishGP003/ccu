@@ -203,7 +203,7 @@ class AcbProfileViewModel : ViewModel() {
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
-            updateEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
+            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             acbProfile.init()
             setOutputTypes(profileConfiguration)
             setScheduleType(profileConfiguration)

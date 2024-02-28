@@ -160,6 +160,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val device = Device.Builder().setHDict(deviceDict).build()
         device.domainName = modelDef.domainName
         device.displayName = deviceDis
+        device.tags["sourceModel"] = HStr.make(modelDef.id)
+        device.tags["sourceModelVersion"] = HStr.make(
+            "${modelDef.version?.major}" +
+                    ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+        )
         hayStack.updateDevice(device, device.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Device ${device.addr}-${device.domainName}")
     }

@@ -18,6 +18,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import org.projecthaystack.HStr
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -287,11 +288,17 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val equip = Equip.Builder().setHDict(equipDict).build()
         equip.domainName = modelDef.domainName
         equip.displayName = equipDis
+        equip.tags["sourceModel"] = HStr.make(modelDef.id)
+        equip.tags["sourceModelVersion"] = HStr.make(
+            "${modelDef.version?.major}" +
+                    ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+        )
         hayStack.updateEquip(equip, equip.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }
     fun doCutOverMigration(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis : String,
                            mapping : Map<String, String>) {
+        CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
         var equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         val site = hayStack.site
@@ -342,13 +349,13 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             }
         }
 
-        CcuLog.e(
+        CcuLog.i(
             Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
                     " Model: ${modelDef.points.size} Map: ${mapping.size} ")
-        CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
+        CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
 
         updateEquip(equipRef, modelDef, equipDis)
-        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
+        CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
 
     private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{

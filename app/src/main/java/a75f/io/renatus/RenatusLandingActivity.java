@@ -632,6 +632,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
             powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
             powerbylogo.setVisibility(View.VISIBLE);
+        }else if (CCUUiUtil.isAiroverseThemeEnabled(this)) {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_brand_logo, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
+            powerbylogo.setVisibility(View.VISIBLE);
         }else {
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));
             powerbylogo.setVisibility(View.GONE);

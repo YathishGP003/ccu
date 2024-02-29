@@ -198,6 +198,11 @@ public class CCUUiUtil {
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
     }
 
+    public static boolean isAiroverseThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals("airoverse_prod") || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("isAiroverseEnabled", false);
+    }
+
     public static boolean isValidMacAddress(String ip) {
         //String regex = "^(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})$";
         String regex = "^[a-fA-F0-9]{2}(.[a-fA-F0-9]{2}){5}$";

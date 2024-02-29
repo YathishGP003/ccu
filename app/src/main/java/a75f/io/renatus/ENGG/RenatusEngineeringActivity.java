@@ -63,6 +63,8 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.d3, null));
 		else if (CCUUiUtil.isCarrierThemeEnabled(this))
 			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
+		else if (CCUUiUtil.isAiroverseThemeEnabled(this))
+			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_brand_logo, null));
 		else
 			logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));
 

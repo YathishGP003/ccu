@@ -112,6 +112,7 @@ public class RawPoint extends Entity
     {
         return port;
     }
+    public void setPort(String port) { this.port = port; }
     public String getType()
     {
         return type;

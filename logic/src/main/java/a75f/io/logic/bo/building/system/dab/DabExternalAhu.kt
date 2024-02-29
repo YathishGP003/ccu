@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.system.dab
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName.coolingLoopOutput
@@ -25,7 +24,6 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.BasicConfig
 import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.SystemMode
-import a75f.io.logic.bo.building.system.SystemState
 import a75f.io.logic.bo.building.system.TempDirection
 import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
@@ -210,7 +208,15 @@ class DabExternalAhu : DabSystemProfile() {
             dabConfig.coolingLoop.toDouble(),
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList, dabConfig)
+        setOccupancyMode(
+            systemEquip,
+            externalEquipId,
+            occupancyMode,
+            hayStack,
+            externalSpList,
+            dabConfig,
+            conditioningMode
+        )
         operateDamper(
             systemEquip,
             dabConfig.weightedAverageCO2,

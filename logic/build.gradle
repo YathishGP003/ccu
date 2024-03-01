@@ -170,8 +170,8 @@ android {
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.airoverse.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.airoverse.service.75f.io/api/v1/\"'
-            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.airoverse.service.75f.io//version/all\"'
-            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.airoverse.service.75f.io//version/getDetails\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/getDetails\"'
 
             minifyEnabled false
         }

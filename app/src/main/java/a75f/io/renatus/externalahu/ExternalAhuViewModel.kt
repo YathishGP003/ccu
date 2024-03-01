@@ -11,7 +11,6 @@ import a75f.io.domain.service.ResponseCallback
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames.DAB_EXTERNAL_AHU_CONTROLLER
 import a75f.io.domain.util.ModelNames.VAV_EXTERNAL_AHU_CONTROLLER
-import a75f.io.domain.util.ModelSource.Companion.getModelByProfileName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -36,7 +35,6 @@ import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.getSlaveIds
 import a75f.io.renatus.modbus.util.isAllLeftParamsSelected
-import a75f.io.renatus.modbus.util.isAllParamsSelected
 import a75f.io.renatus.modbus.util.isAllRightParamsSelected
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
@@ -122,8 +120,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             }
             slaveIdList.value = getSlaveIds(true)
             childSlaveIdList.value = getSlaveIds(false)
-            if (!equipModel.value.isDevicePaired)
-                equipModel.value.slaveId.value = 1
+            if (!equipModel.value.isDevicePaired) equipModel.value.slaveId.value = 1
 
             getModbusConfiguration(profileType)
         } catch (e: Exception) {
@@ -140,7 +137,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         L.ccu().systemProfile.profileType == ProfileType.vavExternalAHUController
 
     private fun getModbusConfiguration(profileType: ProfileType) {
-        CcuLog.i(TAG, "getModbusConfiguration")
         val modbusEquip =
             CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
 
@@ -153,8 +149,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
             val equipmentDevice = buildModbusModel(selectedSlaveId.toInt())
             val model = EquipModel()
             model.equipDevice.value = equipmentDevice
-
-           // model.selectAllParameters.value = isAllParamsSelected(equipmentDevice)
             model.selectAllParameters_Left.value = isAllLeftParamsSelected(equipmentDevice)
             model.selectAllParameters_Right.value = isAllRightParamsSelected(equipmentDevice)
             model.parameters = getParameters(equipmentDevice)
@@ -171,17 +165,14 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     subDeviceList.add(mutableStateOf(subEquip))
                 }
             }
-            if (subDeviceList.isNotEmpty())
-                equipModel.value.subEquips = subDeviceList
-            else
-                equipModel.value.subEquips = mutableListOf()
+            if (subDeviceList.isNotEmpty()) equipModel.value.subEquips = subDeviceList
+            else equipModel.value.subEquips = mutableListOf()
         }
     }
 
     private fun loadModel() {
-        CcuLog.i(TAG, "loadModel")
-        val def = if (profileType == ProfileType.dabExternalAHUController)
-            ModelLoader.getDabExternalAhuModel() else ModelLoader.getVavExternalAhuModel()
+        val def =
+            if (profileType == ProfileType.dabExternalAHUController) ModelLoader.getDabExternalAhuModel() else ModelLoader.getVavExternalAhuModel()
         if (def != null) {
             profileModelDefinition = def as SeventyFiveFProfileDirective
         }
@@ -200,9 +191,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         configModel.value.occupancyMode = config.occupancyMode.enabled
         configModel.value.humidifierControl = config.humidifierControl.enabled
         configModel.value.dehumidifierControl = config.dehumidifierControl.enabled
-
-        //configModel.value.satMin = config.satMin.currentVal.toString()
-        //configModel.value.satMax = config.satMax.currentVal.toString()
         configModel.value.heatingMinSp = config.heatingMinSp.currentVal.toString()
         configModel.value.heatingMaxSp = config.heatingMaxSp.currentVal.toString()
         configModel.value.coolingMinSp = config.coolingMinSp.currentVal.toString()
@@ -217,49 +205,41 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun saveConfiguration() {
-        CcuLog.i(TAG, "saveConfiguration")
         if (checkValidConfiguration()) {
-            RxjavaUtil.executeBackgroundTask(
-                {
-                    ProgressDialogUtils.showProgressDialog(
-                        context,
-                        "Saving Profile Configuration..."
-                    )
-                },
-                {
-                    if (L.ccu().systemProfile != null) {
-                        if (profileType != L.ccu().systemProfile.profileType ) {
-                            L.ccu().systemProfile!!.deleteSystemEquip()
-                            L.ccu().systemProfile = null
-                            addEquip()
-                            saveExternalEquip()
-                        } else {
-                            updateSystemProfile()
-                        }
-                    } else {
+            RxjavaUtil.executeBackgroundTask({
+                ProgressDialogUtils.showProgressDialog(
+                    context, "Saving Profile Configuration..."
+                )
+            }, {
+                if (L.ccu().systemProfile != null) {
+                    if (profileType != L.ccu().systemProfile.profileType) {
+                        L.ccu().systemProfile!!.deleteSystemEquip()
+                        L.ccu().systemProfile = null
                         addEquip()
                         saveExternalEquip()
+                    } else {
+                        updateSystemProfile()
                     }
-                },
-
-                {
-                    L.saveCCUState()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CCUHsApi.getInstance().syncEntityTree()
-                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                    ProgressDialogUtils.hideProgressDialog()
-                    equipModel.value.isDevicePaired = true
-                    showToast("Configuration saved successfully", context)
+                } else {
+                    addEquip()
+                    saveExternalEquip()
                 }
-            )
+            }, {
+                L.saveCCUState()
+                CCUHsApi.getInstance().setCcuReady()
+                CCUHsApi.getInstance().syncEntityTree()
+                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                ProgressDialogUtils.hideProgressDialog()
+                equipModel.value.isDevicePaired = true
+                showToast("Configuration saved successfully", context)
+            })
         }
     }
 
 
     private fun checkValidConfiguration(): Boolean {
         //TODO check validations for bacnet if configured as bacnet
-        if (configType.value == ConfigType.MODBUS && (!isValidConfiguration()))
-            return false
+        if (configType.value == ConfigType.MODBUS && (!isValidConfiguration())) return false
         if (configType.value == ConfigType.BACNET) {
             showToast("Bacnet configuration is not available", context)
             return false
@@ -269,7 +249,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun saveExternalEquip() {
         if (configType.value == ConfigType.MODBUS) {
-            CcuLog.i(TAG, "saveModbusConfiguration")
             populateSlaveId()
             CCUHsApi.getInstance().resetCcuReady()
             setUpsModbusProfile(profileType)
@@ -306,18 +285,16 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun isValidConfiguration(): Boolean {
-        CcuLog.i(TAG, "isValidConfiguration")
         if (equipModel.value.parameters.isEmpty()) {
             showToast("Please select modbus device", context)
             return false
         }
-        if (equipModel.value.isDevicePaired)
-            return true // If it is paired then will not allow the use to to edit slave id
+        if (equipModel.value.isDevicePaired) return true // If it is paired then will not allow the use to to edit slave id
 
         if (L.isModbusSlaveIdExists(equipModel.value.slaveId.value.toShort())) {
             showToast(
-                "Slave Id " + equipModel.value.slaveId.value + " already exists, choose " +
-                        "another slave id to proceed", context
+                "Slave Id " + equipModel.value.slaveId.value + " already exists, choose " + "another slave id to proceed",
+                context
             )
             return false
         }
@@ -325,7 +302,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun populateSlaveId() {
-        CcuLog.i(TAG, "populateSlaveId")
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         equipModel.value.parameters.forEach {
             it.param.value.isDisplayInUI = it.displayInUi.value
@@ -339,25 +315,27 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun updateSystemProfile() {
-        CcuLog.i(TAG, "updateSystemProfile")
         val profileEquipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
         profileEquipBuilder.updateEquipAndPoints(
-            configModel.value.getConfiguration(profileType), profileModelDefinition,
-            CCUHsApi.getInstance().site!!.id, CCUHsApi.getInstance().siteName+"-"+profileModelDefinition.name,
+            configModel.value.getConfiguration(profileType),
+            profileModelDefinition,
+            CCUHsApi.getInstance().site!!.id,
+            CCUHsApi.getInstance().siteName + "-" + profileModelDefinition.name,
             isReconfiguration = true
         )
         saveExternalEquip()
     }
 
     private fun addEquip() {
-        CcuLog.i(TAG, "addEquip")
-        systemProfile = if (profileType == ProfileType.dabExternalAHUController)
-            DabExternalAhu()
-        else
-            VavExternalAhu()
-        addSystemEquip(configModel.value.getConfiguration(profileType), profileModelDefinition, systemProfile as SystemProfile)
+        systemProfile = if (profileType == ProfileType.dabExternalAHUController) DabExternalAhu()
+        else VavExternalAhu()
+        addSystemEquip(
+            configModel.value.getConfiguration(profileType),
+            profileModelDefinition,
+            systemProfile as SystemProfile
+        )
         L.ccu().systemProfile = systemProfile
-        systemProfile?.setOutsideTempCoolingLockoutEnabled( hayStack, L.ccu().oaoProfile != null)
+        systemProfile?.setOutsideTempCoolingLockoutEnabled(hayStack, L.ccu().oaoProfile != null)
         DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance())
     }
 
@@ -378,105 +356,62 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun getModelIdByName(name: String): String {
-        CcuLog.i(TAG, "getModelIdByName $name")
         return deviceModelList.find { it.name == name }!!.id
     }
 
     private fun getVersionByID(id: String): String {
-        CcuLog.i(TAG, "getVersionByID $id")
         return deviceModelList.find { it.id == id }!!.version
     }
 
-    fun onSelectAll(isSelected: Boolean) {
-        CcuLog.i(TAG, "onSelectAll $isSelected")
-        if (equipModel.value.parameters.isNotEmpty()) {
-            equipModel.value.parameters.forEach {
-                it.displayInUi.value = isSelected
-            }
-            if (equipModel.value.subEquips.isNotEmpty()) {
-                equipModel.value.subEquips.forEach { subEquip ->
-                    subEquip.value.selectAllParameters.value = isSelected
-                    subEquip.value.parameters.forEach {
-                        it.displayInUi.value = isSelected
-                    }
-                }
-            }
-        }
-    }
-
-    fun onSelectAllLeft(isSelected: Boolean)
-    {
+    fun onSelectAllLeft(isSelected: Boolean) {
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEachIndexed { index, it ->
-                if(index%2 == 0) {
+                if (index % 2 == 0) {
                     it.displayInUi.value = isSelected
                 }
             }
         }
     }
-    fun onSelectAllRight(isSelected: Boolean)
-    {
+
+    fun onSelectAllRight(isSelected: Boolean) {
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEachIndexed { index, it ->
-                if(index%2 != 0) {
+                if (index % 2 != 0) {
                     it.displayInUi.value = isSelected
                 }
             }
         }
     }
 
-    fun onSelectAllRight_subEquip(isSelected: Boolean,subEquip : MutableState<EquipModel>)
-    {
+    fun onSelectAllRightSubEquip(isSelected: Boolean, subEquip: MutableState<EquipModel>) {
         if (subEquip.value.parameters.isNotEmpty()) {
             subEquip.value.parameters.forEachIndexed { index, it ->
-                if(index%2 != 0) {
+                if (index % 2 != 0) {
                     it.displayInUi.value = isSelected
                 }
             }
         }
     }
 
-    fun onSelectAllLeft_subEquip(isSelected: Boolean,subEquip : MutableState<EquipModel>)
-    {
+    fun onSelectAllLeftSubEquip(isSelected: Boolean, subEquip: MutableState<EquipModel>) {
         if (subEquip.value.parameters.isNotEmpty()) {
             subEquip.value.parameters.forEachIndexed { index, it ->
-                if(index%2 != 0) {
+                if (index % 2 != 0) {
                     it.displayInUi.value = isSelected
                 }
             }
         }
     }
 
-    fun updateSelectAll() {
-        var isAllSelected = true
-        if (equipModel.value.parameters.isNotEmpty()) {
-            equipModel.value.parameters.forEach {
-                if (!it.displayInUi.value)
-                    isAllSelected = false
-            }
-        }
-        if (equipModel.value.subEquips.isNotEmpty()) {
-            equipModel.value.subEquips.forEach { subEquip ->
-                subEquip.value.parameters.forEach {
-                    if (!it.displayInUi.value)
-                        isAllSelected = false
-                }
-            }
-        }
-        equipModel.value.selectAllParameters.value = isAllSelected
-    }
-    fun updateSelectAll_Both() {
+    fun updateSelectAllBoth() {
         var isAllSelected1 = true
         var isAllSelected2 = true
         if (equipModel.value.parameters.isNotEmpty()) {
             equipModel.value.parameters.forEachIndexed { index, it ->
-                if ((index%2 == 0) && (!it.displayInUi.value))
-                    isAllSelected1 = false
-                if ((index%2 != 0) && (!it.displayInUi.value))
-                    isAllSelected2 = false
+                if ((index % 2 == 0) && (!it.displayInUi.value)) isAllSelected1 = false
+                if ((index % 2 != 0) && (!it.displayInUi.value)) isAllSelected2 = false
             }
-        }
-        else{
+        } else {
             isAllSelected1 = false
             isAllSelected2 = false
         }
@@ -484,35 +419,38 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         equipModel.value.selectAllParameters_Right.value = isAllSelected2
     }
 
-    fun updateSelectAll_subEquipLeft(subEquip: MutableState<EquipModel>, index : Int) {
+    fun updateSelectAllSubEquipLeft(indexValue: Int) {
         var isAllSelected = true
-        var data = equipModel.value.subEquips[index]
+        val data = equipModel.value.subEquips[indexValue]
         if (equipModel.value.subEquips.isNotEmpty()) {
             data.value.parameters.forEachIndexed { index, it ->
-                if ((index%2 == 0) && (!it.displayInUi.value))
-                    isAllSelected = false
+                if ((index % 2 == 0) && (!it.displayInUi.value)) isAllSelected = false
             }
+        } else isAllSelected = false
+        if (equipModel.value.selectAllParameters_Left_subEquip.size <= indexValue) {
+            equipModel.value.selectAllParameters_Left_subEquip.add(
+                indexValue, RegisterItemForSubEquip()
+            )
         }
-        else isAllSelected = false
-        if (equipModel.value.selectAllParameters_Left_subEquip.size <= index) {
-            equipModel.value.selectAllParameters_Left_subEquip.add(index, RegisterItemForSubEquip())
-        }
-        equipModel.value.selectAllParameters_Left_subEquip[index].displayInUi.value = isAllSelected
+        equipModel.value.selectAllParameters_Left_subEquip[indexValue].displayInUi.value =
+            isAllSelected
     }
-    fun updateSelectAll_subEquipRight(subEquip: MutableState<EquipModel>, index : Int) {
+
+    fun updateSelectAllSubEquipRight(indexValue: Int) {
         var isAllSelected = true
-        var data = equipModel.value.subEquips[index]
+        val data = equipModel.value.subEquips[indexValue]
         if (equipModel.value.subEquips.isNotEmpty()) {
             data.value.parameters.forEachIndexed { index, it ->
-                if ((index%2 != 0) && (!it.displayInUi.value))
-                    isAllSelected = false
+                if ((index % 2 != 0) && (!it.displayInUi.value)) isAllSelected = false
             }
+        } else isAllSelected = false
+        if (equipModel.value.selectAllParameters_Right_subEquip.size <= indexValue) {
+            equipModel.value.selectAllParameters_Right_subEquip.add(
+                indexValue, RegisterItemForSubEquip()
+            )
         }
-        else isAllSelected = false
-        if (equipModel.value.selectAllParameters_Right_subEquip.size <= index) {
-            equipModel.value.selectAllParameters_Right_subEquip.add(index, RegisterItemForSubEquip())
-        }
-        equipModel.value.selectAllParameters_Right_subEquip[index].displayInUi.value = isAllSelected
+        equipModel.value.selectAllParameters_Right_subEquip[indexValue].displayInUi.value =
+            isAllSelected
     }
 
     enum class ConfigType {
@@ -617,6 +555,5 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         L.ccu().zoneProfiles.add(modbusProfile)
         L.saveCCUState()
     }
-
 
 }

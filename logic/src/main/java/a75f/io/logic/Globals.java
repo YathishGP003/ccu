@@ -237,7 +237,6 @@ public class Globals {
     }
 
     public void startTimerTask(){
-       // CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
 
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);

@@ -114,6 +114,8 @@ public class DabProfile extends ZoneProfile
         double setTempHeating = dabEquip.getDesiredTempHeating();
         double roomTemp = dabEquip.getCurrentTemp();
         GenericPIController damperOpController = dabEquip.damperController;
+
+        dabEquip.refreshPITuners();
     
         co2Loop = dabEquip.getCo2Loop();
         vocLoop = dabEquip.getVOCLoop();
@@ -160,6 +162,9 @@ public class DabProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "DAB-"+dabEquip.nodeAddr+" : roomTemp " + roomTemp
                 + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating
                 + " satConditioning "+satConditioning);
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + dabEquip.damperController.getProportionalGain() + ", integralGain " + dabEquip.damperController.getIntegralGain() +
+                ", proportionalSpread " + dabEquip.damperController.getMaxAllowedError() + ", integralMaxTimeout " + dabEquip.damperController.getIntegralMaxTimeout());
+
         damperOpController.dump();
 
         //Loop Output varies from 0-100% such that, it is 50% at 0 error, 0% at maxNegative error, 100% at maxPositive
@@ -226,7 +231,10 @@ public class DabProfile extends ZoneProfile
         boolean  enabledIAQControl = dabEquip.getConfigNumVal("enable and iaq") > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
-    
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)) {

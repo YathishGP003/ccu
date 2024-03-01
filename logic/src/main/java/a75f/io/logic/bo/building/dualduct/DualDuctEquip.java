@@ -99,7 +99,37 @@ public class DualDuctEquip {
         }
         
     }
-    
+
+    public void refreshPITuners() {
+        if (equipRef != null) {
+            double maxAllowedError = TunerUtil.readTunerValByQuery("dualDuct and pspread and equipRef == \"" + equipRef + "\"");
+            double proportialGain = TunerUtil.readTunerValByQuery("dualDuct and pgain and equipRef == \"" + equipRef + "\"");
+            double integralGain = TunerUtil.readTunerValByQuery("dualDuct and igain and equipRef == \"" + equipRef + "\"");
+            double integralTimeout = TunerUtil.readTunerValByQuery("dualDuct and itimeout and equipRef == \"" + equipRef + "\"");
+
+            coolingDamperController.setMaxAllowedError(maxAllowedError);
+            coolingDamperController.setProportionalGain(proportialGain);
+            coolingDamperController.setIntegralGain(integralGain);
+            coolingDamperController.setIntegralMaxTimeout((int)integralTimeout);
+
+            heatingDamperController.setMaxAllowedError(maxAllowedError);
+            heatingDamperController.setProportionalGain(proportialGain);
+            heatingDamperController.setIntegralGain(integralGain);
+            heatingDamperController.setIntegralMaxTimeout((int)integralTimeout);
+
+            co2Target = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and co2 and target and equipRef == \""+equipRef+"\"");
+            co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and co2 and threshold and equipRef == \""+equipRef+"\"");
+            vocTarget = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and voc and target and equipRef == \""+equipRef+"\"");
+            vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and voc and threshold and equipRef == \""+equipRef+"\"");
+
+            co2Loop.setCo2Target(co2Target);
+            co2Loop.setCo2Threshold(co2Threshold);
+
+            vocLoop.setVOCTarget(vocTarget);
+            vocLoop.setVOCThreshold(vocThreshold);
+        }
+    }
+
     String getId(){
         return equipRef;
     }

@@ -112,7 +112,7 @@ public class Globals {
     }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int TASK_SEPARATION = 15;
+    private static final int TASK_SEPARATION = 30;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
 
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;

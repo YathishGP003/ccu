@@ -73,6 +73,11 @@ android {
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-6bf5248c-4d66-4cdd-bb25-d9837a85fb3e\"'
             buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-f4c98952-2829-4ed8-9805-fb7fd2d6bcda\"'
         }
+        airoverse_prod {
+            minifyEnabled false
+            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-c229e29b-b568-4ee6-9298-c384631f501b\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-fc6c85e6-952a-459d-a1af-d442f29ca271\"'
+        }
     }
 
     android.variantFilter { variant ->

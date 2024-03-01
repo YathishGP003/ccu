@@ -130,6 +130,13 @@ android {
             versionNameSuffix "_" + 'daikin_prod' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_daikin",appicon:"@drawable/daikin",roundicon:"@drawable/daikin"]
         }
+        airoverse_prod {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            versionNameSuffix "_" + 'airoverse_prod' + "_" + versionSuffix
+            debuggable false
+            manifestPlaceholders = [ applicationLabel:"@string/app_airoverse",appicon:"@drawable/appicon_airoverse",roundicon:"@drawable/appicon_airoverse"]
+        }
     }
 
     android.variantFilter { variant ->

@@ -74,7 +74,7 @@ object DomainManager {
         }
     }
 
-    private fun addSystemEquip(hayStack: CCUHsApi, ccuId: String) {
+    fun addSystemEquip(hayStack: CCUHsApi, ccuId: String) {
         val systemEquip = hayStack.readAllEntities("system and equip")
         systemEquip.forEach { equip->
             val equipId = equip["id"]
@@ -92,7 +92,8 @@ object DomainManager {
             }
         }
     }
-    private fun addSystemDevice(hayStack: CCUHsApi,ccuId: String) {
+
+    fun addSystemDevice(hayStack: CCUHsApi,ccuId: String) {
         val devices = hayStack.readAllEntities("device and roomRef == \"SYSTEM\"")
         devices.forEach { device ->
             val deviceId = device["id"]
@@ -186,6 +187,15 @@ object DomainManager {
         Domain.site?.floors?.get(hayStackPoint.floorRef)?.
         rooms?.get(hayStackPoint.roomRef)?.devices?.get(hayStackPoint.deviceRef)?.
         points?.put(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.id))
+    }
+
+    fun removePoint(hayStackPoint : a75f.io.api.haystack.Point) {
+        if (Domain.site == null) {
+            return
+        }
+        Domain.site?.floors?.get(hayStackPoint.floorRef)?.
+        rooms?.get(hayStackPoint.roomRef)?.equips?.get(hayStackPoint.equipRef)?.
+        points?.remove(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.equipRef))
     }
 }
 

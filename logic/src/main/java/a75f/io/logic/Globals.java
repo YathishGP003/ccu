@@ -347,16 +347,7 @@ public class Globals {
                     }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
-                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
-                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-
-                    BearerTokenManager.getInstance().scheduleJob();
-
-                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                     CcuLog.i(L.TAG_CCU_INIT,"Init Watchdog");
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
@@ -386,6 +377,16 @@ public class Globals {
                         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                     }
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+
+                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+
+                    BearerTokenManager.getInstance().scheduleJob();
+
+                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
+                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();

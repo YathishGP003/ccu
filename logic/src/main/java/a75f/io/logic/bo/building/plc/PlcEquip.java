@@ -67,6 +67,18 @@ public class PlcEquip {
 
     }
 
+    public void refreshPITuners() {
+        if (equipRef == null) {
+            HashMap equip = hayStack.read("equip and pid and group == \"" + nodeAddr + "\"");
+            equipRef = equip.get("id").toString();
+        }
+
+        // proportionalSpread is a config point, so init() will be called if this value is changed.
+        plc.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \"" + equipRef + "\""));
+        plc.setProportionalGain(TunerUtil.readTunerValByQuery("pid and pgain and equipRef == \"" + equipRef + "\""));
+        plc.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \"" + equipRef + "\""));
+    }
+
     public GenericPIController getPIController() {
         return plc;
     }

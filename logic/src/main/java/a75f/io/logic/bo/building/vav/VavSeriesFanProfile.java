@@ -74,6 +74,13 @@ public class VavSeriesFanProfile extends VavProfile
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
                 "setTempHeating "+setTempHeating+" systemMode "+conditioning);
 
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
+                ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
+        if (super.vavEquip.getEnableCFMControl().readPriorityVal() > 0) {
+            CcuLog.i(L.TAG_CCU_ZONE, "CFM PI Tuners: cfmProportionalGain " + cfmController.getProportionalGain() + ", cfmIntegralGain " + cfmController.getIntegralGain() +
+                    ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
+        }
+
         int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
 
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
@@ -109,6 +116,9 @@ public class VavSeriesFanProfile extends VavProfile
     private void initLoopVariables(short node) {
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+
+        refreshPITuners();
+
         setDamperLimits(node, damper);
     }
     
@@ -233,7 +243,10 @@ public class VavSeriesFanProfile extends VavProfile
     
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0 ;
         boolean  enabledIAQControl = vavEquip.getEnableIAQControl().readDefaultVal() > 0 ;
-    
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {

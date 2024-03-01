@@ -218,7 +218,9 @@ public class VavSystemController extends SystemController
         co2WeightedAverageSum = 0;
         zoneDeadCount = 0;
         hasTi = false;
-        
+
+        refreshPITuners();
+
         Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
             currSystemOccupancy == Occupancy.PRECONDITIONING ||
@@ -232,6 +234,21 @@ public class VavSystemController extends SystemController
             }
         }
         currSystemOccupancy = occupancy;
+    }
+
+    private void refreshPITuners() {
+        proportionalGain =  TunerUtil.readTunerValByQuery("system and vav and pgain");
+        integralGain = TunerUtil.readTunerValByQuery("system and vav and igain");
+        proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and vav and pspread");
+        integralMaxTimeout = (int)TunerUtil.readTunerValByQuery("system and vav and itimeout");
+
+        CcuLog.i(L.TAG_CCU_SYSTEM, "proportionalGain "+proportionalGain+" integralGain "+integralGain
+                +" proportionalSpread "+proportionalSpread+" integralMaxTimeout "+integralMaxTimeout);
+
+        piController.setIntegralGain(integralGain);
+        piController.setProportionalGain(proportionalGain);
+        piController.setMaxAllowedError(proportionalSpread);
+        piController.setIntegralMaxTimeout(integralMaxTimeout);
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

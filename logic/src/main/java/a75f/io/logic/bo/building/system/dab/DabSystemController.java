@@ -210,7 +210,9 @@ public class DabSystemController extends SystemController
         hasTi = false;
         weightedAverageChangeoverLoadSum = 0;
         weightedAverageChangeoverLoad = 0;
-    
+
+        refreshPITuners();
+
         Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
             currSystemOccupancy == Occupancy.PRECONDITIONING ||
@@ -224,6 +226,21 @@ public class DabSystemController extends SystemController
             }
         }
         currSystemOccupancy = occupancy;
+    }
+
+    private void refreshPITuners() {
+        proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
+        integralGain = TunerUtil.readTunerValByQuery("system and dab and igain");
+        proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and dab and pspread");
+        integralMaxTimeout = (int)TunerUtil.readTunerValByQuery("system and dab and itimeout");
+
+        CcuLog.i(L.TAG_CCU_SYSTEM, "proportionalGain "+proportionalGain+" integralGain "+integralGain
+                +" proportionalSpread "+proportionalSpread+" integralMaxTimeout "+integralMaxTimeout);
+
+        piController.setIntegralGain(integralGain);
+        piController.setProportionalGain(proportionalGain);
+        piController.setMaxAllowedError(proportionalSpread);
+        piController.setIntegralMaxTimeout(integralMaxTimeout);
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

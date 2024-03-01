@@ -9,6 +9,7 @@ import java.util.Set;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
@@ -74,7 +75,9 @@ public class PlcProfile extends ZoneProfile
         double processVariable = plcEquip.getProcessVariable();
         double targetValue = plcEquip.getTargetValue();
         double controlVariable;
-        
+
+        plcEquip.refreshPITuners();
+
         if (plcEquip.isEnabledAnalog2InForSp()) {
             Log.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());
             targetValue = plcEquip.getSpVariable();
@@ -108,6 +111,8 @@ public class PlcProfile extends ZoneProfile
         handleRelayOp(Tags.RELAY2, curCv);
         
         plcEquip.getPIController().dump();
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + plcEquip.plc.getProportionalGain() + ", integralGain " + plcEquip.plc.getIntegralGain() +
+                ", proportionalSpread " + plcEquip.plc.getMaxAllowedError() + ", integralMaxTimeout " + plcEquip.plc.getIntegralMaxTimeout());
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: "+processVariable+", targetValue: "+targetValue+", controlVariable: "+controlVariable);
     }
     

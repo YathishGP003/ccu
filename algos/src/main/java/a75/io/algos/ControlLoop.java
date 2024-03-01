@@ -20,7 +20,12 @@ public class ControlLoop
     GenericPIController piController;
     
     boolean enabled;
-    
+
+    public int getIntegralMaxTimeout() { return integralMaxTimeout; }
+    public int getProportionalSpread() { return proportionalSpread; }
+    public double getProportionalGain() { return proportionalGain; }
+    public double getIntegralGain() { return integralGain; }
+
     public ControlLoop() {
         piController = new GenericPIController();
         piController.setIntegralGain(integralGain);

@@ -71,8 +71,6 @@ class DiffManger(var context: Context?) {
             if (currentModelMeta != null) {
                 CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
-                    CcuLog.i(Domain.LOG_TAG, "Model Update - Model ID: ${version.modelId}; " +
-                            "Current model version: ${currentModelMeta.version}, New model version: ${version.version}")
                     val originalModel = getModelDetective("$BACKUP_FIle_PATH${version.modelId}.json")
                     val newModel = getModelDetective("$NEW_FILE_PATH${version.modelId}.json")
                     //  Retrieve the current equip map by using modelID
@@ -85,23 +83,19 @@ class DiffManger(var context: Context?) {
                             (version.version.toString() != (currentEquipMap["modelVersion"]).toString())) {
                             CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
                                     " current equipment version: ${currentEquipMap["modelVersion"]}")
-                            val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
-                            if (entityConfiguration != null) {
-                                handler.migrateModel(entityConfiguration, newModel, siteRef)
-                            }
+                            val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
+                            handler.migrateModel(entityConfiguration, originalModel, newModel, siteRef)
                         }else if(currentEquipMap.containsKey("sourceModelVersion") &&
                             (version.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())){
                             CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
                                     " current equipment version: ${currentEquipMap["sourceModelVersion"]}")
-                            val entityConfiguration =originalModel?.let { getDiffEntityConfiguration(it, newModel!!) }
-                            if (entityConfiguration != null) {
-                                handler.migrateModel(entityConfiguration, newModel, siteRef)
-                            }
+                            val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
+                            handler.migrateModel(entityConfiguration, originalModel, newModel, siteRef)
                         }else{
-                            CcuLog.i(Domain.LOG_TAG, "Ignoring migration for ${currentModelMeta.modelId}")
+                            CcuLog.i(Domain.LOG_TAG, "Ignoring migration due to missing sourceModelVersion in current equip; currentEquipMap: $currentEquipMap")
                         }
                     }else{
-                        CcuLog.i(Domain.LOG_TAG, "Model not updated; Current model: ${currentModelMeta}, New model: $version")
+                        CcuLog.i(Domain.LOG_TAG, "Model not updated; backup model: ${currentEquipMap}, New model: $newModel and currentEquipMap: $currentEquipMap")
                     }
                 }else{
                     CcuLog.i(Domain.LOG_TAG, "The model with ID ${version.modelId} is not updated, " +

@@ -136,23 +136,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 else -> ModelLoader.getSmartNodeVavNoFanModelDef()
             }
             val equipDis = "${site?.displayName}-VAV-${it["group"]}"
-            equipBuilder.doCutOverMigration(it["id"].toString(), model as SeventyFiveFProfileDirective,
-                                    equipDis, VavZoneProfileCutOverMapping.entries )
-
-            val vavEquip = VavEquip(it["id"].toString())
-
-            // damperSize point changed from a literal to an enum
-            val newDamperSize = getDamperSizeEnum(vavEquip.damperSize.readDefaultVal())
-            vavEquip.damperSize.writeDefaultVal(newDamperSize)
-
-            // temperature offset is now a literal (was multiplied by 10 before)
-            val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
-            vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
 
             val isHelioNode = it.containsKey("helionode")
             val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
             val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
-            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model))
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
             val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
             val profileType = when {
                 it.containsKey("series") -> ProfileType.VAV_SERIES_FAN
@@ -164,11 +152,29 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Integer.parseInt(it["group"].toString()),
                 if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
                 0,
-                it["zoneRef"].toString(),
+                it["roomRef"].toString(),
                 it["floorRef"].toString(),
                 profileType,
                 model
             ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(it["id"].toString(), model,
+                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration)
+
+            val vavEquip = VavEquip(it["id"].toString())
+
+            // damperSize point changed from a literal to an enum
+            val newDamperSize = getDamperSizeEnum(vavEquip.damperSize.readDefaultVal())
+            vavEquip.damperSize.writeDefaultVal(newDamperSize)
+
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+
+            // At app startup, cutover migrations currently run before upgrades.
+            // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
+            // Setting the fallback value manually for now.
+            vavEquip.demandResponseSetback.writeVal(17, 2.0)
 
             deviceBuilder.doCutOverMigration(
                 device.get("id").toString(),

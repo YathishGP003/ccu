@@ -9,7 +9,7 @@ import android.util.Log;
 public class TrimResponseRequest
 {
     
-    int importanceMultiplier = 1;
+    double importanceMultiplier = 1.0;
     double requestIntervalMins = 1;
     
     public double requestHours;
@@ -30,11 +30,11 @@ public class TrimResponseRequest
         importanceMultiplier = im;
     }
     
-    public int getImportanceMultiplier()
+    public double getImportanceMultiplier()
     {
         return importanceMultiplier;
     }
-    public void setImportanceMultiplier(int importanceMultiplier)
+    public void setImportanceMultiplier(double importanceMultiplier)
     {
         this.importanceMultiplier = importanceMultiplier;
     }

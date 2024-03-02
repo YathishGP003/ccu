@@ -217,10 +217,11 @@ public abstract class VavProfile extends ZoneProfile {
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
 
-        satResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        co2ResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        spResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        hwstResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        ZonePriority zonePriority = ZonePriority.values()[(int)vavEquip.getZonePriority().readPriorityVal()];
+        satResetRequest.setImportanceMultiplier(zonePriority.val/10);
+        co2ResetRequest.setImportanceMultiplier(zonePriority.val/10);
+        spResetRequest.setImportanceMultiplier(zonePriority.val/10);
+        hwstResetRequest.setImportanceMultiplier(zonePriority.val/10);
 
         vavUnit.vavDamper.minPosition = 0;
         vavUnit.vavDamper.maxPosition = 100;

@@ -26,7 +26,7 @@ public class SystemTrimResponse
     private int Td;
     private int T;
     private int I;
-    private int R;
+    private double R;
     private double SPtrim;
     private double SPres;
     private double SPresmax;
@@ -78,11 +78,11 @@ public class SystemTrimResponse
     {
         I = i;
     }
-    public int getR()
+    public double getR()
     {
         return R;
     }
-    public void setR(int r)
+    public void setR(double r)
     {
         R = r;
     }

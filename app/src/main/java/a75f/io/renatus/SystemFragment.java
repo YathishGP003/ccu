@@ -1219,7 +1219,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					parameterList.add(parameter);
 			});
 			String nodeAddress = String.valueOf(emDevice.getSlaveId());
-			energyMeterModelDetails.setText(emDevice.getName()+ "("+emDevice.getEquipType().toUpperCase() + nodeAddress + ")");
+			int displayIndex = emDevice.getName().lastIndexOf('-') + 1;
+			String displayName = emDevice.getName().substring(displayIndex);
+			if(!emDevice.getEquipType().contains(displayName))
+				energyMeterModelDetails.setText(displayName + "(" + nodeAddress + ")");
+			else
+				energyMeterModelDetails.setText(emDevice.getName() + "(" + emDevice.getEquipType().toUpperCase() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
@@ -1256,7 +1261,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			});
 
 			String nodeAddress = String.valueOf(btuDevice.getSlaveId());
-			btuMeterModelDetails.setText(btuDevice.getName()+ "("+btuDevice.getEquipType().toUpperCase() + nodeAddress + ")");
+			int displayIndex = btuDevice.getName().lastIndexOf('-') + 1;
+			String displayName = btuDevice.getName().substring(displayIndex);
+			if(!btuDevice.getEquipType().contains(displayName))
+				btuMeterModelDetails.setText(displayName + "(" + nodeAddress + ")");
+			else
+				btuMeterModelDetails.setText(btuDevice.getName() + "(" + btuDevice.getEquipType().toUpperCase() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =

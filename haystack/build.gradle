@@ -75,8 +75,8 @@ android {
         }
         airoverse_prod {
             minifyEnabled false
-            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-c229e29b-b568-4ee6-9298-c384631f501b\"'
-            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-fc6c85e6-952a-459d-a1af-d442f29ca271\"'
+            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu_aefc4ffb-95f6-4600-bc45-6a4a3e359b0c\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu_4558b583-c796-43fa-9a4d-35cc877bd869\"'
         }
     }
 

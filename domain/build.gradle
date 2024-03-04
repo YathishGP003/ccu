@@ -61,6 +61,13 @@ android {
             buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://api.75f.io\"'
             buildConfigField 'String', 'DOMAIN_API_KEY', '\"44d7e68ba6e141e19b78a0c1c62b5076\"'
         }
+        airoverse_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField 'String', 'DOMAIN_API_BASE', '\"https://api.75f.io\"'
+            buildConfigField 'String', 'DOMAIN_API_KEY', '\"44d7e68ba6e141e19b78a0c1c62b5076\"'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

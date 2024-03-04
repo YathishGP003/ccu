@@ -73,13 +73,13 @@
 
                             <Spinner
                                 android:id="@+id/analog1InSensor"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="260dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
 
@@ -101,13 +101,13 @@
 
                             <Spinner
                                 android:id="@+id/th1InSensor"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="260dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
                         <RelativeLayout
@@ -129,7 +129,7 @@
 
                             <Spinner
                                 android:id="@+id/nativeSensor"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="260dp"
                                 android:layout_height="?android:attr/listPreferredItemHeight"
                                 android:layout_alignParentRight="true"
@@ -240,13 +240,13 @@
 
                             <Spinner
                                 android:id="@+id/targetVal"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="160dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
                         <RelativeLayout
@@ -265,13 +265,13 @@
 
                             <Spinner
                                 android:id="@+id/errorRange"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="160dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
                     </LinearLayout>
@@ -311,13 +311,13 @@
 
                             <Spinner
                                 android:id="@+id/analog2InSensor"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="260dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
                         <RelativeLayout
@@ -337,7 +337,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
@@ -359,7 +359,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
@@ -390,13 +390,13 @@
 
                             <Spinner
                                 android:id="@+id/sensorOffset"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="160dp"
-                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_height="50dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
                         </RelativeLayout>
 
                     </LinearLayout>
@@ -460,7 +460,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
 
@@ -481,7 +481,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
 
@@ -537,7 +537,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
 
@@ -558,7 +558,7 @@
                                 android:layout_width="160dp"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
 

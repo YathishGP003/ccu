@@ -17,6 +17,9 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
@@ -32,6 +35,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -108,7 +112,6 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
 
-
         ButterKnife.bind(this, view);
         return view;
     }
@@ -128,6 +131,8 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
         mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         mTemperatureOffset.setWrapSelectorWheel(false);
+
+        mZonePriority.setAdapter(getAdapterValue(new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.zone_priority)))));
 
         if(mOTNProfile != null){
             mOTNConfig = (OTNConfiguration) mOTNProfile.getProfileConfiguration(mNodeAddress);
@@ -187,5 +192,8 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
 
         CcuLog.d(L.TAG_CCU_UI, "Set OTN Config: Profiles - " + L.ccu().zoneProfiles.size());
 
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

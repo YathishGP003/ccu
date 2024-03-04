@@ -161,6 +161,20 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
+        airoverse_prod {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.airoverse.service.75f.io/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.airoverse.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.airoverse.service.75f.io/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.airoverse.service.75f.io/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.airoverse.service.75f.io/\"'
+            buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.airoverse.service.75f.io/\"'
+            buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather.airoverse.service.75f.io/api/v1/\"'
+            buildConfigField "String", 'CCU_VERSION_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/all\"'
+            buildConfigField "String", 'CCU_FILE_SIZE_API_BASE', '\"https://version-management-api.airoverse.service.75f.io/version/getDetails\"'
+
+            minifyEnabled false
+        }
     }
 
     android.variantFilter { variant ->

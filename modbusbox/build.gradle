@@ -65,6 +65,10 @@ android {
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-f7b41a0d-af29-4d5e-a891-f2aa9e73dbfb\"'
         }
+        airoverse_prod {
+            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-fc402733-a779-4e25-9ee1-5ea1cdf6e364\"'
+        }
     }
 
     android.variantFilter { variant ->

@@ -41,6 +41,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -182,7 +183,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         for (int val = 0; val <= 10; val++) {
             voltsArray.add(val);
         }
-        ArrayAdapter<Integer> voltsAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, voltsArray);
+        ArrayAdapter<Integer> voltsAdapter = getAdapterValue(voltsArray);
         oaDamperAtMin.setAdapter(voltsAdapter);
         returnDamperAtMin.setAdapter(voltsAdapter);
         oaDamperAtMax.setAdapter(voltsAdapter);
@@ -192,7 +193,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         for (int val = 0; val <= 100; val++) {
             percentArray.add(val);
         }
-        ArrayAdapter<Integer> percentAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, percentArray);
+        ArrayAdapter<Integer> percentAdapter = getAdapterValue(percentArray);
         oaDamperMinOpen.setAdapter(percentAdapter);
         returnDamperMinOpen.setAdapter(percentAdapter);
         exFanStage1Threshold.setAdapter(percentAdapter);
@@ -205,7 +206,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         for (int val = 0; val <= 2000; val+=10) {
             co2Array.add(val);
         }
-        ArrayAdapter<Integer> co2Adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
+        ArrayAdapter<Integer> co2Adapter = getAdapterValue(co2Array);
         co2Threshold.setAdapter(co2Adapter);
     
     
@@ -213,7 +214,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         ctArr.add("0-10 (A)");
         ctArr.add("0-20 (A)");
         ctArr.add("0-50 (A)");
-        ArrayAdapter<String> ctAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, ctArr);
+        ArrayAdapter<String> ctAdapter = getAdapterValue(ctArr);
         currentTransformerType.setAdapter(ctAdapter);
         
         if (mProfile != null) {
@@ -328,6 +329,10 @@ public class DialogOAOProfile extends BaseDialogFragment
         CCUUiUtil.setSpinnerDropDownColor(smartPurgeOutsideDamperMinOpen,getContext());
         CCUUiUtil.setSpinnerDropDownColor(enhancedVentilationOutsideDamperMinOpen,getContext());
 
+    }
+
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
     
 }

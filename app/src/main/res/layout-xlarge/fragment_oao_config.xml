@@ -81,12 +81,11 @@
                             <Spinner
                                 android:id="@+id/oaDamperAtMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerHorizontal="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -113,11 +112,10 @@
                             <Spinner
                                 android:id="@+id/returnDamperAtMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -142,10 +140,9 @@
                             <Spinner
                                 android:id="@+id/oaDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -169,10 +166,9 @@
                             <Spinner
                                 android:id="@+id/exFanStage1Threshold"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -197,10 +193,9 @@
                             <Spinner
                                 android:id="@+id/currentTransformerType"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -225,10 +220,9 @@
                             <Spinner
                                 android:id="@+id/exFanHysteresis"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -252,10 +246,9 @@
                             <Spinner
                                 android:id="@+id/smartPurgeOutsideDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -288,10 +281,9 @@
                             <Spinner
                                 android:id="@+id/oaDamperAtMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -316,10 +308,9 @@
                             <Spinner
                                 android:id="@+id/returnDamperAtMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -344,10 +335,9 @@
                             <Spinner
                                 android:id="@+id/returnDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -369,9 +359,8 @@
 
                             <Spinner
                                 android:id="@+id/exFanStage2Threshold"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 tools:listitem="@layout/spinner_dropdown_item" />
@@ -399,10 +388,9 @@
                             <Spinner
                                 android:id="@+id/co2Threshold"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
                         </RelativeLayout>
@@ -456,10 +444,9 @@
                             <Spinner
                                 android:id="@+id/enhancedVentiOutsideDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
                         </RelativeLayout>

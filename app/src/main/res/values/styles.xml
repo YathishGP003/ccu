@@ -738,9 +738,71 @@
 
     <style name="TableSpinner" parent="Widget.AppCompat.Spinner.Underlined">
         <item name="android:layout_width">280dp</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:minWidth">90dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:dropDownVerticalOffset">48dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:spinnerMode">dropdown</item>
         <item name="android:layout_gravity">center_vertical</item>
     </style>
+
+    <style name="customSpinnerDownArrow" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:minWidth">90dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:dropDownVerticalOffset">48dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLength">15</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:spinnerMode">dropdown</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+    </style>
+
+<!--    <style name="CustomSpinnerDropdownStyle" parent="Widget.AppCompat.ListPopupWindow">-->
+<!--        <item name="android:gravity">bottom</item>-->
+<!--        &lt;!&ndash; Add other attributes as needed &ndash;&gt;-->
+<!--    </style>-->
+    <style name="customSpinnerForRelay" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:minWidth">90dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:dropDownVerticalOffset">53dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLength">15</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:spinnerMode">dropdown</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+    </style>
+
+    <style name="customSpinnerForNumber" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:minWidth">90dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:dropDownVerticalOffset">70dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLength">15</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:spinnerMode">dropdown</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+    </style>
+
 
     <style name="ToggleButton_HyperStat">
         <item name="android:layout_marginStart">-13dp</item>
@@ -780,15 +842,31 @@
     <style name="DamperPositionSpinner_HyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">170dp</item>
         <item name="android:layout_gravity">end|top</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingBottom">-4dp</item>
+        <item name="android:dropDownVerticalOffset">53dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
     <style name="ThresoldSpinner" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">end|top</item>
-        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_gravity">start|top</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingBottom">-4dp</item>
+        <item name="android:dropDownVerticalOffset">53dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
     <style name="FanPositionLabel_HyperStat">
@@ -799,18 +877,35 @@
     </style>
     <style name="FanPositionSpinner_HyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">170dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">end|top</item>
-        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="android:dropDownVerticalOffset">55dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingBottom">-4dp</item>
+        <item name="android:layout_gravity">end|center_vertical</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
     <style name="Damper_HyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_weight">0.5</item>
         <item name="android:layout_marginRight">10dp</item>
         <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">end</item>
-        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="android:paddingBottom">-4dp</item>
+        <item name="android:dropDownVerticalOffset">55dp</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:layout_gravity">end|top</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
     <style name="VocLabel_HyperStat">
@@ -829,9 +924,16 @@
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginRight">10dp</item>
         <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:dropDownVerticalOffset">48dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+        <item name="android:foreground">@drawable/custom_spinner_down</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_gravity">end|top</item>
-        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
 
@@ -922,9 +1024,12 @@
         <item name="android:textAlignment">viewStart</item>
     </style>
 
-    <style name="TableSpinnerzone" parent="Widget.AppCompat.Spinner.Underlined">
+    <style name="TableSpinnerzone" parent="Widget.AppCompat.Spinner">
     <item name="android:layout_width">280dp</item>
     <item name="android:layout_height">40dp</item>
+    <item name="android:backgroundTint">@android:color/transparent</item>
+    <item name="android:popupBackground">@drawable/custom_spinner_softedge</item>
+    <item name="android:foreground">@drawable/custom_spinner_down</item>
     <item name="android:layout_gravity">center_vertical</item>
     </style>
 

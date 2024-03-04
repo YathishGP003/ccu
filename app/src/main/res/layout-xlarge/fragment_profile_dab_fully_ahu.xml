@@ -130,7 +130,7 @@
 
                             <Spinner
                                 android:id="@+id/analog1Spinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -196,7 +196,7 @@
 
                             <Spinner
                                 android:id="@+id/analog2Spinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -262,7 +262,7 @@
 
                             <Spinner
                                 android:id="@+id/analog3Spinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -314,7 +314,7 @@
 
                             <Spinner
                                 android:id="@+id/analog4Spinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -333,7 +333,7 @@
 
                             <Spinner
                                 android:id="@+id/analog4TestSpinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -454,7 +454,7 @@
 
                             <Spinner
                                 android:id="@+id/relay7Spinner"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
@@ -553,7 +553,7 @@
 
                         <Spinner
                             android:id="@+id/analog1Min"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -582,7 +582,7 @@
 
                         <Spinner
                             android:id="@+id/analog1Max"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
@@ -616,7 +616,7 @@
 
                         <Spinner
                             android:id="@+id/analog2Min"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -644,7 +644,7 @@
 
                         <Spinner
                             android:id="@+id/analog2Max"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
@@ -679,7 +679,7 @@
 
                         <Spinner
                             android:id="@+id/analog3Min"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -707,7 +707,7 @@
 
                         <Spinner
                             android:id="@+id/analog3Max"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"

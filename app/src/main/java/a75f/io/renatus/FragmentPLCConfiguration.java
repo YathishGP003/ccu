@@ -43,6 +43,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -242,8 +243,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             th1InArr.add(m.sensorName+" "+m.engineeringUnit);
         }
 
-        ArrayAdapter<String> analog1InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog1InArr);
-        analog1InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> analog1InAdapter = getAdapterValue(analog1InArr);
+        analog1InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog1InSensorSp.setAdapter(analog1InAdapter);
         analog1InSensorSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -259,8 +260,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 for (int pos = (int)(100*r.minEngineeringValue); pos <= (100*r.maxEngineeringValue); pos+=(100*r.incrementEgineeringValue)) {
                     targetVal.add(pos /100.0);
                 }
-                ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
-                targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                ArrayAdapter<Double> targetValAdapter = getAdapterValue(targetVal);
+                targetValAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 targetValSp.setAdapter(targetValAdapter);
                 targetValSp.invalidate();
                 if (mProfileConfig != null) {
@@ -279,8 +280,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         });
 
 
-        ArrayAdapter<String> th1InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, th1InArr);
-        th1InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> th1InAdapter = getAdapterValue(th1InArr);
+        th1InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         th1InSensorSp.setAdapter(th1InAdapter);
         th1InSensorSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -296,8 +297,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 for (int pos = (int)(100.0*r.minEngineeringValue); pos <= (100.0*r.maxEngineeringValue); pos+=(100.0*r.incrementEngineeringValue)) {
                     targetVal.add(pos/100.0);
                 }
-                ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
-                targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                ArrayAdapter<Double> targetValAdapter = getAdapterValue(targetVal);
+                targetValAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 targetValSp.setAdapter(targetValAdapter);
                 targetValSp.invalidate();
                 if (mProfileConfig != null) {
@@ -318,8 +319,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         for (int pos = 1; pos <= 100; pos++) {
             targetVal.add((double)pos/10);
         }
-        ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
-        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<Double> targetValAdapter = getAdapterValue(targetVal);
+        targetValAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         targetValSp.setAdapter(targetValAdapter);
 
         targetValSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -336,8 +337,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         for (double pos = 1; pos <= 10; pos+=1) {
             errRange.add(pos);
         }
-        ArrayAdapter<Double> errRangeAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, errRange);
-        errRangeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<Double> errRangeAdapter = getAdapterValue(errRange);
+        errRangeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         errorRangeSp.setAdapter(errRangeAdapter);
 
         ArrayList<String> analog2InArr = new ArrayList<>();
@@ -347,8 +348,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             }
         }
 
-        ArrayAdapter<String> analgo2InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog2InArr);
-        analgo2InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> analgo2InAdapter = getAdapterValue(analog2InArr);
+        analgo2InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog2InSensorSp.setAdapter(analgo2InAdapter);
         analog2InSensorSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -369,8 +370,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetVal.add(pos /100.0);
                 }
 
-                ArrayAdapter<Double> offsetAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
-                offsetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                ArrayAdapter<Double> offsetAdapter = getAdapterValue(targetVal);
+                offsetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 sensorOffsetSp.setAdapter(offsetAdapter);
                 sensorOffsetSp.invalidate();
                 if (mProfileConfig != null) {
@@ -390,7 +391,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         {
             analogArray.add(analogVolt);
         }
-        ArrayAdapter<Double> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+        ArrayAdapter<Double> analogAdapter = getAdapterValue(analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analogout1AtMinSp.setAdapter(analogAdapter);
         analogout1AtMaxSp.setAdapter(analogAdapter);
@@ -399,7 +400,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         for (double pos = 0.1; pos <= 10; pos+=0.1) {
             offsetArr.add(Math.round(pos * 10) /10.0);
         }
-        ArrayAdapter<Double> offsetAdapter = new ArrayAdapter<Double>(getActivity(), R.layout.spinner_dropdown_item, offsetArr);
+        ArrayAdapter<Double> offsetAdapter = getAdapterValue(offsetArr);
         offsetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sensorOffsetSp.setAdapter(offsetAdapter);
         analog2DynamicSP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -525,10 +526,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             onboardSensorInArr.add(sensor.sensorName+" "+sensor.engineeringUnit);
         }
 
-        ArrayAdapter<String> sensorAdapter = new ArrayAdapter<String>(getActivity(),
-                                                                      android.R.layout.simple_spinner_item,
-                                                                      onboardSensorInArr);
-        sensorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> sensorAdapter = getAdapterValue(onboardSensorInArr);
+        sensorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         nativeSensorSp.setAdapter(sensorAdapter);
         if (mProfileConfig != null) {
             nativeValSelection = mProfileConfig.nativeSensorInput;
@@ -549,8 +548,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetVal.add(pos/DECIMAL_ADJUST_MULTIPLIER);
                 }
 
-                ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
-                targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                ArrayAdapter<Double> targetValAdapter = getAdapterValue(targetVal);
+                targetValAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 targetValSp.setAdapter(targetValAdapter);
                 targetValSp.invalidate();
 
@@ -610,8 +609,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         for (int percent = 0; percent <= 100; percent+= 1) {
             percentArr.add(percent+"%");
         }
-        ArrayAdapter<String> percentAdapter = new ArrayAdapter<String>(getActivity(),
-                                                                       android.R.layout.simple_spinner_item, percentArr);
+        ArrayAdapter<String> percentAdapter = getAdapterValue(percentArr);
         percentAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return percentAdapter;
     }
@@ -682,5 +680,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         CCUUiUtil.setSpinnerDropDownColor(relay1OffThreshold,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay2OnThreshold,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay2OffThreshold,getContext());
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

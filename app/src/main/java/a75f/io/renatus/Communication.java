@@ -71,6 +71,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -81,6 +83,7 @@ import a75f.io.renatus.util.DataBbmdObj;
 import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import butterknife.BindView;
@@ -235,6 +238,8 @@ public class Communication extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
+        spinnerBaudRate.setAdapter(spinnerBaudRateAdapter);
         spinnerBaudRate.setSelection(((ArrayAdapter<String>)spinnerBaudRate.getAdapter())
                                          .getPosition(String.valueOf(readIntPref(PREF_MB_BAUD_RATE, 9600))));
         spinnerBaudRate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -244,7 +249,9 @@ public class Communication extends Fragment {
             @Override public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-    
+
+        ArrayAdapter<String> spinnerParityAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_parity_array))));
+        spinnerParity.setAdapter(spinnerParityAdapter);
         spinnerParity.setSelection(readIntPref(PREF_MB_PARITY, 0),false);
         spinnerParity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -253,7 +260,9 @@ public class Communication extends Fragment {
             @Override public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-    
+
+        ArrayAdapter<String> spinnerDatabitsAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_databits_array))));
+        spinnerDatabits.setAdapter(spinnerDatabitsAdapter);
         spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerDatabits.getAdapter())
                        .getPosition(String.valueOf(readIntPref(PREF_MB_DATA_BITS, 8))),false);
         spinnerDatabits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -267,6 +276,8 @@ public class Communication extends Fragment {
             }
         });
 
+        ArrayAdapter<String> spinnerStopbitsAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_stopbits_array))));
+        spinnerStopbits.setAdapter(spinnerStopbitsAdapter);
         spinnerStopbits.setSelection(((ArrayAdapter<String>)spinnerStopbits.getAdapter())
                                          .getPosition(String.valueOf(readIntPref(PREF_MB_STOP_BITS, 1))));
         spinnerStopbits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1005,5 +1016,8 @@ public class Communication extends Fragment {
             e.printStackTrace();
         }
         ipAddress.setText(deviceIpAddress);
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

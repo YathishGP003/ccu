@@ -3,7 +3,10 @@
     android:id="@+id/spinnerTarget"
     style="@style/spinner_grey"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:textSize="23sp"
+    android:singleLine="true"
+    android:ellipsize="end"
     android:paddingLeft="4dp"
     android:paddingRight="4dp"
     />

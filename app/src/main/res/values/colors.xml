@@ -89,6 +89,7 @@
     <color name="line_border">#1F000000</color>
     <color name="zoneselection_gray">#F0F0F0</color>
     <color name="spinner_divider">#99707070</color>
+    <color name="spinner_item_highlight">#1AE5561A</color>
 
     <color name="tuner_group">#999999</color>
     <color name="material_button_ripple">#D0D0D0</color>

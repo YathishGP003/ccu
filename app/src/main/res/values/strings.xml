@@ -2,6 +2,7 @@
     <string name="app_75f">CCU</string>
     <string name="app_daikin">Daikin</string>
     <string name="app_carrier">ClimaVision</string>
+    <string name="app_airoverse">Airoverse</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -1447,6 +1448,7 @@
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
     <string name="Daikin_Environment">daikin_prod</string>
     <string name="Carrier_Environment">carrier_prod</string>
+    <string name="Airoverse_Environment">airoverse_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>
@@ -1648,6 +1650,7 @@
     <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
     <string name="txt_submit">Submit</string>
     <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
+    <string name="prefs_airoverse_theme_key">isAiroverseEnabled</string>
     <string name="menutoggle">menutoggle</string>
     <string name="display_toast_message">display toast message</string>
     <string name="txt_add">ADD</string>

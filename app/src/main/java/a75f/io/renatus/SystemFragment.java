@@ -1318,7 +1318,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				});
 
 				String nodeAddress = String.valueOf(externalModbusEquip.getSlaveId());
-				externalModbusModelDetails.setText(externalModbusEquip.getName()+ "("+externalModbusEquip.getEquipType().toUpperCase() + nodeAddress + ")");
+				int displayIndex = externalModbusEquip.getName().lastIndexOf('-') + 1;
+				String displayName = externalModbusEquip.getName().substring(displayIndex);
+				if(!externalModbusEquip.getEquipType().contains(displayName))
+					externalModbusModelDetails.setText(displayName + "(" + nodeAddress + ")");
+				else
+					externalModbusModelDetails.setText(externalModbusEquip.getName()+ "("+externalModbusEquip.getEquipType().toUpperCase() + nodeAddress + ")");
 				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 				externalModbusParams.setLayoutManager(gridLayoutManager);
 				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =

@@ -41,6 +41,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -226,38 +227,30 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			spArray.add(Math.round(pos * 100D) / 100D);
 		}
 		
-		ArrayAdapter<Double> coolingSatMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                               coolingSatArray);
-		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> coolingSatMinAdapter = getAdapterValue(coolingSatArray);
+		coolingSatMinAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> coolingSatMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                               coolingSatArray);
-		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> coolingSatMaxAdapter = getAdapterValue(coolingSatArray);
+		coolingSatMaxAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> heatingSatMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                               heatingSatArray);
-		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> heatingSatMinAdapter = getAdapterValue(heatingSatArray);
+		coolingSatMinAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> heatingSatMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                               heatingSatArray);
-		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> heatingSatMaxAdapter = getAdapterValue(heatingSatArray);
+		coolingSatMaxAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		
-		ArrayAdapter<Double> co2MinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                        co2Array);
-		co2MinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> co2MinAdapter = getAdapterValue(co2Array);
+		co2MinAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> co2MaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                        co2Array);
-		co2MaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> co2MaxAdapter = getAdapterValue(co2Array);
+		co2MaxAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> spMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                       spArray);
-		spMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> spMinAdapter = getAdapterValue(spArray);
+		spMinAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
-		ArrayAdapter<Double> spMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-		                                                       spArray);
-		spMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> spMaxAdapter = getAdapterValue(spArray);
+		spMaxAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		
 	}
@@ -268,7 +261,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		{
 			analogArray.add(a);
 		}
-		ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+		ArrayAdapter<Integer> analogAdapter = getAdapterValue(analogArray);
 		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		analog1Min.setAdapter(analogAdapter);
@@ -295,7 +288,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		humidifierOptions.add("Humidifier");
 		humidifierOptions.add("De-Humidifier");
 		
-		ArrayAdapter<String> humidityAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, humidifierOptions);
+		ArrayAdapter<String> humidityAdapter = getAdapterValue(humidifierOptions);
 		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		relay7Spinner.setAdapter(humidityAdapter);
@@ -308,22 +301,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		{
 			zoroToHundred.add(val);
 		}
-		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+		ArrayAdapter<Double> coolingSatTestAdapter = getAdapterValue(zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
 		ahuAnalog1Test.setSelection(ControlMote.getAnalog1Out(),false);
 		
-		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+		ArrayAdapter<Double> spTestAdapter = getAdapterValue(zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
 		ahuAnalog2Test.setSelection(ControlMote.getAnalog2Out(),false);
 		
-		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+		ArrayAdapter<Double> heatingSatTestAdapter = getAdapterValue(zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
 		ahuAnalog3Test.setSelection(ControlMote.getAnalog3Out(),false);
 		
-		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+		ArrayAdapter<Double> co2TestAdapter = getAdapterValue(zoroToHundred);
 		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog4Test.setAdapter(co2TestAdapter);
 		ahuAnalog4Test.setSelection(ControlMote.getAnalog4Out(),false);
@@ -587,5 +580,8 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		CCUUiUtil.setSpinnerDropDownColor(ahuAnalog2Test,getContext());
 		CCUUiUtil.setSpinnerDropDownColor(ahuAnalog3Test,getContext());
 		CCUUiUtil.setSpinnerDropDownColor(ahuAnalog4Test,getContext());
+	}
+	private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+		return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
 	}
 }

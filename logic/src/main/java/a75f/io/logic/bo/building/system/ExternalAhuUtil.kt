@@ -567,13 +567,18 @@ fun setOccupancyMode(
     occupancy: Occupancy,
     haystack: CCUHsApi,
     externalSpList: ArrayList<String>,
-    operatingStatus : BasicConfig
+    operatingStatus : BasicConfig,
+    conditioningMode: SystemMode
 ) {
-    val occupancyMode = if (operatingStatus.loopOutput > 0) 1.0
+
+
+    var occupancyMode = if (operatingStatus.loopOutput > 0) 1.0
                         else when (occupancy) {
                             Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
                             else -> 1.0
                         }
+    if (conditioningMode == SystemMode.OFF)
+        occupancyMode = 0.0
 
     if (isConfigEnabled(systemEquip, occupancyModeControl)) {
         logIt("Occupancy mode $occupancyMode")

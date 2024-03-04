@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -81,9 +82,7 @@ public class SystemProfileFragment extends Fragment {
             txtHeader.setVisibility(View.VISIBLE);
         }
 
-        ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(),
-                                                                                                  getSystemProfileArrayResource(),
-                                                                                                  R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> systemProfileSelectorAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(getSystemProfileArrayResource()))));
         systemProfileSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spSystemProfile.setAdapter(systemProfileSelectorAdapter);
         CCUUiUtil.setSpinnerDropDownColor(spSystemProfile,getContext());
@@ -262,6 +261,9 @@ public class SystemProfileFragment extends Fragment {
             return R.array.system_profile_select_carrier;
         }
         return R.array.system_profile_select;
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
     
 }

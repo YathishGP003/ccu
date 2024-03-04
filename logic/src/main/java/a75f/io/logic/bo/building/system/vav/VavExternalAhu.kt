@@ -209,7 +209,14 @@ class VavExternalAhu : VavSystemProfile() {
             vavConfig.loopOutput,
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList, vavConfig)
+        setOccupancyMode(systemEquip,
+            externalEquipId,
+            occupancyMode,
+            hayStack,
+            externalSpList,
+            vavConfig,
+            conditioningMode
+        )
         operateDamper(
             systemEquip,
             vavConfig.weightedAverageCO2,

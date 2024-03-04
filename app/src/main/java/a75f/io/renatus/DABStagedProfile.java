@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -28,6 +29,9 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.ToggleButton;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
@@ -45,6 +49,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -230,6 +235,17 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     }
     
     private void setUpSpinners() {
+
+        ArrayAdapter<Integer> relayAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.hvac_stage_selector))));
+        relayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        relay1Spinner.setAdapter(relayAdapter);
+        relay2Spinner.setAdapter(relayAdapter);
+        relay3Spinner.setAdapter(relayAdapter);
+        relay4Spinner.setAdapter(relayAdapter);
+        relay5Spinner.setAdapter(relayAdapter);
+        relay6Spinner.setAdapter(relayAdapter);
+        relay7Spinner.setAdapter(relayAdapter);
+
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);
@@ -466,6 +482,8 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
         CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
-
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

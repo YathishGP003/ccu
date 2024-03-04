@@ -31,6 +31,7 @@ import android.widget.TableRow;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
@@ -49,6 +50,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -299,6 +301,16 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
     
     private void setUpSpinners()
     {
+        ArrayAdapter<Integer> relayAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.hvac_stage_selector))));
+        relayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        relay1Spinner.setAdapter(relayAdapter);
+        relay2Spinner.setAdapter(relayAdapter);
+        relay3Spinner.setAdapter(relayAdapter);
+        relay4Spinner.setAdapter(relayAdapter);
+        relay5Spinner.setAdapter(relayAdapter);
+        relay6Spinner.setAdapter(relayAdapter);
+        relay7Spinner.setAdapter(relayAdapter);
+
         relay1Spinner.setSelection((int) systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int) systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int) systemProfile.getConfigAssociation("relay3"), false);
@@ -347,7 +359,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         {
             analogArray.add(a);
         }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+        ArrayAdapter<Integer> analogAdapter = getAdapterValue(analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog1Min.setAdapter(analogAdapter);
         analog1Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and min")), false);
@@ -379,22 +391,22 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         {
             zoroToHundred.add(val);
         }
-        ArrayAdapter<Double> coolingTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        ArrayAdapter<Double> coolingTestAdapter = getAdapterValue(zoroToHundred);
         coolingTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog1Test.setAdapter(coolingTestAdapter);
         ahuAnalog1Test.setSelection(ControlMote.getAnalog1Out(),false);
         
-        ArrayAdapter<Double> fanTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        ArrayAdapter<Double> fanTestAdapter = getAdapterValue(zoroToHundred);
         fanTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog2Test.setAdapter(fanTestAdapter);
         ahuAnalog2Test.setSelection(ControlMote.getAnalog2Out(),false);
         
-        ArrayAdapter<Double> heatingTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        ArrayAdapter<Double> heatingTestAdapter = getAdapterValue(zoroToHundred);
         heatingTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog3Test.setAdapter(heatingTestAdapter);
         ahuAnalog3Test.setSelection(ControlMote.getAnalog3Out(),false);
         
-        ArrayAdapter<Double> compositeTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        ArrayAdapter<Double> compositeTestAdapter = getAdapterValue(zoroToHundred);
         compositeTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog4Test.setAdapter(compositeTestAdapter);
         ahuAnalog4Test.setSelection(ControlMote.getAnalog4Out(),false);
@@ -729,5 +741,8 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         CCUUiUtil.setSpinnerDropDownColor(ahuAnalog4Test,getContext());
 
 
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

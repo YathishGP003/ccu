@@ -23,6 +23,7 @@ import android.widget.ToggleButton;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -49,6 +50,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -196,21 +198,18 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         ArrayList<Integer> temp = new ArrayList<Integer>();
         for (int pos = 0; pos <= 150; pos++)
             temp.add(pos);
-        ArrayAdapter<Integer> tempRange = new ArrayAdapter<Integer>(getActivity(), android.R.layout.simple_spinner_item, temp);
-        tempRange.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<Integer> tempRange = getAdapterValue(temp);
+        tempRange.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
-        ArrayAdapter<CharSequence> sseRelay1TypeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.sse_relay1_mode, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> sseRelay1TypeAdapter = getAdapterValue(new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.sse_relay1_mode))));
         sseRelay1TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay1Actuator.setAdapter(sseRelay1TypeAdapter);
 
-        ArrayAdapter<CharSequence> sseRelay2TypeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.sse_relay2_mode, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> sseRelay2TypeAdapter = getAdapterValue(new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.sse_relay2_mode))));
         sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
 
-        ArrayAdapter<InputActuatorType> sseAnalogActuatorAdapter = new ArrayAdapter<InputActuatorType>(getActivity(),
-                R.layout.spinner_dropdown_item,InputActuatorType.values());
+        ArrayAdapter<InputActuatorType> sseAnalogActuatorAdapter = getAdapterValue(new ArrayList<>(Arrays.asList(InputActuatorType.values())));
         sseAnalogIn1Spinner.setAdapter(sseAnalogActuatorAdapter);
 
         analogIn1.setOnCheckedChangeListener((compoundButton, checked) -> handleAnalog1InChange(checked));
@@ -396,5 +395,9 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

@@ -33,7 +33,9 @@ import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.util.RelayUtil
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -120,24 +122,24 @@ private fun setUpConditionFanConfig(
     } catch (e: Exception) {
         e.printStackTrace()
     }
-    var conModeAdapter =  createAdapter(context, R.array.smartstat_conditionmode)
+    var conModeAdapter =  getAdapterValue(context, R.array.smartstat_conditionmode)
 
     if (cpuEquipPoints.containsKey(HSZoneStatus.CONDITIONING_ENABLED.name)) {
         if (cpuEquipPoints[HSZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Cool Only")) {
 
-            conModeAdapter = createAdapter(context, R.array.smartstat_conditionmode_coolonly)
+            conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_coolonly)
             if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal)
                 conditionMode = conModeAdapter.count - 1
 
         } else if (cpuEquipPoints[HSZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Heat Only")) {
 
-            conModeAdapter = createAdapter(context, R.array.smartstat_conditionmode_heatonly)
+            conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_heatonly)
             if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal) {
                 conditionMode = conModeAdapter.count - 1
             }
         }
         if (cpuEquipPoints[HSZoneStatus.CONDITIONING_ENABLED.name].toString().contains("Off")) {
-            conModeAdapter = createAdapter( context, R.array.smartstat_conditionmode_off)
+            conModeAdapter = getAdapterValue(context, R.array.smartstat_conditionmode_off)
             conditionMode = 0
         }
     }
@@ -152,7 +154,7 @@ private fun setUpConditionFanConfig(
     }
     val fanSpinnerSelectionValues =
         RelayUtil.getFanOptionByLevel((cpuEquipPoints[HSZoneStatus.FAN_LEVEL.name] as Int?)!!)
-    val fanModeAdapter = createAdapter(context, fanSpinnerSelectionValues)
+    val fanModeAdapter = getAdapterValue(context, fanSpinnerSelectionValues)
 
     if (fanMode >= fanModeAdapter.count) {
         fanMode = 0
@@ -178,7 +180,7 @@ private fun setUpConditionFanConfig(
 
 fun createAdapter(context: Activity , itemArray: Int):ArrayAdapter<CharSequence>{
     val adapter = ArrayAdapter.createFromResource(context, itemArray, R.layout.spinner_zone_item)
-    adapter.setDropDownViewResource(R.layout.spinner_item_grey)
+    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
     return adapter
 }
 
@@ -196,10 +198,10 @@ private fun setUpHumidifierDeHumidifier(
     val dehumidifySpinner = viewPointRow2.findViewById<Spinner>(R.id.spinnerValue2)
     val arrayHumidityTargetList = ArrayList<String>()
     for (pos in 1..100) arrayHumidityTargetList.add("$pos%")
-    val humidityTargetAdapter = ArrayAdapter(
-        context, R.layout.spinner_zone_item, arrayHumidityTargetList
+    val humidityTargetAdapter = CustomSpinnerDropDownAdapter(
+        context, R.layout.spinner_dropdown_item, arrayHumidityTargetList
     )
-    humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey)
+    humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
     if (cpuEquipPoints.containsKey(HSZoneStatus.TARGET_HUMIDITY.name)) {
         textViewLabel3.text = "Target Min Humidity :"
         humiditySpinner.adapter = humidityTargetAdapter
@@ -548,7 +550,9 @@ fun getHyperStatHpuEquipPoints(equipDetails: Equip): HashMap<String, Any> {
     }
     return hpuPoints
 }
-
+private fun getAdapterValue(context : Context, itemArray : Int): ArrayAdapter<*> {
+    return CustomSpinnerDropDownAdapter( context, R.layout.spinner_zone_item, context.resources.getStringArray(itemArray).toMutableList())
+}
 
 
 

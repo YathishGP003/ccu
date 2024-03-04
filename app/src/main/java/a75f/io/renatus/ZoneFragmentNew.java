@@ -71,6 +71,7 @@ import org.joda.time.LocalTime;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -135,6 +136,7 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -927,7 +929,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (v == null) {
                     Context mContext = this.getContext();
                     LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                    v = vi.inflate(R.layout.spinner_dropdown_item, null);
                 }
 
                 TextView tv = (TextView) v.findViewById(R.id.textview);
@@ -960,7 +962,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         };*/
         scheduleSpinner.setAdapter(adapter);
-
+          adapter.setSelectedPosition(scheduleSpinner.getSelectedItemPosition());
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
         try {
@@ -1665,7 +1667,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (v == null) {
                     Context mContext = this.getContext();
                     LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                    v = vi.inflate(R.layout.spinner_dropdown_item, null);
                 }
 
                 TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
@@ -2921,46 +2923,42 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
 
         if (cpuEquipPoints.containsKey("condEnabled")) {
             if (cpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             } else if (cpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             }
             if (cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
 
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_fanmode))));
         if (cpuEquipPoints.containsKey("fanEnabled")) {
             if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (cpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(cpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -3002,7 +3000,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 arrayHumdityTargetList.add(pos+"%");
 
             ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
-            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if (fanHighHumdOption == 2.0) {
@@ -3170,44 +3168,40 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
         if (hpuEquipPoints.containsKey("condEnabled")) {
             if (hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             } else if (hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         conditionSpinner.setAdapter(conModeAdapter);
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_fanmode))));
 
         if (hpuEquipPoints.containsKey("fanEnabled")) {
             if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (hpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         fanSpinner.setAdapter(fanModeAdapter);
 
         //Brute force approach to avoid a crash due to invalid configuration.
@@ -3244,7 +3238,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 arrayHumdityTargetList.add(pos+"%");
 
             ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
-            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if (fanHighHumdOption > 1.0) {
@@ -3417,51 +3411,46 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
 
         if (p2FCUPoints.containsKey("condEnabled")) {
             if (p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item
                 }
             }
             if (p2FCUPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_2pfcu_fanmode))));
         if (p2FCUPoints.containsKey("fanEnabled")) {
             if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                        R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_medium))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(p2FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -3585,52 +3574,47 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
         if (p4FCUPoints.containsKey("condEnabled")) {
             if (p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             }
             if (p4FCUPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
 
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_2pfcu_fanmode))));
 
         if (p4FCUPoints.containsKey("fanEnabled")) {
             if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                        R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_medium))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(p4FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -4584,6 +4568,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 PreferenceUtil.setDataMigrationPopUpClosed();
             });
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
 }

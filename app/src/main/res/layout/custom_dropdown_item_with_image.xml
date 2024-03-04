@@ -16,6 +16,8 @@
         android:padding="10dp"
         android:layout_marginStart="10dp"
         android:layout_weight="1"
+        android:singleLine="true"
+        android:maxLines="1"
         android:textSize="22sp" />
 
 

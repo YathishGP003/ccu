@@ -572,7 +572,8 @@
                                 <Spinner
                                     android:id="@+id/fanOutCoolingStage1Spinner"
                                     style="@style/DamperPositionSpinner_HyperStat"
-                                    android:layout_marginEnd="14dp" />
+                                    android:layout_marginEnd="14dp"
+                                    android:dropDownWidth="wrap_content" />
 
                             </LinearLayout>
 
@@ -586,9 +587,10 @@
                                     style="@style/DamperPositionLabel_HyperStat"
                                     android:text="@string/hyperstat_fan_out_cooling_stage_3" />
 
-                                <Spinner
-                                    android:id="@+id/fanOutCoolingStage3Spinner"
-                                    style="@style/DamperPositionSpinner_HyperStat" />
+                            <Spinner
+                                android:id="@+id/fanOutCoolingStage3Spinner"
+                                style="@style/DamperPositionSpinner_HyperStat"
+                                android:dropDownWidth="wrap_content" />
 
                             </LinearLayout>
 
@@ -611,9 +613,10 @@
                                     style="@style/DamperPositionLabel_HyperStat"
                                     android:text="@string/hyperstat_fan_out_cooling_stage_2" />
 
-                                <Spinner
-                                    android:id="@+id/fanOutCoolingStage2Spinner"
-                                    style="@style/DamperPositionSpinner_HyperStat" />
+                            <Spinner
+                                android:id="@+id/fanOutCoolingStage2Spinner"
+                                style="@style/DamperPositionSpinner_HyperStat"
+                                android:dropDownWidth="wrap_content" />
 
                             </LinearLayout>
 
@@ -685,9 +688,10 @@
                                     style="@style/DamperPositionLabel_HyperStat"
                                     android:text="@string/hyperstat_fan_out_heating_stage_2" />
 
-                                <Spinner
-                                    android:id="@+id/fanOutHeatingStage2Spinner"
-                                    style="@style/DamperPositionSpinner_HyperStat" />
+                            <Spinner
+                                android:id="@+id/fanOutHeatingStage2Spinner"
+                                style="@style/DamperPositionSpinner_HyperStat"
+                                android:dropDownWidth="wrap_content" />
 
                             </LinearLayout>
 
@@ -1060,7 +1064,9 @@
                         <Spinner
                             android:id="@+id/zoneCO2DamperOpeningRateSpinner"
                             android:layout_marginStart="60dp"
+                            android:layout_height="42dp"
                             style="@style/ThresoldSpinner"
+                            android:dropDownWidth="wrap_content"
                             android:visibility="gone"/>
                     </LinearLayout>
                     <LinearLayout
@@ -1072,11 +1078,14 @@
                         <TextView
                             android:id="@+id/zoneCO2Threshold"
                             style="@style/FanPositionLabel_HyperStat"
+                            android:layout_weight="1"
                             android:text="CO2 Threshold"/>
 
                         <Spinner
                             android:id="@+id/zoneCO2ThresholdSpinner"
-                            style="@style/ThresoldSpinner" />
+                            style="@style/ThresoldSpinner"
+                            android:layout_height="42dp"
+                            android:dropDownWidth="wrap_content"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -1093,7 +1102,8 @@
                         <Spinner
                             android:id="@+id/zoneCO2TargetSpinner"
                             android:layout_weight="0.5"
-                            style="@style/FanPositionSpinner_HyperStat" />
+                            android:dropDownWidth="wrap_content"
+                            style="@style/ThresoldSpinner" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -1118,6 +1128,8 @@
 
                         <Spinner
                             android:id="@+id/zoneVocThresholdSpinner"
+                            android:layout_height="42dp"
+                            android:layout_gravity="top"
                             style="@style/FanPositionSpinner_HyperStat" />
                     </LinearLayout>
 
@@ -1135,6 +1147,7 @@
 
                         <Spinner
                             android:id="@+id/zoneVocTargetSpinner"
+                            android:layout_height="42dp"
                             android:layout_weight="0.5"
                             style="@style/ThresoldSpinner" />
                     </LinearLayout>
@@ -1163,6 +1176,7 @@
                         <Spinner
                             android:id="@+id/zonepmThresholdSpinner"
                             android:layout_weight="0.5"
+                            android:layout_gravity="top"
                             style="@style/FanPositionSpinner_HyperStat" /> />
                     </LinearLayout>
 
@@ -1179,6 +1193,7 @@
 
                         <Spinner
                             android:id="@+id/zonepmTargetSpinner"
+                            android:layout_height="42dp"
                             android:layout_weight="0.5"
                             style="@style/ThresoldSpinner" />
                     </LinearLayout>

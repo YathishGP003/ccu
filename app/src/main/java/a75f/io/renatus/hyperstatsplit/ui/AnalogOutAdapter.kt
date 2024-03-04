@@ -1,4 +1,5 @@
 package a75f.io.renatus.hyperstatsplit.ui
+import a75f.io.renatus.R
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ class AnalogOutAdapter(context: Context, resource: Int, objects: Array<String>) 
         return !disabledPositions.contains(position)
     }
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+       parent.setPadding(0, 7, 0, 5)
         val view = super.getView(position, convertView, parent)
         view.isEnabled = !isEnabled(position)
         if (!isEnabled(position)) {
@@ -18,6 +20,13 @@ class AnalogOutAdapter(context: Context, resource: Int, objects: Array<String>) 
         } else {
             view.alpha = 1.0f
         }
+        view.setBackgroundResource(R.drawable.custmspinner)
+        return view
+    }
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        parent.setPadding(0, 0, 0, 0)
+        val view = super.getView(position, convertView, parent)
+        view.setPadding(5, 0, 30, 0)
         return view
     }
     fun setItemEnabled(position: Int, enabled: Boolean) {

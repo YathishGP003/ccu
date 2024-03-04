@@ -116,7 +116,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -183,7 +183,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -249,7 +249,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -316,7 +316,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -383,7 +383,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -451,7 +451,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -519,7 +519,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
@@ -603,7 +603,7 @@
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerDownArrow"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
@@ -654,7 +654,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="82dp"
                             android:layout_toRightOf="@+id/textEconomizer"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -684,7 +684,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginRight="54dp"
                             android:layout_alignParentRight="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -719,7 +719,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="82dp"
                             android:layout_toRightOf="@+id/textCoolS1"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -748,7 +748,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginRight="54dp"
                             android:layout_alignParentRight="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -784,7 +784,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="86dp"
                             android:layout_toRightOf="@+id/textCoolS3"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -813,7 +813,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginRight="54dp"
                             android:layout_alignParentRight="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -848,7 +848,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="86dp"
                             android:layout_toRightOf="@+id/textCoolS5"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -890,7 +890,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="82dp"
                             android:layout_toRightOf="@+id/textHeatS1"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -920,7 +920,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginRight="54dp"
                             android:layout_alignParentRight="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -955,7 +955,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="82dp"
                             android:layout_toRightOf="@+id/textHeatS3"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -984,7 +984,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginRight="54dp"
                             android:layout_alignParentRight="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -1020,7 +1020,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="86dp"
                             android:layout_toRightOf="@+id/textHeatS5"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -1063,7 +1063,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="@dimen/vfd_profile_spinner_margin_left"
                             android:layout_toRightOf="@+id/textAnalog2Default"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerDownArrow"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>

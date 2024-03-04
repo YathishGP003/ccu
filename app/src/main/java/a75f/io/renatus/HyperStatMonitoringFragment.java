@@ -37,6 +37,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -275,14 +276,14 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
             thArr.add(m.sensorName + " " + m.engineeringUnit);
         }
 
-        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, analogArr);
-        analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> analogAdapter = new CustomSpinnerDropDownAdapter<>(this.getContext(),R.layout.spinner_dropdown_item,analogArr);
+        analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mAnalog1Sp.setAdapter(analogAdapter);
         mAnalog2Sp.setAdapter(analogAdapter);
 
 
-        ArrayAdapter<String> thAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, thArr);
-        thAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> thAdapter = new CustomSpinnerDropDownAdapter<>(this.getContext(),R.layout.spinner_dropdown_item,thArr);
+        thAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mThermostat1Sp.setAdapter(thAdapter);
         mThermostat2Sp.setAdapter(thAdapter);
     }

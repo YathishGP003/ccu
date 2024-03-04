@@ -18,7 +18,10 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:layout_gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
             app:srcCompat="@drawable/ic_floormenu" />
 
         <ImageView
@@ -34,7 +37,8 @@
             android:id="@+id/logo_75f"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="40dp"
             android:scaleType="center"
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_75f_logo" />
@@ -45,7 +49,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
-            android:layout_marginStart="12dp"
             app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMode="fixed" />
@@ -59,7 +62,9 @@
             android:id="@+id/powerbylogo"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="24dp"
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_powered_by_75f" />
 

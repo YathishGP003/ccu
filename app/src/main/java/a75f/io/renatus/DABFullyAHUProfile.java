@@ -44,6 +44,7 @@ import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -361,7 +362,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         humidifierOptions.add("Humidifier");
         humidifierOptions.add("De-Humidifier");
         
-        ArrayAdapter<String> humidityAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, humidifierOptions);
+        ArrayAdapter<String> humidityAdapter = getAdapterValue(humidifierOptions);
         humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         
         relay7Spinner.setAdapter(humidityAdapter);
@@ -419,7 +420,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         for (int val = start;  val <= end; val += increment) {
             list.add(val);
         }
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+        ArrayAdapter<Integer> adapter = getAdapterValue(list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
     }
@@ -429,7 +430,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         for (double val = start;  val <= end; val += increment) {
             list.add(val);
         }
-        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+        ArrayAdapter<Double> adapter = getAdapterValue(list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
     }
@@ -782,5 +783,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         CCUUiUtil.setSpinnerDropDownColor(analog4OutMaxCo2,getContext());
         CCUUiUtil.setSpinnerDropDownColor(analog4Spinner,getContext());
 
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

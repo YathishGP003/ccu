@@ -324,7 +324,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -348,7 +348,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -372,7 +372,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -397,7 +397,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -426,7 +426,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }

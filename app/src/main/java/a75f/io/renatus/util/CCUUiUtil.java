@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class CCUUiUtil {
 
@@ -122,7 +123,7 @@ public class CCUUiUtil {
         for (double val = start;  val <= end; val += increment) {
             list.add(val);
         }
-        ArrayAdapter<Double> adapter = new ArrayAdapter<>(c, R.layout.spinner_dropdown_item, list);
+        ArrayAdapter<Double> adapter = getAdapterValue(c,list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
     }
@@ -214,5 +215,8 @@ public class CCUUiUtil {
         Matcher m = p.matcher(ip);
         // Return if the mac address matched the ReGex
         return m.matches();
+    }
+    private static CustomSpinnerDropDownAdapter getAdapterValue(Context context,ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_dropdown_item, values);
     }
 }

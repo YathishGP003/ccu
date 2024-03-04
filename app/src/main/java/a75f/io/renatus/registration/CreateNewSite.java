@@ -87,6 +87,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -722,7 +723,7 @@ public class CreateNewSite extends Fragment {
 
     private void populateAndUpdateTimeZone() {
         
-        timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, getSupportedTimeZones());
+        timeZoneAdapter = getAdapterValue(getSupportedTimeZones());
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
         mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
@@ -1065,5 +1066,8 @@ public class CreateNewSite extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

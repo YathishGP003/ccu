@@ -39,33 +39,42 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
     }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
+        View view = getCustomView(position, convertView, parent,true);
+        int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
+        view.setBackgroundColor(colorSelected);
+        return view;
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent){
-       return getCustomView(position,convertView,parent);
+        parent.setPadding(0, 5, 0, 3);
+       return getCustomView(position,convertView,parent,false);
     }
 
-    public View getCustomView(int position, View convertView, ViewGroup parent) {
+    public View getCustomView(int position, View convertView, ViewGroup parent, Boolean isGetView) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
+        int highlightColor = ContextCompat.getColor(context, R.color.spinner_item_highlight);
 
         if (hasImage.get(position)) {
             View row = inflater.inflate(R.layout.custom_dropdown_item_with_image, parent, false);
-            row.setBackgroundColor(colorSelected);
             TextView textView = row.findViewById(R.id.textView);
             ImageView imageView = row.findViewById(R.id.imageView);
             textView.setText(values.get(position));
             imageView.setImageResource(R.drawable.image_right_arrow);
 
-            if(position == selectedPosition)
+            if(position == selectedPosition){
                 imageView.setImageDrawable(null);
-
+                row.setBackgroundColor(highlightColor);
+            }
+            if(isGetView) {
+                textView.setPadding(0, 0, 3, 1);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+                row.setPadding(0, 0, 4, 2);
+            }
             return row;
         } else {
             View row = inflater.inflate(R.layout.custom_dropdown_item_text_only, parent, false);
-            row.setBackgroundColor(colorSelected);
             TextView textView = row.findViewById(R.id.textView);
             textView.setText(values.get(position));
             if(position == 2 && values.get(position).contains("No Named Schedule available")){
@@ -75,7 +84,13 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
                 textView.setTextColor(Color.BLACK);
                 textView.setEnabled(false);
             }
-
+            if(position == selectedPosition){
+                row.setBackgroundColor(highlightColor);
+            }
+            if(isGetView) {
+                textView.setPadding(0, 0, 4, 0);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+            }
             return row;
         }
     }

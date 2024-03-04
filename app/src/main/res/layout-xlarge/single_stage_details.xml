@@ -62,8 +62,8 @@
 
         <Spinner
             android:id="@+id/sseRelay1Actuator"
+            style="@style/customSpinnerDownArrow"
             android:layout_width="250dp"
-            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:layout_marginLeft="70dp" />
@@ -94,9 +94,9 @@
 
         <Spinner
             android:id="@+id/sseRelay2Actuator"
+            style="@style/customSpinnerDownArrow"
             android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_marginBottom="1dp"
             android:layout_weight="1"
             android:layout_marginLeft="70dp" />
 

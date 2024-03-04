@@ -56,6 +56,7 @@ public class BackFillViewModel {
                 if (position >= getMaxNormalRows()) {
                     row.setAlpha(0.5F);
                 }
+                row.setBackgroundResource(R.drawable.custmspinner);
                 return row;
             }
             private int getMaxNormalRows() {

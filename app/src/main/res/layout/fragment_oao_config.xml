@@ -86,7 +86,7 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -117,7 +117,7 @@
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -145,7 +145,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -172,7 +172,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -200,7 +200,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -228,7 +228,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -255,7 +255,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -291,7 +291,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -319,7 +319,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -347,7 +347,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -373,7 +373,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -401,7 +401,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -459,7 +459,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                style="@style/customSpinnerForNumber"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
                         </RelativeLayout>

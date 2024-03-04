@@ -21,7 +21,10 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -38,6 +41,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -155,8 +159,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         temperatureOffset.setWrapSelectorWheel(false);
         setButton = (Button) view.findViewById(R.id.setBtn);
         zonePriority = view.findViewById(R.id.zonePriority);
-        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.zone_priority, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> zonePriorityAdapter = getAdapterValue(new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.zone_priority))));
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
         CCUUiUtil.setSpinnerDropDownColor(zonePriority,getContext());
@@ -235,7 +238,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View row;
-
+                parent.setPadding(0, 7, 0, 5);
                 Context mContext = this.getContext();
                 LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View v = vi.inflate(R.layout.spinner_item_custom, null);
@@ -244,12 +247,14 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     row = super.getDropDownView(position, v, parent);
                     row.setAlpha(0.5F);
                 }
-
+                 row.setPadding(20, 8, 20, 8);
+                 row.setBackgroundResource(R.drawable.custmspinner);
                 return row;
 
             }
         };
         roomTempSpinner.setAdapter(roomTempSensor);
+        roomTempSensor.setDropDownViewResource(R.layout.spinner_dropdown_item);
         roomTempSensor.getView(1,null,roomTempSpinner);
 
         ArrayAdapter<SupplyTempSensor> supplyTempAdapter = new ArrayAdapter<SupplyTempSensor>(getActivity(), R.layout.spinner_dropdown_item, SupplyTempSensor.values()) {
@@ -273,7 +278,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View row;
-
+                parent.setPadding(0, 7, 0, 5);
                 Context mContext = this.getContext();
                 LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View v = vi.inflate(R.layout.spinner_item_custom, null);
@@ -282,13 +287,14 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     row = super.getDropDownView(position, v, parent);
                     row.setAlpha(0.5F);
                 }
-
+                row.setPadding(20, 8, 20, 8);
+                 row.setBackgroundResource(R.drawable.custmspinner);
                 return row;
 
             }
         };
         supplyAirTempSpinner.setAdapter(supplyTempAdapter);
-
+        supplyTempAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
     }
     private void setupCcuAsZoneProfile() {
 
@@ -332,4 +338,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         }
     }
 
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
+    }
 }

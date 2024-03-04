@@ -82,8 +82,8 @@
 
                 <Spinner
                     android:id="@+id/analog1OutSpinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="280dp"
+                    style="@style/customSpinnerDownArrow"
+                    android:layout_width="wrap_content"
                     android:layout_height="42dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="30dp"
@@ -125,15 +125,15 @@
 
                 <Spinner
                     android:id="@+id/analog2OutSpinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="280dp"
-                    android:layout_height="42dp"
+                    style="@style/customSpinnerDownArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_below="@+id/analog1OutSpinner"
+                    android:layout_alignBaseline="@+id/analog2OutTextView"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="30dp"
-                    android:layout_below="@+id/analog1OutSpinner"
                     android:layout_toEndOf="@+id/analog2OutTextView"
                     android:entries="@array/dab_dual_duct_actuator_types"
-                    android:layout_alignBaseline="@+id/analog2OutTextView"
                     tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
@@ -149,14 +149,14 @@
 
                 <Spinner
                     android:id="@+id/thermistor2Spinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="260dp"
-                    android:layout_height="42dp"
+                    style="@style/customSpinnerDownArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_below="@+id/thermistor1TextVal"
+                    android:layout_alignBaseline="@+id/thermistor2TextView"
+                    android:layout_alignParentRight="true"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="30dp"
-                    android:layout_below="@+id/thermistor1TextVal"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignBaseline="@+id/thermistor2TextView"
                     android:entries="@array/dab_dual_duct_thermistor2_options"
                     tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -431,16 +431,16 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MinDamperHeatingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_alignBaseline="@+id/ao1MinDamperHeatingTV"
                     android:layout_gravity="left"
                     android:layout_marginLeft="20dp"
                     android:layout_marginBottom="14dp"
                     android:layout_toEndOf="@+id/ao1MinDamperHeatingTV"
-                    android:layout_alignBaseline="@+id/ao1MinDamperHeatingTV"
-                    android:dropDownWidth="match_parent"/>
+                    android:dropDownWidth="wrap_content" />
 
                 <TextView
                     android:id="@+id/ao1MaxDamperHeatingTV"
@@ -456,14 +456,14 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MaxDamperHeatingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
-                    android:layout_marginLeft="20dp"
+                    android:layout_height="42dp"
+                    android:layout_alignBaseline="@+id/ao1MaxDamperHeatingTV"
                     android:layout_alignParentRight="true"
-                    android:layout_alignBaseline="@+id/ao1MaxDamperHeatingTV" />
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:id="@+id/ao1MinDamperCoolingTV"
@@ -478,17 +478,17 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MinDamperCoolingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_below="@id/ao1MinDamperHeatingTV"
+                    android:layout_alignBaseline="@+id/ao1MinDamperCoolingTV"
                     android:layout_gravity="left"
                     android:layout_marginLeft="20dp"
                     android:layout_marginBottom="14dp"
-                    android:layout_below="@id/ao1MinDamperHeatingTV"
                     android:layout_toEndOf="@+id/ao1MinDamperHeatingTV"
-                    android:layout_alignBaseline="@+id/ao1MinDamperCoolingTV"
-                    android:dropDownWidth="match_parent"/>
+                    android:dropDownWidth="wrap_content" />
 
                 <TextView
                     android:id="@+id/ao1MaxDamperCoolingTV"
@@ -505,16 +505,15 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MaxDamperCoolingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
-                    android:layout_marginLeft="20dp"
+                    android:layout_height="42dp"
                     android:layout_below="@id/ao1MinDamperHeatingTV"
                     android:layout_alignBaseline="@+id/ao1MaxDamperCoolingTV"
                     android:layout_alignParentRight="true"
-                    />
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="14dp" />
 
 
                 <TextView
@@ -530,17 +529,17 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MinDamperHeatingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_below="@id/ao1MinDamperCoolingTV"
+                    android:layout_alignBaseline="@+id/ao2MinDamperHeatingTV"
                     android:layout_gravity="left"
                     android:layout_marginLeft="20dp"
                     android:layout_marginBottom="14dp"
-                    android:layout_below="@id/ao1MinDamperCoolingTV"
                     android:layout_toEndOf="@+id/ao2MinDamperHeatingTV"
-                    android:layout_alignBaseline="@+id/ao2MinDamperHeatingTV"
-                    android:dropDownWidth="match_parent"/>
+                    android:dropDownWidth="wrap_content" />
 
                 <TextView
                     android:id="@+id/ao2MaxDamperHeatingTV"
@@ -557,16 +556,15 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MaxDamperHeatingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
-                    android:layout_marginLeft="20dp"
+                    android:layout_height="42dp"
                     android:layout_below="@id/ao1MinDamperCoolingTV"
-                    android:layout_alignParentRight="true"
                     android:layout_alignBaseline="@+id/ao2MaxDamperHeatingTV"
-                    />
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:id="@+id/ao2MinDamperCoolingTV"
@@ -581,17 +579,17 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MinDamperCoolingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_below="@id/ao2MinDamperHeatingTV"
+                    android:layout_alignBaseline="@+id/ao2MinDamperCoolingTV"
                     android:layout_gravity="left"
                     android:layout_marginLeft="20dp"
                     android:layout_marginBottom="14dp"
-                    android:layout_below="@id/ao2MinDamperHeatingTV"
                     android:layout_toEndOf="@+id/ao2MinDamperHeatingTV"
-                    android:layout_alignBaseline="@+id/ao2MinDamperCoolingTV"
-                    android:dropDownWidth="match_parent"/>
+                    android:dropDownWidth="wrap_content" />
 
                 <TextView
                     android:id="@+id/ao2MaxDamperCoolingTV"
@@ -608,15 +606,15 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MaxDamperCoolingSpinner"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
-                    android:layout_marginLeft="20dp"
+                    android:layout_height="42dp"
                     android:layout_below="@id/ao2MinDamperHeatingTV"
                     android:layout_alignBaseline="@+id/ao2MaxDamperCoolingTV"
-                    android:layout_alignParentRight="true" />
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="14dp" />
 
             </RelativeLayout>
 

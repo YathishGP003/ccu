@@ -22,12 +22,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
@@ -45,6 +49,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -225,6 +230,16 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     }
 
     private void setUpSpinners() {
+
+        ArrayAdapter<String> adapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.hvac_stage_selector))));
+        relay1Spinner.setAdapter(adapter);
+        relay2Spinner.setAdapter(adapter);
+        relay3Spinner.setAdapter(adapter);
+        relay4Spinner.setAdapter(adapter);
+        relay5Spinner.setAdapter(adapter);
+        relay6Spinner.setAdapter(adapter);
+        relay7Spinner.setAdapter(adapter);
+
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);
@@ -460,5 +475,8 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

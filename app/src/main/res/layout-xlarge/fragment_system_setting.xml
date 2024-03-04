@@ -472,9 +472,9 @@
 
                         <Spinner
                             android:id="@+id/targetMinInsideHumidity"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerForNumber"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="42dp"
                             android:entries="@array/hvac_stage_selector"
@@ -508,9 +508,8 @@
 
                         <Spinner
                             android:id="@+id/targetMaxInsideHumidity"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            style="@style/customSpinnerForNumber"
+                            android:paddingRight="20dp"
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="42dp"
                             android:entries="@array/hvac_stage_selector"

@@ -42,6 +42,7 @@
 
         <Spinner
             android:id="@+id/schedule_spinner"
+            style="@style/customSpinnerDownArrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="20dp"

@@ -22,6 +22,7 @@ import android.widget.ToggleButton;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -42,6 +43,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -311,13 +313,20 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         for (int val = 0; val <= 100; val++) {
             voltages.add((double)val/10);
         }
-        analogOutAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, voltages);
+        analogOutAdapter = getAdapterValue(voltages);
         analogOutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return analogOutAdapter;
     }
     
     private void setupAnalogOutSpinners() {
-    
+
+        ArrayAdapter<String> analogAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.dab_dual_duct_actuator_types))));
+        analog1OutSpinner.setAdapter(analogAdapter);
+        analog2OutSpinner.setAdapter(analogAdapter);
+
+        ArrayAdapter<String> thermistorAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.dab_dual_duct_thermistor2_options))));
+        thermistor2Spinner.setAdapter(thermistorAdapter);
+
         ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();
         ao1MinDamperHeatingSpinner.setAdapter(analogOutAdapter);
         ao1MaxDamperHeatingSpinner.setAdapter(analogOutAdapter);
@@ -339,7 +348,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         CCUUiUtil.setSpinnerDropDownColor(analog1OutSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(analog2OutSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(thermistor2Spinner,getContext());
-
     }
     
     private void updateAO1ConfigVisibility(int visibility) {
@@ -584,6 +592,9 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         }
         L.ccu().zoneProfiles.add(mDualDuctProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set DualDuct Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
     
 }

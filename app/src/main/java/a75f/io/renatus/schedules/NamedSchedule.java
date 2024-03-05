@@ -354,53 +354,64 @@ public class NamedSchedule extends DialogFragment {
         StringBuilder warningMessage = new StringBuilder("No such Schedule");
         boolean isValid = true;
 
-        if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
-            warningMessage = new StringBuilder();
-            Schedule namedSchedule = hsApi.getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
-            String roomRef = getArguments().getString(PARAM_ROOM_REF);
-            ArrayList<Interval> zoneIntervals = namedSchedule.getScheduledIntervals();
-            separateOverNightSchedule(zoneIntervals);
+        if (systemIntervals.isEmpty()) {
+            warningMessage = new StringBuilder("Building occupancy is empty, Cannot apply any Schedule.");
+            showWarningMessage(warningMessage);
+            return false;
+        } else {
+            if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
+                warningMessage = new StringBuilder();
+                Schedule namedSchedule = hsApi.getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
+                String roomRef = getArguments().getString(PARAM_ROOM_REF);
+                ArrayList<Interval> zoneIntervals = namedSchedule.getScheduledIntervals();
+                separateOverNightSchedule(zoneIntervals);
 
-            if (zoneIntervals.isEmpty() || systemIntervals.isEmpty()) return true;
+                if (zoneIntervals.isEmpty() || systemIntervals.isEmpty()) return true;
 
-            zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
-            Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size() - 1);
-            LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
-            Interval systemLastInterval = systemIntervals.get(systemIntervals.size() - 1);
-            LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
-            // checking for overnight for sunday ,if it is has overnight sch for sunday
-            // we need to add the building occupancy for next week monday also
-            if (ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
-                systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
-            updateIntervalSpills(intervalSpills, zoneIntervals, systemIntervals);
-            if (!intervalSpills.isEmpty()) {
-                addIntervalSpillWarning(warningMessage, intervalSpills);
-                isValid = false;
-            }
-            if (deadbandValidation(roomRef, warningMessage, namedSchedule)) {
-                isValid = false;
-            }
+                zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
+                Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size() - 1);
+                LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
+                Interval systemLastInterval = systemIntervals.get(systemIntervals.size() - 1);
+                LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
+                // checking for overnight for sunday ,if it is has overnight sch for sunday
+                // we need to add the building occupancy for next week monday also
+                if (ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
+                    systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
+                updateIntervalSpills(intervalSpills, zoneIntervals, systemIntervals);
+                if (!intervalSpills.isEmpty()) {
+                    addIntervalSpillWarning(warningMessage, intervalSpills);
+                    isValid = false;
+                }
+                if (deadbandValidation(roomRef, warningMessage, namedSchedule)) {
+                    isValid = false;
+                }
 
-            StringBuilder desiredTempWarning = new StringBuilder();
-            boolean isDesiredTempValid = isValidDesiredTemp(desiredTempWarning, namedSchedule);
-            if (!isDesiredTempValid) {
-                invalidDesiredTempError(warningMessage, desiredTempWarning);
-                isValid = false;
-            }
-            StringBuilder userLimitWarning = new StringBuilder();
-            boolean isLimitValid = isValidUserLimit(userLimitWarning, namedSchedule);
-            if (!isLimitValid) {
-                invalidUserLimitError(warningMessage, userLimitWarning);
-                isValid = false;
-            }
-            StringBuilder deadBandWarningMsg = new StringBuilder();
-            boolean isDeadBandValid = isDeadBandValid(deadBandWarningMsg, namedSchedule);
-            if (!isDeadBandValid) {
-                invalidDeadBandError(warningMessage, deadBandWarningMsg);
-                isValid = false;
+                StringBuilder desiredTempWarning = new StringBuilder();
+                boolean isDesiredTempValid = isValidDesiredTemp(desiredTempWarning, namedSchedule);
+                if (!isDesiredTempValid) {
+                    invalidDesiredTempError(warningMessage, desiredTempWarning);
+                    isValid = false;
+                }
+                StringBuilder userLimitWarning = new StringBuilder();
+                boolean isLimitValid = isValidUserLimit(userLimitWarning, namedSchedule);
+                if (!isLimitValid) {
+                    invalidUserLimitError(warningMessage, userLimitWarning);
+                    isValid = false;
+                }
+                StringBuilder deadBandWarningMsg = new StringBuilder();
+                boolean isDeadBandValid = isDeadBandValid(deadBandWarningMsg, namedSchedule);
+                if (!isDeadBandValid) {
+                    invalidDeadBandError(warningMessage, deadBandWarningMsg);
+                    isValid = false;
+                }
             }
         }
-        if (!isValid) showWarningMessage(warningMessage);
+
+
+        if (!isValid) {
+            warningMessage.append("\n\n").append(getText(R.string.pls_goback));
+            showWarningMessage(warningMessage);
+        }
         return isValid;
     }
 
@@ -532,7 +543,6 @@ public class NamedSchedule extends DialogFragment {
     }
 
     private void showWarningMessage(StringBuilder warningMessage) {
-        warningMessage.append("\n\n").append(getText(R.string.pls_goback));
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
         builder.setMessage(warningMessage.toString())
                 .setCancelable(false)

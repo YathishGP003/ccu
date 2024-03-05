@@ -41,7 +41,9 @@ public class PlcProfile extends ZoneProfile
         plcEquip.update(config,floorRef,zoneRef,processTag, dynamicTargetTag);
         plcEquip.init();
     }
-    
+
+    public void setPendingTunerChange() { plcEquip.setPendingTunerChange(); }
+
     @Override
     public ProfileType getProfileType()
     {
@@ -76,7 +78,7 @@ public class PlcProfile extends ZoneProfile
         double targetValue = plcEquip.getTargetValue();
         double controlVariable;
 
-        plcEquip.refreshPITuners();
+        if (plcEquip.hasPendingTunerChange()) plcEquip.refreshPITuners();
 
         if (plcEquip.isEnabledAnalog2InForSp()) {
             Log.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());

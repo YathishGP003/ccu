@@ -84,6 +84,10 @@ public class DabEquip
     double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
 
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
+
     private ControlLoop heatingLoop;
 
     public static final String CARRIER_PROD = "carrier_prod";
@@ -98,6 +102,9 @@ public class DabEquip
     }
     
     public void init() {
+
+        pendingTunerChange = false;
+
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
     
         if (equipMap != null && equipMap.size() > 0)
@@ -158,6 +165,8 @@ public class DabEquip
                     "pgain and equipRef == \"" + equipRef + "\""));
             heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
                     "igain and equipRef == \"" + equipRef + "\""));
+
+            pendingTunerChange = false;
         }
     }
 

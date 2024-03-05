@@ -13,6 +13,12 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
+import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.bo.building.vav.VavProfile;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
@@ -353,6 +359,68 @@ public class TunerUtil
         }
         CcuLog.e(L.TAG_CCU_TUNER, "Copy default value for "+domainName+" "+buildingPointArray);
         hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId));
+    }
+
+    /*
+        For some profiles, PI tuners were cached on the equip and only reloaded at app startup.
+
+        This method finds all profiles where this is done, and sets a flag to reload the tuners from Haystack before the next algo run.
+
+        This could be optimized further (we could filter by tunerGroup, for instance). But this implementation at least ensures that tuners
+        are only reloaded when there's a possible change.
+     */
+    public static void refreshEquipTuners() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+
+        if (L.ccu().systemProfile instanceof VavSystemProfile) {
+            ((VavSystemProfile)L.ccu().systemProfile).setPendingTunerChange();
+
+            ArrayList<HashMap<Object, Object>> vavZoneEquips = hayStack.readAllEntities("equip and vav and zone and not modbus");
+            if (!vavZoneEquips.isEmpty()) {
+                for (HashMap<Object, Object> vavEquip : vavZoneEquips) {
+                    if (vavEquip.containsKey("group") && vavEquip.get("group") != null) {
+                        String group = vavEquip.get("group").toString();
+                        VavProfile vavProfile = (VavProfile) L.getProfile(Short.parseShort(group));
+                        vavProfile.setPendingTunerChange();
+                    }
+                }
+            }
+        } else if (L.ccu().systemProfile instanceof DabSystemProfile) {
+            ((DabSystemProfile) L.ccu().systemProfile).setPendingTunerChange();
+
+            ArrayList<HashMap<Object, Object>> dabZoneEquips = hayStack.readAllEntities("equip and dab and zone and not modbus");
+            if (!dabZoneEquips.isEmpty()) {
+                for (HashMap<Object, Object> dabEquip : dabZoneEquips) {
+                    if (dabEquip.containsKey("group") && dabEquip.get("group") != null) {
+                        String group = dabEquip.get("group").toString();
+                        DabProfile dabProfile = (DabProfile) L.getProfile(Short.parseShort(group));
+                        dabProfile.setPendingTunerChange();
+                    }
+                }
+            }
+
+            ArrayList<HashMap<Object, Object>> dualDuctZoneEquips = hayStack.readAllEntities("equip and dualDuct and zone and not modbus");
+            if (!dualDuctZoneEquips.isEmpty()) {
+                for (HashMap<Object, Object> dualDuctEquip : dualDuctZoneEquips) {
+                    if (dualDuctEquip.containsKey("group") && dualDuctEquip.get("group") != null) {
+                        String group = dualDuctEquip.get("group").toString();
+                        DualDuctProfile dualDuctProfile = (DualDuctProfile) L.getProfile(Short.parseShort(group));
+                        dualDuctProfile.setPendingTunerChange();
+                    }
+                }
+            }
+        }
+
+        ArrayList<HashMap<Object, Object>> piProfileEquips = hayStack.readAllEntities("equip and pid and zone and not modbus");
+        if (!piProfileEquips.isEmpty()) {
+            for (HashMap<Object, Object> piEquip : piProfileEquips) {
+                if (piEquip.containsKey("group") && piEquip.get("group") != null) {
+                    String group = piEquip.get("group").toString();
+                    PlcProfile plcProfile = (PlcProfile) L.getProfile(Short.parseShort(group));
+                    plcProfile.setPendingTunerChange();
+                }
+            }
+        }
     }
 
 }

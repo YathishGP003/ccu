@@ -104,9 +104,15 @@ public class DabSystemController extends SystemController
     
     
     Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
     
     private DabSystemController()
     {
+        pendingTunerChange = false;
+
         proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
         integralGain = TunerUtil.readTunerValByQuery("system and dab and igain");
         proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and dab and pspread");
@@ -211,7 +217,7 @@ public class DabSystemController extends SystemController
         weightedAverageChangeoverLoadSum = 0;
         weightedAverageChangeoverLoad = 0;
 
-        refreshPITuners();
+        if (hasPendingTunerChange()) refreshPITuners();
 
         Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
@@ -241,6 +247,8 @@ public class DabSystemController extends SystemController
         piController.setProportionalGain(proportionalGain);
         piController.setMaxAllowedError(proportionalSpread);
         piController.setIntegralMaxTimeout(integralMaxTimeout);
+
+        pendingTunerChange = false;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

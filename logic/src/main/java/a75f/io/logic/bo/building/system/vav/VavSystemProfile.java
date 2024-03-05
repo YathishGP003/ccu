@@ -368,5 +368,9 @@ public abstract class VavSystemProfile extends SystemProfile
         }
         return fanLoopOp;
     }
-    
+
+    public void setPendingTunerChange() {
+        VavSystemController systemController = (VavSystemController) getSystemController();
+        systemController.setPendingTunerChange();
+    }
 }

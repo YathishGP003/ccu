@@ -54,6 +54,10 @@ public class DualDuctEquip {
     double   co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
     double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
     
     public DualDuctEquip(ProfileType type, int node)
     {
@@ -64,6 +68,9 @@ public class DualDuctEquip {
     }
     
     public void init() {
+
+        pendingTunerChange = false;
+
         HashMap<Object, Object> equipMap = hayStack.readEntity("equip and group == \"" + nodeAddr + "\"");
         
         if (equipMap != null && equipMap.size() > 0)
@@ -127,6 +134,8 @@ public class DualDuctEquip {
 
             vocLoop.setVOCTarget(vocTarget);
             vocLoop.setVOCThreshold(vocThreshold);
+
+            pendingTunerChange = false;
         }
     }
 

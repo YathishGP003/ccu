@@ -700,7 +700,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     () -> {
                         processData(id, level, val, reason);
                     },
-                    ()->{}
+                    ()->{ TunerUtil.refreshEquipTuners(); } // after update is processed, notify any affected equips to refresh cached tuners next time their algo runs
             ));
         }
     }

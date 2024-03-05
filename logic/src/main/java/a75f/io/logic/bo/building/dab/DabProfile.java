@@ -102,6 +102,8 @@ public class DabProfile extends ZoneProfile
         return new Equip.Builder().setHashMap(equip).build();
     }
 
+    public void setPendingTunerChange() { dabEquip.setPendingTunerChange(); }
+
     @Override
     public void updateZonePoints() {
         
@@ -115,7 +117,7 @@ public class DabProfile extends ZoneProfile
         double roomTemp = dabEquip.getCurrentTemp();
         GenericPIController damperOpController = dabEquip.damperController;
 
-        dabEquip.refreshPITuners();
+        if (dabEquip.hasPendingTunerChange()) dabEquip.refreshPITuners();
     
         co2Loop = dabEquip.getCo2Loop();
         vocLoop = dabEquip.getVOCLoop();

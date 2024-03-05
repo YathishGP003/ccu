@@ -58,6 +58,8 @@ public class DualDuctProfile extends ZoneProfile {
     public synchronized void updateDualDuctEquip(DualDuctProfileConfiguration config) {
         dualDuctEquip.updateEquip(config);
     }
+
+    public void setPendingTunerChange() { dualDuctEquip.setPendingTunerChange(); }
     
     @Override
     public ProfileType getProfileType()
@@ -99,7 +101,7 @@ public class DualDuctProfile extends ZoneProfile {
         double setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
         double roomTemp       = dualDuctEquip.getCurrentTemp();
 
-        dualDuctEquip.refreshPITuners();
+        if (dualDuctEquip.hasPendingTunerChange()) dualDuctEquip.refreshPITuners();
 
         heatingDamperController = dualDuctEquip.heatingDamperController;
         coolingDamperController = dualDuctEquip.coolingDamperController;

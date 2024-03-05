@@ -194,7 +194,7 @@ public class VavReheatProfile extends VavProfile
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
 
-        refreshPITuners();
+        if (hasPendingTunerChange()) refreshPITuners();
 
         setDamperLimits( (short) nodeAddr, damper);
     }

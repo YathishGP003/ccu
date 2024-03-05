@@ -93,11 +93,17 @@ public class VavSystemController extends SystemController
     double co2WeightedAverageSum = 0;
     int zoneDeadCount = 0;
     boolean hasTi = false;
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
     
     private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
     
     private VavSystemController()
     {
+        pendingTunerChange = false;
+
         proportionalGain =  TunerUtil.readTunerValByQuery("system and vav and pgain");
         integralGain = TunerUtil.readTunerValByQuery("system and vav and igain");
         proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and vav and pspread");
@@ -219,7 +225,7 @@ public class VavSystemController extends SystemController
         zoneDeadCount = 0;
         hasTi = false;
 
-        refreshPITuners();
+        if (hasPendingTunerChange()) refreshPITuners();
 
         Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
@@ -249,6 +255,8 @@ public class VavSystemController extends SystemController
         piController.setProportionalGain(proportionalGain);
         piController.setMaxAllowedError(proportionalSpread);
         piController.setIntegralMaxTimeout(integralMaxTimeout);
+
+        pendingTunerChange = false;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

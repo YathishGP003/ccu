@@ -66,6 +66,7 @@ class TunerUpdateHandler {
             //Propagate the updated tuner value to building level of corresponding system/zone equips
             propagateTunerByTags(pointUid, msgObject, hayStack);
         }
+        TunerUtil.refreshEquipTuners();
     }
     
     /**

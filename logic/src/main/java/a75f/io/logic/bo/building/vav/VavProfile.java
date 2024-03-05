@@ -65,7 +65,11 @@ public abstract class VavProfile extends ZoneProfile {
     
     public static String TAG = VavProfile.class.getSimpleName().toUpperCase();
     public static final int REHEAT_THRESHOLD_HEATING_LOOP = 50;
-    
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
+
     //public HashMap<Short, VavEquip> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
@@ -153,6 +157,9 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     public void init() {
+
+        pendingTunerChange = false;
+
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
@@ -265,6 +272,8 @@ public abstract class VavProfile extends ZoneProfile {
         co2Loop.setCo2Threshold(co2Threshold);
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
+
+        pendingTunerChange = false;
 
     }
 

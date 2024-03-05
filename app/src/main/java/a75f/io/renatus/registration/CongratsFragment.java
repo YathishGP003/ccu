@@ -118,6 +118,13 @@ public class CongratsFragment extends Fragment {
             textInstruction.setText(R.string.desc_firsttime_carrier);
         }
 
+        if (CCUUiUtil.isAiroverseThemeEnabled(mContext)) {
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_airoverse);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_airoverse);
+        }
+
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
         p.setMargins(0, 0, 0, 80);
 

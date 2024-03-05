@@ -2,7 +2,7 @@
     <string name="app_75f">CCU</string>
     <string name="app_daikin">Daikin</string>
     <string name="app_carrier">ClimaVision</string>
-    <string name="app_airoverse">Airoverse</string>
+    <string name="app_airoverse">Airoverse for Facilities</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -803,8 +803,10 @@
     <string name="title_congrats">CONGRATULATIONS!</string>
     <string name="title_success">You have successfully Installed a 75F System!</string>
     <string name="title_success_carrier">You have successfully Installed a Carrier ClimaVision System!</string>
+    <string name="title_success_airoverse">You have successfully Installed an Airoverse for Facilities System!</string>
     <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="desc_firsttime_carrier">If this is your first installation, the facility manager will receive an email with the Login Password for WebUI.\nOnce logged in please configure the Heatmap and Schedule</string>
+    <string name="desc_firsttime_airoverse">If this is your first installation, the facility manager will receive an email with the Login Password for Airoverse Portal.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="label_ccuname">CCU Name : </string>
     <string name="label_serialno">Serial No. : </string>
     <string name="label_ccuversion">CCU Version : </string>

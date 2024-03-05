@@ -93,6 +93,8 @@ public class AlertsFragment extends Fragment
 						replacement = "SiteLine™";
 					} else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
 						replacement = "ClimaVision";
+					} else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+						replacement = "Airoverse for Facilities";
 					}
 
 					message = message.replace("75F", replacement);

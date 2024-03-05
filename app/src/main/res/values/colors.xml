@@ -106,4 +106,13 @@
     <color name="warning_toast_red">#FF3A42</color>
     <color name="warning_toast_black_background">#CC000000</color>
 
+    <!--Airoverse Theme Color-->
+    <color name="airoverse_primary">#6FC498</color>
+    <color name="airoverse_accent">#6FC498</color>
+    <color name="airoverse_secondary">#1A6FC498</color>
+    <color name="airoverse_hover_01">#CC6FC498</color>
+    <color name="airoverse_hover_02">#806FC498</color>
+    <color name="airoverse_hover_03">#1A6FC498</color>
+    <color name="airoverse_banners">#3C3C3C</color>
+
 </resources>

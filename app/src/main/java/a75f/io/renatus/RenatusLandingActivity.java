@@ -186,8 +186,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.MATCH_PARENT
                     );
-                    int marginStartInPixels = 40;
-                    layoutParams.setMarginStart(marginStartInPixels);
                     mTabLayout.setLayoutParams(layoutParams);
                 }
 

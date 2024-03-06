@@ -365,9 +365,6 @@ public class NamedSchedule extends DialogFragment {
                 String roomRef = getArguments().getString(PARAM_ROOM_REF);
                 ArrayList<Interval> zoneIntervals = namedSchedule.getScheduledIntervals();
                 separateOverNightSchedule(zoneIntervals);
-
-                if (zoneIntervals.isEmpty() || systemIntervals.isEmpty()) return true;
-
                 zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
                 Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size() - 1);
                 LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
@@ -382,7 +379,7 @@ public class NamedSchedule extends DialogFragment {
                     addIntervalSpillWarning(warningMessage, intervalSpills);
                     isValid = false;
                 }
-                if (deadbandValidation(roomRef, warningMessage, namedSchedule)) {
+                if (!deadbandValidation(roomRef, warningMessage, namedSchedule)) {
                     isValid = false;
                 }
 

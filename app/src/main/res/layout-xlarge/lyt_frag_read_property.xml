@@ -205,12 +205,11 @@
 
                     <Spinner
                         android:gravity="right"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        style="@style/customSpinnerDownArrow"
                         android:id="@+id/sp_object_types"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:paddingEnd="@dimen/margin_5"
                         android:paddingTop="@dimen/margin_5"
                         android:paddingBottom="@dimen/margin_5"
@@ -279,12 +278,11 @@
                         android:textStyle="normal" />
 
                     <Spinner
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:id="@+id/sp_property_types"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:paddingEnd="@dimen/margin_5"
                         android:paddingTop="@dimen/margin_5"
                         android:paddingBottom="@dimen/margin_5"

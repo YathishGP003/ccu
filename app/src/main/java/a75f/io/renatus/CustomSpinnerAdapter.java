@@ -54,7 +54,15 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
     public View getCustomView(int position, View convertView, ViewGroup parent, Boolean isGetView) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
-        int highlightColor = ContextCompat.getColor(context, R.color.spinner_item_highlight);
+        int highlightColor;
+        if(BuildConfig.BUILD_TYPE.equals("airoverse_prod")){
+            highlightColor = ContextCompat.getColor(context, R.color.airoverse_secondary);
+        } else if(BuildConfig.BUILD_TYPE.equals("carrier_prod")){
+            highlightColor = ContextCompat.getColor(context, R.color.carrier_75f_secondary);
+        } else if(BuildConfig.BUILD_TYPE.equals("daikin_prod")){
+            highlightColor = ContextCompat.getColor(context, R.color.daikin_75f_secondary);
+        } else
+            highlightColor = ContextCompat.getColor(context, R.color.renatus_75f_secondary);
 
         if (hasImage.get(position)) {
             View row = inflater.inflate(R.layout.custom_dropdown_item_with_image, parent, false);

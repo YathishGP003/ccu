@@ -97,6 +97,8 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
             exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.carrier_75f));
         } else if (CCUUiUtil.isDaikinEnvironment(getApplicationContext())) {
             exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.daikin_75f));
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(getApplicationContext())) {
+            exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.airoverse_primary));
         } else {
             exitSafeMode.setTextColor(ContextCompat.getColor(context, R.color.renatus_75f_primary));
         }

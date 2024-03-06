@@ -50,6 +50,8 @@ public class CCUUiUtil {
             activity.setTheme(R.style.RenatusAppDaikinTheme);
         } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
             activity.setTheme(R.style.RenatusAppCarrierTheme);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppAiroverseTheme);
         }
     }
     public static String getColorCode(Context context) {

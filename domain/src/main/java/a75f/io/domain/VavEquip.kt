@@ -105,4 +105,6 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val seriesFanCmd = Point(DomainName.seriesFanCmd , equipRef)
     val parallelFanCmd = Point(DomainName.parallelFanCmd , equipRef)
     val fanControlOnFixedTimeDelay = Point(DomainName.fanControlOnFixedTimeDelay, equipRef)
+
+    val demandResponseSetback = Point(DomainName.demandResponseSetback, equipRef)
 }

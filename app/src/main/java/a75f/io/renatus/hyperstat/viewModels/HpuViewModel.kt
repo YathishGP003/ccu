@@ -152,6 +152,7 @@ class HpuViewModel(application: Application) : HyperStatViewModel(application) {
                         view.setTextColor(Color.BLACK)
                     }
                 }
+                view.setBackgroundResource(R.drawable.custmspinner)
                 return view
             }
 

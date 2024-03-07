@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
@@ -56,6 +57,7 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -239,8 +241,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         }
 
         damper1Size = view.findViewById(R.id.damper1Size);
-        ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.damper_size, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> damperSizeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.damper_size))));
         damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damper1Size.setAdapter(damperSizeAdapter);
         
@@ -248,7 +249,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         for (DamperShape shape : DamperShape.values()) {
             damperShapes.add(shape.displayName);
         }
-        ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
+        ArrayAdapter<String> damperShapeAdapter = getAdapterValue(damperShapes);
         damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damper1Shape = view.findViewById(R.id.damper1Shape);
         damper1Shape.setAdapter(damperShapeAdapter);
@@ -326,7 +327,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         for (double i = MIN_VAL_FOR_KFactor; i < MAX_VAL_FOR_KFactor; i = i + step_kfactor) {
             spinnerArray.add(df.format(i));
         }
-        kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+        kFactorValues = getAdapterValue(spinnerArray);
         kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         kFactor.setAdapter(kFactorValues);
         kFactor.setSelection(defaultValue_kfactor);
@@ -361,8 +362,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
 
         zonePriority = view.findViewById(R.id.zonePriority);
-        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.zone_priority, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> zonePriorityAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.zone_priority))));
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
         
@@ -371,7 +371,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         for (DamperType damper : DamperType.values()) {
             damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
         }
-        damper1TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper1Types);
+        damper1TypesAdapter = getAdapterValue(damper1Types);
         damper1TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         damper1Type.setAdapter(damper1TypesAdapter);
         
@@ -610,7 +610,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
         }
 
-        ArrayAdapter<String> damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, damper2Types) {
+        ArrayAdapter<String> damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damper2Types) {
 
             @Override
             public boolean isEnabled(int position) {
@@ -628,6 +628,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
+                parent.setPadding(0, 7, 0, 5);
                 TextView view = (TextView)super.getDropDownView(position, convertView, parent);
                 if (position != DamperType.MAT.ordinal()
                         && reheatSpinner.getSelectedItemPosition() > 0
@@ -636,6 +637,15 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 } else {
                     view.setTextColor(Color.BLACK);
                 }
+                view.setBackgroundResource(R.drawable.custmspinner);
+                view.setPadding(20, 0, 20, 0);
+                return view;
+            }
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                parent.setPadding(0, 0, 0, 0);
+                View view = super.getView(position, convertView, parent);
+                view.setPadding(5, 0, 30, 0);
                 return view;
             }
         };
@@ -650,7 +660,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             reheatTypes.add(actuator.displayName);
         }
 
-        ArrayAdapter<String> reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, reheatTypes) {
+        ArrayAdapter<String> reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, reheatTypes) {
 
             @Override
             public boolean isEnabled(int position) {
@@ -667,6 +677,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
+                parent.setPadding(0, 7, 0, 5);
                 TextView view = (TextView)super.getDropDownView(position, convertView, parent);
                 if (position > 0
                         && position <= ReheatType.OneStage.ordinal()
@@ -675,7 +686,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 } else {
                     view.setTextColor(Color.BLACK);
                 }
-
+                view.setBackgroundResource(R.drawable.custmspinner);
+                return view;
+            }
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                parent.setPadding(0, 0, 0, 0);
+                View view = super.getView(position, convertView, parent);
+                view.setPadding(5, 0, 30, 0);
                 return view;
             }
         };
@@ -711,5 +729,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 dabConfig.getOutputs().add(relay1Op);
                 break;
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

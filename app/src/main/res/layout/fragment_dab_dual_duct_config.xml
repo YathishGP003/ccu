@@ -82,7 +82,7 @@
 
                 <Spinner
                     android:id="@+id/analog1OutSpinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="220dp"
                     android:layout_height="42dp"
                     android:layout_gravity="center_vertical"
@@ -124,7 +124,7 @@
 
                 <Spinner
                     android:id="@+id/analog2OutSpinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="220dp"
                     android:layout_height="42dp"
                     android:layout_gravity="center_vertical"
@@ -147,7 +147,7 @@
 
                 <Spinner
                     android:id="@+id/thermistor2Spinner"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
@@ -442,8 +442,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao1MinDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -467,7 +466,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao1MaxDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -489,7 +488,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao1MinDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -515,7 +514,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao1MaxDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -539,7 +538,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao2MinDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -565,7 +564,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao2MaxDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -588,7 +587,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao2MinDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -614,7 +613,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    style="@style/customSpinnerDownArrow"
                     android:id="@+id/ao2MaxDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

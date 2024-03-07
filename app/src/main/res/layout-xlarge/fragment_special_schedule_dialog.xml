@@ -175,9 +175,9 @@
 
                     <Spinner
                         android:id="@+id/heatinglimmin"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="25dp"
                         android:entries="@array/heating_limit"
                         android:overlapAnchor="false"
                         tools:listitem="@layout/spinner_dropdown_item" />
@@ -190,9 +190,9 @@
 
                     <Spinner
                         android:id="@+id/coolinglimmin"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="25dp"
                         android:entries="@array/cooling_limit"
                         android:overlapAnchor="false"
                         tools:listitem="@layout/spinner_dropdown_item" />
@@ -212,7 +212,7 @@
 
                     <Spinner
                         android:id="@+id/heatinglimmax"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="20dp"
                         android:entries="@array/heating_limit"
@@ -227,7 +227,7 @@
 
                     <Spinner
                         android:id="@+id/coolinglimmax"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="20dp"
                         android:entries="@array/cooling_limit"
@@ -257,7 +257,7 @@
 
                     <Spinner
                         android:id="@+id/heatingdeadband"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="20dp"
                         android:entries="@array/deadband"
@@ -273,7 +273,7 @@
 
                     <Spinner
                         android:id="@+id/coolingdeadband"
-                        style="@style/TableSpinner"
+                        style="@style/customSpinnerForNumber"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="20dp"
                         android:entries="@array/deadband"

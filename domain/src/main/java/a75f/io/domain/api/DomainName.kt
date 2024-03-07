@@ -23,6 +23,7 @@ object DomainName {
     const val proportionalKFactor = "proportionalKFactor"
     const val integralKFactor = "integralKFactor"
     const val pidIntegralTime = "pidIntegralTime"
+    const val demandResponseSetback = "demandResponseSetback"
 
     const val rebalanceHoldTime = "rebalanceHoldTime"
     const val constantTempAlertTime = "constantTempAlertTime"

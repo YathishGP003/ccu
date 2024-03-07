@@ -113,6 +113,7 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
 
 /**
@@ -843,8 +844,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			{
 				zoroToHundred.add(val);
 			}
-			humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
-			humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(),R.layout.spinner_dropdown_item, zoroToHundred);
+			humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 			targetMinInsideHumidity.setAdapter(humidityAdapter);
 			targetMinInsideHumidity.setSelection(0);
 			targetMaxInsideHumidity.setAdapter(humidityAdapter);
@@ -881,8 +882,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			zoroToHundred.add(val);
 		}
 		
-		humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
-		humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, zoroToHundred);
+		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		
 		targetMinInsideHumidity.setAdapter(humidityAdapter);

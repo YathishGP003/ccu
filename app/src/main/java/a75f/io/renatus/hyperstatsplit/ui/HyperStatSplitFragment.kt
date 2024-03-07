@@ -25,6 +25,7 @@ import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
 import a75f.io.renatus.views.CustomCCUSwitch
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -281,8 +282,6 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             displayVOC = findViewById(R.id.voc)
             displayPp2p5 = findViewById(R.id.p2pm)
 
-            configUIOnProfile(this)
-
             sensorBusTemps = listOf(
                 SensorBusWidgets(findViewById(R.id.toggle_sensorbus0), findViewById(R.id.sensorbus0_spinner)),
                 SensorBusWidgets(findViewById(R.id.toggle_sensorbus1), findViewById(R.id.sensorbus1_spinner)),
@@ -303,6 +302,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 UniversalInWidgets(findViewById(R.id.toggle_uni_in7), findViewById(R.id.uni7_in_spinner)),
                 UniversalInWidgets(findViewById(R.id.toggle_uni_in8), findViewById(R.id.uni8_in_spinner))
             )
+
+            configUIOnProfile(this)
 
             stagedFanUIs = listOf(
                 StagedFanWidgets(findViewById(R.id.fanOutCoolingStage1Label), findViewById(R.id.fanOutCoolingStage1Spinner)),
@@ -356,9 +357,9 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             analogOut3Test = findViewById(R.id.analog3TestSpinner)
             analogOut4Test = findViewById(R.id.analog4TestSpinner)
 
-            val adapterTestSignal: ArrayAdapter<*> = ArrayAdapter(
+            val adapterTestSignal: ArrayAdapter<*> = CustomSpinnerDropDownAdapter(
                 requireContext(),
-                android.R.layout.simple_spinner_item,
+                R.layout.spinner_dropdown_item,
                 0.rangeTo(100).toList()
             )
 
@@ -1008,19 +1009,21 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         val tvCo2TargetParams = tvZoneCO2Target.layoutParams as LinearLayout.LayoutParams
         if (isDampSelected) {
 
-            llZoneCo2TargetParams.marginStart = 0
+            llZoneCo2TargetParams.marginStart = 10
             llCo2Target.layoutParams = llZoneCo2TargetParams
 
             tvCo2ThresholdParams.weight = 1f
             tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
 
             co2ThresholdParams.weight = 0.5f
+            co2ThresholdParams.width = 140
             zoneCO2Threshold.layoutParams = co2ThresholdParams
 
             tvCo2TargetParams.weight = 1f
             tvZoneCO2Target.layoutParams = tvCo2TargetParams
 
             co2TargetParams.weight = 0.5f
+            co2TargetParams.leftMargin = 25
             zoneCO2Target.layoutParams = co2TargetParams
 
         } else {
@@ -1032,12 +1035,14 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             tvZoneCO2Threshold.layoutParams = tvCo2ThresholdParams
 
             co2ThresholdParams.weight = 1f
+            co2ThresholdParams.width = 170
             zoneCO2Threshold.layoutParams = co2ThresholdParams
 
             tvCo2TargetParams.weight = 1f
             tvZoneCO2Target.layoutParams = tvCo2TargetParams
 
             co2TargetParams.weight = 1f
+            co2TargetParams.leftMargin = 33
             zoneCO2Target.layoutParams = co2TargetParams
 
         }
@@ -1334,21 +1339,38 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
         val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
         adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping()) }
+        val universalAdapter = getAdapterValue(resources.getStringArray(R.array.hyperstatsplit_universal_in_selector))
         var relayPos = 0
 
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
+                CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
                 it.selector.tag = relayPos++
                 CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
         }
         analogOutUIs.forEach {
                 analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping
-                 CCUUiUtil.setSpinnerDropDownColor(analogOutWidgets.selector, context)
+               CCUUiUtil.setSpinnerDropDownColor(analogOutWidgets.selector, context)
         }
+        universalInUIs.forEach {
+            it.selector.adapter = universalAdapter
+            CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
+        }
+        val sensorBusTempsAdapter = getAdapterValue(resources.getStringArray(R.array.hyperstatsplit_sensor_temp_selector))
+        sensorBusTemps.forEach {
+            it.selector.adapter = sensorBusTempsAdapter
+            CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
+        }
+        val sensorBusPressAdapter = getAdapterValue(resources.getStringArray(R.array.hyperstatsplit_sensor_pressure_selector))
+        sensorBusPress.forEach {
+            it.selector.adapter = sensorBusPressAdapter
+            CCUUiUtil.setSpinnerDropDownColor(it.selector, context)
+        }
+
     }
 
     private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
-        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+        return CustomSpinnerDropDownAdapter( requireContext(), R.layout.spinner_dropdown_item, values.toMutableList())
     }
 
     private fun setSpinnerDropDownIconColor() {

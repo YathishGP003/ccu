@@ -9,6 +9,8 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.renatus.R
+import a75f.io.renatus.hyperstat.ui.AnalogOutAdapter
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Application
 import android.content.Context
 import android.view.View
@@ -307,7 +309,7 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
     }
 
     override fun getRelayMappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
-        return ArrayAdapter(context , R.layout.spinner_dropdown_item, values)
+        return CustomSpinnerDropDownAdapter(context , R.layout.spinner_dropdown_item, values.toMutableList())
     }
 
     override fun validateProfileConfig() = true

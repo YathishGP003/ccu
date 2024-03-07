@@ -36,6 +36,7 @@ import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 /**
  * Created by Manjunath K on 15-07-2022.
  */
@@ -307,9 +308,9 @@ class HyperStatFragment : BaseDialogFragment() {
             analogOut3Test = findViewById(R.id.analog3TestSpinner)
 
 
-            val adapterTestSignal: ArrayAdapter<*> = ArrayAdapter(
+            val adapterTestSignal: ArrayAdapter<*> = CustomSpinnerDropDownAdapter(
                 requireContext(),
-                android.R.layout.simple_spinner_item,
+                R.layout.spinner_dropdown_item,
                 0.rangeTo(100).toList()
             )
 
@@ -416,6 +417,16 @@ class HyperStatFragment : BaseDialogFragment() {
                 }
             }
         }
+
+        val analogInAdapter  = ArrayList<ArrayAdapter<*>>()
+            analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai1)))
+           analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai2)))
+
+       analogInUIs.forEachIndexed { index, analogInWidgets ->
+           analogInWidgets.selector.adapter = analogInAdapter[index]
+           CCUUiUtil.setSpinnerDropDownColor(analogInWidgets.selector,context)
+       }
+
     }
 
     private var pendingTempOffsetChange : Boolean = true
@@ -743,21 +754,26 @@ class HyperStatFragment : BaseDialogFragment() {
             val paramsLlCO2Threshold = llCO2Threshold.layoutParams as LinearLayout.LayoutParams
             //TextView of C02Threshold
             val paramsTvCO2Threshold = tvZoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
+            //Spinner of co2Threshold
+            val paramsCo2ThresholdSpinner = zoneCO2Threshold.layoutParams as LinearLayout.LayoutParams
 
             if (isDampSelected) {
                 // If isDampSelected is true, set the margin to start: 10dp, end: 10dp
                 paramsLlCO2Threshold.setMargins(resources.getDimensionPixelSize(R.dimen.start_margin), 0, resources.getDimensionPixelSize(R.dimen.end_margin), 0)
                 // If isDampSelected is true, set the margin end: -48dp
                 paramsTvCO2Threshold.setMargins(0,0,-48,0)
+                paramsCo2ThresholdSpinner.width = 130
             } else {
                 // Otherwise, set the margin to end: 250dp
                 paramsLlCO2Threshold.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.large_end_margin), 0)
                 // If isDampSelected is true, set the margin end: 25dp
-                paramsTvCO2Threshold.setMargins(0,0,25,0)
+                paramsTvCO2Threshold.setMargins(0,0,0,0)
+                paramsCo2ThresholdSpinner.width = 170
             }
             //set the margins
             llCO2Threshold.layoutParams = paramsLlCO2Threshold
             tvZoneCO2Threshold.layoutParams=paramsTvCO2Threshold
+            zoneCO2Threshold.layoutParams=paramsCo2ThresholdSpinner
         }
 
 
@@ -1048,7 +1064,7 @@ class HyperStatFragment : BaseDialogFragment() {
         th2Label.text = viewModel.getTh2SensorLabel()
 
         val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
-        adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping()) }
+        adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping().toMutableList()) }
         var relayPos = 0
         relayUIs.forEach {
                 it.selector.adapter = adapterRelayMapping
@@ -1061,8 +1077,8 @@ class HyperStatFragment : BaseDialogFragment() {
         }
     }
 
-    private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
-        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+    private fun getAdapterValue(values: Array<*>): ArrayAdapter<*> {
+        return CustomSpinnerDropDownAdapter( requireContext(), R.layout.spinner_dropdown_item, values.toMutableList())
     }
 
     private fun setSpinnerDropDownIconColor() {

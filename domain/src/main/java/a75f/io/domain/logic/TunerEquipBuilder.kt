@@ -13,13 +13,12 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
-import io.seventyfivef.ph.core.TagType
 import io.seventyfivef.ph.core.Tags
 
 class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
     fun buildEquipAndPoints(siteRef: String) : String{
-        return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef(hayStack.context), siteRef)
+        return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef(), siteRef)
     }
     fun buildTunerEquipAndPoints(modelDef: ModelDirective, siteRef : String): String {
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone, hayStack.site?.displayName!!))
@@ -276,7 +275,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
 
     fun migrateBuildingTunerPointsForCutOver(equipRef: String, site: Site){
-        val modelDef = ModelLoader.getBuildingEquipModelDef(hayStack.context)
+        val modelDef = ModelLoader.getBuildingEquipModelDef()
         if (modelDef == null) {
             CcuLog.e(Domain.LOG_TAG, " Cut-Over migration aborted. ModelDef does not exist")
             return

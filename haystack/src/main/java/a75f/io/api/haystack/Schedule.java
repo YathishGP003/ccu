@@ -715,12 +715,7 @@ public class Schedule extends Entity
     public ArrayList<Interval> getMergedIntervals(ArrayList<Days> daysSorted) {
     
         ArrayList<Interval> intervals   = getScheduledIntervalsForDays(daysSorted);
-        Collections.sort(intervals, new Comparator<Interval>() {
-                    public int compare(Interval p1, Interval p2) {
-                        return Long.compare(p1.getStartMillis(), p2.getStartMillis());
-                    }
-                }
-                        );
+        intervals.sort((p1, p2) -> Long.compare(p1.getStartMillis(), p2.getStartMillis()));
         
         Stack<Interval> stack=new Stack<>();
         if (intervals.size() > 0)

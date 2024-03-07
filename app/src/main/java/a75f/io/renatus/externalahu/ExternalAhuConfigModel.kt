@@ -43,7 +43,7 @@ class ExternalAhuConfigModel {
     var co2Threshold: String by mutableStateOf("0")
     var co2Target: String by mutableStateOf("0")
     var damperOpeningRate: String by mutableStateOf("0")
-
+    var isStateChanged: Boolean by mutableStateOf(false)
     fun controlName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): String {
         val pointDef = getPointByDomainName(modelDefinition, domainName)
         if (pointDef != null) return pointDef.name

@@ -232,6 +232,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 ProgressDialogUtils.hideProgressDialog()
                 equipModel.value.isDevicePaired = true
                 showToast("Configuration saved successfully", context)
+                configModel.value.isStateChanged = false
             })
         }
     }

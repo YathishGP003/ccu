@@ -369,6 +369,7 @@ fun calculateDSPSetPoints(
 
     val tempDirection = getTempDirection(basicConfig.heatingLoop)
     var fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
+    L.ccu().systemProfile.systemFanLoopOp = fanLoop
     logIt("System Fan loop $fanLoop")
     if (isFanLoopUpdateRequired(tempDirection, conditioningMode)) {
         fanLoop = checkOaoLoop(coolingLoop)

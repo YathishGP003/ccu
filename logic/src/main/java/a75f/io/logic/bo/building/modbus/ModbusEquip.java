@@ -72,7 +72,7 @@ public class ModbusEquip {
         } else {
             modbusEquipType = modbusEquipTypes.get(0);
         }
-        String modbusName = equipmentInfo.getName().split(" ")[0];
+        String modbusName = equipmentInfo.getName();
         String equipDisplayName = equipmentInfo.getEquipDisplayName();
         String equipDis = siteDis + "-"+modbusName+"-"+equipDisplayName+"-"+ equipmentInfo.getSlaveId();
         String gatewayRef = null;

@@ -103,7 +103,7 @@ public class PreferenceUtil {
 
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
-
+    private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
     public static void setContext(Context c) {
         context= c;
     }
@@ -841,5 +841,13 @@ public class PreferenceUtil {
 
     public static void setIsCcuLaunched(Boolean condition) {
         setBooleanPreference(IS_CCU_LAUNCHED, condition);
+    }
+
+    public static boolean getIsNewExternalAhu() {
+        return getBooleanPreference(IS_NEW_EXTERNAL_AHU);
+    }
+
+    public static void setIsNewExternalAhu(Boolean condition) {
+        setBooleanPreference(IS_NEW_EXTERNAL_AHU, condition);
     }
 }

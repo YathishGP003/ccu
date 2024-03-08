@@ -31,6 +31,7 @@ import a75f.io.domain.api.Domain;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.RangeBarView;
 
 
@@ -141,7 +142,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
                 zoneSetBack.add(val);
             }
         }
-        ArrayAdapter<Double> setBackAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoneSetBack);
+        ArrayAdapter<Double> setBackAdapter = getAdapterValue(zoneSetBack);
         setBackAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         unOccupiedZoneSetBack.setAdapter(setBackAdapter);
         if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
@@ -213,6 +214,9 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
     public void onPause() {
         super.onPause();
         rangeSeekBarView.setUnOccupiedFragment(false);
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }
 

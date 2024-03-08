@@ -612,18 +612,37 @@ public class LSmartNode
                     {
                         //In case of vav - series/paralle fan, relay-2 maps to fan
                         if (isEquipType("series", node) || isEquipType("parallel", node)) {
+                            double relay1Threshold = 0;
+                            double relayActivationHysteresis = TunerUtil.readTunerValByQuery("domainName==\"" + DomainName.vavReheatRelayActivationHysteresis + "\"", equipRef);
+                            if (!isRelayTwo(p) && !isAnalog(p)) {
+                                if (hayStack.readHisValById(p.getId()) == 0) { relay1Threshold += relayActivationHysteresis; }
+                            }
+
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
-                                                                 mapDigitalOut(p.getType(), logicalVal > 0)
+                                                                 mapDigitalOut(p.getType(), logicalVal > relay1Threshold)
                             );
                         } else if (isEquipType("chilledBeam", node)) {
                             // In case of vav - acb, relay-1 maps to shut-off valve. No relay 2.
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                     mapDigitalOut(p.getType(), (logicalVal > 0)));
                         } else {
+                            double relay1Threshold = 0;
+                            double relay2Threshold = 50;
+                            double relayActivationHysteresis = TunerUtil.readTunerValByQuery("domainName==\"" + DomainName.vavReheatRelayActivationHysteresis + "\"", equipRef);
+                            if (isRelayTwo(p)) {
+                                if (hayStack.readHisValById(p.getId()) == 0) {
+                                    relay2Threshold += relayActivationHysteresis;
+                                }
+                            } else if (!isAnalog(p)) {
+                                if (hayStack.readHisValById(p.getId()) == 0) {
+                                    relay1Threshold += relayActivationHysteresis;
+                                }
+                            }
+
                             //In case of vav - no fan, relay-2 maps to stage-2
                             mappedVal = (isAnalog(p) ? mapAnalogOut(p.getType(), (short) logicalVal) :
                                     mapDigitalOut(p.getType(), isRelayTwo(p) ?
-                                            logicalVal > 50 : logicalVal > 0)
+                                            logicalVal > relay2Threshold : logicalVal > relay1Threshold)
                             );
                         }
                     }else if (isEquipType("sse", node))

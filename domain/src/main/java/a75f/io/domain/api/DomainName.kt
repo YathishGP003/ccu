@@ -139,6 +139,7 @@ object DomainName {
     const val vavZonePrioritySpread = "vavZonePrioritySpread"
     const val vavZonePriorityMultiplier = "vavZonePriorityMultiplier"
     const val dabHeatingDeadbandMultiplier = "dabHeatingDeadbandMultiplier"
+    const val vavReheatRelayActivationHysteresis = "vavReheatRelayActivationHysteresis"
 
     //ACB-Zone
     const val valveType = "valveType"

@@ -285,6 +285,8 @@ public class DabProfile extends ZoneProfile
     private boolean isSystemFanOn() {
         //This is short cut and not a way to do this. But currently required only for Dab profile.
         String systemStatusMessage = L.ccu().systemProfile.getStatusMessage();
-        return systemStatusMessage.contains("Fan");
+        if (systemStatusMessage.contains("Fan"))
+            return true;
+        return L.ccu().systemProfile.systemFanLoopOp > 0;
     }
 }

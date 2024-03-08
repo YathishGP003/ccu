@@ -256,6 +256,9 @@ public class VavSystemController extends SystemController
         piController.setMaxAllowedError(proportionalSpread);
         piController.setIntegralMaxTimeout(integralMaxTimeout);
 
+        VavSystemProfile profile = (VavSystemProfile) L.ccu().systemProfile;
+        profile.refreshTRTuners();
+
         pendingTunerChange = false;
     }
 

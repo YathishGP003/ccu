@@ -55,6 +55,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.TimeUtils;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBarView;
 
@@ -184,17 +185,11 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
         heatingUserLimitMin = view.findViewById(R.id.heatinglimmin);
-        heatingUserLimitMin.setDropDownWidth(70);
         heatingUserLimitMax = view.findViewById(R.id.heatinglimmax);
-        heatingUserLimitMax.setDropDownWidth(70);
         coolingUserLimitMin = view.findViewById(R.id.coolinglimmin);
-        coolingUserLimitMin.setDropDownWidth(70);
         coolingUserLimitMax = view.findViewById(R.id.coolinglimmax);
-        coolingUserLimitMax.setDropDownWidth(70);
         heatingDeadBand = view.findViewById(R.id.heatingdeadband);
-        heatingDeadBand.setDropDownWidth(70);
         coolingDeadBand = view.findViewById(R.id.coolingdeadband);
-        coolingDeadBand.setDropDownWidth(70);
         followBuilding = view.findViewById(R.id.following_building_toggle);
 
         setSpinnerDropDownIconColor();
@@ -267,17 +262,17 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
         heatDB = CCUHsApi.getInstance().readEntity("point and heating and deadband and schedulable and default");
 
-        ArrayAdapter<String> heatingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingAndCoolingLimit);
+        ArrayAdapter<String> heatingAdapter = getAdapterValue(heatingAndCoolingLimit);
         heatingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingUserLimitMax.setAdapter(heatingAdapter);
         heatingUserLimitMin.setAdapter(heatingAdapter);
 
-        ArrayAdapter<String> coolingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingAndCoolingLimit);
+        ArrayAdapter<String> coolingAdapter = getAdapterValue(heatingAndCoolingLimit);
         coolingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingUserLimitMin.setAdapter(coolingAdapter);
         coolingUserLimitMax.setAdapter(coolingAdapter);
 
-        ArrayAdapter<String> deadBandAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, deadBand);
+        ArrayAdapter<String> deadBandAdapter = getAdapterValue(deadBand);
         deadBandAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingDeadBand.setAdapter(deadBandAdapter);
         heatingDeadBand.setAdapter(deadBandAdapter);
@@ -824,17 +819,17 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             }
         }
 
-        ArrayAdapter<String> heatingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingAndCoolingLimit);
+        ArrayAdapter<String> heatingAdapter = getAdapterValue(heatingAndCoolingLimit);
         heatingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingUserLimitMax.setAdapter(heatingAdapter);
         heatingUserLimitMin.setAdapter(heatingAdapter);
 
-        ArrayAdapter<String> coolingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingAndCoolingLimit);
+        ArrayAdapter<String> coolingAdapter = getAdapterValue(heatingAndCoolingLimit);
         coolingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingUserLimitMin.setAdapter(coolingAdapter);
         coolingUserLimitMax.setAdapter(coolingAdapter);
 
-        ArrayAdapter<String> deadBandAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, deadBand);
+        ArrayAdapter<String> deadBandAdapter = getAdapterValue(deadBand);
         deadBandAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingDeadBand.setAdapter(deadBandAdapter);
         heatingDeadBand.setAdapter(deadBandAdapter);
@@ -894,5 +889,8 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         CCUUiUtil.setSpinnerDropDownColor(heatingUserLimitMax, this.getContext());
         CCUUiUtil.setSpinnerDropDownColor(heatingUserLimitMin, this.getContext());
         CCUUiUtil.setSpinnerDropDownColor(heatingDeadBand, this.getContext());
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

@@ -159,6 +159,10 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
+        if (HSUtil.isVAVZonePriorityConfig(pointUid, CCUHsApi.getInstance())) {
+            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint, hayStack);
+        }
+
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();

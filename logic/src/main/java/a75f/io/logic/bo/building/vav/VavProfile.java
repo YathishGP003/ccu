@@ -230,6 +230,14 @@ public abstract class VavProfile extends ZoneProfile {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
     }
 
+    public void updateZonePriority(int newPriority) {
+        ZonePriority zonePriority = ZonePriority.values()[(int)newPriority];
+        satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+    }
+
     private void initializeCfmController(String equipId) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile initializeCfmController");
         double cfmProportionalGain = (vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() > 0) ? vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() : 0.5;

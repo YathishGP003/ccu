@@ -210,26 +210,30 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         LabelTextView(text = "Discharge Airflow")
                     }
                     Spacer(modifier=Modifier.width(63.dp))
-                    DropDownWithLabel(
-                        label = "Thermistor-2",
-                        list = viewModel.condensateSensorTypesList,
-                        previewWidth = 130,
-                        expandedWidth = 120,
-                        onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
-                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
-                        spacerLimit = 129
-                    )
+                    Row{
+                        HeaderTextView(text = "Relay 1",padding=0)
+                        Spacer(modifier = Modifier.width(180.dp))
+                        LabelTextView(text = "Shut-Off Valve")
+                    }
+
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier=Modifier.width(78.dp))
-                    Row{
-                        HeaderTextView(text = "Relay 1",padding=0)
-                        Spacer(modifier = Modifier.width(260.dp))
-                        LabelTextView(text = "Shut-Off Valve")
-                    }
+                    DropDownWithLabel(
+                        label = "Thermistor-2",
+                        list = viewModel.condensateSensorTypesList,
+                        previewWidth = 160,
+                        expandedWidth = 272,
+                        onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
+                        defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
+                        spacerLimit = 175,
+                        paddingLimit = 10,
+                        heightValue = 125
+                    )
+
                 }
 
                 Spacer(modifier=Modifier.height(20.dp))
@@ -244,10 +248,10 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
                         )
                     }
-                    Spacer(modifier=Modifier.width(94.dp))
+                    Spacer(modifier=Modifier.width(91.dp))
                     Row {
                         HeaderTextView(text = viewModel.profileConfiguration.autoAway.disName, padding = 10)
-                        Spacer(modifier = Modifier.width(245.dp))
+                        Spacer(modifier = Modifier.width(247.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoAway,
                             onEnabled = { it -> viewModel.viewState.autoAway = it }
@@ -266,10 +270,10 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
                         )
                     }
-                    Spacer(modifier=Modifier.width(94.dp))
+                    Spacer(modifier=Modifier.width(91.dp))
                     Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName,padding=10)
-                        Spacer(modifier = Modifier.width(154.dp))
+                        Spacer(modifier = Modifier.width(156.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
@@ -288,7 +292,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
                         )
                     }
-                    Spacer(modifier=Modifier.width(97.dp))
+                    Spacer(modifier=Modifier.width(94.dp))
                     Row {
                         if (viewModel.viewState.enableCFMControl) {
                             DropDownWithLabel(

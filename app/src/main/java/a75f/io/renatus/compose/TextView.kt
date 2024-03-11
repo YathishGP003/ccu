@@ -175,7 +175,7 @@ fun SubTitle(text: String) {
 }
 
 @Composable
-fun SaveTextView(text: String,isChanged: Boolean = false,onClick: () -> Unit) {
+fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
     Button(
         enabled = isChanged,
         onClick = {onClick()},

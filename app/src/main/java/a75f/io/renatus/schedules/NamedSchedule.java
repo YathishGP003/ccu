@@ -122,7 +122,7 @@ public class NamedSchedule extends DialogFragment {
     Button setButton;
     Button cancelButton;
     ImageView closeButton;
-    private boolean flag = false;
+    private boolean NamedScheduleScreenCheck = false;
 
     @Override
     public void onStop() {
@@ -201,7 +201,7 @@ public class NamedSchedule extends DialogFragment {
         }
 
         setButton.setOnClickListener(v -> {
-            flag = true;
+            NamedScheduleScreenCheck = true;
             if (validateNamedSchedule()) {
                 CcuLog.d(TAG, "Valid Named Schedule");
                 try {
@@ -791,6 +791,6 @@ public class NamedSchedule extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (!flag && OnCancel != null) OnCancel.onCancelButtonClicked();
+        if (!NamedScheduleScreenCheck && OnCancel != null) OnCancel.onCancelButtonClicked();
     }
 }

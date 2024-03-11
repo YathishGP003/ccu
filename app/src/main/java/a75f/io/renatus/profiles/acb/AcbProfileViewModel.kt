@@ -206,6 +206,7 @@ class AcbProfileViewModel : ViewModel() {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             acbProfile.init()
             setOutputTypes(profileConfiguration)
+            updateCondensateSensor(profileConfiguration)
             setScheduleType(profileConfiguration)
         }
 
@@ -312,6 +313,27 @@ class AcbProfileViewModel : ViewModel() {
         var analogOut2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
         var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getValveTypeString(config)).build(), analogOut2.get("id").toString())
+
+    }
+
+    private fun updateCondensateSensor(config: AcbProfileConfiguration) {
+        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+        var th2In = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.th2In + "\"")
+        var th2InPoint = RawPoint.Builder().setHashMap(th2In)
+
+        if (profileConfiguration.condensateSensorType.enabled) {
+            // N/C Condensation Sensor
+            val condensateNcPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + config.nodeAddress + "\"")
+            if (condensateNcPoint.containsKey("id")) {
+                hayStack.updatePoint(th2InPoint.setPointRef(condensateNcPoint.get("id").toString()).build(), th2In.get("id").toString())
+            }
+        } else {
+            // N/O Condensation Sensor
+            val condensateNoPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + config.nodeAddress + "\"")
+            if (condensateNoPoint.containsKey("id")) {
+                hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint.get("id").toString()).build(), th2In.get("id").toString())
+            }
+        }
 
     }
 

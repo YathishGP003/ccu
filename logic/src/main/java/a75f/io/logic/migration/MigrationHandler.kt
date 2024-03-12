@@ -50,7 +50,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         doVavDomainModelMigration()
-
+        createMigrationVersionPoint(CCUHsApi.getInstance())
         if (!isMigrationRequired()) {
             return
         }
@@ -199,6 +199,22 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             22.0 -> 9.0
             24.0 -> 10.0
             else -> 0.0
+        }
+    }
+
+    fun updateMigrationVersion(){
+        val pm = Globals.getInstance().applicationContext.packageManager
+        val pi: PackageInfo
+        try {
+            pi = pm.getPackageInfo("a75f.io.renatus", 0)
+            val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
+            val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
+            CcuLog.d("CCU_DOMAIN", "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            if (currentAppVersion != migrationVersion) {
+                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace();
         }
     }
 

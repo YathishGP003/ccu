@@ -1,6 +1,7 @@
 package a75f.io.domain.migration
 
 import a75f.io.domain.api.Domain
+import a75f.io.domain.util.*
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import android.util.Log
@@ -24,11 +25,12 @@ class ModelValidator {
             /*   val newVersionFiles = diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
            // TODO I think no need to validate the current models.
            // val versionFiles = diffManger.getModelFileVersionDetails(DiffManger.VERSION)*/
-            metaDetails.forEach {
-                val isValidDefinition = isValidaModel(it.modelId, path)
+            val requiredModels = getRequiredModels()
+            requiredModels.forEach {
+                val isValidDefinition = isValidaModel(it, path)
                 if (!isValidDefinition) {
-                    inValidModels.add(it.modelId)
-                    Log.i(Domain.LOG_TAG, "Invalid Model "+it.modelId)
+                    inValidModels.add(it)
+                    Log.i(Domain.LOG_TAG, "Invalid Model $it")
                 }
             }
             return inValidModels
@@ -64,6 +66,24 @@ class ModelValidator {
 
         private fun logIt(modelType: String, id: String){
             CcuLog.i (Domain.LOG_TAG, " $modelType Valid Model found. Model Id : $id")
+        }
+
+         fun getRequiredModels(): List<String> {
+            return listOf(
+                MODEL_BUILDING_EQUIP,
+                MODEL_SN_VAV_NO_FAN,
+                MODEL_SN_VAV_SERIES_FAN,
+                MODEL_SN_VAV_PARALLEL_FAN,
+                MODEL_HN_VAV_NO_FAN,
+                MODEL_HN_VAV_SERIES_FAN,
+                MODEL_HN_VAV_PARALLEL_FAN,
+                MODEL_SN_VAV_ACB,
+                MODEL_HN_VAV_ACB,
+                MODEL_SMART_NODE_DEVICE,
+                MODEL_HELIO_NODE_DEVICE,
+                MODEL_EXTERNAL_AHU_DAB,
+                MODEL_EXTERNAL_AHU_VAV
+            )
         }
     }
 }

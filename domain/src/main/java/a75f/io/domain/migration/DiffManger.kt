@@ -3,10 +3,10 @@ package a75f.io.domain.migration
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.EntityConfiguration
+import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import android.content.Context
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDiff
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.common.Version
@@ -33,13 +33,15 @@ class DiffManger(var context: Context?) {
      * check the model version and find the diff and update the model definition
      */
     fun processModelMigration(siteRef: String) {
-        Log.i(Domain.LOG_TAG, "processModelMigration")
+        CcuLog.i(Domain.LOG_TAG, "processModelMigration")
         val newVersionFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(ASSETS_VERSION_FILE_PATH)
         val backupFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(MODELS_VERSION_FILE_PATH)
-        Log.i(Domain.LOG_TAG, " Found ${backupFiles.size} old models at $BACKUP_FIle_PATH$VERSION")
-        Log.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} new models at $NEW_FILE_PATH$VERSION")
-        val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles, NEW_FILE_PATH)
-        Log.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
+        CcuLog.i(Domain.LOG_TAG, " Found ${backupFiles.size} old models at $BACKUP_FIle_PATH$VERSION")
+        CcuLog.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} new models at $NEW_FILE_PATH$VERSION")
+
+       // model validation logic is removed for time being
+        /*val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles, NEW_FILE_PATH)
+        CcuLog.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
 
         if (anyInvalidModels.isNotEmpty()) {
             anyInvalidModels.forEach {
@@ -49,14 +51,23 @@ class DiffManger(var context: Context?) {
                     newVersionFiles.remove(invalidModel)
                 }
             }
-        }
+        }*/
         if (newVersionFiles.isEmpty()) {
-            Log.e(Domain.LOG_TAG, "No valid model found for migration ")
+            CcuLog.e(Domain.LOG_TAG, "No valid model found for migration ")
             return
+        }
+        val newFileIterator = newVersionFiles.iterator()
+        val requiredModels = ModelValidator.getRequiredModels()
+        val requiredModelFiles : MutableList<ModelMeta>  = mutableListOf()
+        while (newFileIterator.hasNext()) {
+            val item = newFileIterator.next()
+            if (item.modelId in requiredModels) {
+                requiredModelFiles.add(item)
+            }
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance(), migrationCompletedListener)
         val versionFiles = getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
-        updateEquipModels(newVersionFiles, versionFiles, migrationHandler, siteRef)
+        updateEquipModels(requiredModelFiles, versionFiles, migrationHandler, siteRef)
     }
 
     fun updateEquipModels(
@@ -71,8 +82,8 @@ class DiffManger(var context: Context?) {
             if (currentModelMeta != null) {
                 CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
                 if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
-                    val originalModel = getModelDetective("$BACKUP_FIle_PATH${version.modelId}.json")
-                    val newModel = getModelDetective("$NEW_FILE_PATH${version.modelId}.json")
+                    val originalModel = getModelDirective("$BACKUP_FIle_PATH${version.modelId}.json")
+                    val newModel = ModelCache.getModelById(version.modelId)
                     //  Retrieve the current equip map by using modelID
                     val currentEquipMap = Domain.readEquip(version.modelId);
                     // Ensure that the current model JSON and new model JSON are not null
@@ -178,7 +189,7 @@ class DiffManger(var context: Context?) {
      * Function to get the model Definition from file
      * @return ModelDirective
      */
-    private fun getModelDetective(modelFile: String): ModelDirective? {
+    private fun getModelDirective(modelFile: String): ModelDirective? {
         return ResourceHelper.loadModelDefinition(modelFile)
     }
 

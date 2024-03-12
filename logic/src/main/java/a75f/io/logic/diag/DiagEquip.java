@@ -331,7 +331,6 @@ public class DiagEquip
             setDiagHisVal("total and memory", mi.totalMem/1048576L);
             setDiagHisVal("low and memory",  mi.lowMemory? 1.0 :0);
         }
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
 
         PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
         PackageInfo pi;
@@ -339,15 +338,11 @@ public class DiagEquip
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
-            String migVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and migration");
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
-            }
-            if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion))) {
-                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
             }
             if(!PreferenceUtil.isSRMigrationPointUpdated() && SchedulableMigrationKt.validateMigration()) {
                 MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());

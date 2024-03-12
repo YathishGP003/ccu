@@ -1151,6 +1151,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneDetails.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
@@ -1375,7 +1376,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -2132,6 +2132,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         //imageView.setTag(gridItemObj);
         nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         textEquipment.setText(zoneTitle);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
@@ -2292,7 +2293,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -2333,7 +2333,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -4312,7 +4311,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -4354,7 +4352,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     selectedView = seekArc.getId();
                     status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

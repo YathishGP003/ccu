@@ -106,9 +106,6 @@ public class OccupancyHandler implements Occupiable {
         if (noconditioning.hasTriggered()) {
             return UnoccupiedTrigger.NoConditioning;
         }
-        if (windowSensor.hasTriggered()) {
-            return UnoccupiedTrigger.DoorWindowInput;
-        }
 
         return UnoccupiedTrigger.Unoccupied;
     }

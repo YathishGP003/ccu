@@ -20,6 +20,9 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
     private ArrayList<String> values;
     private ArrayList<Boolean> hasImage;
     private int selectedPosition = -1;
+    final String AIROVERSE_PROD = "airoverse_prod";
+    final String CARRIER_PROD = "carrier_prod";
+    final String DAIKIN_PROD = "daikin_prod";
 
     public CustomSpinnerAdapter(Context context, int textViewResourceId, ArrayList<String> values, ArrayList<Boolean> hasImage) {
         super(context, textViewResourceId, values);
@@ -55,11 +58,11 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
         int highlightColor;
-        if(BuildConfig.BUILD_TYPE.equals("airoverse_prod")){
+        if(BuildConfig.BUILD_TYPE.equals(AIROVERSE_PROD)){
             highlightColor = ContextCompat.getColor(context, R.color.airoverse_secondary);
-        } else if(BuildConfig.BUILD_TYPE.equals("carrier_prod")){
+        } else if(BuildConfig.BUILD_TYPE.equals(CARRIER_PROD)){
             highlightColor = ContextCompat.getColor(context, R.color.carrier_75f_secondary);
-        } else if(BuildConfig.BUILD_TYPE.equals("daikin_prod")){
+        } else if(BuildConfig.BUILD_TYPE.equals(DAIKIN_PROD)){
             highlightColor = ContextCompat.getColor(context, R.color.daikin_75f_secondary);
         } else
             highlightColor = ContextCompat.getColor(context, R.color.renatus_75f_secondary);

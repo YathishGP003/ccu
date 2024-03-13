@@ -110,20 +110,7 @@ public class CongratsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_congrats, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getContext().getApplicationContext();
-
-        if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
-            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
-            textSuccess.setText(R.string.title_success_carrier);
-            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
-            textInstruction.setText(R.string.desc_firsttime_carrier);
-        }
-
-        if (CCUUiUtil.isAiroverseThemeEnabled(mContext)) {
-            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
-            textSuccess.setText(R.string.title_success_airoverse);
-            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
-            textInstruction.setText(R.string.desc_firsttime_airoverse);
-        }
+        setPartnerSpecificCongratsPage(rootView);
 
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
         p.setMargins(0, 0, 0, 80);
@@ -200,6 +187,19 @@ public class CongratsFragment extends Fragment {
         return rootView;
     }
 
+    private void setPartnerSpecificCongratsPage(View rootView) {
+        if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_carrier);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_carrier);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(mContext)) {
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_airoverse);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_airoverse);
+        }
+    }
 
     @Override
     public void onAttach(Context context) {

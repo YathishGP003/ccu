@@ -183,6 +183,7 @@ public class VavReheatProfile extends VavProfile
     }
     
     private void initLoopVariables() {
+        dischargeSp = 0;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
         setDamperLimits( (short) nodeAddr, damper);
@@ -224,10 +225,9 @@ public class VavReheatProfile extends VavProfile
             CcuLog.d(L.TAG_CCU_ZONE, "updateReheatDuringSystemCooling : Invalid SAT , Use roomTemp "+roomTemp);
             supplyAirTemp = roomTemp;
         }
-        double dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * Math.min(heatingLoopOp, 50) / 50;
+        dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * Math.min(heatingLoopOp, 50) / 50;
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valveController.dump();
-        vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
         int valvePosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
     
         CcuLog.d(L.TAG_CCU_ZONE,

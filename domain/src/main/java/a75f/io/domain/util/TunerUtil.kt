@@ -76,7 +76,7 @@ object TunerUtil {
         domainName: String,
         hayStack: CCUHsApi
     ): Boolean {
-        val systemTunerPoints = hayStack.readAllEntities("point and tuner and not default and not zone and domainName == \"$domainName\"")
+        val systemTunerPoints = hayStack.readAllEntities("point and tuner and not default and domainName == \"$domainName\"")
         val systemTunerPoint = systemTunerPoints.stream()
             .filter { point: java.util.HashMap<*, *> ->
                 point["id"].toString() != dstPointId

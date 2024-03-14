@@ -1178,8 +1178,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" +roomRefZone + "\"").floatValue();
-            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
-            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
+            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
+            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
         }else{
             heatUpperLimitVal = (float)heatUpperlimit;
             heatLowerLimitVal = (float)heatLowerlimit;
@@ -1928,8 +1928,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
-            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
-            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
+            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
+            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
         }else{
             buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin().floatValue();
             buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax().floatValue();

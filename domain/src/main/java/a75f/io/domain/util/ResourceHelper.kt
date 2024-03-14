@@ -134,7 +134,7 @@ object ResourceHelper {
         return modelDirectiveFactory.fromJson(modelData!!)
     }
 
-    private fun getObjectMapper() : ObjectMapper {
+    fun getObjectMapper() : ObjectMapper {
         return jacksonObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)

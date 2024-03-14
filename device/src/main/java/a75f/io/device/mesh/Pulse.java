@@ -204,7 +204,7 @@ public class Pulse
 								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
-								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+								hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 								if (oldCondensateSensor != curCondensateSensor) {
 									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
 								}
@@ -262,7 +262,7 @@ public class Pulse
 							double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if (oldDisTempVal != curDisTempVal) {
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisTempVal);
 								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
@@ -710,7 +710,7 @@ public class Pulse
 								curTempVal=curTh2TempVal;
 								isTh2RoomTempInTI = true;
 							}
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if(oldTh2TempVal != curTh2TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
 							CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
@@ -747,7 +747,7 @@ public class Pulse
 							double curTh1TempVal =
 									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							th1TempVal = curTh1TempVal;
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh1TempVal;
 								isTh1RoomTempInTI = true;
@@ -937,7 +937,7 @@ public class Pulse
 						th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 						th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 						double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 						hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));
 						break;
 					case ANALOG_IN_ONE:
@@ -956,7 +956,7 @@ public class Pulse
 						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 						if(oldTh1TempVal != curTh1TempVal)
 							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
 						break;

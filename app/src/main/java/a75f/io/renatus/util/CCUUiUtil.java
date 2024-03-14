@@ -50,6 +50,8 @@ public class CCUUiUtil {
             activity.setTheme(R.style.RenatusAppDaikinTheme);
         } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
             activity.setTheme(R.style.RenatusAppCarrierTheme);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppAiroverseTheme);
         }
     }
     public static String getColorCode(Context context) {
@@ -197,6 +199,11 @@ public class CCUUiUtil {
     public static boolean isCarrierThemeEnabled(Context context) {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
+    }
+
+    public static boolean isAiroverseThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Airoverse_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.prefs_airoverse_theme_key), false);
     }
 
     public static boolean isValidMacAddress(String ip) {

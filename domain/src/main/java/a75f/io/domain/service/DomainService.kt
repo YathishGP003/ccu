@@ -16,7 +16,7 @@ class DomainService {
 
     fun readModbusModelsList(query: String, callback: ResponseCallback) {
         val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
-            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")) {
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod") || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {
             apiService.getExternalModbusModelsList(query)
         } else {
             apiService.getModbusModelsList(query)
@@ -37,7 +37,8 @@ class DomainService {
 
     fun readModelById(modelId: String,version: String, callback: ResponseCallback){
         val call: Call<ResponseBody> = if (BuildConfig.BUILD_TYPE.contentEquals("carrier_prod")
-            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")) {
+            || BuildConfig.BUILD_TYPE.contentEquals("daikin_prod")
+            || BuildConfig.BUILD_TYPE.contentEquals("airoverse_prod")) {
             apiService.getExternalModelById(modelId,version)
         } else {
             apiService.getModelById(modelId,version)

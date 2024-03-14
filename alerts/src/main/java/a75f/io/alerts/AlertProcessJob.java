@@ -73,6 +73,7 @@ public class AlertProcessJob
             AlertManager alertManager = AlertManager.getInstance();
             alertManager.fetchPredefinedAlertsIfEmpty();
             alertManager.processAlerts();
+            alertManager.processAlertBox();
         } catch (Exception e) {
             CcuLog.w(TAG, "AlertProcessJob Exception: " + e.getMessage(), e);
             e.printStackTrace();

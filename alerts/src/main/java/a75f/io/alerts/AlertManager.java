@@ -112,6 +112,11 @@ public class AlertManager
         repo.processAlertDefs();
     }
 
+    public void processAlertBox() {
+        if (! repoCheck()) return;
+        repo.handleAlertBoxItemsExceedingThreshold();
+    }
+
     public void generateAlert(String title, String msg){
         if (! repoCheck()) return;
         repo.generateAlert(title,msg, "");

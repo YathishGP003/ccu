@@ -119,9 +119,11 @@ public class CCUUtils
     public static String getSupportMsgContent(Context context){
         if(isDaikinEnvironment(context))
             return "please contact SiteLine\u2122 Customer Support.";
-        else if (isCarrierEnvironment(context)) {
+        else if (isCarrierEnvironment(context))
             return "please contact ClimaVision Customer Support.";
-        } else
+        else if (isAiroverseEnvironment(context))
+            return "please contact Airoverse for Facilities Customer Support.";
+        else
             return "please contact 75F Customer Support.";
     }
 
@@ -225,6 +227,11 @@ public class CCUUtils
     public static boolean isCarrierEnvironment(Context context){
         return BuildConfig.BUILD_TYPE.equalsIgnoreCase(context.getString(R.string.Carrier_Environment));
     }
+
+    public static boolean isAiroverseEnvironment(Context context){
+        return BuildConfig.BUILD_TYPE.equalsIgnoreCase("airoverse_prod");
+    }
+
     public static boolean isRecommendedVersionCheckIsNotFalse() {
         try {
             Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");

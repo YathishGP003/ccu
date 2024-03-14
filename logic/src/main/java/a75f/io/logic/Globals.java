@@ -324,12 +324,13 @@ public class Globals {
             @Override
             public void run()
             {
+                MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
                     ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
-                        new MigrationHandler(CCUHsApi.getInstance()).doMigration();
+                        migrationHandler.doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
                         performBuildingTunerUprades(site);
                         migrateHeartbeatPointForEquips(site);
@@ -351,9 +352,7 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
-
-                    //TODO - Find the right place..For now just doing if registered already
-                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                         DiffManger diffManger = new DiffManger(getApplicationContext());
                         diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
                         diffManger.processModelMigration(site.get("id").toString());
@@ -372,8 +371,9 @@ public class Globals {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
                     }
                     isInitCompleted = true;
-                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                        migrationHandler.updateMigrationVersion();
                     }
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,

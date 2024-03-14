@@ -6,10 +6,8 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
@@ -17,10 +15,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -30,7 +25,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -38,10 +32,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.truncate
 
 /**
  * Created by Manjunath K on 18-07-2023.
@@ -183,12 +175,15 @@ fun SubTitle(text: String) {
 }
 
 @Composable
-fun SaveTextView(text: String,onClick: () -> Unit) {
+fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
     Button(
+        enabled = isChanged,
         onClick = {onClick()},
         colors = ButtonDefaults.buttonColors(
             contentColor = primaryColor,
-            containerColor = Color.Transparent // text color
+            containerColor = Color.Transparent, // text color
+            disabledContentColor = Color.Gray,
+            disabledContainerColor = Color.Transparent
         )
     ) {
         Spacer(modifier = Modifier.width(width = 8.dp))

@@ -202,12 +202,11 @@
                         android:textStyle="normal" />
 
                     <Spinner
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:id="@+id/sp_object_types"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:padding="@dimen/margin_5" />
                 </LinearLayout>
 
@@ -273,12 +272,11 @@
                         android:textStyle="normal" />
 
                     <Spinner
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:id="@+id/sp_property_types"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:padding="@dimen/margin_5" />
                 </LinearLayout>
 
@@ -353,12 +351,11 @@
                         android:textStyle="normal" />
 
                     <Spinner
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:id="@+id/sp_data_types"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:padding="@dimen/margin_5" />
                 </LinearLayout>
 

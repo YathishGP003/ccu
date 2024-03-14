@@ -186,8 +186,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.MATCH_PARENT
                     );
-                    int marginStartInPixels = 40;
-                    layoutParams.setMarginStart(marginStartInPixels);
                     mTabLayout.setLayoutParams(layoutParams);
                 }
 
@@ -630,7 +628,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             powerbylogo.setVisibility(View.VISIBLE);
         }else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
-            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_75f_powered_by, null));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else if (CCUUiUtil.isAiroverseThemeEnabled(this)) {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_brand_logo, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_75f_powered_by, null));
             powerbylogo.setVisibility(View.VISIBLE);
         }else {
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));

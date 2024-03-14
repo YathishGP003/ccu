@@ -203,11 +203,10 @@
 
                     <Spinner
                         android:id="@+id/sp_object_types"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:gravity="right"
                         android:paddingTop="@dimen/margin_5"
                         android:paddingEnd="@dimen/margin_5"
@@ -277,11 +276,10 @@
 
                     <Spinner
                         android:id="@+id/sp_property_types"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        style="@style/customSpinnerDownArrow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/spinner_bg_down"
                         android:paddingTop="@dimen/margin_5"
                         android:paddingEnd="@dimen/margin_5"
                         android:paddingBottom="@dimen/margin_5" />

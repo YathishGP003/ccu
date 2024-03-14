@@ -69,7 +69,7 @@ public abstract class DabSystemProfile extends SystemProfile
     
     public void setSystemLoopOp(String loop, double val)
     {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and " + loop, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and not purge and " + loop, val);
     }
     
     public void addDabSystemTuners(String equipref)

@@ -32,6 +32,38 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="50dp"
+            android:orientation="vertical">
+
+            <a75f.io.renatus.views.OaoArc
+                android:id="@+id/oaoArc"
+                android:layout_width="200dp"
+                android:layout_height="280dp"
+                android:layout_marginBottom="20dp"
+                android:visibility="visible" />
+
+            <NumberPicker
+                android:id="@+id/systemModePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/oaoArc"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:theme="?DefaultNumberPickerTheme">
+
+            </NumberPicker>
+
+        </RelativeLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -40,34 +72,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="80dp"
-                android:layout_marginBottom="50dp"
-                android:orientation="vertical">
-
-                <a75f.io.renatus.views.OaoArc
-                    android:id="@+id/oaoArc"
-                    android:layout_width="200dp"
-                    android:layout_height="280dp"
-                    android:layout_marginBottom="20dp"
-                    android:visibility="visible" />
-
-                <NumberPicker
-                    android:id="@+id/systemModePicker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/oaoArc"
-                    android:layout_centerInParent="true"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="30dp"
-                    android:theme="?DefaultNumberPickerTheme">
-
-                </NumberPicker>
-
-            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -137,7 +141,7 @@
                         android:id="@+id/last_updated_time_ccu_hb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -225,7 +229,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -245,7 +249,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout
@@ -282,7 +286,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -303,7 +307,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
 
                         </LinearLayout>
 
@@ -341,7 +345,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -363,7 +367,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -398,7 +402,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -418,7 +422,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
 
@@ -441,7 +445,7 @@
                             android:id="@+id/external_damper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -468,9 +472,9 @@
 
                         <Spinner
                             android:id="@+id/targetMinInsideHumidity"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            style="@style/customSpinnerForNumber"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="42dp"
                             android:entries="@array/hvac_stage_selector"
@@ -492,6 +496,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="end"
+                        android:layout_marginEnd="10dp"
                         android:orientation="horizontal">
 
                         <TextView
@@ -503,9 +508,8 @@
 
                         <Spinner
                             android:id="@+id/targetMaxInsideHumidity"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            style="@style/customSpinnerForNumber"
+                            android:paddingRight="20dp"
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="42dp"
                             android:entries="@array/hvac_stage_selector"
@@ -675,7 +679,7 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="16dp"
+                        android:layout_marginLeft="14dp"
                         android:orientation="horizontal">
 
                         <TextView
@@ -684,13 +688,14 @@
                             android:layout_height="wrap_content"
                             android:text="Last Updated : "
                             android:textAppearance="@style/title_normal"
+                            android:textSize="22sp"
                             android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/external_last_updated_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -718,6 +723,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="30dp"
                             android:text="@string/txt_intrinsic_schedule"
+                            android:textStyle="bold"
                             android:textAppearance="@style/label_black" />
 
                         <TextView
@@ -1358,7 +1364,7 @@
                             android:id="@+id/last_updated_status_oao"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -1498,7 +1504,7 @@
                         android:id="@+id/last_updated_statusEM"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -1553,7 +1559,7 @@
                         android:id="@+id/last_updated_statusBTU"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -1566,4 +1572,5 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 </LinearLayout>

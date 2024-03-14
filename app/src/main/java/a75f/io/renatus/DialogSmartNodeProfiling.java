@@ -286,11 +286,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_acb)
     void onACBOnClick()
     {
-        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
-        } else {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
-        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_ACB, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
@@ -398,11 +393,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavNoFan)
     void onVAVNoFanOnClick()
     {
-        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
-        } else {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
-        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
@@ -411,11 +401,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavSeriesFan)
     void onVAVSeriesFanOnClick()
     {
-        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
-        } else {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
-        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,
@@ -429,11 +414,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavParallelFan)
     void onVAVParallelFanOnClick()
     {
-        if (NodeType.valueOf(nodeType).equals(NodeType.HELIO_NODE)) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
-        } else {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
-        }
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
                                                                     mRoomName,
                                                                     mFloorName,

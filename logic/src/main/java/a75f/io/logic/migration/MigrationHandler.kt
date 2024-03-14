@@ -4,19 +4,24 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
-import a75f.io.domain.logic.EquipBuilder
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
-import a75f.io.domain.util.ModelSource
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -45,7 +50,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         doVavDomainModelMigration()
-
+        createMigrationVersionPoint(CCUHsApi.getInstance())
         if (!isMigrationRequired()) {
             return
         }
@@ -131,8 +136,30 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 else -> ModelLoader.getSmartNodeVavNoFanModelDef()
             }
             val equipDis = "${site?.displayName}-VAV-${it["group"]}"
-            equipBuilder.doCutOverMigration(it["id"].toString(), model as SeventyFiveFProfileDirective,
-                                    equipDis, VavZoneProfileCutOverMapping.entries )
+
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = when {
+                it.containsKey("series") -> ProfileType.VAV_SERIES_FAN
+                it.containsKey("parallel") -> ProfileType.VAV_PARALLEL_FAN
+                else -> ProfileType.VAV_REHEAT
+            }
+
+            val profileConfiguration = VavProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(it["id"].toString(), model,
+                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration)
 
             val vavEquip = VavEquip(it["id"].toString())
 
@@ -140,14 +167,22 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val newDamperSize = getDamperSizeEnum(vavEquip.damperSize.readDefaultVal())
             vavEquip.damperSize.writeDefaultVal(newDamperSize)
 
-            // reheatType now starts at 0 instead of -1
-            val newReheatType = vavEquip.reheatType.readDefaultVal() + 1.0
-            vavEquip.reheatType.writeDefaultVal(newReheatType)
-
             // temperature offset is now a literal (was multiplied by 10 before)
             val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
             vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
 
+            // At app startup, cutover migrations currently run before upgrades.
+            // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
+            // Setting the fallback value manually for now.
+            vavEquip.demandResponseSetback.writeVal(17, 2.0)
+
+            deviceBuilder.doCutOverMigration(
+                device.get("id").toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
         }
     }
 
@@ -164,6 +199,22 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             22.0 -> 9.0
             24.0 -> 10.0
             else -> 0.0
+        }
+    }
+
+    fun updateMigrationVersion(){
+        val pm = Globals.getInstance().applicationContext.packageManager
+        val pi: PackageInfo
+        try {
+            pi = pm.getPackageInfo("a75f.io.renatus", 0)
+            val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
+            val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
+            CcuLog.d("CCU_DOMAIN", "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            if (currentAppVersion != migrationVersion) {
+                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace();
         }
     }
 

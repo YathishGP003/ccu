@@ -4,7 +4,8 @@
     style="?android:attr/spinnerItemStyle"
     android:singleLine="true"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:textSize="18sp"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:textSize="22sp"
     android:ellipsize="marquee"
     android:textAlignment="inherit"/>

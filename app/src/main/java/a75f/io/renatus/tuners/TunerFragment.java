@@ -71,6 +71,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -195,7 +196,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     spinnerSelection.setVisibility(View.GONE);
                     tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
                 }
-                ArrayAdapter<Zone> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, zones);
+                ArrayAdapter<Zone> selectionSpinner = getAdapterValue(zones);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
 
@@ -225,7 +226,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     spinnerSelection.setVisibility(View.GONE);
                     tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
                 }
-                ArrayAdapter<Equip> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, UpdatedEquips);
+                ArrayAdapter<Equip> selectionSpinner = getAdapterValue(UpdatedEquips);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
             }
@@ -237,7 +238,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         }
 
         spinnerSelection.setVisibility(View.GONE);
-        ArrayAdapter<Zone> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, zones);
+        ArrayAdapter<Zone> selectionSpinner = getAdapterValue(zones);
         selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
         spinnerSelection.setAdapter(selectionSpinner);
 
@@ -905,6 +906,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         if (updatedTunerValues != null && updatedTunerValues.size() > 0){
             updatedTunerValues.remove(item);
         }
+    }
+
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
 }

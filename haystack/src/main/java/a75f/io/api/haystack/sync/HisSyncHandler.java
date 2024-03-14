@@ -417,7 +417,7 @@ public class HisSyncHandler
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
                 || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
-                || pointToSync.containsKey("sensor");
+                || pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus");
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {
@@ -497,18 +497,7 @@ public class HisSyncHandler
     }
 
     private int getNumberOfHisEntriesPerPoint(CCUHsApi ccuHsApi) {
-        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
-        int numberOfEntryPerMinute;
-        if (equipCount > 40) {
-            numberOfEntryPerMinute = 50;
-        } else if (equipCount > 30) {
-            numberOfEntryPerMinute = 16;
-        } else if (equipCount > 20) {
-            numberOfEntryPerMinute = 24;
-        } else {
-            numberOfEntryPerMinute = 12;
-        }
-        return numberOfEntryPerMinute;
+        return 50;
     }
 
     private int getBackFillDurationSelected(CCUHsApi ccuHsApi) {

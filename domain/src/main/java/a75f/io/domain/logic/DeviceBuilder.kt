@@ -8,6 +8,9 @@ import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.cutover.BuildingEquipCutOverMapping
+import a75f.io.domain.cutover.devicePointWithDomainNameExists
+import a75f.io.domain.cutover.getDeviceDomainNameFromDis
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
@@ -58,7 +61,17 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setFloorRef(configuration.floorRef)
             .setAddr(configuration.nodeAddress)
             .setSiteRef(siteRef)
+
         modelDef.tags.forEach{ deviceBuilder.addMarker(it.name)}
+
+        deviceBuilder.addTag("sourceModel", HStr.make(modelDef.id))
+        deviceBuilder.addTag(
+            "sourceModelVersion", HStr.make(
+                "${modelDef.version?.major}" +
+                        ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+            )
+        )
+
         return deviceBuilder.build()
     }
 
@@ -139,4 +152,100 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             else -> {""}
         }
     }
+
+    private fun updatePoint(def : SeventyFiveFDevicePointDef, equipConfiguration : ProfileConfiguration, device: Device, deviceDis: String, existingPoint : HashMap<Any, Any>) {
+        val hayStackPoint = buildRawPoint(def, equipConfiguration, device, deviceDis)
+        hayStackPoint.id = existingPoint["id"].toString()
+        if (existingPoint.containsKey("pointRef")) hayStackPoint.pointRef = existingPoint["pointRef"].toString()
+        if (existingPoint.containsKey("portEnabled")) hayStackPoint.enabled = existingPoint["portEnabled"].toString().equals("true")
+        if (existingPoint.containsKey("analogType")) hayStackPoint.type = existingPoint["analogType"].toString()
+
+        hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
+
+        DomainManager.addRawPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Updated Equip point ${def.domainName}")
+    }
+    private fun updateDevice(deviceRef: String, modelDef : SeventyFiveFDeviceDirective, deviceDis: String) {
+        var deviceDict = hayStack.readHDictById(deviceRef)
+        val device = Device.Builder().setHDict(deviceDict).build()
+        device.domainName = modelDef.domainName
+        device.displayName = deviceDis
+        device.tags["sourceModel"] = HStr.make(modelDef.id)
+        device.tags["sourceModelVersion"] = HStr.make(
+            "${modelDef.version?.major}" +
+                    ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+        )
+        hayStack.updateDevice(device, device.id)
+        CcuLog.i(Domain.LOG_TAG, " Updated Device ${device.addr}-${device.domainName}")
+    }
+    private fun createCutoverMigrationPoint(def : SeventyFiveFDevicePointDef, equipConfiguration : ProfileConfiguration, device: Device, deviceDis: String) {
+        val hayStackPoint = buildRawPoint(def, equipConfiguration, device, deviceDis)
+        val pointId = hayStack.addPoint(hayStackPoint)
+        hayStackPoint.id = pointId
+        DomainManager.addRawPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Created Device point ${def.domainName}")
+    }
+    fun doCutOverMigration(deviceRef: String, modelDef: SeventyFiveFDeviceDirective, deviceDis: String,
+                           mapping : Map<String, String>, equipConfiguration: ProfileConfiguration) {
+        var devicePoints = hayStack.readAllEntities("point and deviceRef == \"$deviceRef\"")
+        val site = hayStack.site
+        var deviceDict = hayStack.readHDictById(deviceRef)
+        val device = Device.Builder().setHDict(deviceDict).build()
+        //TODO-To be removed after testing is complete
+        var update = 0
+        var delete = 0
+        var add = 0
+        var pass = 0
+        devicePoints.filter { it["domainName"] == null }
+            .forEach { dbPoint ->
+                val modelPointName = getDeviceDomainNameFromDis(dbPoint, mapping)
+
+                if (modelPointName == null) {
+                    delete++
+                    //DB point does not exist in model. Should be deleted.
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Redundant Point $dbPoint")
+                    //hayStack.deleteEntityTree(dbPoint["id"].toString())
+                } else {
+                    update++
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update with domainName $modelPointName : $dbPoint")
+                    //println("Cut-Over migration Update $dbPoint")
+                    val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
+                    if (modelPoint != null) {
+                        updatePoint(modelPoint, equipConfiguration, device, deviceDis, dbPoint)
+                    } else {
+                        CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
+                    }
+                }
+            }
+
+        modelDef.points.forEach { modelPointDef ->
+
+            val displayName = BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
+            if (displayName == null) {
+                add++
+                //Point exists in model but not in mapping table or local db. create it.
+                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
+                //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
+                if (!devicePointWithDomainNameExists(devicePoints, modelPointDef.domainName, mapping)) {
+                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
+                    createCutoverMigrationPoint(modelPointDef, equipConfiguration, device, deviceDis)
+                }
+            } else {
+                //TODO- Need to consider the case when point exists in map but not in DB.
+                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration PASS $modelPointDef")
+                //println(" Cut-Over migration PASS $modelPointDef")
+                pass++
+            }
+        }
+
+        CcuLog.e(
+            Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${devicePoints.size} " +
+                    " Model: ${modelDef.points.size} Map: ${mapping.size} ")
+        CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
+
+        updateDevice(deviceRef, modelDef, deviceDis)
+        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Device ${modelDef.domainName}")
+
+    }
+
 }

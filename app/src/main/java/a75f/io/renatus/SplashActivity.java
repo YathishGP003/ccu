@@ -46,6 +46,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     private ImageView splashLogo75f;
     private LinearLayout daikinSplash;
     private LinearLayout carrierSplash;
+    private LinearLayout airoverseSplash;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +56,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
         carrierSplash = findViewById(R.id.carrier_splash);
+        airoverseSplash = findViewById(R.id.airoverse_splash);
         prefs = new Prefs(this);
         /*PreferenceManager.getDefaultSharedPreferences(this).edit().
                 putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
@@ -243,6 +245,8 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             daikinSplash.setVisibility(View.VISIBLE);
         else if(CCUUiUtil.isCarrierThemeEnabled(this))
             carrierSplash.setVisibility(View.VISIBLE);
+        else if(CCUUiUtil.isAiroverseThemeEnabled(this))
+            airoverseSplash.setVisibility(View.VISIBLE);
         else
             splashLogo75f.setVisibility(View.VISIBLE);
     }

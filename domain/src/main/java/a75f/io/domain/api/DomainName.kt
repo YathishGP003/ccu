@@ -23,6 +23,7 @@ object DomainName {
     const val proportionalKFactor = "proportionalKFactor"
     const val integralKFactor = "integralKFactor"
     const val pidIntegralTime = "pidIntegralTime"
+    const val demandResponseSetback = "demandResponseSetback"
 
     const val rebalanceHoldTime = "rebalanceHoldTime"
     const val constantTempAlertTime = "constantTempAlertTime"
@@ -388,6 +389,8 @@ object DomainName {
     const val analog2Out = "analog2Out"
     const val analog1In = "analog1In"
     const val analog2In = "analog2In"
+    const val th1In = "th1In"
+    const val th2In = "th2In"
 
     const val smartnodeVAVReheatNoFan = "smartnodeVAVReheatNoFan"
     const val smartnodeVAVReheatParallelFan = "smartnodeVAVReheatParallelFan"

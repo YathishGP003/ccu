@@ -26,6 +26,7 @@ import a75f.io.domain.VavAcbEquip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavEquip;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.logic.DeviceBuilder;
 import a75f.io.domain.logic.EntityMapper;
@@ -750,8 +751,14 @@ public abstract class VavProfile extends ZoneProfile {
         String message = "";
         if (profileType == ProfileType.VAV_ACB) {
             VavAcbEquip acbEquip = (VavAcbEquip)vavEquip;
-            if (acbEquip.getCondensateNC().readHisVal() > 0.0 || acbEquip.getCondensateNO().readHisVal() > 0.0) {
-                message += ", Condensation Detected";
+            if (((VavAcbEquip)vavEquip).getThermistor2Type().readPriorityVal() > 0.0) {
+                if (CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + nodeAddr + "\"") > 0.0) {
+                    message += ", Condensation Detected";
+                }
+            } else {
+                if (CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + nodeAddr + "\"") > 0.0) {
+                    message += ", Condensation Detected";
+                }
             }
             if (acbEquip.getValveType().readPriorityVal() > 0.0) {
                 if (acbEquip.getChwValveCmd().readHisVal() > 0.0) {

@@ -84,7 +84,7 @@ public class OccupancyHandler implements Occupiable {
     
     //Triggers that can influence the unoccupied mode.
     public UnoccupiedTrigger getUnoccupiedTrigger() {
-        
+
         if (windowSensor.hasTriggered()) {
             return UnoccupiedTrigger.DoorWindowInput;
         }
@@ -106,9 +106,7 @@ public class OccupancyHandler implements Occupiable {
         if (noconditioning.hasTriggered()) {
             return UnoccupiedTrigger.NoConditioning;
         }
-        if (vacation.hasTriggered()) {
-            return UnoccupiedTrigger.Vacation;
-        }
+
         return UnoccupiedTrigger.Unoccupied;
     }
 

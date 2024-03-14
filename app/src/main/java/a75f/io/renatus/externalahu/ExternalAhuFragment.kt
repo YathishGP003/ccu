@@ -16,18 +16,17 @@ import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMinimum
 import a75f.io.domain.api.DomainName.systemHeatingSATMaximum
 import a75f.io.domain.api.DomainName.systemHeatingSATMinimum
-import a75f.io.domain.api.DomainName.systemSATMaximum
-import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 import a75f.io.domain.api.DomainName.tagValueIncrement
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.renatus.R
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.compose.HeaderCenterLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderLeftAlignedTextView
 import a75f.io.renatus.compose.HeaderTextView
-import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.ParameterLabel
+import a75f.io.renatus.compose.LabelTextViewForModbus
+import a75f.io.renatus.compose.ParameterLabel_ForOneColumn
 import a75f.io.renatus.compose.RadioButtonCompose
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SetPointConfig
@@ -36,8 +35,10 @@ import a75f.io.renatus.compose.TextViewCompose
 import a75f.io.renatus.compose.TextViewWithClick
 import a75f.io.renatus.compose.TextViewWithClickOption
 import a75f.io.renatus.compose.ToggleButton
+import a75f.io.renatus.compose.VersionTextView
 import a75f.io.renatus.modbus.ModelSelectionFragment
 import a75f.io.renatus.modbus.models.EquipModel
+import a75f.io.renatus.modbus.models.RegisterItemForSubEquip
 import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS
@@ -45,7 +46,6 @@ import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
 import a75f.io.renatus.modbus.util.SEARCH_SLAVE_ID
-import a75f.io.renatus.modbus.util.SELECT_ALL
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.modbus.util.SLAVE_ID
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -58,17 +58,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
@@ -83,7 +88,6 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 
 class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     private lateinit var viewModel: ExternalAhuViewModel
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -102,97 +106,34 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         Row {
                             SetPointControlCompose(
                                 viewModel.configModel.value.controlName(
-                                    viewModel.profileModelDefinition,
-                                    satSetpointControlEnable
+                                    viewModel.profileModelDefinition, satSetpointControlEnable
                                 ), state = viewModel.configModel.value.setPointControl
                             ) {
                                 viewModel.configModel.value.setPointControl = it
-                                if (!viewModel.configModel.value.setPointControl) viewModel.configModel.value.dualSetPointControl =
-                                    false
-                                viewModel.configModel.value.satMin = viewModel.getDefaultValByDomain(systemSATMinimum)
-                                viewModel.configModel.value.satMax = viewModel.getDefaultValByDomain(systemSATMaximum)
-
-                                viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
-                                viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
-                                viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
-                                viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
+                                viewModel.configModel.value.heatingMinSp =
+                                    viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
+                                viewModel.configModel.value.heatingMaxSp =
+                                    viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
+                                viewModel.configModel.value.coolingMinSp =
+                                    viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
+                                viewModel.configModel.value.coolingMaxSp =
+                                    viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
+                                setStateChanged()
                             }
-                            if (viewModel.configModel.value.setPointControl) {
+                            Row(modifier = Modifier.padding(start = 60.dp)) {
                                 SetPointControlCompose(
                                     viewModel.configModel.value.controlName(
-                                        viewModel.profileModelDefinition,
-                                        dualSetpointControlEnable
-                                    ),
-                                    state = viewModel.configModel.value.dualSetPointControl
+                                        viewModel.profileModelDefinition, dualSetpointControlEnable
+                                    ), state = viewModel.configModel.value.dualSetPointControl
                                 ) {
                                     viewModel.configModel.value.dualSetPointControl = it
-                                    viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
-                                    viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
-                                    viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
-                                    viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
+                                    setStateChanged()
                                 }
                             }
                         }
+
                         Row {
-                            if (viewModel.configModel.value.setPointControl && !viewModel.configModel.value.dualSetPointControl) {
-                                Row {
-                                    Column {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
-                                        ) {
-                                            val satMin =
-                                                viewModel.configModel.value.getPointByDomainName(
-                                                    viewModel.profileModelDefinition,
-                                                    systemSATMinimum
-                                                )
-                                            val satMax =
-                                                viewModel.configModel.value.getPointByDomainName(
-                                                    viewModel.profileModelDefinition,
-                                                    systemSATMaximum
-                                                )
-                                            if (satMin != null) {
-                                                val items = viewModel.itemsFromMinMax(
-                                                    (satMin.valueConstraint as NumericConstraint).minValue,
-                                                    (satMin.valueConstraint as NumericConstraint).maxValue,
-                                                    (satMin.presentationData?.get(
-                                                        tagValueIncrement
-                                                    ) as Int).toDouble()
-                                                )
-                                                SetPointConfig(
-                                                    satMin.name,
-                                                    viewModel.configModel.value.satMin,
-                                                    items, satMin.defaultUnit ?: EMPTY,
-                                                ) { selected ->
-                                                    viewModel.configModel.value.satMin =
-                                                        selected
-                                                }
-                                            }
-                                            if (satMax != null) {
-                                                val items = viewModel.itemsFromMinMax(
-                                                    (satMax.valueConstraint as NumericConstraint).minValue,
-                                                    (satMax.valueConstraint as NumericConstraint).maxValue,
-                                                    (satMax.presentationData?.get(
-                                                        tagValueIncrement
-                                                    ) as Int).toDouble()
-                                                )
-                                                SetPointConfig(
-                                                    satMax.name,
-                                                    viewModel.configModel.value.satMax,
-                                                    items, satMax.defaultUnit ?: EMPTY,
-                                                ) { selected ->
-                                                    viewModel.configModel.value.satMax =
-                                                        selected
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        Row {
-                            if (viewModel.configModel.value.dualSetPointControl) {
+                            if (viewModel.configModel.value.setPointControl || viewModel.configModel.value.dualSetPointControl) {
                                 Row {
                                     Column {
                                         val satHeatingMin =
@@ -237,6 +178,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 ) { selected ->
                                                     viewModel.configModel.value.heatingMinSp =
                                                         selected
+                                                    setStateChanged()
                                                 }
                                             }
                                             if (satHeatingMax != null) {
@@ -254,6 +196,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 ) { selected ->
                                                     viewModel.configModel.value.heatingMaxSp =
                                                         selected
+                                                    setStateChanged()
                                                 }
                                             }
                                         }
@@ -277,6 +220,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 ) { selected ->
                                                     viewModel.configModel.value.coolingMinSp =
                                                         selected
+                                                    setStateChanged()
                                                 }
                                             }
                                             if (satCoolingMax != null) {
@@ -294,6 +238,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 ) { selected ->
                                                     viewModel.configModel.value.coolingMaxSp =
                                                         selected
+                                                    setStateChanged()
                                                 }
                                             }
                                         }
@@ -307,12 +252,14 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             viewModel.configModel.value.controlName(
                                 viewModel.profileModelDefinition,
                                 staticPressureSetpointControlEnable
-                            ),
-                            state = viewModel.configModel.value.fanStaticSetPointControl
+                            ), state = viewModel.configModel.value.fanStaticSetPointControl
                         ) {
                             viewModel.configModel.value.fanStaticSetPointControl = it
-                            viewModel.configModel.value.fanMinSp = viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
-                            viewModel.configModel.value.fanMaxSp = viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
+                            viewModel.configModel.value.fanMinSp =
+                                viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
+                            viewModel.configModel.value.fanMaxSp =
+                                viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
+                            setStateChanged()
                         }
                     }
                     item {
@@ -320,12 +267,10 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             Row {
 
                                 val fanSpMin = viewModel.configModel.value.getPointByDomainName(
-                                    viewModel.profileModelDefinition,
-                                    systemStaticPressureMinimum
+                                    viewModel.profileModelDefinition, systemStaticPressureMinimum
                                 )
                                 val fanSpMax = viewModel.configModel.value.getPointByDomainName(
-                                    viewModel.profileModelDefinition,
-                                    systemStaticPressureMaximum
+                                    viewModel.profileModelDefinition, systemStaticPressureMaximum
                                 )
 
                                 Column {
@@ -340,8 +285,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 (fanSpMin.valueConstraint as NumericConstraint).maxValue,
                                                 (fanSpMin.presentationData?.get(
                                                     tagValueIncrement
-                                                )
-                                                    .toString().toDouble())
+                                                ).toString().toDouble())
                                             )
                                             SetPointConfig(
                                                 fanSpMin.name,
@@ -349,6 +293,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, fanSpMin.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.fanMinSp = selected
+                                                setStateChanged()
                                             }
                                         }
                                         if (fanSpMax != null) {
@@ -357,8 +302,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 (fanSpMax.valueConstraint as NumericConstraint).maxValue,
                                                 (fanSpMax.presentationData?.get(
                                                     tagValueIncrement
-                                                )
-                                                    .toString().toDouble())
+                                                ).toString().toDouble())
                                             )
                                             SetPointConfig(
                                                 fanSpMax.name,
@@ -366,6 +310,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, fanSpMax.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.fanMaxSp = selected
+                                                setStateChanged()
                                             }
                                         }
                                     }
@@ -376,40 +321,41 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     item {
                         SetPointControlCompose(
                             viewModel.configModel.value.controlName(
-                                viewModel.profileModelDefinition,
-                                dcvDamperControlEnable
+                                viewModel.profileModelDefinition, dcvDamperControlEnable
                             ), state = viewModel.configModel.value.dcvControl
                         ) {
                             viewModel.configModel.value.dcvControl = it
-                            viewModel.configModel.value.dcvMin = viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
-                            viewModel.configModel.value.dcvMax = viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
-                            viewModel.configModel.value.co2Threshold = viewModel.getDefaultValByDomain(systemCO2Threshold)
-                            viewModel.configModel.value.co2Target = viewModel.getDefaultValByDomain(systemCO2Target)
-                            viewModel.configModel.value.damperOpeningRate = viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
+                            viewModel.configModel.value.dcvMin =
+                                viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
+                            viewModel.configModel.value.dcvMax =
+                                viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
+                            viewModel.configModel.value.co2Threshold =
+                                viewModel.getDefaultValByDomain(systemCO2Threshold)
+                            viewModel.configModel.value.co2Target =
+                                viewModel.getDefaultValByDomain(systemCO2Target)
+                            viewModel.configModel.value.damperOpeningRate =
+                                viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
+                            setStateChanged()
                         }
                     }
                     item {
                         if (viewModel.configModel.value.dcvControl) {
 
                             val dcvMin = viewModel.configModel.value.getPointByDomainName(
-                                viewModel.profileModelDefinition,
-                                systemDCVDamperPosMinimum
+                                viewModel.profileModelDefinition, systemDCVDamperPosMinimum
                             )
                             val dcvMax = viewModel.configModel.value.getPointByDomainName(
-                                viewModel.profileModelDefinition,
-                                systemDCVDamperPosMaximum
+                                viewModel.profileModelDefinition, systemDCVDamperPosMaximum
                             )
                             val co2Threshold = viewModel.configModel.value.getPointByDomainName(
-                                viewModel.profileModelDefinition,
-                                systemCO2Threshold
+                                viewModel.profileModelDefinition, systemCO2Threshold
                             )
-                            val damperOpeningRate = viewModel.configModel.value.getPointByDomainName(
-                                viewModel.profileModelDefinition,
-                                systemCO2DamperOpeningRate
-                            )
+                            val damperOpeningRate =
+                                viewModel.configModel.value.getPointByDomainName(
+                                    viewModel.profileModelDefinition, systemCO2DamperOpeningRate
+                                )
                             val co2Target = viewModel.configModel.value.getPointByDomainName(
-                                viewModel.profileModelDefinition,
-                                systemCO2Target
+                                viewModel.profileModelDefinition, systemCO2Target
                             )
 
                             Row {
@@ -431,6 +377,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, dcvMin.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.dcvMin = selected
+                                                setStateChanged()
                                             }
                                         }
                                         if (dcvMax != null) {
@@ -445,6 +392,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, dcvMax.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.dcvMax = selected
+                                                setStateChanged()
                                             }
                                         }
                                     }
@@ -461,7 +409,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                             val items = viewModel.itemsFromMinMax(
                                                 (co2Threshold.valueConstraint as NumericConstraint).minValue,
                                                 (co2Threshold.valueConstraint as NumericConstraint).maxValue,
-                                                (co2Threshold.presentationData?.get(tagValueIncrement) as Int).toDouble()
+                                                (co2Threshold.presentationData?.get(
+                                                    tagValueIncrement
+                                                ) as Int).toDouble()
                                             )
                                             SetPointConfig(
                                                 co2Threshold.name,
@@ -469,6 +419,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, co2Threshold.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.co2Threshold = selected
+                                                setStateChanged()
                                             }
                                         }
                                         if (co2Target != null) {
@@ -483,6 +434,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                                 items, co2Target.defaultUnit ?: EMPTY,
                                             ) { selected ->
                                                 viewModel.configModel.value.co2Target = selected
+                                                setStateChanged()
                                             }
                                         }
                                     }
@@ -501,14 +453,18 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                             val items = viewModel.itemsFromMinMax(
                                                 (damperOpeningRate.valueConstraint as NumericConstraint).minValue,
                                                 (damperOpeningRate.valueConstraint as NumericConstraint).maxValue,
-                                                (damperOpeningRate.presentationData?.get(tagValueIncrement) as Int).toDouble()
+                                                (damperOpeningRate.presentationData?.get(
+                                                    tagValueIncrement
+                                                ) as Int).toDouble()
                                             )
                                             SetPointConfig(
                                                 damperOpeningRate.name,
                                                 viewModel.configModel.value.damperOpeningRate,
                                                 items, damperOpeningRate.defaultUnit ?: EMPTY,
                                             ) { selected ->
-                                                viewModel.configModel.value.damperOpeningRate = selected
+                                                viewModel.configModel.value.damperOpeningRate =
+                                                    selected
+                                                setStateChanged()
                                             }
                                         }
                                     }
@@ -519,34 +475,31 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     item {
                         SetPointControlCompose(
                             viewModel.configModel.value.controlName(
-                                viewModel.profileModelDefinition,
-                                occupancyModeControl
-                            ),
-                            state = viewModel.configModel.value.occupancyMode
+                                viewModel.profileModelDefinition, occupancyModeControl
+                            ), state = viewModel.configModel.value.occupancyMode
                         ) {
                             viewModel.configModel.value.occupancyMode = it
+                            setStateChanged()
                         }
                     }
                     item {
                         SetPointControlCompose(
                             viewModel.configModel.value.controlName(
-                                viewModel.profileModelDefinition,
-                                humidifierOperationEnable
-                            ),
-                            state = viewModel.configModel.value.humidifierControl
+                                viewModel.profileModelDefinition, humidifierOperationEnable
+                            ), state = viewModel.configModel.value.humidifierControl
                         ) {
                             viewModel.configModel.value.humidifierControl = it
+                            setStateChanged()
                         }
                     }
                     item {
                         SetPointControlCompose(
                             viewModel.configModel.value.controlName(
-                                viewModel.profileModelDefinition,
-                                dehumidifierOperationEnable
-                            ),
-                            state = viewModel.configModel.value.dehumidifierControl
+                                viewModel.profileModelDefinition, dehumidifierOperationEnable
+                            ), state = viewModel.configModel.value.dehumidifierControl
                         ) {
                             viewModel.configModel.value.dehumidifierControl = it
+                            setStateChanged()
                         }
                     }
 
@@ -554,9 +507,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(PaddingValues(top = 10.dp))
-                                .wrapContentHeight(),
-                            contentAlignment = Alignment.Center
+                                .padding(PaddingValues(top = 10.dp, end = 30.dp))
+                                .wrapContentHeight(), contentAlignment = Alignment.Center
                         ) { HeaderCenterLeftAlignedTextView(text = SELECT_PROTOCOL) }
                     }
                     item {
@@ -569,18 +521,19 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
 
                             val radioOptions = listOf(BACNET, MODBUS)
                             RadioButtonCompose(
-                                radioOptions,
-                                viewModel.configType.value.ordinal
+                                radioOptions, viewModel.configType.value.ordinal
                             ) {
                                 when (it) {
                                     BACNET -> {
                                         viewModel.configType.value =
                                             ExternalAhuViewModel.ConfigType.BACNET
+                                        setStateChanged()
                                     }
 
                                     MODBUS -> {
                                         viewModel.configType.value =
                                             ExternalAhuViewModel.ConfigType.MODBUS
+                                        setStateChanged()
                                     }
                                 }
                             }
@@ -605,17 +558,34 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     }
 
     private fun init() {
+        isNewProfile()
         ProgressDialogUtils.showProgressDialog(requireContext(), LOADING)
         viewModel.configModelDefinition(
             requireContext(), profileType
         )
+        if (PreferenceUtil.getIsNewExternalAhu()) resetScreen()
     }
+
+    private fun isNewProfile() {
+        val systemProfile = L.ccu().systemProfile.profileType
+        val selectedProfileType = profileType
+        if(((systemProfile == ProfileType.vavExternalAHUController) && (selectedProfileType == ProfileType.vavExternalAHUController))
+            || (systemProfile == ProfileType.dabExternalAHUController) && (selectedProfileType == ProfileType.dabExternalAHUController)){
+            PreferenceUtil.setIsNewExternalAhu(false)
+        }
+        else PreferenceUtil.setIsNewExternalAhu(true)
+    }
+
     private fun reload() {
-        val fragmentManager = requireActivity().supportFragmentManager
-        val profile = if (profileType == ProfileType.dabExternalAHUController) "dabExternalAHUController" else "vavExternalAHUController"
-        val fragment: ExternalAhuFragment =
-        fragmentManager.findFragmentByTag(profile) as ExternalAhuFragment
-        fragmentManager.beginTransaction().replace(R.id.profileContainer, fragment).commit()
+         isNewProfile()
+         if (PreferenceUtil.getIsNewExternalAhu()) {
+            viewModel.apply {
+                equipModel = mutableStateOf(EquipModel())
+                selectedModbusType = mutableStateOf(0)
+                modelName = mutableStateOf("Select Model")
+            }
+         }
+         init()
     }
 
     @Composable
@@ -630,16 +600,23 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
             Box(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                    .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
                 contentAlignment = Alignment.Center
-            ) { SaveTextView(CANCEL) { reload() } }
+            ) { SaveTextView(CANCEL, viewModel.configModel.value.isStateChanged) { reload() } }
+            Divider(
+                modifier = Modifier
+                    .height(25.dp)
+                    .width(2.dp)
+                    .padding(bottom = 6.dp),
+                color = Color.LightGray
+            )
             Box(
                 modifier = Modifier
                     .wrapContentWidth()
                     .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                SaveTextView(SET) { viewModel.saveConfiguration() }
+                SaveTextView(SET, viewModel.configModel.value.isStateChanged) { viewModel.saveConfiguration() }
             }
         }
     }
@@ -656,11 +633,19 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         viewModel.configModbusDetails()
         Row {
             Box(
-                modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PaddingValues(top = 10.dp, end = 25.dp)),
+                contentAlignment = Alignment.Center
             ) { HeaderCenterLeftAlignedTextView(SELECT_MODEL) }
         }
 
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 430.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
             Row {
                 if (viewModel.equipModel.value.isDevicePaired) {
                     viewModel.modelName.value =
@@ -671,7 +656,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         enableClick = false,
                         isCompress = false
                     )
-                    HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
+                    VersionTextView(" V " + viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
                 } else {
                     TextViewWithClick(
                         text = viewModel.modelName, onClick = {
@@ -684,7 +669,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                             }
                         }, enableClick = true, isCompress = false
                     )
-                    HeaderTextView(viewModel.equipModel.value.version.value)
+                    if (viewModel.equipModel.value.version.value.isNotEmpty()) {
+                        VersionTextView(" V ${viewModel.equipModel.value.version.value}")
+                    }
                 }
             }
         }
@@ -701,8 +688,10 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else viewModel.equipModel.value.equipDevice.value.name
                 )
             }
-            Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID, fontSize = 20) }
+            Box(modifier = Modifier
+                .weight(1f)
+                .wrapContentHeight()) {
                 val onItemSelect = object : OnItemSelect {
                     override fun onItemSelected(index: Int, item: String) {
                         viewModel.equipModel.value.slaveId.value = item.toInt()
@@ -724,27 +713,31 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                 )
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingValues(bottom = 5.dp)),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HeaderTextView(SELECT_ALL)
-            ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters.value) {
-                viewModel.equipModel.value.selectAllParameters.value = it
-                viewModel.onSelectAll(it)
+
+        Row(modifier = Modifier.padding(start = 10.dp)) {
+            ParameterLabel_ForOneColumn()
+            ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters_Left.value) {
+                viewModel.equipModel.value.selectAllParameters_Left.value = it
+                viewModel.onSelectAllLeft(it)
+                setStateChanged()
+            }
+            Spacer(modifier = Modifier.width(30.dp))
+            ParameterLabel_ForOneColumn()
+            ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters_Right.value) {
+                viewModel.equipModel.value.selectAllParameters_Right.value = it
+                viewModel.onSelectAllRight(it)
+                setStateChanged()
             }
         }
-        Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
-        ParametersListView(data = viewModel.equipModel)
+
+        // This index -1 refers to parameters equip and other index 0 to n refers index of sub equips
+        ParametersListView(data = viewModel.equipModel, indexForSelectAllRelay = -1)
         SubEquipments(viewModel.equipModel)
     }
 
 
     @Composable
-    fun ParametersListView(data: MutableState<EquipModel>) {
+    fun ParametersListView(data: MutableState<EquipModel>, indexForSelectAllRelay: Int) {
         if (data.value.parameters.isNotEmpty()) {
             var index = 0
             while (index < data.value.parameters.size) {
@@ -757,17 +750,28 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         for (rowIndex in 0 until 2) {
                             if (index < data.value.parameters.size) {
                                 val item = data.value.parameters[index]
-                                LabelTextView(
+                                LabelTextViewForModbus(
                                     if (item.param.value.name.length > 30) item.param.value.name.substring(
-                                        0,
-                                        30
+                                        0, 30
                                     )
                                     else item.param.value.name
                                 )
-                                ToggleButton(item.displayInUi.value) {
-                                    item.displayInUi.value = it
-                                    item.param.value.getParameterId()
-                                    viewModel.updateSelectAll()
+                                Box(modifier = Modifier.padding(end = 55.dp)) {
+                                    ToggleButton(item.displayInUi.value) {
+                                        item.displayInUi.value = it
+                                        item.param.value.getParameterId()
+                                        if (indexForSelectAllRelay == -1) //This is for finding main parameters
+                                            viewModel.updateSelectAllBoth()
+                                        else {
+                                            viewModel.updateSelectAllSubEquipLeft(
+                                                indexForSelectAllRelay
+                                            )
+                                            viewModel.updateSelectAllSubEquipRight(
+                                                indexForSelectAllRelay
+                                            )
+                                        }
+                                        setStateChanged()
+                                    }
                                 }
                                 Box(modifier = Modifier.width(50.dp)) { }
                                 index++
@@ -783,7 +787,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     fun SubEquipments(data: MutableState<EquipModel>) {
 
         Column {
-            data.value.subEquips.forEach { subEquip ->
+            data.value.subEquips.forEachIndexed { index, subEquip ->
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
@@ -821,7 +825,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                     showDialogFragment(
                                         ModelSelectionFragment.newInstance(
                                             viewModel.childSlaveIdList,
-                                            onItemSelect, SEARCH_SLAVE_ID
+                                            onItemSelect,
+                                            SEARCH_SLAVE_ID
                                         ), ModelSelectionFragment.ID
                                     )
                                 },
@@ -831,8 +836,26 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         }
                     }
                 }
-                Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
-                ParametersListView(data = subEquip)
+                Row(modifier = Modifier.padding(start = 10.dp)) {
+                    ParameterLabel_ForOneColumn()
+                    if (data.value.selectAllParameters_Left_subEquip.size <= index) {
+                        data.value.selectAllParameters_Left_subEquip.add(RegisterItemForSubEquip())
+                    }
+                    ToggleButton(defaultSelection = data.value.selectAllParameters_Left_subEquip[index].displayInUi.value) {
+                        data.value.selectAllParameters_Left_subEquip[index].displayInUi.value = it
+                        viewModel.onSelectAllLeftSubEquip(it, subEquip)
+                    }
+                    Spacer(modifier = Modifier.width(30.dp))
+                    ParameterLabel_ForOneColumn()
+                    if (data.value.selectAllParameters_Right_subEquip.size <= index) {
+                        data.value.selectAllParameters_Right_subEquip.add(RegisterItemForSubEquip())
+                    }
+                    ToggleButton(defaultSelection = data.value.selectAllParameters_Right_subEquip[index].displayInUi.value) {
+                        data.value.selectAllParameters_Right_subEquip[index].displayInUi.value = it
+                        viewModel.onSelectAllRightSubEquip(it, subEquip)
+                    }
+                }
+                ParametersListView(data = subEquip, indexForSelectAllRelay = index)
             }
         }
     }
@@ -850,6 +873,34 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
         }
         transaction.addToBackStack(null)
         dialogFragment.show(transaction, id)
+    }
+    private fun resetScreen() {
+        viewModel.configModel.value.setPointControl = false
+        viewModel.configModel.value.dualSetPointControl = false
+        viewModel.configModel.value.heatingMinSp = viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
+        viewModel.configModel.value.heatingMaxSp = viewModel.getDefaultValByDomain(systemHeatingSATMaximum)
+        viewModel.configModel.value.coolingMinSp = viewModel.getDefaultValByDomain(systemCoolingSATMinimum)
+        viewModel.configModel.value.coolingMaxSp = viewModel.getDefaultValByDomain(systemCoolingSATMaximum)
+
+        viewModel.configModel.value.fanStaticSetPointControl = false
+        viewModel.configModel.value.fanMinSp = viewModel.getDefaultValByDomain(systemStaticPressureMinimum)
+        viewModel.configModel.value.fanMaxSp = viewModel.getDefaultValByDomain(systemStaticPressureMaximum)
+
+        viewModel.configModel.value.dcvControl = false
+        viewModel.configModel.value.dcvMin = viewModel.getDefaultValByDomain(systemDCVDamperPosMinimum)
+        viewModel.configModel.value.dcvMax = viewModel.getDefaultValByDomain(systemDCVDamperPosMaximum)
+        viewModel.configModel.value.co2Threshold = viewModel.getDefaultValByDomain(systemCO2Threshold)
+        viewModel.configModel.value.co2Target = viewModel.getDefaultValByDomain(systemCO2Target)
+        viewModel.configModel.value.damperOpeningRate = viewModel.getDefaultValByDomain(systemCO2DamperOpeningRate)
+
+        viewModel.configModel.value.occupancyMode = false
+        viewModel.configModel.value.humidifierControl = false
+        viewModel.configModel.value.dehumidifierControl = false
+
+        viewModel.configType.value = ExternalAhuViewModel.ConfigType.BACNET
+    }
+    private fun setStateChanged() {
+        viewModel.configModel.value.isStateChanged = true
     }
 
 }

@@ -62,8 +62,10 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxjavaUtil;
 
 public class ScheduleManager {
     
@@ -82,6 +84,7 @@ public class ScheduleManager {
     //TODO-Schedules - To be moved
     private ZoneDataInterface scheduleDataInterface = null;
     private ZoneDataInterface zoneDataInterface     = null;
+    private BuildingScheduleListener buildingScheduleListener = null;
     
     public static ScheduleManager getInstance() {
         if (instance == null) {
@@ -98,8 +101,9 @@ public class ScheduleManager {
     public void setZoneDataInterface(ZoneDataInterface in){
         zoneDataInterface = in;
     }
-    
-    
+    public void setBuildingScheduleListener(BuildingScheduleListener in) {
+        buildingScheduleListener = in;
+    }
     public Occupied getOccupiedModeCache(String id) {
         return occupiedHashMap.get(id);
     }
@@ -148,7 +152,7 @@ public class ScheduleManager {
         if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
             heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
             coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + equip.getRoomRef() + "\"");
-            setback = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and unoccupied and setback and roomRef == \"" + equip.getRoomRef() + "\"");
+            setback = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.getRoomRef() + "\"");
         }else{
             heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
             coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
@@ -195,14 +199,10 @@ public class ScheduleManager {
         Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
         updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
         updateDesiredTemp(zoneProfiles);
+        if(buildingScheduleListener!= null)
+            buildingScheduleListener.refreshScreen();
 
-
-        ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-
-        if (!isSchedulableAvailable.isEmpty())
             updateLimitsAndDeadBand();
-
-
 
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
@@ -279,22 +279,24 @@ public class ScheduleManager {
     }
     
     public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
-        CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
-        for (ZoneProfile profile : zoneProfiles) {
-            if (profile instanceof ModbusProfile) {
-                continue;
+
+            CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
+            for (ZoneProfile profile : zoneProfiles) {
+                if (profile instanceof ModbusProfile) {
+                    continue;
+                }
+                profile.updateOccupancy(hayStack);
+                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+                OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
+                CcuLog.i(TAG_CCU_SCHEDULER,
+                        "Updated equipOccupancy " + profile.getEquip().getDisplayName() + " : " + occupancyData.occupancy);
+
+                equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
             }
-            profile.updateOccupancy(hayStack);
-            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-            OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
-            CcuLog.i(TAG_CCU_SCHEDULER,
-                     "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
-            
-            equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
-        }
-        
-        updateZoneOccupancy(hayStack);
-        updateSystemOccupancy(hayStack);
+
+            updateZoneOccupancy(hayStack);
+            updateSystemOccupancy(hayStack);
+
     }
     
     
@@ -387,17 +389,13 @@ public class ScheduleManager {
     }
 
     public void updateLimitsAndDeadBand() {
+
+        RxjavaUtil.executeBackground(()->{
+
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             Equip equip = profile.getEquip();
             String roomRef = equip.getRoomRef();
 
-
-            ArrayList<HashMap<Object, Object>> schedulableOfTheRoom = CCUHsApi.getInstance().readAllEntities("schedulable and zone and roomRef ==\""
-                    +roomRef+ "\"");
-
-            if(schedulableOfTheRoom.size() > 7) {
-                SchedulableMigrationKt.deleteDuplicateLimits(roomRef);
-            }
             if (profile instanceof ModbusProfile
                     || profile instanceof HyperStatMonitoringProfile
                     || profile instanceof PlcProfile
@@ -472,6 +470,7 @@ public class ScheduleManager {
                 }
             }
         }
+        });
     }
 
     private void clearLevel10(String roomRef) {
@@ -603,8 +602,7 @@ public class ScheduleManager {
             systemOccupancy = FORCEDOCCUPIED;
         }
         
-        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneAutoForcedOccupied(ahuServedEquipsOccupancy)
-                                        && !ScheduleUtil.areAllZonesAutoForcedOccupied(ahuServedEquipsOccupancy)) {
+        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneAutoForcedOccupied(ahuServedEquipsOccupancy)) {
             systemOccupancy = AUTOFORCEOCCUPIED;
         }
         
@@ -1072,13 +1070,19 @@ public class ScheduleManager {
     private void clearUserLimitChange(String tag,  String roomRef) {
         HashMap<Object, Object> userLimit =
                 CCUHsApi.getInstance().readEntity("schedulable and point and limit and user and " + tag + "and roomRef == \"" + roomRef + "\"" );
-        CCUHsApi.getInstance().clearPointArrayLevel(userLimit.get("id").toString(), HayStackConstants.USER_APP_WRITE_LEVEL,false);
+        HashMap existingVal = HSUtil.getPriorityLevel((userLimit.get("id")).toString(),HayStackConstants.USER_APP_WRITE_LEVEL);
+        if(existingVal.get("val")!=null) {
+            CCUHsApi.getInstance().clearPointArrayLevel((userLimit.get("id")).toString(), HayStackConstants.USER_APP_WRITE_LEVEL, false);
+        }
     }
 
     private void clearDeadBandChange(String tag, String roomRef) {
         HashMap<Object, Object> deadBand =
                 CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
-        CCUHsApi.getInstance().clearPointArrayLevel(deadBand.get("id").toString(),HayStackConstants.USER_APP_WRITE_LEVEL,false);
+        HashMap existingVal = HSUtil.getPriorityLevel((deadBand.get("id")).toString(),HayStackConstants.USER_APP_WRITE_LEVEL);
+        if(existingVal.get("val")!=null) {
+            CCUHsApi.getInstance().clearPointArrayLevel((deadBand.get("id")).toString(), HayStackConstants.USER_APP_WRITE_LEVEL, false);
+        }
     }
 
     private void clearUnoccupiedSetbackChange(String roomRef) {

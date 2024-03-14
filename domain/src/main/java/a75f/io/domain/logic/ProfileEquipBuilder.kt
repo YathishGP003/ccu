@@ -18,6 +18,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import org.projecthaystack.HStr
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -268,6 +269,37 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
+    private fun createPoint(pointConfig: PointBuilderConfig) {
+        val hayStackPoint = buildPoint(pointConfig)
+        val pointId = hayStack.addPoint(hayStackPoint)
+        hayStackPoint.id = pointId
+
+        if (pointConfig.configuration?.getEnableConfigs()?.getConfig(pointConfig.modelDef.domainName) != null) {
+            val enableConfig = pointConfig.configuration?.getEnableConfigs()?.getConfig(pointConfig.modelDef.domainName)
+            if (enableConfig != null) {
+                initializeDefaultVal(hayStackPoint, enableConfig.enabled.toInt() )
+            }
+        } else if (pointConfig.configuration?.getAssociationConfigs()?.getConfig(pointConfig.modelDef.domainName) != null) {
+            val associationConfig = pointConfig.configuration?.getAssociationConfigs()?.getConfig(pointConfig.modelDef.domainName)
+            associationConfig?.associationVal?.let {
+                initializeDefaultVal(hayStackPoint, it)
+            }
+        } else if (pointConfig.configuration?.getValueConfigs()?.getConfig(pointConfig.modelDef.domainName) != null) {
+            val valueConfig = pointConfig.configuration?.getValueConfigs()?.getConfig(pointConfig.modelDef.domainName)
+            if (valueConfig != null) {
+                initializeDefaultVal(hayStackPoint, valueConfig.currentVal )
+            }
+        } else if (pointConfig.modelDef.tagNames.contains("writable") && pointConfig.modelDef.defaultValue is Number) {
+            initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
+        } else if (pointConfig.modelDef.tagNames.contains("his") && !(pointConfig.modelDef.domainName.equals(
+                DomainName.heartBeat))) {
+            // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
+            hayStack.writeHisValById(pointId, 0.0)
+        }
+
+        DomainManager.addPoint(hayStackPoint)
+        CcuLog.i(Domain.LOG_TAG," Created Equip point ${pointConfig.modelDef.domainName}")
+    }
     private fun updatePoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
         val hayStackPoint = buildPoint(pointConfig)
         hayStackPoint.id = existingPoint["id"].toString()
@@ -287,11 +319,17 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val equip = Equip.Builder().setHDict(equipDict).build()
         equip.domainName = modelDef.domainName
         equip.displayName = equipDis
+        equip.tags["sourceModel"] = HStr.make(modelDef.id)
+        equip.tags["sourceModelVersion"] = HStr.make(
+            "${modelDef.version?.major}" +
+                    ".${modelDef.version?.minor}.${modelDef.version?.patch}"
+        )
         hayStack.updateEquip(equip, equip.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }
     fun doCutOverMigration(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis : String,
-                           mapping : Map<String, String>) {
+                           mapping : Map<String, String>, profileConfiguration: ProfileConfiguration) {
+        CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
         var equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         val site = hayStack.site
@@ -308,7 +346,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     delete++
                     //DB point does not exist in model. Should be deleted.
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Redundant Point $dbPoint")
-                    //hayStack.deleteEntityTree(dbPoint["id"].toString())
+                    hayStack.deleteEntityTree(dbPoint["id"].toString())
                 } else {
                     update++
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update with domainName $modelPointName : $dbPoint")
@@ -330,9 +368,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 //Point exists in model but not in mapping table or local db. create it.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
                 //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
-                if (!pointWithDomainNameExists(equipPoints, modelPointDef.domainName)) {
+                if (!pointWithDomainNameExists(equipPoints, modelPointDef.domainName, mapping)) {
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
-                    //createCutoverMigrationPoint(PointBuilderConfig(modelPointDef, null, equipRef, site.id, site.tz, equipDis))
+                    createPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, site!!.id, site?.tz, equipDis))
                 }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
@@ -342,16 +380,20 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             }
         }
 
-        CcuLog.e(
+        CcuLog.i(
             Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
                     " Model: ${modelDef.points.size} Map: ${mapping.size} ")
-        CcuLog.e(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
+        CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
 
         updateEquip(equipRef, modelDef, equipDis)
-        CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
+        CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
 
-    private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String) : Boolean{
-        return dbPoints.any { it["domainName"]?.toString().equals(domainName, true) }
+    private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String, mapping : Map <String, String>) : Boolean{
+        return dbPoints.any { dbPoint ->
+            mapping.get(dbPoint["dis"].toString()
+                .replace("\\s".toRegex(),"")
+                .substringAfterLast("-")
+            ).equals(domainName, ignoreCase = true) }
     }
 }

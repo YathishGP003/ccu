@@ -38,6 +38,8 @@ public class ProgressDialogUtils {
                 gifView.setImageResource(R.drawable.daikin_loader);
             else if(CCUUiUtil.isCarrierThemeEnabled(context))
                 gifView.setImageResource(R.drawable.carrier_loader);
+            else if(CCUUiUtil.isAiroverseThemeEnabled(context))
+                gifView.setImageResource(R.drawable.airoverse_loader);
             else
                 gifView.setImageResource(R.drawable.loader1);
             progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));

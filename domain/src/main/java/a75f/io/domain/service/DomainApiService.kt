@@ -94,6 +94,9 @@ class ServiceGenerator {
             "carrier_prod" -> {
                 newRequest.header("Ocp-Apim-Subscription-Key", BuildConfig.DOMAIN_API_KEY)
             }
+            "airoverse_prod" -> {
+                newRequest.header("Ocp-Apim-Subscription-Key", BuildConfig.DOMAIN_API_KEY)
+            }
             else -> {
                 newRequest.header("Authorization", "Bearer ${ CCUHsApi.getInstance().jwt}")
                 newRequest.header("Accept","application/json")

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/custom_toast_layout_warning"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog_radius_4"
+    android:backgroundTint="@color/warning_toast_black_background"
+    android:orientation="horizontal"
+    android:paddingStart="10dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/custom_toast_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:src="@drawable/warning_toast" />
+
+        <TextView
+            android:id="@+id/custom_toast_message_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/success"
+            android:fontFamily="@font/lato"
+            android:gravity="center_vertical"
+            android:text="@string/Toast_Warning_Title"
+            android:textColor="@color/warning_toast_red"
+            android:textSize="@dimen/margin_20"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/custom_toast_message_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="12dp"
+        android:layout_weight="400"
+        android:fontFamily="@font/lato"
+        android:gravity="center_vertical"
+        android:lineHeight="24px"
+        android:text="@string/Toast_Warning_Message"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/margin_20" />
+
+</LinearLayout>

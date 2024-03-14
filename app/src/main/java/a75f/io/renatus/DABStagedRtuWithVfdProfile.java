@@ -29,6 +29,7 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -48,6 +49,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -260,6 +262,17 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     }
     
     private void setUpSpinners() {
+
+        ArrayAdapter<Integer> relayAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.hvac_stage_selector))));
+        relayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        relay1Spinner.setAdapter(relayAdapter);
+        relay2Spinner.setAdapter(relayAdapter);
+        relay3Spinner.setAdapter(relayAdapter);
+        relay4Spinner.setAdapter(relayAdapter);
+        relay5Spinner.setAdapter(relayAdapter);
+        relay6Spinner.setAdapter(relayAdapter);
+        relay7Spinner.setAdapter(relayAdapter);
+
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);
@@ -291,7 +304,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         {
             analogArray.add(a);
         }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+        ArrayAdapter<Integer> analogAdapter = getAdapterValue(analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog2TestSpinner.setAdapter(analogAdapter);
         analog2TestSpinner.setSelection(ControlMote.getAnalog2Out()/10,false);
@@ -664,5 +677,8 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage5,getContext());
         CCUUiUtil.setSpinnerDropDownColor(analog2DefaultSpinner,getContext());
 
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

@@ -20,6 +20,9 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
     private ArrayList<String> values;
     private ArrayList<Boolean> hasImage;
     private int selectedPosition = -1;
+    final String AIROVERSE_PROD = "airoverse_prod";
+    final String CARRIER_PROD = "carrier_prod";
+    final String DAIKIN_PROD = "daikin_prod";
 
     public CustomSpinnerAdapter(Context context, int textViewResourceId, ArrayList<String> values, ArrayList<Boolean> hasImage) {
         super(context, textViewResourceId, values);
@@ -39,33 +42,50 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
     }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
+        View view = getCustomView(position, convertView, parent,true);
+        int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
+        view.setBackgroundColor(colorSelected);
+        return view;
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent){
-       return getCustomView(position,convertView,parent);
+        parent.setPadding(0, 5, 0, 3);
+       return getCustomView(position,convertView,parent,false);
     }
 
-    public View getCustomView(int position, View convertView, ViewGroup parent) {
+    public View getCustomView(int position, View convertView, ViewGroup parent, Boolean isGetView) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int colorSelected = ContextCompat.getColor(context, R.color.zoneselection_gray);
+        int highlightColor;
+        if(BuildConfig.BUILD_TYPE.equals(AIROVERSE_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.airoverse_secondary);
+        } else if(BuildConfig.BUILD_TYPE.equals(CARRIER_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.carrier_75f_secondary);
+        } else if(BuildConfig.BUILD_TYPE.equals(DAIKIN_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.daikin_75f_secondary);
+        } else
+            highlightColor = ContextCompat.getColor(context, R.color.renatus_75f_secondary);
 
         if (hasImage.get(position)) {
             View row = inflater.inflate(R.layout.custom_dropdown_item_with_image, parent, false);
-            row.setBackgroundColor(colorSelected);
             TextView textView = row.findViewById(R.id.textView);
             ImageView imageView = row.findViewById(R.id.imageView);
             textView.setText(values.get(position));
             imageView.setImageResource(R.drawable.image_right_arrow);
 
-            if(position == selectedPosition)
+            if(position == selectedPosition){
                 imageView.setImageDrawable(null);
-
+                row.setBackgroundColor(highlightColor);
+            }
+            if(isGetView) {
+                textView.setPadding(0, 0, 3, 1);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+                row.setPadding(0, 0, 4, 2);
+            }
             return row;
         } else {
             View row = inflater.inflate(R.layout.custom_dropdown_item_text_only, parent, false);
-            row.setBackgroundColor(colorSelected);
             TextView textView = row.findViewById(R.id.textView);
             textView.setText(values.get(position));
             if(position == 2 && values.get(position).contains("No Named Schedule available")){
@@ -75,7 +95,13 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
                 textView.setTextColor(Color.BLACK);
                 textView.setEnabled(false);
             }
-
+            if(position == selectedPosition){
+                row.setBackgroundColor(highlightColor);
+            }
+            if(isGetView) {
+                textView.setPadding(0, 0, 4, 0);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+            }
             return row;
         }
     }

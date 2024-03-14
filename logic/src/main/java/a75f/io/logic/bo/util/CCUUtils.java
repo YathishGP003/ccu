@@ -6,6 +6,7 @@ import android.util.Log;
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
 
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -118,9 +119,11 @@ public class CCUUtils
     public static String getSupportMsgContent(Context context){
         if(isDaikinEnvironment(context))
             return "please contact SiteLine\u2122 Customer Support.";
-        else if (isCarrierEnvironment(context)) {
+        else if (isCarrierEnvironment(context))
             return "please contact ClimaVision Customer Support.";
-        } else
+        else if (isAiroverseEnvironment(context))
+            return "please contact Airoverse for Facilities Customer Support.";
+        else
             return "please contact 75F Customer Support.";
     }
 
@@ -223,5 +226,20 @@ public class CCUUtils
 
     public static boolean isCarrierEnvironment(Context context){
         return BuildConfig.BUILD_TYPE.equalsIgnoreCase(context.getString(R.string.Carrier_Environment));
+    }
+
+    public static boolean isAiroverseEnvironment(Context context){
+        return BuildConfig.BUILD_TYPE.equalsIgnoreCase("airoverse_prod");
+    }
+
+    public static boolean isRecommendedVersionCheckIsNotFalse() {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method method = systemPropertiesClass.getMethod("get", String.class);
+            return !method.invoke(null, "recommended_version_check").equals("false");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
     }
 }

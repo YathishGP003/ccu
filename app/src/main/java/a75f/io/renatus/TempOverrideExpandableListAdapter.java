@@ -324,7 +324,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -348,7 +348,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -372,7 +372,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -397,7 +397,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -426,7 +426,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 ((TextView) v).setGravity(Gravity.CENTER);
                 ((TextView) v).setTextAppearance(R.style.text_appearance);
-
+                v.setBackgroundResource(R.drawable.custmspinner);
                 return v;
 
             }
@@ -546,7 +546,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0);
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
-                        value = value * 0.001;
+                        //value = value * 0.001;
                         String thermistorMapped = getZoneMapping("Thermistor" + getThermistorIndex(expandedListText), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + getThermistorIndex(expandedListText) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");

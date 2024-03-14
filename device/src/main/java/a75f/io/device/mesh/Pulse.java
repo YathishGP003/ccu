@@ -204,7 +204,7 @@ public class Pulse
 								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
-								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+								hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 								if (oldCondensateSensor != curCondensateSensor) {
 									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
 								}
@@ -262,7 +262,7 @@ public class Pulse
 							double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if (oldDisTempVal != curDisTempVal) {
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisTempVal);
 								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
@@ -479,8 +479,8 @@ public class Pulse
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp = 0;
 		double averageTemp;
-		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
-		double hdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
+		double hdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 		Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 		if(occ != null) {
@@ -489,8 +489,8 @@ public class Pulse
 		}
 
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
-		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \""+equip.getRoomRef()+"\"");
-		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \""+equip.getRoomRef()+"\"");
+		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
+		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 
 
 		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
@@ -539,7 +539,7 @@ public class Pulse
 		CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
-		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+equip.getId()+"\"");
+		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and (avg or average) and sp and equipRef == \""+equip.getId()+"\"");
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
@@ -710,7 +710,7 @@ public class Pulse
 								curTempVal=curTh2TempVal;
 								isTh2RoomTempInTI = true;
 							}
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if(oldTh2TempVal != curTh2TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
 							CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
@@ -747,7 +747,7 @@ public class Pulse
 							double curTh1TempVal =
 									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							th1TempVal = curTh1TempVal;
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh1TempVal;
 								isTh1RoomTempInTI = true;
@@ -937,7 +937,7 @@ public class Pulse
 						th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 						th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 						double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 						hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));
 						break;
 					case ANALOG_IN_ONE:
@@ -956,7 +956,7 @@ public class Pulse
 						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 						if(oldTh1TempVal != curTh1TempVal)
 							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
 						break;
@@ -1102,14 +1102,14 @@ public class Pulse
 		if (device != null && device.size() > 0)
 		{
 
-			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and deviceRef == \"" + device.get("id") + "\"");
 
 			for(HashMap phyPoint : phyPoints) {
 				if (phyPoint.isEmpty()) continue;
 				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
-				if (Port.valueOf(phyPoint.get("port").toString()) == Port.DESIRED_TEMP) {//Compare with what was sent out.
+				if (isDesiredTempPhyPoint(phyPoint)) {//Compare with what was sent out.
 					double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 					double desiredTemp = getDesredTempConversion(temp);
 					CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp + "," + curValue);
@@ -1123,6 +1123,19 @@ public class Pulse
 			}
 		}
 	}
+
+	public static boolean isDesiredTempPhyPoint(HashMap<Object, Object> p) {
+		if (p.containsKey("domainName")) {
+			return p.get("domainName").toString().equals((DomainName.desiredTemp));
+		}
+
+		if (p.containsKey("port")) {
+			return Port.valueOf(p.get("port").toString()) == Port.DESIRED_TEMP;
+		}
+
+		return false;
+	}
+
 	public static void updateSetTempFromBacnet(short nodeAddr, double temp, String coolheat){
 
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");

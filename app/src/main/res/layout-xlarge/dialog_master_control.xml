@@ -89,11 +89,10 @@
 
                         <Spinner
                             android:id="@+id/buildinglimmin"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
-                            android:layout_marginStart="125dp"
-                            android:dropDownWidth="160dp"
+                            android:layout_marginStart="120dp"
                             android:overlapAnchor="false"
 
                             android:textColor="@color/selection_gray"
@@ -106,7 +105,7 @@
 
                         <Spinner
                             android:id="@+id/buildinglimitmax"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="20dp"
@@ -129,7 +128,7 @@
 
                         <Spinner
                             android:id="@+id/buildingtozonediff"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="28dp"
@@ -186,7 +185,7 @@
 
                         <Spinner
                             android:id="@+id/heatinglimmin"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="80dp"
@@ -201,7 +200,7 @@
 
                         <Spinner
                             android:id="@+id/coolinglimmin"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="24dp"
@@ -224,7 +223,7 @@
 
                         <Spinner
                             android:id="@+id/heatinglimmax"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="75dp"
@@ -239,7 +238,7 @@
 
                         <Spinner
                             android:id="@+id/coolinglimmax"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="20dp"
@@ -270,7 +269,7 @@
 
                         <Spinner
                             android:id="@+id/heatingdeadband"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="120dp"
@@ -286,7 +285,7 @@
 
                         <Spinner
                             android:id="@+id/coolingdeadband"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="60dp"
@@ -318,7 +317,7 @@
 
                         <Spinner
                             android:id="@+id/unoccupiedzonesetback"
-                            style="@style/TableSpinnermaster"
+                            style="@style/customSpinnerDownArrow"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:layout_marginStart="220dp"

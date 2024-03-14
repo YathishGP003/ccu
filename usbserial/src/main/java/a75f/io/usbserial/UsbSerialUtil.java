@@ -49,11 +49,15 @@ public class UsbSerialUtil {
         }
         return false;
     }
-    
-    public static boolean isSerialRetryRequired(CCUHsApi hayStack) {
+
+    public static boolean isSerialRetryRequired(CCUHsApi hayStack, Context context) {
         List<HashMap<Object, Object>> zoneEquips = hayStack.readAllEntities("equip and zone");
         return zoneEquips.size() > 0 &&
-               (BuildConfig.BUILD_TYPE.equals("staging") ||
-                BuildConfig.BUILD_TYPE.equals("prod"));
+                (BuildConfig.BUILD_TYPE.equals("staging") ||
+                        BuildConfig.BUILD_TYPE.equals("prod") || BuildConfig.BUILD_TYPE.equals("daikin_prod")
+                        || BuildConfig.BUILD_TYPE.equals("carrier_prod")
+                        || BuildConfig.BUILD_TYPE.equals("airoverse_prod")
+                ) && !isBiskitModeEnabled(context)
+        ;
     }
 }

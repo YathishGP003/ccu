@@ -112,7 +112,7 @@ public class Globals {
     }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int TASK_SEPARATION = 15;
+    private static final int TASK_SEPARATION = 30;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
 
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
@@ -237,7 +237,6 @@ public class Globals {
     }
 
     public void startTimerTask(){
-       // CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
 
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
@@ -325,12 +324,13 @@ public class Globals {
             @Override
             public void run()
             {
+                MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
                     ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
-                        new MigrationHandler(CCUHsApi.getInstance()).doMigration();
+                        migrationHandler.doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
                         performBuildingTunerUprades(site);
                         migrateHeartbeatPointForEquips(site);
@@ -347,23 +347,12 @@ public class Globals {
                     }
                     CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
                     TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
-                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
-                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-
-                    BearerTokenManager.getInstance().scheduleJob();
-
-                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                     CcuLog.i(L.TAG_CCU_INIT,"Init Watchdog");
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
-
-                    //TODO - Find the right place..For now just doing if registered already
-                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                         DiffManger diffManger = new DiffManger(getApplicationContext());
                         diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
                         diffManger.processModelMigration(site.get("id").toString());
@@ -382,10 +371,21 @@ public class Globals {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
                     }
                     isInitCompleted = true;
-                    if (CCUHsApi.getInstance().isCCURegistered()) {
+                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                        migrationHandler.updateMigrationVersion();
                     }
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+
+                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
+                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+
+                    BearerTokenManager.getInstance().scheduleJob();
+
+                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
+                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();

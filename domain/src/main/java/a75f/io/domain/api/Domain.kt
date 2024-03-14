@@ -3,7 +3,6 @@ package a75f.io.domain.api
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildingEquip
 import a75f.io.domain.DomainEquip
-import a75f.io.domain.VavEquip
 import a75f.io.domain.logic.DomainManager
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
@@ -101,6 +100,12 @@ object Domain {
     fun getPointByDomain(equip: Equip, domainName: String): Double {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let { return point.readDefaultVal() }
+        return 0.0
+    }
+
+    fun getPointPriorityValByDomain(equip: Equip, domainName: String): Double {
+        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
+        point?.let { return point.readPriorityVal() }
         return 0.0
     }
 

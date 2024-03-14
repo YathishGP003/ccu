@@ -127,7 +127,7 @@ public class EquipScheduleHandler implements Schedulable {
             setback  = schedule.getUnoccupiedZoneSetback();
         if(setback == null ) {
             setback = CCUHsApi.getInstance().readPointPriorityValByQuery
-                    ("zone and unoccupied and setback and roomRef == \"" + HSUtil.getZoneIdFromEquipId(equipRef) + "\"");
+                    ("schedulable and zone and unoccupied and setback and roomRef == \"" + HSUtil.getZoneIdFromEquipId(equipRef) + "\"");
         }
     
         double avgTemp = (occupiedSchedule.getCoolingVal() + occupiedSchedule.getHeatingVal()) / 2.0;

@@ -36,10 +36,12 @@ public class UsbSerialWatchdog {
         int USB_TABLET_REBOOT_TIMEOUT_MINS = 30;
         if (++watchdogTimeoutCounter >= USB_TABLET_REBOOT_TIMEOUT_MINS) {
             Log.i("CCU_USB", "USB watch dog triggering tablet reboot.");
-            if (UsbSerialUtil.isSerialRetryRequired(hayStack)) {
+            if (UsbSerialUtil.isSerialRetryRequired(hayStack, context)) {
                 watchdogTimeoutCounter = 0;
                 Intent intent = new Intent(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
                 context.sendBroadcast(intent);
+            } else {
+                watchdogTimeoutCounter = 0;
             }
         } else {
             Log.i("CCU_USB", "watchdogTimeoutCounter "+watchdogTimeoutCounter);

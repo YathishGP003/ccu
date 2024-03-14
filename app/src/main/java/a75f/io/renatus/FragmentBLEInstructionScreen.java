@@ -430,7 +430,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
             } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())){
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn_carrier);
-            } else {
+            } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())){
+                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_sn_airoverse);
+            }else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn);
             }
 
@@ -445,10 +447,11 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 {
                     pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn_carrier);
                 }
+            } else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hn_airoverse);
             } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn);
             }
-
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {
@@ -461,6 +464,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
+            else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hs_airoverse);
             else
             pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }
@@ -470,6 +475,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
             else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hs_airoverse);
             else
                 pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
         }

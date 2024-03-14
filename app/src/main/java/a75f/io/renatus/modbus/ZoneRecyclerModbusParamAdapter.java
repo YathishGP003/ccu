@@ -40,6 +40,7 @@ import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -98,8 +99,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 commands = entry.getValue();
                             }
-                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, android.R.layout.simple_spinner_item, commands);
-                            commandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_dropdown_item, commands);
+                            commandAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(commandAdapter);
                             for (int i = 0; i < modbusParam.get(position).getCommands().size(); i++) {
@@ -115,8 +116,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 doubleArrayList = entry.getValue();
                             }
 
-                            ArrayAdapter<Double> spinnerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, doubleArrayList);
-                            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            ArrayAdapter<Double> spinnerAdapter = getAdapterValue(doubleArrayList);
+                            spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(spinnerAdapter);
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
@@ -144,6 +145,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         if (unit != null && !unit.equals("")) {
                             viewHolder.tvParamLabel.append("(" + unit + ")");
                         }
+                        viewHolder.tvParamLabel.append(" : ");
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                             Point p = readPoint(modbusParam.get(position));
@@ -167,6 +169,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if (unit != null && !unit.equals(" ")) {
                                     viewHolder.tvParamLabel.append("(" + unit + ")");
                                 }
+                                viewHolder.tvParamLabel.append(" : ");
                             }
                         }
                     }
@@ -196,6 +199,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (unit != null && !unit.equals(" ")) {
                         viewHolder.tvParamLabel.append("(" + unit + ")");
                     }
+                    viewHolder.tvParamLabel.append(" : ");
                 }
                 
             }
@@ -394,5 +398,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 .setPadding(10f)
                 .show();
         new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, 3000);
+    }
+
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_dropdown_item, values);
     }
 }

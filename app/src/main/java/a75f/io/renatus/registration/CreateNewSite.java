@@ -4,6 +4,7 @@ import static java.lang.Thread.sleep;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
@@ -86,6 +87,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -149,7 +151,8 @@ public class CreateNewSite extends Fragment {
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
 
-        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")
+                && isRecommendedVersionCheckIsNotFalse()) {
             if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()){
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction();
                 Fragment fragmentByTag = getParentFragmentManager().findFragmentByTag("popup");
@@ -530,7 +533,7 @@ public class CreateNewSite extends Fragment {
     }
     @Override
     public void onResume() {
-        if(!CCUHsApi.getInstance().isCCURegistered()) {
+        if(!CCUHsApi.getInstance().isCCURegistered() && isRecommendedVersionCheckIsNotFalse()) {
             if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
                 try {
                     FragmentTransaction ft = getParentFragmentManager().beginTransaction();
@@ -720,7 +723,7 @@ public class CreateNewSite extends Fragment {
 
     private void populateAndUpdateTimeZone() {
         
-        timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, getSupportedTimeZones());
+        timeZoneAdapter = getAdapterValue(getSupportedTimeZones());
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
         mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
@@ -1063,5 +1066,8 @@ public class CreateNewSite extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

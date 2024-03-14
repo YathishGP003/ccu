@@ -231,13 +231,14 @@ class ModbusConfigView : BaseDialogFragment() {
                                         item.param.value.name.substring(0, 30)
                                     else
                                         item.param.value.name
+                                    , widthValue = 440
                                 )
                                 ToggleButton(item.displayInUi.value) {
                                     item.displayInUi.value = it
                                     item.param.value.getParameterId()
                                     viewModel.updateSelectAll()
                                 }
-                                Box(modifier = Modifier.width(50.dp)) { }
+                                Box(modifier = Modifier.width(90.dp)) { }
                                 index++
                             }
                         }

@@ -23,11 +23,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.BasicConfig
 import a75f.io.logic.bo.building.system.SystemController
+import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.TempDirection
 import a75f.io.logic.bo.building.system.calculateDSPSetPoints
 import a75f.io.logic.bo.building.system.calculateSATSetPoints
 import a75f.io.logic.bo.building.system.getConditioningMode
 import a75f.io.logic.bo.building.system.getExternalEquipId
+import a75f.io.logic.bo.building.system.getPreviousOperatingModeFromDb
 import a75f.io.logic.bo.building.system.getTunerByDomainName
 import a75f.io.logic.bo.building.system.handleDeHumidityOperation
 import a75f.io.logic.bo.building.system.handleHumidityOperation
@@ -65,6 +67,7 @@ class VavExternalAhu : VavSystemProfile() {
     private var loopRunningDirection = TempDirection.COOLING
     private var hayStack = CCUHsApi.getInstance()
 
+    private var previousOperationMode = SystemMode.OFF.ordinal
     override fun getProfileName(): String = PROFILE_NAME
 
     override fun getProfileType(): ProfileType = ProfileType.vavExternalAHUController
@@ -181,7 +184,7 @@ class VavExternalAhu : VavSystemProfile() {
         updateLoopDirection(vavConfig, systemEquip)
         updateOperatingMode(
             systemEquip,
-            vavSystem.systemState.ordinal.toDouble(),
+            getUpdatedOperatingMode().toDouble(),
             operatingMode,
             externalSpList,
             externalEquipId,
@@ -206,7 +209,14 @@ class VavExternalAhu : VavSystemProfile() {
             vavConfig.loopOutput,
             conditioningMode
         )
-        setOccupancyMode(systemEquip, externalEquipId, occupancyMode, hayStack, externalSpList)
+        setOccupancyMode(systemEquip,
+            externalEquipId,
+            occupancyMode,
+            hayStack,
+            externalSpList,
+            vavConfig,
+            conditioningMode
+        )
         operateDamper(
             systemEquip,
             vavConfig.weightedAverageCO2,
@@ -214,7 +224,8 @@ class VavExternalAhu : VavSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            conditioningMode
+            conditioningMode,
+            vavConfig
         )
         handleHumidityOperation(
             systemEquip,
@@ -224,7 +235,8 @@ class VavExternalAhu : VavSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            vavConfig
         )
         handleDeHumidityOperation(
             systemEquip,
@@ -241,17 +253,35 @@ class VavExternalAhu : VavSystemProfile() {
     }
 
     private fun updateLoopDirection(basicConfig: BasicConfig, systemEquip: Equip) {
-        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} heat ${basicConfig.heatingLoop}")
+        logIt("Current loop direction $loopRunningDirection  Loop cool: ${basicConfig.coolingLoop} " +
+                "heat ${basicConfig.heatingLoop} Mode $previousOperationMode")
         loopRunningDirection = when(vavSystem.systemState) {
-            SystemController.State.COOLING -> TempDirection.COOLING
-            SystemController.State.HEATING -> TempDirection.HEATING
-            else -> TempDirection.COOLING
+            SystemController.State.COOLING -> {
+                previousOperationMode = SystemController.State.COOLING.ordinal
+                TempDirection.COOLING
+            }
+            SystemController.State.HEATING -> {
+                previousOperationMode = SystemController.State.HEATING.ordinal
+                TempDirection.HEATING
+            }
+            else -> {
+                previousOperationMode = if (previousOperationMode == 0) getPreviousOperatingModeFromDb(systemEquip, hayStack) else previousOperationMode
+                if (previousOperationMode == SystemController.State.HEATING.ordinal ) TempDirection.HEATING else TempDirection.COOLING
+            }
         }
+
         updatePointValue(systemEquip, coolingLoopOutput, basicConfig.coolingLoop.toDouble())
         updatePointValue(systemEquip, heatingLoopOutput, basicConfig.heatingLoop.toDouble())
-        logIt("Changed direction $loopRunningDirection ");
+        logIt("Changed direction $loopRunningDirection")
     }
 
+    private fun getUpdatedOperatingMode() : Int{
+        return when(vavSystem.systemState) {
+            SystemController.State.COOLING -> vavSystem.systemState.ordinal
+            SystemController.State.HEATING -> vavSystem.systemState.ordinal
+            else -> previousOperationMode
+        }
+    }
     private fun getBasicVavConfigData() = BasicConfig(
         coolingLoop = if (vavSystem.coolingSignal <= 0) 0 else vavSystem.coolingSignal,
         heatingLoop = if (vavSystem.heatingSignal <= 0) 0 else vavSystem.heatingSignal,

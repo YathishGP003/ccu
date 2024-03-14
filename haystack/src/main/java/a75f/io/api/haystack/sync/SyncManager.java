@@ -60,20 +60,10 @@ public class SyncManager {
             return;
         }
 
-        if (isMigrationRequired()) {
-            CcuLog.d(TAG, "Migration Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
-                                                getMigrationWorkRequest())
-                                                .then(getSyncWorkRequest())
-                                                .enqueue();
-        } else {
-            CcuLog.d(TAG, "Migration not Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
-                                                getSyncWorkRequest())
-                                                .enqueue();
-        }
+        WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                        workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
+                        getSyncWorkRequest())
+                .enqueue();
     }
 
     public void syncPointArray() {
@@ -106,22 +96,11 @@ public class SyncManager {
             mSyncTimerTask = null;
         }
 
-        if (isMigrationRequired()) {
-            CcuLog.d(TAG, "Migration Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getMigrationWorkRequest())
-                       .then(getSyncWorkRequestWithDelay(delaySeconds))
-                       .then(getPointWriteWorkRequest())
-                       .enqueue();
-        } else {
-            CcuLog.d(TAG, "Migration not Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getSyncWorkRequestWithDelay(delaySeconds))
-                       .then(getPointWriteWorkRequest())
-                       .enqueue();
-        }
+        WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                        ExistingWorkPolicy.REPLACE,
+                        getSyncWorkRequestWithDelay(delaySeconds))
+                .then(getPointWriteWorkRequest())
+                .enqueue();
     }
 
 
@@ -172,35 +151,6 @@ public class SyncManager {
                                             TimeUnit.MILLISECONDS)
                                         .addTag(POINT_WRITE_WORK_TAG)
                                         .build();
-    }
-    
-    /**
-     * Do migration if there is idmap and flag is not set.
-     * @return
-     */
-    private boolean isMigrationRequired() {
-        boolean migrationFlag = PreferenceUtil.getUuidMigrationCompleted(appContext);
-        if (migrationFlag) {
-            return false; //Migration has been completed.
-        }
-        
-        boolean migrationRequired = false;
-        if (CCUHsApi.getInstance().getIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        if (CCUHsApi.getInstance().getUpdateIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        if (CCUHsApi.getInstance().getRemoveIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        
-        if (!migrationRequired) {
-            //Nothing to migrate. May be fresh installation.
-            PreferenceUtil.setUuidMigrationCompleted(true, appContext);
-        }
-        
-        return migrationRequired;
     }
     
     public void scheduleSync() {

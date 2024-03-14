@@ -113,6 +113,7 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
 
 /**
@@ -299,6 +300,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
         }
 		UpdateScheduleHandler.setIntrinsicScheduleListener(this);
 		SystemFragment.setIntrinsicScheduleListener(this);
+		UpdatePointHandler.setIntrinsicScheduleListener(this);
 	}
 
 	@Override
@@ -309,6 +311,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		UpdateScheduleHandler.setIntrinsicScheduleListener(null);
 		SystemFragment.setIntrinsicScheduleListener(null);
+		UpdatePointHandler.setIntrinsicScheduleListener(null);
 	}
 
 	@Override
@@ -316,9 +319,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		super.setUserVisibleHint(isVisibleToUser);
 		if(isVisibleToUser) {
 			UpdatePointHandler.setSystemDataInterface(this);
+			UpdatePointHandler.setIntrinsicScheduleListener(this);
 			loadIntrinsicSchedule();
 		} else {
 			UpdatePointHandler.setSystemDataInterface(null);
+			UpdatePointHandler.setIntrinsicScheduleListener(null);
 		}
 	}
 	@Override
@@ -655,6 +660,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void updateIntrinsicSchedule() {
 		if(getActivity() != null) {
 			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
+			fetchPoints();
 		}
 	}
 
@@ -838,8 +844,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			{
 				zoroToHundred.add(val);
 			}
-			humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
-			humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(),R.layout.spinner_dropdown_item, zoroToHundred);
+			humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 			targetMinInsideHumidity.setAdapter(humidityAdapter);
 			targetMinInsideHumidity.setSelection(0);
 			targetMaxInsideHumidity.setAdapter(humidityAdapter);
@@ -876,8 +882,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			zoroToHundred.add(val);
 		}
 		
-		humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
-		humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		humidityAdapter = new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, zoroToHundred);
+		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		
 		targetMinInsideHumidity.setAdapter(humidityAdapter);
@@ -1266,7 +1272,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void configWatermark(){
 		mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
-		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())
+		 || !CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
 			mainLayout.setBackground(null);
 		}
 	}

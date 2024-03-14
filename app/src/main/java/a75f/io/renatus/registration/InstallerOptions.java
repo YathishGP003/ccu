@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+
 import android.app.AlertDialog;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -16,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,6 +83,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
@@ -184,6 +188,7 @@ public class InstallerOptions extends Fragment {
     private static final String TAG = InstallerOptions.class.getSimpleName();
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
+    private View toastWarning;
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
         imageTemp.setTempControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
 
@@ -287,6 +292,8 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
 
+        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
+
         setToggleCheck();
 
         if (ccuId != null) {
@@ -312,12 +319,20 @@ public class InstallerOptions extends Fragment {
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
                         HashMap band = CCUHsApi.getInstance().read("point and snband");
+                        if(!addressBandSelected.equals(band.get("val").toString()) && regAddressBands.contains(addressBandSelected)) {
+                            Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                            toast.setGravity(Gravity.BOTTOM, 50, 50);
+                            toast.setView(toastWarning);
+                            toast.setDuration(Toast.LENGTH_LONG);
+                            toast.show();
+                        }
                         SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(band);
                         sp.setVal(addressBandSelected);
                         SettingPoint snBand = sp.build();
 
                         CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
-
+                        regAddressBands.remove(band.get("val"));
+                        regAddressBands.add(addressBandSelected);
                         try {
                             String confString = prefs.getString(BACNET_CONFIGURATION);
                             JSONObject config = new JSONObject(confString);
@@ -332,7 +347,6 @@ public class InstallerOptions extends Fragment {
 
                     }
                 }
-
             }
 
             @Override
@@ -700,16 +714,6 @@ public class InstallerOptions extends Fragment {
             ArrayList<String> zonediff = new ArrayList<>();
 
             if(isCelsiusTunerAvailableStatus()){
-                buildingLimitMin.setDropDownWidth(150);
-                buildingLimitMax.setDropDownWidth(150);
-                unoccupiedZoneSetback.setDropDownWidth(150);
-                heatingLimitMin.setDropDownWidth(150);
-                heatingLimitMax.setDropDownWidth(150);
-                coolingLimitMin.setDropDownWidth(150);
-                coolingLimitMax.setDropDownWidth(150);
-                coolingDeadBand.setDropDownWidth(150);
-                heatingDeadBand.setDropDownWidth(150);
-                buildingToZoneDiff.setDropDownWidth(150);
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
                 }
@@ -730,16 +734,6 @@ public class InstallerOptions extends Fragment {
                 }
 
             }else{
-                buildingLimitMin.setDropDownWidth(70);
-                buildingLimitMax.setDropDownWidth(70);
-                unoccupiedZoneSetback.setDropDownWidth(70);
-                heatingLimitMin.setDropDownWidth(70);
-                heatingLimitMax.setDropDownWidth(70);
-                coolingLimitMin.setDropDownWidth(70);
-                coolingLimitMax.setDropDownWidth(70);
-                coolingDeadBand.setDropDownWidth(70);
-                heatingDeadBand.setDropDownWidth(70);
-                buildingToZoneDiff.setDropDownWidth(70);
 
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F");
@@ -761,31 +755,31 @@ public class InstallerOptions extends Fragment {
                 }
             }
 
-            ArrayAdapter<String> zoneDiffadapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zonediff);
+            ArrayAdapter<String> zoneDiffadapter = getAdapterValue(zonediff);
             zoneDiffadapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             buildingToZoneDiff.setAdapter(zoneDiffadapter);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+            ArrayAdapter<String> adapter = getAdapterValue(list);
             adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             buildingLimitMin.setAdapter(adapter);
 
             buildingLimitMax.setAdapter(adapter);
 
-            ArrayAdapter<String> setbackadapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoneSetBack);
+            ArrayAdapter<String> setbackadapter = getAdapterValue(zoneSetBack);
             setbackadapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             unoccupiedZoneSetback.setAdapter(setbackadapter);
 
-            ArrayAdapter<String> heatingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingLimit);
+            ArrayAdapter<String> heatingAdapter = getAdapterValue(heatingLimit);
             heatingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             heatingLimitMin.setAdapter(heatingAdapter);
             heatingLimitMax.setAdapter(heatingAdapter);
 
-            ArrayAdapter<String> coolingAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, coolingLimit);
+            ArrayAdapter<String> coolingAdapter = getAdapterValue(coolingLimit);
             coolingAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             coolingLimitMin.setAdapter(coolingAdapter);
             coolingLimitMax.setAdapter(coolingAdapter);
 
-            ArrayAdapter<String> deadBandAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, deadBand);
+            ArrayAdapter<String> deadBandAdapter = getAdapterValue(deadBand);
             deadBandAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             coolingDeadBand.setAdapter(deadBandAdapter);
             heatingDeadBand.setAdapter(deadBandAdapter);
@@ -1072,7 +1066,7 @@ public class InstallerOptions extends Fragment {
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
+                    HDict tDict = new HDictBuilder().add("filter", "snband and siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
                         Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
@@ -1085,29 +1079,19 @@ public class InstallerOptions extends Fragment {
                     while (it.hasNext())
                     {
                         HRow r = (HRow) it.next();
-                        if (r.getStr("group") != null) {
-                            regAddressBands.add(r.getStr("group"));
+                        if (r.getStr("val") != null) {
+                            regAddressBands.add(r.getStr("val"));
                         }
                     }
                 },
                 ()->{
-                    for(int i = 0; i < regAddressBands.size(); i++)
-                    {
-                        for(int j = 0; j < addressBand.size(); j++)
-                        {
-                            if(regAddressBands.get(i).equals(addressBand.get(j)))
-                            {
-                                addressBand.remove(regAddressBands.get(i));
-                            }
-                        }
-                    }
                     setNodeAddress();
                 }
         );
     }
 
     public void setNodeAddress(){
-        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, addressBand);
+        ArrayAdapter<String> analogAdapter = getAdapterValue(addressBand);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mAddressBandSpinner.setAdapter(analogAdapter);
 
@@ -1124,5 +1108,8 @@ public class InstallerOptions extends Fragment {
         } else {
             ccu().setSmartNodeAddressBand((short) 1000);
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }

@@ -65,10 +65,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.base.BaseInterval;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -125,6 +129,7 @@ import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.renatus.schedules.NamedSchedule;
+import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
@@ -132,6 +137,7 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -700,6 +706,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CCUHsApi.getInstance().setCcuReady();
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
+        if(PreferenceUtil.getIsCcuLaunched()) {
+            Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            PreferenceUtil.setIsCcuLaunched(false);
+        }
     }
 
     private int loadZone(View rootView, LinearLayout[] tablerowLayout, HashMap roomMap) {
@@ -902,58 +912,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
         CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getActivity(), R.layout.custom_dropdown_item_with_image, scheduleArray, hasImage);
-       /* ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.custom_dropdown_item_with_image ,scheduleArray) {
 
-            @Override
-            public boolean isEnabled(int position) {
-                return position !=1 ;// As this option is a title for NamedSchedule
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
-                }
-
-                TextView tv = (TextView) v.findViewById(R.id.textview);
-                tv.setText(scheduleArray.get(position));
-
-
-                switch (position) {
-                    case 0:
-                        break;
-                    case 1:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 2:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
-            }
-        };*/
         scheduleSpinner.setAdapter(adapter);
-
+          adapter.setSelectedPosition(scheduleSpinner.getSelectedItemPosition());
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
         try {
@@ -1063,33 +1024,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
                 if(isItemSelectedEvent)
                     return;
-
-//                if (position == 0 && (mScheduleType != -1)) {
-//                    if (mSchedule.isZoneSchedule()) {
-//                        mSchedule.setDisabled(true);
-//                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
-//                    }
-//                    scheduleImageButton.setVisibility(View.GONE);
-//
-//                    if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.BUILDING.ordinal()) {
-//                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING, zoneMap);
-//                        mScheduleTypeMap.put(equipId[0], ScheduleType.BUILDING.ordinal());
-//                    }
-//                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-//                    Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-//                    if (zone != null) {
-//                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
-//                                "not special and not vacation and roomRef " + "== " +zone.getId());
-//                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
-//                        zone.setScheduleRef(scheduleById.getId());
-//                        CCUHsApi.getInstance().updateZone(zone, zoneId);
-//                    }
-//                    scheduleSpinner.setSelection(position);
-//                    scheduleImageButton.setTag(mSchedule.getId());
-//                    vacationImageButton.setTag(mSchedule.getId());
-//                    specialScheduleImageButton.setTag(mSchedule.getId());
-//                    CCUHsApi.getInstance().scheduleSync();
-//                } else
 
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                    boolean isContainment = true;
@@ -1217,6 +1151,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneDetails.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
@@ -1441,7 +1376,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1658,7 +1592,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (v == null) {
                     Context mContext = this.getContext();
                     LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                    v = vi.inflate(R.layout.spinner_dropdown_item, null);
                 }
 
                 TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
@@ -2198,6 +2132,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         //imageView.setTag(gridItemObj);
         nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         textEquipment.setText(zoneTitle);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
@@ -2358,7 +2293,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -2399,7 +2333,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -2907,46 +2840,42 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
 
         if (cpuEquipPoints.containsKey("condEnabled")) {
             if (cpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             } else if (cpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             }
             if (cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
 
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_fanmode))));
         if (cpuEquipPoints.containsKey("fanEnabled")) {
             if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (cpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(cpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -2988,7 +2917,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 arrayHumdityTargetList.add(pos+"%");
 
             ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
-            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if (fanHighHumdOption == 2.0) {
@@ -3156,44 +3085,40 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
         if (hpuEquipPoints.containsKey("condEnabled")) {
             if (hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             } else if (hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         conditionSpinner.setAdapter(conModeAdapter);
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_fanmode))));
 
         if (hpuEquipPoints.containsKey("fanEnabled")) {
             if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (hpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         fanSpinner.setAdapter(fanModeAdapter);
 
         //Brute force approach to avoid a crash due to invalid configuration.
@@ -3230,7 +3155,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 arrayHumdityTargetList.add(pos+"%");
 
             ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
-            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if (fanHighHumdOption > 1.0) {
@@ -3403,51 +3328,46 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
 
         if (p2FCUPoints.containsKey("condEnabled")) {
             if (p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item
                 }
             }
             if (p2FCUPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_2pfcu_fanmode))));
         if (p2FCUPoints.containsKey("fanEnabled")) {
             if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                        R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_medium))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(p2FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -3571,52 +3491,47 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             e.printStackTrace();
         }
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> conModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_conditionmode))));
         if (p4FCUPoints.containsKey("condEnabled")) {
             if (p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_coolonly))));
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if (p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_heatonly))));
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             }
             if (p4FCUPoints.get("condEnabled").toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_conditionmode_off))));
                 conditionMode = 0;
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue1.setAdapter(conModeAdapter);
 
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        ArrayAdapter<CharSequence> fanModeAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.smartstat_2pfcu_fanmode))));
 
         if (p4FCUPoints.containsKey("fanEnabled")) {
             if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                        R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_medium))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_low))));
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanModeAdapter =getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray( R.array.smartstat_2pfcu_fanmode_off))));
                 fanMode = 0;
             }
         }
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(p4FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -4026,12 +3941,33 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
-
-        for (Interval v : systemIntervals) {
-            CcuLog.d("CCU_UI", "Merged System interval " + v);
-        }
-
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+        int size = zoneIntervals.size();
+
+        for (int i = 0; i < size; i++) {
+            Interval it = zoneIntervals.get(i);
+
+            LocalTime startTimeOfDay = it.getStart().toLocalTime();
+            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
+
+            // Check if the start time is after the end time and separating the overnight schedule
+            if (startTimeOfDay.isAfter(endTimeOfDay)) {
+                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
+                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
+            }
+        }
+        //sorting the zoneInterval
+        zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
+        Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size()-1);
+        LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
+        Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
+        LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
+        /** checking for overnight for sunday ,if it is has overnight sch for sunday
+         we need to add the building occupancy for next week monday also **/
+        if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
+        {
+            systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
+        }
 
         for (Interval z : zoneIntervals) {
             boolean add = true;
@@ -4375,7 +4311,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -4417,7 +4352,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     selectedView = seekArc.getId();
                     status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -4538,6 +4472,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 PreferenceUtil.setDataMigrationPopUpClosed();
             });
         }
+    }
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
 }

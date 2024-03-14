@@ -566,40 +566,10 @@ public class FloorPlanFragment extends Fragment {
         ArrayList<String> arrayList = new ArrayList<>();
 
         for (Equip e : equips) {
-            preLoadEquipModel(e);
             arrayList.add(e.getGroup());
 
         }
         return arrayList;
-    }
-
-    private void preLoadEquipModel(Equip equip) {
-        if (equip.getMarkers().contains("smartnode")) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
-
-            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavNoFanModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavParallelFanModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavSeriesModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeVavAcbModelDef());
-            }
-        } else if (equip.getMarkers().contains("helionode")) {
-            RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
-
-            if (equip.getProfile().equals(ProfileType.VAV_REHEAT.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavNoFanModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavParallelFanModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavSeriesModelDef());
-            } else if (equip.getProfile().equals(ProfileType.VAV_ACB.name())) {
-                RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeVavAcbModelDef());
-            }
-        }
-
     }
 
     private void enableFloorButton() {

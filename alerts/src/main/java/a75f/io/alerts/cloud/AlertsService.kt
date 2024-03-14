@@ -38,7 +38,7 @@ interface AlertsService {
    /**
     * Get all alert definitions for a site, predefined and custom.
     */
-   @GET("/definitions/sites/{siteId}?size=100&sortField=alert.mSeverity&sortDirection=DESC")
+   @GET("/definitions/sites/{siteId}?sortField=alert.mSeverity&sortDirection=DESC")
    fun getSiteDefinitions(
       @Path("siteId") siteId: String,
    ): Single<DefinitionsResponse>

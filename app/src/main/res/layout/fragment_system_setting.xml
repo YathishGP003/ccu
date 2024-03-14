@@ -137,7 +137,7 @@
                         android:id="@+id/last_updated_time_ccu_hb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -225,7 +225,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -245,7 +245,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout
@@ -282,7 +282,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -303,7 +303,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
 
                         </LinearLayout>
 
@@ -341,7 +341,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -363,7 +363,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -398,7 +398,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/current"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -418,7 +418,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left"
                                 android:text="@string/setpoint"
-                                android:textAppearance="@style/label_grey" />
+                                android:textAppearance="@style/label_grey_SystemFragment" />
                         </LinearLayout>
 
 
@@ -441,7 +441,7 @@
                             android:id="@+id/external_damper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -690,7 +690,7 @@
                             android:id="@+id/external_last_updated_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -1358,7 +1358,7 @@
                             android:id="@+id/last_updated_status_oao"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/label_grey" />
+                            android:textAppearance="@style/label_grey_SystemFragment" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -1498,7 +1498,7 @@
                         android:id="@+id/last_updated_statusEM"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -1553,7 +1553,7 @@
                         android:id="@+id/last_updated_statusBTU"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/label_grey" />
+                        android:textAppearance="@style/label_grey_SystemFragment" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView

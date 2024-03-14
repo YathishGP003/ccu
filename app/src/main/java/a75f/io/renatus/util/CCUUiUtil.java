@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class CCUUiUtil {
 
@@ -49,6 +50,8 @@ public class CCUUiUtil {
             activity.setTheme(R.style.RenatusAppDaikinTheme);
         } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
             activity.setTheme(R.style.RenatusAppCarrierTheme);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppAiroverseTheme);
         }
     }
     public static String getColorCode(Context context) {
@@ -122,7 +125,7 @@ public class CCUUiUtil {
         for (double val = start;  val <= end; val += increment) {
             list.add(val);
         }
-        ArrayAdapter<Double> adapter = new ArrayAdapter<>(c, R.layout.spinner_dropdown_item, list);
+        ArrayAdapter<Double> adapter = getAdapterValue(c,list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
     }
@@ -198,6 +201,11 @@ public class CCUUiUtil {
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
     }
 
+    public static boolean isAiroverseThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Airoverse_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.prefs_airoverse_theme_key), false);
+    }
+
     public static boolean isValidMacAddress(String ip) {
         //String regex = "^(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})$";
         String regex = "^[a-fA-F0-9]{2}(.[a-fA-F0-9]{2}){5}$";
@@ -209,5 +217,8 @@ public class CCUUiUtil {
         Matcher m = p.matcher(ip);
         // Return if the mac address matched the ReGex
         return m.matches();
+    }
+    private static CustomSpinnerDropDownAdapter getAdapterValue(Context context,ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_dropdown_item, values);
     }
 }

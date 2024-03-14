@@ -63,6 +63,9 @@ android {
                 includeCompileClasspath true
             }
         }*/
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
         buildConfigField "String", 'DEBUG_USER', properties.getProperty("debug.user.email", '\"\"')
 
         signingConfig signingConfigs.debug

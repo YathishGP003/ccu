@@ -276,7 +276,7 @@ public class Schedule extends Entity
             
             if (schedule != null )
             {
-                CcuLog.i("CCU_SCHEDULE", "Zone Schedule: for "+zone.getDisplayName()+" : "+ schedule.toString());
+                //CcuLog.i("CCU_SCHEDULE", "Zone Schedule: for "+zone.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
         }

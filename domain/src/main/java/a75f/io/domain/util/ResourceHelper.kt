@@ -63,36 +63,8 @@ object ResourceHelper {
 
     fun loadProfileModelDefinition(fileName : String) : SeventyFiveFProfileDirective {
         @Nullable val modelData: String? = loadString(fileName)
-
-        /*val moshiInstance = Moshi.Builder()
-            .add(NullToEmptyStringAdapter)
-            .add(
-                PolymorphicJsonAdapterFactory.of(Constraint::class.java, Constraint::constraintType.name)
-                    .withSubtype(NoConstraint::class.java, Constraint.ConstraintType.NONE.name)
-                    .withSubtype(NumericConstraint::class.java, Constraint.ConstraintType.NUMERIC.name)
-                    .withSubtype(MultiStateConstraint::class.java, Constraint.ConstraintType.MULTI_STATE.name))
-            .add(
-                PolymorphicJsonAdapterFactory.of(PointConfiguration::class.java, PointConfiguration::configType.name)
-                    .withSubtype(BaseConfiguration::class.java, PointConfiguration.ConfigType.BASE.name)
-                    .withSubtype(AssociatedConfiguration::class.java, PointConfiguration.ConfigType.ASSOCIATED.name)
-                    .withSubtype(AssociationConfiguration::class.java, PointConfiguration.ConfigType.ASSOCIATION.name)
-                    .withSubtype(DependentConfiguration::class.java, PointConfiguration.ConfigType.DEPENDENT.name)
-                    .withSubtype(DynamicSensorConfiguration::class.java, PointConfiguration.ConfigType.DYNAMIC_SENSOR.name))
-            .add(KotlinJsonAdapterFactory())
-            .build()
-        val jsonAdapter: JsonAdapter<SeventyFiveFProfileDirective> = moshiInstance.adapter(SeventyFiveFProfileDirective::class.java)
-
-        return modelData?.let {jsonAdapter.fromJson(modelData)}!!*/
-        //val objectMapper = ObjectMapperConfig().objectMapper()
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFProfileDirective
-    }
-
-    fun loadDeviceModelDefinition(fileName: String) : SeventyFiveFDeviceDirective {
-        @Nullable val modelData: String? = loadString(fileName)
-
-        val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
-        return modelDirectiveFactory.fromJson(modelData!!) as SeventyFiveFDeviceDirective
     }
 
     fun getModelVersion(fileName: String): JSONObject {
@@ -107,7 +79,6 @@ object ResourceHelper {
         @Nullable val modelData: String? = loadString(fileName)
         if (modelData.isNullOrEmpty())
             return null
-        //val objectMapper = ObjectMapperConfig().objectMapper()
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData)
     }
@@ -115,7 +86,6 @@ object ResourceHelper {
     fun loadModel(fileName : String) : ModelDirective {
         CcuLog.i("CCU_DM", "loadModel $fileName")
         @Nullable val modelData: String? = loadString(fileName)
-        //val objectMapper = ObjectMapperConfig().objectMapper()
         CcuLog.i("CCU_DM", "loadModel data $modelData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)

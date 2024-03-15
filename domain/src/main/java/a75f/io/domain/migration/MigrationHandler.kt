@@ -98,6 +98,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     updateRef(equipMap, profileConfiguration)
                     val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
                         haystack.timeZone, equipMap["dis"].toString()))
+                    hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
+                    hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                     haystack.updateEquip(hayStackEquip, it.id)
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
@@ -156,6 +158,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     updateRef(equipMap, profileConfiguration)
                     val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
                         haystack.timeZone, equipMap["dis"].toString()))
+                    hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
+                    hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                     haystack.updateEquip(hayStackEquip, it.id)
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {

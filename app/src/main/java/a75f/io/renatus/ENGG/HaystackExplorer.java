@@ -340,8 +340,15 @@ public class HaystackExplorer extends Fragment
                 tunerList.add(name);
                 tunerMap.put(name, t.get("id").toString());
             }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
-            equipMap.put(m.get("dis").toString(), m.get("id").toString());
+
+            if(m.containsKey("sourceModelVersion")) {
+                expandableListDetail.put(m.get("dis").toString()+" : "+m, tunerList);
+                equipMap.put(m.get("dis").toString(), m.get("id").toString());
+            }
+            else {
+                expandableListDetail.put(m.get("dis").toString(), tunerList);
+                equipMap.put(m.get("dis").toString(), m.get("id").toString());
+            }
         }
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
     }

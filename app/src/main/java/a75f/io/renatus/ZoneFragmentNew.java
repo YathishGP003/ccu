@@ -553,7 +553,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void updateSensorValue(short nodeAddress) {
         if (getActivity() != null) {
             if (zoneNonTempOpen) {
-                if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
+                if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().startsWith("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

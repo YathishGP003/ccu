@@ -265,7 +265,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
-    private fun createPoint(pointConfig: PointBuilderConfig) {
+    fun createPoint(pointConfig: PointBuilderConfig) {
         val hayStackPoint = buildPoint(pointConfig)
         val pointId = hayStack.addPoint(hayStackPoint)
         hayStackPoint.id = pointId

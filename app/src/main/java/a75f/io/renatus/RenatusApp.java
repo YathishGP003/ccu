@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -159,6 +161,9 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void closeApp() {
+		AlertManager.getInstance().clearAlertsWhenAppClose();
+		new AlertsDataStore(context).appRestarted();
+		CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
 		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);

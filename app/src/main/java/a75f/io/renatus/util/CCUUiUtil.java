@@ -1,5 +1,7 @@
 package a75f.io.renatus.util;
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -66,6 +71,9 @@ public class CCUUiUtil {
     }
 
     public static void triggerRestart(Context context) {
+        AlertManager.getInstance().clearAlertsWhenAppClose();
+        new AlertsDataStore(context).appRestarted();
+        CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();

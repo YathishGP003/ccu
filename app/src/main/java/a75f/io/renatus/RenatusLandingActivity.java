@@ -53,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.device.mesh.LSmartNode;
@@ -452,10 +453,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        appRestarted();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        appRestarted();
         ccuLaunched();
         abortCCUDownloadProcess();
         try {
@@ -472,6 +473,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void appRestarted() {
+        new AlertsDataStore(context).appRestarted();
         CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
     }
 

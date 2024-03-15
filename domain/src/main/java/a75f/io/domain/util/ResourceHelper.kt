@@ -3,19 +3,15 @@ package a75f.io.domain.util
 import a75f.io.logger.CcuLog
 import android.content.Context
 import androidx.annotation.Nullable
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
-import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.ConstraintDeserializer
 import io.seventyfivef.domainmodeler.common.ModelDirectiveDeserializer
 import io.seventyfivef.domainmodeler.common.PointConfigurationDeserializer
@@ -130,6 +126,9 @@ object ResourceHelper {
         CcuLog.i("CCU_DM", "loadModel stream $inputStream")
         @Nullable val modelData: String? = loadString(inputStream)
         CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
+        val model = JSONObject(modelData)
+        val versionData = model.getJSONObject("version")
+        CcuLog.printLongMessage("CCU_DM", "Model Version $versionData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

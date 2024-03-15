@@ -115,11 +115,6 @@ object Domain {
         return 0.0
     }
 
-    private fun getIdByDomain(equip: Equip, domainName: String): String? {
-        val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
-        return point?.id
-    }
-
     fun writePointByDomain(equip: Equip, domainName: String, value: Any) {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value
         point?.let {
@@ -165,15 +160,15 @@ object Domain {
 
         if (point?.valueConstraint is MultiStateConstraint) {
 
-            (point?.valueConstraint as MultiStateConstraint).allowedValues.forEach{ state ->
+            (point.valueConstraint as MultiStateConstraint).allowedValues.forEach{ state ->
                 valuesList.add(state.value)
             }
 
         } else if (point?.valueConstraint is NumericConstraint) {
 
-            val minVal = (point?.valueConstraint as NumericConstraint).minValue
-            val maxVal = (point?.valueConstraint as NumericConstraint).maxValue
-            val incVal = point?.presentationData?.get("tagValueIncrement").toString().toDouble()
+            val minVal = (point.valueConstraint as NumericConstraint).minValue
+            val maxVal = (point.valueConstraint as NumericConstraint).maxValue
+            val incVal = point.presentationData?.get("tagValueIncrement").toString().toDouble()
 
             var it = minVal
             while (it <= maxVal && incVal > 0.0) {
@@ -199,9 +194,7 @@ object Domain {
     fun getDomainEquip(equipId : String) : DomainEquip? {
         return equips[equipId]
     }
-    fun readPointValueByDomainName(domainName: String, equipRef : String): Double {
-        return hayStack.readDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
-    }
+
     fun readStrPointValueByDomainName(domainName: String, equipRef : String): String {
         return hayStack.readDefaultStrVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }

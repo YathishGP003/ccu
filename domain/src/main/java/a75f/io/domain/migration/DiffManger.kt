@@ -28,7 +28,6 @@ class DiffManger(var context: Context?) {
         const val BACKUP_FIle_PATH = "assets/models/"
         const val VERSION = "versions.json"
         const val ASSETS_VERSION_FILE_PATH = "assets/assets/75f/versions.json"
-        const val MODELS_VERSION_FILE_PATH = "assets/models/versions.json"
         lateinit var  migrationCompletedListener: OnMigrationCompletedListener
     }
 
@@ -74,8 +73,8 @@ class DiffManger(var context: Context?) {
     }
 
     fun updateEquipModels(
-        newModelMetaList: List<ModelMeta>,
-        oldModelMetaList: List<ModelMeta>,
+        newModelMetaList: List<ModelMeta>,  // directly from library
+        oldModelMetaList: List<ModelMeta>,  // Read from shared preference
         handler: MigrationHandler,
         siteRef: String,
         sharedPref: SharedPreferences?
@@ -87,18 +86,17 @@ class DiffManger(var context: Context?) {
                 CcuLog.i(Domain.LOG_TAG, "Currently used model meta: $oldModelMeta")
                 if (isModelVersionUpdated(oldModelMeta.version, assetsModelMeta.version)) {
                     //fetching old model from the sharedPref
-                    val oldModel = getModelDirectiveFromSf(assetsModelMeta.modelId, sharedPref)
-                    Log.d(
-                        Domain.LOG_TAG,
-                        "sharedPref old Model: ${assetsModelMeta.modelId}: " + sharedPref?.getString(
-                            assetsModelMeta.modelId,
-                            null
-                        )
-                    )
+                    var oldModel = getModelDirectiveFromSf(assetsModelMeta.modelId, sharedPref)
+                    if(oldModel == null)
+                        oldModel = getOldModelDirective(assetsModelMeta.modelId)
                     // Retrieve new model from the modelCache(assets/new model)
                     val newModel = ModelCache.getModelById(assetsModelMeta.modelId)
                     // Retrieve the current equip map by using modelID
-                    val currentEquipMap = Domain.readEquip(assetsModelMeta.modelId);
+                    val currentEquipMap = Domain.readEquip(assetsModelMeta.modelId)
+
+                    Log.d(Domain.LOG_TAG, "OLD Model Data ${oldModel!!.name} ${oldModel.version}")
+                    Log.d(Domain.LOG_TAG, "Current Model Data $currentEquipMap")
+
                     // Ensure that the current model JSON and new model JSON are not null
                     if (oldModel != null && newModel != null
                         && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)
@@ -144,7 +142,7 @@ class DiffManger(var context: Context?) {
                     } else {
                         CcuLog.i(
                             Domain.LOG_TAG,
-                            "Model not updated; backup model: ${currentEquipMap}, New model: $newModel and currentEquipMap: $currentEquipMap"
+                            "Model not updated : New model version: ${newModel.version.toString()} :  backup model: ${currentEquipMap},  "
                         )
                     }
                 } else {
@@ -159,13 +157,6 @@ class DiffManger(var context: Context?) {
                 CcuLog.i(Domain.LOG_TAG, "Model not found for ${assetsModelMeta.modelId}")
             }
         }
-    }
-
-    private fun getProfileNameByDomainName(): String {
-        /**
-         * TODO implementation function to fund the profile name by domain name using existing equip details
-         */
-        return ""
     }
 
 
@@ -228,12 +219,8 @@ class DiffManger(var context: Context?) {
         return diffFinder.calculateDiff(original, newModel)
     }
 
-    /**
-     * Function to get the model Definition from file
-     * @return ModelDirective
-     */
-    private fun getModelDirective(modelFile: String): ModelDirective? {
-        return ResourceHelper.loadModelDefinition(modelFile)
+    private fun getOldModelDirective(modelId: String): ModelDirective? {
+        return ResourceHelper.loadModelDefinition("${BACKUP_FIle_PATH}${modelId}.json")
     }
 
     interface OnMigrationCompletedListener {
@@ -249,9 +236,9 @@ class DiffManger(var context: Context?) {
         sharedPref.edit().putString("modelsVersion", versionDetails.toString()).apply()
 
         versionDetails.keys().forEach {
-            val modelId = versionDetails.getJSONObject(it).get("id").toString();
+            val modelId = versionDetails.getJSONObject(it).get("id").toString()
             val modelData: String? = ResourceHelper.loadString("$NEW_FILE_PATH$modelId.json")
-            CcuLog.e(Domain.LOG_TAG, "modelId: $modelId, modelData: $modelData")
+            CcuLog.e(Domain.LOG_TAG, "modelId: $modelId")
             sharedPref.edit().putString(modelId, modelData).apply()
         }
     }
@@ -283,7 +270,7 @@ class DiffManger(var context: Context?) {
         modelId: String,
         sharedPref: SharedPreferences?
     ): ModelDirective? {
-        val modelData = sharedPref?.getString(modelId, null);
+        val modelData = sharedPref?.getString(modelId, null)
         if (modelData.isNullOrEmpty())
             return null
         val modelDirectiveFactory = ModelDirectiveFactory(ResourceHelper.getObjectMapper())

@@ -141,7 +141,7 @@ public class ScheduleManager {
         occ.setVacation(vacation);
         occ.setSystemZone(true);
         
-        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
+        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and (occupancy or occupied) and mode and equipRef == \""+equip.getId()+"\"");
 
         double heatingDeadBand ;
         double coolingDeadBand ;
@@ -199,10 +199,12 @@ public class ScheduleManager {
         Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
         updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
         updateDesiredTemp(zoneProfiles);
-        if(buildingScheduleListener!= null)
-            buildingScheduleListener.refreshScreen();
 
-            updateLimitsAndDeadBand();
+        if (buildingScheduleListener != null) {
+            buildingScheduleListener.refreshScreen();
+        }
+
+        updateLimitsAndDeadBand();
 
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {

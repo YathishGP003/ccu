@@ -23,7 +23,7 @@ public class EmergencyConditioning implements OccupancyTrigger{
         Double zonePriority = CCUHsApi.getInstance().
                 readPointPriorityValByQuery("zone and priority and not dynamic and " +
                         "not spread and not multiplier and equipRef == \"" + equipRef + "\"");
-        double currentTemp = hayStack.readHisValByQuery("current and temp and sensor and equipRef == \"" + equipRef + "\"");
+        double currentTemp = hayStack.readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipRef + "\"");
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();

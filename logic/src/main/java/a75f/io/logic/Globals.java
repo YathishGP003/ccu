@@ -390,18 +390,23 @@ public class Globals {
     }
 
     private void modelMigration(MigrationHandler migrationHandler){
-        DiffManger  diffManger = new DiffManger(getApplicationContext());
-        if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
-            HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-            modelSharedPref =  Globals.getInstance().mApplicationContext
-                    .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
-            diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
-            diffManger.processModelMigration(site.get("id").toString(), modelSharedPref);
-            TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
-            migrationHandler.updateMigrationVersion();
-            if(diffManger != null){
-                diffManger.saveModelsInSharedPref(modelSharedPref);
+        try {
+            DiffManger diffManger = new DiffManger(getApplicationContext());
+            if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                modelSharedPref = Globals.getInstance().mApplicationContext
+                        .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
+                diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
+                diffManger.processModelMigration(site.get("id").toString(), modelSharedPref);
+                TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                migrationHandler.updateMigrationVersion();
+                if (diffManger != null) {
+                    diffManger.saveModelsInSharedPref(modelSharedPref);
+                }
             }
+        }  catch ( Exception e) {
+            //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
+            CcuLog.i(L.TAG_CCU_INIT,"modelMigration is failed", e);
         }
     }
 

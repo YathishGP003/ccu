@@ -1,6 +1,8 @@
 package a75f.io.logic;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
@@ -97,6 +99,7 @@ import a75f.io.logic.watchdog.Watchdog;
 public class Globals {
     private static final String RESTART_CCU = "restart_ccu";
     private static final String RESTART_TABLET = "restart_tablet";
+    private static final String DOMAIN_MODEL_SF = "domain_model_sf";
 
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
@@ -137,6 +140,7 @@ public class Globals {
 
     private boolean recoveryMode = false;
     private boolean isInitCompleted = false;
+    private SharedPreferences modelSharedPref = null;
 
     private List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
     private Globals() {
@@ -327,6 +331,7 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+
                     ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
@@ -352,11 +357,7 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
-                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
-                        DiffManger diffManger = new DiffManger(getApplicationContext());
-                        diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
-                        diffManger.processModelMigration(site.get("id").toString());
-                    }
+                    modelMigration(migrationHandler);
                 }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
@@ -371,19 +372,12 @@ public class Globals {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
                     }
                     isInitCompleted = true;
-                    if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
-                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
-                        migrationHandler.updateMigrationVersion();
-                    }
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                             TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-
                     BearerTokenManager.getInstance().scheduleJob();
-
                     mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                     getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
@@ -392,6 +386,27 @@ public class Globals {
 
         if (isTestMode()) {
             setTestMode(false);
+        }
+    }
+
+    private void modelMigration(MigrationHandler migrationHandler){
+        try {
+            DiffManger diffManger = new DiffManger(getApplicationContext());
+            if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                modelSharedPref = Globals.getInstance().mApplicationContext
+                        .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
+                diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
+                diffManger.processModelMigration(site.get("id").toString(), modelSharedPref);
+                TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                migrationHandler.updateMigrationVersion();
+                if (diffManger != null) {
+                    diffManger.saveModelsInSharedPref(modelSharedPref);
+                }
+            }
+        }  catch ( Exception e) {
+            //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
+            CcuLog.i(L.TAG_CCU_INIT,"modelMigration is failed", e);
         }
     }
 

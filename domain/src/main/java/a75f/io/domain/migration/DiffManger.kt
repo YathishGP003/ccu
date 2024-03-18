@@ -7,9 +7,13 @@ import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDiff
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
 import io.seventyfivef.domainmodeler.common.Version
+import org.json.JSONObject
 
 
 /**
@@ -24,7 +28,6 @@ class DiffManger(var context: Context?) {
         const val BACKUP_FIle_PATH = "assets/models/"
         const val VERSION = "versions.json"
         const val ASSETS_VERSION_FILE_PATH = "assets/assets/75f/versions.json"
-        const val MODELS_VERSION_FILE_PATH = "assets/models/versions.json"
         lateinit var  migrationCompletedListener: OnMigrationCompletedListener
     }
 
@@ -32,98 +35,128 @@ class DiffManger(var context: Context?) {
      * starts scanning all the models
      * check the model version and find the diff and update the model definition
      */
-    fun processModelMigration(siteRef: String) {
+    fun processModelMigration(siteRef: String, sharedPref: SharedPreferences?) {
         CcuLog.i(Domain.LOG_TAG, "processModelMigration")
-        val newVersionFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(ASSETS_VERSION_FILE_PATH)
-        val backupFiles : MutableList<ModelMeta> =  getModelFileVersionDetails(MODELS_VERSION_FILE_PATH)
-        CcuLog.i(Domain.LOG_TAG, " Found ${backupFiles.size} old models at $BACKUP_FIle_PATH$VERSION")
-        CcuLog.i(Domain.LOG_TAG, " Found ${newVersionFiles.size} new models at $NEW_FILE_PATH$VERSION")
-
-       // model validation logic is removed for time being
-        /*val anyInvalidModels = ModelValidator.validateAllDomainModels(newVersionFiles, NEW_FILE_PATH)
-        CcuLog.i(Domain.LOG_TAG, " Found ${anyInvalidModels.size} models invalid ")
-
-        if (anyInvalidModels.isNotEmpty()) {
-            anyInvalidModels.forEach {
-                Log.i(Domain.LOG_TAG, "Invalid model definition $it: ")
-                val invalidModel = newVersionFiles.find { model -> model.modelId == it }
-                if(invalidModel != null) {
-                    newVersionFiles.remove(invalidModel)
-                }
-            }
-        }*/
+        val newVersionFiles: MutableList<ModelMeta> =
+            getModelFileVersionDetails(ASSETS_VERSION_FILE_PATH)
+        CcuLog.i(
+            Domain.LOG_TAG,
+            " Found ${newVersionFiles.size} new models at $NEW_FILE_PATH$VERSION"
+        )
         if (newVersionFiles.isEmpty()) {
             CcuLog.e(Domain.LOG_TAG, "No valid model found for migration ")
             return
         }
         val newFileIterator = newVersionFiles.iterator()
         val requiredModels = ModelValidator.getRequiredModels()
-        val requiredModelFiles : MutableList<ModelMeta>  = mutableListOf()
+        val newModelMetaList: MutableList<ModelMeta> = mutableListOf()
         while (newFileIterator.hasNext()) {
             val item = newFileIterator.next()
             if (item.modelId in requiredModels) {
-                requiredModelFiles.add(item)
+                newModelMetaList.add(item)
             }
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance(), migrationCompletedListener)
-        val versionFiles = getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
-        updateEquipModels(requiredModelFiles, versionFiles, migrationHandler, siteRef)
+
+        val oldModelMetaList = if (isModelsSharedPrefAvailable(sharedPref)) {
+            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the shared preference")
+            getModelsFromSharedPref(sharedPref)
+        } else {
+            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the assets/models folder")
+            getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
+        }
+        CcuLog.i(
+            Domain.LOG_TAG,
+            "old models present in sharedPref: ${oldModelMetaList.size}, currently used models count: ${newModelMetaList.size}"
+        )
+        updateEquipModels(newModelMetaList, oldModelMetaList, migrationHandler, siteRef, sharedPref)
     }
 
     fun updateEquipModels(
-        newVersionFiles: List<ModelMeta>,
-        versionFiles: List<ModelMeta>,
+        newModelMetaList: List<ModelMeta>,  // directly from library
+        oldModelMetaList: List<ModelMeta>,  // Read from shared preference
         handler: MigrationHandler,
-        siteRef : String
+        siteRef: String,
+        sharedPref: SharedPreferences?
     ) {
-        newVersionFiles.forEach { version ->
-            val currentModelMeta = getCurrentModel(versionFiles, version.modelId)
+        newModelMetaList.forEach { assetsModelMeta ->
+            val oldModelMeta = getCurrentModel(oldModelMetaList, assetsModelMeta.modelId)
 
-            if (currentModelMeta != null) {
-                CcuLog.i(Domain.LOG_TAG, " currentModelMeta $currentModelMeta")
-                if (isModelVersionUpdated(currentModelMeta.version, version.version)) {
-                    val originalModel = getModelDirective("$BACKUP_FIle_PATH${version.modelId}.json")
-                    val newModel = ModelCache.getModelById(version.modelId)
-                    //  Retrieve the current equip map by using modelID
-                    val currentEquipMap = Domain.readEquip(version.modelId);
+            if (oldModelMeta != null) {
+                CcuLog.i(Domain.LOG_TAG, "Currently used model meta: $oldModelMeta")
+                if (isModelVersionUpdated(oldModelMeta.version, assetsModelMeta.version)) {
+                    //fetching old model from the sharedPref
+                    var oldModel = getModelDirectiveFromSf(assetsModelMeta.modelId, sharedPref)
+                    if(oldModel == null)
+                        oldModel = getOldModelDirective(assetsModelMeta.modelId)
+                    // Retrieve new model from the modelCache(assets/new model)
+                    val newModel = ModelCache.getModelById(assetsModelMeta.modelId)
+                    // Retrieve the current equip map by using modelID
+                    val currentEquipMap = Domain.readEquip(assetsModelMeta.modelId)
+
+                    Log.d(Domain.LOG_TAG, "OLD Model Data ${oldModel!!.name} ${oldModel.version}")
+                    Log.d(Domain.LOG_TAG, "Current Model Data $currentEquipMap")
+
                     // Ensure that the current model JSON and new model JSON are not null
-                    if(originalModel != null && newModel != null
-                        && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)){
+                    if (oldModel != null && newModel != null
+                        && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)
+                    ) {
                         // if block should be removed once modelVersion key migrated completely to sourceModelVersion
-                        if(currentEquipMap.containsKey("modelVersion") &&
-                            (version.version.toString() != (currentEquipMap["modelVersion"]).toString())) {
-                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
-                                    " current equipment version: ${currentEquipMap["modelVersion"]}")
-                            val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
-                            handler.migrateModel(entityConfiguration, originalModel, newModel, siteRef)
-                        }else if(currentEquipMap.containsKey("sourceModelVersion") &&
-                            (version.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())){
-                            CcuLog.i(Domain.LOG_TAG, "Comparing new model version: ${version.version}," +
-                                    " current equipment version: ${currentEquipMap["sourceModelVersion"]}")
-                            val entityConfiguration = getDiffEntityConfiguration(originalModel, newModel!!)
-                            handler.migrateModel(entityConfiguration, originalModel, newModel, siteRef)
-                        }else{
-                            CcuLog.i(Domain.LOG_TAG, "Ignoring migration due to missing sourceModelVersion in current equip; currentEquipMap: $currentEquipMap")
+                        if (currentEquipMap.containsKey("modelVersion") &&
+                            (assetsModelMeta.version.toString() != (currentEquipMap["modelVersion"]).toString())
+                        ) {
+                            CcuLog.i(
+                                Domain.LOG_TAG,
+                                "Comparing new model version: ${assetsModelMeta.version}," +
+                                        " current equipment version: ${currentEquipMap["modelVersion"]}"
+                            )
+                            val entityConfiguration =
+                                getDiffEntityConfiguration(oldModel, newModel)
+                            handler.migrateModel(
+                                entityConfiguration,
+                                oldModel,
+                                newModel,
+                                siteRef
+                            )
+                        } else if (currentEquipMap.containsKey("sourceModelVersion") &&
+                            (assetsModelMeta.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())
+                        ) {
+                            CcuLog.i(
+                                Domain.LOG_TAG,
+                                "Comparing new model version: ${assetsModelMeta.version}," +
+                                        " current equipment version: ${currentEquipMap["sourceModelVersion"]}"
+                            )
+                            val entityConfiguration =
+                                getDiffEntityConfiguration(oldModel, newModel)
+                            handler.migrateModel(
+                                entityConfiguration,
+                                oldModel,
+                                newModel,
+                                siteRef
+                            )
+                        } else {
+                            CcuLog.i(
+                                Domain.LOG_TAG, "Migration skipped: new model version " +
+                                        "${assetsModelMeta.version}, current model in use: $currentEquipMap")
                         }
-                    }else{
-                        CcuLog.i(Domain.LOG_TAG, "Model not updated; backup model: ${currentEquipMap}, New model: $newModel and currentEquipMap: $currentEquipMap")
+                    } else {
+                        CcuLog.i(
+                            Domain.LOG_TAG,
+                            "Model not updated : New model version: ${newModel.version.toString()} :  backup model: ${currentEquipMap},  "
+                        )
                     }
-                }else{
-                    CcuLog.i(Domain.LOG_TAG, "The model with ID ${version.modelId} is not updated, " +
-                            "as the current model version (${currentModelMeta.version})" +
-                            " is the same as the new model version (${version.version}).")
+                } else {
+                    CcuLog.i(
+                        Domain.LOG_TAG,
+                        "The model with ID ${assetsModelMeta.modelId} is not updated, " +
+                                "as the current model version (${oldModelMeta.version})" +
+                                " is the same as the new model version (${assetsModelMeta.version})."
+                    )
                 }
             } else {
-                CcuLog.i(Domain.LOG_TAG, "Model not found for ${version.modelId}")
+                CcuLog.i(Domain.LOG_TAG, "Model not found for ${assetsModelMeta.modelId}")
             }
         }
-    }
-
-    private fun getProfileNameByDomainName(): String {
-        /**
-         * TODO implementation function to fund the profile name by domain name using existing equip details
-         */
-        return ""
     }
 
 
@@ -137,7 +170,8 @@ class DiffManger(var context: Context?) {
         versionDetails.keys().forEach {
             val versionModel = versionDetails.getJSONObject(it)
             models.add(
-                ModelMeta(modelId = versionModel.getString(ID),
+                ModelMeta(
+                    modelId = versionModel.getString(ID),
                     Version(
                         major = versionModel.getJSONObject(MODEL_VERSION).getInt(MAJOR),
                         minor = versionModel.getJSONObject(MODEL_VERSION).getInt(MINOR),
@@ -180,17 +214,13 @@ class DiffManger(var context: Context?) {
         return entityConfiguration
     }
 
-    private fun getDiff(original: ModelDirective, newModel: ModelDirective): ModelDiff{
+    private fun getDiff(original: ModelDirective, newModel: ModelDirective): ModelDiff {
         val diffFinder = DiffFinder()
         return diffFinder.calculateDiff(original, newModel)
     }
 
-    /**
-     * Function to get the model Definition from file
-     * @return ModelDirective
-     */
-    private fun getModelDirective(modelFile: String): ModelDirective? {
-        return ResourceHelper.loadModelDefinition(modelFile)
+    private fun getOldModelDirective(modelId: String): ModelDirective? {
+        return ResourceHelper.loadModelDefinition("${BACKUP_FIle_PATH}${modelId}.json")
     }
 
     interface OnMigrationCompletedListener {
@@ -200,4 +230,51 @@ class DiffManger(var context: Context?) {
     fun registerOnMigrationCompletedListener(listener: OnMigrationCompletedListener) {
         migrationCompletedListener = listener
     }
+
+    fun saveModelsInSharedPref(sharedPref: SharedPreferences) {
+        val versionDetails = ResourceHelper.getModelVersion(ASSETS_VERSION_FILE_PATH)
+        sharedPref.edit().putString("modelsVersion", versionDetails.toString()).apply()
+
+        versionDetails.keys().forEach {
+            val modelId = versionDetails.getJSONObject(it).get("id").toString()
+            val modelData: String? = ResourceHelper.loadString("$NEW_FILE_PATH$modelId.json")
+            CcuLog.e(Domain.LOG_TAG, "modelId: $modelId")
+            sharedPref.edit().putString(modelId, modelData).apply()
+        }
+    }
+
+    private fun isModelsSharedPrefAvailable(sharedPref: SharedPreferences?): Boolean {
+        return sharedPref!!.getString("modelsVersion", null) != null
+    }
+
+    private fun getModelsFromSharedPref(sharedPref: SharedPreferences?): MutableList<ModelMeta> {
+        val versionDetails = sharedPref?.getString("modelsVersion", null)?.let { JSONObject(it) }
+        val models = mutableListOf<ModelMeta>()
+        versionDetails?.keys()?.forEach {
+            val versionModel = versionDetails.getJSONObject(it)
+            models.add(
+                ModelMeta(
+                    modelId = versionModel.getString(ID),
+                    Version(
+                        major = versionModel.getJSONObject(MODEL_VERSION).getInt(MAJOR),
+                        minor = versionModel.getJSONObject(MODEL_VERSION).getInt(MINOR),
+                        patch = versionModel.getJSONObject(MODEL_VERSION).getInt(PATCH)
+                    )
+                )
+            )
+        }
+        return models
+    }
+
+    private fun getModelDirectiveFromSf(
+        modelId: String,
+        sharedPref: SharedPreferences?
+    ): ModelDirective? {
+        val modelData = sharedPref?.getString(modelId, null)
+        if (modelData.isNullOrEmpty())
+            return null
+        val modelDirectiveFactory = ModelDirectiveFactory(ResourceHelper.getObjectMapper())
+        return modelDirectiveFactory.fromJson(modelData)
+    }
+
 }

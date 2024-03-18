@@ -174,7 +174,20 @@ public class LSmartNode
             settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
         }
 
-        settings.temperatureOffset.set((short)(10*getTempOffset(address)));
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        boolean isVav = equip.getProfile().equals(ProfileType.VAV_REHEAT.name())
+                || equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())
+                || equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())
+                || equip.getProfile().equals(ProfileType.VAV_ACB.name())
+                || equip.getProfile().equals(ProfileType.VAV_REHEAT.name());
+
+        if (isVav) {
+            settings.temperatureOffset.set((short)(10*getTempOffset(address)));
+        } else {
+            settings.temperatureOffset.set((short)(getTempOffset(address)));
+        }
+
         
         if(profile == null)
             profile = "dab";

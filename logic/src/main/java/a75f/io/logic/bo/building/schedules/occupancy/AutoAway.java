@@ -7,7 +7,6 @@ import java.util.Date;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 
@@ -27,12 +26,15 @@ public class AutoAway implements OccupancyTrigger {
     }
     
     public boolean hasTriggered() {
+        return isZoneInAutoAwayMode(occupancyUtil);
+    }
 
-        if (!isEnabled() || occupancyUtil.getSensorStatus("occupancy") ) {
+    public static boolean isZoneInAutoAwayMode(OccupancyUtil occupancyUtil) {
+        if (!isAutoAwayEnabled(occupancyUtil) || occupancyUtil.getSensorStatus("occupancy") ) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoAway not enabled");
             return false;
         }
-        
+
         Date lastOccupancy = occupancyUtil.getLastOccupancyDetectionTime();
         Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
         //TODO-Schedules - check how this is handled now.
@@ -53,14 +55,16 @@ public class AutoAway implements OccupancyTrigger {
                 occupancyMode == Occupancy.VACATION) {
             return false;
         }
-        
+
         double autoAwayTimeMinutes = occupancyUtil.getAutoAwayTime();
         double timeToAutoAway =
             (lastOccupancy.getTime() + autoAwayTimeMinutes * 60 * 1000) - System.currentTimeMillis();
         CcuLog.i(L.TAG_CCU_SCHEDULER, "autoAwayTimeMinutes "+autoAwayTimeMinutes+" : millis Left "+ timeToAutoAway);
-       
+
         return timeToAutoAway <= 0;
     }
-    
-    
+
+    private static boolean isAutoAwayEnabled(OccupancyUtil occupancyUtil) {
+        return occupancyUtil.isConfigEnabled("auto and away");
+    }
 }

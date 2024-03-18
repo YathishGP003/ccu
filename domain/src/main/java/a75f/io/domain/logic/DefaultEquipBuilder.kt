@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.BuildConfig
 import a75f.io.domain.api.Domain
+import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint

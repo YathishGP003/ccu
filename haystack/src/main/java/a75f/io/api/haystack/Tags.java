@@ -221,6 +221,7 @@ public class Tags
     public static final String MAX_VAL = "maxVal";
 
     public static final String DOMAIN_NAME = "domainName";
+    public static final String ACTIVATION = "activation";
 
     public static final String BACNET = "bacnet";
 }

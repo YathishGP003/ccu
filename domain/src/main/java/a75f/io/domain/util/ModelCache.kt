@@ -24,6 +24,7 @@ object ModelCache {
         loadDeviceModels()
         loadVavZoneEquipModels()
         loadSystemProfileModels()
+        loadBypassDamperModels()
     }
 
     private fun loadDeviceModels() {
@@ -67,6 +68,11 @@ object ModelCache {
         //modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
         //CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
     }
+
+    private fun loadBypassDamperModels() {
+        modelContainer[MODEL_SN_BYPASS_DAMPER] = getModelById(MODEL_SN_BYPASS_DAMPER)
+    }
+
     /**
      * Could directly used in Unit tests without calling init() to set the context.
      */

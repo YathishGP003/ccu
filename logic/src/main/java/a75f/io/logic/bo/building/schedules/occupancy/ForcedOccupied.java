@@ -19,8 +19,12 @@ public class ForcedOccupied implements OccupancyTrigger {
     public boolean isEnabled() {
         return true;
     }
-    
+
     public boolean hasTriggered() {
+        return isZoneForcedOccupied(equipRef);
+    }
+
+    public static boolean isZoneForcedOccupied(String equipRef) {
         Map<Object, Object> forcedOccupiedLevel = ScheduleUtil.getForcedOccupiedLevel(equipRef);
         if (forcedOccupiedLevel != null &&
             forcedOccupiedLevel.get("duration") != null &&
@@ -33,7 +37,7 @@ public class ForcedOccupied implements OccupancyTrigger {
         return false;
     }
 
-    private boolean isNotAutoForcedOccupied(Map<Object, Object> forcedOccupiedLevel) {
+    private static boolean isNotAutoForcedOccupied(Map<Object, Object> forcedOccupiedLevel) {
         return !forcedOccupiedLevel.get("who").toString().contains("OccupancySensor") &&
                 !forcedOccupiedLevel.get("who").toString().contains("Occupancy Sensor");
     }

@@ -150,6 +150,7 @@ public class Pulse
 			if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") != null) {
 				if (hayStack.readPointPriorityValByQuery("point and equipRef == \"" + device.get("equipRef") + "\" and domainName == \"" + DomainName.thermistor2Type + "\"") > 0.0) { isCondensateNc = true; }
 			}
+			boolean isBypassDamper = isDomainEquip && equip.getDomainName().equals(DomainName.smartnodeBypassDamper);
 
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
@@ -225,8 +226,9 @@ public class Pulse
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
+						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
+						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						Log.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						if (oldDisAnalogVal != curDisAnalogVal) {
@@ -248,6 +250,9 @@ public class Pulse
 								if (currentTempInterface != null) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
+							} else if (isBypassDamper) {
+								// For Bypass Damper, AI2 maps to Damper Feedback
+								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 							} else
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar);
 						}
@@ -303,6 +308,20 @@ public class Pulse
 			}
 		}
 		CcuLog.i(L.TAG_CCU_DEVICE, nodeAddr+" : regularSNUpdate timeMS "+(System.currentTimeMillis()-time));
+	}
+
+	private static double getPressureConversion(Equip equip, double val) {
+		double minVoltage = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.sensorMinVoltage + "\" and equipRef == \""+equip.getId()+"\"");
+		double maxVoltage = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.sensorMaxVoltage + "\" and equipRef == \""+equip.getId()+"\"");
+		double minPressure = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.pressureSensorMinVal + "\" and equipRef == \""+equip.getId()+"\"");
+		double maxPressure = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.pressureSensorMaxVal + "\" and equipRef == \""+equip.getId()+"\"");
+
+		double i = ((.001*val) - minVoltage) / (maxVoltage - minVoltage);
+		if (i < 0) i = 0;
+		if (i > 1) i = 1;
+
+		double pressure = i * (maxPressure - minPressure) + minPressure;
+		return pressure;
 	}
 
 	private static boolean isMATDamperConfigured(HashMap logicalPoint, Short nodeAddr, String primary,
@@ -448,7 +467,7 @@ public class Pulse
 		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address "+ pp.get("group")+" Feedback  type"+pp.get("analogType"));
 		double analogVal = val/1000;
 		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address analogVal after devide "+analogVal);
-		if(lp.containsKey("vav") || lp.containsKey("dab") || lp.containsKey("dualDuct")) {
+		if(lp.containsKey("vav") || lp.containsKey("dab") || lp.containsKey("dualDuct") || lp.containsKey("bypassDamper")) {
 			double damperPercent= DeviceUtil.getPercentageFromVoltage(analogVal,
 					Objects.requireNonNull(pp.get("analogType")).toString());
 			Log.i(L.TAG_CCU_DEVICE, "Feedback Reversed damper percent  : "+damperPercent);

@@ -9,10 +9,12 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.util.OfflineModeUtilKt;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
@@ -100,6 +102,7 @@ public class TunerUtil
     }
     
     public static void writeSystemUserIntentVal(String tags, double val) {
+
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);
 
@@ -222,7 +225,7 @@ public class TunerUtil
     
     public static double getProportionalGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap pgain = hayStack.read("point and tuner and pgain and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
+        HashMap pgain = hayStack.read("point and tuner and pgain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         if (!pgain.isEmpty()) {
             ArrayList values = hayStack.readPoint(pgain.get("id").toString());
             if (values != null && values.size() > 0) {
@@ -239,7 +242,7 @@ public class TunerUtil
     
     public static double getIntegralGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap integralGain = hayStack.read("point and tuner and igain and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
+        HashMap integralGain = hayStack.read("point and tuner and igain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!integralGain.isEmpty()) {
             ArrayList values = hayStack.readPoint(integralGain.get("id").toString());
@@ -254,10 +257,10 @@ public class TunerUtil
         }
         return BuildingTunerFallback.getDefaultTunerVal("igain");
     }
-    
+
     public static double getProportionalSpread(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
+        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!proportionalSpread.isEmpty()) {
             ArrayList values = hayStack.readPoint(proportionalSpread.get("id").toString());
@@ -275,7 +278,7 @@ public class TunerUtil
     
     public static double getIntegralTimeout(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap itimeout = hayStack.read("point and tuner and itimeout and not (trueCFM or trueCfm) and equipRef == \""+equipRef+"\"");
+        HashMap itimeout = hayStack.read("point and tuner and itimeout and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         
         if (!itimeout.isEmpty()) {
             ArrayList values = hayStack.readPoint(itimeout.get("id").toString());
@@ -353,6 +356,34 @@ public class TunerUtil
         }
         CcuLog.e(L.TAG_CCU_TUNER, "Copy default value for "+domainName+" "+buildingPointArray);
         hayStack.writeHisValById(systemPointId, HSUtil.getPriorityVal(systemPointId));
+    }
+
+    public static void updateDefault(double isOffline) {
+        CCUHsApi instance = CCUHsApi.getInstance();
+        HashMap<Object, Object> watchDogPoint = instance.readEntity("network and watchdog and timeout");
+
+        if(isOffline > 0) {
+            instance.writePointForCcuUser(watchDogPoint.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                    0.0, 0, null);
+            instance.writeHisValById(watchDogPoint.get("id").toString(), 0.0);
+            instance.writeHisValByQuery("backfill and ventilation and config", 0.0);
+            instance.writeDefaultVal("backfill and ventilation and config", 0.0);
+            instance.writeHisValByQuery("point and diag and cloud and connected", 0.0);
+            instance.writeDefaultVal("point and diag and cloud and connected", 0.0);
+            OfflineModeUtilKt.updateMechanicalLockout();
+        }else{
+            instance.writePointForCcuUser(watchDogPoint.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                    45.0, 0, null);
+            instance.writeHisValById(watchDogPoint.get("id").toString(), 45.0);
+            instance.writeHisValByQuery("backfill and ventilation and config", 24.0);
+            instance.writeDefaultVal("backfill and ventilation and config", 24.0);
+            instance.writeHisValByQuery("point and diag and cloud and connected", 1.0);
+            instance.writeDefaultVal("point and diag and cloud and connected", 1.0);
+            OfflineModeUtilKt.fetchToken();
+            CCUHsApi.getInstance().syncEntityWithPointWrite();
+        }
+
+
     }
 
 }

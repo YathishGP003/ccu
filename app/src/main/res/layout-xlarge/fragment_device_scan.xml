@@ -1,12 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
-    <ListView
-        android:id="@+id/ble_device_list_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
+    <LinearLayout
+        android:id="@+id/available_devices_layout"
+        android:layout_width="490dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:orientation="vertical"
+        android:visibility="gone">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/lato_bold"
+            android:text="Available Devices"
+            android:textColor="#212121"
+            android:textSize="26dp" />
+
+        <ListView
+            android:id="@+id/ble_device_list_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp" />
+
+        <TextView
+            android:id="@+id/pairManuallyText1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Please have smart devices in advertisement mode\nand be within range. \n\nNot finding the devices you looking for?"
+            android:textColor="#333333"
+            android:layout_marginBottom="30dp"
+            android:visibility="gone"
+            android:textSize="22dp" />
+
+        <TextView
+            android:id="@+id/connect_manually"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="262dp"
+            android:layout_marginBottom="40dp"
+            android:text="CONNECT MANUALLY"
+            android:textColor="#E5561A"
+            android:textSize="22dp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/no_devices_layout"
+        android:layout_width="500dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/lato_bold"
+            android:text="No devices found"
+            android:textColor="#212121"
+            android:textSize="26dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/lato_regular"
+            android:text="Please have smart devices in advertisement \nmode and be within range."
+            android:textColor="#333333"
+            android:layout_marginBottom="30dp"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/pairManuallyText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="40dp"
+            android:fontFamily="@font/lato_regular"
+            android:text="Do you want to Pair to Device Manually?"
+            android:textColor="#333333"
+            android:textSize="22dp"
+            android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/connect_manually_no_device"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="370dp"
+            android:layout_marginBottom="40dp"
+            android:text="CONNECT"
+            android:textColor="#E5561A"
+            android:visibility="gone"
+            android:textSize="22dp" />
+    </LinearLayout>
 </LinearLayout>

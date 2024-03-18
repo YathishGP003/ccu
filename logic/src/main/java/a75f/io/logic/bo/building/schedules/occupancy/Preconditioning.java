@@ -22,14 +22,11 @@ public class Preconditioning implements OccupancyTrigger {
         this.hayStack = hayStack;
         this.equipRef = equipRef;
     }
-    public boolean isEnabled() {
-        return true;
-    }
-    
-    public boolean hasTriggered() {
-        Equip equip = HSUtil.getEquip(hayStack, equipRef);
-        Occupied occupiedSchedule = ScheduleUtil.getOccupied(equipRef);
-        
+
+    public static boolean isZoneInPreconditioning(CCUHsApi hayStack, String equipId) {
+        Equip equip = HSUtil.getEquip(hayStack, equipId);
+        Occupied occupiedSchedule = ScheduleUtil.getOccupied(equipId);
+
         if (occupiedSchedule == null) {
             return false;
         }
@@ -38,13 +35,21 @@ public class Preconditioning implements OccupancyTrigger {
                                      equip.getMarkers().contains("sse") ||
                                      equip.getMarkers().contains("hyperstat") || equip.getMarkers().contains("hyperstatsplit"));
 
-        if (isStandaloneEquip && isZoneRequiresPreconditioning(equipRef, occupiedSchedule)) {
+        if (isStandaloneEquip && isZoneRequiresPreconditioning(equipId, occupiedSchedule)) {
             return true;
         } else if (!isStandaloneEquip && ScheduleManager.getInstance().getSystemOccupancy() == PRECONDITIONING){
             return true;
         }
         return false;
-        
+    }
+
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public boolean hasTriggered() {
+
+        return isZoneInPreconditioning(hayStack, equipRef);
     }
     
     public static boolean isZoneRequiresPreconditioning(String equipId, Occupied occupied){
@@ -63,12 +68,24 @@ public class Preconditioning implements OccupancyTrigger {
          *Initial tempDiff based on average temp is used to determine heating/cooling preconditioning required.
          *Then calculate the absolute tempDiff to determine the preconditioning time.
          */
-        if (tempDiff > 0) {
-            tempDiff = currentTemp - occupied.getCoolingVal();
+        // Check if Demand Response mode is activated
+        if (DemandResponse.isDRModeActivated(CCUHsApi.getInstance())) {
+            double demandResponseSetback = TunerUtil.readTunerValByQuery("demand and response and setback", equipId);
+            double tempAdjustment = (tempDiff > 0) ? occupied.getCoolingVal() : occupied.getHeatingVal();
+            if (tempDiff > 0) {
+                tempDiff = currentTemp - tempAdjustment - demandResponseSetback;
+            } else {
+                tempDiff = tempAdjustment - currentTemp - demandResponseSetback;
+            }
         } else {
-            tempDiff = occupied.getHeatingVal() - currentTemp;
+            double tempAdjustment = (tempDiff > 0) ? occupied.getCoolingVal() : occupied.getHeatingVal();
+            if (tempDiff > 0) {
+                tempDiff = currentTemp - tempAdjustment;
+            } else {
+                tempDiff = tempAdjustment - currentTemp;
+            }
         }
-    
+
         Log.d(L.TAG_CCU_SCHEDULER,
               "isZonePreconditioningActive = " + preconRate + "," + tempDiff + "," + occupied.getMillisecondsUntilNextChange()
               + "," + currentTemp + "," + desiredTemp + "," + occupied.isPreconditioning());

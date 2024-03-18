@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import a75f.io.logger.CcuLog;
@@ -108,6 +109,20 @@ public class HSUtil
     public static List<Equip> getSubEquips(String parentEquipId){
         List<HashMap<Object, Object>> equips =
                 CCUHsApi.getInstance().readAllEntities("equip and equipRef == \""+parentEquipId+"\"");
+        List<Equip> equipList = new ArrayList<>();
+        for (HashMap<Object, Object> m : equips) {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
+        }
+        return equipList;
+    }
+
+    public static boolean isEquipHasEquipsWithAhuRefOnThisCcu(String parentEquipId) {
+        return CCUHsApi.getInstance().readAllEntities("equip and ahuRef == \""+parentEquipId+"\" and ccuRef == \""+CCUHsApi.getInstance().getCcuId()+"\"").size() > 0;
+    }
+
+    public static List<Equip> getEquipsWithAhuRefOnThisCcu(String parentEquipId){
+        List<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and ahuRef == \""+parentEquipId+"\" and ccuRef == \""+CCUHsApi.getInstance().getCcuId()+"\"");
         List<Equip> equipList = new ArrayList<>();
         for (HashMap<Object, Object> m : equips) {
             equipList.add(new Equip.Builder().setHashMap(m).build());
@@ -638,7 +653,29 @@ public class HSUtil
         return ((pointEntity.containsKey(Tags.BACKFILL))&&(pointEntity.containsKey(Tags.DURATION)));
     }
 
+    public static boolean isBypassDamperPresentInSystem(CCUHsApi ccuHsApi) {
+        try {
+            ArrayList<Equip> sysEquips = getEquips("SYSTEM");
+            Optional<Equip> bdEquip = sysEquips.stream().filter(eq -> eq.getDomainName() != null && eq.getDomainName().equals("smartnodeBypassDamper") && eq.getCcuRef().equals(ccuHsApi.getCcuId())).findAny();
+            return bdEquip.isPresent();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
+    public static Equip getBypassDamperEquip(CCUHsApi ccuHsApi) {
+        try {
+            ArrayList<Equip> sysEquips = getEquips("SYSTEM");
+            Optional<Equip> bdEquip = sysEquips.stream().filter(eq -> eq.getDomainName() != null && eq.getDomainName().equals("smartnodeBypassDamper") && eq.getCcuRef().equals(ccuHsApi.getCcuId())).findAny();
+            if (bdEquip.isPresent()) {
+                return bdEquip.get();
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     public static HDict mapToHDict(HashMap<String, String> m)
     {

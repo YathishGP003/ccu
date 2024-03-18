@@ -36,11 +36,12 @@ public class KeyCard implements OccupancyTrigger {
         Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
         if(occStatus.isOccupied() &&
                 (occupancyMode == Occupancy.OCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED
-                        || occupancyMode == Occupancy.KEYCARD_AUTOAWAY)){
+                        || occupancyMode == Occupancy.KEYCARD_AUTOAWAY || occupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED)){
             return occupancyUtil.getSensorStatus("keycard and input");
         }
         if(!occStatus.isOccupied() &&
-                (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED)) {
+                (occupancyMode == Occupancy.UNOCCUPIED ||occupancyMode ==
+                        Occupancy.DEMAND_RESPONSE_UNOCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED)) {
             return (!occupancyUtil.getSensorStatus("keycard and input"));
         }
         return false;

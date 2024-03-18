@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 public class OTNTuners {
 
@@ -227,7 +228,8 @@ public class OTNTuners {
         String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, 2.0);
-
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack, equipref, equipdis,
+                false, roomRef, floorRef);
 
     }
 

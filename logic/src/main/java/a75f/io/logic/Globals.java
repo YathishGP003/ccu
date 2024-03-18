@@ -34,6 +34,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -626,14 +627,19 @@ public class Globals {
         }
 
         HashMap<Object,Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
-
         if (oaoEquip != null && oaoEquip.size() > 0) {
-            CcuLog.d(L.TAG_CCU, "Create Dafault OAO Profile");
+            CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
             oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
             L.ccu().oaoProfile = oao;
         }
 
+        HashMap<Object,Object> bypassDamperEquip = CCUHsApi.getInstance().readEntity("equip and domainName == \"" + DomainName.smartnodeBypassDamper + "\"");
+        if (bypassDamperEquip != null && bypassDamperEquip.size() > 0) {
+            CcuLog.d(L.TAG_CCU, "Create Default Bypass Damper Profile");
+            BypassDamperProfile bypassDamperProfile = new BypassDamperProfile(bypassDamperEquip.get("id").toString(), Short.parseShort(bypassDamperEquip.get("group").toString()));
+            L.ccu().bypassDamperProfile = bypassDamperProfile;
+        }
 
         /*
          * Get all the default BTU_Meter profile details

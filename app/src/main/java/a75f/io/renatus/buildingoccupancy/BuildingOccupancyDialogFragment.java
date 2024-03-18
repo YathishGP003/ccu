@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyDayViewModel;
@@ -293,7 +294,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         if(BuildConfig.BUILD_TYPE == "qa")
             Log.d(TAG,"isCloudConnected" + isCloudConnected);
 
-        if (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) {
+        if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) && !OfflineModeUtilKt.isOfflineMode()){
             Toast.makeText(getActivity(), "Building Occupancy cannot be deleted when CCU is offline. Please " +
                     "connect to network.", Toast.LENGTH_LONG).show();
             return ;

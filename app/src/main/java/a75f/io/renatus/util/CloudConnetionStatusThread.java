@@ -13,6 +13,7 @@ import android.util.Log;
 import a75f.io.logic.Globals;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.NotificationHandler;
 import a75f.io.renatus.RenatusApp;
 
@@ -70,6 +71,8 @@ public class CloudConnetionStatusThread extends Thread {
             @Override
             public void onSuccessResponse(boolean isOk) {
                 Log.i(TAG_CLOUD_CONNECTION_STATUS, "onSuccessResponse "+ isOk);
+                if(OfflineModeUtilKt.isOfflineMode())
+                    isOk = false;
                 NotificationHandler.setCloudConnectionStatus(isOk);
             }
 

@@ -21,6 +21,7 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.OAOTuners;
 import a75f.io.logic.tuners.SystemTuners;
+import a75f.io.logic.util.OfflineModeUtilKt;
 
 public class OAOEquip
 {
@@ -571,6 +572,10 @@ public class OAOEquip
         }
     }
     public double getHisVal(String tags) {
+        if(tags.contains("outside") && tags.contains("air") && tags.contains("temp")){
+            if(!OfflineModeUtilKt.isOATValid())
+                return 0;
+        }
         return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
     }
     

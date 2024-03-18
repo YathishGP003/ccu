@@ -6,29 +6,26 @@ import a75f.io.logic.L;
 import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTunerCache;
 
-public class EmergencyConditioning implements OccupancyTrigger{
-    
+public class EmergencyConditioning implements OccupancyTrigger {
+
     CCUHsApi hayStack;
     String equipRef;
-    
+
     public EmergencyConditioning(CCUHsApi hayStack, String equipRef) {
         this.hayStack = hayStack;
         this.equipRef = equipRef;
     }
-    public boolean isEnabled() {
-        return true;
-    }
-    
-    public boolean hasTriggered() {
+
+    public static boolean isZoneInEmergencyConditioning(CCUHsApi hayStack, String equipId) {
         Double zonePriority = CCUHsApi.getInstance().
                 readPointPriorityValByQuery("zone and priority and not dynamic and " +
-                        "not spread and not multiplier and equipRef == \"" + equipRef + "\"");
-        double currentTemp = hayStack.readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipRef + "\"");
+                        "not spread and not multiplier and equipRef == \"" + equipId + "\"");
+        double currentTemp = hayStack.readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipId + "\"");
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         String conditioningMode = CCUHsApi.getInstance().
-                readDefaultStrVal("status and zone and message and equipRef == \"" + equipRef + "\"");
+                readDefaultStrVal("status and zone and message and equipRef == \"" + equipId + "\"");
 
         String systemStatus = CCUHsApi.getInstance().
                 readDefaultStrVal("status and system");
@@ -43,5 +40,14 @@ public class EmergencyConditioning implements OccupancyTrigger{
                         ")");
         return currentTemp < buildingLimitMin && currentTemp > buildingLimitMin - tempDeadLeeway ||
                 currentTemp > buildingLimitMax && currentTemp < buildingLimitMax + tempDeadLeeway;
+    }
+
+
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public boolean hasTriggered() {
+        return isZoneInEmergencyConditioning(hayStack, equipRef);
     }
 }

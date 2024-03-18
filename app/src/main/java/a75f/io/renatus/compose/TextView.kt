@@ -6,16 +6,7 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -25,6 +16,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -57,6 +49,23 @@ fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22) {
     )
 }
 
+@Composable
+fun HeaderTextViewNew(text: String, padding : Int = 5) {
+    Text(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(padding.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+        ),
+        text = text
+    )
+}
+
 
 @Composable
 fun HeaderLeftAlignedTextView(text: String) {
@@ -76,19 +85,35 @@ fun HeaderLeftAlignedTextView(text: String) {
 }
 
 @Composable
+fun HeaderLeftAlignedTextViewNew(text: String) {
+    Text(
+        modifier = Modifier
+            .wrapContentSize(),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
+    )
+}
+
+@Composable
 fun LabelTextView(text: String,widthValue:Int =200) {
-        Text(
-            modifier = Modifier
-                .padding(PaddingValues(start = 20.dp))
-                .width(widthValue.dp),
-            style = TextStyle(
-                fontFamily = myFontFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp,
-                color = Color.Black
-            ),
-            text = text
-        )
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = 20.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 20.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
 }
 
 @Composable
@@ -192,6 +217,20 @@ fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun SaveTextViewNew(text: String,onClick: () -> Unit) {
+    Button(
+        onClick = {onClick()},
+        colors = ButtonDefaults.buttonColors(
+            contentColor = primaryColor,
+            containerColor = Color.White // text color
+        ),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 22.sp,  fontWeight = FontWeight.Normal))
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableClick: Boolean, isCompress: Boolean) {
@@ -204,40 +243,40 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
 
     Column {
 
-            TextField(
-                value = text.value,
-                onValueChange = { text.value = it },
-                enabled = false,
-                readOnly = !enableClick,
-                modifier = modifier.fillMaxHeight().width(300.dp),
-                maxLines = 1,
-                textStyle = TextStyle(
-                    fontFamily = myFontFamily,
-                    fontSize = 19.sp,
-                    color = Color.Black,
-                    textAlign = TextAlign.Start
-                ),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = primaryColor,
-                    textColor = primaryColor,
-                    placeholderColor = primaryColor,
-                    unfocusedIndicatorColor = primaryColor,
-                    disabledIndicatorColor = Color.Transparent,
-                    containerColor = Color.Transparent,
-                    cursorColor = primaryColor,
-                    disabledTextColor = Color.Black,
-                    disabledLabelColor = Color.Black
-                ),
-                trailingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.angle_down_solid),
-                        colorFilter = ColorFilter.tint(primaryColor),
-                        contentDescription = "Custom Icon",
-                        modifier = Modifier.size(20.dp)
+        TextField(
+            value = text.value,
+            onValueChange = { text.value = it },
+            enabled = false,
+            readOnly = !enableClick,
+            modifier = modifier.fillMaxHeight().width(300.dp),
+            maxLines = 1,
+            textStyle = TextStyle(
+                fontFamily = myFontFamily,
+                fontSize = 19.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Start
+            ),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = primaryColor,
+                textColor = primaryColor,
+                placeholderColor = primaryColor,
+                unfocusedIndicatorColor = primaryColor,
+                disabledIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                cursorColor = primaryColor,
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black
+            ),
+            trailingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    colorFilter = ColorFilter.tint(primaryColor),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(20.dp)
 
-                    )
-                },
-            )
+                )
+            },
+        )
         Divider(
             Modifier.width(280.dp).padding(top = 0.dp, start = 13.dp).offset(x = 5.dp, y = (-10).dp))
     }
@@ -248,48 +287,48 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
 @Composable
 fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enableClick: Boolean) {
 
-  Column {
+    Column {
 
-      TextField(
-          value = text.value.toString(),
-          onValueChange = { text.value = it.toInt() },
-          enabled = false,
-          readOnly = !enableClick,
-          modifier = Modifier
-              .width(100.dp)
-              .clickable(onClick = {
-                  if (enableClick)
-                      onClick()
-              }),
-          textStyle = TextStyle(
-              fontFamily = myFontFamily,
-              fontSize = 19.sp,
-              color = Color.Black,
-              textAlign = TextAlign.Left
-          ),
-          colors = TextFieldDefaults.textFieldColors(
-              focusedIndicatorColor = primaryColor,
-              textColor = primaryColor,
-              placeholderColor = primaryColor,
-              unfocusedIndicatorColor = primaryColor,
-              disabledIndicatorColor = Color.Transparent,
-              containerColor = Color.Transparent,
-              cursorColor = primaryColor,
-              disabledTextColor = Color.Black,
-              disabledLabelColor = Color.Black
-          ),
-          trailingIcon = {
-              Image(
-                  painter = painterResource(id = R.drawable.angle_down_solid),
-                  colorFilter = ColorFilter.tint(primaryColor),
-                  contentDescription = "Custom Icon",
-                  modifier = Modifier.size(20.dp)
-              )
-          },
-      )
-      Divider(
-          Modifier.width(85.dp).padding(top = 0.dp, start = 5.dp).offset(x = 5.dp, y = (-10).dp))
-  }
+        TextField(
+            value = text.value.toString(),
+            onValueChange = { text.value = it.toInt() },
+            enabled = false,
+            readOnly = !enableClick,
+            modifier = Modifier
+                .width(100.dp)
+                .clickable(onClick = {
+                    if (enableClick)
+                        onClick()
+                }),
+            textStyle = TextStyle(
+                fontFamily = myFontFamily,
+                fontSize = 19.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Left
+            ),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = primaryColor,
+                textColor = primaryColor,
+                placeholderColor = primaryColor,
+                unfocusedIndicatorColor = primaryColor,
+                disabledIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                cursorColor = primaryColor,
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black
+            ),
+            trailingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    colorFilter = ColorFilter.tint(primaryColor),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+        )
+        Divider(
+            Modifier.width(85.dp).padding(top = 0.dp, start = 5.dp).offset(x = 5.dp, y = (-10).dp))
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -352,4 +391,23 @@ fun HeaderCenterLeftAlignedTextView(text: String) {
         ),
         text = text
     )
+}
+
+@Composable
+fun VerticalDivider(heightValue:Int=20,offsetValue:Int=0){
+    Box(modifier=Modifier.height(heightValue.dp),
+        contentAlignment = Alignment.Center) {
+        Row(modifier=Modifier.width(1.dp)
+            //verticalAlignment = Alignment.CenterVertically,
+            //horizontalArrangement = Arrangement.Center
+        ) {
+            Divider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(heightValue.dp)
+                    .offset(x=0.dp,y=offsetValue.dp),
+                color = Color.Gray
+            )
+        }
+    }
 }

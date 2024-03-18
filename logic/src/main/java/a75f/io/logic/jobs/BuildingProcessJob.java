@@ -74,7 +74,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 runZoneProfilesAlgorithm();
                 
                 runOAOAlgorithm();
-                
+
+                runBypassDamperAlgorithm();
+
                 runSystemControlAlgorithm();
 
                 status = true;
@@ -110,7 +112,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     private void runZoneProfilesAlgorithm() {
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             try {
-                profile.updateZonePoints();
+                            profile.updateZonePoints();
             } catch (Exception e){
                 CcuLog.e(L.TAG_CCU_JOB, "runZoneProfilesAlgorithm Failed ! ", e);
             }
@@ -127,6 +129,16 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             }
         } catch (Exception e){
             CcuLog.e(L.TAG_CCU_JOB, "runOAOAlgorithm Failed ! ", e);
+        }
+    }
+
+    private void runBypassDamperAlgorithm() {
+        try{
+            if (L.ccu().bypassDamperProfile != null) {
+                L.ccu().bypassDamperProfile.updateZonePoints();
+            }
+        } catch (Exception e){
+            CcuLog.e(L.TAG_CCU_JOB, "runBypassDamperAlgorithm Failed ! ", e);
         }
     }
     

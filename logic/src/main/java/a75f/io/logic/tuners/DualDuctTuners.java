@@ -2,9 +2,6 @@ package a75f.io.logic.tuners;
 
 import android.util.Log;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +13,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 public class DualDuctTuners {
     
@@ -405,7 +403,8 @@ public class DualDuctTuners {
         BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
-    
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack,
+                equipref, equipdis, false, roomRef, floorRef);
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 }

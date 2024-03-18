@@ -106,6 +106,8 @@ public class MeshNetwork extends DeviceNetwork
                                     snprofile = "lcm";
                                 else if (d.getMarkers().contains("iftt"))
                                     snprofile = "iftt";
+                                else if (d.getMarkers().contains("bypassDamper"))
+                                    snprofile = "bypass";
                                 if (bSeedMessage) {
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN SEEDS=====================" + zone.getId());
                                     CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
@@ -280,6 +282,41 @@ public class MeshNetwork extends DeviceNetwork
                         controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
                         sendStructToNodes(controlsMessage);
                     }
+                }
+            }
+
+            if (ccu().bypassDamperProfile != null)
+            {
+                if (bSeedMessage)
+                {
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN SEED Message =====================");
+                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
+                            (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                    sendStructToCM(seedMessage);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN Settings2 Message =====================");
+                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
+                            (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                    sendStructToCM(settings2Message);
+                }
+                else
+                {
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN Settings=====================");
+                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
+                            , (short)L.ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+                    sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN CONTROLS=====================");
+                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
+                            , (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef());
+                    //Check duplicated without current time and then append time to control package.
+                    if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
+                    {
+                        controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
+                        sendStructToNodes(controlsMessage);
+                    }
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING Bypass Damper SN SETTINGS2=====================");
+                    CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("BYPASS DAMPER").build()
+                            , (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(), "bypass");
+                    sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message);
                 }
             }
             

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.system.SystemProfile;
 
@@ -63,6 +64,7 @@ public class CCUApplication
     public SystemProfile   systemProfile = null;
     public Set<ZoneProfile> zoneProfiles  = ConcurrentHashMap.newKeySet();
     public OAOProfile oaoProfile = null;
+    public BypassDamperProfile bypassDamperProfile = null;
     
     public Site defaultSite = null;
     

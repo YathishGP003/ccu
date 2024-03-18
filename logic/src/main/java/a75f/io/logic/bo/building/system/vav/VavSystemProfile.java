@@ -152,10 +152,6 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().writePointForCcuUser(compensateHumidityId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(compensateHumidityId, 0.0);
 
-        Point demandResponseMode = new Point.Builder().setDisplayName(equipDis + "-" + "demandResponseMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("demand").addMarker("response").setEnums("false,true").setTz(tz).build();
-        String demandResponseModeId = CCUHsApi.getInstance().addPoint(demandResponseMode);
-        CCUHsApi.getInstance().writePointForCcuUser(demandResponseModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
-        CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);
     }
     
     public void addNewTunerPoints(String equipRef) {

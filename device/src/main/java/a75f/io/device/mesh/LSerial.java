@@ -1,6 +1,7 @@
 package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
+import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.logic.L.ccu;
 
@@ -25,6 +26,7 @@ import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CmToCcuOtaStatus_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -474,6 +476,21 @@ public class LSerial
             CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
                     (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
             sendStructToCM(seedMessage);
+            LSerial.getInstance().setNodeSeeding(false);
+        }
+    }
+
+    public void sendBypassSeedMessage(){
+        if(isConnected()) {
+            LSerial.getInstance().setNodeSeeding(true);
+            CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING BYPASS DAMPER SN SEED Message =====================");
+            CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
+                    (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(),"bypass");
+            sendStructToCM(seedMessage);
+            CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN Settings2=====================");
+            CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(new Zone.Builder().setDisplayName("BYPASS DAMPER").build(),
+                    (short) ccu().bypassDamperProfile.getNodeAddr(), ccu().bypassDamperProfile.getEquipRef(), "bypass");
+            sendStructToCM(settings2Message);
             LSerial.getInstance().setNodeSeeding(false);
         }
     }

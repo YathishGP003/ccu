@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
+import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
@@ -176,7 +177,10 @@ public class UpdatePointHandler implements MessageHandler
         if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
             TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
         }
-
+        if(DemandResponseMode.isDemandResponseConfigPoint(pointEntity)){
+            DemandResponseMode.handleDRMessageUpdate(pointEntity, hayStack, msgObject, zoneDataInterface);
+            return;
+        }
         if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
             JsonElement backFillVal = msgObject.get("val");
             if (!backFillVal.isJsonNull()){

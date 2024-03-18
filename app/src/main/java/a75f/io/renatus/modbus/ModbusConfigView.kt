@@ -83,7 +83,11 @@ class ModbusConfigView : BaseDialogFragment() {
         viewModel = ViewModelProvider(this)[ModbusConfigViewModel::class.java]
         viewModel.holdBundleValues(requireArguments())
         rootView.apply {
-            setContent { RootView() }
+            setContent {
+                RootView(
+                filter = requireArguments().getString(FragmentCommonBundleArgs.MODBUS_FILTER, "")
+                )
+            }
             return rootView
         }
 
@@ -98,115 +102,241 @@ class ModbusConfigView : BaseDialogFragment() {
     }
 
     @Composable
-    fun RootView() {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
-        ) {
-            viewModel.configModelDefinition(requireContext())
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) { TitleTextView(MODBUS) }
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) { HeaderTextView(EQUIP_TYPE) }
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Row {
-                        if (viewModel.equipModel.value.isDevicePaired) {
-                            viewModel.modelName.value =
-                                getName(viewModel.equipModel.value.equipDevice.value.name)
-                            TextViewWithClick(
-                                text = viewModel.modelName,
-                                onClick = { },
-                                enableClick = false,
-                                isCompress = false
+    fun RootView(filter : String ="") {
+        if(filter=="btu"||filter=="emr"){
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp),
+            ) {
+                viewModel.configModelDefinition(requireContext())
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) { TitleTextView(MODBUS) }
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) { HeaderTextView(EQUIP_TYPE) }
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Row {
+                            if (viewModel.equipModel.value.isDevicePaired) {
+                                viewModel.modelName.value =
+                                    getName(viewModel.equipModel.value.equipDevice.value.name)
+                                TextViewWithClick(
+                                    text = viewModel.modelName,
+                                    onClick = { },
+                                    enableClick = false,
+                                    isCompress = false
+                                )
+                                HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
+                            } else {
+                                TextViewWithClick(
+                                    text = viewModel.modelName,
+                                    onClick = {
+                                        showDialogFragment(
+                                            ModelSelectionFragment.newInstance(
+                                                viewModel.deviceList,
+                                                viewModel.onItemSelect, SEARCH_MODEL
+                                            ), ModelSelectionFragment.ID
+                                        )
+                                    },
+                                    enableClick = true, isCompress = false
+                                )
+                                if (viewModel.equipModel.value.version.value.isNotEmpty()) {
+                                    HeaderTextView("V${viewModel.equipModel.value.version.value}")
+                                }
+                            }
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+
+                        Box(modifier = Modifier.weight(7f)) {
+                            HeaderLeftAlignedTextView(
+                                if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else getName(
+                                    viewModel.equipModel.value.equipDevice.value.name
+                                )
                             )
-                            HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
-                        } else {
-                            TextViewWithClick(
-                                text = viewModel.modelName,
+                        }
+                        Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
+                        Box(modifier = Modifier.weight(1f)) {
+                            val onItemSelect = object : OnItemSelect {
+                                override fun onItemSelected(index: Int, item: String) {
+                                    viewModel.equipModel.value.slaveId.value = item.toInt()
+                                }
+                            }
+                            TextViewWithClickOption(
+                                text = viewModel.equipModel.value.slaveId,
                                 onClick = {
+                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
                                     showDialogFragment(
                                         ModelSelectionFragment.newInstance(
-                                            viewModel.deviceList,
-                                            viewModel.onItemSelect, SEARCH_MODEL
+                                            viewModel.slaveIdList,
+                                            onItemSelect, SEARCH_SLAVE_ID
                                         ), ModelSelectionFragment.ID
                                     )
                                 },
-                                enableClick = true, isCompress = false
+                                enableClick = !viewModel.equipModel.value.isDevicePaired,
                             )
-                            if (viewModel.equipModel.value.version.value.isNotEmpty()) {
-                                HeaderTextView("V${viewModel.equipModel.value.version.value}")
-                            }
                         }
                     }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(PaddingValues(bottom = 5.dp)),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HeaderTextView(SELECT_ALL)
+                        ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters.value) {
+                            viewModel.equipModel.value.selectAllParameters.value = it
+                            viewModel.onSelectAll(it)
+                        }
+                    }
+                    Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel(filterValue = filter) }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
+                item { ParametersListView(data = viewModel.equipModel) }
+                item { SubEquipments(viewModel.equipModel) }
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(PaddingValues(bottom = 5.dp)),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (viewModel.isExistingProfile() && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals("SYSTEM")) { SaveTextView("UNPAIR") { viewModel.unpair() } }
+                        SaveTextView(SET) { viewModel.saveConfiguration() }
+                    }
 
-                    Box(modifier = Modifier.weight(7f)) {
-                        HeaderLeftAlignedTextView(
-                            if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else getName(
-                                viewModel.equipModel.value.equipDevice.value.name
-                            )
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
-                    Box(modifier = Modifier.weight(1f)) {
-                        val onItemSelect = object : OnItemSelect {
-                            override fun onItemSelected(index: Int, item: String) {
-                                viewModel.equipModel.value.slaveId.value = item.toInt()
+                }
+            }
+        }
+        else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp),
+            ) {
+                viewModel.configModelDefinition(requireContext())
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) { TitleTextView(MODBUS) }
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) { HeaderTextView(EQUIP_TYPE) }
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Row {
+                            if (viewModel.equipModel.value.isDevicePaired) {
+                                viewModel.modelName.value =
+                                    getName(viewModel.equipModel.value.equipDevice.value.name)
+                                TextViewWithClick(
+                                    text = viewModel.modelName,
+                                    onClick = { },
+                                    enableClick = false,
+                                    isCompress = false
+                                )
+                                HeaderTextView(viewModel.equipModel.value.equipDevice.value.modbusEquipIdId)
+                            } else {
+                                TextViewWithClick(
+                                    text = viewModel.modelName,
+                                    onClick = {
+                                        showDialogFragment(
+                                            ModelSelectionFragment.newInstance(
+                                                viewModel.deviceList,
+                                                viewModel.onItemSelect, SEARCH_MODEL
+                                            ), ModelSelectionFragment.ID
+                                        )
+                                    },
+                                    enableClick = true, isCompress = false
+                                )
+                                if (viewModel.equipModel.value.version.value.isNotEmpty()) {
+                                    HeaderTextView("V${viewModel.equipModel.value.version.value}")
+                                }
                             }
                         }
-                        TextViewWithClickOption(
-                            text = viewModel.equipModel.value.slaveId,
-                            onClick = {
-                                ProgressDialogUtils.showProgressDialog(context, LOADING)
-                                showDialogFragment(
-                                    ModelSelectionFragment.newInstance(
-                                        viewModel.slaveIdList,
-                                        onItemSelect, SEARCH_SLAVE_ID
-                                    ), ModelSelectionFragment.ID
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+
+                        Box(modifier = Modifier.weight(7f)) {
+                            HeaderLeftAlignedTextView(
+                                if (viewModel.equipModel.value.equipDevice.value.name.isNullOrEmpty()) "" else getName(
+                                    viewModel.equipModel.value.equipDevice.value.name
                                 )
-                            },
-                            enableClick = !viewModel.equipModel.value.isDevicePaired,
-                        )
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
+                        Box(modifier = Modifier.weight(1f)) {
+                            val onItemSelect = object : OnItemSelect {
+                                override fun onItemSelected(index: Int, item: String) {
+                                    viewModel.equipModel.value.slaveId.value = item.toInt()
+                                }
+                            }
+                            TextViewWithClickOption(
+                                text = viewModel.equipModel.value.slaveId,
+                                onClick = {
+                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
+                                    showDialogFragment(
+                                        ModelSelectionFragment.newInstance(
+                                            viewModel.slaveIdList,
+                                            onItemSelect, SEARCH_SLAVE_ID
+                                        ), ModelSelectionFragment.ID
+                                    )
+                                },
+                                enableClick = !viewModel.equipModel.value.isDevicePaired,
+                            )
+                        }
                     }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(PaddingValues(bottom = 5.dp)),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HeaderTextView(SELECT_ALL)
-                    ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters.value) {
-                        viewModel.equipModel.value.selectAllParameters.value = it
-                        viewModel.onSelectAll(it)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(PaddingValues(bottom = 5.dp)),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HeaderTextView(SELECT_ALL)
+                        ToggleButton(defaultSelection = viewModel.equipModel.value.selectAllParameters.value) {
+                            viewModel.equipModel.value.selectAllParameters.value = it
+                            viewModel.onSelectAll(it)
+                        }
                     }
+                    Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
                 }
-                Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
-            }
-            item { ParametersListView(data = viewModel.equipModel) }
-            item { SubEquipments(viewModel.equipModel) }
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    SaveTextView(SET) { viewModel.saveConfiguration() }
+                item { ParametersListView(data = viewModel.equipModel) }
+                item { SubEquipments(viewModel.equipModel) }
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(PaddingValues(bottom = 5.dp)),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (viewModel.isExistingProfile() && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals(
+                                "SYSTEM"
+                            )
+                        ) {
+                            SaveTextView("UNPAIR") { viewModel.unpair() }
+                        }
+                        SaveTextView(SET) { viewModel.saveConfiguration() }
+                    }
+
                 }
             }
         }

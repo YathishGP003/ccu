@@ -1,5 +1,19 @@
 package a75f.io.logic.bo.building.schedules;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.DEMAND_RESPONSE_OCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.DEMAND_RESPONSE_UNOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
+
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -28,18 +42,6 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
-import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 
 public class ScheduleUtil {
     
@@ -98,7 +100,26 @@ public class ScheduleUtil {
         }
         return true;
     }
-    
+    public static boolean isAnyZoneInDemandResponse(Map<String, OccupancyData> equipOccupancy) {
+        for (OccupancyData occupancyData : equipOccupancy.values()) {
+            if (occupancyData.occupancy == DEMAND_RESPONSE_UNOCCUPIED ||
+                    occupancyData.occupancy == DEMAND_RESPONSE_OCCUPIED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Occupancy getDemandResponseMode(Map<String, OccupancyData> equipOccupancy) {
+        for (OccupancyData occupancyData : equipOccupancy.values()) {
+            if (occupancyData.occupancy == DEMAND_RESPONSE_OCCUPIED) {
+                return DEMAND_RESPONSE_OCCUPIED;
+            } else if (occupancyData.occupancy == DEMAND_RESPONSE_UNOCCUPIED) {
+                return DEMAND_RESPONSE_UNOCCUPIED;
+            }
+        }
+        return null;
+    }
     /**
      * Zone is in AutoAway if at least one equip is in AutoAway.
      */
@@ -374,23 +395,23 @@ public class ScheduleUtil {
         
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {
-            HashMap thMap = HSUtil.getPriorityLevel(coolDT.get("id").toString(), 4);
+            HashMap thMap = HSUtil.getPriorityLevel(coolDT.get("id").toString(), HayStackConstants.FORCE_OVERRIDE_LEVEL);
             if (thMap != null && thMap.get("duration") != null && thMap.get("val") != null )
             {
                 return (long) Double.parseDouble(thMap.get("duration").toString());
             }
         }
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+q.getId()+"\"");
-        if (heatDT.size() > 0 && HSUtil.getPriorityLevelVal(heatDT.get("id").toString(), 4) > 0) {
-            HashMap thMap = HSUtil.getPriorityLevel(heatDT.get("id").toString(), 4);
+        if (heatDT.size() > 0 && HSUtil.getPriorityLevelVal(heatDT.get("id").toString(), HayStackConstants.FORCE_OVERRIDE_LEVEL) > 0) {
+            HashMap thMap = HSUtil.getPriorityLevel(heatDT.get("id").toString(), HayStackConstants.FORCE_OVERRIDE_LEVEL);
             if (thMap != null && thMap.get("duration") != null && thMap.get("val") != null )
             {
                 return (long) Double.parseDouble(thMap.get("duration").toString());
             }
         }
         HashMap avgDt = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \""+q.getId()+"\"");
-        if (avgDt.size() > 0 && HSUtil.getPriorityLevelVal(avgDt.get("id").toString(), 4) > 0) {
-            HashMap thMap = HSUtil.getPriorityLevel(avgDt.get("id").toString(), 4);
+        if (avgDt.size() > 0 && HSUtil.getPriorityLevelVal(avgDt.get("id").toString(), HayStackConstants.FORCE_OVERRIDE_LEVEL) > 0) {
+            HashMap thMap = HSUtil.getPriorityLevel(avgDt.get("id").toString(), HayStackConstants.FORCE_OVERRIDE_LEVEL);
             if (thMap != null && thMap.get("duration") != null && thMap.get("val") != null )
             {
                 return (long) Double.parseDouble(thMap.get("duration").toString());

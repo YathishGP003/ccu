@@ -572,7 +572,8 @@ public class CCUHsApi
                               .addMarker("occupancy").addMarker("state")
                               .addMarker("zone").addMarker("his")
                               .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
-                                        "emergencyconditioning,keycardautoaway,windowopen,noconditioning")
+                                        "emergencyconditioning,keycardautoaway,windowopen,noconditioning," +
+                                      "demandresponseoccupied,demandresponseunoccupied")
                               .setTz(getTimeZone())
                               .build();
         CCUHsApi.getInstance().addPoint(occupancy);
@@ -974,6 +975,14 @@ public class CCUHsApi
     public HGrid pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
 
+        HashMap<Object, Object> pointMap = readMapById(id.toString());
+
+        if((readDefaultVal("offline and mode and point") > 0)
+                && ((!pointMap.containsKey("offline") && !pointMap.containsKey("watchdog")))){
+            CcuLog.d("CCU_HS"," Skip write");
+            return hGrid;
+        }
+
         if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
             if (dur.unit == null) {
@@ -994,6 +1003,14 @@ public class CCUHsApi
 
     public HGrid tunerPointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+
+        HashMap<Object, Object> pointMap = readMapById(id.toString());
+
+        if((readDefaultVal("offline and mode and point") > 0)
+                && ((!pointMap.containsKey("offline") && !pointMap.containsKey("watchdog")))){
+            CcuLog.d("CCU_HS"," Skip write");
+            return hGrid;
+        }
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
             String uid = id.toString();
@@ -1560,6 +1577,10 @@ public class CCUHsApi
 
     public void syncEntityTree()
     {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
         //TODO : Check if sync session is already in progress
         if (syncManager.isEntitySyncProgress()) {
             syncManager.scheduleSync();
@@ -1585,6 +1606,11 @@ public class CCUHsApi
     }
 
     public void syncHisDataWithPeriodicPurge() {
+        if(readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         if (syncManager.isEntitySyncProgress()) {
             CcuLog.d("CCU_HS"," Skip his sync, entity sync in progress");
             return;
@@ -1593,6 +1619,11 @@ public class CCUHsApi
     }
 
     public boolean syncExistingSite(String siteId) {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Cannot sync existing");
+            return false;
+        }
+
         siteId = StringUtils.stripStart(siteId,"@");
 
         if (StringUtils.isBlank(siteId)) {
@@ -2355,7 +2386,11 @@ public class CCUHsApi
     public void updateSchedule(Schedule schedule)
     {
         schedule.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
-        tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
+
+        if(schedule.isNamedSchedule())
+            tagsDb.addHDict(schedule.getId(), schedule.getNamedScheduleHDict());
+        else
+            tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
 
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
@@ -2486,8 +2521,6 @@ public class CCUHsApi
                 hisGrid.dump();
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
                 return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
-            } else {
-                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
             }
         }
         return 0;
@@ -2501,23 +2534,24 @@ public class CCUHsApi
             HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, getSiteIdRef()).toDict();
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
-            HVal weatherRef = site.row(0).get("weatherRef", false);
-            if (weatherRef != null) {
-                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + weatherRef).toDict();
-                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                if (weatherPoint != null && weatherPoint.numRows() > 0)
-                {
-                    weatherPoint.dump();
-                    humidityWeatherRef = weatherPoint.row(0).getRef("id");
-                    HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
-                    hisGrid.dump();
-                    if (hisGrid != null && hisGrid.numRows() > 0) {
-                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                        HDateTime date = (HDateTime) r.get("ts");
-                        double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
-                        Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
-                        return 100 * humidityVal;
+            if(site != null) {
+                HVal weatherRef = site.row(0).get("weatherRef", false);
+                if (weatherRef != null) {
+                    HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + weatherRef).toDict();
+                    HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                    if (weatherPoint != null && weatherPoint.numRows() > 0) {
+                        weatherPoint.dump();
+                        humidityWeatherRef = weatherPoint.row(0).getRef("id");
+                        HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+                        hisGrid.dump();
+                        if (hisGrid != null && hisGrid.numRows() > 0) {
+                            HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                            HDateTime date = (HDateTime) r.get("ts");
+                            double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
+                            Log.d("CCU_OAO", date + " External Humidity: " + humidityVal);
+                            return 100 * humidityVal;
 
+                        }
                     }
                 }
             }

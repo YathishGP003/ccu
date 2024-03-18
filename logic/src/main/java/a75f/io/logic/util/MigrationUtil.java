@@ -2682,7 +2682,6 @@ public class MigrationUtil {
     public static void migrateZoneScheduleTypeIfMissed(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
-        Log.d("SpooLog","in migrateScheduletype");
 
         for(HashMap<Object, Object> room : rooms) {
 
@@ -2698,23 +2697,15 @@ public class MigrationUtil {
             ArrayList<HashMap<Object, Object>> scheduleTypePoints = ccuHsApi.readAllEntities("scheduleType and roomRef == \"" + zoneId + "\"");
             ArrayList<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
 
-            Log.d("SpooLog","in migrateScheduletype"+zoneId);
 
             if (scheduleTypePoints.isEmpty() || equips.size() > scheduleTypePoints.size()) {
                 //create schedule type point assign it to 2
                 //set schedule ref to default name to that zone
                 // return deafult named
-
-                Log.d("SpooLog","scheduletype is empty");
-
-
-
-
                 ArrayList<HashMap<Object, Object>> allEquip =
                         ccuHsApi.readAllEntities("equip and roomRef == \"" + zoneId + "\"");
                 for (HashMap<Object, Object> equip : allEquip) {
                     String profileType = equip.get("profile").toString();
-                    Log.d("SpooLog","createScheduleType call");
                     createScheduleType(equip, profileType,scheduleTypeToBeSet);
                 }
 
@@ -2726,9 +2717,6 @@ public class MigrationUtil {
                     }
                 }
 
-            }else{
-                Log.d("SpooLog","scheduletype not null");
-             //   Log.d("SpooLog","scheduleTypeid"+scheduleTypePoints.get("id").toString());
             }
         }
         ccuHsApi.scheduleSync();
@@ -2744,8 +2732,6 @@ public class MigrationUtil {
         String roomRef = equip.get("roomRef").toString();
         String floorRef = equip.get("floorRef").toString();
         String tz = equip.get("tz").toString();
-
-        Log.d("SpooLog","createScheduleType in call");
 
         Point.Builder equipScheduleType = new Point.Builder()
                 .setDisplayName(siteDis+"-scheduleType")

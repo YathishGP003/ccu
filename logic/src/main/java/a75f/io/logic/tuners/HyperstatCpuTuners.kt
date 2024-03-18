@@ -3,14 +3,11 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
+import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
-import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND
-import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND_MULTIPLIER_DEFAULT
-import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HEATING_DEADBAND
-import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HEATING_DEADBAND_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HEATING_DEADBAND_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HEATING_DEADBAND_MULTIPLIER_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HUMIDITY_HISTERESIS
@@ -358,6 +355,9 @@ class HyperstatCpuTuners {
                 0
             )
             hayStack.writeHisValById(autoAwaySetbackId, 2.0)
+            DemandResponseMode.createDemandResponseSetBackTuner(hayStack, equipRef,
+                equipDis, false, roomRef, floorRef
+            )
 
         }
 

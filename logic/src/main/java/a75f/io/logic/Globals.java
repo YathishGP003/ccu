@@ -357,6 +357,7 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
+                    modelMigration(migrationHandler);
                 }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
@@ -366,7 +367,6 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
 
                     try {
-                        modelMigration(migrationHandler);
                         loadEquipProfiles();
                     } catch (Exception e) {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);

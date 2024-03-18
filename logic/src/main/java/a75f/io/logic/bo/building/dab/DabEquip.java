@@ -135,6 +135,8 @@ public class DabEquip
                                                         "pgain and equipRef == \"" + equipRef + "\""));
             heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
                                                         "igain and equipRef == \"" + equipRef + "\""));
+
+            CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for DAB zone with address=" + nodeAddr);
         }
     
     }

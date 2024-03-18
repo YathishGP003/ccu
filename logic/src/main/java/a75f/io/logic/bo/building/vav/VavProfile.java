@@ -275,6 +275,7 @@ public abstract class VavProfile extends ZoneProfile {
 
         pendingTunerChange = false;
 
+        CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for VAV zone with address=" + nodeAddr);
     }
 
     private void initializeCfmController(String equipId) {

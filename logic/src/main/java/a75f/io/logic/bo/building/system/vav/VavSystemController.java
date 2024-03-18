@@ -260,6 +260,8 @@ public class VavSystemController extends SystemController
         profile.refreshTRTuners();
 
         pendingTunerChange = false;
+
+        CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for VAV system equip");
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

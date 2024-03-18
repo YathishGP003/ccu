@@ -473,7 +473,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void appRestarted() {
-        new AlertsDataStore(context).appRestarted();
+        AlertManager.getInstance().getRepo().setRestartAppToTrue();
         CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
     }
 

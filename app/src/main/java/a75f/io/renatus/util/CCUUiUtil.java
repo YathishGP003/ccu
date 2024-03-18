@@ -72,7 +72,7 @@ public class CCUUiUtil {
 
     public static void triggerRestart(Context context) {
         AlertManager.getInstance().clearAlertsWhenAppClose();
-        new AlertsDataStore(context).appRestarted();
+        AlertManager.getInstance().getRepo().setRestartAppToTrue();
         CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());

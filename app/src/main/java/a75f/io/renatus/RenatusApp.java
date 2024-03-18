@@ -162,7 +162,7 @@ public class RenatusApp extends UtilityApplication
 
 	public static void closeApp() {
 		AlertManager.getInstance().clearAlertsWhenAppClose();
-		new AlertsDataStore(context).appRestarted();
+		AlertManager.getInstance().getRepo().setRestartAppToTrue();
 		CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
 		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;

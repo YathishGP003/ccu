@@ -120,7 +120,7 @@ class BuildingEquipTest {
         equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
         println(mockHayStack.readEntity("tuner and equip"))
         val diffManger = DiffManger(null)
-        diffManger.processModelMigration("@TestSiteRef")
+        diffManger.processModelMigration("@TestSiteRef", null)
         val updatedPoint = Domain.readPoint("forcedOccupiedTime")
         println(updatedPoint)
         println(mockHayStack.readPointArr(updatedPoint.getId()))

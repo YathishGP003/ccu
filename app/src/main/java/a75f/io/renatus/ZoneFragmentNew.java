@@ -3942,6 +3942,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+        if(zoneIntervals.isEmpty()) return true;
         int size = zoneIntervals.size();
 
         for (int i = 0; i < size; i++) {

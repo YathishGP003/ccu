@@ -364,6 +364,11 @@ public class NamedSchedule extends DialogFragment {
                 Schedule namedSchedule = hsApi.getScheduleById(getArguments().getString(PARAM_SCHEDULE_ID));
                 String roomRef = getArguments().getString(PARAM_ROOM_REF);
                 ArrayList<Interval> zoneIntervals = namedSchedule.getScheduledIntervals();
+                if(zoneIntervals.isEmpty()){
+                    warningMessage = new StringBuilder("Selected named schedule has no occupied blocks, please define occupied slots in the named schedule to apply");
+                    showWarningMessage(warningMessage);
+                    return false;
+                }
                 separateOverNightSchedule(zoneIntervals);
                 zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
                 Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size() - 1);

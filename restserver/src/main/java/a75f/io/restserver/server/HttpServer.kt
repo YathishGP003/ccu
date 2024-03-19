@@ -1,11 +1,13 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
 import a75f.io.api.haystack.util.retrieveLevelValues
-import a75f.io.api.haystack.HisItem
+import a75f.io.device.bacnet.BacnetConfigConstants
 import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
+import a75f.io.device.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
 import a75f.io.device.bacnet.readExternalBacnetJsonFile
 import a75f.io.device.bacnet.updateBacnetHeartBeat
 import a75f.io.logger.CcuLog
@@ -37,11 +39,14 @@ import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.joda.time.DateTime
-import org.projecthaystack.HDateTime
+import org.json.JSONException
+import org.json.JSONObject
+import org.projecthaystack.HDict
+import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
+import org.projecthaystack.HVal
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
@@ -62,6 +67,20 @@ class HttpServer {
             return instance
         }
     }
+
+    fun isVirtualZoneEnabled() : Boolean{
+        var isVirtualZoneEnabled = false
+        val confString: String? = sharedPreferences!!.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
+        if (confString != null) {
+            try {
+                isVirtualZoneEnabled = JSONObject(confString).getBoolean(ZONE_TO_VIRTUAL_DEVICE_MAPPING)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+        return isVirtualZoneEnabled
+    }
+
     fun startServer() {
         CoroutineScope(Dispatchers.IO).launch {
             server.start(wait = true)
@@ -169,22 +188,22 @@ class HttpServer {
 
                 get("/readAll/{query}") {
                     val query = call.parameters["query"]
-                    CcuLog.i(HTTP_SERVER, " query: $query")
+                    CcuLog.i(HTTP_SERVER, "read all query: $query")
+                    val isVirtualZoneEnabled = isVirtualZoneEnabled()
+                    CcuLog.i(HTTP_SERVER, "read all query isVirtualZoneEnabled: $isVirtualZoneEnabled")
                     if (query != null) {
-//                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query))
-//                        CcuLog.i(HTTP_SERVER, " response: $response")
-//                        call.respond(HttpStatusCode.OK, BaseResponse(response))
-
                         val tempGrid = CCUHsApi.getInstance().getHSClient().readAll(query)
-                        val response = HZincWriter.gridToString(tempGrid)
+                        val mutableDictList = repackagePoints(tempGrid, isVirtualZoneEnabled)
+                        val finalGrid = HGridBuilder.dictsToGrid(mutableDictList.toTypedArray())
+                        val modifiedGridResponse = HZincWriter.gridToString(finalGrid)
                         if(query.contains("point")){
-                            val levelData =  getLevelValues(tempGrid)
-                            val fullResponse = ReadAllResponse(response, levelData)
+                            val levelData =  getLevelValues(finalGrid)
+                            val fullResponse = ReadAllResponse(modifiedGridResponse, levelData)
                             CcuLog.i(HTTP_SERVER, " fullResponse: ${BaseResponse(fullResponse)}")
                             call.respond(HttpStatusCode.OK, BaseResponse(fullResponse))
                         }else {
-                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(response)}")
-                            call.respond(HttpStatusCode.OK, BaseResponse(response))
+                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(modifiedGridResponse)}")
+                            call.respond(HttpStatusCode.OK, BaseResponse(modifiedGridResponse))
                         }
                     } else {
                         call.respond(HttpStatusCode.NotFound)
@@ -324,5 +343,70 @@ class HttpServer {
             hisItem = list[0]
         }
         return hisItem
+    }
+
+    private fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean): MutableList<HDict> {
+        val mutableDictList = mutableListOf<HDict>()
+        val gridIterator = tempGrid.iterator()
+        while (gridIterator.hasNext()) {
+            val row = gridIterator.next() as HRow
+            val rowIterator = row.iterator()
+            var hDictBuilder = HDictBuilder()
+            var extractedDis = ""
+            var extractedGroup = ""
+            var extractedZoneRef = ""
+            var isEquip = false
+            while (rowIterator.hasNext()) {
+                val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
+                when (e.value!!) {
+                    is String -> hDictBuilder.add(e.key.toString(), e.value as String)
+                    is Long -> hDictBuilder.add(e.key.toString(), e.value as Long)
+                    is Double -> hDictBuilder.add(e.key.toString(), e.value as Double)
+                    is Boolean -> hDictBuilder.add(e.key.toString(), e.value as Boolean)
+                    is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
+                    else -> hDictBuilder.add(e.key.toString(), e.value.toString())
+                }
+
+                if (e.key.toString() == "equip") {
+                    isEquip = true
+                }
+                if (e.key.toString() == "dis") {
+                    extractedDis = e.value.toString()
+                }
+                if (e.key.toString() == "group") {
+                    extractedGroup = e.value.toString()
+                }
+                if (e.key.toString() == "roomRef") {
+                    extractedZoneRef = e.value.toString()
+                }
+            }
+            val zoneName = CCUHsApi.getInstance()
+                .readMapById(extractedZoneRef.replace("@", ""))["dis"].toString().trim()
+            val pointDisName = extractedDis.split("-")
+            val lastLiteralFromDis = pointDisName[pointDisName.size - 1]
+            var profileName = ""
+            if (pointDisName.size > 1) {
+                profileName = pointDisName[1]
+            }
+
+            if (isVirtualZoneEnabled) {
+                if (isEquip) {
+                    hDictBuilder.add("dis", "${zoneName}_${extractedGroup}")
+                } else {
+                    hDictBuilder.add("dis", lastLiteralFromDis)
+                }
+            } else {
+                if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
+                    hDictBuilder.add("dis","${profileName}_$lastLiteralFromDis")
+                } else {
+                    hDictBuilder.add(
+                        "dis",
+                        "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
+                    )
+                }
+            }
+            mutableDictList.add(hDictBuilder.toDict())
+        }
+        return mutableDictList
     }
 }

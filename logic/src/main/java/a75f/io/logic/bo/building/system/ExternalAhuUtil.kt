@@ -271,11 +271,7 @@ fun calculateSATSetPoints(
     externalSpList: ArrayList<String>,
     loopRunningDirection: TempDirection,
 ) {
-    val isSetPointEnabled = isConfigEnabled(systemEquip, satSetpointControlEnable)
-    if (!isSetPointEnabled) {
-        logIt("satSetpointControl disabled")
-        return
-    }
+
     logIt("Cooling lockout ${L.ccu().systemProfile.isCoolingLockoutActive} heating lockout ${L.ccu().systemProfile.isHeatingLockoutActive}")
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {

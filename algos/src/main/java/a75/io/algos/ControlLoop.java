@@ -22,7 +22,7 @@ public class ControlLoop
     boolean enabled;
 
     public int getIntegralMaxTimeout() { return integralMaxTimeout; }
-    public int getProportionalSpread() { return proportionalSpread; }
+    public double getProportionalSpread() { return proportionalSpread; }
     public double getProportionalGain() { return proportionalGain; }
     public double getIntegralGain() { return integralGain; }
 

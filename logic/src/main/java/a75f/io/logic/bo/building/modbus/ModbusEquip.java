@@ -207,11 +207,17 @@ public class ModbusEquip {
                     else if(marker.getTagName().contains("cell")){
                         logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                     }
-                    else if(marker.getTagName().contains("stage")){
-                        logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
-                    }
                     else if(!marker.getTagName().contains("kind")) {
-                        logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                        if(isInt(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                        } else if(isLong(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Long.parseLong(marker.getTagValue())));
+                        } else if(isDouble(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Double.parseDouble(marker.getTagValue())));
+                        } else {
+                            logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                        }
+
                     }
 
                 }else{
@@ -242,11 +248,16 @@ public class ModbusEquip {
                         else if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
-                        else if(marker.getTagName().contains("stage")){
-                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
-                        }
                         else if(!marker.getTagName().contains("kind")) {
-                            logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                            if(isInt(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                            } else if(isLong(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Long.parseLong(marker.getTagValue())));
+                            } else if(isDouble(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Double.parseDouble(marker.getTagValue())));
+                            } else {
+                                logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                            }
                         }
                     } else {
                         logicalParamPoint.addMarker(marker.getTagName());
@@ -399,5 +410,32 @@ public class ModbusEquip {
         }
 
         return true;
+    }
+
+    public static boolean isDouble(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isLong(String str) {
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isInt(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

@@ -14,8 +14,6 @@ import a75f.io.domain.api.DomainName.systemDCVDamperPosMaximum
 import a75f.io.domain.api.DomainName.systemDCVDamperPosMinimum
 import a75f.io.domain.api.DomainName.systemHeatingSATMaximum
 import a75f.io.domain.api.DomainName.systemHeatingSATMinimum
-import a75f.io.domain.api.DomainName.systemSATMaximum
-import a75f.io.domain.api.DomainName.systemSATMinimum
 import a75f.io.domain.api.DomainName.systemStaticPressureMaximum
 import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
 
@@ -33,9 +31,6 @@ class ExternalAhuConfiguration (profileType : String)
     var occupancyMode = EnableConfig(occupancyModeControl)
     var humidifierControl = EnableConfig(humidifierOperationEnable)
     var dehumidifierControl = EnableConfig(dehumidifierOperationEnable)
-
-    //var satMin = ValueConfig(systemSATMinimum)
-    //var satMax = ValueConfig(systemSATMaximum)
     var heatingMinSp = ValueConfig(systemHeatingSATMinimum)
     var heatingMaxSp = ValueConfig(systemHeatingSATMaximum)
     var coolingMinSp = ValueConfig(systemCoolingSATMinimum)
@@ -54,12 +49,6 @@ class ExternalAhuConfiguration (profileType : String)
 
     override fun getDependencies(): List<ValueConfig> {
         val valueConfiguration = mutableListOf<ValueConfig>()
-        //valueConfiguration.add(satMin)
-        //valueConfiguration.add(satMax)
-        valueConfiguration.add(heatingMinSp)
-        valueConfiguration.add(heatingMaxSp)
-        valueConfiguration.add(coolingMinSp)
-        valueConfiguration.add(coolingMaxSp)
         valueConfiguration.add(fanMinSp)
         valueConfiguration.add(fanMaxSp)
         valueConfiguration.add(dcvMin)
@@ -84,8 +73,6 @@ class ExternalAhuConfiguration (profileType : String)
 
     override fun getValueConfigs(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
-            //add(satMin)
-            //add(satMax)
             add(heatingMinSp)
             add(heatingMaxSp)
             add(coolingMinSp)

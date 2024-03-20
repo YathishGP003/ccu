@@ -148,9 +148,9 @@ open class DefaultEquipBuilder : EquipBuilder {
         if (pointConfig.modelDef.valueConstraint.constraintType.name.contentEquals("MULTI_STATE")) {
             (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value ->
                 enums = if (enums.isNotEmpty()) {
-                    "$enums$index=${value.value},"
+                    "$enums${value.value}=$index,"
                 } else {
-                    "$index=${value.value},"
+                    "${value.value}=$index,"
                 }
             }
         }

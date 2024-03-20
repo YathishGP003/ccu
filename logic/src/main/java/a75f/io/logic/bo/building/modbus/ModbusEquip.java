@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.modbus;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
 import java.util.ArrayList;
@@ -206,7 +207,10 @@ public class ModbusEquip {
                     else if(marker.getTagName().contains("cell")){
                         logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                     }
-                    else {
+                    else if(marker.getTagName().contains("stage")){
+                        logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                    }
+                    else if(!marker.getTagName().contains("kind")) {
                         logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
                     }
 
@@ -238,7 +242,10 @@ public class ModbusEquip {
                         else if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
-                        else {
+                        else if(marker.getTagName().contains("stage")){
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                        }
+                        else if(!marker.getTagName().contains("kind")) {
                             logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
                         }
                     } else {

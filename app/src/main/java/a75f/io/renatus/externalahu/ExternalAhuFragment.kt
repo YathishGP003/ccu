@@ -110,6 +110,9 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 ), state = viewModel.configModel.value.setPointControl
                             ) {
                                 viewModel.configModel.value.setPointControl = it
+                                if (it && viewModel.configModel.value.dualSetPointControl)
+                                    viewModel.configModel.value.dualSetPointControl = false
+
                                 viewModel.configModel.value.heatingMinSp =
                                     viewModel.getDefaultValByDomain(systemHeatingSATMinimum)
                                 viewModel.configModel.value.heatingMaxSp =
@@ -126,6 +129,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                         viewModel.profileModelDefinition, dualSetpointControlEnable
                                     ), state = viewModel.configModel.value.dualSetPointControl
                                 ) {
+                                    if (it && viewModel.configModel.value.setPointControl)
+                                        viewModel.configModel.value.setPointControl = false
                                     viewModel.configModel.value.dualSetPointControl = it
                                     setStateChanged()
                                 }

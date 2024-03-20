@@ -188,12 +188,21 @@ class HttpServer {
 
                 get("/readAll/{query}") {
                     val query = call.parameters["query"]
-                    CcuLog.i(HTTP_SERVER, "read all query: $query")
                     val isVirtualZoneEnabled = isVirtualZoneEnabled()
-                    CcuLog.i(HTTP_SERVER, "read all query isVirtualZoneEnabled: $isVirtualZoneEnabled")
+                    CcuLog.i(HTTP_SERVER, "read all query: $query <-isVirtualZoneEnabled-> $isVirtualZoneEnabled")
+                    var equipRefId = ""
                     if (query != null) {
+                        var group = ""
+                        if(query.contains("equipRef")){
+                            try {
+                                equipRefId = getEquipRefId(query).replace("@","").trim()
+                                group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
+                            }catch (e: Exception){
+                                e.printStackTrace()
+                            }
+                        }
                         val tempGrid = CCUHsApi.getInstance().getHSClient().readAll(query)
-                        val mutableDictList = repackagePoints(tempGrid, isVirtualZoneEnabled)
+                        val mutableDictList = repackagePoints(tempGrid, isVirtualZoneEnabled, group)
                         val finalGrid = HGridBuilder.dictsToGrid(mutableDictList.toTypedArray())
                         val modifiedGridResponse = HZincWriter.gridToString(finalGrid)
                         if(query.contains("point")){
@@ -314,6 +323,15 @@ class HttpServer {
         }
     }
 
+    private fun getEquipRefId(input: String): String {
+            val regex = "@[a-fA-F0-9\\-]+".toRegex()
+            val matches = regex.findAll(input)
+            for (match in matches) {
+                return match.value
+            }
+        return ""
+    }
+
     private fun getLevelValues(tempGrid: HGrid): MutableList<LevelData> {
         val mutableList = mutableListOf<LevelData>()
         for (row in tempGrid) {
@@ -345,7 +363,7 @@ class HttpServer {
         return hisItem
     }
 
-    private fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean): MutableList<HDict> {
+    private fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: String): MutableList<HDict> {
         val mutableDictList = mutableListOf<HDict>()
         val gridIterator = tempGrid.iterator()
         while (gridIterator.hasNext()) {
@@ -355,7 +373,10 @@ class HttpServer {
             var extractedDis = ""
             var extractedGroup = ""
             var extractedZoneRef = ""
+            var bacnetId = ""
             var isEquip = false
+            var extractedEquipRef = ""
+            var isSystem = false
             while (rowIterator.hasNext()) {
                 val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
                 when (e.value!!) {
@@ -366,7 +387,9 @@ class HttpServer {
                     is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
                     else -> hDictBuilder.add(e.key.toString(), e.value.toString())
                 }
-
+                if (e.key.toString() == "system") {
+                    isSystem = true
+                }
                 if (e.key.toString() == "equip") {
                     isEquip = true
                 }
@@ -379,6 +402,12 @@ class HttpServer {
                 if (e.key.toString() == "roomRef") {
                     extractedZoneRef = e.value.toString()
                 }
+                if (e.key.toString() == "bacnetId") {
+                    bacnetId = e.value.toString()
+                }
+                if (e.key.toString() == "equipRef") {
+                    extractedEquipRef = e.value.toString()
+                }
             }
             val zoneName = CCUHsApi.getInstance()
                 .readMapById(extractedZoneRef.replace("@", ""))["dis"].toString().trim()
@@ -389,20 +418,40 @@ class HttpServer {
                 profileName = pointDisName[1]
             }
 
-            if (isVirtualZoneEnabled) {
-                if (isEquip) {
-                    hDictBuilder.add("dis", "${zoneName}_${extractedGroup}")
+            if (!isSystem) {
+                if (isVirtualZoneEnabled) {
+                    if (isEquip) {
+                        hDictBuilder.add("dis", "${zoneName}_${extractedGroup}")
+                    } else {
+                        hDictBuilder.add("dis", lastLiteralFromDis)
+                    }
+
+                    if (group.isNotEmpty()) {
+                        bacnetId = bacnetId.replace(group, "").trim()
+                    } else if (extractedGroup.isNotEmpty()) {
+                        bacnetId = bacnetId.replace(extractedGroup, "").trim()
+                    } else if (extractedEquipRef.isNotEmpty()) {
+                        extractedEquipRef = extractedEquipRef.replace("@", "").trim()
+                        val groupFromEquipRef =
+                            CCUHsApi.getInstance().readMapById(extractedEquipRef)["group"] as String
+                        bacnetId = bacnetId.replace(groupFromEquipRef, "").trim()
+                    }
+                    try {
+                        if (bacnetId != "0.0") {
+                            hDictBuilder.add("bacnetId", bacnetId.toLong())
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 } else {
-                    hDictBuilder.add("dis", lastLiteralFromDis)
-                }
-            } else {
-                if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
-                    hDictBuilder.add("dis","${profileName}_$lastLiteralFromDis")
-                } else {
-                    hDictBuilder.add(
-                        "dis",
-                        "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
-                    )
+                    if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
+                        hDictBuilder.add("dis", "${profileName}_$lastLiteralFromDis")
+                    } else {
+                        hDictBuilder.add(
+                            "dis",
+                            "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
+                        )
+                    }
                 }
             }
             mutableDictList.add(hDictBuilder.toDict())

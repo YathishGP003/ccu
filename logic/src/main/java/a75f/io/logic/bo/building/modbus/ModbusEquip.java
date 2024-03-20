@@ -191,20 +191,23 @@ public class ModbusEquip {
                         logicalParamPoint.setUnit(marker.getTagValue());
                         physicalParamPoint.setUnit(marker.getTagValue());
                     }
-                    if(marker.getTagName().contains("hisInterpolate")){
+                    else if(marker.getTagName().contains("hisInterpolate")){
                         logicalParamPoint.setHisInterpolate(marker.getTagValue());
                     }
-                    if(marker.getTagName().contains("minVal")){
+                    else if(marker.getTagName().contains("minVal")){
                         logicalParamPoint.setMinVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("maxVal")){
+                    else if(marker.getTagName().contains("maxVal")){
                         logicalParamPoint.setMaxVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("incrementVal")){
+                    else if(marker.getTagName().contains("incrementVal")){
                         logicalParamPoint.setIncrementVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("cell")){
+                    else if(marker.getTagName().contains("cell")){
                         logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
+                    }
+                    else {
+                        logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
                     }
 
                 }else{
@@ -220,20 +223,23 @@ public class ModbusEquip {
                             logicalParamPoint.setUnit(marker.getTagValue());
                             physicalParamPoint.setUnit(marker.getTagValue());
                         }
-                        if (marker.getTagName().contains("hisInterpolate")) {
+                        else if (marker.getTagName().contains("hisInterpolate")) {
                             logicalParamPoint.setHisInterpolate(marker.getTagValue());
                         }
-                        if(marker.getTagName().contains("minVal")){
+                        else if(marker.getTagName().contains("minVal")){
                             logicalParamPoint.setMinVal(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("maxVal")){
+                        else if(marker.getTagName().contains("maxVal")){
                             logicalParamPoint.setMaxVal(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("incrementVal")){
+                        else if(marker.getTagName().contains("incrementVal")){
                             logicalParamPoint.setHisInterpolate(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("cell")){
+                        else if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
+                        }
+                        else {
+                            logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
                         }
                     } else {
                         logicalParamPoint.addMarker(marker.getTagName());

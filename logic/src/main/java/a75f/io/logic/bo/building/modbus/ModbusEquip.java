@@ -237,7 +237,7 @@ public class ModbusEquip {
                             logicalParamPoint.setMaxVal(String.valueOf(marker.getTagValue()));
                         }
                         else if(marker.getTagName().contains("incrementVal")){
-                            logicalParamPoint.setHisInterpolate(String.valueOf(marker.getTagValue()));
+                            logicalParamPoint.setIncrementVal(String.valueOf(marker.getTagValue()));
                         }
                         else if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));

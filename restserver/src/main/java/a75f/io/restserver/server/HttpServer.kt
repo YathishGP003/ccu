@@ -453,6 +453,8 @@ class HttpServer {
                         )
                     }
                 }
+            }else{
+                hDictBuilder.add("dis", lastLiteralFromDis)
             }
             mutableDictList.add(hDictBuilder.toDict())
         }

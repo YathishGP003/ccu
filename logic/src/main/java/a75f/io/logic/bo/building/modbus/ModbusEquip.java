@@ -390,16 +390,6 @@ public class ModbusEquip {
         return false;
     }
 
-    public List<Parameter> getProfileConfiguration(){
-        if(configuredParams != null && (configuredParams.size() > 0))
-            return configuredParams;
-        else {
-            //TODO need to fetch all configured data
-
-            return null;
-        }
-    }
-
     public static boolean isEquipTypeInUpperCase(String str) {
         String[] words = str.split("\\s+");
 

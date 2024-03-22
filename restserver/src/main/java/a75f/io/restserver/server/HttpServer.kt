@@ -47,6 +47,7 @@ import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.HVal
+import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
@@ -197,7 +198,7 @@ class HttpServer {
                             try {
                                 equipRefId = getEquipRefId(query).replace("@","").trim()
                                 group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
-                            }catch (e: Exception){
+                            }catch (e: UnknownRecException){
                                 e.printStackTrace()
                             }
                         }

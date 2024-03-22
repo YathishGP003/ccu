@@ -401,4 +401,12 @@ class AlertsRepository(
       val threshold = 5000
       return dataStore.getAllAlerts().size > threshold
    }
+
+   fun setRestartAppToTrue() {
+      dataStore.appRestarted()
+   }
+
+   fun checkIfAppRestarted() : Boolean {
+      return dataStore.isAppRestarted()
+   }
 }

@@ -11,6 +11,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 public class StandAloneTuners {
     
@@ -480,7 +481,8 @@ public class StandAloneTuners {
         BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
-
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack,
+                equipref, equipdis, false, roomRef, floorRef);
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     

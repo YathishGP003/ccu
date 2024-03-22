@@ -1,5 +1,7 @@
 package a75f.io.renatus.registration;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 import android.app.AlertDialog;
@@ -68,10 +70,13 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -90,6 +95,7 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -151,6 +157,10 @@ public class InstallerOptions extends Fragment {
     CustomCCUSwitch toggleCelsius;
     TextView textCelsiusEnable;
 
+    CustomCCUSwitch toggleOfflineMode;
+    TextView textOfflineMode;
+    TextView descOfflineMode;
+
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
     String networkConfig = "";
@@ -184,6 +194,7 @@ public class InstallerOptions extends Fragment {
     private Spinner buildingToZoneDiff;
 
     private Spinner backFillTimeSpinner;
+    CustomCCUSwitch switchDREnrollment;
 
     private static final String TAG = InstallerOptions.class.getSimpleName();
     ArrayList<String> regAddressBands = new ArrayList<>();
@@ -251,6 +262,7 @@ public class InstallerOptions extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_installeroption, container, false);
 
         mContext = getContext().getApplicationContext();
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
         prefs = new Prefs(mContext);
         isFreshRegister = getActivity() instanceof FreshRegistration;
@@ -267,6 +279,11 @@ public class InstallerOptions extends Fragment {
         //BACnet Setup UI Components
         toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
         textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
+
+        toggleOfflineMode = rootView.findViewById(R.id.offlineModetoggle);
+        textOfflineMode = rootView.findViewById(R.id.textofflineMode);
+        descOfflineMode = rootView.findViewById(R.id.textofflineModeDesc);
+
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         Button buttonApply = rootView.findViewById(R.id.buttonApply);
         Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
@@ -284,7 +301,8 @@ public class InstallerOptions extends Fragment {
         textUseCoolingLockoutDesc = rootView.findViewById(R.id.textUseCoolingLockoutDesc);
         textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
         textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
-        
+        switchDREnrollment = rootView.findViewById(R.id.switchDRMode);
+
         initializeTempLockoutUI(CCUHsApi.getInstance());
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
@@ -292,9 +310,23 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
 
+        toggleOfflineMode.setVisibility(View.VISIBLE);
+        textOfflineMode.setVisibility(View.VISIBLE);
+        descOfflineMode.setVisibility(View.VISIBLE);
+
         toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
 
         setToggleCheck();
+
+        toggleOfflineMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                double offlineValue = isChecked ? 1.0 : 0.0;
+                CCUHsApi.getInstance().writeDefaultVal("offline and mode ",offlineValue);
+                CCUHsApi.getInstance().writeHisValByQuery("offline and mode ",offlineValue);
+                TunerUtil.updateDefault(offlineValue);
+            }
+        });
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -422,9 +454,13 @@ public class InstallerOptions extends Fragment {
             }
         });
 
+
+
+
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
         setBackFillTimeSpinner(rootView);
+        setUpDREnrollmentMode(CCUHsApi.getInstance());
 
         buttonApply.setOnClickListener(view -> {
             int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
@@ -443,6 +479,21 @@ public class InstallerOptions extends Fragment {
         buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
+    }
+
+    private void setUpDREnrollmentMode(CCUHsApi ccuHsApi) {
+        switchDREnrollment.setChecked(DemandResponseMode.isDREnrollmentSelected(ccuHsApi));
+        switchDREnrollment.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point created");
+                DemandResponseMode.handleDRActivationConfiguration(true, ccuHsApi);
+                DemandResponseMode.setDREnrollmentStatus(ccuHsApi, true);
+            } else {
+                CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point deleted");
+                DemandResponseMode.handleDRActivationConfiguration(false, ccuHsApi);
+                DemandResponseMode.setDREnrollmentStatus(ccuHsApi, false);
+            }
+        });
     }
 
     @Override
@@ -522,6 +573,11 @@ public class InstallerOptions extends Fragment {
         boolean newValue = isCelsiusTunerAvailableStatus();
         if ( toggleCelsius != null && toggleCelsius.isChecked() != newValue) {
             toggleCelsius.setChecked(newValue);
+        }
+
+        boolean isOfflineMode = CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0;
+        if ( toggleOfflineMode != null && toggleOfflineMode.isChecked() != isOfflineMode) {
+            toggleOfflineMode.setChecked(isOfflineMode);
         }
     }
 
@@ -836,29 +892,61 @@ public class InstallerOptions extends Fragment {
 
                 executor.execute(() -> {
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                    HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteMap.get("id").toString()).toDict();
-                    HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                    if (schedulePoint != null) {
-                        Iterator it = schedulePoint.iterator();
-                        while (it.hasNext()) {
-                            HRow r = (HRow) it.next();
-                            scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                    String siteRef = siteMap.get("id").toString();
+                    if(OfflineModeUtilKt.isOfflineMode()){
+                        ArrayList<HashMap<Object, Object>> schedules = CCUHsApi.getInstance().readAllEntities
+                                ("schedule and days and siteRef ==  " +siteRef );
+
+                        List<HashMap<Object, Object>> namedSchedule = CCUHsApi.getInstance().getAllNamedSchedules();
+
+                        ArrayList<HashMap<Object, Object>> zoneList = CCUHsApi.getInstance().readAllEntities
+                                ("room");
+
+                        for (HashMap<Object, Object> schedule:schedules) {
+                            scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
                         }
-                    }
-                    HDict zoneDict = new HDictBuilder().add("filter", "room and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
-                    HGrid zoneGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneDict));
-                    if(zoneGrid != null) {
-                        List<HashMap> zoneMaps = CCUHsApi.getInstance().HGridToList(zoneGrid);
-                        for (HashMap zone : zoneMaps) {
-                            zones.add(new Zone.Builder().setHashMap(zone).build());
+                        for (HashMap<Object, Object> schedule:namedSchedule) {
+                            scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
                         }
-                    }
-                    HDict equipDict = new HDictBuilder().add("filter", "equip and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
-                    HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
-                    if(equipGrid != null) {
-                        List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
-                        for (HashMap equip : equipMaps) {
-                            equipList.add(new Equip.Builder().setHashMap(equip).build());
+
+                        for (HashMap<Object, Object> m : zoneList)
+                        {
+                            zones.add(new Zone.Builder().setHashMap(m).build());
+                        }
+
+                        ArrayList<HashMap<Object, Object>> equipMaps = CCUHsApi.getInstance().
+                                readAllEntities("equip and siteRef ==  \"" +siteRef + "\"");
+                        if(equipMaps != null) {
+                            for (HashMap equip : equipMaps) {
+                                equipList.add(new Equip.Builder().setHashMap(equip).build());
+                            }
+                        }
+
+                    }else {
+                        HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteMap.get("id").toString()).toDict();
+                        HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                        if (schedulePoint != null) {
+                            Iterator it = schedulePoint.iterator();
+                            while (it.hasNext()) {
+                                HRow r = (HRow) it.next();
+                                scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                            }
+                        }
+                        HDict zoneDict = new HDictBuilder().add("filter", "room and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                        HGrid zoneGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneDict));
+                        if (zoneGrid != null) {
+                            List<HashMap> zoneMaps = CCUHsApi.getInstance().HGridToList(zoneGrid);
+                            for (HashMap zone : zoneMaps) {
+                                zones.add(new Zone.Builder().setHashMap(zone).build());
+                            }
+                        }
+                        HDict equipDict = new HDictBuilder().add("filter", "equip and siteRef == " + CCUHsApi.getInstance().readEntity("site").get("id").toString()).toDict();
+                        HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
+                        if (equipGrid != null) {
+                            List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
+                            for (HashMap equip : equipMaps) {
+                                equipList.add(new Equip.Builder().setHashMap(equip).build());
+                            }
                         }
                     }
                     handler.post(() -> {

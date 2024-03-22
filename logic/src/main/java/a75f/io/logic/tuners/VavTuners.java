@@ -2,12 +2,7 @@ package a75f.io.logic.tuners;
 
 import android.util.Log;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,7 +16,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Units;
-import a75f.io.logic.util.RxTask;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_VAV_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
@@ -1006,6 +1001,8 @@ public class VavTuners {
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
 
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack, equipref, equipdis,
+                false, roomRef, floorRef);
     }
     
     public static Point createReheatZoneToDATMinDifferentialTuner(boolean defaultTuner, String equipDis,

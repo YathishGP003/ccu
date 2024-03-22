@@ -18,7 +18,7 @@ class HyperstatLoopController {
     private fun initialiseControlLoop(controlLoop: ControlLoop, tuners: HyperStatProfileTuners) {
         controlLoop.setProportionalGain(tuners.proportionalGain)
         controlLoop.setIntegralGain(tuners.integralGain)
-        controlLoop.setProportionalSpread(tuners.proportionalSpread.toInt())
+        controlLoop.setProportionalSpread(tuners.proportionalSpread)
         controlLoop.setIntegralMaxTimeout(tuners.integralMaxTimeout)
         controlLoop.useNegativeCumulativeError(false)
     }

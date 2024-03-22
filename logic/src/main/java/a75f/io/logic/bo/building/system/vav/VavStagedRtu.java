@@ -1,38 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.content.Intent;
-import android.util.Log;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import a75.io.algos.vav.VavTRSystem;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.BacnetIdKt;
-import a75f.io.logic.BacnetUtilKt;
-import a75f.io.logic.Globals;
-import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningState;
-import a75f.io.logic.autocommission.AutoCommissioningUtil;
-import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.system.SystemConstants;
-import a75f.io.logic.bo.building.system.SystemController;
-import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.tuners.VavTRTuners;
-import a75f.io.logic.util.SystemProfileUtil;
-
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
@@ -50,11 +17,41 @@ import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
+
+import android.content.Intent;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import a75.io.algos.vav.VavTRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetIdKt;
+import a75f.io.logic.BacnetUtilKt;
+import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
+import a75f.io.logic.bo.building.EpidemicState;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -544,7 +541,8 @@ public class VavStagedRtu extends VavSystemProfile
                 case DEHUMIDIFIER:
                     if (systemMode == SystemMode.OFF ||
                         ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
-                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION) {
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION ||
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) {
                         relayState = 0;
                     } else {
                         double humidity = VavSystemController.getInstance().getAverageSystemHumidity();

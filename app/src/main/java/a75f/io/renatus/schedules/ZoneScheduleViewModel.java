@@ -30,7 +30,7 @@ public class ZoneScheduleViewModel {
     public HashMap<String, ArrayList<Interval>> getScheduleSpills(ArrayList<Schedule.Days> daysArrayList, Schedule schedule) {
 
         LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
-        if (schedule.isZoneSchedule()) {
+        if (schedule.isZoneSchedule() || schedule.isNamedSchedule()) {
             Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
             ArrayList<Interval> intervalSpills = new ArrayList<>();
             ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals(daysArrayList);

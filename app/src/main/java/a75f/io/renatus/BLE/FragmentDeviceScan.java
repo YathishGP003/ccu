@@ -1,5 +1,10 @@
 package a75f.io.renatus.BLE;
 
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -17,16 +22,20 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.fragment.app.DialogFragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +44,11 @@ import a75f.io.device.serial.SerialConsts;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.renatus.AlternatePairingFragment;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -66,6 +71,18 @@ public class FragmentDeviceScan extends BaseDialogFragment
     private BluetoothLeScanner mBluetoothLeScanner;
     boolean mScanning;
     BluetoothStateReceiver bluetoothStateReceiver;
+    @BindView(R.id.connect_manually)
+    TextView connectManuallyInAvailableDevice;
+    @BindView(R.id.connect_manually_no_device)
+    TextView connectManuallyNoDevice;
+    @BindView(R.id.pairManuallyText)
+    TextView pairManuallyTextNoDevice;
+    @BindView(R.id.pairManuallyText1)
+    TextView pairManuallyTextInAvailableList;
+    @BindView(R.id.available_devices_layout)
+    LinearLayout availableDevicesLayout;
+    @BindView(R.id.no_devices_layout)
+    LinearLayout noDevicesLayout;
 
     private ScanCallback mScanCallback = new ScanCallback()
     {
@@ -80,6 +97,19 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     if(device != null && device.getName() != null && !(isDeviceMatching(device.getName()))){
                         setListViewEmptyView();
                         return;
+                    } else {
+                        int deviceCount = mLeDeviceListAdapter.getCount();
+                        int deviceCountLimitToShow = 4;
+                        int maxSizeOfListView = 360;
+                        if(deviceCount >= deviceCountLimitToShow) {
+                            DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                            float density = displayMetrics.density;
+                            mBLEDeviceListListView.getLayoutParams().height = (int) (maxSizeOfListView * density);
+                            mBLEDeviceListListView.requestLayout();
+                        }
+                        noDevicesLayout.setVisibility(View.GONE);
+                        availableDevicesLayout.setVisibility(View.VISIBLE);
+                       viewConnectManuallyOptionForAvailableDevice();
                     }
                     mLeDeviceListAdapter.addDevice(device);
                 });
@@ -170,7 +200,12 @@ public class FragmentDeviceScan extends BaseDialogFragment
         return retVal;
     }
 
-
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        connectManuallyInAvailableDevice.setOnClickListener(connectManuallyListener);
+        connectManuallyNoDevice.setOnClickListener(connectManuallyListener);
+    }
     @Override
     public void onResume()
     {
@@ -223,23 +258,51 @@ public class FragmentDeviceScan extends BaseDialogFragment
             }
         }).start();
     }
+    View.OnClickListener connectManuallyListener = view -> {
+        AlternatePairingFragment alternatePairingFragment = new AlternatePairingFragment(
+                mNodeType, mPairingAddress, mName, mFloorName, mProfileType);
+        showDialogFragment(alternatePairingFragment, AlternatePairingFragment.ID);
+    };
 
-
-    private void setListViewEmptyView()
-    {
-        if (mBLEDeviceListListView.getEmptyView() == null) {
-            TextView emptyText = new TextView(getActivity());
-            emptyText
-                    .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            emptyText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
-            emptyText.setPadding(20, 20, 20, 20);
-            ((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
-            emptyText.setText(R.string.ble_no_devices_found_warning);
-            mBLEDeviceListListView.setEmptyView(emptyText);
+    private void setListViewEmptyView() {
+        if (isDeviceSupportsAlternatePairing() && mLeDeviceListAdapter.getCount() == 0) {
+            noDevicesLayout.setVisibility(View.VISIBLE);
+            availableDevicesLayout.setVisibility(View.GONE);
+            viewConnectManuallyOption();
+        } else {
+            if(mBLEDeviceListListView.getEmptyView() == null){
+                TextView emptyText = new TextView(getActivity());
+                emptyText
+                        .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                emptyText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
+                emptyText.setPadding(20, 20, 20, 20);
+                ((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
+                emptyText.setText(R.string.ble_no_devices_found_warning);
+                mBLEDeviceListListView.setEmptyView(emptyText);
+            }
         }
     }
-    
-    
+
+    private void viewConnectManuallyOption() {
+        if (isDeviceSupportsAlternatePairing()) {
+            pairManuallyTextNoDevice.setVisibility(View.VISIBLE);
+            connectManuallyNoDevice.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void viewConnectManuallyOptionForAvailableDevice() {
+        if (isDeviceSupportsAlternatePairing()) {
+            pairManuallyTextInAvailableList.setVisibility(View.VISIBLE);
+            connectManuallyInAvailableDevice.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean isDeviceSupportsAlternatePairing() {
+        return mNodeType == NodeType.SMART_NODE || mNodeType.equals(NodeType.HELIO_NODE) ||
+                mNodeType.equals(NodeType.HYPER_STAT);
+    }
+
+
     private void finish(BluetoothDevice device)
     {
         DialogFragment newFragment = FragmentBLEDevicePin
@@ -439,21 +502,27 @@ public class FragmentDeviceScan extends BaseDialogFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
+            if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                final BluetoothManager bluetoothManager =
-                        (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
-                mBluetoothAdapter = bluetoothManager.getAdapter();
-                mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-                if(state == BluetoothAdapter.STATE_ON){
-                    Log.d(L.TAG_CCU_BLE, "bluetooth is enabled");
-                    requireContext().unregisterReceiver(bluetoothStateReceiver);
-                    searchDevices();
-                }
-                if(state == BluetoothAdapter.STATE_OFF){
-                    Log.d(L.TAG_CCU_BLE, "bluetooth is disabled");
-                    requireContext().unregisterReceiver(bluetoothStateReceiver);
-                    searchDevices();
+                if (isAdded()) {
+                    final BluetoothManager bluetoothManager =
+                            (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
+
+                    mBluetoothAdapter = bluetoothManager.getAdapter();
+                    mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+
+                    if (state == BluetoothAdapter.STATE_ON) {
+                        Log.d(L.TAG_CCU_BLE, "bluetooth is enabled");
+                        requireContext().unregisterReceiver(bluetoothStateReceiver);
+                        searchDevices();
+                    }
+                    if (state == BluetoothAdapter.STATE_OFF) {
+                        Log.d(L.TAG_CCU_BLE, "bluetooth is disabled");
+                        requireContext().unregisterReceiver(bluetoothStateReceiver);
+                        searchDevices();
+                    }
+                } else {
+                    Log.d(L.TAG_CCU_BLE, "Fragment is not yet added");
                 }
             }
         }

@@ -14,7 +14,7 @@ public class ControlLoop
 {
     
     int    integralMaxTimeout = 15;
-    int proportionalSpread = 3;
+    double proportionalSpread = 3.0;
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     GenericPIController piController;
@@ -62,7 +62,7 @@ public class ControlLoop
         this.integralMaxTimeout = integralMaxTimeout;
         piController.setIntegralMaxTimeout(integralMaxTimeout);
     }
-    public void setProportionalSpread(int proportionalSpread)
+    public void setProportionalSpread(double proportionalSpread)
     {
         this.proportionalSpread = proportionalSpread;
         piController.setMaxAllowedError(proportionalSpread);

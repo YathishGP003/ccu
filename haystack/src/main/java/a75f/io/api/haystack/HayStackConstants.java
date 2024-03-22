@@ -6,8 +6,9 @@ package a75f.io.api.haystack;
 
 public class HayStackConstants
 {
-    public static final int AUTO_AWAY_LEVEL = 3;
-    public static final int FORCE_OVERRIDE_LEVEL = 4;
+    public static final int DEMAND_RESPONSE_LEVEL = 3;
+    public static final int AUTO_AWAY_LEVEL = 4;
+    public static final int FORCE_OVERRIDE_LEVEL = 5;
     public static final int DEFAULT_POINT_LEVEL = 8;
     public static final int CCU_USER_WRITE_LEVEL = 8;
     public static final int USER_APP_WRITE_LEVEL = 10;

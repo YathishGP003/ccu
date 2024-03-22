@@ -1,6 +1,8 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
@@ -13,11 +15,15 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
+import a75f.io.logic.tuners.TunerUtil
+import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
@@ -51,6 +57,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     override fun doMigration() {
         doVavDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
+        if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            createOfflineModePoint()
+        }
+        if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            migrationForDRMode(CCUHsApi.getInstance())
+        }
         if (!isMigrationRequired()) {
             return
         }
@@ -67,6 +79,98 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 syncZoneSchedulesToCloud(ccuHsApi)
             }
             schedulerRevamp.doMigration()
+        }
+    }
+
+    private fun migrationForDRMode(ccuHsApi: CCUHsApi) {
+        val demandResponse = DemandResponseMode()
+        val systemProfile = ccuHsApi.readEntity("equip and system")
+        val displayName = systemProfile[Tags.DIS].toString()
+        val siteRef = systemProfile[Tags.SITEREF].toString()
+        val id = systemProfile[Tags.ID].toString()
+        val tz = systemProfile[Tags.TZ].toString()
+        val demandResponseMode = ccuHsApi.readEntity(
+            "demand and" +
+                    " response and not activation and not enable and system and not tuner"
+        )
+        val demandResponseEnrollment = ccuHsApi.readEntity(
+            "demand and" +
+                    " response and enable and system"
+        )
+        if (demandResponseMode.size > 0) {
+            ccuHsApi.deleteEntityItem(demandResponseMode["id"].toString())
+        }
+        if (demandResponseEnrollment.isEmpty()) {
+            demandResponse.createDemandResponseEnrollmentPoint(displayName, siteRef, id, tz, ccuHsApi
+            )
+        }
+        migrateDemandResponseSetbackTunerForAllTempZones(ccuHsApi)
+        migrateDemandResponseForOccupancyEnum(ccuHsApi)
+    }
+
+    private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
+        val occModePoints = ccuHsApi.readAllEntities("occupancy and mode")
+        occModePoints.forEach { occMode ->
+            val occModePoint = Point.Builder().setHashMap(occMode).build()
+            if (!occModePoint.enums.toString().contains("demandresponseoccupied")) {
+                occModePoint.enums = Occupancy.getEnumStringDefinition()
+                hayStack.updatePoint(occModePoint, occModePoint.id)
+            }
+        }
+
+        val occStatePoints = ccuHsApi.readAllEntities("occupancy and state")
+        occStatePoints.forEach { occState ->
+            val occStatePoint = Point.Builder().setHashMap(occState).build()
+            if (!occStatePoint.enums.toString().contains("demandresponseoccupied")) {
+                occStatePoint.enums = Occupancy.getEnumStringDefinition()
+                hayStack.updatePoint(occStatePoint, occStatePoint.id)
+            }
+        }
+    }
+
+    private fun migrateDemandResponseSetbackTunerForAllTempZones(ccuHsApi: CCUHsApi) {
+        val demandResponseSetBackTuner = ccuHsApi.readEntity(
+            "demand and" +
+                    " response and system and tuner"
+        )
+        if (demandResponseSetBackTuner.isEmpty()) {
+            val systemEquip = ccuHsApi.readEntity("equip and system and not modbus")
+            val equipRef = systemEquip["id"].toString()
+            val equipDis = systemEquip["dis"].toString()
+            CcuLog.i(L.TAG_CCU_DR_MODE, "System level tuner is created for: $equipDis")
+            DemandResponseMode.createDemandResponseSetBackTuner(
+                ccuHsApi,
+                equipRef, equipDis, true, null, null
+            )
+        }
+        val equipsList: MutableList<ArrayList<HashMap<Any, Any>>> = ArrayList()
+        equipsList.add(ccuHsApi.readAllEntities("equip and vav and not system"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and dab and not system"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and dualDuct"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and smartstat"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstat"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstatsplit"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and sse"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and sse"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and ti"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and otn"))
+
+        for (equips in equipsList) {
+            for (equipMap in equips) {
+                val demandResponseSetBackTunerPoint =
+                    ccuHsApi.readEntity("demand and response and setback and equipRef == \"" + equipMap["id"].toString() + "\"")
+                if (demandResponseSetBackTunerPoint.isEmpty()) {
+                    DemandResponseMode.createDemandResponseSetBackTuner(
+                        ccuHsApi,
+                        equipMap["id"].toString(), equipMap["dis"].toString(), false,
+                        equipMap["roomRef"].toString(), equipMap["floorRef"].toString()
+                    )
+                    CcuLog.i(
+                        L.TAG_CCU_DR_MODE,
+                        "Equip level tuner is created for: " + equipMap["dis"].toString()
+                    )
+                }
+            }
         }
     }
 

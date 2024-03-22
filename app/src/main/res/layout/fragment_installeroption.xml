@@ -129,17 +129,14 @@
                 android:textColor="@color/black"
                 android:textSize="19.5sp" />
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleCoolingLockout"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/textPairingDesc"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
+                layout="@layout/custom_ccu_switch"/>
 
             <TextView
                 android:id="@+id/textCoolingLockoutTemp"
@@ -176,18 +173,15 @@
                 android:textColor="@color/black"
                 android:textSize="25sp" />
 
-            <ToggleButton
+            <include
                 android:id="@+id/toggleHeatingLockout"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/textCoolingLockoutTemp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
+                layout="@layout/custom_ccu_switch"/>
 
             <TextView
                 android:id="@+id/textHeatingLockoutDesc"
@@ -223,10 +217,44 @@
                 android:layout_below="@+id/toggleHeatingLockout" />
 
             <TextView
-                android:id="@+id/textBuilding"
+                android:id="@+id/textofflineMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textHeatingLockoutTemp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
+                android:text="@string/offlinemode"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
+
+            <include
+                android:id="@+id/offlineModetoggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textHeatingLockoutTemp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
+                layout="@layout/custom_ccu_switch"/>
+
+            <TextView
+                android:id="@+id/textofflineModeDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textofflineMode"
+                android:layout_marginStart="76dp"
+                android:alpha="0.60"
+                android:text="@string/offline_desc"
+                android:textColor="@color/black"
+                android:textSize="19.5sp" />
+
+            <TextView
+                android:id="@+id/textBuilding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textofflineModeDesc"
                 android:layout_marginTop="36dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/title_building"
@@ -235,11 +263,17 @@
                 android:textSize="34sp"
                 android:textStyle="bold" />
 
+            <FrameLayout
+                android:id="@+id/buildingOccupancyFragmentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/textBuilding"/>
+
             <TextView
                 android:id="@+id/textTempLimit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textBuilding"
+                android:layout_below="@+id/buildingOccupancyFragmentContainer"
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="42dp"
                 android:alpha="0.87"
@@ -258,6 +292,37 @@
                 android:textColor="@color/black"
                 android:textSize="19.5sp" />
 
+            <a75f.io.renatus.views.TempLimit.TempLimitView
+                android:id="@+id/imageTemp"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_below="@+id/textTempLimitDesc"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp" />
+
+            <TextView
+                android:id="@+id/textUseCelsius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageTemp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
+                android:text="@string/usecelsius"
+                android:textColor="@color/black"
+                android:textSize="25sp"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/toggleCelsius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageTemp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
+                android:visibility="gone"
+                layout="@layout/custom_ccu_switch"/>
 
             <TextView
                 android:id="@+id/textBackfillDurationTime"
@@ -335,43 +400,6 @@
                     android:textColor="?orange_75f"
                     android:textSize="19.5sp" />
             </LinearLayout>
-
-
-            <a75f.io.renatus.views.TempLimit.TempLimitView
-                android:id="@+id/imageTemp"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_below="@+id/textTempLimitDesc"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp" />
-
-            <TextView
-                android:id="@+id/textUseCelsius"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/imageTemp"
-                android:layout_marginStart="76dp"
-                android:layout_marginTop="36dp"
-                android:alpha="0.87"
-                android:text="@string/usecelsius"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:visibility="gone" />
-
-            <ToggleButton
-                android:id="@+id/toggleCelsius"
-                android:layout_width="47dp"
-                android:layout_height="28dp"
-                android:layout_below="@+id/imageTemp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="36dp"
-                android:background="@drawable/toggle_selector"
-                android:checked="false"
-                android:enabled="true"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textUseMT"
@@ -459,12 +487,12 @@
                 android:visibility="gone" />
 
             <Button
+                android:layout_below="@+id/imageTemp"
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/imageTemp"
                 android:layout_alignParentEnd="true"
-                android:layout_marginTop="36dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="24dp"
                 android:background="@null"
                 android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"

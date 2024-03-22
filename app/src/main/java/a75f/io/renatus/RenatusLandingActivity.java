@@ -110,7 +110,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
      * {@link FragmentStatePagerAdapter}.
      */
     private SettingsPagerAdapter mSettingPagerAdapter;
-    private StatusPagerAdapter mStatusPagerAdapter;
+    public static StatusPagerAdapter mStatusPagerAdapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -165,7 +165,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         startCountDownTimer(INTERVAL);
                         setMarginStart(mTabLayout);
-                        menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.GONE);
 
                     } else if (tab.getPosition() == 1){
@@ -175,8 +174,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         if (isZonePassWordRequired()) {
                             showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
                         }
-
-                        menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.VISIBLE);
                     }
                     btnTabs.setEnabled(true);
@@ -206,10 +203,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
 
             menuToggle.setOnClickListener(view -> {
-                if (SettingsFragment.slidingPane.isOpen()) {
+                if (SettingsFragment.slidingPane.isOpen() || SystemConfigFragment.slidingSysPane.isOpen()) {
                     SettingsFragment.slidingPane.closePane();
+                    SystemConfigFragment.slidingSysPane.closePane();
                 } else {
                     SettingsFragment.slidingPane.openPane();
+                    SystemConfigFragment.slidingSysPane.openPane();
                 }
             });
             logo_75f.setOnLongClickListener(view -> {
@@ -351,11 +350,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
-                if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
+                if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SystemConfigFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                } else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                }
+
+                else if(i==2 && mViewPager.getAdapter().instantiateItem(mViewPager,i) instanceof SettingsFragment){
+                    menuToggle.setVisibility(View.VISIBLE);
+                    floorMenu.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
+                }
+
+                else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
                     if (isZonePassWordRequired()) {
                         showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
                     }

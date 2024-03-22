@@ -44,6 +44,11 @@ public class SyncManager {
      */
     public void syncEntities(boolean workPolicyKeep) {
 
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         CcuLog.d(TAG, "syncEntities");
         if (mSyncTimerTask != null) {
             mSyncTimerTask.cancel();
@@ -67,6 +72,10 @@ public class SyncManager {
     }
 
     public void syncPointArray() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
 
         CcuLog.d(TAG, "syncPointArray : Migration not required");
         WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
@@ -80,11 +89,21 @@ public class SyncManager {
      * Queue a sync work followed by pointWrite work replacing any pending work in queue.
      */
     public void syncEntitiesWithPointWrite() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         CcuLog.d(TAG, "syncEntitiesWithPointWrite");
         syncEntitiesWithPointWriteWithDelay(0);
     }
 
     public void syncEntitiesWithPointWriteWithDelay(long delaySeconds) {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
             return;
@@ -154,6 +173,11 @@ public class SyncManager {
     }
     
     public void scheduleSync() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         if (mSyncTimerTask != null) {
             return;
         }

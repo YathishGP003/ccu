@@ -1,17 +1,20 @@
 package a75f.io.renatus.modbus
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.device.modbus.buildModbusModel
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.modbus.ModbusProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.SystemConfigFragment
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
 import a75f.io.renatus.modbus.models.EquipModel
@@ -44,7 +47,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonParseException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 
 
@@ -283,6 +290,57 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         return true
     }
 
+    fun unpair() {
+        viewModelScope.launch {
+            ProgressDialogUtils.showProgressDialog(context, "Deleting Modbus Equip")
+            withContext(Dispatchers.IO) {
+                val hayStack = CCUHsApi.getInstance()
+                hayStack.setCcuReady()
+                try {
+                    val sysEquips = HSUtil.getEquips("SYSTEM")
+                    if (profileType.equals(ProfileType.MODBUS_EMR)) {
+                        val emrEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_EMR.name) }
+                        val emrAddr = Integer.parseInt(emrEquip?.group)
+                        hayStack.deleteEntity(emrEquip?.id)
+
+                        val emrDevice = HSUtil.getDevice(emrAddr.toShort())
+                        hayStack.deleteEntity(emrDevice?.id)
+
+                        CcuLog.i("CCU_DOMAIN", "Energy Meter Equip deleted successfully")
+                    } else if (profileType.equals(ProfileType.MODBUS_BTU)) {
+                        val btuEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_BTU.name) }
+                        val btuAddr = Integer.parseInt(btuEquip?.group)
+                        hayStack.deleteEntity(btuEquip?.id)
+
+                        val btuDevice = HSUtil.getDevice(btuAddr.toShort())
+                        hayStack.deleteEntity(btuDevice?.id)
+
+                        CcuLog.i("CCU_DOMAIN", "BTU Meter Equip deleted successfully")
+                    }
+                } catch (e: Exception) {
+                    CcuLog.d(L.TAG_CCU_UI, "Exception while trying to delete Modbus equip")
+                    e.printStackTrace()
+                }
+
+                L.saveCCUState()
+
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+            }
+            withContext(Dispatchers.Main) {
+                if (profileType.equals(ProfileType.MODBUS_EMR)) {
+                    SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(3)
+                } else if (profileType.equals(ProfileType.MODBUS_BTU)) {
+                    SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(4)
+                }
+
+                ProgressDialogUtils.hideProgressDialog()
+                _isDialogOpen.value = false
+                showToast("Modbus Equip deleted successfully", context)
+                CcuLog.i("CCU_DOMAIN", "Close Pairing dialog")
+            }
+        }
+    }
 
     fun saveConfiguration() {
         if (isValidConfiguration()) {
@@ -294,6 +352,12 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 setUpsModbusProfile()
                 L.saveCCUState()
                 CCUHsApi.getInstance().setCcuReady()
+
+                if (profileType.equals(ProfileType.MODBUS_EMR)) {
+                    SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(3)
+                } else if (profileType.equals(ProfileType.MODBUS_BTU)) {
+                    SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(4)
+                }
             }, {
                 ProgressDialogUtils.hideProgressDialog()
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
@@ -324,6 +388,11 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         } else {
             updateModbusProfile()
         }
+    }
+
+    fun isExistingProfile() : Boolean {
+        val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
+        return !parentMap.isNullOrEmpty()
     }
 
     private fun updateModbusProfile() {

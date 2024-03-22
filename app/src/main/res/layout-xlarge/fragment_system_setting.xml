@@ -530,6 +530,25 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/drActivationLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/demand_response_active"
+                        android:textAppearance="@style/label_black"/>
+                    <include
+                        android:id="@+id/switchActivation"
+                        android:layout_marginStart="40dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        layout="@layout/custom_ccu_switch" />
+                </LinearLayout>
+                <LinearLayout
                     android:id="@+id/ie_gateway_details"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -716,7 +735,6 @@
                         android:id="@+id/scheduleType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
                         android:orientation="horizontal">
 
                         <TextView

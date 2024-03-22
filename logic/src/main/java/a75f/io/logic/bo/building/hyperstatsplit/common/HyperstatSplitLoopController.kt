@@ -20,7 +20,7 @@ class HyperstatSplitLoopController {
     private fun initialiseControlLoop(controlLoop: ControlLoop, tuners: HyperStatSplitProfileTuners) {
         controlLoop.setProportionalGain(tuners.proportionalGain)
         controlLoop.setIntegralGain(tuners.integralGain)
-        controlLoop.setProportionalSpread(tuners.proportionalSpread.toInt())
+        controlLoop.setProportionalSpread(tuners.proportionalSpread)
         controlLoop.setIntegralMaxTimeout(tuners.integralMaxTimeout)
         controlLoop.useNegativeCumulativeError(false)
     }

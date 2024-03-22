@@ -318,6 +318,11 @@ class AlertsRepository(
          return
       }
 
+      //donot sync in offlineMode
+      if (CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0) {
+         return
+      }
+
       val unsyncedAlerts: List<Alert> = getUnsyncedAlerts()
       CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
 

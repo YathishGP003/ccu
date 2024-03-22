@@ -202,7 +202,7 @@ public class VavParallelFanProfile extends VavProfile
         
         double valveStartDamperPercent = vavEquip.getValveActuationStartDamperPosDuringSysHeating().readPriorityVal();
         double maxHeatingPos = vavEquip.getMaxHeatingDamperPos().readDefaultVal();
-        double minHeatingPos = vavEquip.getMinHeatingDamperPos().readDefaultVal();
+        double minHeatingPos = vavEquip.getMinHeatingDamperPos().readPriorityVal();
         double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
         if (damper.currentPosition > valveStart) {
             valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
@@ -252,8 +252,8 @@ public class VavParallelFanProfile extends VavProfile
     private void updateZoneDead() {
         if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
 
-            double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
-                    : vavEquip.getMinCoolingDamperPos().readDefaultVal());
+            double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()
+                    : vavEquip.getMinCoolingDamperPos().readPriorityVal());
             double damperMax = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
                     : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
             double damperPos = (damperMax+damperMin)/2;

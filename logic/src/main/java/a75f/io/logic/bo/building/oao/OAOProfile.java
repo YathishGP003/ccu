@@ -6,8 +6,13 @@ import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 
 import android.util.Log;
 
+import org.projecthaystack.HDateTime;
+
+import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -24,6 +29,7 @@ import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.OfflineModeUtilKt;
 
 /*
 *  OAO Combines both System profile and Zone Profile behaviours.
@@ -212,7 +218,7 @@ public class OAOProfile
         }
     }
     public void doEconomizing() {
-    
+
         double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
         double externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
         
@@ -377,6 +383,7 @@ public class OAOProfile
         switch (systemOccupancy) {
             case OCCUPIED:
             case FORCEDOCCUPIED:
+            case DEMAND_RESPONSE_OCCUPIED:
                 if(systemMode != SystemMode.OFF) {
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
@@ -391,6 +398,7 @@ public class OAOProfile
                 outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
             case UNOCCUPIED:
+            case DEMAND_RESPONSE_UNOCCUPIED:
                 if(epidemicState == EpidemicState.OFF)
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;

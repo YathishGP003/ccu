@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Tags.CPUECON
 import a75f.io.api.haystack.Tags.HYPERSTATSPLIT
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -32,7 +33,9 @@ import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoi
 import a75f.io.logic.tuners.HyperstatSplitCpuEconTuners
 import a75f.io.logic.tuners.OAOTuners
 import a75f.io.logic.util.RxTask
+import a75f.io.logic.util.TIMER_TO_BE_VALID
 import android.util.Log
+import java.util.Date
 
 /**
  * Models CPU/Economiser Equipment in its interface, calls through to datastore (haystack)
@@ -1406,10 +1409,28 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     }
 
     fun getOutsideAirTempSensor(): Double {
+        // Return 0 for local OAT if the reading is more than 15 minutes old
+        // This will lead to the economizer being locked out
+        val outsideTemp = hayStack.readEntity("point and outside and air and temp and sensor and equipRef == \"$equipRef\"")
+        val hisitem = hayStack.curRead(outsideTemp["id"].toString())
+        val hisItemDate : Date = hisitem.date
+        val lastModifiedDateTime = hisItemDate.time
+        val currentTime =  Date (System.currentTimeMillis())
+        if (currentTime.time - lastModifiedDateTime > TIMER_TO_BE_VALID) { return 0.0 }
+
         return hsSplitHaystackUtil.getOutsideAirTempSensor()
     }
 
     fun getOutsideAirHumiditySensor(): Double {
+        // Return 0 for local OAH if the reading is more than 15 minutes old
+        // This will lead to the economizer being locked out
+        val outsideHumidity = hayStack.readEntity("point and outside and air and humidity and sensor and equipRef == \"$equipRef\"")
+        val hisitem = hayStack.curRead(outsideHumidity["id"].toString())
+        val hisItemDate : Date = hisitem.date
+        val lastModifiedDateTime = hisItemDate.time
+        val currentTime =  Date (System.currentTimeMillis())
+        if (currentTime.time - lastModifiedDateTime > TIMER_TO_BE_VALID) { return 0.0 }
+
         return hsSplitHaystackUtil.getOutsideAirHumiditySensor()
     }
 

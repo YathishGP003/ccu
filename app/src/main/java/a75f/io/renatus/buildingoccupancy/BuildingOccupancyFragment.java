@@ -50,6 +50,7 @@ import a75f.io.api.haystack.schedule.BuildingOccupancy;
 
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
@@ -220,7 +221,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
 
         boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
 
-        if (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) {
+        if( (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) && !OfflineModeUtilKt.isOfflineMode()){
             Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
                     "connect to network.", Toast.LENGTH_LONG).show();
             return false;

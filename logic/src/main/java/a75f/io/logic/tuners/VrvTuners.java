@@ -14,6 +14,7 @@ import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 public class VrvTuners {
     
@@ -177,6 +178,8 @@ public class VrvTuners {
 
         HyperStatDevice device = new HyperStatDevice(Integer.parseInt(nodeAddress));
         device.addSensor(Port.SENSOR_OCCUPANCY, occupancySensorId);
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack,
+                equipref, displayName, false, roomRef, floorRef);
 
     }
 

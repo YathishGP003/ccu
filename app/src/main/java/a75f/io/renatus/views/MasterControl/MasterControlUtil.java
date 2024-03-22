@@ -25,6 +25,9 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -215,10 +218,12 @@ public class MasterControlUtil {
         if (WarningMessage == null) {
             WarningMessage = validateZoneVal(buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
                         coolingMaxVal,unoccupiedZoneSetBackval);
-            StringBuilder globalWarning = validateGlobalSchedule(schedules,buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
-                    coolingMaxVal, zones, equipList);
-            if(globalWarning.length() > 1)
-                WarningMessage = WarningMessage + globalWarning;
+            if(! OfflineModeUtilKt.isOfflineMode()) {
+                StringBuilder globalWarning = validateGlobalSchedule(schedules, buildingLimMinVal, buildingZoneDifferentialVal, buildingLimMaxVal, heatingMinVal, heatingMaxVal, coolingMinVal,
+                        coolingMaxVal, zones, equipList);
+                if (globalWarning.length() > 1)
+                    WarningMessage = WarningMessage + globalWarning;
+            }
 
 
             if (!getSpecialSchedule(null).isEmpty() || isZoneSpecialExist())  {

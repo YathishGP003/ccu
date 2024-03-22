@@ -27,6 +27,10 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_SN_VAV_ACB)
     }
 
+    fun getSmartNodeBypassDamperModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SN_BYPASS_DAMPER)
+    }
+
     fun getSmartNodeDevice() : ModelDirective {
         return ModelCache.getModelById(MODEL_SMART_NODE_DEVICE)
     }
@@ -62,6 +66,7 @@ object ModelLoader {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
             "smartnodeVAVReheatSeriesFan" -> getSmartNodeVavSeriesModelDef()
             "smartnodeVAVReheatParallelFan" -> getSmartNodeVavParallelFanModelDef()
+            "smartnodeBypassDamper" -> getSmartNodeBypassDamperModelDef()
             "smartnodeActiveChilledBeam" -> getSmartNodeVavAcbModelDef()
             "helionodeVAVReheatNoFan" -> getHelioNodeVavNoFanModelDef()
             "helionodeVAVReheatSeriesFan" -> getHelioNodeVavSeriesModelDef()

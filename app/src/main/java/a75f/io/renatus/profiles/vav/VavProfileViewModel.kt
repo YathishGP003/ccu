@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
+import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
@@ -206,11 +207,13 @@ class VavProfileViewModel : ViewModel() {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
+            if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
             L.ccu().zoneProfiles.add(vavProfile)
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
+            if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             vavProfile.init()
             setOutputTypes(profileConfiguration)
             setScheduleType(profileConfiguration)
@@ -316,6 +319,31 @@ class VavProfileViewModel : ViewModel() {
         var analogOut2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
         var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build(), analogOut2.get("id").toString())
+
+    }
+
+    private fun overrideForBypassDamper(config: VavProfileConfiguration) {
+        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
+        val vavEquip = VavEquip(equip.get("id").toString())
+
+        if (!(vavEquip.enableCFMControl.readDefaultVal() > 0.0)) {
+            vavEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, vavEquip.minCoolingDamperPos.readDefaultVal(), 0)
+            vavEquip.minCoolingDamperPos.writeDefaultVal(20.0)
+            vavEquip.minCoolingDamperPos.writeHisVal(10.0)
+
+            vavEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, vavEquip.minHeatingDamperPos.readDefaultVal(), 0)
+            vavEquip.minHeatingDamperPos.writeDefaultVal(20.0)
+            vavEquip.minHeatingDamperPos.writeHisVal(10.0)
+        }
+
+        vavEquip.vavProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)
+        vavEquip.vavProportionalKFactor.writeHisVal(0.7)
+
+        vavEquip.vavIntegralKfactor.writeVal(14, hayStack.ccuUserName, 0.3, 0)
+        vavEquip.vavIntegralKfactor.writeHisVal(0.3)
+
+        vavEquip.vavTemperatureProportionalRange.writeVal(14, hayStack.ccuUserName, 1.5, 0)
+        vavEquip.vavTemperatureProportionalRange.writeHisVal(1.5)
 
     }
 

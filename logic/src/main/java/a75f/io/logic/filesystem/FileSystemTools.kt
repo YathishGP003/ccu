@@ -4,6 +4,7 @@ import a75f.io.data.RenatusDatabaseBuilder
 import a75f.io.data.entities.EntityDatabaseHelper
 import a75f.io.data.message.MessageDatabaseHelper
 import a75f.io.data.writablearray.WritableArrayDatabaseHelper
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import android.content.Context
 import android.content.SharedPreferences
@@ -204,5 +205,51 @@ class FileSystemTools(private val appContext: Context) {
       return writeStringToFileInLogsDir(log.toString(), fileName)
    }
 
+    fun copyModels(context: Context, source: String, destination: String) {
+        try {
+            val assetsManager = context.assets
+            val assetsList = assetsManager.list(source) ?: arrayOf()
 
+            for (assetName in assetsList) {
+                if (!assetName.contains(".")) {
+                    CcuLog.d(
+                        "CCU_FILES", "found folder: $assetName and " +
+                                "calling copyModels with source: $source/$assetName and destination: $destination"
+                    )
+                    copyModels(context, "$source/$assetName", destination)
+                    continue
+                }
+                val inputStream = assetsManager.open("$source/$assetName")
+                val outputStream = FileOutputStream(File(destination, assetName))
+                inputStream.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                CcuLog.d("CCU_FILES", "File copied: $assetName")
+            }
+        } catch (ex: Exception) {
+            CcuLog.e("CCU_FILES", "Error copying assets folder: ${ex.message}")
+            ex.printStackTrace()
+        }
+    }
+
+    fun createDirectory(path: String) {
+        val projDir = File(path)
+        if(projDir.exists()){
+            clearDirectory(projDir)
+        }else{
+            projDir.mkdirs()
+            projDir.setReadable(true)
+        }
+    }
+
+    private fun clearDirectory(directory: File) {
+        if (directory.exists() && directory.isDirectory) {
+            directory.listFiles()?.forEach { file ->
+                file.delete()
+                CcuLog.d("CCU_FILES", "delete file: ${file.name}")
+            }
+        }
+    }
 }

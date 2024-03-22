@@ -9,11 +9,13 @@ import a75f.io.logger.CcuLog
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.annotation.Nullable
 import io.seventyfivef.domainmodeler.client.ModelDiff
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
 import io.seventyfivef.domainmodeler.common.Version
 import org.json.JSONObject
+import java.io.File
 
 
 /**
@@ -35,7 +37,8 @@ class DiffManger(var context: Context?) {
      * starts scanning all the models
      * check the model version and find the diff and update the model definition
      */
-    fun processModelMigration(siteRef: String, sharedPref: SharedPreferences?) {
+    fun processModelMigration(siteRef: String, sharedPref: SharedPreferences?, modelsPath: String) {
+
         CcuLog.i(Domain.LOG_TAG, "processModelMigration")
         val newVersionFiles: MutableList<ModelMeta> =
             getModelFileVersionDetails(ASSETS_VERSION_FILE_PATH)
@@ -58,18 +61,22 @@ class DiffManger(var context: Context?) {
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance(), migrationCompletedListener)
 
-        val oldModelMetaList = if (isModelsSharedPrefAvailable(sharedPref)) {
-            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the shared preference")
-            getModelsFromSharedPref(sharedPref)
-        } else {
-            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the assets/models folder")
-            getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
-        }
+        val oldModelMetaList =
+            if (isModelsFolderExists(modelsPath)) {
+                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the models from external")
+                getModelMeta(modelsPath + File.separator + VERSION)
+            } else if (isModelsSharedPrefAvailable(sharedPref)) {
+                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the shared preference")
+                getModelsFromSharedPref(sharedPref)
+            } else {
+                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the assets/models folder")
+                getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
+            }
         CcuLog.i(
             Domain.LOG_TAG,
-            "old models present in sharedPref: ${oldModelMetaList.size}, currently used models count: ${newModelMetaList.size}"
+            "old models count: ${oldModelMetaList.size}, currently used models count: ${newModelMetaList.size}"
         )
-        updateEquipModels(newModelMetaList, oldModelMetaList, migrationHandler, siteRef, sharedPref)
+        updateEquipModels(newModelMetaList, oldModelMetaList, migrationHandler, siteRef, sharedPref, modelsPath)
     }
 
     fun updateEquipModels(
@@ -77,7 +84,8 @@ class DiffManger(var context: Context?) {
         oldModelMetaList: List<ModelMeta>,  // Read from shared preference
         handler: MigrationHandler,
         siteRef: String,
-        sharedPref: SharedPreferences?
+        sharedPref: SharedPreferences?,
+        modelsPath: String
     ) {
         newModelMetaList.forEach { assetsModelMeta ->
             val oldModelMeta = getCurrentModel(oldModelMetaList, assetsModelMeta.modelId)
@@ -85,8 +93,13 @@ class DiffManger(var context: Context?) {
             if (oldModelMeta != null) {
                 CcuLog.i(Domain.LOG_TAG, "Currently used model meta: $oldModelMeta")
                 if (isModelVersionUpdated(oldModelMeta.version, assetsModelMeta.version)) {
-                    //fetching old model from the sharedPref
-                    var oldModel = getModelDirectiveFromSf(assetsModelMeta.modelId, sharedPref)
+                    var oldModel = if(isModelsFolderExists(modelsPath)){
+                        CcuLog.i(Domain.LOG_TAG, "getting old models from external")
+                        getModelDirective(assetsModelMeta.modelId, modelsPath)
+                    }else{
+                        CcuLog.i(Domain.LOG_TAG, "getting old models from shared preference")
+                        getModelDirectiveFromSf(assetsModelMeta.modelId, sharedPref)
+                    }
                     if(oldModel == null)
                         oldModel = getOldModelDirective(assetsModelMeta.modelId)
                     // Retrieve new model from the modelCache(assets/new model)
@@ -98,8 +111,7 @@ class DiffManger(var context: Context?) {
                     Log.d(Domain.LOG_TAG, "Current Model Data $currentEquipMap")
 
                     // Ensure that the current model JSON and new model JSON are not null
-                    if (oldModel != null && newModel != null
-                        && (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null)
+                    if (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null
                     ) {
                         // if block should be removed once modelVersion key migrated completely to sourceModelVersion
                         if (currentEquipMap.containsKey("modelVersion") &&
@@ -183,6 +195,25 @@ class DiffManger(var context: Context?) {
         return models
     }
 
+    fun getModelMeta(fileName: String): MutableList<ModelMeta> {
+        val versionDetails = ResourceHelper.readFile(fileName);
+        val models = mutableListOf<ModelMeta>()
+        versionDetails.keys().forEach {
+            val versionModel = versionDetails.getJSONObject(it)
+            models.add(
+                ModelMeta(
+                    modelId = versionModel.getString(ID),
+                    Version(
+                        major = versionModel.getJSONObject(MODEL_VERSION).getInt(MAJOR),
+                        minor = versionModel.getJSONObject(MODEL_VERSION).getInt(MINOR),
+                        patch = versionModel.getJSONObject(MODEL_VERSION).getInt(PATCH)
+                    )
+                )
+            )
+        }
+        return models
+    }
+
     /**
      * function which compares the version between current and new model
      * @param currentList
@@ -223,6 +254,14 @@ class DiffManger(var context: Context?) {
         return ResourceHelper.loadModelDefinition("${BACKUP_FIle_PATH}${modelId}.json")
     }
 
+    private fun getModelDirective(modelId: String, modelsPath: String): ModelDirective? {
+        @Nullable val modelData: String = File(modelsPath + File.separator + "${modelId}.json").readText()
+        if (modelData.isNullOrEmpty())
+            return null
+        val modelDirectiveFactory = ModelDirectiveFactory(ResourceHelper.getObjectMapper())
+        return modelDirectiveFactory.fromJson(modelData)
+    }
+
     interface OnMigrationCompletedListener {
         fun onMigrationCompletedCompleted(hsApi: CCUHsApi)
     }
@@ -242,6 +281,11 @@ class DiffManger(var context: Context?) {
             sharedPref.edit().putString(modelId, modelData).apply()
         }
     }
+
+    private fun isModelsFolderExists(path: String): Boolean {
+        return File(path).exists()
+    }
+
 
     private fun isModelsSharedPrefAvailable(sharedPref: SharedPreferences?): Boolean {
         return sharedPref!!.getString("modelsVersion", null) != null

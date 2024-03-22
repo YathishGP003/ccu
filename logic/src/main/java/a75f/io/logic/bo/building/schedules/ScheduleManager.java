@@ -416,6 +416,9 @@ public class ScheduleManager {
 
             Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                     .replace("@", ""));
+            if(equipSchedule.getDays().isEmpty()){
+                continue;
+            }
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
             if (!equipSchedule.getMarkers().contains("specialschedule")) {
                 if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {

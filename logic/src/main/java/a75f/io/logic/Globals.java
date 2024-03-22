@@ -76,6 +76,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
@@ -142,6 +143,7 @@ public class Globals {
     private boolean recoveryMode = false;
     private boolean isInitCompleted = false;
     private SharedPreferences modelSharedPref = null;
+
 
     private List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
     private Globals() {
@@ -332,7 +334,6 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
-
                     ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if(!isSafeMode()) {
@@ -392,23 +393,31 @@ public class Globals {
 
     private void modelMigration(MigrationHandler migrationHandler){
         try {
+            String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath()+"/models";
             DiffManger diffManger = new DiffManger(getApplicationContext());
             if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 modelSharedPref = Globals.getInstance().mApplicationContext
                         .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
                 diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
-                diffManger.processModelMigration(site.get("id").toString(), modelSharedPref);
+                diffManger.processModelMigration(site.get("id").toString(), modelSharedPref, modelsPath);
                 TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
                 migrationHandler.updateMigrationVersion();
-                if (diffManger != null) {
-                    diffManger.saveModelsInSharedPref(modelSharedPref);
-                }
+                copyModels();
             }
         }  catch ( Exception e) {
             //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
             CcuLog.i(L.TAG_CCU_INIT,"modelMigration is failed", e);
+            e.printStackTrace();
         }
+    }
+
+    public void copyModels() {
+        String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath()+"/models";
+        FileSystemTools fileSystemTools = new FileSystemTools(getApplicationContext());
+        fileSystemTools.createDirectory(modelsPath);
+        fileSystemTools.copyModels(Globals.getInstance().getApplicationContext(),
+                "assets/75f", modelsPath);
     }
 
     public boolean testHarness() {

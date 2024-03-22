@@ -3034,7 +3034,15 @@ public class CCUHsApi
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
-        markItemsUnSynced(readAllEntities(Tags.POINT));
+
+        ArrayList<HashMap<Object, Object>> pointsForSync = new ArrayList<>();
+
+        readAllEntities(Tags.POINT).forEach( point -> {
+            if (point.get("equipRef") != null && !readMapById(point.get("equipRef").toString()).containsKey("tuner")) {
+                pointsForSync.add(point);
+            }
+        });
+        markItemsUnSynced(pointsForSync);
 
         syncStatusService.saveSyncStatus();
         syncEntityTree();

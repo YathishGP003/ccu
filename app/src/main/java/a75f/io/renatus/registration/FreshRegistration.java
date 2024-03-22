@@ -1246,41 +1246,38 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         //CCU registration
         long delay = CCUHsApi.getInstance().siteSynced() ? 1000 : 15000;
         CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo with delay "+delay);
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo");
-                if (!Globals.getInstance().siteAlreadyCreated()) {
-                    DefaultSchedules.generateDefaultSchedule(false, null);
-                }
-                InstallerOptions installerOptions = new InstallerOptions();
-                HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
-                installerOptions.createInstallerPoints(ccu, prefs);
-                prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
-                prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
-                ProgressDialogUtils.hideProgressDialog();
-                if (pingCloudServer()){
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo");
+            if (!Globals.getInstance().siteAlreadyCreated()) {
+                DefaultSchedules.generateDefaultSchedule(false, null);
+            }
+            InstallerOptions installerOptions = new InstallerOptions();
+            HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
+            installerOptions.createInstallerPoints(ccu, prefs);
+            prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
+            prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
+            ProgressDialogUtils.hideProgressDialog();
+            if (pingCloudServer()){
 
-                    registerCcuInBackground();
+                registerCcuInBackground();
 
-                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    finish();
+                Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                finish();
 
-                } else {
-                    new AlertDialog.Builder(FreshRegistration.this)
-                            .setCancelable(false)
-                            .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
-                            .setPositiveButton("Proceed", (dialog, id) -> {
-                                registerCcuInBackground();
-                                Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
-                                finish();
-                            })
-                            .show();
-                }
+            } else {
+                new AlertDialog.Builder(FreshRegistration.this)
+                        .setCancelable(false)
+                        .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
+                        .setPositiveButton("Proceed", (dialog, id) -> {
+                            registerCcuInBackground();
+                            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                            finish();
+                        })
+                        .show();
             }
         }, delay);
     }
@@ -1350,7 +1347,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_daikin_logo_colored, null));
         else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
             imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_logo_dark_blue, null));
-        } else {
+        }else if (CCUUiUtil.isAiroverseThemeEnabled(this)) {
+            imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_logo, null));
+        }else {
             imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_logo_svg, null));
             findViewById(R.id.main_layout).setBackgroundResource(R.drawable.bg_logoscreen);
         }

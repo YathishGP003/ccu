@@ -3,6 +3,7 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
+import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND
@@ -360,7 +361,9 @@ class HyperstatSplitCpuEconTuners {
                 0
             )
             hayStack.writeHisValById(autoAwaySetbackId, 2.0)
-
+            DemandResponseMode.createDemandResponseSetBackTuner(hayStack, equipRef,
+                equipDis, false, roomRef, floorRef
+            )
         }
 
         fun addHyperStatSplitModuleTuners(

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <RelativeLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp">
+
+        <ImageView
+            android:id="@+id/imageGoback"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2.5dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="64dp"
+            android:rotation="180"
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/title_pairsn"
+            android:textAllCaps="true"
+            android:textColor="?orange_75f"
+            android:textSize="23.5dp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:src="@drawable/manual_pairing_smartnode"
+        android:layout_below="@+id/layoutHeader"
+        android:layout_marginTop="64dp"
+        android:layout_marginLeft="34dp"
+        android:layout_marginRight="64dp"
+        android:id="@+id/pairinginstruct"
+        android:layout_marginBottom="64dp"
+        />
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
+
+
+        <Button
+            android:id="@+id/pair_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
+            android:drawablePadding="5dp"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/button_pair"
+            android:textColor="?orange_75f"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="24dp"
+            android:textSize="24dp" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/dynamicNodeAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="518dp"
+        android:layout_marginTop="250dp"
+        android:gravity="center"
+        android:background="@color/white"
+        android:text="1234"
+        android:textSize="32dp"
+        android:textColor="?orange_75f"
+        />
+
+</RelativeLayout>

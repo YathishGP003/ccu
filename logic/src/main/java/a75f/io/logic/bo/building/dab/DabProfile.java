@@ -130,10 +130,12 @@ public class DabProfile extends ZoneProfile
         if (systemMode != SystemMode.OFF) {
             if (satConditioning > 0) {
                 //Effective SAT conditioning is available. Run the PI loop based on that.
+                //But setTemp is still determined based on the current system operating mode.
+                double setTempOpMode = (conditioning == SystemController.State.COOLING) ? setTempCooling : setTempHeating;
                 if (satConditioning == SystemController.EffectiveSatConditioning.SAT_COOLING.ordinal()) {
-                    damperOpController.updateControlVariable(roomTemp, setTempCooling);
+                    damperOpController.updateControlVariable(roomTemp, setTempOpMode);
                 } else {
-                    damperOpController.updateControlVariable(setTempHeating, roomTemp);
+                    damperOpController.updateControlVariable(setTempOpMode, roomTemp);
                 }
             } else {
                 //Fall back to System-conditioning based PI loop.
@@ -285,6 +287,8 @@ public class DabProfile extends ZoneProfile
     private boolean isSystemFanOn() {
         //This is short cut and not a way to do this. But currently required only for Dab profile.
         String systemStatusMessage = L.ccu().systemProfile.getStatusMessage();
-        return systemStatusMessage.contains("Fan");
+        if (systemStatusMessage.contains("Fan"))
+            return true;
+        return L.ccu().systemProfile.systemFanLoopOp > 0;
     }
 }

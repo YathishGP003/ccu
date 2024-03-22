@@ -51,7 +51,7 @@ public class SyncWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-    
+
         CcuLog.i(TAG, " doSyncWork ");
         if (isSyncWorkInProgress()) {
             CcuLog.i(TAG, " doSyncWork Called : Previous session running ");

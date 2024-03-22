@@ -113,9 +113,9 @@ class DiffManagerTest {
             .setSiteRef(siteRef)
             .build()
         val zoneRef = hayStack.addZone(z)
-       var dmModel = a75f.io.domain.ResourceHelper.loadProfileModelDefinition("models/645b27a27f70f27a05508363.json")
+       val dmModel = a75f.io.domain.ResourceHelper.loadProfileModelDefinition("models/645b27a27f70f27a05508363.json")
 
-        dmModel?.let {
+        dmModel.let {
             val equipBuilder = ProfileEquipBuilder(hayStack)
             val profileConfig = getTestProfileConfig()
             profileConfig.floorRef = floorRef

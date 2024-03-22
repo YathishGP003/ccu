@@ -19,4 +19,22 @@ public class SmartNodeSettings2_t extends Struct {
     public final Unsigned8 airflowCFMIntegralKFactor = new Unsigned8(); ///< 1/100th of the value. Default - 50
     public final Unsigned8 enableCFM = new Unsigned8(1); ///< . Default - False(Disabled)
 
+    public final Enum8<InputSensorType_t> inputSensor1 = new Enum8<>(InputSensorType_t.values()); //Analog 1 or TH1 or Native Sensor
+    public final Enum8<InputSensorType_t> inputSensor2 = new Enum8<>(InputSensorType_t.values()); //Analog2 if enabled
+    public final Signed16 setpointSensorOffset = new Signed16();
+    public final Signed16 genericPiProportionalRange = new Signed16();
+    public final Unsigned8 turnOnRelay1 = new Unsigned8();
+    public final Unsigned8 turnOnRelay2 = new Unsigned8();
+    public final Unsigned8 turnOffRelay1 = new Unsigned8();
+    public final Unsigned8 turnOffRelay2 = new Unsigned8();
+    public final Unsigned8 expectedZeroErrorAtMidpoint = new Unsigned8(1);
+    public final Unsigned8 invertControlLoopOutput = new Unsigned8(1);
+    public final Unsigned8 useAnalogIn2ForDynamicSetpoint = new Unsigned8(1);
+    public final Unsigned8 relay1Enable = new Unsigned8(1);
+    public final Unsigned8 relay2Enable = new Unsigned8(1);
+    public final Unsigned8 runPILoopOnNode = new Unsigned8(1);
+    public final Unsigned8 minVolt = new Unsigned8();
+    public final Unsigned8 maxVolt = new Unsigned8();
+    public final Signed16 minEngVal = new Signed16();
+    public final Signed16 maxEngVal = new Signed16();
 }

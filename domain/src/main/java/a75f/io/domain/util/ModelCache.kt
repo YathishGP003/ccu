@@ -17,16 +17,14 @@ object ModelCache {
     var context : Context? = null
     fun init(hayStack : CCUHsApi, context: Context) {
         this.context = context
-        if (!hayStack.isCCURegistered) {
-            CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
-            val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
-            modelContainer[MODEL_BUILDING_EQUIP] = buildingEquipModel
-            CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
-        }
-
+        CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
+        val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
+        modelContainer[MODEL_BUILDING_EQUIP] = buildingEquipModel
+        CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
         loadDeviceModels()
         loadVavZoneEquipModels()
         loadSystemProfileModels()
+        loadBypassDamperModels()
     }
 
     private fun loadDeviceModels() {
@@ -70,6 +68,11 @@ object ModelCache {
         //modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
         //CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
     }
+
+    private fun loadBypassDamperModels() {
+        modelContainer[MODEL_SN_BYPASS_DAMPER] = getModelById(MODEL_SN_BYPASS_DAMPER)
+    }
+
     /**
      * Could directly used in Unit tests without calling init() to set the context.
      */
@@ -77,7 +80,7 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "getModelById $modelId")
         var model = modelContainer[modelId]
         if (model != null) {
-            CcuLog.i(Domain.LOG_TAG, "Model Loaded from Cache ${model.name}")
+            CcuLog.i(Domain.LOG_TAG, "Model Loaded from Cache ${model.name}, model Version: ${model.version.toString()} ")
             return model
         }
 
@@ -86,7 +89,7 @@ object ModelCache {
         } else {
             ResourceHelper.loadModel("$MODEL_ASSET_PREFIX$modelId.json")
         }
-        CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}")
+        CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}\" + \".${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
     }

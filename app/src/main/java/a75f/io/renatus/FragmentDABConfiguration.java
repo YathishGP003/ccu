@@ -30,8 +30,10 @@ import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -50,6 +52,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -286,7 +289,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(0);
         minCoolingDamperPos.setMaxValue(100);
-        minCoolingDamperPos.setValue(40);
+        minCoolingDamperPos.setValue(L.ccu().bypassDamperProfile != null ? 10 : 40);
         minCoolingDamperPos.setWrapSelectorWheel(false);
         
         maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
@@ -302,7 +305,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(0);
         minHeatingDamperPos.setMaxValue(100);
-        minHeatingDamperPos.setValue(40);
+        minHeatingDamperPos.setValue(L.ccu().bypassDamperProfile != null ? 10 : 40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
         
 
@@ -566,8 +569,48 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         } else {
             mDabProfile.updateDabEquip(dabConfig);
         }
+        if (L.ccu().bypassDamperProfile != null) { overrideForBypassDamper(dabConfig); }
         L.ccu().zoneProfiles.add(mDabProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set DAB Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+
+    private void overrideForBypassDamper(DabProfileConfiguration config) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> equip = hayStack.read("equip and group == \"" + config.getNodeAddress() + "\"");
+
+        double minCoolingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and cooling and equipRef == \"" + equip.get("id") + "\"");
+        double minHeatingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and heating and equipRef == \"" + equip.get("id") + "\"");
+
+        HashMap<Object,Object> minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and equipRef == \"" + equip.get("id") + "\"");
+        String minCoolingDamperPosPointId = minCoolingDamperPosPoint.get("id").toString();
+        hayStack.writePointForCcuUser(minCoolingDamperPosPointId, 7, minCoolingDamperPos, 0, "Bypass Damper Added");
+        hayStack.writeHisValById(minCoolingDamperPosPointId, minCoolingDamperPos);
+        hayStack.writeDefaultValById(minCoolingDamperPosPointId, 40.0);
+
+        HashMap<Object,Object> minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and equipRef == \"" + equip.get("id") + "\"");
+        String minHeatingDamperPosPointId = minHeatingDamperPosPoint.get("id").toString();
+        hayStack.writePointForCcuUser(minHeatingDamperPosPointId, 7, minHeatingDamperPos, 0, "Bypass Damper Added");
+        hayStack.writeHisValById(minHeatingDamperPosPointId, minHeatingDamperPos);
+        hayStack.writeDefaultValById(minHeatingDamperPosPointId, 40.0);
+
+        // There is a bug with tuner copying currently (matching is based on presence of markers and can fail).
+        // Tuner-copying framework (pre-DM) doesn't have a way of saying "and not reheat".
+        // So, we have to set the values here to be sure that tuners are overridden correctly.
+        double systemPGain = TunerUtil.readTunerValByQuery("system and dab and pgain and not reheat and not default");
+        HashMap<Object,Object> pGainPoint = hayStack.readEntity("point and tuner and dab and pgain and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String pGainPointId = pGainPoint.get("id").toString();
+        hayStack.writePointForCcuUser(pGainPointId, 14, systemPGain, 0, "Bypass Damper Added");
+
+        double systemIGain = TunerUtil.readTunerValByQuery("system and dab and igain and not reheat and not default");
+        HashMap<Object,Object> iGainPoint = hayStack.readEntity("point and tuner and dab and igain and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String iGainPointId = iGainPoint.get("id").toString();
+        hayStack.writePointForCcuUser(iGainPointId, 14, systemIGain, 0, "Bypass Damper Added");
+
+        double systemPSpread = TunerUtil.readTunerValByQuery("system and dab and pspread and not reheat and not default");
+        HashMap<Object,Object> pSpreadPoint = hayStack.readEntity("point and tuner and dab and pspread and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String pSpreadPointId = pSpreadPoint.get("id").toString();
+        hayStack.writePointForCcuUser(pSpreadPointId, 14, systemPSpread, 0, "Bypass Damper Added");
+
     }
 
     private void setDividerColor(NumberPicker picker) {

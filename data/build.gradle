@@ -1,5 +1,4 @@
-import groovy.json.JsonSlurperClassic
-import org.apache.commons.io.FileUtils;
+
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
@@ -17,11 +16,6 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        /*javaCompileOptions {
-            annotationProcessorOptions {
-                includeCompileClasspath true
-            }
-        }*/
     }
 
     buildTypes {
@@ -55,6 +49,11 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
+        airoverse_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
     }
 
     compileOptions {
@@ -65,14 +64,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
-
-    /*sourceSets {
-        main {
-            java {
-                srcDirs = [ 'src/main/java','src/androidTest/java']
-            }
-        }
-    }*/
 
     testOptions {
         unitTests {
@@ -133,47 +124,6 @@ task getExternalLibraryPaths {
     doLast {
         def parentFolder = file(projectDir.parent)
         def domainAssets = file("${parentFolder}/domain/src/main/assets")
-        def destination = file("${parentFolder}/domain/src/main/assets/models")
-        def sourceFolder = file("${parentFolder}/domain/src/main/assets/assets/75f/models")
-        def tempFolder = file("${parentFolder}/domain/src/main/assets/temp")
-        //assets version file
-        def versionFile = file("${parentFolder}/domain/src/main/assets/assets/75f/versions.json")
-        //temp version file
-        def tempVersionFile = file("${parentFolder}/domain/src/main/assets/temp/versions.json")
-
-        if (!tempFolder.exists()) {
-            println("CCU_DOMAIN - temp directory is created.")
-            tempFolder.mkdirs()
-        }
-
-        //copying asset version file temp folder
-        project.copy {
-            from versionFile
-            into tempFolder
-            println("CCU_DOMAIN - copying asset's version file to tempFolder.")
-        }
-        // copy assets to temp directory
-        def files = sourceFolder.listFiles()
-        files.each { file ->
-            project.copy {
-                from file
-                into tempFolder
-                println("CCU_DOMAIN - copying asset's json file to tempFolder.")
-            }
-        }
-
-        if (sourceFolder.exists()) {
-            FileUtils.cleanDirectory(sourceFolder)
-            println("CCU_DOMAIN - clearing asset's model Folder.")
-        }
-
-        task remove {
-            if(versionFile.exists()) {
-                boolean fileSuccessfullyDeleted = versionFile.delete()
-                println("CCU_DOMAIN - deleting asset's version file -"+fileSuccessfullyDeleted)
-            }
-        }
-
         configurations.customImplementation.getFiles().each { file ->
             if (file.getAbsolutePath().endsWith("domain-modeler-lib-$domainModelLibVersion"+".jar")) {
                 project.ext.myParam = file.getAbsolutePath()
@@ -189,38 +139,6 @@ task getExternalLibraryPaths {
 
                 println("CCU_DOMAIN - extracted 75f jar to assets folder")
             }
-        }
-
-
-        def assetsVersionFileJson = new JsonSlurperClassic().parseText(versionFile.text) // assets version file
-        def tempVersionFileJson = new JsonSlurperClassic().parseText(tempVersionFile.text) // temp version file
-        println("CCU_DOMAIN - assetsVersionFileJson "+assetsVersionFileJson)
-        println("CCU_DOMAIN - tempVersionFileJson "+tempVersionFileJson)
-        if(assetsVersionFileJson != tempVersionFileJson)
-        {
-            if (destination.exists()) {
-                FileUtils.cleanDirectory(destination)
-                println("CCU_DOMAIN - creaning models[backup] folder")
-            }
-
-            project.copy {
-                from tempVersionFile
-                into destination
-                println("CCU_DOMAIN - cpoying versions.json from tempFolder to models[backup] folder")
-            }
-            def temp_files = tempFolder.listFiles()
-            temp_files.each { file ->
-                project.copy {
-                    from file
-                    into destination
-                    println("CCU_DOMAIN - cpoying json files from temp folder to models[backup] folder")
-                }
-            }
-        }
-
-        if (tempFolder.exists()) {
-            tempFolder.deleteDir()
-            println("CCU_DOMAIN - deleting temp folder.")
         }
     }
 }

@@ -88,8 +88,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     @BindView(R.id.ccu75_img)
     ImageView ccu75Image;
 
+    @BindView(R.id.modbus75_img)
+    ImageView modbus75Image;
+
     @BindView(R.id.daikin_ccu)
     ImageView daikinCcu;
+
+    @BindView(R.id.airoverse_modbus)
+    ImageView airoverseModbus;
 
     @BindView(R.id.hyperstatImageId)
     ImageView hyperStatImage;
@@ -350,9 +356,17 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
             hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.image_hs_split_carrier,null));
 
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+            daikinCcu.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_ccu, null));
+            daikinCcu.setVisibility(View.VISIBLE);
+            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_hs, null));
+            airoverseModbus.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_modbus, null));
+            modbus75Image.setVisibility(View.GONE);
+            airoverseModbus.setVisibility(View.VISIBLE);
         } else {
             hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_75f, null));
             ccu75Image.setVisibility(View.VISIBLE);
+            modbus75Image.setVisibility(View.VISIBLE);
         }
 
     }

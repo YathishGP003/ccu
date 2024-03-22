@@ -2,6 +2,7 @@
     <string name="app_75f">CCU</string>
     <string name="app_daikin">Daikin</string>
     <string name="app_carrier">ClimaVision</string>
+    <string name="app_airoverse">Airoverse for Facilities</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -581,6 +582,7 @@
     <string name="templimit">Temperature Limits</string>
     <string name="templimitdesc">Building limits specify the max/min temperatures before alerts will be \ngenerated and emergency heating/cooling will occur</string>
     <string name="usecelsius">Use Celsius</string>
+    <string name="offlinemode">Offline Mode</string>
     <string name="usemiltime">Use Military Time</string>
     <string name="usesingletemp">Use Single Desired Temperature</string>
     <string name="usetempforall">Use Same Occupied Temperature for all Days</string>
@@ -790,6 +792,7 @@
     <string name="button_set">SET</string>
     <string name="button_cancel">CANCEL</string>
     <string name="button_save">SAVE</string>
+    <string name="button_unpair">UNPAIR</string>
     <string name="label_cpucoolstage1">Cooling Stage 1</string>
     <string name="label_cpucoolstage2">Cooling Stage 2</string>
     <string name="label_cpuheatstage1">Heating Stage 1</string>
@@ -802,8 +805,10 @@
     <string name="title_congrats">CONGRATULATIONS!</string>
     <string name="title_success">You have successfully Installed a 75F System!</string>
     <string name="title_success_carrier">You have successfully Installed a Carrier ClimaVision System!</string>
+    <string name="title_success_airoverse">You have successfully Installed an Airoverse for Facilities System!</string>
     <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="desc_firsttime_carrier">If this is your first installation, the facility manager will receive an email with the Login Password for WebUI.\nOnce logged in please configure the Heatmap and Schedule</string>
+    <string name="desc_firsttime_airoverse">If this is your first installation, the facility manager will receive an email with the Login Password for Airoverse Portal.\nOnce logged in please configure the Heatmap and Schedule</string>
     <string name="label_ccuname">CCU Name : </string>
     <string name="label_serialno">Serial No. : </string>
     <string name="label_ccuversion">CCU Version : </string>
@@ -1003,6 +1008,10 @@
     <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
     <string name="title_pairhn">HELIO NODE | PAIRING STEPS </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
+    <string name="title_pair_sn_manual">SMART NODE | MANUAL PAIRING STEPS </string>
+    <string name="title_pair_hn_manual">HELIO NODE | MANUAL PAIRING STEPS </string>
+    <string name="title_pair_hs_manual">HYPER STAT | MANUAL PAIRING STEPS </string>
+    <string name="title_pair_hss_manual">HYPER STAT SPLIT| MANUAL PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
     <string name="title_site_id">Site Id</string>
@@ -1133,6 +1142,9 @@
     <string name="txt_wifisettings">WiFiSettings</string>
     <string name="txt_installer_operations">Installer Operations</string>
     <string name="txt_temporary_override">Temporary Override</string>
+    <string name="txt_bypass">Bypass Damper</string>
+    <string name="txt_energy_meter">Energy Meter</string>
+    <string name="txt_btu_meter">BTU Meter</string>
     <string name="txt_about">About</string>
     <string name="txt_place_holder">place holder</string>
     <string name="txt_cancel">Cancel</string>
@@ -1447,6 +1459,7 @@
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
     <string name="Daikin_Environment">daikin_prod</string>
     <string name="Carrier_Environment">carrier_prod</string>
+    <string name="Airoverse_Environment">airoverse_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>
@@ -1454,6 +1467,7 @@
     <string name="no_mechanical_heating_above">No Mechanical Heating Above</string>
     <string name="cooling_lockout_desc">Disable Cooling based on Outside Air Temperatures</string>
     <string name="heating_lockout_desc">Disable Heating based on Outside Air Temperatures</string>
+    <string name="offline_desc">Enable CCU to operate in standalone, all data syncing with the cloud \nwill be stopped</string>
 
     <!-- Activate Session Passcode -->
     <string name="title_activate_session">Activate Device Session</string>
@@ -1469,7 +1483,9 @@
     <string name="desired_temperature">Desired Temperature</string>
     <string name="backFill_duration">Backfill Time</string>
     <string name="backFill_duration_description">Please choose backfill time according to site for appropriate offline storage.</string>
-
+    <string name="dr_enrollment">DR Enrollment</string>
+    <string name="dr_enrollment_description">Enroll to demand response to optimize energy consumption and \nreduce peak demand.</string>
+    <string name="demand_response_active">Demand Response Active</string>
 
     <!-- Named Schedule-->
     <string name="monday">MONDAY</string>
@@ -1648,6 +1664,7 @@
     <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
     <string name="txt_submit">Submit</string>
     <string name="prefs_carrier_theme_key">isCarrierEnabled</string>
+    <string name="prefs_airoverse_theme_key">isAiroverseEnabled</string>
     <string name="menutoggle">menutoggle</string>
     <string name="display_toast_message">display toast message</string>
     <string name="txt_add">ADD</string>
@@ -1673,4 +1690,8 @@
     <string name="txt_valid_input">Please provide valid input</string>
     <string name="Toast_Warning_Message">The selected pairing address is currently being used by another CCU.</string>
     <string name="Toast_Warning_Title">Warning!</string>
+
+
+    <string name="offline_description">Not connected to Cloud</string>
+    <string name="system_profile">System Profile</string>
 </resources>

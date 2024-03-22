@@ -69,7 +69,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 			case 1:
 				return "System";
 			case 2:
-				return "Building";
+				return "SCHEDULING";
 			case 3:
 				return "Alerts";
 		}

@@ -215,6 +215,9 @@ object BuildingEquipCutOverMapping {
         "BuildingTuner-OAO-systemPurgeVavDamperMinOpenMultiplier" to "systemPurgeVavDamperMinOpenMultiplier",
         "BuildingTuner-OAO-economizingDryBulbThreshold" to "economizingDryBulbThreshold",
 
+        "BuildingTuner-OAO-systemPurgeVVTDamperMinOpenMultiplier" to "systemPurgeDabDamperMinOpenMultiplier",
+        "BuildingTuner-OAO-systemPurgeVVTMinFanLoopOutput" to "systemPurgeDabMinFanLoopOutput",
+
         "BuildingTuner-OAO-standaloneEnthalpyDuctCompensationOffset" to "standaloneEnthalpyDuctCompensationOffset",
         "BuildingTuner-OAO-standaloneEconomizingToMainCoolingLoopMap" to "standaloneEconomizingToMainCoolingLoopMap",
         "BuildingTuner-OAO-standaloneEconomizingMinTemperature" to "standaloneEconomizingMinTemperature",

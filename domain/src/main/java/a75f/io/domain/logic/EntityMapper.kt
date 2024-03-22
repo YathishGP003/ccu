@@ -127,11 +127,18 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             val pointConfiguration = def.configuration as DependentConfiguration
             val associationPointName = pointConfiguration.domainName
 
-            val baseConfig = profileConfiguration.getEnableConfigs().find { point -> point.domainName == associationPointName }
-
-            if (baseConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
+            val baseEnableConfig = profileConfiguration.getEnableConfigs().find { point -> point.domainName == associationPointName }
+            if (baseEnableConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
                     pointConfiguration.value as Int,
-                    baseConfig.enabled.toInt())) {
+                    baseEnableConfig.enabled.toInt())) {
+                enabledDependencies.add(def.domainName)
+            }
+
+            val baseValueConfig = profileConfiguration.getValueConfigs().find { point -> point.domainName == associationPointName }
+            if (baseValueConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
+                    pointConfiguration.value as Int,
+                    baseValueConfig.currentVal.toInt()
+            )) {
                 enabledDependencies.add(def.domainName)
             }
 

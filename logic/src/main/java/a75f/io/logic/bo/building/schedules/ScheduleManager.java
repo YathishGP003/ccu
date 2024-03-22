@@ -5,6 +5,8 @@ import static a75f.io.domain.api.DomainName.heatingPreconditioningRate;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.DEMAND_RESPONSE_OCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.DEMAND_RESPONSE_UNOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
@@ -55,11 +57,19 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
+import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
+import a75f.io.logic.bo.building.schedules.occupancy.EmergencyConditioning;
+import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
+import a75f.io.logic.bo.building.schedules.occupancy.Preconditioning;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
+import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
@@ -68,24 +78,24 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxjavaUtil;
 
 public class ScheduleManager {
-    
-    
+
+
     private static ScheduleManager instance = null;
-    
-    
+
+
     private final HashMap<String, Occupied> occupiedHashMap = new HashMap<>();
     private final Map<String, Occupancy> zoneOccupancy = new HashMap<>();
     private final Map<String, OccupancyData> equipOccupancy = new ConcurrentHashMap<>();
-    
+
     private Occupied currentOccupiedInfo = null;
     private Occupied nextOccupiedInfo = null;
     private Occupancy systemOccupancy = null;
-    
+
     //TODO-Schedules - To be moved
     private ZoneDataInterface scheduleDataInterface = null;
     private ZoneDataInterface zoneDataInterface     = null;
     private BuildingScheduleListener buildingScheduleListener = null;
-    
+
     public static ScheduleManager getInstance() {
         if (instance == null) {
             synchronized(ScheduleManager.class) {
@@ -96,7 +106,7 @@ public class ScheduleManager {
         }
         return instance;
     }
-    
+
     public void setScheduleDataInterface(ZoneDataInterface in) { scheduleDataInterface = in; }
     public void setZoneDataInterface(ZoneDataInterface in){
         zoneDataInterface = in;
@@ -107,7 +117,7 @@ public class ScheduleManager {
     public Occupied getOccupiedModeCache(String id) {
         return occupiedHashMap.get(id);
     }
-    
+
     /**
      * This could be removed in future. All the other modules should read occupancy points from the Damain/haystack
      * and stop using getOccupiedModeCache directly.
@@ -115,12 +125,12 @@ public class ScheduleManager {
      * (June-2022).
      */
     public void updateOccupiedSchedule(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        
-        
+
+
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupiedSchedule: " + equip.getDisplayName()+" "+equipSchedule);
-        
+
         Occupied occ = equipSchedule.getCurrentValues();
-        
+
         //When schedule is deleted
         if (occ == null) {
             occupiedHashMap.remove(equip.getRoomRef());
@@ -130,18 +140,18 @@ public class ScheduleManager {
             CcuLog.i(TAG_CCU_SCHEDULER, " occ.getCoolingVal(): "+occ.getCoolingVal()+" occ.getHeatingVal(): "+occ.getHeatingVal());
             return;
         }
-        
+
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupiedSchedule: NextOcc "+occ.getNextOccupiedSchedule()+" "+
                                     "Current occ "+occ.getCurrentlyOccupiedSchedule());
-        
-        
+
+
         if(vacation != null)
             occ.setOccupied(false);
-        
+
         occ.setVacation(vacation);
         occ.setSystemZone(true);
         
-        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
+        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and (occupancy or occupied) and mode and equipRef == \""+equip.getId()+"\"");
 
         double heatingDeadBand ;
         double coolingDeadBand ;
@@ -199,10 +209,12 @@ public class ScheduleManager {
         Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
         updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
         updateDesiredTemp(zoneProfiles);
-        if(buildingScheduleListener!= null)
-            buildingScheduleListener.refreshScreen();
 
-            updateLimitsAndDeadBand();
+        if (buildingScheduleListener != null) {
+            buildingScheduleListener.refreshScreen();
+        }
+
+        updateLimitsAndDeadBand();
 
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
@@ -211,7 +223,7 @@ public class ScheduleManager {
         }
         ScheduleUtil.deleteExpiredVacation();
         ScheduleUtil.deleteExpiredSpecialSchedules();
-    
+
         //TODO - refactor. This can only be done after updating desired temp.
         for (ZoneProfile profile : zoneProfiles) {
 
@@ -246,7 +258,7 @@ public class ScheduleManager {
             CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
             return;
         }
-    
+
         Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
                                                                                                               replace("@", ""));
         if(ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
@@ -262,54 +274,52 @@ public class ScheduleManager {
     }
     //TODO-Schedules - Merge with above method
     public void processZoneEquipSchedule(Equip equip){
-        
+
         if (equip == null) {
             return;
         }
         Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
-    
+
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
         Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
-    
+
         processScheduleForEquip(equip, activeSystemVacation);
-        
+
         updateEquipScheduleStatus(equip);
         //systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy(CCUHsApi.getInstance());
     }
-    
+
     public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
-
-            CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
-            for (ZoneProfile profile : zoneProfiles) {
-                if (profile instanceof ModbusProfile) {
-                    continue;
-                }
-                profile.updateOccupancy(hayStack);
-                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-                OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
-                CcuLog.i(TAG_CCU_SCHEDULER,
-                        "Updated equipOccupancy " + profile.getEquip().getDisplayName() + " : " + occupancyData.occupancy);
-
-                equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
+        CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
+        for (ZoneProfile profile : zoneProfiles) {
+            if (profile instanceof ModbusProfile) {
+                continue;
             }
+            profile.updateOccupancy(hayStack);
+            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+            OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
+            CcuLog.i(TAG_CCU_SCHEDULER,
+                     "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
 
-            updateZoneOccupancy(hayStack);
-            updateSystemOccupancy(hayStack);
+            equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
+        }
 
+        updateZoneOccupancy(hayStack);
+        updateSystemOccupancy(hayStack);
     }
-    
-    
+
+
     //Update Schedules instantly
     public void updateSchedules() {
         CcuLog.d(TAG_CCU_SCHEDULER,"updateSchedules ->");
-        
+
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
             CcuLog.d(TAG_CCU_SCHEDULER,"No Site Registered ! <-updateSchedules ");
             return;
         }
-        
+
         new Thread() {
             @Override
             public void run() {
@@ -317,11 +327,11 @@ public class ScheduleManager {
                 CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules");
             }
         }.start();
-        
+
     }
     public void updateSchedules(final Equip equip) {
         CcuLog.d(TAG_CCU_SCHEDULER,"updateSchedules ->"+equip.getDisplayName());
-        
+
         new Thread() {
             @Override
             public void run() {
@@ -329,9 +339,9 @@ public class ScheduleManager {
                 CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules for equip done"+equip.getDisplayName());
             }
         }.start();
-        
+
     }
-    
+
     /**
      *  If the occupied mode is different when putting it in the cache return true.
      *  If it is the same return false.
@@ -342,7 +352,7 @@ public class ScheduleManager {
             occupiedHashMap.put(id, occupied);
             return true;
         }
-        
+
         Occupied currentOccupiedMode = occupiedHashMap.get(id);
         if(currentOccupiedMode != null) {
             if(occupied.equals(currentOccupiedMode)) {
@@ -356,9 +366,9 @@ public class ScheduleManager {
         }
         return false;
     }
-    
-    
-    
+
+
+
     public void updateDesiredTemp(Set<ZoneProfile> zoneProfiles) {
 
         for (ZoneProfile profile : zoneProfiles) {
@@ -406,6 +416,9 @@ public class ScheduleManager {
 
             Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                     .replace("@", ""));
+            if(equipSchedule.getDays().isEmpty()){
+                continue;
+            }
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
             if (!equipSchedule.getMarkers().contains("specialschedule")) {
                 if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
@@ -489,7 +502,7 @@ public class ScheduleManager {
 
     public void updateZoneOccupancy(CCUHsApi hayStack) {
         List<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
-        
+
         rooms.forEach( room -> {
             List<HashMap<Object, Object>> equips =
                 hayStack.readAllEntities("equip and roomRef == \"" + Objects.requireNonNull(room.get("id")) + "\"");
@@ -537,23 +550,19 @@ public class ScheduleManager {
                                         (double)occupancy.ordinal());
         });
     }
-    
-    
+
+
     public void updateSystemOccupancy(CCUHsApi hayStack) {
-        
+
         currentOccupiedInfo = null;
         systemOccupancy = UNOCCUPIED;
         if (L.ccu().systemProfile == null || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             CcuLog.i(TAG_CCU_SCHEDULER, " Skip updateSystemOccupancy for Default System Profile ");
             return;
         }
-        Map<String, OccupancyData> ahuServedEquipsOccupancy = new HashMap<>();
-        
-        equipOccupancy.keySet().forEach( equipId -> {
-            if (ScheduleUtil.isAHUServedEquip(hayStack.readMapById(equipId))) {
-                ahuServedEquipsOccupancy.put(equipId, equipOccupancy.get(equipId));
-            }
-        });
+        Map<String, OccupancyData> ahuServedEquipsOccupancy = getAhuServedEquipsOccupancy(
+                equipOccupancy, hayStack);
+
 
         if(ahuServedEquipsOccupancy.size() == 0){
             systemOccupancy = NONE;
@@ -565,14 +574,14 @@ public class ScheduleManager {
             postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
-        
+
         if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)
                 && L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
             systemOccupancy = EMERGENCY_CONDITIONING;
             postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
-        
+
         if (ScheduleUtil.areAllZonesInVacation(ahuServedEquipsOccupancy)) {
             if (ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
                 systemOccupancy = FORCEDOCCUPIED;
@@ -583,21 +592,27 @@ public class ScheduleManager {
             postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
-        
+
         if (ScheduleUtil.isAnyZoneOccupiedOrAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = OCCUPIED;
             currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
             CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
         }
-        
-        if (systemOccupancy == UNOCCUPIED) {
+
+
+        if (systemOccupancy == UNOCCUPIED || systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED) {
             nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
             if (nextOccupiedInfo != null) {
                 CcuLog.i(TAG_CCU_SCHEDULER, "Next Occupied : "+nextOccupiedInfo);
-                systemOccupancy = getSystemPreconditioningStatus(nextOccupiedInfo);
+                systemOccupancy = getSystemPreconditioningStatus(nextOccupiedInfo, hayStack);
             }
         }
-        
+        if (ScheduleUtil.isAnyZoneInDemandResponse(ahuServedEquipsOccupancy)) {
+            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
+            nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
+            systemOccupancy = ScheduleUtil.getDemandResponseMode(ahuServedEquipsOccupancy);
+            postSystemOccupancy(CCUHsApi.getInstance());
+        }
         if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
             systemOccupancy = FORCEDOCCUPIED;
         }
@@ -609,12 +624,23 @@ public class ScheduleManager {
         /*if (ScheduleUtil.areAllZonesInAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = AUTOAWAY;
         }*/
-        
+
         if (ScheduleUtil.areAllZonesKeyCardAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = KEYCARD_AUTOAWAY;
         }
+
         postSystemOccupancy(CCUHsApi.getInstance());
         CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy : " + systemOccupancy);
+    }
+
+    private Map<String, OccupancyData> getAhuServedEquipsOccupancy(Map<String, OccupancyData> equipOccupancy, CCUHsApi hayStack) {
+        Map<String, OccupancyData> ahuServedEquipsOccupancy = new HashMap<>();
+        equipOccupancy.keySet().forEach( equipId -> {
+            if (ScheduleUtil.isAHUServedEquip(hayStack.readMapById(equipId))) {
+                ahuServedEquipsOccupancy.put(equipId, equipOccupancy.get(equipId));
+            }
+        });
+        return ahuServedEquipsOccupancy;
     }
 
     private void postSystemOccupancy(CCUHsApi hayStack) {
@@ -625,27 +651,29 @@ public class ScheduleManager {
         hayStack.writeHisValByQuery("point and system and his and occupancy and mode",
                 (double) systemOccupancy.ordinal());
     }
-    
-    
-    private static Occupancy getSystemPreconditioningStatus(Occupied nextOccupied) {
-        
+
+
+    private static Occupancy getSystemPreconditioningStatus(Occupied nextOccupied, CCUHsApi hayStack) {
+
         double preconDegree = 0;
         double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        
+
         if (nextOccupied != null) {
             if (L.ccu().systemProfile.getAverageTemp() > 0) {
                 if (L.ccu().systemProfile.getSystemController()
                                          .getConditioningForecast(nextOccupied) == SystemController.State.COOLING) {
                     if(preconRate == 0)
                         preconRate = getCoolingPreconditioningRate();
-                    preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
+                    preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal()
+                            - DemandResponseMode.getDemandResponseSetBackIfActive(hayStack);
                 } else if (L.ccu().systemProfile.getSystemController()
                                                 .getConditioningForecast(nextOccupied) == SystemController.State.HEATING) {
                     if(preconRate == 0)
                         preconRate = getHeatingPreconditioningRate();
 
-                    preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
+                    preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp()
+                            - DemandResponseMode.getDemandResponseSetBackIfActive(hayStack);
                 }
             }
         }
@@ -663,22 +691,22 @@ public class ScheduleManager {
                 return PRECONDITIONING;
         }
         CcuLog.d(L.TAG_CCU_SCHEDULER, "getSystemPreconditioningStatus : "+UNOCCUPIED);
-        return UNOCCUPIED;
+        return DemandResponse.isDRModeActivated(hayStack) ? DEMAND_RESPONSE_UNOCCUPIED : UNOCCUPIED;
     }
-    
+
     //TODO-Schedules - Make sure the applySchedule has run before algo loops to ensure the cache is updated
     public Occupancy getEquipOccupancy(String equipRef) {
         return equipOccupancy.get(equipRef).occupancy;
     }
-    
+
     public Occupancy getZoneOccupancy(String zoneRef) {
         return zoneOccupancy.get(zoneRef);
     }
-    
+
     public Occupancy getSystemOccupancy() {
         return systemOccupancy;
     }
-    
+
     public Occupied getNextOccupiedTimeInMillis(){
         return nextOccupiedInfo;
     }
@@ -698,7 +726,7 @@ public class ScheduleManager {
             return prevOccupied;
         }
     }
-    
+
     /**
      * Public method that returns the zone status string.
      * @param zoneId
@@ -717,7 +745,7 @@ public class ScheduleManager {
             //Scheduler hasn't run yet.
             String previousStatus = CCUHsApi.getInstance().readDefaultStrVal("point and scheduleStatus and equipRef " +
                                                                             "== \""+equipId+"\"");
-            
+
             return previousStatus.isEmpty() ? "Loading Schedules" : previousStatus;
         }
         String status = equipOccupancyData.message;
@@ -727,7 +755,7 @@ public class ScheduleManager {
         }
         return status;
     }
-    
+
     private OccupancyData getOccupiedData(OccupiedTrigger occupiedTrigger, String equipRef, CCUHsApi hayStack) {
         OccupancyData occupancyData = new OccupancyData();
         occupancyData.isOccupied = true;
@@ -736,7 +764,7 @@ public class ScheduleManager {
         occupancyData.message = getZoneStatusString(equipRef, occupancyData.occupancy, hayStack);
         return occupancyData;
     }
-    
+
     private OccupancyData getUnoccupiedData(UnoccupiedTrigger unoccupiedTrigger, String equipRef, CCUHsApi hayStack) {
         OccupancyData occupancyData = new OccupancyData();
         occupancyData.isOccupied = false;
@@ -745,7 +773,7 @@ public class ScheduleManager {
         occupancyData.message = getZoneStatusString(equipRef, occupancyData.occupancy, hayStack);
         return occupancyData;
     }
-    
+
     private OccupancyData getOccupancyData(EquipOccupancyHandler occupancyHandler, CCUHsApi hayStack) {
         if (occupancyHandler.isScheduleOccupied()) {
             return getOccupiedData(occupancyHandler.getCurrentOccupiedTrigger(), occupancyHandler.getEquipRef(),
@@ -755,7 +783,7 @@ public class ScheduleManager {
                                      hayStack);
         }
     }
-    
+
     public void updateEquipScheduleStatus(Equip equip) {
         HashMap<Object, Object> scheduleStatusPoint = CCUHsApi.getInstance()
                             .readEntity("point and scheduleStatus and equipRef == \""+equip.getId()+ "\"");
@@ -776,12 +804,12 @@ public class ScheduleManager {
             }
         }
     }
-    
+
     private String getZoneStatusString(String equipId, Occupancy curOccupancyMode, CCUHsApi hayStack){
         Equip equip = HSUtil.getEquip(hayStack, equipId);
         Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
         CcuLog.i(TAG_CCU_SCHEDULER,
-                 " getZoneStatusString "+equip.getDisplayName()+" "+cachedOccupied+" "+curOccupancyMode);
+                " getZoneStatusString "+equip.getDisplayName()+" "+cachedOccupied+" "+curOccupancyMode);
 
         if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
             CcuLog.i(TAG_CCU_SCHEDULER, "Zone page status - AutoCommissioning is Started ");
@@ -792,45 +820,68 @@ public class ScheduleManager {
             return "No schedule configured";
         }
         if (curOccupancyMode == Occupancy.PRECONDITIONING) {
+            if(DemandResponse.isDRModeActivated(hayStack)){
+                return "In Demand Response | Preconditioning";
+            }
             return "In Preconditioning";
         }
 
         if(curOccupancyMode == NO_CONDITIONING){
             return "No Conditioning: Building Limits Breached";
         }
-        
         if (curOccupancyMode == EMERGENCY_CONDITIONING) {
-            return "In Emergency Conditioning[Building Limits breached]";
+            return  "In Emergency Conditioning[Building Limits breached]";
         }
-        
         if (curOccupancyMode == KEYCARD_AUTOAWAY) {
             return "Keycard Autoaway";
         }
-        
+
         if (curOccupancyMode == WINDOW_OPEN) {
             return "Door/Window Open";
         }
-    
+
         if(curOccupancyMode == AUTOAWAY){
-            return String.format("In Auto Away");
+            if(DemandResponse.isDRModeActivated(hayStack)){
+                return "In Auto Away | Demand Response";
+            }
+            return "In Auto Away";
         }
-    
+
         if(curOccupancyMode == OCCUPIED) {
             if (cachedOccupied.getCurrentlyOccupiedSchedule() == null){
                 CcuLog.i(TAG_CCU_SCHEDULER, " getZoneStatusString , occupied but current schedule null");
                 return "No schedule configured";
             }
-                return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Occupied mode",
+            return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                    TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                    TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
+        }
+        if(curOccupancyMode == DEMAND_RESPONSE_OCCUPIED) {
+            if(AutoAway.isZoneInAutoAwayMode(new OccupancyUtil(hayStack, equipId))){
+                 return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Auto Away",
+                         cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                         cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                         TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                        TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
+            } else if (EmergencyConditioning.isZoneInEmergencyConditioning(hayStack, equipId)) {
+                return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Occupied | Emergency Conditioning",
                         cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                         cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
                         TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
                         TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
+            }
+            return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                    TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                    TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
         }
-        
         long th = ScheduleUtil.getTemporaryHoldExpiry(equip);
         CcuLog.i(TAG_CCU_SCHEDULER, " th "+th);
         if(curOccupancyMode == AUTOFORCEOCCUPIED) {
-        
+
             if (th > 0) {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
@@ -842,47 +893,96 @@ public class ScheduleManager {
             if (th > 0) {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
+                if(DemandResponse.isDRModeActivated(hayStack)){
+                    return String.format(Locale.US, "In Temporary Hold | Demand Response |" +
+                            " till %s", et.getHourOfDay() + ":" + (min < 10 ? "0" + min : min));
+                }
                 return String.format(Locale.US, "In Temporary Hold | till %s", et.getHourOfDay() + ":" + (min < 10 ?
-                                                                                                             "0" + min : min));
+                        "0" + min : min));
             }
         }
         String statusString = "";
-    
+
         if(cachedOccupied.getVacation() != null) {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
-                                         cachedOccupied.getVacation().getEndDateString());
+                    cachedOccupied.getVacation().getEndDateString());
+            if(curOccupancyMode == DEMAND_RESPONSE_UNOCCUPIED) {
+                statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied mode",
+                        cachedOccupied.getHeatingVal(),
+                        cachedOccupied.getCoolingVal(),
+                        cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                        cachedOccupied.getNextOccupiedSchedule().getStmm());
+            }
         } else {
             boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +
-                                                                              "his and  equipRef == \"" + equipId +
-                                                                              "\"") == ZoneState.TEMPDEAD.ordinal();
+                    "his and  equipRef == \"" + equipId +
+                    "\"") == ZoneState.TEMPDEAD.ordinal();
             if(curOccupancyMode == PRECONDITIONING && !isZoneTempDead) {//Currently handled only for standalone
                 if (cachedOccupied.getNextOccupiedSchedule() == null){
                     CcuLog.i(TAG_CCU_SCHEDULER,
-                             "Preconditioning nextOccupied schedule not found "+equip.getDisplayName());
+                            "Preconditioning nextOccupied schedule not found "+equip.getDisplayName());
                     return "No schedule configured";
                 }
-                    statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Preconditioning",
-                            cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
-                            cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
-                            cachedOccupied.getNextOccupiedSchedule().getEthh(),
-                            cachedOccupied.getNextOccupiedSchedule().getEtmm());
-            
+                statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Preconditioning",
+                        cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getNextOccupiedSchedule().getEthh(),
+                        cachedOccupied.getNextOccupiedSchedule().getEtmm());
+
             } else {
                 if (cachedOccupied.getNextOccupiedSchedule() == null) {
                     CcuLog.i(TAG_CCU_SCHEDULER, "Unoccupied schedule not found "+equip.getDisplayName());
                     return "No schedule configured";
                 }
+                if(curOccupancyMode == DEMAND_RESPONSE_UNOCCUPIED){
+                    if(AutoForcedOccupied.isZoneInAutoForcedOccupied(new OccupancyUtil(hayStack, equipId))){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Auto Forced Occupied",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    } else if (ForcedOccupied.isZoneForcedOccupied(equipId)){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Forced Occupied",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    }
+                    else if (EmergencyConditioning.isZoneInEmergencyConditioning(hayStack, equipId)){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied | Emergency Conditioning",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    } else if (Preconditioning.isZoneInPreconditioning(hayStack, equipId)){
+                        return "In Demand Response | Preconditioning";
+                    } else if ((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) &&
+                            nextOccupiedInfo != null && getSystemPreconditioningStatus(nextOccupiedInfo,
+                            hayStack) == PRECONDITIONING) {
+                        return "In Demand Response | Preconditioning";
+                    }else {
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied mode",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    }
+                }else {
                     statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Unoccupied mode",
                             cachedOccupied.getHeatingVal(),
                             cachedOccupied.getCoolingVal(),
                             cachedOccupied.getNextOccupiedSchedule().getSthh(),
                             cachedOccupied.getNextOccupiedSchedule().getStmm());
+                }
             }
+        }
+        if (curOccupancyMode == EMERGENCY_CONDITIONING) {
+            statusString = "In Emergency Conditioning[Building Limits breached]";
         }
         CcuLog.i(TAG_CCU_SCHEDULER, "Invalid zone occupancy status  ");
         return statusString;
     }
-    
+
     /**
      * Public method that returns the zone status string.
      */
@@ -895,9 +995,10 @@ public class ScheduleManager {
         }
         return status;
     }
-    
+
     public String getSystemStatusString() {
-        
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         CcuLog.i(TAG_CCU_SCHEDULER, " getSystemStatusString systemOccupancy "+systemOccupancy+" currentOccupiedInfo "+currentOccupiedInfo);
         //This might happen when getSystemStatusString is called too early, even before the systemProfile is loaded.
 
@@ -909,7 +1010,7 @@ public class ScheduleManager {
         if (L.ccu().systemProfile == null) {
             return "Loading...";
         }
-        
+
         if(L.ccu().systemProfile instanceof DefaultSystem)
             return "No Central equipment connected.";
         if(systemOccupancy == null || systemOccupancy == NONE) {
@@ -920,15 +1021,11 @@ public class ScheduleManager {
         if(systemOccupancy == NO_CONDITIONING){
             return "No Conditioning - Building Limits breached";
         }
-        
-        if (systemOccupancy == EMERGENCY_CONDITIONING) {
-            return "In Emergency Conditioning[Building Limits breached]";
-        }
-    
+
         if (systemOccupancy == KEYCARD_AUTOAWAY) {
             return "Keycard AutoAway";
         }
-        
+
         if (systemOccupancy == VACATION && systemOccupancy != FORCEDOCCUPIED) {
             Schedule activeSystemVacation = ScheduleUtil.getActiveSystemVacation();
             if (activeSystemVacation != null) {
@@ -938,20 +1035,11 @@ public class ScheduleManager {
             }*/
             return "In Energy saving Vacation";
         }
-        
+
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and mode and state and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         String epidemicString = (epidemicState != EpidemicState.OFF) ? "["+epidemicState.name()+"] " : "";
-        if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
-            if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
-                //return "Building Limit Breach | Emergency Heating turned ON";
-                return "In Emergency Conditioning";
-            } else if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING) {
-               // return "Building Limit Breach | Emergency Cooling turned ON";
-                return "In Emergency Conditioning";
-            }
-        }
-        
+
         switch (systemOccupancy) {
             case OCCUPIED:
                 if (currentOccupiedInfo == null || currentOccupiedInfo.getCurrentlyOccupiedSchedule() == null){
@@ -962,13 +1050,16 @@ public class ScheduleManager {
                                      epidemicString,"Occupied mode",
                                      TimeUtil.getEndTimeHr(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()),
                                      TimeUtil.getEndTimeMin(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()));
-            
+
             case PRECONDITIONING:
+                if(DemandResponse.isDRModeActivated(ccuHsApi)){
+                    return "In Demand Response | Preconditioning";
+                }
                 return "In Preconditioning";
-            
+
             case AUTOAWAY:
                 return "In AutoAway";
-            
+
             case UNOCCUPIED:
                 if (ScheduleUtil.isAnyZoneAutoAway(equipOccupancy)) {
                     return "In AutoAway";
@@ -991,15 +1082,50 @@ public class ScheduleManager {
                 DateTime tempHoldExpiry = new DateTime(ScheduleUtil.getSystemTemporaryHoldExpiry());
                 int mins = tempHoldExpiry.getMinuteOfHour();
                 return String.format("%sIn Temporary Hold(AUTO) | till %s",epidemicString, tempHoldExpiry.getHourOfDay()+":"+(mins < 10 ? "0"+mins : mins));
-            
-            
+
+            case DEMAND_RESPONSE_OCCUPIED:
+                if (currentOccupiedInfo == null){
+                    CcuLog.i(TAG_CCU_SCHEDULER, "Demand Response Occupied , but info does not exist");
+                    return "In Demand Response Occupied Mode";
+                }
+                return String.format(Locale.US, "%sIn %s | Changes to Energy saving Unoccupied mode at %02d:%02d",
+                        epidemicString,"Demand Response Occupied Mode",
+                        TimeUtil.getEndTimeHr(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),
+                                currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()),
+                        TimeUtil.getEndTimeMin(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),
+                                currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()));
+
+            case DEMAND_RESPONSE_UNOCCUPIED:
+                if (nextOccupiedInfo == null || nextOccupiedInfo.getNextOccupiedSchedule() == null ){
+                    CcuLog.i(TAG_CCU_SCHEDULER, " Demand Response Unoccupied and info does not exist");
+                    return "In Demand Response Unoccupied Mode";
+                }
+                if(getSystemPreconditioningStatus(nextOccupiedInfo, ccuHsApi) == PRECONDITIONING) {
+                    return "In Demand Response | Preconditioning";
+                }
+                return String.format("%sIn %s | Changes to Occupied mode at %02d:%02d",epidemicString, "Demand Response Unoccupied Mode",
+                        nextOccupiedInfo.getNextOccupiedSchedule().getSthh(),
+                        nextOccupiedInfo.getNextOccupiedSchedule().getStmm());
+
+        }
+        if (systemOccupancy == EMERGENCY_CONDITIONING) {
+            return "In Emergency Conditioning[Building Limits breached]";
+        }
+        if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
+            if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
+                //return "Building Limit Breach | Emergency Heating turned ON";
+                return "In Emergency Conditioning";
+            } else if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING) {
+                // return "Building Limit Breach | Emergency Cooling turned ON";
+                return "In Emergency Conditioning";
+            }
         }
         return "";
     }
-    
+
     public String getVacationStateString(String zoneId) {
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
-        
+
         if(cachedOccupied == null) {
             return "No schedule configured";
         }
@@ -1010,7 +1136,7 @@ public class ScheduleManager {
             return "No Active Vacation";
         }
     }
-    
+
     public double getSystemCoolingDesiredTemp(){
         double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)
@@ -1021,7 +1147,7 @@ public class ScheduleManager {
                         nextOccupiedInfo.getCoolingVal() + setback : nextOccupiedInfo.getCoolingVal();
         else return 0;
     }
-    
+
     public double getSystemHeatingDesiredTemp(){
         double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
         if(currentOccupiedInfo != null)

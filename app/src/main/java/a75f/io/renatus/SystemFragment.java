@@ -98,6 +98,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
@@ -113,9 +114,10 @@ import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.OaoArc;
-
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -218,6 +220,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private Drawable mDrawableBreakLineLeft;
 	private Drawable mDrawableBreakLineRight;
+	CustomCCUSwitch switchActivation;
+	LinearLayout drActivationLayout;
 
 	Schedule schedule;
 	RecyclerView externalModbusParams;
@@ -343,6 +347,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		textViewFriday = rootView.findViewById(R.id.textViewFriday);
 		textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
 		textViewSunday = rootView.findViewById(R.id.textViewSunday);
+		drActivationLayout = rootView.findViewById(R.id.drActivationLayout);
+		switchActivation = rootView.findViewById(R.id.switchActivation);
 
 		//Time lines with 2 hrs Interval 00:00 to 24:00
 		view00 = rootView.findViewById(R.id.view00);
@@ -832,7 +838,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		externalModbusLastUpdated = view.findViewById(R.id.external_last_updated_status);
 		external_last_updated = view.findViewById(R.id.external_last_updated);
 		showExternalModbusDevice();
-
+		setUpDRModeActivationLayout();
 
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
@@ -943,6 +949,27 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 
+
+	private void setUpDRModeActivationLayout() {
+		CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+		if (DemandResponseMode.isDREnrollmentSelected(ccuHsApi)) {
+			drActivationLayout.setVisibility(View.VISIBLE);
+			switchActivation.setChecked(DemandResponseMode.isDRModeActivated(ccuHsApi));
+		} else {
+			drActivationLayout.setVisibility(View.GONE);
+		}
+		switchActivation.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if(buttonView.isPressed()) {
+				if (isChecked) {
+					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation enabled");
+					DemandResponseMode.setDRModeActivationStatus(ccuHsApi, true);
+				} else {
+					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation disabled");
+					DemandResponseMode.setDRModeActivationStatus(ccuHsApi, false);
+				}
+			}
+		});
+	}
 
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null) {
@@ -1063,6 +1090,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						configureExternalAhu();
 					}
 				}
+				switchActivation.setChecked(DemandResponseMode.isDRModeActivated(CCUHsApi.getInstance()));
 				if (L.ccu().systemProfile != null) {
 					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}
@@ -1282,7 +1310,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void configWatermark(){
 		mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
-		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+		if(!CCUUiUtil.isDaikinEnvironment(requireContext()) || !CCUUiUtil.isCarrierThemeEnabled(requireContext())
+		 || !CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
 			mainLayout.setBackground(null);
 		}
 	}

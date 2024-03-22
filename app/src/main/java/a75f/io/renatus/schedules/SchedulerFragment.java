@@ -28,14 +28,17 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.core.widget.TextViewCompat;
@@ -54,6 +57,7 @@ import org.projecthaystack.HDict;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,45 +66,28 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.MockTime;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
-import a75f.io.renatus.StatusPagerAdapter;
-import a75f.io.renatus.ZoneFragmentNew;
-import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import a75f.io.renatus.views.RangeBar;
 
-import static a75f.io.usbserial.UsbModbusService.TAG;
-
-public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener {
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener, NamedScheduleOccupiedDialogFragment.NamedScheduleOccupiedDialogFragmentListener
+, UnOccupiedZoneSetBackDialogFragment.UnOccupiedZoneSetBackListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
@@ -125,7 +112,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     View view01, view03, view05, view07, view09, view11, view13, view15, view17, view19, view21, view23;
     TextView textViewScheduletitle;
     TextView textViewaddEntry;
-    TextView textViewaddEntryIcon;
     TextView textViewVacations;
     Button textViewaddVacations;
     Button textViewAddSpecialSchedule;
@@ -141,6 +127,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private VacationAdapter mVacationAdapter;
     private RecyclerView specialScheduleRecycler;
     FrameLayout frameLayout;
+
+    LinearLayout title_Layout;
+
+    ZoneScheduleViewModel zoneScheduleViewModel;
+
 
     private Handler scheduleFragmentHandler;
 
@@ -247,12 +238,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         mVacationRecycler = rootView.findViewById(R.id.vacationRecycler);
         textViewScheduletitle = rootView.findViewById(R.id.scheduleTitle);
         textViewaddEntry = rootView.findViewById(R.id.addEntry);
-        textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
         mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
         scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
         scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
-        textViewaddEntryIcon.setTypeface(iconFont);
-        textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
 
         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
@@ -274,6 +262,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
         textViewSunday = rootView.findViewById(R.id.textViewSunday);
         frameLayout = rootView.findViewById(R.id.zoneScheduleFragmentContainer);
+        title_Layout = rootView.findViewById(R.id.header_title);
 
         //Time lines with 2 hrs Interval 00:00 to 24:00
         view00 = rootView.findViewById(R.id.view00);
@@ -337,21 +326,46 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         colorMaxTemp = getResources().getString(0 + R.color.max_temp);
         colorMaxTemp = "#" + colorMaxTemp.substring(3);
 
-
-        textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
-        textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
+        textViewaddEntry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+                Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
+                if(buildingOccupancyFragment != null){
+                    fragmentTransaction.remove(buildingOccupancyFragment);
+                }
+                showDialogNamed();
+            }
+        });
         textViewScheduletitle.setFocusable(true);
 
+        boolean isOffline =
+                CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0;
+
+
+        if(isOffline) {
+            if((getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))
+                    && !((getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE)) ||
+                    getArguments().getBoolean(PARAM_IS_VACATION))) {
+                replaceLayout();
+            }
+        }else{
+           replaceLayout();
+        }
+
+        return rootView;
+    }
+
+    private void replaceLayout(){
+        constraintScheduler.setVisibility(View.GONE);
         Fragment childFragment;
-        if(getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)) {
+        if (getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)) {
             childFragment = new ZoneScheduleFragment(getArguments().getString(PARAM_ROOM_REF));
-        }else {
+        } else {
             childFragment = new ZoneScheduleFragment();
         }
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.zoneScheduleFragmentContainer, childFragment).commit();
-
-        return rootView;
     }
 
     @Override
@@ -405,11 +419,37 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 getArguments().getBoolean(PARAM_IS_VACATION)))
         {
             textViewScheduletitle.setText("Zone Schedule");
-
+            constraintScheduler.setVisibility(View.GONE);
             updateUI();
         }else {
-            frameLayout.setVisibility(View.GONE);
-            textViewScheduletitle.setVisibility(View.GONE);
+            boolean isOffline =
+                    CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0;
+            if(isOffline && getContext()!= null){
+                // read default named schedule
+                //set  it to schedule
+                HashMap<Object,Object> nm = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
+                if(nm.isEmpty()){
+                    title_Layout.setVisibility(View.GONE);
+                    frameLayout.setVisibility(View.GONE);
+                    textViewScheduletitle.setVisibility(View.GONE);
+                    constraintScheduler.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Default Named Schedule not available", Toast.LENGTH_LONG).show();
+                }else {
+                    mScheduleId = nm.get("id").toString();
+                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                    textViewScheduletitle.setText("Default - " + CCUHsApi.getInstance().getSiteName());
+                    textViewScheduletitle.setTypeface(Typeface.DEFAULT_BOLD);
+                    textViewaddEntry.setVisibility(View.VISIBLE);
+                    constraintScheduler.setVisibility(View.VISIBLE);
+                    frameLayout.setVisibility(View.GONE);
+                    updateUINamed();
+                }
+            }else {
+                title_Layout.setVisibility(View.GONE);
+                frameLayout.setVisibility(View.GONE);
+                textViewScheduletitle.setVisibility(View.GONE);
+                constraintScheduler.setVisibility(View.GONE);
+            }
         }
         loadVacations();
         loadSpecialSchedules();
@@ -417,18 +457,28 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void updateUI() {
         schedule.populateIntersections();
-        hasTextViewChildren();
-        ArrayList<Schedule.Days> days = schedule.getDays();
-        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
 
-        for (int i = 0; i < days.size(); i++) {
-            Schedule.Days daysElement = days.get(i);
-            drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                    daysElement.getSthh(), daysElement.getEthh(),
-                    daysElement.getStmm(), daysElement.getEtmm(),
-                    DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
-        }
+        new Handler(Looper.getMainLooper()).post(() -> {
+
+            hasTextViewChildren();
+            ArrayList<Schedule.Days> days = schedule.getDays();
+            days.sort(Comparator.comparingInt(Schedule.Days::getSthh));
+            days.sort(Comparator.comparingInt(Schedule.Days::getDay));
+
+            for(int i = 0; i < 7; i++){
+                drawSchedule(i, 0,0,0, 23, 0, 59, DAYS.values()[i],
+                        false,
+                        false);
+            }
+
+            for (int i = 0; i < days.size(); i++) {
+                Schedule.Days daysElement = days.get(i);
+                drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                        daysElement.getSthh(), daysElement.getEthh(),
+                        daysElement.getStmm(), daysElement.getEtmm(),
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection(),true);
+            }
+        });
     }
 
     private void hasTextViewChildren() {
@@ -1194,23 +1244,21 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         return Math.round(d * 2) / 2.0f;
     }
 
-    private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
+    private void drawSchedule(int position, double heatingTemp, double coolingTemp,
+                              int startTimeHH, int endTimeHH, int startTimeMM,
+                              int endTimeMM, DAYS day, boolean intersection,boolean isOccupied) {
 
-
-        String unit = "\u00B0F";
 
         if(isCelsiusTunerAvailableStatus()) {
-            coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
-            heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
-            unit = "\u00B0C";
+            coolingTemp =(fahrenheitToCelsius(coolingTemp));
+            heatingTemp=(fahrenheitToCelsius(heatingTemp));
         }
-
-        String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp) + unit, colorMinTemp);
-        String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp) + unit, colorMaxTemp);
+        String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
+        String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
         Typeface typeface=Typeface.DEFAULT;
         try {
-            typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
+            typeface = Typeface.createFromAsset(requireActivity().getAssets(), "fonts/lato_regular.ttf");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1218,14 +1266,16 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
                     24, startTimeMM, 0,
-                    getTextViewFromDay(day), false, true, intersection);
+                    getTextViewFromDay(day), false, true, intersection,isOccupied);
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, 0,
                     endTimeHH, 0, endTimeMM,
-                    getTextViewFromDay(day.getNextDay()), true, false, intersection);
+                    getTextViewFromDay(day.getNextDay()), true, false, intersection
+                    ,isOccupied);
         } else {
             drawScheduleBlock(position, strminTemp, strmaxTemp,
                     typeface, startTimeHH, endTimeHH, startTimeMM,
-                    endTimeMM, getTextViewFromDay(day), false, false, intersection);
+                    endTimeMM, getTextViewFromDay(day), false, false,
+                    intersection,isOccupied);
         }
 
 
@@ -1298,35 +1348,34 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface,
                                    int tempStartTime, int tempEndTime,
                                    int startTimeMM, int endTimeMM, TextView textView,
-                                   boolean leftBreak, boolean rightBreak, boolean intersection) {
+                                   boolean leftBreak, boolean rightBreak, boolean intersection,boolean isOccupied) {
 
-        Log.i("CCU_UI", "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+        CcuLog.i(TAG, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
-        if(getContext()==null) return;
+        if (getContext() == null) return;
         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
+
+
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
-        textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
-        if(typeface!=null)
+        String celsiusUnitMin = FontManager.getColoredSpanned("\u00B0C", colorMinTemp);
+        String celsiusUnitMax = FontManager.getColoredSpanned("\u00B0C", colorMaxTemp);
+        String farenUnitMin = FontManager.getColoredSpanned("\u00B0F", colorMinTemp);
+        String farenUnitMax = FontManager.getColoredSpanned("\u00B0F", colorMaxTemp);
+        if (isOccupied) {
+            if (isCelsiusTunerAvailableStatus()) {
+                textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
+            }
+        }
+        if (typeface != null)
             textViewTemp.setTypeface(typeface);
         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         textViewTemp.setMaxLines(2);
-        textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);
+        textViewTemp.setContentDescription(textView.getText().toString() + "_" + tempStartTime + ":" + startTimeMM + "-" + tempEndTime + ":" + endTimeMM);
         textViewTemp.setId(ViewCompat.generateViewId());
         textViewTemp.setTag(position);
 
-        if (getArguments() != null) {
-            boolean isVacation =
-                    getArguments().containsKey(PARAM_IS_VACATION) && getArguments().getBoolean(PARAM_IS_VACATION);
-            boolean isSpecialSchedule =
-                    getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
-            if (isVacation || isSpecialSchedule){
-                if (!schedule.getDis().equals("Zone Schedule")) {
-                    textViewaddEntry.setEnabled(false);
-                    textViewaddEntryIcon.setEnabled(false);
-                    textViewTemp.setEnabled(false);
-                }
-            }
-        }
 
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
         lp.baselineToBaseline = textView.getId();
@@ -1338,14 +1387,15 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         lp.leftMargin = leftMargin;
         lp.rightMargin = rightMargin;
 
-        Drawable drawableCompat = null;
+        Drawable drawableCompat;
 
         if (leftBreak) {
-            drawableCompat = getResources().getDrawable(R.drawable.temperature_background_left);
+            drawableCompat =  ContextCompat.getDrawable(requireContext(),R.drawable.occupancy_background_left);
             if (intersection) {
-                Drawable rightGreyBar = getResources().getDrawable(R.drawable.vline);
-                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
-            }else
+                Drawable rightGreyBar = ContextCompat.getDrawable(requireContext(),R.drawable.vline);
+                if(isOccupied)
+                    textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
+            }else if(isOccupied)
                 textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
 
             Space space = new Space(getActivity());
@@ -1367,8 +1417,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
         } else if (rightBreak) {
-            drawableCompat = getResources().getDrawable(R.drawable.temperature_background_right);
-            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
+            drawableCompat = ContextCompat.getDrawable(requireContext(),R.drawable.occupancy_background_left);
+            if(isOccupied)
+                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
             Space space = new Space(getActivity());
             space.setId(View.generateViewId());
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
@@ -1385,13 +1436,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
             if (intersection) {
-                Drawable rightGreyBar = getResources().getDrawable(R.drawable.vline);
+                Drawable rightGreyBar = ContextCompat.getDrawable(requireContext(),R.drawable.vline);
                 textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null,
                         rightGreyBar, null);
             }
 
 
-            drawableCompat = getResources().getDrawable(R.drawable.temperature_background);
+            drawableCompat = ContextCompat.getDrawable(requireContext(),isOccupied ? R.drawable.occupancy_background_left
+                    :R.drawable.occupancy_background_unoccupied);
 
             if (endTimeMM > 0)
                 tempEndTime++;
@@ -1406,24 +1458,146 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             @Override
             public void onClick(View v) {
                 int clickedPosition = (int)v.getTag();
-                //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
-                // force refresh schedule
-                if(mScheduleId != null) {
-                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                }
-
-                Schedule.Days day = schedule.getDays().get(clickedPosition);
-                    ArrayList<Schedule.Days> days = schedule.getDays();
-                    try {
-                        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                        showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        Log.d(TAG, "onClick: " + e.getMessage());
+                HashMap<Object,Object> scheduleObject = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
+                mScheduleId = scheduleObject.get("id").toString();
+                schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                ArrayList<Schedule.Days> days = schedule.getDays();
+                try {
+                    Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                    Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                    if(isOccupied) {
+                        showDialogNamed(0, clickedPosition, schedule);
+                    }else {
+                        showDialogNamed(1, clickedPosition, schedule);
                     }
-
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    CcuLog.d(TAG, "onClick: " + e.getMessage());
+                }
             }
         });
+
+    }
+
+    @Override
+    public boolean onClickSaveNamed(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour,
+                                    int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days, Double heatingUserLimitMaxVal,
+                                    Double heatingUserLimitMinVal, Double coolingUserLimitMaxVal, Double coolingUserLimitMinVal,
+                                    Double heatingDeadBandVal, Double coolingDeadBandVal, Schedule.Days mDay) {
+        if (position != NamedScheduleOccupiedDialogFragment.NO_REPLACE) {
+            //sort schedule days according to the start hour of the day
+            try {
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                removeEntry = schedule.getDays().remove(position);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Log.d(TAG, "onClickSave: " + e.getMessage());
+            }
+        } else {
+            removeEntry = null;
+        }
+
+        CcuLog.d(L.TAG_CCU_UI, " onClickSave " + "startTime " + startTimeHour + ":" + startTimeMinute + " endTime " + endTimeHour + ":" + endTimeMinute + " removeEntry " + removeEntry);
+
+        ArrayList<Schedule.Days> daysArrayList = new ArrayList<>();
+        if (days != null) {
+                for (DAYS day : days) {
+                    Schedule.Days dayBO = new Schedule.Days();
+                    dayBO.setEthh(endTimeHour);
+                    dayBO.setSthh(startTimeHour);
+                    dayBO.setEtmm(endTimeMinute);
+                    dayBO.setStmm(startTimeMinute);
+                    dayBO.setHeatingVal(heatingTemp);
+                    dayBO.setCoolingVal(coolingTemp);
+                    dayBO.setSunset(false);
+                    dayBO.setSunrise(false);
+                    dayBO.setHeatingUserLimitMin(heatingUserLimitMinVal);
+                    dayBO.setHeatingUserLimitMax(heatingUserLimitMaxVal);
+                    dayBO.setCoolingUserLimitMin(coolingUserLimitMinVal);
+                    dayBO.setCoolingUserLimitMax(coolingUserLimitMaxVal);
+                    dayBO.setHeatingDeadBand(heatingDeadBandVal);
+                    dayBO.setCoolingDeadBand(coolingDeadBandVal);
+                    dayBO.setDay(day.ordinal());
+                    daysArrayList.add(dayBO);
+                }
+            }
+
+        for (Schedule.Days d : daysArrayList) {
+            CcuLog.d(L.TAG_CCU_UI, " daysArrayList  " + d);
+        }
+
+        boolean intersection = schedule.checkIntersection(daysArrayList);
+        if (intersection) {
+
+            StringBuilder overlapDays = new StringBuilder();
+            for (Schedule.Days day : daysArrayList) {
+                ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
+                for (Interval overlap : overlaps) {
+                    Log.d("CCU_UI", " overLap " + overlap);
+                    overlapDays.append(getDayString(overlap.getStart()) + "(" + overlap.getStart().hourOfDay().get() + ":" + (overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
+                            + " - " + (getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())) + ":" + (getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()) + ") ");
+                }
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n" + overlapDays.toString())
+                    .setCancelable(false)
+                    .setIcon(R.drawable.ic_dialog_alert)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (removeEntry != null)
+                                schedule.getDays().add(position, removeEntry);
+                        }
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+            return false;
+
+        }
+
+
+        HashMap<String, ArrayList<Interval>> spillsMap =
+                zoneScheduleViewModel.getScheduleSpills(daysArrayList, schedule);
+
+        if (spillsMap != null && spillsMap.size() > 0) {
+            if (schedule.isNamedSchedule()) {
+                StringBuilder spillZones = new StringBuilder();
+                for (String zone : spillsMap.keySet()) {
+                    for (Interval i : spillsMap.get(zone)) {
+                        spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                    }
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Named Schedule is outside building occupancy currently set. " +
+                                "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
+                        .setCancelable(false)
+                        .setTitle("Schedule Errors")
+                        .setIcon(R.drawable.ic_dialog_alert)
+                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                showDialogNamed(position, daysArrayList);
+                            }
+                        })
+                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                schedule.getDays().addAll(daysArrayList);
+                                ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
+                                zoneScheduleViewModel.doScheduleUpdate(schedule);
+                                updateUINamed();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+            return true;
+        }
+
+        schedule.getDays().addAll(daysArrayList);
+        zoneScheduleViewModel.doScheduleUpdate(schedule);
+        updateUINamed();
+        return true;
     }
 
     public boolean onClickCancel(String mScheduleId) {
@@ -1432,9 +1606,28 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         return true;
     }
 
+    public void onClickCancelNamed(String mScheduleId) {
+        schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+        updateUINamed();
+
+    }
+
     public void setOnExitListener(OnExitListener onExitListener) {
         this.mOnExitListener = onExitListener;
 
+    }
+
+    @Override
+    public void onClickSaveSchedule(double unOccupiedZoneSetBackVal, Schedule schedule) {
+        schedule.setUnoccupiedZoneSetback(unOccupiedZoneSetBackVal);
+        CCUHsApi.getInstance().updateSchedule(schedule);
+        Occupied occ = schedule.getCurrentValues();
+        occ.setUnoccupiedZoneSetback(schedule.getUnoccupiedZoneSetback());
+    }
+
+    @Override
+    public void onClickCancelSaveSchedule(String scheduleId) {
+        RangeBar.setUnOccupiedFragment(true);
     }
 
     public interface OnExitListener {
@@ -1460,6 +1653,153 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
+    }
+
+
+
+
+    private void showDialogNamed() {
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+        Fragment prev = getParentFragmentManager().findFragmentByTag("popup");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        NamedScheduleOccupiedDialogFragment newFragment = new NamedScheduleOccupiedDialogFragment(this, schedule);
+        newFragment.show(ft, "popup");
+    }
+
+    private void showDialogNamed( Schedule.Days day) {
+
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+        Fragment scheduleFragment = getParentFragmentManager().findFragmentByTag("popup");
+        if (scheduleFragment != null) {
+            ft.remove(scheduleFragment);
+        }
+        NamedScheduleOccupiedDialogFragment newFragment = new NamedScheduleOccupiedDialogFragment(this, schedule, day);
+        newFragment.show(ft, "popup");
+    }
+
+    private void showDialogNamed(int id, int position, Schedule schedule) {
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+        Schedule.Days occupiedDays;
+        UnOccupiedDays unOccupiedDays;
+
+        switch (id) {
+            case 0:
+                occupiedDays = schedule.getDays().get(position);
+                Fragment scheduleFragment = getParentFragmentManager().findFragmentByTag("popup");
+                if (scheduleFragment != null) {
+                    ft.remove(scheduleFragment);
+                }
+                NamedScheduleOccupiedDialogFragment newFragment = new NamedScheduleOccupiedDialogFragment(this, position, occupiedDays, schedule);
+                newFragment.show(ft, "popup");
+                break;
+
+            case 1:
+                Fragment unOccupiedSetBackFragment = getParentFragmentManager().findFragmentByTag("popup");
+                if (unOccupiedSetBackFragment != null) {
+                    ft.remove(unOccupiedSetBackFragment);
+                }
+                List<Schedule.Days> days = schedule.getDays();
+                days.sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                days.sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                List<UnOccupiedDays> unoccupiedDays = zoneScheduleViewModel.getUnoccupiedDays(days);
+                unOccupiedDays = unoccupiedDays.get(position);
+                int occupiedSlotsSize = schedule.getDays().size();
+                if(schedule.getDays().size() == 0)
+                    break;
+                Schedule.Days nextDay = getNextOccupiedSlot(position, unOccupiedDays, occupiedSlotsSize);
+                UnOccupiedZoneSetBackDialogFragment unOccupiedZoneSetBackDialogFragment = new UnOccupiedZoneSetBackDialogFragment(this, nextDay, schedule);
+                unOccupiedZoneSetBackDialogFragment.show(ft, "popup");
+
+        }
+    }
+
+    private void showDialogNamed(int position, ArrayList<Schedule.Days> days) {
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+        Fragment scheduleFragment = getParentFragmentManager().findFragmentByTag("popup");
+        if (scheduleFragment != null) {
+            ft.remove(scheduleFragment);
+        }
+        NamedScheduleOccupiedDialogFragment newFragment = new NamedScheduleOccupiedDialogFragment(this, position, days, schedule);
+        newFragment.show(ft, "popup");
+    }
+
+
+    private Schedule.Days getNextOccupiedSlot(int position, UnOccupiedDays unOccupiedDays,
+                                              int size){
+
+        ArrayList<Schedule.Days> occupiedDays = schedule.getDays();
+        if(position - unOccupiedDays.getDay() < size) {
+            if(unOccupiedDays.getEthh() == 24 && unOccupiedDays.getEtmm() == 0){
+                if(occupiedDays.get(occupiedDays.size() - 1).getDay() <= unOccupiedDays.getDay()){
+                    return occupiedDays.get(0);
+                }
+                for (int i = 0; i < occupiedDays.size(); i++) {
+                    for(int j= 1; j < 6;j++) {
+                        if (occupiedDays.get(i).getDay() == unOccupiedDays.getDay() + j) {
+                            return occupiedDays.get(i);
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < occupiedDays.size(); i++) {
+                if (occupiedDays.get(i).getDay() == unOccupiedDays.getDay()) {
+                    if (unOccupiedDays.getEthh() == occupiedDays.get(i).getSthh()) {
+                        if (unOccupiedDays.getEtmm() == occupiedDays.get(i).getStmm()) {
+                            return occupiedDays.get(i);
+                        }
+                    }
+                }
+            }
+        }
+        return occupiedDays.get(0);
+    }
+
+    private void updateUINamed() {
+        schedule.populateIntersections();
+        new Handler(Looper.getMainLooper()).post(() -> {
+            hasTextViewChildren();
+            List<Schedule.Days> days = schedule.getDays();
+            days.sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+            days.sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+            zoneScheduleViewModel = new ZoneScheduleViewModel();
+            List<UnOccupiedDays> unoccupiedDays = zoneScheduleViewModel.getUnoccupiedDays(days);
+            for (int i = 0; i < days.size(); i++) {
+                Schedule.Days occupiedDaysElement = days.get(i);
+                if (occupiedDaysElement.getSthh() > occupiedDaysElement.getEthh()) {
+                    for (int j = 0; j < unoccupiedDays.size(); j++) {
+                        UnOccupiedDays daysElement1 = unoccupiedDays.get(j);
+                        if (occupiedDaysElement.getDay() == daysElement1.getDay() && occupiedDaysElement.getEthh() == daysElement1.getSthh() ){
+                            if(unoccupiedDays.get(j).getDay() == 6){
+                                unoccupiedDays.remove(j);
+                                unoccupiedDays.get(0).setSthh(daysElement1.getSthh());
+                                unoccupiedDays.get(0).setStmm(daysElement1.getStmm());
+                            }else {
+                                unoccupiedDays.remove(j);
+                                unoccupiedDays.get(j).setSthh(daysElement1.getSthh());
+                                unoccupiedDays.get(j).setStmm(daysElement1.getStmm());
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < unoccupiedDays.size(); i++) {
+                UnOccupiedDays daysElement = unoccupiedDays.get(i);
+                drawSchedule(i, 0,0,daysElement.getSthh(), daysElement.getEthh(),
+                        daysElement.getStmm(), daysElement.getEtmm(),
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection(), false);
+            }
+
+            for (int i = 0; i < days.size(); i++) {
+                Schedule.Days daysElement = days.get(i);
+                drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                        daysElement.getSthh(), daysElement.getEthh(),
+                        daysElement.getStmm(), daysElement.getEtmm(),
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection(), true);
+            }
+        });
     }
 
     @Override

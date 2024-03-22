@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
+import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
@@ -199,13 +200,17 @@ class AcbProfileViewModel : ViewModel() {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
+            if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
+            if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
+
             acbProfile.init()
             setOutputTypes(profileConfiguration)
+            updateCondensateSensor(profileConfiguration)
             setScheduleType(profileConfiguration)
         }
 
@@ -315,6 +320,27 @@ class AcbProfileViewModel : ViewModel() {
 
     }
 
+    private fun updateCondensateSensor(config: AcbProfileConfiguration) {
+        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+        var th2In = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.th2In + "\"")
+        var th2InPoint = RawPoint.Builder().setHashMap(th2In)
+
+        if (profileConfiguration.condensateSensorType.enabled) {
+            // N/C Condensation Sensor
+            val condensateNcPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + config.nodeAddress + "\"")
+            if (condensateNcPoint.containsKey("id")) {
+                hayStack.updatePoint(th2InPoint.setPointRef(condensateNcPoint.get("id").toString()).build(), th2In.get("id").toString())
+            }
+        } else {
+            // N/O Condensation Sensor
+            val condensateNoPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + config.nodeAddress + "\"")
+            if (condensateNoPoint.containsKey("id")) {
+                hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint.get("id").toString()).build(), th2In.get("id").toString())
+            }
+        }
+
+    }
+
     private fun setScheduleType(config: AcbProfileConfiguration) {
         val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
         val scheduleTypeId = scheduleTypePoint.get("id").toString()
@@ -325,6 +351,32 @@ class AcbProfileViewModel : ViewModel() {
         } else {
             hayStack.writeDefaultValById(scheduleTypeId, 2.0)
         }
+    }
+
+    private fun overrideForBypassDamper(config: AcbProfileConfiguration) {
+        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
+        val acbEquip = VavAcbEquip(equip.get("id").toString())
+
+        if (!(acbEquip.enableCFMControl.readDefaultVal() > 0.0)) {
+            acbEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minCoolingDamperPos.readDefaultVal(), 0)
+            acbEquip.minCoolingDamperPos.writeDefaultVal(20.0)
+            acbEquip.minCoolingDamperPos.writeHisVal(10.0)
+
+            acbEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minHeatingDamperPos.readDefaultVal(), 0)
+            acbEquip.minHeatingDamperPos.writeDefaultVal(20.0)
+            acbEquip.minHeatingDamperPos.writeHisVal(10.0)
+        }
+
+        // Right now, framework is not copying from System Tuner correctly. Duct-tape fix for this case.
+        acbEquip.vavProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)
+        acbEquip.vavProportionalKFactor.writeHisVal(0.7)
+
+        acbEquip.vavIntegralKfactor.writeVal(14, hayStack.ccuUserName, 0.3, 0)
+        acbEquip.vavIntegralKfactor.writeHisVal(0.3)
+
+        acbEquip.vavTemperatureProportionalRange.writeVal(14, hayStack.ccuUserName, 1.5, 0)
+        acbEquip.vavTemperatureProportionalRange.writeHisVal(1.5)
+
     }
 
     // This logic will break if the "damperType" point enum is changed

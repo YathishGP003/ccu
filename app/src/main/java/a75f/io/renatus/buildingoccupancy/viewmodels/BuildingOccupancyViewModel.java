@@ -49,6 +49,7 @@ import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.domain.api.Room;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -170,23 +171,45 @@ public class BuildingOccupancyViewModel {
         String siteRef = siteMap.get("id").toString();
         Map<String, List<Zone>> zoneMap = new LinkedHashMap<>();
 
-
         LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
         Future<LinkedHashMap<String, ArrayList<Interval>>> future = executor.submit(() -> {
-            HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-            HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
-            HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
 
-            HDict queryDictionary = new HDictBuilder().add("filter",
-                    "named and schedule and organization == \""+
-                            Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization()+"\"").toDict();
-            HGrid namedschedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
+            if(OfflineModeUtilKt.isOfflineMode()){
+                ArrayList<HashMap<Object, Object>> schedules = CCUHsApi.getInstance().readAllEntities
+                        ("schedule and days and siteRef == " + siteRef);
+
+                List<HashMap<Object, Object>> namedSchedule = CCUHsApi.getInstance().getAllNamedSchedules();
+
+                ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities
+                        ("room");
+
+                for (HashMap<Object, Object> schedule:schedules) {
+                    scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
+                }
+                for (HashMap<Object, Object> schedule:namedSchedule) {
+                    scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
+                }
+
+                for (HashMap<Object, Object> m : zones)
+                {
+                    zoneList.add(new Zone.Builder().setHashMap(m).build());
+                }
+
+            }else {
+                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
+                HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+
+                HDict queryDictionary = new HDictBuilder().add("filter",
+                        "named and schedule and organization == \"" +
+                                Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization() + "\"").toDict();
+                HGrid namedschedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
 
 
-            HDict roomDict = new HDictBuilder().add("filter", "room and siteRef == " + siteRef).toDict();
-            HGrid roomPoint = hClient.call("read", HGridBuilder.dictToGrid(roomDict));
+                HDict roomDict = new HDictBuilder().add("filter", "room and siteRef == " + siteRef).toDict();
+                HGrid roomPoint = hClient.call("read", HGridBuilder.dictToGrid(roomDict));
 
-            CcuLog.d("BO_Log", "org ="+CCUHsApi.getInstance().getSite().getOrganization());
+                CcuLog.d(L.TAG_CCU_SCHEDULER, "org =" + CCUHsApi.getInstance().getSite().getOrganization());
 
             if (roomPoint != null) {
                 Iterator hZincReaderIterator = roomPoint.iterator();
@@ -209,31 +232,30 @@ public class BuildingOccupancyViewModel {
             }
 
 
-
-            if (schedulePoint != null) {
-                Iterator it = schedulePoint.iterator();
-                while (it.hasNext()) {
-                    HRow r = (HRow) it.next();
-                    scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
-                }
-            }
-            if (namedschedules != null) {
-                Iterator it = namedschedules.iterator();
-                while (it.hasNext()) {
-                    HRow r = (HRow) it.next();
-                    Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-                    if(schedule.getMarkers().contains("default")
-                            && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))){
-                        continue;
+                if (schedulePoint != null) {
+                    Iterator it = schedulePoint.iterator();
+                    while (it.hasNext()) {
+                        HRow r = (HRow) it.next();
+                        scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                     }
-                    scheduleList.add(schedule);
                 }
-            }else{
-                CcuLog.d("BO_Log", "Named sched is null");
+                if (namedschedules != null) {
+                    Iterator it = namedschedules.iterator();
+                    while (it.hasNext()) {
+                        HRow r = (HRow) it.next();
+                        Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                        if (schedule.getMarkers().contains("default")
+                                && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))) {
+                            continue;
+                        }
+                        scheduleList.add(schedule);
+                    }
+                } else {
+                    CcuLog.d(L.TAG_CCU_SCHEDULER, "Named sched is null");
+                }
+
+                CcuLog.i(L.TAG_CCU_SCHEDULER, "Retrieved schedule list of size " + scheduleList.size() + " for site " + siteRef);
             }
-
-            CcuLog.i("BO_Log", "Retrieved schedule list of size " + scheduleList.size() + " for site " + siteRef);
-
 
             for (Zone zone:zoneList) {
                 for (Schedule schedule: scheduleList) {
@@ -356,46 +378,63 @@ public class BuildingOccupancyViewModel {
                     Zone z = new Zone();
                     Floor f = new Floor();
                     List<Equip> equipList = new ArrayList<>();
-                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                    HDict equipDict = new HDictBuilder().add("filter", "equip and roomRef == " + zone).toDict();
-                    HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
-                    if(equipGrid != null) {
-                        List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
-                        for (HashMap equip : equipMaps) {
-                            equipList.add(new Equip.Builder().setHashMap(equip).build());
-                        }
-                    }
-                    String response = CCUHsApi.getInstance().fetchRemoteEntity(zone);
 
-                    if (response != null) {
-                        HZincReader hZincReader = new HZincReader(response);
-                        Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                        while (hZincReaderIterator.hasNext()) {
-                            HDict dict = (HDict) hZincReaderIterator.next();
-                            HashMap<Object, Object> map = new HashMap<>();
-                            Iterator it = dict.iterator();
-                            while (it.hasNext()) {
-                                Map.Entry entry = (Map.Entry) it.next();
-                                map.put(entry.getKey().toString(), entry.getValue().toString());
+                    if(OfflineModeUtilKt.isOfflineMode()){
+                        ArrayList<HashMap<Object, Object>> equipMaps = CCUHsApi.getInstance().
+                                readAllEntities("equip and roomRef ==  \"" +zone + "\"");
+                        if(equipMaps != null) {
+                            for (HashMap equip : equipMaps) {
+                                equipList.add(new Equip.Builder().setHashMap(equip).build());
                             }
-                            z = new Zone.Builder().setHashMap(map).build();
-
                         }
-                    }
-                    String floorResponse = CCUHsApi.getInstance().fetchRemoteEntity(z.getFloorRef());
-                    if (floorResponse != null) {
-                        HZincReader hZincReader = new HZincReader(floorResponse);
-                        Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                        while (hZincReaderIterator.hasNext()) {
-                            HDict dict = (HDict) hZincReaderIterator.next();
-                            HashMap<Object, Object> map = new HashMap<>();
-                            Iterator it = dict.iterator();
-                            while (it.hasNext()) {
-                                Map.Entry entry = (Map.Entry) it.next();
-                                map.put(entry.getKey().toString(), entry.getValue().toString());
-                            }
-                            f = new Floor.Builder().setHashMap(map).build();
+                        HashMap<Object, Object> zonemap = CCUHsApi.getInstance().readMapById(zone);
+                        z = new Zone.Builder().setHashMap(zonemap).build();
+                        HashMap<Object, Object> floormap = CCUHsApi.getInstance().readMapById(z.getFloorRef());
+                        f = new Floor.Builder().setHashMap(floormap).build();
+                    }else {
 
+                        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                        HDict equipDict = new HDictBuilder().add("filter", "equip and roomRef == " + zone).toDict();
+                        HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
+                        if (equipGrid != null) {
+                            List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
+                            for (HashMap equip : equipMaps) {
+                                equipList.add(new Equip.Builder().setHashMap(equip).build());
+                            }
+                        }
+                        String response = CCUHsApi.getInstance().fetchRemoteEntity(zone);
+
+
+                        if (response != null) {
+                            HZincReader hZincReader = new HZincReader(response);
+                            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                            while (hZincReaderIterator.hasNext()) {
+                                HDict dict = (HDict) hZincReaderIterator.next();
+                                HashMap<Object, Object> map = new HashMap<>();
+                                Iterator it = dict.iterator();
+                                while (it.hasNext()) {
+                                    Map.Entry entry = (Map.Entry) it.next();
+                                    map.put(entry.getKey().toString(), entry.getValue().toString());
+                                }
+                                z = new Zone.Builder().setHashMap(map).build();
+
+                            }
+                        }
+                        String floorResponse = CCUHsApi.getInstance().fetchRemoteEntity(z.getFloorRef());
+                        if (floorResponse != null) {
+                            HZincReader hZincReader = new HZincReader(floorResponse);
+                            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                            while (hZincReaderIterator.hasNext()) {
+                                HDict dict = (HDict) hZincReaderIterator.next();
+                                HashMap<Object, Object> map = new HashMap<>();
+                                Iterator it = dict.iterator();
+                                while (it.hasNext()) {
+                                    Map.Entry entry = (Map.Entry) it.next();
+                                    map.put(entry.getKey().toString(), entry.getValue().toString());
+                                }
+                                f = new Floor.Builder().setHashMap(map).build();
+
+                            }
                         }
                     }
 

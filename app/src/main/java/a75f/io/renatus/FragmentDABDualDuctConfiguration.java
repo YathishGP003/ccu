@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -38,6 +39,7 @@ import a75f.io.logic.bo.building.dualduct.DualDuctAnalogActuator;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -68,7 +70,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     private static final int DEFAULT_DAMPER_MIN = 0;
     private static final int DEFAULT_DAMPER_MAX= 100;
     private static final int DEFAULT_DAMPER_VAL= 20;
-    
+    private static final int BYPASS_OVERRIDE_DAMPER_VAL= 10;
+
     static final int TEMP_OFFSET_LIMIT = 100;
     
     @BindView(R.id.analog1OutSpinner) Spinner analog1OutSpinner;
@@ -283,7 +286,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         minCoolingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
-        minCoolingDamperPos.setValue(DEFAULT_DAMPER_VAL);
+        minCoolingDamperPos.setValue(L.ccu().bypassDamperProfile != null ? BYPASS_OVERRIDE_DAMPER_VAL : DEFAULT_DAMPER_VAL);
         minCoolingDamperPos.setWrapSelectorWheel(false);
 
 
@@ -297,7 +300,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         minHeatingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
-        minHeatingDamperPos.setValue(DEFAULT_DAMPER_VAL);
+        minHeatingDamperPos.setValue(L.ccu().bypassDamperProfile != null ? BYPASS_OVERRIDE_DAMPER_VAL : DEFAULT_DAMPER_VAL);
         minHeatingDamperPos.setWrapSelectorWheel(false);
 
 
@@ -590,11 +593,51 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         } else {
             mDualDuctProfile.updateDualDuctEquip(dualDuctConfig);
         }
+        if(L.ccu().bypassDamperProfile != null) { overrideForBypassDamper(dualDuctConfig); }
         L.ccu().zoneProfiles.add(mDualDuctProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set DualDuct Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
-    
+
+
+    private void overrideForBypassDamper(DualDuctProfileConfiguration config) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> equip = hayStack.read("equip and group == \"" + config.getNodeAddress() + "\"");
+
+        double minCoolingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and cooling and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
+        double minHeatingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and heating and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
+
+        HashMap<Object,Object> minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
+        String minCoolingDamperPosPointId = minCoolingDamperPosPoint.get("id").toString();
+        hayStack.writePointForCcuUser(minCoolingDamperPosPointId, 7, minCoolingDamperPos, 0, "Bypass Damper Added");
+        hayStack.writeHisValById(minCoolingDamperPosPointId, minCoolingDamperPos);
+        hayStack.writeDefaultValById(minCoolingDamperPosPointId, 20.0);
+
+        HashMap<Object,Object> minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
+        String minHeatingDamperPosPointId = minHeatingDamperPosPoint.get("id").toString();
+        hayStack.writePointForCcuUser(minHeatingDamperPosPointId, 7, minHeatingDamperPos, 0, "Bypass Damper Added");
+        hayStack.writeHisValById(minHeatingDamperPosPointId, minHeatingDamperPos);
+        hayStack.writeDefaultValById(minHeatingDamperPosPointId, 20.0);
+
+        // There is a bug with tuner copying currently (matching is based on presence of markers and can fail).
+        // Tuner-copying framework (pre-DM) doesn't have a way of saying "and not reheat".
+        // So, we have to set the values here to be sure that tuners are overridden correctly.
+        double systemPGain = TunerUtil.readTunerValByQuery("system and dab and pgain and not reheat and not default");
+        HashMap<Object,Object> pGainPoint = hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String pGainPointId = pGainPoint.get("id").toString();
+        hayStack.writePointForCcuUser(pGainPointId, 14, systemPGain, 0, "Bypass Damper Added");
+
+        double systemIGain = TunerUtil.readTunerValByQuery("system and dab and igain and not reheat and not default");
+        HashMap<Object,Object> iGainPoint = hayStack.readEntity("point and tuner and dualDuct and igain and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String iGainPointId = iGainPoint.get("id").toString();
+        hayStack.writePointForCcuUser(iGainPointId, 14, systemIGain, 0, "Bypass Damper Added");
+
+        double systemPSpread = TunerUtil.readTunerValByQuery("system and dab and pspread and not reheat and not default");
+        HashMap<Object,Object> pSpreadPoint = hayStack.readEntity("point and tuner and dualDuct and pspread and not reheat and equipRef == \"" + equip.get("id") + "\"");
+        String pSpreadPointId = pSpreadPoint.get("id").toString();
+        hayStack.writePointForCcuUser(pSpreadPointId, 14, systemPSpread, 0, "Bypass Damper Added");
+    }
+
 }

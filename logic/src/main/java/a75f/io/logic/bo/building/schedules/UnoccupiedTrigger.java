@@ -7,6 +7,7 @@ public enum UnoccupiedTrigger {
     DoorWindowInput(Occupancy.WINDOW_OPEN),
     KeyCardInput(Occupancy.AUTOFORCEOCCUPIED),
     Preconditioning(Occupancy.PRECONDITIONING),
+    DemandResponseUnoccupied(Occupancy.DEMAND_RESPONSE_UNOCCUPIED),
     ForcedOccupied(Occupancy.FORCEDOCCUPIED),
     AutoForcedOccupied(Occupancy.AUTOFORCEOCCUPIED),
     EmergencyConditioning(Occupancy.EMERGENCY_CONDITIONING),

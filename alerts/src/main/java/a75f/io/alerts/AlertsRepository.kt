@@ -1,10 +1,20 @@
 package a75f.io.alerts
 
 import a75f.io.alerts.cloud.AlertsService
-import a75f.io.alerts.model.*
+import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.alerts.model.AlertDefProgress.Partial
+import a75f.io.alerts.model.AlertDefsMap
+import a75f.io.alerts.model.AlertDefsState
+import a75f.io.alerts.model.minus
+import a75f.io.alerts.model.plusAssign
+import a75f.io.alerts.model.remove
+import a75f.io.alerts.model.removeAll
+import a75f.io.alerts.model.toArrayList
 import a75f.io.api.haystack.Alert
+import a75f.io.api.haystack.Alert.AlertSeverity
+import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
 import android.util.Log
 import io.reactivex.rxjava3.core.Completable
@@ -12,6 +22,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /**
  * Gateway to Alerts and AlertDefinitions data, business logic processing, and backend alerservice.
@@ -236,7 +247,6 @@ class AlertsRepository(
          Log.i("DEV_DEUG", "Hard Fix: $alert")
               fixAlert(alert)
       }
-
       // check for alert time-out
       clearElapsedAlerts()
 
@@ -308,6 +318,11 @@ class AlertsRepository(
          return
       }
 
+      //donot sync in offlineMode
+      if (CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0) {
+         return
+      }
+
       val unsyncedAlerts: List<Alert> = getUnsyncedAlerts()
       CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
 
@@ -363,5 +378,35 @@ class AlertsRepository(
          }
       }
       saveDefs()
+   }
+   fun handleAlertBoxItemsExceedingThreshold() {
+      if(alertBoxSizeAboveThreshold()) {
+         val alertBox = hayStack.tagsDb.boxStore.boxFor(Alert::class.java)
+         val query = alertBox.query()
+         query.`in`(Alert_.mSeverity, intArrayOf(
+            AlertSeverity.INTERNAL_INFO.ordinal,
+            AlertSeverity.INTERNAL_LOW.ordinal,
+            AlertSeverity.INTERNAL_MODERATE.ordinal,
+            AlertSeverity.INTERNAL_SEVERE.ordinal,
+            AlertSeverity.LOW.ordinal
+         ))
+         thread(start = true, name = "clearAlertItems") {
+            val alertList = query.build().find()
+            alertBox.remove(alertList)
+         }
+      }
+   }
+
+   fun alertBoxSizeAboveThreshold() : Boolean {
+      val threshold = 5000
+      return dataStore.getAllAlerts().size > threshold
+   }
+
+   fun setRestartAppToTrue() {
+      dataStore.appRestarted()
+   }
+
+   fun checkIfAppRestarted() : Boolean {
+      return dataStore.isAppRestarted()
    }
 }

@@ -80,7 +80,7 @@ public class RangeBarView extends LinearLayout {
 
         if (mSchedule!= null && !mSchedule.isBuildingSchedule() && mSchedule.isZoneSchedule() && MasterControlUtil.isMigrated()) {
             getZoneHeatAndCoolingDeadBand();
-        } else  if (mSchedule!= null && mSchedule.isBuildingSchedule()) {
+        } else  if (mSchedule!= null && (mSchedule.isBuildingSchedule() || mSchedule.isNamedSchedule())) {
             getBuildingHeatAndCoolingDeadBand();
         }
 

@@ -1,5 +1,7 @@
 package a75f.io.renatus.util;
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -50,6 +55,8 @@ public class CCUUiUtil {
             activity.setTheme(R.style.RenatusAppDaikinTheme);
         } else if (CCUUiUtil.isCarrierThemeEnabled(activity)) {
             activity.setTheme(R.style.RenatusAppCarrierTheme);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(activity)) {
+            activity.setTheme(R.style.RenatusAppAiroverseTheme);
         }
     }
     public static String getColorCode(Context context) {
@@ -64,6 +71,9 @@ public class CCUUiUtil {
     }
 
     public static void triggerRestart(Context context) {
+        AlertManager.getInstance().clearAlertsWhenAppClose();
+        AlertManager.getInstance().getRepo().setRestartAppToTrue();
+        CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();
@@ -197,6 +207,11 @@ public class CCUUiUtil {
     public static boolean isCarrierThemeEnabled(Context context) {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
+    }
+
+    public static boolean isAiroverseThemeEnabled(Context context) {
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Airoverse_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.prefs_airoverse_theme_key), false);
     }
 
     public static boolean isValidMacAddress(String ip) {

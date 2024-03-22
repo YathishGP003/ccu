@@ -33,6 +33,9 @@ import androidx.compose.ui.unit.sp
 fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
     var selectedItem by remember { mutableStateOf(radioOptions[default]) }
 
+    if (selectedItem != radioOptions[default]) {
+         selectedItem = radioOptions[default]
+    }
     Row(modifier = Modifier
         .selectableGroup()
         .fillMaxWidth(),

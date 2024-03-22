@@ -53,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.device.mesh.LSmartNode;
@@ -109,7 +110,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
      * {@link FragmentStatePagerAdapter}.
      */
     private SettingsPagerAdapter mSettingPagerAdapter;
-    private StatusPagerAdapter mStatusPagerAdapter;
+    public static StatusPagerAdapter mStatusPagerAdapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -164,7 +165,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         startCountDownTimer(INTERVAL);
                         setMarginStart(mTabLayout);
-                        menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.GONE);
 
                     } else if (tab.getPosition() == 1){
@@ -174,8 +174,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         if (isZonePassWordRequired()) {
                             showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
                         }
-
-                        menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.VISIBLE);
                     }
                     btnTabs.setEnabled(true);
@@ -186,8 +184,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.MATCH_PARENT
                     );
-                    int marginStartInPixels = 40;
-                    layoutParams.setMarginStart(marginStartInPixels);
                     mTabLayout.setLayoutParams(layoutParams);
                 }
 
@@ -207,10 +203,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
 
             menuToggle.setOnClickListener(view -> {
-                if (SettingsFragment.slidingPane.isOpen()) {
+                if (SettingsFragment.slidingPane.isOpen() || SystemConfigFragment.slidingSysPane.isOpen()) {
                     SettingsFragment.slidingPane.closePane();
+                    SystemConfigFragment.slidingSysPane.closePane();
                 } else {
                     SettingsFragment.slidingPane.openPane();
+                    SystemConfigFragment.slidingSysPane.openPane();
                 }
             });
             logo_75f.setOnLongClickListener(view -> {
@@ -352,11 +350,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
-                if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
+                if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SystemConfigFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                } else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                }
+
+                else if(i==2 && mViewPager.getAdapter().instantiateItem(mViewPager,i) instanceof SettingsFragment){
+                    menuToggle.setVisibility(View.VISIBLE);
+                    floorMenu.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
+                }
+
+                else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
                     if (isZonePassWordRequired()) {
                         showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
                     }
@@ -454,10 +460,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        appRestarted();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        appRestarted();
         ccuLaunched();
         abortCCUDownloadProcess();
         try {
@@ -474,6 +480,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void appRestarted() {
+        AlertManager.getInstance().getRepo().setRestartAppToTrue();
         CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
     }
 
@@ -630,7 +637,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             powerbylogo.setVisibility(View.VISIBLE);
         }else if (CCUUiUtil.isCarrierThemeEnabled(this)) {
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier_logo, null));
-            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_75f_powered_by, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_75f_powered_by, null));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else if (CCUUiUtil.isAiroverseThemeEnabled(this)) {
+            logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_brand_logo, null));
+            powerbylogo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_75f_powered_by, null));
             powerbylogo.setVisibility(View.VISIBLE);
         }else {
             logo_75f.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_75f_logo, null));

@@ -304,6 +304,11 @@ public class UpdateScheduleHandler implements MessageHandler
 
     @Override
     public boolean ignoreMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        //Ignore the message if the CCUref is different from the CCU
+        if(jsonObject.get("ccuRef") != null){
+            String ccuRef = jsonObject.get("ccuRef").getAsString();
+            return !ccuRef.equals(CCUHsApi.getInstance().getCcuRef().toString());
+        }
         return false;
     }
 }

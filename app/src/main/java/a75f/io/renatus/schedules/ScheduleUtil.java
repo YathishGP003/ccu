@@ -87,13 +87,6 @@ public class ScheduleUtil {
                 }
                 validSpills.put(d, disconnectedIntervals(spills, i));
                 conflictDays.add(d);
-                /*if (spill.getStartMillis() <= i.getStartMillis()) {
-                    d.setSthh(spill.getEnd().getHourOfDay());
-                    d.setStmm(spill.getEnd().getMinuteOfHour());
-                } else if (i.getEndMillis() >= spill.getStartMillis()) {
-                    d.setEthh(spill.getStart().getHourOfDay());
-                    d.setEtmm(spill.getStart().getMinuteOfHour());
-                }*/
             }
         }
         for (Map.Entry<Schedule.Days, ArrayList<Interval>> entry : validSpills.entrySet()) {
@@ -125,7 +118,10 @@ public class ScheduleUtil {
             s.getDays().remove(d);
         }
 
-        CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
+        if(s.isNamedSchedule())
+            CCUHsApi.getInstance().updateSchedule(s);
+        else
+            CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
     }
 
     public static Interval OverNightEnding(Interval Ending)

@@ -9,6 +9,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
 import a75f.io.logic.bo.building.schedules.occupancy.NoConditioning;
 import a75f.io.logic.bo.building.schedules.occupancy.EmergencyConditioning;
 import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
@@ -38,6 +39,7 @@ public class OccupancyHandler implements Occupiable {
     OccupancyTrigger preconditioning;
     OccupancyTrigger vacation;
     OccupancyTrigger noconditioning;
+    OccupancyTrigger demandResponse;
     OccupancyUtil    occupancyUtil;
     
     public OccupancyHandler(CCUHsApi hayStack, String equipRef, OccupancyUtil occupancyUtil) {
@@ -54,6 +56,7 @@ public class OccupancyHandler implements Occupiable {
         preconditioning = new Preconditioning(hayStack, equipRef);
         vacation = new Vacation(hayStack, equipRef);
         noconditioning = new NoConditioning(hayStack,equipRef);
+        demandResponse = new DemandResponse(hayStack, equipRef);
     }
     
     public Schedule getSchedule() {
@@ -68,6 +71,9 @@ public class OccupancyHandler implements Occupiable {
         }
         if (keyCardSensor.hasTriggered()) {
             return OccupiedTrigger.KeyCardInput;
+        }
+        if (demandResponse.hasTriggered()) {
+            return OccupiedTrigger.DemandResponseOccupied;
         }
         if (autoAway.hasTriggered()) {
             return OccupiedTrigger.Autoaway;
@@ -85,14 +91,14 @@ public class OccupancyHandler implements Occupiable {
     //Triggers that can influence the unoccupied mode.
     public UnoccupiedTrigger getUnoccupiedTrigger() {
 
-        if (vacation.hasTriggered()) {
-            return UnoccupiedTrigger.Vacation;
-        }
         if (windowSensor.hasTriggered()) {
             return UnoccupiedTrigger.DoorWindowInput;
         }
         if (keyCardSensor.hasTriggered()) {
             return UnoccupiedTrigger.KeyCardInput;
+        }
+        if (demandResponse.hasTriggered()) {
+            return UnoccupiedTrigger.DemandResponseUnoccupied;
         }
         if (preconditioning.hasTriggered()) {
             return UnoccupiedTrigger.Preconditioning;
@@ -109,7 +115,9 @@ public class OccupancyHandler implements Occupiable {
         if (noconditioning.hasTriggered()) {
             return UnoccupiedTrigger.NoConditioning;
         }
-
+        if (vacation.hasTriggered()) {
+            return UnoccupiedTrigger.Vacation;
+        }
         return UnoccupiedTrigger.Unoccupied;
     }
 

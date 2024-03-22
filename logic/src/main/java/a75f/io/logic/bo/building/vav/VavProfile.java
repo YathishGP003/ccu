@@ -280,10 +280,10 @@ public abstract class VavProfile extends ZoneProfile {
             d.minPosition = 0;
             d.maxPosition = 100;
         } else {
-            d.minPosition = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
-                    : vavEquip.getMinCoolingDamperPos().readDefaultVal());
-            d.maxPosition = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
-                    : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
+            d.minPosition = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()
+                    : vavEquip.getMinCoolingDamperPos().readPriorityVal());
+            d.maxPosition = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readPriorityVal()
+                    : vavEquip.getMaxCoolingDamperPos().readPriorityVal());
         }
 
         d.iaqCompensatedMinPos = d.minPosition;

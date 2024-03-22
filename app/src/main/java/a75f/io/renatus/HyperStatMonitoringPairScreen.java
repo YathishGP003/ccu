@@ -110,9 +110,10 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
         } else if(CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
             pairImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrierhspairingscreen, null));
             pairImage = view.findViewById(R.id.hyperStatMonitoringPairing);
-            if (CCUUiUtil.isDaikinEnvironment(getContext())) {
-                pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
-            }
+        } else if(CCUUiUtil.isDaikinEnvironment(getContext())) {
+            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
+        } else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.image_auto_pairing_screen_hs_airoverse));
         }
         return view;
     }

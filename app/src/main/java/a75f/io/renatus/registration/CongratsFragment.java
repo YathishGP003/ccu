@@ -30,15 +30,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class CongratsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     @BindView(R.id.textCCUName)
     TextView mCCUName;
     @BindView(R.id.textSerialNo)
@@ -71,8 +62,6 @@ public class CongratsFragment extends Fragment {
 
     Context            mContext;
 
-    private static final String TAG = CongratsFragment.class.getSimpleName();
-
     public CongratsFragment() {
         // Required empty public constructor
     }
@@ -81,27 +70,16 @@ public class CongratsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment StartCCUFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CongratsFragment newInstance(String param1, String param2) {
-        CongratsFragment fragment = new CongratsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static CongratsFragment newInstance() {
+        return new CongratsFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -110,13 +88,7 @@ public class CongratsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_congrats, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getContext().getApplicationContext();
-
-        if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
-            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
-            textSuccess.setText(R.string.title_success_carrier);
-            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
-            textInstruction.setText(R.string.desc_firsttime_carrier);
-        }
+        setPartnerSpecificCongratsPage(rootView);
 
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
         p.setMargins(0, 0, 0, 80);
@@ -193,6 +165,19 @@ public class CongratsFragment extends Fragment {
         return rootView;
     }
 
+    private void setPartnerSpecificCongratsPage(View rootView) {
+        if (CCUUiUtil.isCarrierThemeEnabled(mContext)) {
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_carrier);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_carrier);
+        } else if (CCUUiUtil.isAiroverseThemeEnabled(mContext)) {
+            TextView textSuccess = rootView.findViewById(R.id.textSuccess);
+            textSuccess.setText(R.string.title_success_airoverse);
+            TextView textInstruction = rootView.findViewById(R.id.textInstruction);
+            textInstruction.setText(R.string.desc_firsttime_airoverse);
+        }
+    }
 
     @Override
     public void onAttach(Context context) {

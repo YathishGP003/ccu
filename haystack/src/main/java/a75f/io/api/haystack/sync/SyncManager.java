@@ -44,6 +44,11 @@ public class SyncManager {
      */
     public void syncEntities(boolean workPolicyKeep) {
 
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         CcuLog.d(TAG, "syncEntities");
         if (mSyncTimerTask != null) {
             mSyncTimerTask.cancel();
@@ -60,23 +65,17 @@ public class SyncManager {
             return;
         }
 
-        if (isMigrationRequired()) {
-            CcuLog.d(TAG, "Migration Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
-                                                getMigrationWorkRequest())
-                                                .then(getSyncWorkRequest())
-                                                .enqueue();
-        } else {
-            CcuLog.d(TAG, "Migration not Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
-                                                getSyncWorkRequest())
-                                                .enqueue();
-        }
+        WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                        workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
+                        getSyncWorkRequest())
+                .enqueue();
     }
 
     public void syncPointArray() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
 
         CcuLog.d(TAG, "syncPointArray : Migration not required");
         WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
@@ -90,11 +89,21 @@ public class SyncManager {
      * Queue a sync work followed by pointWrite work replacing any pending work in queue.
      */
     public void syncEntitiesWithPointWrite() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         CcuLog.d(TAG, "syncEntitiesWithPointWrite");
         syncEntitiesWithPointWriteWithDelay(0);
     }
 
     public void syncEntitiesWithPointWriteWithDelay(long delaySeconds) {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
             return;
@@ -106,22 +115,11 @@ public class SyncManager {
             mSyncTimerTask = null;
         }
 
-        if (isMigrationRequired()) {
-            CcuLog.d(TAG, "Migration Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getMigrationWorkRequest())
-                       .then(getSyncWorkRequestWithDelay(delaySeconds))
-                       .then(getPointWriteWorkRequest())
-                       .enqueue();
-        } else {
-            CcuLog.d(TAG, "Migration not Required");
-            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getSyncWorkRequestWithDelay(delaySeconds))
-                       .then(getPointWriteWorkRequest())
-                       .enqueue();
-        }
+        WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                        ExistingWorkPolicy.REPLACE,
+                        getSyncWorkRequestWithDelay(delaySeconds))
+                .then(getPointWriteWorkRequest())
+                .enqueue();
     }
 
 
@@ -174,36 +172,12 @@ public class SyncManager {
                                         .build();
     }
     
-    /**
-     * Do migration if there is idmap and flag is not set.
-     * @return
-     */
-    private boolean isMigrationRequired() {
-        boolean migrationFlag = PreferenceUtil.getUuidMigrationCompleted(appContext);
-        if (migrationFlag) {
-            return false; //Migration has been completed.
-        }
-        
-        boolean migrationRequired = false;
-        if (CCUHsApi.getInstance().getIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        if (CCUHsApi.getInstance().getUpdateIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        if (CCUHsApi.getInstance().getRemoveIdMap().size() > 0) {
-            migrationRequired = true;
-        }
-        
-        if (!migrationRequired) {
-            //Nothing to migrate. May be fresh installation.
-            PreferenceUtil.setUuidMigrationCompleted(true, appContext);
-        }
-        
-        return migrationRequired;
-    }
-    
     public void scheduleSync() {
+        if(CCUHsApi.getInstance().readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         if (mSyncTimerTask != null) {
             return;
         }

@@ -64,6 +64,7 @@ public class L
     public static final String TAG_CCU_BACNET = "CCU_BACNET";
     public static final String TAG_CCU_DOWNLOAD = "CCU_DOWNLOAD";
     public static final String CCU_REMOTE_ACCESS = "CCU_REMOTE_ACCESS";
+    public static final String TAG_CCU_DR_MODE = "CCU_DR_MODE";
 
     public static Context app()
     {
@@ -142,6 +143,30 @@ public class L
             for (HashMap node : nodes)
             {
                 if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
+                    nextAddr++;
+                    addrUsed = true;
+                    break;
+                } else {
+                    addrUsed = false;
+                }
+            }
+        }
+        return nextAddr;
+    }
+
+    public static short generateModbusAddress()
+    {
+        short currentAddr = 1;
+        ArrayList<HashMap> modbusDevices = CCUHsApi.getInstance().readAll("device and modbus");
+
+        boolean addrUsed = true;
+        short nextAddr = currentAddr;
+
+        while (addrUsed)
+        {
+            for (HashMap d : modbusDevices)
+            {
+                if (d.get("addr").toString().equals(String.valueOf(nextAddr))) {
                     nextAddr++;
                     addrUsed = true;
                     break;

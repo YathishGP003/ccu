@@ -1,17 +1,13 @@
 package a75f.io.domain.util
 
-import a75f.io.api.haystack.CCUHsApi
-import android.content.Context
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
-import java.lang.IllegalStateException
 
 /**
  * Reading of Model through ModelLoader will have the model cached after first read.
  */
 object ModelLoader {
 
-    fun getBuildingEquipModelDef(context: Context? = null) : ModelDirective {
+    fun getBuildingEquipModelDef(): ModelDirective {
         return ModelCache.getModelById(MODEL_BUILDING_EQUIP)
     }
 
@@ -29,6 +25,10 @@ object ModelLoader {
 
     fun getSmartNodeVavAcbModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_SN_VAV_ACB)
+    }
+
+    fun getSmartNodeBypassDamperModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SN_BYPASS_DAMPER)
     }
 
     fun getSmartNodeDevice() : ModelDirective {
@@ -66,6 +66,7 @@ object ModelLoader {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
             "smartnodeVAVReheatSeriesFan" -> getSmartNodeVavSeriesModelDef()
             "smartnodeVAVReheatParallelFan" -> getSmartNodeVavParallelFanModelDef()
+            "smartnodeBypassDamper" -> getSmartNodeBypassDamperModelDef()
             "smartnodeActiveChilledBeam" -> getSmartNodeVavAcbModelDef()
             "helionodeVAVReheatNoFan" -> getHelioNodeVavNoFanModelDef()
             "helionodeVAVReheatSeriesFan" -> getHelioNodeVavSeriesModelDef()

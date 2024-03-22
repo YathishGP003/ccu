@@ -76,6 +76,7 @@
 				android:textSize="30dp"
 				android:textColor="?orange_75f"/>
 
+			<!--
 			<RelativeLayout
 				android:id="@+id/rl_systemdevice"
 				android:layout_width="wrap_content"
@@ -102,7 +103,7 @@
 					android:layout_marginLeft="60dp"
 					android:layout_alignParentBottom="true" />
 			</RelativeLayout>
-
+			-->
 
 			<ListView
 				android:id="@+id/floorList"
@@ -178,6 +179,7 @@
 				android:textColor="?orange_75f"
 				android:textSize="30dp" />
 
+			<!--
 			<RelativeLayout
 				android:visibility="gone"
 				android:id="@+id/rl_oao"
@@ -257,6 +259,7 @@
 					android:layout_marginLeft="60dp"
 					android:layout_alignParentBottom="true" />
 			</RelativeLayout>
+			-->
 			<ListView
 				android:id="@+id/roomList"
 				android:animateLayoutChanges="true"

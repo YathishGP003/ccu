@@ -2,13 +2,9 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 
 import org.projecthaystack.UnknownRecException;
 
-import java.util.ArrayList;
 import java.util.Date;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -42,24 +38,26 @@ public class AutoForcedOccupied implements OccupancyTrigger {
      * @return
      */
     public boolean hasTriggered() {
-        /*ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
-        Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
-        if(activeSystemVacation != null){
-            CcuLog.i(L.TAG_CCU_SCHEDULER, "Active vacation");
-            return false;
-        }*/
+        return isZoneInAutoForcedOccupied(occupancyUtil);
+    }
 
-        if (!isEnabled()) {
+    public static boolean isAutoForceEnabled(OccupancyUtil occupancyUtil) {
+        return occupancyUtil.isConfigEnabled("auto and forced and occupied") ||
+                occupancyUtil.isConfigEnabled("auto and forced and occupancy");
+    }
+
+    public static boolean isZoneInAutoForcedOccupied(OccupancyUtil occupancyUtil) {
+        if (!isAutoForceEnabled(occupancyUtil)) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForcedOccupied not enabled");
             return false;
         }
-    
+
         Date lastOccupancy = occupancyUtil.getLastOccupancyDetectionTime();
         //TODO-Schedules - check how this is handled now.
         if (lastOccupancy == null) {
             return false;
         }
-        
+
         Occupied occStatus = ScheduleUtil.getOccupied(occupancyUtil.getEquipRef());
         if (occStatus == null) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupied entry not found , disable auto forced occupied");
@@ -72,14 +70,14 @@ public class AutoForcedOccupied implements OccupancyTrigger {
             && occupancyMode != Occupancy.AUTOAWAY
             && occupancyMode != Occupancy.PRECONDITIONING
             && occupancyMode != Occupancy.FORCEDOCCUPIED) {
-    
+
             double forcedOccupiedTimeMinutes = occupancyUtil.getForcedOccupiedTime();
-            
+
             double timeToForcedOccupiedExpiry =
                 (lastOccupancy.getTime() + forcedOccupiedTimeMinutes * 60 * 1000) - System.currentTimeMillis();
             CcuLog.i(L.TAG_CCU_SCHEDULER, "forcedOccupiedTimeMinutes "+forcedOccupiedTimeMinutes+
                                                                 " : timeToForcedOccupiedExpiry "+ timeToForcedOccupiedExpiry);
-            
+
             return timeToForcedOccupiedExpiry > 0;
         }
         return false;

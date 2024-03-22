@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
+import static a75f.io.logic.util.OfflineModeUtilKt.createOfflineModePoint;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,6 +10,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
@@ -32,6 +35,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -58,9 +62,17 @@ public abstract class SystemProfile
     public double systemHeatingLoopOp;
     public double systemFanLoopOp;
     public double systemCo2LoopOp;
-    
+
+    private boolean isBypassCoolingLockoutActive;
+    private boolean isBypassHeatingLockoutActive;
+
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
+
+    private Timer bypassHeatingLockoutTimer;
+    private Timer bypassCoolingLockoutTimer;
+    private TimerTask heatingTimerTask;
+    private TimerTask coolingTimerTask;
 
     public abstract void doSystemControl();
 
@@ -428,7 +440,8 @@ public abstract class SystemProfile
                 .setTz(tz).build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
         TunerUtil.copyDefaultBuildingTunerVal(humidityCompensationOffsetId, DomainName.humidityCompensationOffset, hayStack);
-
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack, equipRef, equipDis, true,
+                null, null);
     }
 
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
@@ -489,6 +502,8 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
         addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        createDemandResponseConfigPoints(equipDis, siteRef, equipref, tz, CCUHsApi.getInstance());
+        createOfflineModePoint();
 
     }
 
@@ -558,10 +573,11 @@ public abstract class SystemProfile
         }
 
         addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        createOfflineModePoint();
 
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }
-    
+
     private void createOutsideTempLockoutPoints(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
                                                 String tz) {
         if(!verifyPointsAvailability("config and outsideTemp and cooling and lockout",equipref)) {
@@ -681,10 +697,9 @@ public abstract class SystemProfile
             }
         }
 
-        if (externalTemp != 0) {
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
-        }
+        CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
+        CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+        
     }
     
     /**
@@ -763,21 +778,108 @@ public abstract class SystemProfile
     public double getHeatingLockoutVal() {
         return TunerUtil.readTunerValByQuery("outsideTemp and heating and lockout", equipRef);
     }
-    
+
+    public void updateBypassSatLockouts(CCUHsApi hayStack) {
+        if (L.ccu().bypassDamperProfile != null) {
+            double bypassSat = L.ccu().bypassDamperProfile.getBdEquip().getSupplyAirTemp().readHisVal();
+            double satMinThreshold = L.ccu().bypassDamperProfile.getBdEquip().getSatMinThreshold().readPriorityVal();
+            double satMaxThreshold = L.ccu().bypassDamperProfile.getBdEquip().getSatMaxThreshold().readPriorityVal();
+
+            CcuLog.d("CCU_BYPASS", "handle Bypass SAT lockout: SAT = " + bypassSat + " °F");
+
+            if (bypassSat < satMinThreshold && bypassSat > 0.0) {
+                CcuLog.d("CCU_BYPASS", "SAT is below satMinThreshold of " + satMinThreshold + " °F");
+                handleBypassHeatingLockoutNormal();
+                handleBypassCoolingLockoutTripped();
+            } else if (bypassSat > satMaxThreshold && bypassSat < 200.0) {
+                CcuLog.d("CCU_BYPASS", "SAT is above satMaxThreshold of " + satMaxThreshold + " °F");
+                handleBypassHeatingLockoutTripped();
+                handleBypassCoolingLockoutNormal();
+            } else {
+                CcuLog.d("CCU_BYPASS", "SAT is in-range of " + satMinThreshold + "-" + satMaxThreshold + " or is invalid");
+                handleBypassHeatingLockoutNormal();
+                handleBypassCoolingLockoutNormal();
+            }
+        } else {
+            handleBypassHeatingLockoutNormal();
+            handleBypassCoolingLockoutNormal();
+        }
+
+        hayStack.writeDefaultVal("point and domainName == \"" + DomainName.bypassHeatingLockout + "\"", isBypassHeatingLockoutActive ? 1.0 : 0.0);
+        hayStack.writeDefaultVal("point and domainName == \"" + DomainName.bypassCoolingLockout + "\"", isBypassCoolingLockoutActive ? 1.0 : 0.0);
+        hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.bypassHeatingLockout + "\"", isBypassHeatingLockoutActive ? 1.0 : 0.0);
+        hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.bypassCoolingLockout + "\"", isBypassCoolingLockoutActive ? 1.0 : 0.0);
+    }
+
+    private void handleBypassHeatingLockoutTripped() {
+        if (bypassHeatingLockoutTimer == null) {
+            long satLimitBreachTime = (long)(60000 * ccu().bypassDamperProfile.getBdEquip().getBypassDamperSATTimeDelay().readPriorityVal());
+            if (satLimitBreachTime == 0) { satLimitBreachTime = 5 * 60000; }
+            bypassHeatingLockoutTimer = new Timer();
+            heatingTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    isBypassHeatingLockoutActive = true;
+                }
+            };
+            bypassHeatingLockoutTimer.schedule(heatingTimerTask, satLimitBreachTime);
+            CcuLog.d("CCU_BYPASS", "Starting heating lockout timer of " + satLimitBreachTime + " ms");
+        }
+    }
+
+    private void handleBypassCoolingLockoutTripped() {
+        if (bypassCoolingLockoutTimer == null) {
+            long satLimitBreachTime = (long)(60000 * ccu().bypassDamperProfile.getBdEquip().getBypassDamperSATTimeDelay().readPriorityVal());
+            if (satLimitBreachTime == 0) { satLimitBreachTime = 5 * 60000; }
+            bypassCoolingLockoutTimer = new Timer();
+            coolingTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    isBypassCoolingLockoutActive = true;
+                }
+            };
+            bypassCoolingLockoutTimer.schedule(coolingTimerTask, satLimitBreachTime);
+            CcuLog.d("CCU_BYPASS", "Starting cooling lockout timer of " + satLimitBreachTime + " ms");
+        }
+    }
+
+    private void handleBypassHeatingLockoutNormal() {
+        isBypassHeatingLockoutActive = false;
+
+        if (bypassHeatingLockoutTimer != null) {
+            bypassHeatingLockoutTimer.cancel();
+            bypassHeatingLockoutTimer = null;
+            CcuLog.d("CCU_BYPASS", "Heating lockout timer cancelled");
+        }
+    }
+
+    private void handleBypassCoolingLockoutNormal() {
+        isBypassCoolingLockoutActive = false;
+
+        if (bypassCoolingLockoutTimer != null) {
+            bypassCoolingLockoutTimer.cancel();
+            bypassCoolingLockoutTimer = null;
+            CcuLog.d("CCU_BYPASS", "Cooling lockout timer cancelled");
+        }
+    }
+
     public void updateMechanicalConditioning(CCUHsApi hayStack) {
+        updateBypassSatLockouts(hayStack);
+        CcuLog.e("CCU_BYPASS", "Updating conditioning: isBypassHeatingLockoutActive " + isBypassHeatingLockoutActive + ", isBypassCoolingLockoutActive " + isBypassCoolingLockoutActive);
+
         double outsideAirTemp = getOutsideAirTemp(hayStack);
         if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())) {
-            mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+            mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal() && !isBypassCoolingLockoutActive;
         } else {
-            mechanicalCoolingAvailable = true;
+            mechanicalCoolingAvailable = !isBypassCoolingLockoutActive;
         }
         hayStack.writeHisValByQuery("system and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
         if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
-            mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal();
+            mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal() && !isBypassHeatingLockoutActive;
         } else {
-            mechanicalHeatingAvailable = true;
+            mechanicalHeatingAvailable = !isBypassHeatingLockoutActive;
         }
         hayStack.writeHisValByQuery("system and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
@@ -793,6 +895,8 @@ public abstract class SystemProfile
     public boolean isHeatingLockoutActive() {
         return !mechanicalHeatingAvailable;
     }
+
+
 
     public double getSystemLoopOutputValue(String state){
          double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");
@@ -818,5 +922,9 @@ public abstract class SystemProfile
         }
 
 
+    }
+    public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
+        DemandResponseMode demandResponseMode = new DemandResponseMode();
+        demandResponseMode.createDemandResponseEnrollmentPoint(equipDis, siteRef, equipRef, tz, hayStack);
     }
 }

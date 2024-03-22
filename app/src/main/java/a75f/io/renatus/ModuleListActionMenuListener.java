@@ -66,9 +66,11 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 						deleteSelectedFSV();
 						seletedModules.clear();
 						floorPlanActivity.refreshScreen();
+						/*
 						if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
 							floorPlanActivity.systemDeviceOnClick();
 						}
+						*/
 						mode.finish(); // Action picked, so close the CAB
 
 					} else {

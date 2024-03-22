@@ -58,6 +58,7 @@ import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
+import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import butterknife.BindView;
@@ -420,6 +421,11 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case OAO:
                         showDialogFragment(DialogOAOProfile.newInstance(mPairingAddress,mName,mFloorName),DialogOAOProfile.ID);
+                        break;
+                    case BYPASS_DAMPER:
+                        showDialogFragment(
+                                BypassConfigFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,mNodeType, mProfileType),
+                                BypassConfigFragment.Companion.getID());
                         break;
                     case PLC:
                         showDialogFragment(FragmentPLCConfiguration

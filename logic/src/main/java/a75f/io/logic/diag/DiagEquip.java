@@ -19,8 +19,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -297,7 +301,9 @@ public class DiagEquip
         int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED,-1);
         if((plugged == BatteryManager.BATTERY_PLUGGED_AC) || (plugged == BatteryManager.BATTERY_PLUGGED_USB))
             isPowerConnected = true;
-        
+
+        setDiagHisVal("app and restart", AlertManager.getInstance().getRepo().checkIfAppRestarted() ? 1.0 : 0.0);
+
         // Are we charging / charged?
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
@@ -331,7 +337,6 @@ public class DiagEquip
             setDiagHisVal("total and memory", mi.totalMem/1048576L);
             setDiagHisVal("low and memory",  mi.lowMemory? 1.0 :0);
         }
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
 
         PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
         PackageInfo pi;
@@ -339,15 +344,11 @@ public class DiagEquip
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
-            String migVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and migration");
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
-            }
-            if(SchedulableMigrationKt.validateMigration() && !(migVersion.equals(hisVersion))) {
-                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", hisVersion);
             }
             if(!PreferenceUtil.isSRMigrationPointUpdated() && SchedulableMigrationKt.validateMigration()) {
                 MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());

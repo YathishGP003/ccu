@@ -88,6 +88,11 @@ public class HisSyncHandler
     }
     
     private void doSync(boolean syncAllData) {
+        if(ccuHsApi.readDefaultVal("offline and mode and point") > 0) {
+            CcuLog.d("CCU_HS"," Skip his sync in offlineMode");
+            return;
+        }
+
         int cacheSyncFrequency = Math.max(ccuHsApi.getCacheSyncFrequency(), 1);
         int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint(ccuHsApi);
         CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData+" cacheSyncFrequency "+cacheSyncFrequency);
@@ -193,6 +198,8 @@ public class HisSyncHandler
             } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
                 CcuLog.e(TAG, "His write failed! , Trying to handle the error");
                 EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+                // Marking his items are synched to confirm
+                ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
             }
         }else{
             CcuLog.e(TAG, "null response");
@@ -417,7 +424,9 @@ public class HisSyncHandler
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
                 || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
-                || pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus");
+                || pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus")
+                || (pointToSync.containsKey("outside") && pointToSync.containsKey("temp")
+                && pointToSync.containsKey("system"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

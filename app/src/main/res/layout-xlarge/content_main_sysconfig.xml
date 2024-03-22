@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.slidingpanelayout.widget.SlidingPaneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sysConfig_sliding_pane"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <!--Master fragment-->
+    <FrameLayout
+        android:id="@+id/sysConfigMasterContainer"
+        android:layout_width="290.dp"
+        android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/fragment_system_config"
+        android:name="a75f.io.renatus.SystemConfigMenuFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+    <!--Detail layout -->
+    <FrameLayout
+        android:id="@+id/sysConfigFlContent"
+        android:layout_width="1200.dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="56dp"
+        android:paddingStart="50dp" />
+
+</androidx.slidingpanelayout.widget.SlidingPaneLayout>

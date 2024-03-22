@@ -172,8 +172,8 @@ public class VavAcbProfile extends VavProfile
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+nodeAddr+" roomTemp : "+vavEquip.getCurrentTemp().readHisVal());
         state = TEMPDEAD;
         if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
-            double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readDefaultVal()
-                                                : vavEquip.getMinCoolingDamperPos().readDefaultVal());
+            double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()
+                                                : vavEquip.getMinCoolingDamperPos().readPriorityVal());
             double damperMax = (int) (state == HEATING ? vavEquip.getMaxHeatingDamperPos().readDefaultVal()
                                                 : vavEquip.getMaxCoolingDamperPos().readDefaultVal());
             double damperPos = (damperMax+damperMin)/2;

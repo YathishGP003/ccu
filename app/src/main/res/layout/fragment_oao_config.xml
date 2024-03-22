@@ -471,21 +471,39 @@
 
             </RelativeLayout>
 
-            <Button
-                android:id="@+id/setBtn"
-                android:layout_width="wrap_content"
+
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@null"
-                android:button="@null"
-                android:layout_gravity="end|center"
-                android:fontFamily="@font/lato_regular"
-                android:text="@string/button_set"
-                android:textAllCaps="true"
-                android:textColor="?orange_75f"
-                android:textSize="19.5dp" />
+                android:layout_marginTop="30dp">
+
+                <Button
+                    android:id="@+id/unpairBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:background="@null"
+                    android:button="@null"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="@string/button_unpair"
+                    android:textAllCaps="true"
+                    android:textColor="?orange_75f"
+                    android:textSize="19.5dp" />
+
+                <Button
+                    android:id="@+id/setBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:background="@null"
+                    android:button="@null"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="@string/button_set"
+                    android:textAllCaps="true"
+                    android:textColor="?orange_75f"
+                    android:textSize="19.5dp" />
+            </RelativeLayout>
+
         </LinearLayout>
 
     </RelativeLayout>

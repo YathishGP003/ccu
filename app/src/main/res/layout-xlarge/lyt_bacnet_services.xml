@@ -15,8 +15,7 @@
 
         <Spinner
             android:paddingRight="30dp"
-            android:background="@drawable/spinner_bg_down"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
+            style="@style/customSpinnerDownArrow"
             android:id="@+id/spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

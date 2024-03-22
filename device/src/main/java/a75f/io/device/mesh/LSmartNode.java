@@ -28,12 +28,14 @@ import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.CondensateSensor_t;
 import a75f.io.device.serial.DamperActuator_t;
 import a75f.io.device.serial.DamperShape_t;
+import a75f.io.device.serial.InputSensorType_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.ProfileMap_t;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings2_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.BypassDamperEquip;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
@@ -44,6 +46,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -165,16 +168,38 @@ public class LSmartNode
             settings.maxUserTem.set((short) 75);
             settings.minUserTemp.set((short) 69);
         }
-        
-        if (getStatus(address) == ZoneState.HEATING.ordinal()) {
-            settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
-            settings.minDamperOpen.set((short)getDamperLimit("heating", "min", address));
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        if (profile.equals("bypass")) {
+            settings.minDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMinPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
+            settings.maxDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMaxPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
+        } else if (equip.getProfile().equals("PLC")) {
+            settings.minDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and min and output and group == \"" + address + "\"").intValue())));
+            settings.maxDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and max and output and group == \"" + address + "\"").intValue())));
         } else {
-            settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
-            settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
+            if (getStatus(address) == ZoneState.HEATING.ordinal()) {
+                settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
+                settings.minDamperOpen.set((short)getDamperLimit("heating", "min", address));
+            } else {
+                settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
+                settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
+            }
         }
 
-        settings.temperatureOffset.set((short)(10*getTempOffset(address)));
+         boolean isVav = equip.getProfile().equals(ProfileType.VAV_REHEAT.name())
+                || equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())
+                || equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())
+                || equip.getProfile().equals(ProfileType.VAV_ACB.name())
+                || equip.getProfile().equals(ProfileType.VAV_REHEAT.name());
+
+        if (isVav) {
+            settings.temperatureOffset.set((short)(10*getTempOffset(address)));
+        } else {
+            settings.temperatureOffset.set((short)(getTempOffset(address)));
+        }
+
         
         if(profile == null)
             profile = "dab";
@@ -196,6 +221,8 @@ public class LSmartNode
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
                 break;
+            case "bypass":
+                setupBypassDamperActuator(settings, equip.getId());
 
         }
         settings.roomName.set(zone.getDisplayName());
@@ -204,17 +231,32 @@ public class LSmartNode
         settings.reverseMotorBacklash.set((short)5);
 
         String equipId = SystemTemperatureUtil.getEquip(address).getId();
-        try {
-            settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
-            settings.integralConstant.set((short)(TunerUtil.getIntegralGain(equipId) * 100));
-            settings.proportionalTemperatureRange.set((short)(TunerUtil.getProportionalSpread(equipId) * 10));
-            settings.integrationTime.set((short)TunerUtil.getIntegralTimeout(equipId));
-        } catch (Exception e) {
-            //Equips not having PI tuners are bound to throw exception
-            settings.proportionalConstant.set((short)50);
-            settings.integralConstant.set((short)50);
-            settings.proportionalTemperatureRange.set((short)15);
-            settings.integrationTime.set((short)30);
+        if (profile.equals("bypass")) {
+            try {
+                settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
+                settings.integralConstant.set((short)(TunerUtil.getIntegralGain(equipId) * 100));
+                settings.proportionalTemperatureRange.set((short)20);
+                settings.integrationTime.set((short)TunerUtil.getIntegralTimeout(equipId));
+            } catch (Exception e) {
+                //Equips not having PI tuners are bound to throw exception
+                settings.proportionalConstant.set((short)50);
+                settings.integralConstant.set((short)50);
+                settings.proportionalTemperatureRange.set((short)15);
+                settings.integrationTime.set((short)30);
+            }
+        } else {
+            try {
+                settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
+                settings.integralConstant.set((short)(TunerUtil.getIntegralGain(equipId) * 100));
+                settings.proportionalTemperatureRange.set((short)(TunerUtil.getProportionalSpread(equipId) * 10));
+                settings.integrationTime.set((short)TunerUtil.getIntegralTimeout(equipId));
+            } catch (Exception e) {
+                //Equips not having PI tuners are bound to throw exception
+                settings.proportionalConstant.set((short)50);
+                settings.integralConstant.set((short)50);
+                settings.proportionalTemperatureRange.set((short)15);
+                settings.integrationTime.set((short)30);
+            }
         }
         
         settings.airflowHeatingTemperature.set((short)105);
@@ -276,6 +318,37 @@ public class LSmartNode
             airflowCFMIntegralTime = (int)(acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
             airflowCFMIntegralKFactor = (int)(100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
             enableCFM = (int)(acbEquip.getEnableCFMControl().readPriorityVal());
+        } else if (equip.getProfile().equals("PLC")) {
+            CCUHsApi hsApi = CCUHsApi.getInstance();
+            settings2.inputSensor1.set(getInputSensor1(hsApi, address));
+            InputSensorType_t inputSensor2 = getInputSensor2(hsApi.readDefaultVal("point and config and analog2 and sensor and group == \""+address+"\"").intValue());
+            settings2.inputSensor2.set(inputSensor2);
+
+            double rawSpSensorOffset = hsApi.readDefaultVal("point and config and setpoint and sensor and offset and group == \""+address+"\"");
+            settings2.setpointSensorOffset.set(getInputSensor1Multiplier(inputSensor2, rawSpSensorOffset));
+
+            settings2.genericPiProportionalRange.set(hsApi.readDefaultVal("point and config and pid and prange and group == \""+address+"\"").shortValue());
+            settings2.turnOnRelay1.set(hsApi.readDefaultVal("point and config and relay1 and on and threshold and group == \""+address+"\"").shortValue());
+            settings2.turnOnRelay2.set(hsApi.readDefaultVal("point and config and relay2 and on and threshold and group == \""+address+"\"").shortValue());
+            settings2.turnOffRelay1.set(hsApi.readDefaultVal("point and config and relay1 and off and threshold and group == \""+address+"\"").shortValue());
+            settings2.turnOffRelay2.set(hsApi.readDefaultVal("point and config and relay2 and off and threshold and group == \""+address+"\"").shortValue());
+            settings2.expectedZeroErrorAtMidpoint.set(hsApi.readDefaultVal("point and config and zero and error and midpoint and group == \""+address+"\"").shortValue());
+            settings2.invertControlLoopOutput.set(hsApi.readDefaultVal("point and config and control and loop and inversion and group == \""+address+"\"").shortValue());
+            settings2.useAnalogIn2ForDynamicSetpoint.set(hsApi.readDefaultVal("point and config and analog2 and setpoint and enabled and group == \""+address+"\"").shortValue());
+            settings2.relay1Enable.set(hsApi.readDefaultVal("point and config and relay1 and enabled and group == \""+address+"\"").shortValue());
+            settings2.relay2Enable.set(hsApi.readDefaultVal("point and config and relay2 and enabled and group == \""+address+"\"").shortValue());
+            // PI Loop runs all the time for PI Profile
+            settings2.runPILoopOnNode.set((short)0);
+        } else if (equip.getProfile().equals("BYPASS_DAMPER")) {
+            BypassDamperEquip bdEquip = new BypassDamperEquip(equipRef);
+            settings2.inputSensor1.set(bdEquip.getPressureSensorType().readDefaultVal() > 0 ? InputSensorType_t.INPUT_SENSOR_GENERIC_0_10V : InputSensorType_t.INPUT_SENSOR_NATIVE_PRESSURE);
+            settings2.genericPiProportionalRange.set((short)(10*bdEquip.getExpectedPressureError().readDefaultVal()));
+            // systemFanLoopOutput > 0 is the condition for enabling the PI on the CCU; send this same value to the node here
+            settings2.runPILoopOnNode.set(CCUHsApi.getInstance().readHisValByQuery("point and fan and system and loop and output and not tuner") > 0.0 ? (short)1 : (short)0);
+            settings2.minVolt.set((short)(10*bdEquip.getSensorMinVoltageOutput().readDefaultVal()));
+            settings2.maxVolt.set((short)(10*bdEquip.getSensorMaxVoltageOutput().readDefaultVal()));
+            settings2.minEngVal.set((short)(10*bdEquip.getPressureSensorMinVal().readDefaultVal()));
+            settings2.maxEngVal.set((short)(10*bdEquip.getPressureSensorMaxVal().readDefaultVal()));
         }
 
         settings2.kFactor.set(enableCFM > 0 ? kFactor : 200);
@@ -306,35 +379,88 @@ public class LSmartNode
             return ProfileMap_t.PROFILE_MAP_GENERIC_PI_CONTROL;
         } else if (profString.equals(ProfileType.SSE.name())) {
             return ProfileMap_t.PROFILE_MAP_SINGLE_STAGE_EQUIPMENT;
+        } else if (profString.equals(ProfileType.BYPASS_DAMPER.name())) {
+            return ProfileMap_t.PROFILE_MAP_BYPASS_DAMPER_CONTROL;
         }
 
         return ProfileMap_t.PROFILE_MAP_NOT_AVAILABLE;
     }
 
+    private static InputSensorType_t getInputSensor1(CCUHsApi hsApi, short address) {
+
+        int ai1Input = hsApi.readDefaultVal("point and config and analog1 and sensor and group == \""+address+"\"").intValue();
+        switch (ai1Input) {
+            case 1: return InputSensorType_t.INPUT_SENSOR_GENERIC_0_10V;
+            case 2: return InputSensorType_t.INPUT_SENSOR_PRESSURE_SENSOR_0_2;
+            case 3: return InputSensorType_t.INPUT_SENSOR_DIFF_PRESSURE_SENSOR_0_0P25;
+            case 4: return InputSensorType_t.INPUT_SENSOR_AIRFLOW_SENSOR_0_1000;
+            case 5: return InputSensorType_t.INPUT_SENSOR_HUMIDITY_0_100;
+            case 6: return InputSensorType_t.INPUT_SENSOR_CO2_0_2000;
+            case 7: return InputSensorType_t.INPUT_SENSOR_CO_0_100;
+            case 8: return InputSensorType_t.INPUT_SENSOR_NO2_0_5;
+            case 9: return InputSensorType_t.INPUT_SENSOR_CT_0_10;
+            case 10: return InputSensorType_t.INPUT_SENSOR_CT_0_20;
+            case 11: return InputSensorType_t.INPUT_SENSOR_CT_0_50;
+            case 12: return InputSensorType_t.INPUT_SENSOR_ION_METER_1_1M;
+        }
+
+        int th1Input = hsApi.readDefaultVal("point and config and th1 and sensor and group == \""+address+"\"").intValue();
+        switch (th1Input) {
+            case 1: return InputSensorType_t.INPUT_SENSOR_10K_TYPE2_PROBE;
+            case 2: return InputSensorType_t.INPUT_SENSOR_GENERIC_1K_100K;
+        }
+
+        int nativeSensorInput = hsApi.readDefaultVal("point and config and native and sensor and group == \""+address+"\"").intValue();
+        switch (nativeSensorInput) {
+            case 1: return InputSensorType_t.INPUT_SENSOR_NATIVE_TEMP;
+            case 2: return InputSensorType_t.INPUT_SENSOR_NATIVE_HUMIDITY;
+            case 3: return InputSensorType_t.INPUT_SENSOR_NATIVE_CO2;
+            case 4: return InputSensorType_t.INPUT_SENSOR_NATIVE_CO;
+            case 5: return InputSensorType_t.INPUT_SENSOR_NATIVE_NO;
+            case 6: return InputSensorType_t.INPUT_SENSOR_NATIVE_VOC;
+            case 7: return InputSensorType_t.INPUT_SENSOR_NATIVE_PRESSURE;
+            case 8: return InputSensorType_t.INPUT_SENSOR_NATIVE_SOUND;
+            case 9: return InputSensorType_t.INPUT_SENSOR_NATIVE_OCCUPANCY;
+            case 10: return InputSensorType_t.INPUT_SENSOR_NATIVE_ILLUMINANCE;
+            case 11: return InputSensorType_t.INPUT_SENSOR_NATIVE_CO2_EQUIVALENT;
+            case 12: return InputSensorType_t.INPUT_SENSOR_NATIVE_UVI;
+            case 13: return InputSensorType_t.INPUT_SENSOR_NATIVE_PM2P5;
+            case 14: return InputSensorType_t.INPUT_SENSOR_NATIVE_PM10;
+        }
+
+        return InputSensorType_t.INPUT_SENSOR_NOT_USED;
+    }
+
+    private static InputSensorType_t getInputSensor2(int index) {
+        switch (index) {
+            case 0: return InputSensorType_t.INPUT_SENSOR_GENERIC_0_10V;
+            case 1: return InputSensorType_t.INPUT_SENSOR_PRESSURE_SENSOR_0_2;
+            case 2: return InputSensorType_t.INPUT_SENSOR_DIFF_PRESSURE_SENSOR_0_0P25;
+            case 3: return InputSensorType_t.INPUT_SENSOR_AIRFLOW_SENSOR_0_1000;
+            case 4: return InputSensorType_t.INPUT_SENSOR_HUMIDITY_0_100;
+            case 5: return InputSensorType_t.INPUT_SENSOR_CO2_0_2000;
+            case 6: return InputSensorType_t.INPUT_SENSOR_CO_0_100;
+            case 7: return InputSensorType_t.INPUT_SENSOR_NO2_0_5;
+            case 8: return InputSensorType_t.INPUT_SENSOR_CT_0_10;
+            case 9: return InputSensorType_t.INPUT_SENSOR_CT_0_20;
+            case 10: return InputSensorType_t.INPUT_SENSOR_CT_0_50;
+            default: return InputSensorType_t.INPUT_SENSOR_NOT_USED;
+        }
+    }
+
     private static int getDamperSizeInInches(int index) {
         switch (index) {
-            case 0:
-                return 4;
-            case 1:
-                return 6;
-            case 2:
-                return 8;
-            case 3:
-                return 10;
-            case 4:
-                return 12;
-            case 5:
-                return 14;
-            case 6:
-                return 16;
-            case 7:
-                return 18;
-            case 8:
-                return 20;
-            case 9:
-                return 22;
-            default:
-                return 0;
+            case 0: return 4;
+            case 1: return 6;
+            case 2: return 8;
+            case 3: return 10;
+            case 4: return 12;
+            case 5: return 14;
+            case 6: return 16;
+            case 7: return 18;
+            case 8: return 20;
+            case 9: return 22;
+            default: return 0;
         }
     }
 
@@ -360,7 +486,6 @@ public class LSmartNode
             setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
         }
     }
-
 
     public static void setupDamperActuator(
             SmartNodeSettings_t settings,
@@ -444,6 +569,19 @@ public class LSmartNode
         return DAMPER_ACTUATOR_NOT_PRESENT;
     }
 
+    public static void setupBypassDamperActuator(SmartNodeSettings_t settings, String equipRef) {
+        int damperConfig = CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperType + "\" and equipRef == \""+equipRef+"\"").intValue();
+
+        switch (damperConfig) {
+            case 0: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_0_10V); break;
+            case 1: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_2_10V); break;
+            case 2: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_10_0V); break;
+            case 3: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_10_2V); break;
+            case 4: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_MAT); break;
+            case 5: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_0_5V); break;
+            default: settings.outsideAirOptimizationDamperActuatorType.set(DAMPER_ACTUATOR_NOT_PRESENT);
+        }
+    }
 
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
@@ -546,6 +684,7 @@ public class LSmartNode
             }
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
+            controls_t.targetValue.set(getTargetValue(equipRef));
         }
     }
 
@@ -708,6 +847,64 @@ public class LSmartNode
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 
+    public static short getTargetValue(String equipRef) {
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        try {
+            if (equip.getProfile().equals(ProfileType.BYPASS_DAMPER.name())) {
+                double target = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.ductStaticPressureSetpoint + "\" and equipRef == \"" + equipRef + "\"");
+                return Short.parseShort(String.valueOf((int)(10*target)));
+            } else if  (equip.getProfile().equals(ProfileType.PLC.name())) {
+                double target = CCUHsApi.getInstance().readPointPriorityValByQuery("point and config and pid and target and value and equipRef == \"" + equipRef + "\"");
+                InputSensorType_t sensorType = getInputSensor1(CCUHsApi.getInstance(), Short.parseShort(equip.getGroup()));
+                return getInputSensor1Multiplier(sensorType, target);
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    private static Short getInputSensor1Multiplier(InputSensorType_t sensorType, double val) {
+        switch (sensorType) {
+            case INPUT_SENSOR_GENERIC_0_10V:
+            case INPUT_SENSOR_PRESSURE_SENSOR_0_2:
+            case INPUT_SENSOR_NO2_0_5:
+            case INPUT_SENSOR_CT_0_10:
+            case INPUT_SENSOR_CT_0_20:
+            case INPUT_SENSOR_CT_0_50:
+            case INPUT_SENSOR_10K_TYPE2_PROBE:
+            case INPUT_SENSOR_GENERIC_1K_100K:
+            case INPUT_SENSOR_NATIVE_TEMP:
+            case INPUT_SENSOR_NATIVE_NO:
+            case INPUT_SENSOR_NATIVE_PRESSURE:
+            case INPUT_SENSOR_NATIVE_UVI:
+                return Short.parseShort(String.valueOf((int)(10*val)));
+            case INPUT_SENSOR_DIFF_PRESSURE_SENSOR_0_0P25:
+                return Short.parseShort(String.valueOf((int)(100*val)));
+            case INPUT_SENSOR_AIRFLOW_SENSOR_0_1000:
+            case INPUT_SENSOR_HUMIDITY_0_100:
+            case INPUT_SENSOR_CO2_0_2000:
+            case INPUT_SENSOR_CO_0_100:
+            case INPUT_SENSOR_NATIVE_HUMIDITY:
+            case INPUT_SENSOR_NATIVE_SOUND:
+            case INPUT_SENSOR_NATIVE_CO:
+            case INPUT_SENSOR_NATIVE_CO2:
+            case INPUT_SENSOR_NATIVE_OCCUPANCY:
+            case INPUT_SENSOR_NATIVE_ILLUMINANCE:
+            case INPUT_SENSOR_NATIVE_PM2P5:
+            case INPUT_SENSOR_NATIVE_PM10:
+                Short.parseShort(String.valueOf((int)(val)));
+            case INPUT_SENSOR_NATIVE_CO2_EQUIVALENT:
+                return Short.parseShort(String.valueOf((int)(val/10)));
+            case INPUT_SENSOR_ION_METER_1_1M:
+            case INPUT_SENSOR_NATIVE_VOC:
+                return Short.parseShort(String.valueOf((int)(val/1000)));
+            default:
+                return 0;
+        }
+    }
 
     public static int getCurrentDayOfWeekWithMondayAsStart() {
         Calendar calendar = GregorianCalendar.getInstance();

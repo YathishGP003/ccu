@@ -153,7 +153,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 reheatTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, reheatTypes);
                 reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[(int)equip.getReheatType().readDefaultVal()-1].displayName);
+                int reheatType = (int)equip.getReheatType().readDefaultVal();
+                int reheatPosition;
+                if (reheatType < 7) {
+                    reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[reheatType].displayName);
+                } else {
+                    reheatPosition = 6;
+                }
                 if (damperPosition == 0) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog1",profile+"-type-0-10v");
@@ -183,28 +189,28 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 }
-                if (reheatPosition == 0) {
+                if (reheatPosition == 1) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog2",profile+"-type-0-10v");
                     edit.commit();
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
-                } else if (reheatPosition == 1) {
+                } else if (reheatPosition == 2) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog2",profile+"-type-2-10v");
                     edit.commit();
                     for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
-                } else if (reheatPosition == 2) {
+                } else if (reheatPosition == 3) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog2",profile+"-type-10-2v");
                     edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
-                } else if (reheatPosition == 3) {
+                } else if (reheatPosition == 4) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString("cat-analog2",profile+"-type-10-0v");
                     edit.commit();
@@ -546,7 +552,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0);
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
-                        value = value * 0.001;
+                        //value = value * 0.001;
                         String thermistorMapped = getZoneMapping("Thermistor" + getThermistorIndex(expandedListText), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + getThermistorIndex(expandedListText) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");

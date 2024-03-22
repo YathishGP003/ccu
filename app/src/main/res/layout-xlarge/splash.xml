@@ -59,4 +59,27 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/airoverse_splash"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_marginTop="70dp"
+            android:layout_width="370dp"
+            android:src="@drawable/airoverse_logo"
+            android:layout_height="370dp"
+            android:layout_gravity="top" />
+
+        <ImageView
+            android:layout_marginTop="150dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center|bottom"
+            android:src="@drawable/carrier_75f_powered_by" />
+
+    </LinearLayout>
+
 </LinearLayout>

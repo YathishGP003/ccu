@@ -63,6 +63,9 @@ android {
                 includeCompileClasspath true
             }
         }*/
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
         buildConfigField "String", 'DEBUG_USER', properties.getProperty("debug.user.email", '\"\"')
 
         signingConfig signingConfigs.debug
@@ -129,6 +132,13 @@ android {
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             versionNameSuffix "_" + 'daikin_prod' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_daikin",appicon:"@drawable/daikin",roundicon:"@drawable/daikin"]
+        }
+        airoverse_prod {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            versionNameSuffix "_" + 'airoverse_prod' + "_" + versionSuffix
+            debuggable false
+            manifestPlaceholders = [ applicationLabel:"@string/app_airoverse",appicon:"@drawable/appicon_airoverse",roundicon:"@drawable/appicon_airoverse"]
         }
     }
 

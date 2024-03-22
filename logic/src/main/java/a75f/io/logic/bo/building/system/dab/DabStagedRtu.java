@@ -1,5 +1,29 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
+import static a75f.io.logic.bo.building.hvac.Stage.DEHUMIDIFIER;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_4;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_5;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
+import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+
 import android.content.Intent;
 
 import java.util.Arrays;
@@ -27,30 +51,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.SystemProfileUtil;
-
-import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
-import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
-import static a75f.io.logic.bo.building.hvac.Stage.DEHUMIDIFIER;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_4;
-import static a75f.io.logic.bo.building.hvac.Stage.FAN_5;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
-import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 
 /**
  * Created by samjithsadasivan on 11/5/18.
@@ -493,7 +493,8 @@ public class DabStagedRtu extends DabSystemProfile
                 case DEHUMIDIFIER:
                     if (systemMode == SystemMode.OFF ||
                         ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
-                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION) {
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION ||
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) {
                         relayState = 0;
                     } else {
                         double humidity = getSystemController().getAverageSystemHumidity();

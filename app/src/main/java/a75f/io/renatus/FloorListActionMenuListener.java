@@ -137,9 +137,11 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 									selectedFloor.clear();
 									floorPlanActivity.refreshScreen();
 									floorPlanActivity.hideWait();
+									/*
 									if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
 										floorPlanActivity.systemDeviceOnClick();
 									}
+									 */
 								},
 								error -> {
 									Toast.makeText(floorPlanActivity.requireContext(), "Error deleting floor",

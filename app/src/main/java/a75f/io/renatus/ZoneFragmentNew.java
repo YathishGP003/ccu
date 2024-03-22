@@ -60,13 +60,17 @@ import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.tabs.TabLayout;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.base.BaseInterval;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -118,6 +122,7 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.messaging.handler.UpdatePointHandler;
@@ -218,6 +223,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     TextView zoneLoadTextView = null;
 
+    private ImageView weather_icon_offline;
+
+    private TextView offline_description;
+
     private BroadcastReceiver siteLocationChangedReceiver;
 
     public ZoneFragmentNew() {
@@ -263,6 +272,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         maximumTemp = (TextView) getView().findViewById(R.id.maximumTemp);
         minimumTemp = (TextView) getView().findViewById(R.id.minimumTemp);
         note = (TextView) getView().findViewById(R.id.note);
+        weather_icon_offline = (ImageView) getView().findViewById(R.id.weather_icon_offline);
+        offline_description = (TextView) getView().findViewById(R.id.offlineModeDesc);
 
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
         tableLayout = (TableLayout) view.findViewById(R.id.tableRoot);
@@ -552,7 +563,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void updateSensorValue(short nodeAddress) {
         if (getActivity() != null) {
             if (zoneNonTempOpen) {
-                if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
+                if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().startsWith("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -580,7 +591,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void UpdateWeatherData() {
         String forMatValue = "%4.0f";
 
-        if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
+        if(OfflineModeUtilKt.isOfflineMode()){
+
+            place.setVisibility(View.GONE);
+            weather_icon.setVisibility(View.GONE);
+            weather_icon_offline.setVisibility(View.VISIBLE);
+            temperature.setVisibility(View.GONE);
+            weather_condition.setVisibility(View.GONE);
+            maximumTemp.setVisibility(View.GONE);
+            minimumTemp.setVisibility(View.GONE);
+            note.setVisibility(View.GONE);
+            offline_description.setVisibility(View.VISIBLE);
+            offline_description.setText(R.string.offline_description);
+
+        }else if(WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
             if (isCelsiusTunerAvailableStatus()) {
                 updateView(temperature, String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
                 updateView(maximumTemp, String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
@@ -911,56 +935,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
         CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getActivity(), R.layout.custom_dropdown_item_with_image, scheduleArray, hasImage);
-       /* ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.custom_dropdown_item_with_image ,scheduleArray) {
 
-            @Override
-            public boolean isEnabled(int position) {
-                return position !=1 ;// As this option is a title for NamedSchedule
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_dropdown_item, null);
-                }
-
-                TextView tv = (TextView) v.findViewById(R.id.textview);
-                tv.setText(scheduleArray.get(position));
-
-
-                switch (position) {
-                    case 0:
-                        break;
-                    case 1:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 2:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
-            }
-        };*/
         scheduleSpinner.setAdapter(adapter);
           adapter.setSelectedPosition(scheduleSpinner.getSelectedItemPosition());
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
@@ -1017,7 +992,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             namedSchedule.show(childFragmentManager, "dialog");
         });
 
-        if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule()) {
+
+        if ((mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule())
+        || (mSchedule.isNamedSchedule() && mSchedule.getDis().contains("Default") && !mSchedule.getDis().contains("Temporary")
+         && OfflineModeUtilKt.isOfflineMode())){
             scheduleImageButton.setVisibility(View.VISIBLE);
         } else {
             scheduleImageButton.setVisibility(View.GONE);
@@ -1072,33 +1050,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
                 if(isItemSelectedEvent)
                     return;
-
-//                if (position == 0 && (mScheduleType != -1)) {
-//                    if (mSchedule.isZoneSchedule()) {
-//                        mSchedule.setDisabled(true);
-//                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
-//                    }
-//                    scheduleImageButton.setVisibility(View.GONE);
-//
-//                    if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.BUILDING.ordinal()) {
-//                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING, zoneMap);
-//                        mScheduleTypeMap.put(equipId[0], ScheduleType.BUILDING.ordinal());
-//                    }
-//                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-//                    Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-//                    if (zone != null) {
-//                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
-//                                "not special and not vacation and roomRef " + "== " +zone.getId());
-//                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
-//                        zone.setScheduleRef(scheduleById.getId());
-//                        CCUHsApi.getInstance().updateZone(zone, zoneId);
-//                    }
-//                    scheduleSpinner.setSelection(position);
-//                    scheduleImageButton.setTag(mSchedule.getId());
-//                    vacationImageButton.setTag(mSchedule.getId());
-//                    specialScheduleImageButton.setTag(mSchedule.getId());
-//                    CCUHsApi.getInstance().scheduleSync();
-//                } else
 
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                    boolean isContainment = true;
@@ -1166,11 +1117,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule Title
                 } else if (position >= 2 && (mScheduleType != -1)) {
+
                    scheduleImageButton.setVisibility(View.GONE);
                    namedScheduleView.setVisibility(View.VISIBLE);
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+
+                    if(scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") &&
+                            OfflineModeUtilKt.isOfflineMode()){
+                        scheduleImageButton.setVisibility(View.VISIBLE);
+                    }
+
                     String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))  ?
                            "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
@@ -1181,7 +1139,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
                         scheduleSpinner.setSelection(position);
-                        scheduleImageButton.setVisibility(View.GONE);
+                        if(scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")
+                          && OfflineModeUtilKt.isOfflineMode()){
+                            scheduleImageButton.setVisibility(View.VISIBLE);
+                        }else
+                            scheduleImageButton.setVisibility(View.GONE);
                         namedScheduleView.setVisibility(View.VISIBLE);
 
                         namedSchedule.setOnExitListener(() -> {
@@ -1226,6 +1188,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneDetails.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
@@ -1252,8 +1215,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" +roomRefZone + "\"").floatValue();
-            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
-            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
+            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
+            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
         }else{
             heatUpperLimitVal = (float)heatUpperlimit;
             heatLowerLimitVal = (float)heatLowerlimit;
@@ -1450,7 +1413,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1467,7 +1429,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         namedScheduleView.setVisibility(View.GONE);
                     } else {
-                        scheduleImageButton.setVisibility(View.GONE);
+                      //  scheduleImageButton.setVisibility(View.GONE);
                         namedScheduleView.setVisibility(View.VISIBLE);
                     }
 
@@ -1567,18 +1529,36 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.viewTemperatureBasedZone Done");
 
     }
+    @SuppressLint("ResourceType")
     private void imageButtonClickListener(View v, String zoneId, String[] equipId,
-                                        FragmentManager childFragmentManager2,boolean isSpecial) {
-        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
-        FragmentManager childFragmentManager = childFragmentManager2;
-        childFragmentManager.beginTransaction();
-        schedulerFragment.show(childFragmentManager, "dialog");
+                                          FragmentManager childFragmentManager2, boolean isSpecial) {
+        Schedule schedule = CCUHsApi.getInstance().getScheduleById((String)v.getTag());
 
-        schedulerFragment.setOnExitListener(() -> {
-            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
-            ScheduleManager.getInstance().updateSchedules(equipOpen);
-        });
+        if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule()) {
+            RenatusLandingActivity.mViewPager.setAdapter(RenatusLandingActivity.mStatusPagerAdapter);
+            RenatusLandingActivity.btnTabs.getTabAt(1).select();
+            RenatusLandingActivity.mTabLayout.post(() ->
+                    RenatusLandingActivity.mTabLayout.setupWithViewPager(RenatusLandingActivity.mViewPager, true));
+            TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
+            selectedTab.select();
+        }else {
+
+
+            SchedulerFragment schedulerFragment =
+                    schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
+
+            FragmentManager childFragmentManager = childFragmentManager2;
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager, "dialog");
+
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
+                ScheduleManager.getInstance().updateSchedules(equipOpen);
+            });
+        }
+
     }
 
 
@@ -1815,7 +1795,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             scheduleSpinner.setSelection(mScheduleType -1, false);
             isItemSelectedEvent = false;
         }
-        if (mSchedule.isZoneSchedule()) {
+        if (mSchedule.isZoneSchedule()
+                || (mSchedule.isNamedSchedule() && mSchedule.getDis().contains("Default") && !mSchedule.getDis().contains("Temporary")
+        && OfflineModeUtilKt.isOfflineMode())){
             scheduleImageButton.setVisibility(View.VISIBLE);
         } else {
             scheduleImageButton.setVisibility(View.GONE);
@@ -1933,7 +1915,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
                     String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
-
+                    if(scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") && OfflineModeUtilKt.isOfflineMode()){
+                        scheduleImageButton.setVisibility(View.VISIBLE);
+                    }
 
                     String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary"))?
                             "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
@@ -1954,7 +1938,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             namedScheduleView.setVisibility(View.VISIBLE);
                             vacationImageButton.setTag(mSchedule.getId());
                             specialScheduleImageButton.setTag(mSchedule.getId());
-                            scheduleImageButton.setVisibility(View.GONE);
+                            if(scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") &&
+                                    OfflineModeUtilKt.isOfflineMode()){
+                                scheduleImageButton.setVisibility(View.VISIBLE);
+                            }else
+                                scheduleImageButton.setVisibility(View.GONE);
                             namedScheduleView.setVisibility(View.VISIBLE);
                         });
 
@@ -2003,8 +1991,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             coolingUpperLimitVal = CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and point and limit and user and max and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             coolingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("desired and cooling and roomRef == \"" + roomRefZone + "\"").floatValue();
             heatingDesired = CCUHsApi.getInstance().readPointPriorityValByQuery("point and desired and heating and roomRef == \"" + roomRefZone + "\"").floatValue();
-            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
-            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and roomRef == \"" + roomRefZone + "\"").floatValue();
+            heatingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
+            coolingDeadBand = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and zone and not multiplier and roomRef == \"" + roomRefZone + "\"").floatValue();
         }else{
             buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin().floatValue();
             buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax().floatValue();
@@ -2207,6 +2195,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         //imageView.setTag(gridItemObj);
         nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setTextColor(getResources().getColor(R.color.text_color));
         textEquipment.setText(zoneTitle);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
@@ -2367,7 +2356,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -2408,7 +2396,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -4024,12 +4011,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
-
-        for (Interval v : systemIntervals) {
-            CcuLog.d("CCU_UI", "Merged System interval " + v);
-        }
-
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+        if(zoneIntervals.isEmpty()) return true;
         int size = zoneIntervals.size();
 
         for (int i = 0; i < size; i++) {
@@ -4045,13 +4028,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
         //sorting the zoneInterval
-        Collections.sort(zoneIntervals, new Comparator<Interval>() {
-                    public int compare(Interval p1, Interval p2) {
-                        return Long.compare(p1.getStartMillis(), p2.getStartMillis());
-                    }
-                }
-        );
-
+        zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
         Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size()-1);
         LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
         Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
@@ -4405,7 +4382,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                             try {
-                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -4447,7 +4423,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     selectedView = seekArc.getId();
                     status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     try {
-                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

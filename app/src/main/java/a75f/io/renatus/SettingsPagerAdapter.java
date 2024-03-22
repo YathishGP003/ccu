@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import a75f.io.renatus.tuners.TunerFragment;
@@ -26,10 +27,14 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
                 fragment = FloorPlanFragment.newInstance();
                 break;
             case 1:
+                fragment = SystemConfigFragment.newInstance();
+                //fragment = SystemProfileFragment.newInstance();
+                break;
+            case 2:
                 //fragment = USBHomeFragment.getInstance();
                 fragment = SettingsFragment.newInstance();
                 break;
-            case 2:
+            case 3:
                 //fragment = USBHomeFragment.getInstance();
                 fragment = TunerFragment.newInstance();
                 break;
@@ -41,7 +46,7 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getCount() {
         // Show 2 total pages.
-        return 3;
+        return 4;
     }
 
 
@@ -57,8 +62,10 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
             case 0:
                 return "Floor Layout";
             case 1:
-                return "Settings";
+                return "System Config";
             case 2:
+                return "Settings";
+            case 3:
                 return "Tuners";
         }
         return null;

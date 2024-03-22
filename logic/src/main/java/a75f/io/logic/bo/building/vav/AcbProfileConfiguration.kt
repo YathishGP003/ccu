@@ -7,6 +7,7 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -75,6 +76,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         if (!(maxCFMReheating.currentVal > 0.0)) maxCFMReheating.currentVal = 250.0
         if (!(minCFMReheating.currentVal > 0.0)) minCFMReheating.currentVal = 50.0
 
+        if (L.ccu().bypassDamperProfile != null) {
+            minCoolingDamperPos.currentVal = 10.0
+            minHeatingDamperPos.currentVal = 10.0
+        }
+
         isDefault = true
 
         return this
@@ -115,6 +121,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             maxCoolingDamperPos = getDefaultValConfig(DomainName.maxCoolingDamperPos, model)
             minHeatingDamperPos = getDefaultValConfig(DomainName.minHeatingDamperPos, model)
 
+            if (L.ccu().bypassDamperProfile != null) {
+                minCoolingDamperPos.currentVal = 10.0
+                minHeatingDamperPos.currentVal = 10.0
+            }
+
             maxCFMCooling.currentVal = vavEquip.maxCFMCooling.readDefaultVal()
             minCFMCooling.currentVal = vavEquip.minCFMCooling.readDefaultVal()
             maxCFMReheating.currentVal = vavEquip.maxCFMReheating.readDefaultVal()
@@ -122,9 +133,9 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         } else {
             kFactor = getDefaultValConfig(DomainName.kFactor, model)
 
-            minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readDefaultVal()
+            minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readPriorityVal()
             maxCoolingDamperPos.currentVal = vavEquip.maxCoolingDamperPos.readDefaultVal()
-            minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readDefaultVal()
+            minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readPriorityVal()
 
             maxCFMCooling = getDefaultValConfig(DomainName.maxCFMCooling, model)
             minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)

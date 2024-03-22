@@ -56,6 +56,7 @@ public class UsbSerialUtil {
                 (BuildConfig.BUILD_TYPE.equals("staging") ||
                         BuildConfig.BUILD_TYPE.equals("prod") || BuildConfig.BUILD_TYPE.equals("daikin_prod")
                         || BuildConfig.BUILD_TYPE.equals("carrier_prod")
+                        || BuildConfig.BUILD_TYPE.equals("airoverse_prod")
                 ) && !isBiskitModeEnabled(context)
         ;
     }

@@ -271,11 +271,7 @@ fun calculateSATSetPoints(
     externalSpList: ArrayList<String>,
     loopRunningDirection: TempDirection,
 ) {
-    val isSetPointEnabled = isConfigEnabled(systemEquip, satSetpointControlEnable)
-    if (!isSetPointEnabled) {
-        logIt("satSetpointControl disabled")
-        return
-    }
+
     logIt("Cooling lockout ${L.ccu().systemProfile.isCoolingLockoutActive} heating lockout ${L.ccu().systemProfile.isHeatingLockoutActive}")
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {
@@ -369,6 +365,7 @@ fun calculateDSPSetPoints(
 
     val tempDirection = getTempDirection(basicConfig.heatingLoop)
     var fanLoop = loopOutput * analogFanMultiplier.coerceAtMost(100.0)
+    L.ccu().systemProfile.systemFanLoopOp = fanLoop
     logIt("System Fan loop $fanLoop")
     if (isFanLoopUpdateRequired(tempDirection, conditioningMode)) {
         fanLoop = checkOaoLoop(coolingLoop)

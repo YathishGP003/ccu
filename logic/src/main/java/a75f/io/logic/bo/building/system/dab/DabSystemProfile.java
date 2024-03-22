@@ -69,7 +69,7 @@ public abstract class DabSystemProfile extends SystemProfile
     
     public void setSystemLoopOp(String loop, double val)
     {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and " + loop, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and not purge and " + loop, val);
     }
     
     public void addDabSystemTuners(String equipref)
@@ -240,11 +240,7 @@ public abstract class DabSystemProfile extends SystemProfile
         String compensateHumidityId = CCUHsApi.getInstance().addPoint(compensateHumidity);
         CCUHsApi.getInstance().writePointForCcuUser(compensateHumidityId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(compensateHumidityId, 0.0);
-        
-        Point demandResponseMode = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "demandResponseMode")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("demand").addMarker("response").setEnums("false,true").setTz(tz).build();
-        String demandResponseModeId = CCUHsApi.getInstance().addPoint(demandResponseMode);
-        CCUHsApi.getInstance().writePointForCcuUser(demandResponseModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
-        CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);
+
     }
     
     public double getUserIntentVal(String tags)

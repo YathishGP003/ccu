@@ -167,6 +167,7 @@ public class SettingsFragment extends Fragment {
                         }
                         break;
                     }
+                    /*
                     case 4: {
                         if (isTransactionSafe && !(fragment instanceof SystemProfileFragment)) {
                             fragmentClass = SystemProfileFragment.class;
@@ -185,8 +186,8 @@ public class SettingsFragment extends Fragment {
                         }
                         break;
                     }
-    
-                    case 5: {
+                    */
+                    case 4: {
                         if (isTransactionSafe && !(fragment instanceof Communication)) {
                             fragmentClass = Communication.class;
                             try {
@@ -204,7 +205,7 @@ public class SettingsFragment extends Fragment {
                         }
                         break;
                     }
-                    case 6: {
+                    case 5: {
                         if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
                             //TODO:
                             fragmentClass = TempOverrideFragment.class;
@@ -223,7 +224,7 @@ public class SettingsFragment extends Fragment {
                         }
                         break;
                     }
-                    case 7:
+                    case 6:
                         if (isTransactionSafe && !(fragment instanceof AboutFragment)) {
                             fragmentClass = AboutFragment.class;
                             try {
@@ -281,7 +282,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
+        if (isVisibleToUser && isTransactionSafe) {
             getActivity().sendBroadcast(new Intent(ACTION_SETTING_SCREEN));
         }
     }

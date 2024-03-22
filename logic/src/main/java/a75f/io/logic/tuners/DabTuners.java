@@ -16,11 +16,10 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Units;
+import a75f.io.logic.bo.util.DemandResponseMode;
 
 import static a75f.io.logic.bo.building.dab.DabEquip.getDisName;
-import static a75f.io.logic.tuners.TunerConstants.DAB_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
@@ -549,7 +548,8 @@ public class DabTuners {
         BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
-
+        DemandResponseMode.createDemandResponseSetBackTuner(hayStack,
+                equipref, equipdis, false, roomRef, floorRef);
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 

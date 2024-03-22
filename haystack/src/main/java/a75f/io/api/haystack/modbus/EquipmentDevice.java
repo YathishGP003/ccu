@@ -29,6 +29,9 @@ public class EquipmentDevice {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("displayName")
+    @Expose
+    private String equipDisplayName;
     @SerializedName("description")
     @Expose
     private String description;
@@ -85,6 +88,8 @@ public class EquipmentDevice {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getEquipDisplayName() { return equipDisplayName; }
 
     public int getSlaveId() {
         return slaveId;

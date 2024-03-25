@@ -19,8 +19,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsDataStore;
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -297,7 +301,9 @@ public class DiagEquip
         int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED,-1);
         if((plugged == BatteryManager.BATTERY_PLUGGED_AC) || (plugged == BatteryManager.BATTERY_PLUGGED_USB))
             isPowerConnected = true;
-        
+
+        setDiagHisVal("app and restart", AlertManager.getInstance().getRepo().checkIfAppRestarted() ? 1.0 : 0.0);
+
         // Are we charging / charged?
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||

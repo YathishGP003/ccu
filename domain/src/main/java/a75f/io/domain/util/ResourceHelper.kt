@@ -19,6 +19,7 @@ import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 
@@ -113,5 +114,15 @@ object ResourceHelper {
                     .addDeserializer(Constraint::class.java, ConstraintDeserializer())
                     .addDeserializer(PointConfiguration::class.java, PointConfigurationDeserializer())
             )
+    }
+
+    fun readFile(filePath: String): JSONObject {
+        val fileContent = try {
+            File(filePath).readText()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return JSONObject()
+        }
+        return JSONObject(fileContent)
     }
 }

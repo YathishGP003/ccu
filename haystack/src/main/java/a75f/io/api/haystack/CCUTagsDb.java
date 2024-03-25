@@ -1,7 +1,5 @@
 package a75f.io.api.haystack;
 
-import static a75f.io.api.haystack.util.ResponsesKt.retrieveLevelValues;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +17,6 @@ import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
-import org.joda.time.DateTime;
 import org.projecthaystack.HBin;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HCoord;
@@ -42,6 +39,7 @@ import org.projecthaystack.HUri;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
 import org.projecthaystack.MapImpl;
+import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
@@ -65,12 +63,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import a75f.io.api.haystack.util.BaseResponse;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
 import a75f.io.api.haystack.util.Migrations;
-import a75f.io.api.haystack.util.ReadAllResponse;
 import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.entities.DatabaseHelper;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -1872,15 +1868,18 @@ public class CCUTagsDb extends HServer {
             hisBox.remove(hisItems);
         }
     }
-    
+
     public void clearHistory(HRef id) {
-        HDict entity = readById(id);
-        
-        QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .order(HisItem_.date);
-        List<HisItem>  hisItems = hisQuery.build().find();
-        hisBox.remove(hisItems);
+        try {
+            HDict entity = readById(id);
+            QueryBuilder<HisItem> hisQuery = hisBox.query();
+            hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                    .order(HisItem_.date);
+            List<HisItem> hisItems = hisQuery.build().find();
+            hisBox.remove(hisItems);
+        } catch (UnknownRecException e) {
+            CcuLog.i("CCU_HS_SYNC", " UnknownRecException "+id+ " Not found");
+        }
     }
 
     private boolean insertEntity(HDict hDict, String id) {

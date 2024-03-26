@@ -1,5 +1,6 @@
 package a75f.io.messaging.service
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.data.message.DatabaseHelper
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
 import a75f.io.data.message.Message
@@ -20,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -147,5 +149,19 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
     private fun isUpdateCcuCommand(message: Message) : Boolean {
         return message.remoteCmdType != null &&
                 message.remoteCmdType == RemoteCommandUpdateHandler.UPDATE_CCU
+    }
+
+    fun ignoreUpdateSchedule(jsonObject: JsonObject) : Boolean {
+        val message = jsonObject.get("message").toString()
+        val jsonobjectOfMessage =  JSONObject(message)
+        if(jsonobjectOfMessage.getString("command").equals("updateSchedule")) {
+            if(jsonobjectOfMessage.has("ccuRef")) {
+                if (!((JSONObject(message).getString("ccuRef")).equals(
+                        CCUHsApi.getInstance().ccuId.replace("@", "")))) {
+                    return true;
+                }
+            }
+        }
+        return false
     }
 }

@@ -73,23 +73,16 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                     hDictBuilder.add("dis", lastLiteralFromDis)
                 }
 
-                if (group.isNotEmpty()) {
-                    bacnetId = bacnetId.replace(group, "").trim()
-                } else if (extractedGroup.isNotEmpty()) {
-                    bacnetId = bacnetId.replace(extractedGroup, "").trim()
-                } else if (extractedEquipRef.isNotEmpty()) {
-                    extractedEquipRef = extractedEquipRef.replace("@", "").trim()
-                    val groupFromEquipRef =
-                        CCUHsApi.getInstance().readMapById(extractedEquipRef)["group"] as String
-                    bacnetId = bacnetId.replace(groupFromEquipRef, "").trim()
-                }
+
                 try {
+                    bacnetId = getBacNetId(bacnetId, group, extractedGroup, extractedEquipRef)
                     if (bacnetId != "0.0") {
                         hDictBuilder.add("bacnetId", bacnetId.toLong())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+
             } else {
                 if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
                     hDictBuilder.add("dis", "${profileName}_$lastLiteralFromDis")
@@ -106,6 +99,26 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList
+}
+
+fun getBacNetId(
+    bacnetId: String,
+    group: String,
+    extractedGroup: String,
+    extractedEquipRef: String
+): String {
+    var tempId = ""
+    if (group.isNotEmpty()) {
+        tempId = bacnetId.replace(group, "").trim()
+    } else if (extractedGroup.isNotEmpty()) {
+        tempId = bacnetId.replace(extractedGroup, "").trim()
+    } else if (extractedEquipRef.isNotEmpty()) {
+        var tempExtractedEquipRef = extractedEquipRef.replace("@", "").trim()
+        val groupFromEquipRef =
+            CCUHsApi.getInstance().readMapById(tempExtractedEquipRef)["group"] as String
+        tempId = bacnetId.replace(groupFromEquipRef, "").trim()
+    }
+    return tempId
 }
 
 fun getEquipRefId(input: String): String {

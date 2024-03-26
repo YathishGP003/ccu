@@ -184,7 +184,9 @@ class HttpServer {
                         if(query.contains("equipRef")){
                             try {
                                 equipRefId = getEquipRefId(query).replace("@","").trim()
-                                group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
+                                if(CCUHsApi.getInstance().readMapById(equipRefId)["group"] != null){
+                                    group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
+                                }
                             }catch (e: UnknownRecException){
                                 e.printStackTrace()
                             }

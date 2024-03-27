@@ -2,7 +2,6 @@ package a75f.io.renatus.schedules;
 
 
 
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
@@ -296,6 +295,39 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         setDefaultUserLimits(heatingAdapter, coolingAdapter, deadBandAdapter);
         followBuilding.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(followBuilding.isChecked()){
+
+                    ArrayList<Schedule.Days> dayList = mSchedule.getDays();
+                    ArrayList<Integer> dayIndexArr = new ArrayList<>();
+
+                    //collecting the building level heating and cooling desired temperatures
+                    double heatingLimitMax =CCUHsApi.getInstance().readPointPriorityValByQuery("limit and default and max and heating and schedulable");
+                    double heatingLimitMin =CCUHsApi.getInstance().readPointPriorityValByQuery("limit and default and min and heating and schedulable");
+                    double coolingLimitMax =CCUHsApi.getInstance().readPointPriorityValByQuery("limit and default and max and cooling and schedulable");
+                    double coolingLimitMin =CCUHsApi.getInstance().readPointPriorityValByQuery("limit and default and min and cooling and schedulable");
+
+
+                    for(int i= 0; i < dayList.size(); i++) {
+                        Schedule.Days tempDay = dayList.get(i);
+                        double hdt = tempDay.getHeatingVal();
+                        double cdt = tempDay.getCoolingVal();
+                        if (!(hdt>=heatingLimitMin && hdt<=heatingLimitMax) || !(cdt>=coolingLimitMin && cdt<=coolingLimitMax)) {
+                            dayIndexArr.add(tempDay.getDay());
+                        }
+                    }
+                    if(dayIndexArr.size() > 0) {
+                        new AlertDialog.Builder(getContext())
+                                .setCancelable(false)
+                                .setTitle("Follow Building\n")
+                                .setIcon(R.drawable.ic_dialog_alert)
+                                .setMessage("The desired temperature range for the following day(s) is not within the range of the building.\n\n " +displayDayName(dayIndexArr)+"\n\n"+"Building Heating limits -("+heatingLimitMin+" - "+heatingLimitMax+")"+"\n" +"Building Cooling limits-("+coolingLimitMin+" - "+coolingLimitMax+")" +"\n" + "\n"+"Please edit the Desired Temperatures for Heating and Cooling for the day(s) mentioned above.")
+                                .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                                    followBuilding.setChecked(false);
+                                })
+                                .show();
+                        dayIndexArr.clear();
+                        return;
+                    }
+
                 heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
                         getAdapterVal(Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal(), true)));
                 heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
@@ -707,6 +739,46 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 .create();
 
     }
+
+    private String displayDayName(ArrayList<Integer> dayIndexArr) {
+        StringBuilder daysName = new StringBuilder();
+
+        for(int i=0; i<dayIndexArr.size(); i++){
+            daysName.append(getDayName(dayIndexArr.get(i))+"\n");
+        }
+        return daysName.toString();
+    }
+
+    private String getDayName(int index) {
+        ArrayList<Schedule.Days> daysList = mSchedule.getDays();
+        Schedule.Days day;
+
+        switch (index){
+            case 0:
+                day = daysList.get(0);
+                return "Monday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 1:
+                day=daysList.get(1);
+                return "Tuesday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 2:
+                day=daysList.get(2);
+                return "Wednesday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 3:
+                day=daysList.get(3);
+                return "Thursday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 4:
+                day=daysList.get(4);
+                return "Friday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 5:
+                day=daysList.get(5);
+                return "Saturday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+            case 6:
+                day=daysList.get(6);
+                return "Sunday - ("+ day.getHeatingVal() + " - " + day.getCoolingVal() + ")";
+        }
+        return null;
+    }
+
 
     private void setDefaultUserLimits(ArrayAdapter<String> heatingAdapter, ArrayAdapter<String> coolingAdapter, ArrayAdapter<String> deadBandAdapter) {
         if(followBuilding.isChecked()){

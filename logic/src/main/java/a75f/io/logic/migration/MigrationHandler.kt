@@ -84,7 +84,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrationForDRMode(ccuHsApi: CCUHsApi) {
         val demandResponse = DemandResponseMode()
-        val systemProfile = ccuHsApi.readEntity("equip and system")
+        val systemProfile = ccuHsApi.readEntity("equip and system and not modbus")
         val displayName = systemProfile[Tags.DIS].toString()
         val siteRef = systemProfile[Tags.SITEREF].toString()
         val id = systemProfile[Tags.ID].toString()

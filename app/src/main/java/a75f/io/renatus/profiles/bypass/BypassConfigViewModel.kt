@@ -165,9 +165,9 @@ class BypassConfigViewModel : ViewModel() {
                 CCUHsApi.getInstance().resetCcuReady()
 
                 try {
-                    val sysEquips = HSUtil.getEquips("SYSTEM");
+                    val sysEquips = HSUtil.getEquips("SYSTEM") + HSUtil.getEquips("@SYSTEM")
                     val bdEquip = sysEquips.find { eq : Equip -> eq.domainName != null && eq.domainName == DomainName.smartnodeBypassDamper && eq.group.equals(profileConfiguration.nodeAddress.toString())}
-                    val sysDevices = HSUtil.getDevices("SYSTEM")
+                    val sysDevices = HSUtil.getDevices("SYSTEM") + HSUtil.getDevices("@SYSTEM")
                     val bdDevice = sysDevices.find { d : Device -> d.domainName != null && d.addr.equals(profileConfiguration.nodeAddress.toString()) && d.domainName.equals("smartnodeDevice")}
                     hayStack.deleteEntity(bdEquip?.id)
                     hayStack.deleteEntity(bdDevice?.id)

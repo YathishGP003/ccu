@@ -1534,7 +1534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                           FragmentManager childFragmentManager2, boolean isSpecial) {
         Schedule schedule = CCUHsApi.getInstance().getScheduleById((String)v.getTag());
 
-        if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule()) {
+        if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule() && !isSpecial) {
             RenatusLandingActivity.mViewPager.setAdapter(RenatusLandingActivity.mStatusPagerAdapter);
             RenatusLandingActivity.btnTabs.getTabAt(1).select();
             RenatusLandingActivity.mTabLayout.post(() ->
@@ -1542,10 +1542,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
             selectedTab.select();
         }else {
-
-
-            SchedulerFragment schedulerFragment =
-                    schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
 
             FragmentManager childFragmentManager = childFragmentManager2;
             childFragmentManager.beginTransaction();

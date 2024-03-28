@@ -416,7 +416,7 @@ public class ScheduleManager {
 
             Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                     .replace("@", ""));
-            if(equipSchedule.getDays().isEmpty()){
+            if (equipSchedule == null) {
                 continue;
             }
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
@@ -425,6 +425,8 @@ public class ScheduleManager {
                     if (equipSchedule.getUnoccupiedZoneSetback() != null)
                         updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
                     Occupied occ = equipSchedule.getCurrentValues();
+                    if (occ == null)
+                        break;
                     if (equipSchedule.getUnoccupiedZoneSetback() != null)
                         occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
                     int day = DateTime.now().dayOfWeek().get() - 1;

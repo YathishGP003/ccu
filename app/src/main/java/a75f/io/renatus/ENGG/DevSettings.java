@@ -34,15 +34,13 @@ import androidx.fragment.app.Fragment;
 import com.instabug.crash.CrashReporting;
 import com.instabug.library.Feature;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
@@ -75,9 +73,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public static DevSettings newInstance(){
         return new DevSettings();
     }
+    private boolean frequencyUpdatedCheck = false;
                                     
     @BindView(R.id.biskitModBtn)
     ToggleButton biskitModeBtn;
+    @BindView(R.id.biskitModLayout)
+    LinearLayout biskitModLayout;
+    @BindView(R.id.loopspinner)
+    Spinner loopSpinner;
     
     @BindView(R.id.logCaptureBtn)
     Button logCaptureBtn;
@@ -157,18 +160,32 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
          super.onViewCreated(view, savedInstanceState);
-         biskitModeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+
+        biskitModeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
          {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
                  {
                      Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                              .edit().putBoolean("biskit_mode", b).apply();
+
+                     if(BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+                         biskitModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
+                     }
                  }
          });
         biskitModeBtn.setChecked(Globals.getInstance().isSimulation());
-        
-        
+        if(BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+            biskitModLayout.setVisibility(Globals.getInstance().isSimulation() ? View.VISIBLE : View.INVISIBLE);
+        }
+        List<Integer> controlLoopFrequency = IntStream.rangeClosed(1,60)
+                .boxed().collect(Collectors.toList());
+        ArrayAdapter<Integer> ControlLoopAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, controlLoopFrequency);
+        ControlLoopAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        loopSpinner.setAdapter(ControlLoopAdapter);
+        loopSpinner.setSelection(ControlLoopAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("control_loop_frequency", 60)));
+        loopSpinner.setOnItemSelectedListener(this);
         logCaptureBtn.setOnClickListener(view13 -> {
             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
 
@@ -177,7 +194,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             String date = fileSystemTools.timeStamp();
 
             //alert.setMessage(date);
-
             // Set an EditText view to get user input
             final EditText input = new EditText(getActivity());
             input.setText("Logs_"+date);
@@ -228,16 +244,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                         CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
                         TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
-                        /*CCUHsApi.getInstance().importBuildingTuners();
-
-                        ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
-                                .readAllEntities("point and tuner and default");
-                        ArrayList<HDict> hDicts = new ArrayList<>();
-                        for (HashMap<Object, Object> m : writablePoints) {
-                            HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
-                            hDicts.add(pid);
-                        }
-                        CCUHsApi.getInstance().importPointArrays(hDicts);*/
                     },
                     () -> {
                         ProgressDialogUtils.hideProgressDialog();
@@ -299,12 +305,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
         testModBtn.setChecked(Globals.getInstance().isWeatherTest());
         testModLayout.setVisibility(Globals.getInstance().isWeatherTest()?View.VISIBLE :View.INVISIBLE);
-    
-        ArrayList<Integer> zoroToHundred = new ArrayList<>();
-        for (int val = -20;  val <= 120; val++)
-        {
-            zoroToHundred.add(val);
-        }
+
+        List<Integer> zoroToHundred = IntStream.rangeClosed(-20,120)
+                .boxed().collect(Collectors.toList());
         ArrayAdapter<Integer> zeroToHundredDataAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         zeroToHundredDataAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         outsideTemp.setAdapter(zeroToHundredDataAdapter);
@@ -476,6 +479,25 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     {
         switch (arg0.getId())
         {
+            case R.id.loopspinner:
+                if(frequencyUpdatedCheck) {
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setTitle("App restart confirmation")
+                            .setMessage("The updated control loop frequency will be applied after the next app restart. Do you want to continue?")
+                            .setPositiveButton("Restart", (dialog1, which) -> {
+                                writePref("control_loop_frequency", Integer.parseInt(loopSpinner.getSelectedItem().toString()));
+                                CCUUiUtil.triggerRestart(getContext());
+                            })
+                            .setNegativeButton("Cancel", (dialog1, which) -> {
+                                writePref("control_loop_frequency", Integer.parseInt(loopSpinner.getSelectedItem().toString()));
+                            })
+                            .create();
+                    dialog.show();
+                }
+                else {
+                    frequencyUpdatedCheck =true;
+                }
+                break;
             case R.id.outsideTemp:
                 writePref("outside_temp", Integer.parseInt(outsideTemp.getSelectedItem().toString()));
                 break;

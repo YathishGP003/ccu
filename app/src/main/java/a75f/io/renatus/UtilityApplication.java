@@ -262,8 +262,8 @@ public abstract class UtilityApplication extends Application {
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         deviceUpdateJob = new DeviceUpdateJob();
-        deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
-                15, TimeUnit.SECONDS);
+        deviceUpdateJob.scheduleJob("DeviceUpdateJob",Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("control_loop_frequency",60), 15, TimeUnit.SECONDS);
         Watchdog.getInstance().addMonitor(deviceUpdateJob);
 
 

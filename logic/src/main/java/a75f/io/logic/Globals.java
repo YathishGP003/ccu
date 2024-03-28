@@ -120,7 +120,7 @@ public class Globals {
     private static final int TASK_SEPARATION = 30;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
 
-    private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
+    private static int DEFAULT_HEARTBEAT_INTERVAL = 60;
 
     private static Globals globals;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
@@ -374,14 +374,14 @@ public class Globals {
                         CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
                     }
                     isInitCompleted = true;
+                    DEFAULT_HEARTBEAT_INTERVAL =  Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                            .getInt("control_loop_frequency",60);
                     initCompletedListeners.forEach( listener -> listener.onInitCompleted());
-                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                            TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
                     mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30,DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();

@@ -1,6 +1,5 @@
 package a75f.io.renatus.registration;
 
-import static java.lang.Thread.sleep;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
@@ -13,8 +12,6 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -72,7 +69,6 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -355,8 +351,7 @@ public class CreateNewSite extends Fragment {
                                 L.ccu().setCCUName(ccuName);
                                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                             }
-                            //SiteRegistrationHandler siteHandler = new SiteRegistrationHandler();
-                            //siteHandler.doSync();
+                            L.ccu().systemProfile = new DefaultSystem();
                         },
                         () -> {
                             mNext.setEnabled(true);
@@ -483,15 +478,6 @@ public class CreateNewSite extends Fragment {
                 mSiteCCU.setText(ccuName);
                 ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteInstallerEmailId.setText(ccuInstallerEmail);
-
-//
-//                As per Lukee's comment in the Bug 12630: " there is no concept of a CCU-level Facility Manager Role in the User Management system"
-//                So we are commenting following code and we are showing the site entity fm email details
-//
-//                ccuFmEmail = ccu.get("fmEmail").toString();
-//                mSiteEmailId.setText(ccuFmEmail);
-//
-
             }
 
         }
@@ -943,14 +929,8 @@ public class CreateNewSite extends Fragment {
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
 
         CCUHsApi.getInstance().syncEntityTree();
-        //TODO- COMMON-DATA-FEATURE
-        //BuildingTuners.getInstance().updateBuildingTuners();
-        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-
-        //SystemEquip.getInstance();
         DiagEquip.getInstance().create();
         updateMigrationDiagWithAppVersion();
-        L.ccu().systemProfile = new DefaultSystem();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);

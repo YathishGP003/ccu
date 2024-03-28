@@ -78,6 +78,8 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 haystack.updateEquip(hayStackEquip, it.id)
                 DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
             }else{
+                hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
+                hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                 haystack.updateEquip(hayStackEquip, it.id)
                 hayStackEquip.id = it.id
                 DomainManager.addEquip(hayStackEquip)

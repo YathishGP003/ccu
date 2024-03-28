@@ -342,7 +342,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         boolean isOffline =
                 CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0;
 
-
         if(isOffline) {
             if((getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))
                     && !((getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE)) ||
@@ -429,10 +428,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 //set  it to schedule
                 HashMap<Object,Object> nm = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
                 if(nm.isEmpty()){
-                    title_Layout.setVisibility(View.GONE);
-                    frameLayout.setVisibility(View.GONE);
-                    textViewScheduletitle.setVisibility(View.GONE);
-                    constraintScheduler.setVisibility(View.GONE);
+                    disappearScheduleLayout();
                     Toast.makeText(getContext(), "Default Named Schedule not available", Toast.LENGTH_LONG).show();
                 }else {
                     mScheduleId = nm.get("id").toString();
@@ -445,14 +441,22 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     updateUINamed();
                 }
             }else {
-                title_Layout.setVisibility(View.GONE);
-                frameLayout.setVisibility(View.GONE);
-                textViewScheduletitle.setVisibility(View.GONE);
-                constraintScheduler.setVisibility(View.GONE);
+                disappearScheduleLayout();
             }
+        }
+        if( getArguments() != null && (getArguments().getBoolean(PARAM_IS_VACATION) ||
+                getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE))){
+            disappearScheduleLayout();
         }
         loadVacations();
         loadSpecialSchedules();
+    }
+
+    private void disappearScheduleLayout(){
+        title_Layout.setVisibility(View.GONE);
+        frameLayout.setVisibility(View.GONE);
+        textViewScheduletitle.setVisibility(View.GONE);
+        constraintScheduler.setVisibility(View.GONE);
     }
 
     private void updateUI() {

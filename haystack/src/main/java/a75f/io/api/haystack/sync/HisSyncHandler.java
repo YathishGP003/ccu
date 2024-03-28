@@ -198,6 +198,8 @@ public class HisSyncHandler
             } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
                 CcuLog.e(TAG, "His write failed! , Trying to handle the error");
                 EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+                // Marking his items are synched to confirm
+                ccuHsApi.tagsDb.updateHisItemCache(hisItemList);
             }
         }else{
             CcuLog.e(TAG, "null response");

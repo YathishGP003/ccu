@@ -297,7 +297,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 val hayStack = CCUHsApi.getInstance()
                 hayStack.setCcuReady()
                 try {
-                    val sysEquips = HSUtil.getEquips("SYSTEM")
+                    val sysEquips = HSUtil.getEquips("SYSTEM") + HSUtil.getEquips("@SYSTEM")
                     if (profileType.equals(ProfileType.MODBUS_EMR)) {
                         val emrEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_EMR.name) }
                         val emrAddr = Integer.parseInt(emrEquip?.group)

@@ -433,12 +433,20 @@ public class MigrationUtil {
             PreferenceUtil.setZoneEquipConfigPointMigrationDone();
         }
 
+        if(!PreferenceUtil.getHisItemsUpdatedStatus()){
+            updateHisValue(CCUHsApi.getInstance());
+        }
+
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-//        migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+
+        if (!PreferenceUtil.getModulatingFanSpeedMigrationStatus()) {
+            migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
+        }
+
         addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateModbusProfiles();
@@ -2877,5 +2885,25 @@ public class MigrationUtil {
                 ccuHsApi.addPoint(remoteSessionStatus);
             }
         }
+    }
+
+    private static void updateHisValue(CCUHsApi haystack) {
+        RxjavaUtil.executeBackground(() -> {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateHisValue migration started");
+            ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable");
+            for (HashMap<Object, Object> map : writablePoints) {
+                try{
+                    if (map.containsKey("id") && map.get("id") != null) {
+                        double pointPriorityVal = haystack.readPointPriorityVal(map.get("id").toString());
+                        haystack.writeHisValById(map.get("id").toString(), pointPriorityVal);
+                    }
+                } catch (NumberFormatException e){
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point not updated: " + map.get("id").toString());
+                    e.printStackTrace();
+                }
+            }
+            PreferenceUtil.setHisItemsUpdatedStatus();
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateHisValue migration ended");
+        });
     }
 }

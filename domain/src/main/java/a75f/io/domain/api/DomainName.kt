@@ -403,7 +403,7 @@ object DomainName {
     const val smartnodeBypassDamper = "smartnodeBypassDamper"
 
     const val ductStaticPressureSensor = "ductStaticPressureSensor"
-    const val ductStaticPressureSetpoint = "ductStaticPressueSetpoint"
+    const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val pressureSensorType = "pressureSensorType"
     const val damperMinPosition = "damperMinPosition"
     const val damperMaxPosition = "damperMaxPosition"

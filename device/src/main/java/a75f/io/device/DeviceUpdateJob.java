@@ -1,5 +1,7 @@
 package a75f.io.device;
 
+import android.content.Context;
+
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -43,8 +45,8 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         modbusNetwork = new ModbusNetwork();
     
         deviceStatusUpdateJob = new DeviceStatusUpdateJob();
-        deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", 60,
-                                    45, TimeUnit.SECONDS);
+        deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
     }
     
     public void doJob()

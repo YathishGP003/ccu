@@ -1117,7 +1117,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule Title
                 } else if (position >= 2 && (mScheduleType != -1)) {
-
+                   mScheduleTypeMap.put(equipId[0], ScheduleType.NAMED.ordinal());
                    scheduleImageButton.setVisibility(View.GONE);
                    namedScheduleView.setVisibility(View.VISIBLE);
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
@@ -1534,7 +1534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                           FragmentManager childFragmentManager2, boolean isSpecial) {
         Schedule schedule = CCUHsApi.getInstance().getScheduleById((String)v.getTag());
 
-        if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule()) {
+        if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule() && !isSpecial) {
             RenatusLandingActivity.mViewPager.setAdapter(RenatusLandingActivity.mStatusPagerAdapter);
             RenatusLandingActivity.btnTabs.getTabAt(1).select();
             RenatusLandingActivity.mTabLayout.post(() ->
@@ -1542,10 +1542,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
             selectedTab.select();
         }else {
-
-
-            SchedulerFragment schedulerFragment =
-                    schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
 
             FragmentManager childFragmentManager = childFragmentManager2;
             childFragmentManager.beginTransaction();
@@ -1628,56 +1625,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
         CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getActivity(), R.layout.custom_dropdown_item_with_image, scheduleArray, hasImage);
-
-        /*ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
-
-            @Override
-            public boolean isEnabled(int position) {
-                return position !=1 ;// As this option is a title for NamedSchedule
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_dropdown_item, null);
-                }
-
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
-
-                switch (position) {
-                    case 0:
-                        break;
-                    case 1:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 2:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
-            }
-        };*/
         scheduleSpinner.setAdapter(adapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
@@ -1811,35 +1758,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     adapter.setSelectedPosition(position);
                 if(isItemSelectedEvent)
                     return;
-
-//                if (position == 0 && (mScheduleType != -1)) {
-//                    if (mSchedule.isZoneSchedule()) {
-//                        mSchedule.setDisabled(true);
-//                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
-//                    }
-//
-//                    scheduleImageButton.setVisibility(View.GONE);
-//
-//                    if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
-//                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING, openZoneMap);
-//                        mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
-//                    }
-//                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-//                    Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-//
-//                    if (z != null && z.getScheduleRef() == null) {
-//                        HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
-//                                "not special and not vacation and roomRef " + "== " +z.getId());
-//
-//                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
-//                        z.setScheduleRef(scheduleById.getId());
-//                        CCUHsApi.getInstance().updateZone(z, zoneId);
-//                    }
-//                    CCUHsApi.getInstance().scheduleSync();
-//                    scheduleImageButton.setTag(mSchedule.getId());
-//                    vacationImageButton.setTag(mSchedule.getId());
-//                    specialScheduleImageButton.setTag(mSchedule.getId());
-//                } else
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
@@ -1910,6 +1828,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule
                 } else if (position >= 2 && (mScheduleType != -1) && !isRemoteChangeApplied) {
+                   mScheduleTypeMap.put(equipId, ScheduleType.NAMED.ordinal());
                    namedScheduleView.setVisibility(View.VISIBLE);
                    scheduleImageButton.setVisibility(View.GONE);
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
@@ -2502,11 +2421,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         zoneDetails.findViewById(R.id.last_updated);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
 
-                                String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
                                 StringBuffer equipString = new StringBuffer();
-                                for(String equipType : equipTypes){
-                                    equipString.append(StringUtils.capitalize(equipType.trim()));
-                                    equipString.append(" ");
+                                EquipmentDevice modbusDevice = modbusDevices.get(i);
+                                int displayIndex = modbusDevice.getName().lastIndexOf('-') + 1;
+                                String displayName = modbusDevice.getName().substring(displayIndex);
+                                if(!modbusDevice.getEquipType().contains(displayName)) {
+                                    equipString.append(displayName);
+                                } else {
+                                    String[] equipTypes = modbusDevice.getEquipType().split(",");
+                                    for(String equipType : equipTypes){
+                                        equipString.append(StringUtils.capitalize(equipType.trim()));
+                                        equipString.append(" ");
+                                    }
                                 }
                                 tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 if(isLastUpdatedTimeShowable(parentModbusEquip, modbusDevices, i)) {

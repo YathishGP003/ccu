@@ -127,7 +127,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 newEntityConfig.tobeAdded.add(it)
             }
         }
-        return newEntityConfig;
+        return newEntityConfig
     }
 
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,
@@ -168,9 +168,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
 
-    private fun isItTunerPoint(mutableList: MutableList<String>): Boolean {
-        return mutableList.contains(Tags.TUNER)
-    }
     private fun updatePoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                              entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
         val tz = hayStack.timeZone
@@ -207,7 +204,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun updatePointValues(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                                   entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
-        val tz = hayStack.timeZone
         entityConfiguration.tobeUpdated.forEach { point ->
             CcuLog.i(Domain.LOG_TAG, "updatePointValues - ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")

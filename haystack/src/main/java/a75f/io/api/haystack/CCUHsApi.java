@@ -1381,6 +1381,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
+        tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
     }
 
@@ -1394,6 +1395,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
+        tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
     }
 
@@ -1410,6 +1412,8 @@ public class CCUHsApi
         CcuLog.d("CCU_HS", "deleteEntity: " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
+        tagsDb.clearHistory(HRef.copy(id));
+        HisItemCache.getInstance().delete(id);
         removeId(id);
     }
 
@@ -1534,9 +1538,6 @@ public class CCUHsApi
         } else if (entity.get("point") != null) {
             if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
-            }
-            if (entity.get("his") != null) {
-                tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntityItem(entity.get("id").toString());
             hsClient.clearPointFromWatch(HRef.copy(entity.get("id").toString()));
@@ -3033,7 +3034,15 @@ public class CCUHsApi
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
-        markItemsUnSynced(readAllEntities(Tags.POINT));
+
+        ArrayList<HashMap<Object, Object>> pointsForSync = new ArrayList<>();
+
+        readAllEntities(Tags.POINT).forEach( point -> {
+            if (point.get("equipRef") != null && !readMapById(point.get("equipRef").toString()).containsKey("tuner")) {
+                pointsForSync.add(point);
+            }
+        });
+        markItemsUnSynced(pointsForSync);
 
         syncStatusService.saveSyncStatus();
         syncEntityTree();

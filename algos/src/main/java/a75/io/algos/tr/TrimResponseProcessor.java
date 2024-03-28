@@ -51,21 +51,23 @@ public class TrimResponseProcessor
             return;
         }
     
-        double sp = setPoint + trSetting.getSPtrim();
+        double sp = setPoint;
         
-        int netRequests = trSetting.getR() - trSetting.getI();
+        double netRequests = trSetting.getR() - trSetting.getI();
         
         //TR System responds only when the net request count is positive
         if (netRequests > 0) {
             double response = netRequests * trSetting.getSPres();
-            if (response < trSetting.getSPresmax() ||
-                            response > trSetting.getSPresmax()) {
+            if ((response < 0 && response < trSetting.getSPresmax()) ||
+                    (response > 0 && response > trSetting.getSPresmax())) {
                 response = trSetting.getSPresmax();
             }
             sp += response;
             for (TrimResetListener l : trListeners) {
                 l.handleSystemReset();
             }
+        } else {
+            sp += trSetting.getSPtrim();
         }
         trSetting.resetRequest();
         

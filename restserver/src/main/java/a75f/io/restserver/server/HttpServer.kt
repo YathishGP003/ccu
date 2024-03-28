@@ -1,11 +1,13 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
 import a75f.io.api.haystack.util.retrieveLevelValues
-import a75f.io.api.haystack.HisItem
+import a75f.io.device.bacnet.BacnetConfigConstants
 import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
+import a75f.io.device.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
 import a75f.io.device.bacnet.readExternalBacnetJsonFile
 import a75f.io.device.bacnet.updateBacnetHeartBeat
 import a75f.io.logger.CcuLog
@@ -37,11 +39,15 @@ import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.joda.time.DateTime
-import org.projecthaystack.HDateTime
+import org.json.JSONException
+import org.json.JSONObject
+import org.projecthaystack.HDict
+import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
+import org.projecthaystack.HVal
+import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
@@ -62,6 +68,7 @@ class HttpServer {
             return instance
         }
     }
+
     fun startServer() {
         CoroutineScope(Dispatchers.IO).launch {
             server.start(wait = true)
@@ -169,22 +176,33 @@ class HttpServer {
 
                 get("/readAll/{query}") {
                     val query = call.parameters["query"]
-                    CcuLog.i(HTTP_SERVER, " query: $query")
+                    val isVirtualZoneEnabled = isVirtualZoneEnabled()
+                    CcuLog.i(HTTP_SERVER, "read all query: $query <-isVirtualZoneEnabled-> $isVirtualZoneEnabled")
+                    var equipRefId = ""
                     if (query != null) {
-//                        val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query))
-//                        CcuLog.i(HTTP_SERVER, " response: $response")
-//                        call.respond(HttpStatusCode.OK, BaseResponse(response))
-
+                        var group = ""
+                        if(query.contains("equipRef")){
+                            try {
+                                equipRefId = getEquipRefId(query).replace("@","").trim()
+                                if(CCUHsApi.getInstance().readMapById(equipRefId)["group"] != null){
+                                    group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
+                                }
+                            }catch (e: UnknownRecException){
+                                e.printStackTrace()
+                            }
+                        }
                         val tempGrid = CCUHsApi.getInstance().getHSClient().readAll(query)
-                        val response = HZincWriter.gridToString(tempGrid)
+                        val mutableDictList = repackagePoints(tempGrid, isVirtualZoneEnabled, group)
+                        val finalGrid = HGridBuilder.dictsToGrid(mutableDictList.toTypedArray())
+                        val modifiedGridResponse = HZincWriter.gridToString(finalGrid)
                         if(query.contains("point")){
-                            val levelData =  getLevelValues(tempGrid)
-                            val fullResponse = ReadAllResponse(response, levelData)
+                            val levelData =  getLevelValues(finalGrid)
+                            val fullResponse = ReadAllResponse(modifiedGridResponse, levelData)
                             CcuLog.i(HTTP_SERVER, " fullResponse: ${BaseResponse(fullResponse)}")
                             call.respond(HttpStatusCode.OK, BaseResponse(fullResponse))
                         }else {
-                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(response)}")
-                            call.respond(HttpStatusCode.OK, BaseResponse(response))
+                            CcuLog.i(HTTP_SERVER, " response: ${BaseResponse(modifiedGridResponse)}")
+                            call.respond(HttpStatusCode.OK, BaseResponse(modifiedGridResponse))
                         }
                     } else {
                         call.respond(HttpStatusCode.NotFound)

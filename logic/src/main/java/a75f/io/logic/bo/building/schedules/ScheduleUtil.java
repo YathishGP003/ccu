@@ -372,6 +372,8 @@ public class ScheduleUtil {
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
+                ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and roomRef == \""+z.getId()+"\"");
+               if(equips.isEmpty()) continue;
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
                    || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")

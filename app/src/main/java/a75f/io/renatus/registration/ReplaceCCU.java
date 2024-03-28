@@ -495,6 +495,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             replaceStatus.setText("Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
                     "%)");
             if (RestoreCCU.isReplaceCCUCompleted()) {
+                Globals.getInstance().copyModels();
                 Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
                 progressAlertDialog.dismiss();
                 ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);

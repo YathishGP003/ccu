@@ -32,6 +32,27 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp" />
 
+                <LinearLayout
+                    android:id="@+id/biskitModLayout"
+                    android:layout_width="match_parent"
+                    android:layout_margin="10dp"
+                    android:visibility="gone"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:text="Control loop frequncey"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                    <Spinner
+                        android:id="@+id/loopspinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout

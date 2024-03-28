@@ -8,6 +8,7 @@ import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
 import a75f.io.logic.tuners.TunerConstants
@@ -242,6 +243,32 @@ class HyperStatSplitUserIntentHandler {
                 )
                 zoneDataInterface?.refreshScreen("", false)
             }
+        }
+
+        fun isFanModeChangeUnnecessary(equipRef: String, userIntentFanMode: Int): Boolean {
+            val haystack: CCUHsApi = CCUHsApi.getInstance()
+            val currentFanMode = haystack.readPointPriorityValByQuery("zone and fan and mode and operation and equipRef == \"$equipRef\"").toInt()
+            // Ignore a change to OFF if current Fan Mode is OFF
+            val isAlreadyFanOff = userIntentFanMode == StandaloneFanStage.OFF.ordinal
+                    && currentFanMode == StandaloneFanStage.OFF.ordinal
+
+            // Ignore a change to AUTO if current Fan Mode is AUTO
+            val isAlreadyFanAuto = userIntentFanMode == StandaloneFanStage.AUTO.ordinal
+                    && currentFanMode == StandaloneFanStage.AUTO.ordinal
+
+            // Ignore a change to LOW_CUR_OCC if current Fan Mode is LOW_CUR_OCC, LOW_OCC, or LOW_ALL_TIMES
+            val isAlreadyFanLow = userIntentFanMode == StandaloneFanStage.LOW_CUR_OCC.ordinal &&
+                    (currentFanMode == StandaloneFanStage.LOW_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.LOW_OCC.ordinal || currentFanMode == StandaloneFanStage.LOW_ALL_TIME.ordinal)
+
+            // Ignore a change to MEDIUM_CUR_OCC if current Fan Mode is MEDIUM_CUR_OCC, MEDIUM_OCC, or MEDIUM_ALL_TIMES
+            val isAlreadyFanMedium = userIntentFanMode == StandaloneFanStage.MEDIUM_CUR_OCC.ordinal &&
+                    (currentFanMode == StandaloneFanStage.MEDIUM_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.MEDIUM_OCC.ordinal || currentFanMode == StandaloneFanStage.MEDIUM_ALL_TIME.ordinal)
+
+            // Ignore a change to HIGH_CUR_OCC if current Fan Mode is HIGH_CUR_OCC, HIGH_OCC, or HIGH_ALL_TIMES
+            val isAlreadyFanHigh = userIntentFanMode == StandaloneFanStage.HIGH_CUR_OCC.ordinal &&
+                    (currentFanMode == StandaloneFanStage.HIGH_CUR_OCC.ordinal || currentFanMode == StandaloneFanStage.HIGH_OCC.ordinal || currentFanMode == StandaloneFanStage.HIGH_ALL_TIME.ordinal)
+
+            return (isAlreadyFanOff || isAlreadyFanAuto || isAlreadyFanLow || isAlreadyFanMedium || isAlreadyFanHigh)
         }
 
         fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {

@@ -827,7 +827,7 @@ public class HyperSplitMsgReceiver {
 
     public static void updateFanMode(String equipId, int mode, PossibleFanMode possibleMode){
         int fanMode = getLogicalFanMode(possibleMode,mode);
-        if(fanMode!= -1) {
+        if(fanMode!= -1 && !HyperStatSplitUserIntentHandler.Companion.isFanModeChangeUnnecessary(equipId, fanMode)) {
             HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints(
                     equipId, "zone and sp and fan and operation and mode", fanMode, WhoFiledConstants.HYPERSTAT_SPLIT_WHO);
         }

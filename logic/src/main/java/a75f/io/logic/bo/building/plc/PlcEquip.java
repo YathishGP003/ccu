@@ -34,6 +34,10 @@ public class PlcEquip {
     ProfileType profileType;
     int nodeAddr;
 
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
+
     GenericPIController plc;
     String equipRef = null;
 
@@ -54,6 +58,7 @@ public class PlcEquip {
             HashMap equip = hayStack.read("equip and pid and group == \"" + nodeAddr + "\"");
             equipRef = equip.get("id").toString();
         }
+        pendingTunerChange = false;
         plc = new GenericPIController();
         plc.setMaxAllowedError(hayStack.readDefaultVal("point and prange and equipRef == \"" + equipRef + "\""));
         plc.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \"" + equipRef + "\""));
@@ -65,6 +70,20 @@ public class PlcEquip {
         isEnabledAnalog2InForSp = hayStack.readDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \"" + equipRef + "\"") > 0;
         isEnabledZeroErrorMidpoint = hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"") > 0;
 
+    }
+
+    public void refreshPITuners() {
+        if (equipRef == null) {
+            HashMap equip = hayStack.read("equip and pid and group == \"" + nodeAddr + "\"");
+            equipRef = equip.get("id").toString();
+        }
+
+        // proportionalSpread is a config point, so init() will be called if this value is changed.
+        plc.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \"" + equipRef + "\""));
+        plc.setProportionalGain(TunerUtil.readTunerValByQuery("pid and pgain and equipRef == \"" + equipRef + "\""));
+        plc.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \"" + equipRef + "\""));
+
+        pendingTunerChange = false;
     }
 
     public GenericPIController getPIController() {

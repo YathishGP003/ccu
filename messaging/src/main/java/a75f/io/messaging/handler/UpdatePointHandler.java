@@ -39,6 +39,7 @@ import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
@@ -71,6 +72,8 @@ public class UpdatePointHandler implements MessageHandler
                 zoneDataInterface.refreshScreen("", true);
             }
             return;
+        } else if (hayStack.readMapById(pointUid).containsKey(Tags.TUNER)) {
+            TunerUtil.refreshEquipTuners();
         }
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();

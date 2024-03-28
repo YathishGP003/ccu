@@ -301,4 +301,9 @@ public abstract class DabSystemProfile extends SystemProfile
             hayStack.writeHisValById(effectiveSatConditioningId, 0.0);
         }
     }
+
+    public void setPendingTunerChange() {
+        DabSystemController systemController = (DabSystemController) getSystemController();
+        systemController.setPendingTunerChange();
+    }
 }

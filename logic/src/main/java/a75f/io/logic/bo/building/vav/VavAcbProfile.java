@@ -86,9 +86,16 @@ public class VavAcbProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
-        CcuLog.e(L.TAG_CCU_ZONE, "");
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
                 "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
+
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
+                ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
+        if (vavEquip.getEnableCFMControl().readPriorityVal() > 0) {
+            CcuLog.i(L.TAG_CCU_ZONE, "CFM PI Tuners: cfmProportionalGain " + cfmController.getProportionalGain() + ", cfmIntegralGain " + cfmController.getIntegralGain() +
+                    ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
+        }
+
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -204,6 +211,9 @@ public class VavAcbProfile extends VavProfile
         chwValve = ((VavAcbUnit)vavUnit).chwValve;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+
+        if (hasPendingTunerChange()) refreshPITuners();
+
         setDamperLimits( (short) nodeAddr, damper);
     }
     
@@ -242,6 +252,10 @@ public class VavAcbProfile extends VavProfile
 
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
         boolean  enabledIAQControl = vavEquip.getEnableIAQControl().readDefaultVal() > 0;
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied())

@@ -84,6 +84,10 @@ public class DabEquip
     double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
 
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
+
     private ControlLoop heatingLoop;
 
     public static final String CARRIER_PROD = "carrier_prod";
@@ -98,6 +102,9 @@ public class DabEquip
     }
     
     public void init() {
+
+        pendingTunerChange = false;
+
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
     
         if (equipMap != null && equipMap.size() > 0)
@@ -130,6 +137,37 @@ public class DabEquip
                                                         "igain and equipRef == \"" + equipRef + "\""));
         }
     
+    }
+
+    public void refreshPITuners() {
+        if (equipRef != null) {
+            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and not reheat and equipRef == \"" + equipRef + "\""));
+
+            co2Target = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and target and equipRef == \"" + equipRef + "\"");
+            co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and threshold and equipRef == \"" + equipRef + "\"");
+            vocTarget = (int) TunerUtil.readTunerValByQuery("zone and dab and voc and target and equipRef == \"" + equipRef + "\"");
+            vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and dab and voc and threshold and equipRef == \"" + equipRef + "\"");
+
+            co2Loop.setCo2Target(co2Target);
+            co2Loop.setCo2Threshold(co2Threshold);
+
+            vocLoop.setVOCTarget(vocTarget);
+            vocLoop.setVOCThreshold(vocThreshold);
+
+            heatingLoop.setProportionalSpread((int) TunerUtil.readTunerValByQuery("dab and reheat and " +
+                    "pspread and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and reheat and " +
+                    "itimeout and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                    "pgain and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                    "igain and equipRef == \"" + equipRef + "\""));
+
+            pendingTunerChange = false;
+        }
     }
 
     public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)

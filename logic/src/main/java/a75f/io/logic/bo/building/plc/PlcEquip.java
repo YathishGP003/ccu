@@ -12,7 +12,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -85,8 +84,6 @@ public class PlcEquip {
         plc.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \"" + equipRef + "\""));
 
         pendingTunerChange = false;
-
-        CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for PI Loop zone with address=" + nodeAddr);
     }
 
     public GenericPIController getPIController() {

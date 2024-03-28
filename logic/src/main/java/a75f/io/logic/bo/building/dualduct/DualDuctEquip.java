@@ -103,8 +103,6 @@ public class DualDuctEquip {
     
             vocLoop.setVOCTarget(vocTarget);
             vocLoop.setVOCThreshold(vocThreshold);
-
-            CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for Dual-Duct zone with address=" + nodeAddr);
         }
         
     }

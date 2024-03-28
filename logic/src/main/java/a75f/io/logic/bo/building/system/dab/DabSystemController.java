@@ -249,8 +249,6 @@ public class DabSystemController extends SystemController
         piController.setIntegralMaxTimeout(integralMaxTimeout);
 
         pendingTunerChange = false;
-
-        CcuLog.d("CCU_TUNER_RELOAD", "Reloaded tuners from Haystack for DAB System Equip");
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {

@@ -3,6 +3,7 @@ package a75f.io.alerts.model
 import a75f.io.alerts.AlertBuilder
 import a75f.io.alerts.AlertDefinition
 import a75f.io.alerts.AlertFormatter
+import a75f.io.alerts.AlertsRepository
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
 
@@ -21,13 +22,13 @@ data class AlertDefOccurrence(
 ) {
    val key = AlertsDefStateKey(alertDef.alert.mTitle, equipRef)
 
-   fun toAlert(haystack: CCUHsApi): Alert {
+   fun toAlert(haystack: CCUHsApi, repository : AlertsRepository): Alert {
       return if (pointId != null)
-         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef, pointId), haystack,
+         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef, pointId, repository), haystack,
             equipRef,
             pointId)
       else
-         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack)
+         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef, repository), haystack)
    }
 }
 

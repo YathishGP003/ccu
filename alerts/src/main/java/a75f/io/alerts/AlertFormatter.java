@@ -1,5 +1,6 @@
 package a75f.io.alerts;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ public class AlertFormatter
         entitySet.add("present");
     }
     
-    public static String getFormattedMessage(AlertDefinition def) {
+    public static String getFormattedMessage(AlertDefinition def, AlertsRepository repository) {
         String message = def.alert.mMessage;
         StringTokenizer t = new StringTokenizer(def.alert.mMessage);
         while(t.hasMoreTokens()) {
@@ -59,12 +60,18 @@ public class AlertFormatter
                 }
             }
         }
-        message = StringUtil.processMessageForNumberFormatting(message);
+
+        if(repository.isOtaAlert(def.alert.mTitle)) {
+            message = StringUtil.processMessageForNumberFormattingOnlyOtaUpdate(message);
+        }
+        else {
+            message = StringUtil.processMessageForNumberFormatting(message);
+        }
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
 
-    public static String getFormattedMessage(AlertDefinition def, String pointId) {
+    public static String getFormattedMessage(AlertDefinition def, String pointId, AlertsRepository repository) {
         String message = def.alert.mMessage;
         StringTokenizer t = new StringTokenizer(def.alert.mMessage);
         while(t.hasMoreTokens()) {
@@ -73,7 +80,12 @@ public class AlertFormatter
                 message = replaceToken(message, token, def, pointId);
             }
         }
-        message = StringUtil.processMessageForNumberFormatting(message);
+        if(repository.isOtaAlert(def.alert.mTitle)) {
+            message = StringUtil.processMessageForNumberFormattingOnlyOtaUpdate(message);
+        }
+        else {
+            message = StringUtil.processMessageForNumberFormatting(message);
+        }
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
@@ -204,4 +216,5 @@ public class AlertFormatter
         }
         return value;
     }
+
 }

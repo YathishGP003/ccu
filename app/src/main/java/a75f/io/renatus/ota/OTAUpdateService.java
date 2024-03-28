@@ -341,7 +341,7 @@ public class OTAUpdateService extends IntentService {
             HashMap ccu = CCUHsApi.getInstance().read("ccu");
             String ccuName = ccu.get("dis").toString();
             AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
-                    "ended for smart device"+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
+                    "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
                     "." + versionMinor);
             Log.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);

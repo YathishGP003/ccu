@@ -146,6 +146,7 @@ class DabExternalAhu : DabSystemProfile() {
         if (equip["profile"]?.toString().contentEquals(ProfileType.dabExternalAHUController.name)) {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
+        removeSystemEquipModbus()
     }
 
     @Synchronized
@@ -203,10 +204,10 @@ class DabExternalAhu : DabSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            dabConfig,
             analogFanMultiplier,
             dabConfig.coolingLoop.toDouble(),
-            conditioningMode
+            conditioningMode,
+            dabSystem
         )
         setOccupancyMode(
             systemEquip,
@@ -246,7 +247,8 @@ class DabExternalAhu : DabSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            dabConfig
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)

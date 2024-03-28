@@ -113,7 +113,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         propagateAddZoneTunerPoints(modelDef, updateConfig, siteRef)
         propagateAddSystemTunerPoints(modelDef, updateConfig, siteRef)
         propagateUpdateTunerPoints(modelDef, updateConfig, siteRef)
-        propagateDeleteTunerPoints(modelDef, updateConfig, siteRef)
+        propagateDeleteTunerPoints(modelDef, updateConfig)
     }
     private fun propagateAddZoneTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
         updateConfig.tobeAdded.forEach { point ->
@@ -178,7 +178,10 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         }
     }
 
-    private fun propagateDeleteTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
+    private fun propagateDeleteTunerPoints(
+        modelDef: ModelDirective,
+        updateConfig: EntityConfiguration
+    ) {
         updateConfig.tobeUpdated.forEach { point ->
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
@@ -223,7 +226,6 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             "ti" -> return "ti"
             "oao" -> return "oao"
             "otn" -> return "otn"
-            "ti" -> return "ti"
             else -> null
         }
     }
@@ -347,7 +349,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Updated Equip ${modelDef.domainName}")
         //Required to update backend points since local building tuners are no longer synced.
         updateBackendBuildingTuner(site.id, hayStack)
-        hayStack.syncEntityTree();
+        hayStack.syncEntityTree()
     }
 
     private fun handleMandatoryMigrationForOlderCCUs(modelDef: ModelDirective) {

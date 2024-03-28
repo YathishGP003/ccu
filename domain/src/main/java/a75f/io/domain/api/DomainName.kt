@@ -472,6 +472,7 @@ object DomainName {
     const val weightedAverageChangeOverLoadMA  = "weightedAverageChangeOverLoadMA"
     const val weightedAverageCoolingLoadPostML  = "weightedAverageCoolingLoadPostML"
     const val weightedAverageHeatingLoadPostML  = "weightedAverageHeatingLoadPostML"
+    const val epidemicModeSystemState  = "epidemicModeSystemState"
 
 }
 

@@ -85,7 +85,7 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
-<!--        <item>  VAV External AHU Controller</item>-->
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
@@ -100,7 +100,7 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
-<!--        <item>  VAV External AHU Controller</item>-->
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>

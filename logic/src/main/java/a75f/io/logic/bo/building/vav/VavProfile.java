@@ -217,16 +217,25 @@ public abstract class VavProfile extends ZoneProfile {
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
 
-        satResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        co2ResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        spResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        hwstResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        ZonePriority zonePriority = ZonePriority.values()[(int)vavEquip.getZonePriority().readPriorityVal()];
+        satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
 
         vavUnit.vavDamper.minPosition = 0;
         vavUnit.vavDamper.maxPosition = 100;
         damper = vavUnit.vavDamper; //This is not necessary. Keeping to maintain legacy code.
         valve = vavUnit.reheatValve;
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
+    }
+
+    public void updateZonePriority(int newPriority) {
+        ZonePriority zonePriority = ZonePriority.values()[(int)newPriority];
+        satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
     }
 
     private void initializeCfmController(String equipId) {

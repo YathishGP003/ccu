@@ -53,7 +53,7 @@ public class TrimResponseProcessor
     
         double sp = setPoint + trSetting.getSPtrim();
         
-        int netRequests = trSetting.getR() - trSetting.getI();
+        double netRequests = trSetting.getR() - trSetting.getI();
         
         //TR System responds only when the net request count is positive
         if (netRequests > 0) {

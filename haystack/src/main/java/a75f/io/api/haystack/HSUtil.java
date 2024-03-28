@@ -413,6 +413,14 @@ public class HSUtil
         }
     }
 
+    public static boolean isVAVZonePriorityConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
+        if (pointEntity.containsKey("domainName")) {
+            return pointEntity.get("domainName").equals("zonePriority") && pointEntity.containsKey("vav");
+        }
+        return false;
+    }
+
     public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
             HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
             return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));

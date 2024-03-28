@@ -670,7 +670,45 @@ class HyperStatFragment : BaseDialogFragment() {
         var isHeatingStage3Enabled = false
         var isStagedFanEnabled = false
         var isDampSelected = false
+        viewState.relays.forEachIndexed { index, relayState ->
+            with(relayUIs[index]) {
+                switch.isChecked = relayState.enabled
+                selector.isEnabled = relayState.enabled
+                selector.setSelection(relayState.association)
 
+                if (relayState.enabled) {
+                    when (relayState.association) {
+                        CpuRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
+                        CpuRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
+                        CpuRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
+                    }
+                }
+                if (isViewModelCPUViewModel(viewModel)) {
+                    makeStagedFanVisible(
+                        isCoolingStage1Enabled,
+                        isCoolingStage2Enabled,
+                        isCoolingStage3Enabled,
+                        isHeatingStage1Enabled,
+                        isHeatingStage2Enabled,
+                        isHeatingStage3Enabled,
+                        isStagedFanEnabled
+                    )
+                } else {
+                    makeStagedFanVisible(
+                        isCoolingStage1Enabled = false,
+                        isCoolingStage2Enabled = false,
+                        isCoolingStage3Enabled = false,
+                        isHeatingStage1Enabled = false,
+                        isHeatingStage2Enabled = false,
+                        isHeatingStage3Enabled = false,
+                        false
+                    )
+                }
+            }
+        }
         viewState.analogOutUis.forEachIndexed { index, analogOutState ->
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
@@ -776,46 +814,6 @@ class HyperStatFragment : BaseDialogFragment() {
             zoneCO2Threshold.layoutParams=paramsCo2ThresholdSpinner
         }
 
-
-        viewState.relays.forEachIndexed { index, relayState ->
-            with(relayUIs[index]) {
-                switch.isChecked = relayState.enabled
-                selector.isEnabled = relayState.enabled
-                selector.setSelection(relayState.association)
-
-                if (relayState.enabled) {
-                    when (relayState.association) {
-                        CpuRelayAssociation.COOLING_STAGE_1.ordinal -> isCoolingStage1Enabled = true
-                        CpuRelayAssociation.COOLING_STAGE_2.ordinal -> isCoolingStage2Enabled = true
-                        CpuRelayAssociation.COOLING_STAGE_3.ordinal -> isCoolingStage3Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_1.ordinal -> isHeatingStage1Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_2.ordinal -> isHeatingStage2Enabled = true
-                        CpuRelayAssociation.HEATING_STAGE_3.ordinal -> isHeatingStage3Enabled = true
-                    }
-                }
-                if (isViewModelCPUViewModel(viewModel)) {
-                    makeStagedFanVisible(
-                        isCoolingStage1Enabled,
-                        isCoolingStage2Enabled,
-                        isCoolingStage3Enabled,
-                        isHeatingStage1Enabled,
-                        isHeatingStage2Enabled,
-                        isHeatingStage3Enabled,
-                        isStagedFanEnabled
-                    )
-                } else {
-                    makeStagedFanVisible(
-                        isCoolingStage1Enabled = false,
-                        isCoolingStage2Enabled = false,
-                        isCoolingStage3Enabled = false,
-                        isHeatingStage1Enabled = false,
-                        isHeatingStage2Enabled = false,
-                        isHeatingStage3Enabled = false,
-                        false
-                    )
-                }
-            }
-        }
         pendingAnalogOutChange = false
         pendingRelayChange = false
     }

@@ -553,9 +553,10 @@ public class CCUUtils {
 		PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
 		try {
 			PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
-			String appVersion = info.versionName + "." + info.versionCode;
-			CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", appVersion);
-			CcuLog.d("CCU_MIGRATION", "Update Migration Diag Point "+appVersion);
+			String appVersion = info.versionName;
+			String migrationVersion=appVersion.substring(appVersion.lastIndexOf('_') + 1);
+			CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", migrationVersion);
+			CcuLog.d("CCU_MIGRATION", "Update Migration Diag Point "+migrationVersion);
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 		}

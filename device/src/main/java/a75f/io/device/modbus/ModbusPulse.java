@@ -16,6 +16,8 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.util.CCUUtils;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class ModbusPulse {
@@ -109,16 +111,17 @@ public class ModbusPulse {
                 hayStack.readAllEntities("equip and modbus and group == \"" + slaveId +
                         "\"");
         for(HashMap<Object, Object> equip : equipList) {
-            HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and (heartBeat or heartbeat) and equipRef == " +
-                    "\""+equip.get("id")+ "\"");
-            long current_millis = System.currentTimeMillis();
-            if(!lastHisItemMap.containsKey(slaveId))
-            {
-                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-                lastHisItemMap.put(slaveId, current_millis);
-            }else if((current_millis - lastHisItemMap.get(slaveId)) > 40000){
-                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-                lastHisItemMap.put(slaveId, current_millis);
+            if(CCUUtils.isModbusHeartbeatRequired(equip, hayStack)) {
+                HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and (heartBeat or heartbeat) and equipRef == " +
+                        "\"" + equip.get("id") + "\"");
+                long current_millis = System.currentTimeMillis();
+                if(!lastHisItemMap.containsKey(slaveId)) {
+                    hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+                    lastHisItemMap.put(slaveId, current_millis);
+                } else if((current_millis - lastHisItemMap.get(slaveId)) > 40000) {
+                    hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+                    lastHisItemMap.put(slaveId, current_millis);
+                }
             }
         }
     }
@@ -359,5 +362,4 @@ public class ModbusPulse {
         final long mask = (1L << nrBits) - 1L;
         return rightShifted & mask;
     }
-    
 }

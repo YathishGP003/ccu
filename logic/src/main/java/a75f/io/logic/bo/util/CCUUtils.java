@@ -62,12 +62,14 @@ public class CCUUtils
         if(equipList.size() == 0){
             return null;
         }
-        for( HashMap<Object, Object> equip : equipList){
-            HashMap<Object, Object> heartBeatPoint =
-                    hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.get("id")+ "\"");
-            if(heartBeatPoint.size() > 0){
-                HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
-                return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        for(HashMap<Object, Object> equip : equipList) {
+            if(isModbusHeartbeatRequired(equip, hayStack)) {
+                HashMap<Object, Object> heartBeatPoint =
+                        hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
+                if(heartBeatPoint.size() > 0) {
+                    HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+                    return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+                }
             }
         }
         return null;
@@ -240,5 +242,13 @@ public class CCUUtils
             e.printStackTrace();
             return true;
         }
+    }
+
+    public static boolean isModbusHeartbeatRequired(HashMap<Object, Object> equip, CCUHsApi hayStack) {
+        if(equip.containsKey("equipRef")) {
+            HashMap<Object, Object> parentEquip = hayStack.readMapById(equip.get("equipRef").toString());
+            return !equip.get("group").toString().equals(parentEquip.get("group"));
+        }
+        return true;
     }
 }

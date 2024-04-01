@@ -340,7 +340,7 @@ public class DeviceUtil {
                     + equip.get("id").toString() + "\"");
             HashMap<Object,Object> heatDT = hayStack.readEntity("point and temp and desired and heating and equipRef == \""
                     + equip.get("id").toString() + "\"");
-            HashMap<Object,Object> avgDT = hayStack.readEntity("point and temp and desired and average and equipRef == \""
+            HashMap<Object,Object> avgDT = hayStack.readEntity("point and temp and desired and (avg or average) and equipRef == \""
                     + equip.get("id").toString() + "\"");
 
             Point coolDtPoint = new Point.Builder().setHashMap(coolDT).build();

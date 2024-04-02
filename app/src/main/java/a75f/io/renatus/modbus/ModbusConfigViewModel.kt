@@ -301,19 +301,19 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                     if (profileType.equals(ProfileType.MODBUS_EMR)) {
                         val emrEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_EMR.name) }
                         val emrAddr = Integer.parseInt(emrEquip?.group)
-                        hayStack.deleteEntity(emrEquip?.id)
+                        hayStack.deleteEntityTree(emrEquip?.id)
 
                         val emrDevice = HSUtil.getDevice(emrAddr.toShort())
-                        hayStack.deleteEntity(emrDevice?.id)
+                        hayStack.deleteEntityTree(emrDevice?.id)
 
                         CcuLog.i("CCU_DOMAIN", "Energy Meter Equip deleted successfully")
                     } else if (profileType.equals(ProfileType.MODBUS_BTU)) {
                         val btuEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_BTU.name) }
                         val btuAddr = Integer.parseInt(btuEquip?.group)
-                        hayStack.deleteEntity(btuEquip?.id)
+                        hayStack.deleteEntityTree(btuEquip?.id)
 
                         val btuDevice = HSUtil.getDevice(btuAddr.toShort())
-                        hayStack.deleteEntity(btuDevice?.id)
+                        hayStack.deleteEntityTree(btuDevice?.id)
 
                         CcuLog.i("CCU_DOMAIN", "BTU Meter Equip deleted successfully")
                     }

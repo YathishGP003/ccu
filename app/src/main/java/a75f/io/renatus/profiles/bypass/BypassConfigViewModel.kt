@@ -169,8 +169,8 @@ class BypassConfigViewModel : ViewModel() {
                     val bdEquip = sysEquips.find { eq : Equip -> eq.domainName != null && eq.domainName == DomainName.smartnodeBypassDamper && eq.group.equals(profileConfiguration.nodeAddress.toString())}
                     val sysDevices = HSUtil.getDevices("SYSTEM") + HSUtil.getDevices("@SYSTEM")
                     val bdDevice = sysDevices.find { d : Device -> d.domainName != null && d.addr.equals(profileConfiguration.nodeAddress.toString()) && d.domainName.equals("smartnodeDevice")}
-                    hayStack.deleteEntity(bdEquip?.id)
-                    hayStack.deleteEntity(bdDevice?.id)
+                    hayStack.deleteEntityTree(bdEquip?.id)
+                    hayStack.deleteEntityTree(bdDevice?.id)
                     L.ccu().bypassDamperProfile = null
                     CcuLog.i(Domain.LOG_TAG, "Bypass Damper Equip deleted successfully")
                 } catch (e: Exception) {

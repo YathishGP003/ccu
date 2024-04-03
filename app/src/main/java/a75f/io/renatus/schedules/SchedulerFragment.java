@@ -404,7 +404,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
-            schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+            schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId) == null ?
+                    CCUHsApi.getInstance().getDefaultNamedSchedule() :
+                    CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
             ArrayList<Schedule> buildingScheduleList = CCUHsApi.getInstance().getSystemSchedule(false);
             if(buildingScheduleList.size() > 0) {
@@ -784,7 +786,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void showDialog(int id, int position, Schedule.Days day) {
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId());
+        schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId()) == null ?
+                CCUHsApi.getInstance().getDefaultNamedSchedule() : CCUHsApi.getInstance().getScheduleById(schedule.getId());
         switch (id) {
             case ID_DIALOG_SCHEDULE:
                 Fragment scheduleFragment = getFragmentManager().findFragmentByTag("popup");
@@ -1461,6 +1464,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(schedule.isNamedSchedule()){
+                    Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 int clickedPosition = (int)v.getTag();
                 HashMap<Object,Object> scheduleObject = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
                 mScheduleId = scheduleObject.get("id").toString();

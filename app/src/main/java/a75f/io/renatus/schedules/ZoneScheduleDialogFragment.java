@@ -811,20 +811,33 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     }
 
     private void resetRangeBarLimits() {
+        String heatingUserlimitMinItem =  (heatingUserLimitMin.getSelectedItem() == null) ?
+                heatingUserLimitMin.getItemAtPosition(heatingUserLimitMin.getCount() -1).toString() :
+                heatingUserLimitMin.getSelectedItem().toString();
+        String heatingUserlimitMaxItem = (heatingUserLimitMax.getSelectedItem() == null) ?
+                heatingUserLimitMax.getItemAtPosition(heatingUserLimitMax.getCount() -1).toString() :
+                heatingUserLimitMax.getSelectedItem().toString();
+        String coolingUserlimitMinItem = (coolingUserLimitMin.getSelectedItem() == null) ?
+                coolingUserLimitMin.getItemAtPosition(coolingUserLimitMin.getCount() -1).toString() :
+                coolingUserLimitMin.getSelectedItem().toString();
+        String coolingUserlimitMaxItem = (coolingUserLimitMax.getSelectedItem() == null) ?
+                coolingUserLimitMax.getItemAtPosition(coolingUserLimitMax.getCount() -1).toString() :
+                coolingUserLimitMax.getSelectedItem().toString();
+
         if (isCelsiusTunerAvailableStatus()) {
             rangeSeekBarView.setHeatingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserlimitMinItem, "\u00B0C"))));
             rangeSeekBarView.setHeatingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserlimitMaxItem, "\u00B0C"))));
             rangeSeekBarView.setCoolingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserLimitMax.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserlimitMaxItem, "\u00B0C"))));
             rangeSeekBarView.setCoolingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserLimitMin.getSelectedItem().toString(), "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserlimitMinItem, "\u00B0C"))));
         } else {
-            rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMin.getSelectedItem().toString()));
-            rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMax.getSelectedItem().toString()));
-            rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMax.getSelectedItem().toString()));
-            rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMin.getSelectedItem().toString()));
+            rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserlimitMinItem));
+            rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserlimitMaxItem));
+            rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserlimitMaxItem));
+            rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserlimitMinItem));
         }
     }
 

@@ -2170,7 +2170,20 @@ public class CCUHsApi
         for(HashMap<Object, Object> equipMap : equipMapList) {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             CCUHsApi.getInstance().updateEquip(equip, equip.getId());
-            updateCcuRefForDiagPoints(equip);
+            if(equip.getCcuRef().isEmpty()) {
+                updateCcuRefForDiagPoints(equip);
+            }
+            updateCcuRefForDiagPointWhileMigration(equip);
+        }
+    }
+
+    private void updateCcuRefForDiagPointWhileMigration(Equip equip) {
+        ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
+        for(HashMap<Object, Object> equipPoint : equipPoints){
+            Point point = new Point.Builder().setHashMap(equipPoint).build();
+            if(point.getCcuRef().isEmpty()) {
+                updatePoint(point, point.getId());
+            }
         }
     }
     public void updateDiagGatewayRef(String systemEquipRef){
@@ -3495,5 +3508,13 @@ public class CCUHsApi
     public int getCacheSyncFrequency() {
         return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("cacheSyncFrequency", 1);
+    }
+
+    public Schedule getDefaultNamedSchedule() {
+        HDict scheduleHGrid = tagsDb.read("default and named and schedule");
+        if(scheduleHGrid != null) {
+            return new Schedule.Builder().setHDict(scheduleHGrid).build();
+        }
+        return null;
     }
 }

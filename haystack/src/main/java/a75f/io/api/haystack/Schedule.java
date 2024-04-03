@@ -289,7 +289,8 @@ public class Schedule extends Entity
         }
 
         CcuLog.e("CCU_SCHEDULE", " !! A zone without valid schedule : something is broken for "+zone.getDisplayName());
-        return null;
+        CcuLog.d("Schedule", " ScheduleType is null returning defaultnamed");
+        return CCUHsApi.getInstance().getDefaultNamedSchedule();
     }
 
     private static boolean isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(Schedule.Days lessPrioritySchedule,
@@ -537,7 +538,8 @@ public class Schedule extends Entity
         CcuLog.d("Schedule", " Zone Id ="+zoneId);
         HashMap<Object,Object> scheduleTypePoint = CCUHsApi.getInstance().readEntity("scheduleType and roomRef == \"" + zoneId + "\"");
         if(scheduleTypePoint.isEmpty()){
-            return null;
+            CcuLog.d("Schedule", " ScheduleType is null returning defaultnamed");
+            return CCUHsApi.getInstance().getDefaultNamedSchedule();
         }
 
         double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("scheduleType and roomRef == \"" + zoneId + "\"");
@@ -549,7 +551,8 @@ public class Schedule extends Entity
                 return schedule;
             }
         }
-        return null;
+        CcuLog.d("Schedule", " ScheduleType is null returning defaultnamed");
+        return CCUHsApi.getInstance().getDefaultNamedSchedule();
     }
 
     private static Schedule mergeSpecialScheduleWithZoneSchedule(Set<Schedule.Days> combinedSpecialSchedules,

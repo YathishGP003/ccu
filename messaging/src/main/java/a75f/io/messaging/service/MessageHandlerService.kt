@@ -2,14 +2,12 @@ package a75f.io.messaging.service
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.data.message.DatabaseHelper
-import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
 import a75f.io.data.message.Message
 import a75f.io.data.message.updateMessage
 import a75f.io.data.message.updateMessageHandled
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.messaging.MessageHandler
-import a75f.io.messaging.exceptions.InvalidMessageFormatException
 import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler
 import a75f.io.messaging.messageToJson

@@ -91,7 +91,7 @@ class BypassConfigViewModel : ViewModel() {
     lateinit var pressureSetpointsList: List<String>
     lateinit var expectedPressureErrorList: List<String>
 
-    private val _isDialogOpen = MutableLiveData<Boolean>()
+    private val _isDialogOpen = MutableLiveData(true)
     private var saveJob : Job? = null
 
     var modelLoaded by  mutableStateOf(false)
@@ -166,11 +166,11 @@ class BypassConfigViewModel : ViewModel() {
 
                 try {
                     val sysEquips = HSUtil.getEquips("SYSTEM") + HSUtil.getEquips("@SYSTEM")
-                    val bdEquip = sysEquips.find { eq : Equip -> eq.domainName != null && eq.domainName == DomainName.smartnodeBypassDamper && eq.group.equals(profileConfiguration.nodeAddress.toString())}
+                    val bdEquips = sysEquips.filter { eq : Equip -> eq.domainName != null && eq.domainName == DomainName.smartnodeBypassDamper && eq.group.equals(profileConfiguration.nodeAddress.toString())}
                     val sysDevices = HSUtil.getDevices("SYSTEM") + HSUtil.getDevices("@SYSTEM")
-                    val bdDevice = sysDevices.find { d : Device -> d.domainName != null && d.addr.equals(profileConfiguration.nodeAddress.toString()) && d.domainName.equals("smartnodeDevice")}
-                    hayStack.deleteEntityTree(bdEquip?.id)
-                    hayStack.deleteEntityTree(bdDevice?.id)
+                    val bdDevices = sysDevices.filter { d : Device -> d.domainName != null && d.addr.equals(profileConfiguration.nodeAddress.toString()) && d.domainName.equals("smartnodeDevice")}
+                    bdEquips.forEach { bdEquip -> hayStack.deleteEntityTree(bdEquip?.id) }
+                    bdDevices.forEach { bdDevice -> hayStack.deleteEntityTree(bdDevice?.id) }
                     L.ccu().bypassDamperProfile = null
                     CcuLog.i(Domain.LOG_TAG, "Bypass Damper Equip deleted successfully")
                 } catch (e: Exception) {
@@ -253,12 +253,6 @@ class BypassConfigViewModel : ViewModel() {
                         showToast("Bypass Damper Configuration saved successfully", context)
                         CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                     }
-
-                }
-
-                if (ProgressDialogUtils.isDialogShowing()) {
-                    ProgressDialogUtils.hideProgressDialog()
-                    _isDialogOpen.value = false
                 }
             }
         }

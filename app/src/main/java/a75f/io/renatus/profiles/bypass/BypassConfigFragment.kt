@@ -86,7 +86,7 @@ class BypassConfigFragment : BaseDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             }
         }

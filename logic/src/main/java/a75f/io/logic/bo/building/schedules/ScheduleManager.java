@@ -197,7 +197,8 @@ public class ScheduleManager {
         Log.d(TAG_CCU_SCHEDULER, " #### processSchedules activeSystemVacation ####" + activeSystemVacation);
 
         //Read all equips
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance()
+                .readAllEntities("equip and zone and not pid and not modbus and not emr and not monitoring");
         for(HashMap hs : equips) {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
             if(equip != null) {
@@ -227,7 +228,11 @@ public class ScheduleManager {
         //TODO - refactor. This can only be done after updating desired temp.
         for (ZoneProfile profile : zoneProfiles) {
 
-            if (profile instanceof ModbusProfile) {
+            if (profile instanceof ModbusProfile
+                    || profile instanceof HyperStatMonitoringProfile
+                    || profile instanceof PlcProfile
+                    || profile instanceof EmrProfile
+            ) {
                 continue;
             }
 

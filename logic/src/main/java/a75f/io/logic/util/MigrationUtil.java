@@ -153,12 +153,11 @@ public class MigrationUtil {
         migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-
         if (!PreferenceUtil.getModulatingFanSpeedMigrationStatus()) {
             migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         }
 
-        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
+//        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {

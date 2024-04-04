@@ -230,6 +230,11 @@ public class CCUUtils
             PreferenceUtil.setCcuRefTagMigration(false);
         }
 
+        ArrayList<HashMap<Object, Object>> zoneSchedulePointList = CCUHsApi.getInstance().readAllEntities("point and zone and (schedulable or hvacMode) and not tuner and ccuRef and ccuRef!=\""+ccuId+"\"");
+        for(HashMap<Object, Object> zoneSchedulePoint: zoneSchedulePointList) {
+            Point point = new Point.Builder().setHashMap(zoneSchedulePoint).build();
+            ccuHsApi.updatePoint(point, point.getId());
+        }
     }
 
     public static boolean isCarrierEnvironment(Context context){

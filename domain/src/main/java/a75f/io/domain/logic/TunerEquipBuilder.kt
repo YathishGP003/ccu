@@ -110,53 +110,7 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     }
 
     private fun propagateTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
-        propagateAddZoneTunerPoints(modelDef, updateConfig, siteRef)
-        propagateAddSystemTunerPoints(modelDef, updateConfig, siteRef)
         propagateUpdateTunerPoints(modelDef, updateConfig, siteRef)
-        propagateDeleteTunerPoints(modelDef, updateConfig)
-    }
-    private fun propagateAddZoneTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
-        updateConfig.tobeAdded.forEach { point ->
-            val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
-            modelPointDef?.let {
-                val groupTag = getZoneMarkerTagForTunerPointRef(modelPointDef)
-                val equips = hayStack.readAllEntities("equip and zone and $groupTag")
-                equips.forEach { equip ->
-                    val hayStackPoint = buildPoint( PointBuilderConfig(modelPointDef, null,
-                        equip["id"].toString(), siteRef, equip["tz"].toString(), equip["dis"].toString()))
-                    val pointId = hayStack.addPoint(hayStackPoint)
-                    hayStackPoint.id = pointId
-                    hayStack.writeDefaultTunerValById(
-                        pointId,
-                        modelPointDef.defaultValue.toString().toDouble()
-                    )
-                    DomainManager.addPoint(hayStackPoint)
-                    CcuLog.i(Domain.LOG_TAG, " Created Tuner point ${point.domainName} on " + equip)
-                }
-            } ?: CcuLog.i(Domain.LOG_TAG, "Migration zone point does not exist for ${point.domainName}")
-        }
-    }
-
-    private fun propagateAddSystemTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
-        updateConfig.tobeAdded.forEach { point ->
-            val modelPointDef = modelDef.points.find { it.domainName == point.domainName && it.tagNames.contains("system")}
-            modelPointDef?.let {
-                val groupTag = getSystemMarkerTagForTunerPointRef(modelPointDef)
-                val equip = hayStack.readEntity("equip and $groupTag")
-                if (equip.isNotEmpty()) {
-                    val hayStackPoint = buildPoint( PointBuilderConfig(modelPointDef, null,
-                        equip["id"].toString(), siteRef, equip["tz"].toString(), equip["dis"].toString()))
-                    val pointId = hayStack.addPoint(hayStackPoint)
-                    hayStackPoint.id = pointId
-                    hayStack.writeDefaultTunerValById(
-                        pointId,
-                        modelPointDef.defaultValue.toString().toDouble()
-                    )
-                    DomainManager.addPoint(hayStackPoint)
-                    CcuLog.i(Domain.LOG_TAG, " Created Tuner point ${point.domainName} on " + equip)
-                }
-            } ?: CcuLog.i(Domain.LOG_TAG, "Migration system point does not exist for ${point.domainName}")
-        }
     }
 
     private fun propagateUpdateTunerPoints(modelDef: ModelDirective, updateConfig: EntityConfiguration, siteRef: String) {
@@ -165,70 +119,13 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
             modelPointDef?.run {
                 val points = hayStack.readAllEntities("point and not default and domainName == \"${point.domainName}\"")
                 points.forEach { existingPoint ->
-                    val equipDis = hayStack.readMapById(existingPoint["equipRef"].toString())["dis"].toString()
-                    val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, null,
-                        existingPoint["id"].toString(), siteRef, existingPoint["tz"].toString(), equipDis))
-                    hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
-                    hayStackPoint.id = existingPoint["id"].toString()
-                    hayStack.writeDefaultTunerValById(hayStackPoint.id, modelPointDef.defaultValue.toString().toDouble())
-                    DomainManager.addPoint(hayStackPoint)
+                    hayStack.writeDefaultTunerValById(existingPoint["id"].toString(), modelPointDef.defaultValue.toString().toDouble())
                     CcuLog.i(Domain.LOG_TAG," Updated Tuner point $point")
                 }
             } ?: CcuLog.i(Domain.LOG_TAG, "Migration point does not exist for ${point.domainName}")
         }
     }
 
-    private fun propagateDeleteTunerPoints(
-        modelDef: ModelDirective,
-        updateConfig: EntityConfiguration
-    ) {
-        updateConfig.tobeUpdated.forEach { point ->
-            val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
-            modelPointDef?.run {
-                val points = hayStack.readAllEntities("point and not default and domainName == \"${point.domainName}\"")
-                points.forEach { existingPoint ->
-                    hayStack.deleteEntityTree( existingPoint["id"].toString())
-                    CcuLog.i(Domain.LOG_TAG," Deleted Tuner point $point")
-                }
-            } ?: CcuLog.i(Domain.LOG_TAG, "Migration point does not exist for ${point.domainName}")
-        }
-    }
-
-    /**
-     * Model should have appropriate tuner group on Building tuner points.
-     * Otherwise this method returns NULL and they wont be propagated.
-     */
-    private fun getZoneMarkerTagForTunerPointRef(pointDef: ModelPointDef) : String? {
-        val tunerGroupTag = pointDef.tags.find { it.name == "tunerGroup" }
-        if (tunerGroupTag == null) {
-            CcuLog.e(Domain.LOG_TAG, " tunerGroup does not exist for ${pointDef.domainName}")
-            return null
-        }
-        //TODO - define tag constants
-        return when(tunerGroupTag.defaultValue) {
-            "oao" -> return "oao"
-            "vav" -> return "system and vav"
-            "dab" -> return "system and dab"
-            else -> null
-        }
-    }
-
-    private fun getSystemMarkerTagForTunerPointRef(pointDef: ModelPointDef) : String? {
-        val tunerGroupTag = pointDef.tags.find { it.name == "tunerGroup" }
-        if (tunerGroupTag == null) {
-            CcuLog.e(Domain.LOG_TAG, " tunerGroup does not exist for ${pointDef.domainName}")
-            return null
-        }
-        //TODO - define tag constants
-        return when(tunerGroupTag.defaultValue) {
-            "vav" -> return "vav"
-            "dab" -> return "dab"
-            "ti" -> return "ti"
-            "oao" -> return "oao"
-            "otn" -> return "otn"
-            else -> null
-        }
-    }
     fun getEntityConfigForUpdate(modelDef: ModelDirective, equipRef: String) : EntityConfiguration{
         val entityNameMap = mutableMapOf<String, Double>()
         val tunerPoints =

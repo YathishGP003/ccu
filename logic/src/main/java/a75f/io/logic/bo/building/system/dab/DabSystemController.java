@@ -17,6 +17,8 @@ import android.util.Log;
 
 import com.google.common.collect.EvictingQueue;
 
+import org.projecthaystack.UnknownRecException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -723,20 +725,24 @@ public class DabSystemController extends SystemController
 
             double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
             double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
-            HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
-                                                            .readEntity("point and system and cm and cooling" +
-                                                                    " and desired and temp and equipRef == \"" +
-                                                                    L.ccu().systemProfile.getSystemEquipRef() + "\""
-            );
-            CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
-            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance()
-                                                            .readEntity("point and system and cm and " +
-                                                                        "heating and desired and temp and equipRef == \"" +
-                                                                        L.ccu().systemProfile.getSystemEquipRef() + "\""
-            );
-            CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
-        }catch (Exception e){
-            e.printStackTrace();
+
+            String coolingPointId = CCUHsApi.getInstance().readId("point and system and cm and cooling" +
+                    " and desired and temp and equipRef == \"" +
+                    L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+            String heatingPointId = CCUHsApi.getInstance().readId("point and system and cm and heating" +
+                    " and desired and temp and equipRef == \"" +
+                    L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+            CCUHsApi.getInstance().writeHisValById(coolingPointId, desiredTempCooling);
+            CCUHsApi.getInstance().writeDefaultValById(coolingPointId, desiredTempCooling);
+
+
+            CCUHsApi.getInstance().writeHisValById(heatingPointId, desiredTempHeating);
+            CCUHsApi.getInstance().writeDefaultValById(heatingPointId, desiredTempHeating);
+
+        }catch (NullPointerException | UnknownRecException e){
+            CcuLog.e(L.TAG_CCU_SYSTEM, "Id for desired temp not found in haystack");
         }
     }
     

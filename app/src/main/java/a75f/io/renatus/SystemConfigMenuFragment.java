@@ -72,34 +72,37 @@ public class SystemConfigMenuFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_menu_system_config, container, false);
         ButterKnife.bind(this, rootView);
 
+        // If Activity is null, we don't have enough info to do the complete animation.
+        // So, don't process the click at all. Give the user a chance to try again once the app stabilizes.
+        if (getActivity() != null) {
+            if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
+                SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(0);
+            }
 
-        if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
-            SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(0);
+            listSelectorBackground = CCUUiUtil.getListSelectorBackground(getContext());
+            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.white));
+            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+
+            textSystemProfile.setTextColor(getResources().getColor(R.color.white));
+            textOao.setTextColor(getResources().getColor(R.color.black));
+            textBypass.setTextColor(getResources().getColor(R.color.black));
+            textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
+            textBtuMeter.setTextColor(getResources().getColor(R.color.black));
+
+            lilSystemProfile.setBackgroundResource(listSelectorBackground);
+            lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         }
-        listSelectorBackground = CCUUiUtil.getListSelectorBackground(getContext());
-        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                R.color.white));
-        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                R.color.black));
-        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                R.color.black));
-        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                R.color.black));
-        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                R.color.black));
-
-        textSystemProfile.setTextColor(getResources().getColor(R.color.white));
-        textOao.setTextColor(getResources().getColor(R.color.black));
-        textBypass.setTextColor(getResources().getColor(R.color.black));
-        textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
-        textBtuMeter.setTextColor(getResources().getColor(R.color.black));
-
-        lilSystemProfile.setBackgroundResource(listSelectorBackground);
-        lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
         return rootView;
 
     }
@@ -193,133 +196,138 @@ public class SystemConfigMenuFragment extends Fragment {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case 0:
-                        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.white));
-                        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
+                        if (getActivity() != null) {
+                            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
 
-                        textSystemProfile.setTextColor(getResources().getColor(R.color.white));
-                        textOao.setTextColor(getResources().getColor(R.color.black));
-                        textBypass.setTextColor(getResources().getColor(R.color.black));
-                        textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
-                        textBtuMeter.setTextColor(getResources().getColor(R.color.black));
+                            textSystemProfile.setTextColor(getResources().getColor(R.color.white));
+                            textOao.setTextColor(getResources().getColor(R.color.black));
+                            textBypass.setTextColor(getResources().getColor(R.color.black));
+                            textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
+                            textBtuMeter.setTextColor(getResources().getColor(R.color.black));
 
-                        lilSystemProfile.setBackgroundResource(listSelectorBackground);
-                        lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
+                            lilSystemProfile.setBackgroundResource(listSelectorBackground);
+                            lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
                         break;
 
                     case 1:
-                        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.white));
-                        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
+                        if (getActivity() != null) {
+                            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
 
-                        textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                        textOao.setTextColor(getResources().getColor(R.color.white));
-                        textBypass.setTextColor(getResources().getColor(R.color.black));
-                        textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
-                        textBtuMeter.setTextColor(getResources().getColor(R.color.black));
+                            textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textOao.setTextColor(getResources().getColor(R.color.white));
+                            textBypass.setTextColor(getResources().getColor(R.color.black));
+                            textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
+                            textBtuMeter.setTextColor(getResources().getColor(R.color.black));
 
-                        lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilOao.setBackgroundResource(listSelectorBackground);
-                        lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
+                            lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilOao.setBackgroundResource(listSelectorBackground);
+                            lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
                         break;
 
                     case 2:
-                        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.white));
-                        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
+                        if (getActivity() != null) {
+                            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
 
-                        textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                        textOao.setTextColor(getResources().getColor(R.color.black));
-                        textBypass.setTextColor(getResources().getColor(R.color.white));
-                        textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
-                        textBtuMeter.setTextColor(getResources().getColor(R.color.black));
+                            textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textOao.setTextColor(getResources().getColor(R.color.black));
+                            textBypass.setTextColor(getResources().getColor(R.color.white));
+                            textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
+                            textBtuMeter.setTextColor(getResources().getColor(R.color.black));
 
-                        lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBypass.setBackgroundResource(listSelectorBackground);
-                        liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
+                            lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBypass.setBackgroundResource(listSelectorBackground);
+                            liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
                         break;
 
                     case 3:
-                        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.white));
-                        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
+                        if (getActivity() != null) {
+                            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
 
-                        textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                        textOao.setTextColor(getResources().getColor(R.color.black));
-                        textBypass.setTextColor(getResources().getColor(R.color.black));
-                        textEnergyMeter.setTextColor(getResources().getColor(R.color.white));
-                        textBtuMeter.setTextColor(getResources().getColor(R.color.black));
+                            textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textOao.setTextColor(getResources().getColor(R.color.black));
+                            textBypass.setTextColor(getResources().getColor(R.color.black));
+                            textEnergyMeter.setTextColor(getResources().getColor(R.color.white));
+                            textBtuMeter.setTextColor(getResources().getColor(R.color.black));
 
-                        lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        liltEnergyMeter.setBackgroundResource(listSelectorBackground);
-                        lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
+                            lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltEnergyMeter.setBackgroundResource(listSelectorBackground);
+                            lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBtuMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
                         break;
 
                     case 4:
-                        iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.black));
-                        iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
-                                R.color.white));
+                        if (getActivity() != null) {
+                            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconOao.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBypass.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconEnergyMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconBtuMeter.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
 
-                        textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                        textOao.setTextColor(getResources().getColor(R.color.black));
-                        textBypass.setTextColor(getResources().getColor(R.color.black));
-                        textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
-                        textBtuMeter.setTextColor(getResources().getColor(R.color.white));
+                            textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textOao.setTextColor(getResources().getColor(R.color.black));
+                            textBypass.setTextColor(getResources().getColor(R.color.black));
+                            textEnergyMeter.setTextColor(getResources().getColor(R.color.black));
+                            textBtuMeter.setTextColor(getResources().getColor(R.color.white));
 
-                        lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilBtuMeter.setBackgroundResource(listSelectorBackground);
-                        lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
+                            lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilBtuMeter.setBackgroundResource(listSelectorBackground);
+                            lilBypass.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilOao.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltEnergyMeter.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
                         break;
 
                     default:

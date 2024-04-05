@@ -86,8 +86,16 @@ class BypassConfigFragment : BaseDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.Main) {
+            withContext(Dispatchers.IO) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            }
+            withContext(Dispatchers.Main) {
+                viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
+                    CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
+                    if (!isDialogOpen) {
+                        this@BypassConfigFragment.closeAllBaseDialogFragments()
+                    }
+                }
             }
         }
         val rootView = ComposeView(requireContext())
@@ -96,15 +104,6 @@ class BypassConfigFragment : BaseDialogFragment() {
             return rootView
         }
 
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@BypassConfigFragment.closeAllBaseDialogFragments()
-            }
-        }
     }
 
     @Composable

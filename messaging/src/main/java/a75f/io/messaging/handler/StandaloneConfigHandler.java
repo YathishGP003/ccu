@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.sshpu.HeatPumpPackageUnitUtil;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 
 public class StandaloneConfigHandler {
     
@@ -39,7 +40,9 @@ public class StandaloneConfigHandler {
             else
                 cache.removeFanModeFromCache(configPoint.getEquipRef());
         }
-
+        if (configPoint.getMarkers().contains(Tags.USERINTENT) && configPoint.getMarkers().contains(Tags.CONDITIONING)) {
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.getRoomRef(), CCUHsApi.getInstance());
+        }
         
     }
     

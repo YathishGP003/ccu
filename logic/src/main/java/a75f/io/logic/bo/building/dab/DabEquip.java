@@ -399,7 +399,7 @@ public class DabEquip
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
                                     .addMarker("status").addMarker("his").addMarker("dab").addMarker("logical").addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums("deadband,cooling,heating,tempdead")
+                                    .setEnums("deadband,cooling,heating,tempdead,rfdead")
                                     .setTz(tz)
                                     .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

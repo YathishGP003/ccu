@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.vav;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,7 +71,10 @@ public class VavAcbProfile extends VavProfile
             CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
             continue;
         }*/
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            handleRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -154,6 +158,11 @@ public class VavAcbProfile extends VavProfile
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
+    }
+
+    private void handleRFDead() {
+        vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
     }
 
     private boolean getCondensate() {

@@ -482,7 +482,7 @@ public class DualDuctEquip {
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
                                     .addMarker("status").addMarker("his").addMarker("dualDuct").addMarker("logical").addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums("deadband,cooling,heating,tempdead")
+                                    .setEnums("deadband,cooling,heating,tempdead,rfdead")
                                     .setTz(tz)
                                     .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

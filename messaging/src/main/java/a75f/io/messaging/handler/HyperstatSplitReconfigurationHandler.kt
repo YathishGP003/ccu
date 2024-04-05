@@ -50,6 +50,11 @@ class HyperstatSplitReconfigurationHandler {
                 Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateConfigPoint: ${e.localizedMessage}")
             }
             pointUpdateOwner(configPoint, msgObject, hayStack)
+            if (configPoint.markers.contains(Tags.USERINTENT) && configPoint.markers.contains(Tags.CONDITIONING)) {
+                DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.roomRef, CCUHsApi.getInstance())
+            } else {
+                DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
+            }
             hayStack.scheduleSync()
 
         }

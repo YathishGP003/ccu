@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -223,8 +224,11 @@ public class StandaloneScheduler {
                             hayStack.writeHisValById(id, val);
                         }
                     }
+                    if(p.getMarkers().contains("conditioning") && p.getMarkers().contains("userIntent")) {
+                        String zoneId = HSUtil.getZoneIdFromEquipId(equipRef);
+                        DesiredTempDisplayMode.setModeTypeOnUserIntentChange(zoneId, CCUHsApi.getInstance());
+                    }
                 }
-
 
                 return null;
             }

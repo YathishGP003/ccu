@@ -106,8 +106,11 @@ public class DabProfile extends ZoneProfile
 
     @Override
     public void updateZonePoints() {
-        
-        if (isZoneDead()) {
+
+        if (isRFDead()) {
+            updateRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -229,7 +232,15 @@ public class DabProfile extends ZoneProfile
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
-    
+    private void updateRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE, RFDead+": " + dabEquip.nodeAddr);
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and" +
+                " message and writable and group == \""+dabEquip.nodeAddr+"\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable " +
+                    "and group == \"" + dabEquip.nodeAddr + "\"", RFDead);
+        }
+    }
     private void updateDamperIAQCompensation() {
         boolean  enabledCO2Control = dabEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dabEquip.getConfigNumVal("enable and iaq") > 0 ;

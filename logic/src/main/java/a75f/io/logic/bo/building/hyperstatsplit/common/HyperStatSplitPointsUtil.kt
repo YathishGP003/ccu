@@ -2395,7 +2395,7 @@ class HyperStatSplitPointsUtil(
         val equipStatusPoint = createHaystackPointWithEnums(
             "$equipDis-equipStatus",
             equipStatusPointMarkers,
-            "deadband,cooling,heating,tempdead"
+            "deadband,cooling,heating,tempdead,rfdead"
         )
 
         val equipStatusMessagePoint = createHaystackPointWithHisInterPolate(

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.ss2pfcu;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import android.util.Log;
@@ -76,7 +77,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 continue;
             double roomTemp = twoPfcuDevice.getCurrentTemp();
             Equip twoPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            if (isZoneDead()) {
+            if (isRFDead()) {
+                handleRFDead(node, twoPfcuDevice);
+                return;
+            } else if (isZoneDead()) {
                 resetRelays(twoPfcuEquip.getId(), node,ZoneTempState.TEMP_DEAD);
                 twoPfcuDevice.setStatus(TEMPDEAD.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
@@ -162,6 +166,16 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         }
 
     }
+
+    private void handleRFDead(short node, TwoPipeFanCoilUnitEquip twoPfcuDevice) {
+        twoPfcuDevice.setStatus(RFDEAD.ordinal());
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", RFDead);
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) RFDEAD.ordinal());
+    }
+
     @Override
     public ZoneState getState() {
         return state;

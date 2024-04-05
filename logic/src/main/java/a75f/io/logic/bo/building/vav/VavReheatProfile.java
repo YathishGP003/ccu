@@ -27,6 +27,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import org.projecthaystack.UnknownRecException;
@@ -68,7 +69,10 @@ public class VavReheatProfile extends VavProfile
             CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
             continue;
         }*/
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            handleRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -157,7 +161,8 @@ public class VavReheatProfile extends VavProfile
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
     }
-    
+
+
     private void logLoopParams(int node, double roomTemp, int loopOp) {
         
         CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
@@ -189,7 +194,12 @@ public class VavReheatProfile extends VavProfile
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
         }
     }
-    
+    private void handleRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE,"RF Signal Dead : equipRef: "+vavEquip.getEquipRef());
+        vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
+    }
+
     private void initLoopVariables() {
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();

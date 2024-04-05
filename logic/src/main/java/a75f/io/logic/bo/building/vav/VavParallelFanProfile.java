@@ -25,6 +25,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
@@ -60,8 +61,10 @@ public class VavParallelFanProfile extends VavProfile
         double roomTemp = getCurrentTemp();
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"")).build();
-
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            handleRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -107,7 +110,8 @@ public class VavParallelFanProfile extends VavProfile
         logLoopParams((short)nodeAddr, roomTemp, loopOp);
         updateLoopParams((short) nodeAddr);
     }
-    
+
+
     private void initLoopVariables(int node) {
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
@@ -282,7 +286,10 @@ public class VavParallelFanProfile extends VavProfile
             vavEquip.getParallelFanCmd().writeHisVal(0);
         }
     }
-    
+    private void handleRFDead() {
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead+" : "+getFanStatusMessage());
+        vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
+    }
     private void updateFanStatus () {
         vavEquip.getParallelFanCmd().writeHisVal(state == HEATING ? 1 : 0);
     }

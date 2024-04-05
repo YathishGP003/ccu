@@ -115,6 +115,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                             profile.updateZonePoints();
             } catch (Exception e){
                 CcuLog.e(L.TAG_CCU_JOB, "runZoneProfilesAlgorithm Failed ! ", e);
+                e.printStackTrace();
             }
         }
     }

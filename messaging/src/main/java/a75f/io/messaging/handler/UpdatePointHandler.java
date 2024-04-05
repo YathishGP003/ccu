@@ -34,6 +34,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.bo.util.DemandResponseMode;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
@@ -125,6 +126,9 @@ public class UpdatePointHandler implements MessageHandler
                 && !localPoint.getMarkers().contains(Tags.TUNER)) {
             HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
+            if (localPoint.getMarkers().contains(Tags.USERINTENT) && localPoint.getMarkers().contains(Tags.CONDITIONING)) {
+                DesiredTempDisplayMode.setModeTypeOnUserIntentChange(localPoint.getRoomRef(), CCUHsApi.getInstance());
+            }
             if (localPoint.getMarkers().contains(Tags.VRV)) {
                 VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
             }

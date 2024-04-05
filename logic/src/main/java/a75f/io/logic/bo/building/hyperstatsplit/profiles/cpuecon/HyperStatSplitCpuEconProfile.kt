@@ -120,8 +120,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         logicalPointsList = equip.getLogicalPointList()
 
         hsSplitHaystackUtil = HSSplitHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-
-        if (isZoneDead) {
+        if(isRFDead){
+            handleRFDead(equip)
+            return
+        } else if (isZoneDead) {
             handleDeadZone(equip)
             return
         }
@@ -1165,7 +1167,22 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }
-
+    private fun handleRFDead(equip: HyperStatSplitCpuEconEquip) {
+        logIt("RF Signal is Dead ${equip.node}")
+        state = ZoneState.RFDEAD
+        equip.hsSplitHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
+        if (equip.hsSplitHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
+            equip.hsSplitHaystackUtil.setEquipStatus(state.ordinal.toDouble())
+        }
+        val curStatus = equip.hsSplitHaystackUtil.getEquipLiveStatus()
+        if (curStatus != RFDead) {
+            equip.hsSplitHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
+        }
+        equip.haystack.writeHisValByQuery(
+            "point and not ota and status and his and group == \"${equip.node}\"",
+            ZoneState.RFDEAD.ordinal.toDouble()
+        )
+    }
     override fun getEquip(): Equip? {
         for (nodeAddress in cpuEconDeviceMap.keys) {
             val equip = CCUHsApi.getInstance().readEntity("equip and group == \"$nodeAddress\"")

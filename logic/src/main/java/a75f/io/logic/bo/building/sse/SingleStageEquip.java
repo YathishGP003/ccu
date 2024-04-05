@@ -212,7 +212,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("status").addMarker("his").addMarker("sse").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("deadband,cooling,heating,tempdead")
+                .setEnums("deadband,cooling,heating,tempdead,rfdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -810,25 +810,24 @@ public class SingleStageEquip {
     }
     public void setStatus(String sseStatus, double status, boolean emergency) {
         CCUHsApi.getInstance().writeHisValByQuery("point and status and not ota and not message and his and group == \"" + nodeAddr + "\"", status);
-
-
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
-        } else
-        {
-            message = (status == 3 ? "Zone Temp Dead" : status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+        } else {
+            message = (status == 3 ? "Zone Temp Dead" : status == 0 ? "" : status == 1 ? "Cooling Space" : "Warming Space");
             if(!sseStatus.isEmpty()){
-                if(sseStatus.equals("Fan ON"))
+                if(sseStatus.equals("Fan ON")) {
                     message = "Recirculating Air, " + sseStatus;
-                else
+                } else if (!message.isEmpty()) {
                     message = message + ","+sseStatus;
+                } else {
+                    message = sseStatus;
+                }
             }
         }
 
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
-        if (!curStatus.equals(message))
-        {
+        if (!curStatus.equals(message)) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
         }
     }

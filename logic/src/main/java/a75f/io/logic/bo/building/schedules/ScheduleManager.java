@@ -398,7 +398,8 @@ public class ScheduleManager {
                             + " -> " + updatedOccupancy.occupancy);
             profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
             if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
-                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
+                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
+                        "", equip.getRoomRef());
             }
         }
     }

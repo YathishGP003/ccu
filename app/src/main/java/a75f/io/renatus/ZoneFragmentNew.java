@@ -113,6 +113,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
@@ -428,7 +429,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
-    public void refreshDesiredTemp(String nodeAddress, String pointcoolDT1, String pointheatDT1) {
+    public void refreshDesiredTemp(String nodeAddress, String pointcoolDT1, String pointheatDT1,
+                                   String roomRef) {
         if (getActivity() != null ) {
             int i;
             for (i = 0; i < seekArcArrayList.size(); i++) {
@@ -441,9 +443,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     SeekArc tempSeekArc = seekArcArrayList.get(i);
                     double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
                     double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
+                    int currentModeType = CCUHsApi.getInstance().readHisValByQuery("hvacMode and roomRef == \""
+                            + roomRef + "\"").intValue();
                     //float coolDt = Float.parseFloat(pointcoolDT);
                     //float heatDt = Float.parseFloat(pointheatDT);
-                    if ((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)) {
+                    if ((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)
+                            || tempSeekArc.getTemperatureMode() != currentModeType) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -2988,6 +2993,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", enumVal);
                     //}
                 }
+
             }
 
             @Override
@@ -3570,6 +3576,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else {
                     StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", enumVal);
                 }
+
             }
 
             @Override

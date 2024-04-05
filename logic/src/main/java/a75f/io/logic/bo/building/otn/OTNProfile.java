@@ -34,6 +34,7 @@ import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /*
@@ -70,22 +71,13 @@ public class OTNProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
-
-        if (isZoneDead()) {
-            state = TEMPDEAD;
-            String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
-                    "message and writable and group == \"" + mOTNEquip.mNodeAddr + "\"");
-            if (!curStatus.equals("Zone Temp Dead")) {
-                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
-                        " and" +
-                        " group == \"" + mOTNEquip.mNodeAddr + "\"", "Zone Temp Dead");
-            }
-            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
-                    mOTNEquip.mNodeAddr + "\"", (double) TEMPDEAD.ordinal());
+        if(isRFDead()){
+            handleRFDead(mOTNEquip);
+            return;
+        } else if (isZoneDead()) {
+            handleZoneDead(mOTNEquip);
             return;
         }
-
-
 
         boolean isAutoforceoccupiedenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mOTNEquip.mEquipRef + "\"") > 0;
@@ -176,6 +168,32 @@ public class OTNProfile extends ZoneProfile {
                         buildingLimitMinBreached()
                         : state == COOLING && buildingLimitMaxBreached()));
 
+    }
+
+    private void handleZoneDead(OTNEquip mOTNEquip) {
+        state = TEMPDEAD;
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
+                "message and writable and group == \"" + mOTNEquip.mNodeAddr + "\"");
+        if (!curStatus.equals("Zone Temp Dead")) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
+                    " and" +
+                    " group == \"" + mOTNEquip.mNodeAddr + "\"", "Zone Temp Dead");
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
+                mOTNEquip.mNodeAddr + "\"", (double) TEMPDEAD.ordinal());
+    }
+
+    private void handleRFDead(OTNEquip mOTNEquip) {
+        state = RFDEAD;
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
+                "message and writable and group == \"" + mOTNEquip.mNodeAddr + "\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
+                    " and" +
+                    " group == \"" + mOTNEquip.mNodeAddr + "\"", RFDead);
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
+                mOTNEquip.mNodeAddr + "\"", (double) RFDEAD.ordinal());
     }
 
     @Override

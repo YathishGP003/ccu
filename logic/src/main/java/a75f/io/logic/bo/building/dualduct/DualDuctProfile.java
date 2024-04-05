@@ -92,11 +92,14 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public synchronized void updateZonePoints()
     {
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            updateRFDead();
+            return;
+        } else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
-        
+
         double setTempCooling = TemperatureProfileUtil.getDesiredTempCooling(dualDuctEquip.nodeAddr);
         double setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
         double roomTemp       = dualDuctEquip.getCurrentTemp();
@@ -149,7 +152,17 @@ public class DualDuctProfile extends ZoneProfile {
         CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: CoolingDamper CV " + coolingDamperController.getControlVariable() + " " +
                                  "currentPosition " +coolingDamper.currentPosition);
     }
-    
+
+    private void updateRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE, RFDead+" : " + dualDuctEquip.nodeAddr);
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
+                " and writable and group == \""+dualDuctEquip.nodeAddr+"\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable " +
+                    "and group == \"" + dualDuctEquip.nodeAddr + "\"", RFDead);
+        }
+    }
+
     private void handleZoneCooling(double roomTemp, double setTempCooling) {
         if (state != COOLING)
         {

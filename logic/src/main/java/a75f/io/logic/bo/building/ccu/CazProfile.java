@@ -20,6 +20,7 @@ import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 //CCU As a Zone Profile
@@ -65,7 +66,18 @@ public class CazProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
-        if (isZoneDead()) {
+        if(isRFDead()){
+            state = RFDEAD;
+            String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and" +
+                    " message and writable and group == \"" + cazEquip.nodeAddr + "\"");
+            if (!curStatus.equals(RFDead)) {
+                CCUHsApi.getInstance().writeDefaultVal("point and status and message and" +
+                        " writable and group == \"" + cazEquip.nodeAddr + "\"", RFDead);
+            }
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and" +
+                    " his and group == \"" + cazEquip.nodeAddr + "\"", (double) RFDEAD.ordinal());
+            return;
+        } else if (isZoneDead()) {
             state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + cazEquip.nodeAddr + "\"");
             if (!curStatus.equals("Zone Temp Dead")) {

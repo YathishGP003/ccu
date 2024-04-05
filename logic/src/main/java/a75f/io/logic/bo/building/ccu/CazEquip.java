@@ -183,7 +183,7 @@ public class CazEquip
                 .setHisInterpolate("cov")
                 .addMarker("status").addMarker("vav").addMarker("his").addMarker("ti").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("deadband,cooling,heating,tempdead")
+                .setEnums("deadband,cooling,heating,tempdead,rfdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

@@ -14,6 +14,7 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.util.PointsUtil;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -432,6 +433,8 @@ public class SmartNode
             return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         }  else if (equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
             return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.smartnodeBypassDamper)) {
+            return new BypassDamperProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.BYPASS_DAMPER, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else {
             return null;
         }
@@ -635,6 +638,7 @@ public class SmartNode
 
     public static String getEquipDomainNameFromPort(Port p) {
         switch(p) {
+            case SENSOR_RH: return DomainName.zoneHumidity;
             case SENSOR_CO2: return DomainName.zoneCO2;
             case SENSOR_VOC: return DomainName.zoneVoc;
             case SENSOR_ILLUMINANCE: return DomainName.zoneIlluminance;

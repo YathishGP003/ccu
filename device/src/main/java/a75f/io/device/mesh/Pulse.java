@@ -366,23 +366,23 @@ public class Pulse
 					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
 					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if(oldHumidityVal != curHumidityVal)
+					if(oldHumidityVal != curHumidityVal && sp.getPointRef() != null)
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val));
+					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), convertPressureFromPaToInH2O(val)); }
 					break;
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val); }
 					break;
 				case OCCUPANCY:
 					updateOTNOccupancyStatus(sp, val, device);
 					break;
 				case ILLUMINANCE:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val * 10) );
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val*10));
+					if (sp.getPointRef() != null) { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val*10)); }
 					break;
 				case CO2:
 				case CO:
@@ -393,7 +393,7 @@ public class Pulse
 				case PM2P5:
 				case PM10:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val));
+					if (sp.getPointRef() != null)  { CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val)); }
 					break;
 				case ENERGY_METER_HIGH:
 					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();

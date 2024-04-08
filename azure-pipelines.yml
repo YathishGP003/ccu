@@ -4,7 +4,14 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- master
+- none
+
+schedules:
+  - cron: '30 18 * * *' # This cron expression represents 12:00 AM IST
+    displayName: CCU Scheduled Nightly Build
+    branches:
+      include:
+        - master
 
 jobs:
 - job: Job_1

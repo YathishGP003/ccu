@@ -108,6 +108,8 @@ public class PreferenceUtil {
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
 
+    public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -870,4 +872,13 @@ public class PreferenceUtil {
     public static void setModulatingFanSpeedMigrationStatus() {
         setBooleanPreference(MODULATING_FANSPEED_MIGRATION, true);
     }
+
+    public static boolean getVavReheatRelayActivationHysteresisValueMigration() {
+        return getBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION);
+    }
+
+    public static void setVavReheatRelayActivationHysteresisValueMigration() {
+        setBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION, true);
+    }
+
 }

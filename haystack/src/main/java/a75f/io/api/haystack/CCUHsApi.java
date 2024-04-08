@@ -2170,7 +2170,7 @@ public class CCUHsApi
         for(HashMap<Object, Object> equipMap : equipMapList) {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             CCUHsApi.getInstance().updateEquip(equip, equip.getId());
-            if(equip.getCcuRef().isEmpty()) {
+            if( equip.getCcuRef() == null || equip.getCcuRef().isEmpty()) {
                 updateCcuRefForDiagPoints(equip);
             }
             updateCcuRefForDiagPointWhileMigration(equip);
@@ -2181,7 +2181,7 @@ public class CCUHsApi
         ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
         for(HashMap<Object, Object> equipPoint : equipPoints){
             Point point = new Point.Builder().setHashMap(equipPoint).build();
-            if(point.getCcuRef().isEmpty()) {
+            if( point.getCcuRef() == null || point.getCcuRef().isEmpty()) {
                 updatePoint(point, point.getId());
             }
         }

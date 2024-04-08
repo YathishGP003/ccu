@@ -135,7 +135,7 @@ public class CCUUtils
         ArrayList<HashMap<Object, Object>> zoneList = ccuHsApi.readAllEntities("room");
         for(HashMap<Object, Object> zoneMap : zoneList){
             Zone zone =  new Zone.Builder().setHashMap(zoneMap).build();
-            if(zone != null && zone.getCcuRef() != null)
+            if(zone != null && zone.getCcuRef() == null)
                 ccuHsApi.updateZone(zone, zone.getId());
         }
         ArrayList<HashMap<Object, Object>> zoneOccupancyPointList = ccuHsApi.readAllEntities("zone and occupancy and " +
@@ -143,7 +143,7 @@ public class CCUUtils
 
         for(HashMap<Object, Object> zoneOccupancyPoint : zoneOccupancyPointList){
             Point point = new Point.Builder().setHashMap(zoneOccupancyPoint).build();
-            if(point != null && point.getCcuRef() != null)
+            if(point != null && point.getCcuRef() == null)
                 ccuHsApi.updatePoint(point, point.getId());
         }
 
@@ -154,7 +154,7 @@ public class CCUUtils
             ArrayList<HashMap<Object, Object>> equipPoints = ccuHsApi.readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
             for(HashMap<Object, Object> equipPoint : equipPoints){
                 Point point = new Point.Builder().setHashMap(equipPoint).build();
-                if(point != null && point.getCcuRef() != null)
+                if(point != null && point.getCcuRef() == null)
                     ccuHsApi.updatePoint(point, point.getId());
             }
         }
@@ -162,13 +162,13 @@ public class CCUUtils
         ArrayList<HashMap<Object, Object>> deviceList = ccuHsApi.readAllEntities("device and not ccu");
         for(HashMap<Object, Object> deviceMap : deviceList){
             Device device = new Device.Builder().setHashMap(deviceMap).build();
-            if(device != null && device.getCcuRef() != null)
+            if(device != null && device.getCcuRef() == null)
                 ccuHsApi.updateDevice(device, device.getId());
             ArrayList<HashMap<Object, Object>> devicePoints =
                     ccuHsApi.readAllEntities("point and deviceRef == \"" + device.getId()+"\"");
             for(HashMap<Object, Object> devicePoint : devicePoints){
                 RawPoint point = new RawPoint.Builder().setHashMap(devicePoint).build();
-                if(point != null && point.getCcuRef() != null)
+                if(point != null && point.getCcuRef() == null)
                     ccuHsApi.updatePoint(point, point.getId());
             }
         }
@@ -177,7 +177,7 @@ public class CCUUtils
                 "\"");
         for(HashMap<Object, Object> settingPoint : settingPoints){
             SettingPoint point = new SettingPoint.Builder().setHashMap(settingPoint).build();
-            if(point != null && point.getCcuRef() != null)
+            if(point != null && point.getCcuRef() == null)
                 ccuHsApi.updateSettingPoint(point, point.getId());
         }
 
@@ -186,7 +186,7 @@ public class CCUUtils
         for(HashMap<Object, Object> zoneSchedule : zoneScheduleList){
             zoneSchedule.put("ccuRef", ccuHsApi.getCcuId());
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.get("id").toString());
-            if(schedule != null && schedule.getCcuRef() != null)
+            if(schedule != null && schedule.getCcuRef() == null)
                 CCUHsApi.getInstance().updateZoneSchedule(schedule, zoneSchedule.get("roomRef").toString());
         }
         try{

@@ -302,8 +302,8 @@ public class DialogOAOProfile extends BaseDialogFragment
         try {
             CCUHsApi hayStack = CCUHsApi.getInstance();
             Device oaoSN = HSUtil.getDevice((short)ccu().oaoProfile.getNodeAddress());
-            hayStack.deleteEntity(ccu().oaoProfile.getEquipRef());
-            hayStack.deleteEntity((oaoSN.getId()));
+            hayStack.deleteEntityTree(ccu().oaoProfile.getEquipRef());
+            hayStack.deleteEntityTree((oaoSN.getId()));
             ccu().oaoProfile = null;
             CcuLog.i(L.TAG_CCU_OAO, "OAO Equip deleted successfully");
         } catch (Exception e) {

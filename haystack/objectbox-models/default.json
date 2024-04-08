@@ -185,7 +185,7 @@
     },
     {
       "id": "3:4064082301962546987",
-      "lastPropertyId": "22:2361690474949658897",
+      "lastPropertyId": "23:6866744477310609605",
       "name": "EquipmentDevice",
       "properties": [
         {
@@ -274,6 +274,11 @@
         {
           "id": "22:2361690474949658897",
           "name": "deviceEquipRef",
+          "type": 9
+        },
+        {
+          "id": "23:6866744477310609605",
+          "name": "equipDisplayName",
           "type": 9
         }
       ],

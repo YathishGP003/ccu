@@ -14,6 +14,8 @@ public class VOCLoop
     {
         this.vocTarget = vocTarget;
     }
+    public double getVocThreshold() { return vocThreshold; }
+    public double getVocTarget() { return vocTarget; }
     double vocThreshold = 400;
     double vocTarget = 500;
     

@@ -195,7 +195,7 @@ class AlertsRepository(
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
          alertDef.alert.setmNotificationMsg(msg)
-         val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null)
+         val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
             alert.setFixed(true)
             alert.setEndTime(DateTime().millis)
@@ -204,7 +204,7 @@ class AlertsRepository(
       }
    }
 
-   private fun isOtaAlert(title: String): Boolean{
+   fun isOtaAlert(title: String): Boolean{
       return (title.contentEquals(FIRMWARE_OTA_UPDATE_STARTED) || title.contentEquals(FIRMWARE_OTA_UPDATE_ENDED)  )
    }
 
@@ -240,7 +240,7 @@ class AlertsRepository(
 
       // commit changes
       alertsStateChange.newAlerts
-         .map { occurrence ->  occurrence.toAlert(haystack) }
+         .map { occurrence ->  occurrence.toAlert(haystack,this) }
          .forEach { alert -> addAlert(alert)
       }
       alertsStateChange.newlyFixedAlerts.forEach { alert ->
@@ -400,5 +400,13 @@ class AlertsRepository(
    fun alertBoxSizeAboveThreshold() : Boolean {
       val threshold = 5000
       return dataStore.getAllAlerts().size > threshold
+   }
+
+   fun setRestartAppToTrue() {
+      dataStore.appRestarted()
+   }
+
+   fun checkIfAppRestarted() : Boolean {
+      return dataStore.isAppRestarted()
    }
 }

@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
@@ -110,8 +111,10 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         relayOutputPoints = equip.getRelayOutputPoints()
         analogOutputPoints = equip.getAnalogOutputPoints()
         hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-
-        if (isZoneDead) {
+        if(isRFDead){
+            handleRFDead(equip)
+            return
+        } else if (isZoneDead) {
             handleDeadZone(equip)
             return
         }
@@ -304,7 +307,22 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }
-
+    private fun handleRFDead(equip: HyperStatPipe2Equip) {
+        logIt("RF Signal is Dead ${equip.node}")
+        state = ZoneState.RFDEAD
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
+        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
+            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
+        }
+        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
+        if (curStatus != RFDead) {
+            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
+        }
+        equip.haystack.writeHisValByQuery(
+            "point and not ota and status and his and group == \"${equip.node}\"",
+            ZoneState.RFDEAD.ordinal.toDouble()
+        )
+    }
     private fun fetchUserIntents(equip: HyperStatPipe2Equip): UserIntents {
 
         return UserIntents(

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.sse;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import android.util.Log;
@@ -81,7 +82,10 @@ public class SingleStageProfile extends ZoneProfile
     @Override
     public void updateZonePoints()
     {
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            handleRFDead();
+            return;
+        } else if (isZoneDead()) {
             reset((short) sseEquip.nodeAddr);
             CcuLog.d(L.TAG_CCU_UI,"sse Zone Temp Dead: "+sseEquip.nodeAddr+" roomTemp : "+sseEquip.getCurrentTemp());
             state = TEMPDEAD;
@@ -179,6 +183,23 @@ public class SingleStageProfile extends ZoneProfile
                 sseEquip.setProfilePoint("occupancy and status", occupied ? 1 : 0);
             }
     }
+
+    private void handleRFDead() {
+        state = RFDEAD;
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and not ota and not message" +
+                " and his and group == \"" + sseEquip.nodeAddr + "\"", (double) RFDEAD.ordinal());
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
+                " and writable and group == \""+sseEquip.nodeAddr+"\"");
+        if (!curStatus.equals(RFDead))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
+                    " and group == \"" + sseEquip.nodeAddr + "\"", RFDead);
+            CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
+                    "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
+        }
+        //sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
+    }
+
     @JsonIgnore
     @Override
     public double getCurrentTemp() {
@@ -231,8 +252,10 @@ public class SingleStageProfile extends ZoneProfile
         if ((relay2config > 0) && occupied) {
             stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
             setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
-        } else
+        } else {
             setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
+            stageStatus = "Fan Not Enabled";
+        }
         return stageStatus;
     }
 

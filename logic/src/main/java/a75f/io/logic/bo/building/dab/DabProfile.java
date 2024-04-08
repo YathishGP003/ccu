@@ -102,10 +102,15 @@ public class DabProfile extends ZoneProfile
         return new Equip.Builder().setHashMap(equip).build();
     }
 
+    public void setPendingTunerChange() { dabEquip.setPendingTunerChange(); }
+
     @Override
     public void updateZonePoints() {
-        
-        if (isZoneDead()) {
+
+        if (isRFDead()) {
+            updateRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -114,6 +119,8 @@ public class DabProfile extends ZoneProfile
         double setTempHeating = dabEquip.getDesiredTempHeating();
         double roomTemp = dabEquip.getCurrentTemp();
         GenericPIController damperOpController = dabEquip.damperController;
+
+        if (dabEquip.hasPendingTunerChange()) dabEquip.refreshPITuners();
     
         co2Loop = dabEquip.getCo2Loop();
         vocLoop = dabEquip.getVOCLoop();
@@ -130,10 +137,12 @@ public class DabProfile extends ZoneProfile
         if (systemMode != SystemMode.OFF) {
             if (satConditioning > 0) {
                 //Effective SAT conditioning is available. Run the PI loop based on that.
+                //But setTemp is still determined based on the current system operating mode.
+                double setTempOpMode = (conditioning == SystemController.State.COOLING) ? setTempCooling : setTempHeating;
                 if (satConditioning == SystemController.EffectiveSatConditioning.SAT_COOLING.ordinal()) {
-                    damperOpController.updateControlVariable(roomTemp, setTempCooling);
+                    damperOpController.updateControlVariable(roomTemp, setTempOpMode);
                 } else {
-                    damperOpController.updateControlVariable(setTempHeating, roomTemp);
+                    damperOpController.updateControlVariable(setTempOpMode, roomTemp);
                 }
             } else {
                 //Fall back to System-conditioning based PI loop.
@@ -160,6 +169,9 @@ public class DabProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "DAB-"+dabEquip.nodeAddr+" : roomTemp " + roomTemp
                 + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating
                 + " satConditioning "+satConditioning);
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + dabEquip.damperController.getProportionalGain() + ", integralGain " + dabEquip.damperController.getIntegralGain() +
+                ", proportionalSpread " + dabEquip.damperController.getMaxAllowedError() + ", integralMaxTimeout " + dabEquip.damperController.getIntegralMaxTimeout());
+
         damperOpController.dump();
 
         //Loop Output varies from 0-100% such that, it is 50% at 0 error, 0% at maxNegative error, 100% at maxPositive
@@ -220,13 +232,24 @@ public class DabProfile extends ZoneProfile
             CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
-    
+    private void updateRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE, RFDead+": " + dabEquip.nodeAddr);
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and" +
+                " message and writable and group == \""+dabEquip.nodeAddr+"\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable " +
+                    "and group == \"" + dabEquip.nodeAddr + "\"", RFDead);
+        }
+    }
     private void updateDamperIAQCompensation() {
         boolean  enabledCO2Control = dabEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dabEquip.getConfigNumVal("enable and iaq") > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
-    
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)) {

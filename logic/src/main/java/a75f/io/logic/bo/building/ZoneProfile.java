@@ -30,6 +30,7 @@ public abstract class ZoneProfile
     
     private EquipOccupancyHandler equipOccupancyHandler = null;
     private EquipScheduleHandler equipScheduleHandler = null;
+    public String RFDead = "RF Signal Dead";
     public ZoneProfile()
     {
     }
@@ -77,18 +78,10 @@ public abstract class ZoneProfile
         if (mInterface != null)
             mInterface.refreshView();
     }
-    
-    /**
-     * TODO - Refactor.
-     * Currently this is repeated it all the Zone profile's. It should be replaced by a single common implementation
-     * here.
-     */
-    public boolean isZoneDead() {
-
+    public boolean isRFDead() {
         Equip equip = getEquip();
-
         if (equip == null) {
-            CcuLog.e(L.TAG_CCU_ZONE, "Profile does not have linked equip , assume zone is dead");
+            CcuLog.e(L.TAG_CCU_ZONE, "Profile does not have linked equip , assume RF is dead");
             return true;
         }
 
@@ -96,7 +89,7 @@ public abstract class ZoneProfile
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
-                CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat does not exist for "+equip.getDisplayName());
+                CcuLog.e(L.TAG_CCU_ZONE, "RF dead! , Heartbeat does not exist for "+equip.getDisplayName());
                 return true;
             }
             double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time",
@@ -106,16 +99,23 @@ public abstract class ZoneProfile
                 zoneDeadTime = 15;
             }
             if ((System.currentTimeMillis() - hisItem.getDateInMillis()) > zoneDeadTime * 60 * 1000) {
-                CcuLog.e(L.TAG_CCU_ZONE, "Equip dead! , Heartbeat "+hisItem.getDate().toString()+" "+equip.getDisplayName()+" "+zoneDeadTime);
+                CcuLog.e(L.TAG_CCU_ZONE, "RF dead! , Heartbeat "+hisItem.getDate().toString()+" "+equip.getDisplayName()+" "+zoneDeadTime);
                 return true;
             }
         }
+        return false;
+    }
+    /**
+     * TODO - Refactor.
+     * Currently this is repeated it all the Zone profile's. It should be replaced by a single common implementation
+     * here.
+     */
+    public boolean isZoneDead() {
 
+        Equip equip = getEquip();
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-
         double currentTemp = CCUHsApi.getInstance().readHisValByQuery("sensor and (current or space) and temp and equipRef == \""+equip.getId()+"\"");
 
         if (currentTemp > (buildingLimitMax + tempDeadLeeway)
@@ -123,7 +123,6 @@ public abstract class ZoneProfile
             CcuLog.e(L.TAG_CCU_ZONE, "Equip dead : "+equip.getDisplayName()+" currentTemp "+currentTemp);
             return true;
         }
-
         return false;
     }
     

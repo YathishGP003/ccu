@@ -197,7 +197,8 @@ public class ScheduleManager {
         Log.d(TAG_CCU_SCHEDULER, " #### processSchedules activeSystemVacation ####" + activeSystemVacation);
 
         //Read all equips
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance()
+                .readAllEntities("equip and zone and not pid and not modbus and not emr and not monitoring");
         for(HashMap hs : equips) {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
             if(equip != null) {
@@ -227,7 +228,11 @@ public class ScheduleManager {
         //TODO - refactor. This can only be done after updating desired temp.
         for (ZoneProfile profile : zoneProfiles) {
 
-            if (profile instanceof ModbusProfile) {
+            if (profile instanceof ModbusProfile
+                    || profile instanceof HyperStatMonitoringProfile
+                    || profile instanceof PlcProfile
+                    || profile instanceof EmrProfile
+            ) {
                 continue;
             }
 
@@ -393,7 +398,8 @@ public class ScheduleManager {
                             + " -> " + updatedOccupancy.occupancy);
             profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
             if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
-                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
+                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
+                        "", equip.getRoomRef());
             }
         }
     }
@@ -416,12 +422,17 @@ public class ScheduleManager {
 
             Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                     .replace("@", ""));
+            if (equipSchedule == null) {
+                continue;
+            }
             ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
             if (!equipSchedule.getMarkers().contains("specialschedule")) {
                 if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
                     if (equipSchedule.getUnoccupiedZoneSetback() != null)
                         updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
                     Occupied occ = equipSchedule.getCurrentValues();
+                    if (occ == null)
+                        break;
                     if (equipSchedule.getUnoccupiedZoneSetback() != null)
                         occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
                     int day = DateTime.now().dayOfWeek().get() - 1;
@@ -595,12 +606,7 @@ public class ScheduleManager {
             currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
             CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
         }
-        if (ScheduleUtil.isAnyZoneInDemandResponse(ahuServedEquipsOccupancy)) {
-            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
-            nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
-            systemOccupancy = ScheduleUtil.getDemandResponseMode(ahuServedEquipsOccupancy);
-            postSystemOccupancy(CCUHsApi.getInstance());
-        }
+
 
         if (systemOccupancy == UNOCCUPIED || systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED) {
             nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
@@ -609,7 +615,12 @@ public class ScheduleManager {
                 systemOccupancy = getSystemPreconditioningStatus(nextOccupiedInfo, hayStack);
             }
         }
-
+        if (ScheduleUtil.isAnyZoneInDemandResponse(ahuServedEquipsOccupancy)) {
+            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
+            nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
+            systemOccupancy = ScheduleUtil.getDemandResponseMode(ahuServedEquipsOccupancy);
+            postSystemOccupancy(CCUHsApi.getInstance());
+        }
         if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
             systemOccupancy = FORCEDOCCUPIED;
         }
@@ -953,6 +964,10 @@ public class ScheduleManager {
                                 cachedOccupied.getNextOccupiedSchedule().getStmm());
                     } else if (Preconditioning.isZoneInPreconditioning(hayStack, equipId)){
                         return "In Demand Response | Preconditioning";
+                    } else if ((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) &&
+                            nextOccupiedInfo != null && getSystemPreconditioningStatus(nextOccupiedInfo,
+                            hayStack) == PRECONDITIONING) {
+                        return "In Demand Response | Preconditioning";
                     }else {
                         statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied mode",
                                 cachedOccupied.getHeatingVal(),
@@ -1092,6 +1107,9 @@ public class ScheduleManager {
                 if (nextOccupiedInfo == null || nextOccupiedInfo.getNextOccupiedSchedule() == null ){
                     CcuLog.i(TAG_CCU_SCHEDULER, " Demand Response Unoccupied and info does not exist");
                     return "In Demand Response Unoccupied Mode";
+                }
+                if(getSystemPreconditioningStatus(nextOccupiedInfo, ccuHsApi) == PRECONDITIONING) {
+                    return "In Demand Response | Preconditioning";
                 }
                 return String.format("%sIn %s | Changes to Occupied mode at %02d:%02d",epidemicString, "Demand Response Unoccupied Mode",
                         nextOccupiedInfo.getNextOccupiedSchedule().getSthh(),

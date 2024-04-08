@@ -19,6 +19,8 @@ public class CO2Loop
     {
         this.co2Target = co2Target;
     }
+    public double getCo2Threshold() { return co2Threshold; }
+    public double getCo2Target() { return co2Target; }
     double co2Threshold = 800;
     double co2Target = 1000;
     

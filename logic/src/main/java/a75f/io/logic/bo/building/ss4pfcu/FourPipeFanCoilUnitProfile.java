@@ -28,6 +28,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 public class FourPipeFanCoilUnitProfile extends ZoneProfile {
@@ -74,7 +75,10 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 continue;
             double roomTemp = fourPfcuDevice.getCurrentTemp();
             Equip fourPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            if (isZoneDead()) {
+            if (isRFDead()) {
+                handleRFDead(fourPfcuDevice, node);
+                continue;
+            } else if (isZoneDead()) {
                 resetRelays(fourPfcuEquip.getId(), node, ZoneTempState.TEMP_DEAD);
                 fourPfcuDevice.setStatus(TEMPDEAD.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
@@ -142,6 +146,15 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 resetRelays(fourPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
             }
         }
+    }
+
+    private void handleRFDead(FourPipeFanCoilUnitEquip fourPfcuDevice, short node) {
+        fourPfcuDevice.setStatus(RFDEAD.ordinal());
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", RFDead);
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) RFDEAD.ordinal());
     }
 
 

@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
@@ -62,8 +63,10 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         relayOutputPoints = equip.getRelayOutputPoints()
         analogOutputPoints = equip.getAnalogOutputPoints()
         hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-        
-        if (isZoneDead) {
+        if(isRFDead){
+            handleRFDead(equip)
+            return
+        } else if (isZoneDead) {
             handleDeadZone(equip)
             return
         }
@@ -889,7 +892,22 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }
-
+    private fun handleRFDead(equip: HyperStatHpuEquip) {
+        logIt("RF Signal is Dead ${equip.node}")
+        state = ZoneState.RFDEAD
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
+        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
+            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
+        }
+        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
+        if (curStatus != RFDead) {
+            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
+        }
+        equip.haystack.writeHisValByQuery(
+            "point and not ota and status and his and group == \"${equip.node}\"",
+            ZoneState.RFDEAD.ordinal.toDouble()
+        )
+    }
     override fun getHyperStatEquip(node: Short): HyperStatEquip {
         return hpuDeviceMap[node] as HyperStatHpuEquip
     }

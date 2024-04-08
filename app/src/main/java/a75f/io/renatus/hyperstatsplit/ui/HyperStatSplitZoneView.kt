@@ -6,6 +6,7 @@ package a75f.io.renatus.hyperstatsplit.ui
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -36,6 +37,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import java.util.*
 import a75f.io.device.HyperSplit
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.content.Context
@@ -282,8 +284,14 @@ private fun handleConditionMode(
     if(profileType == ProfileType.HYPERSTATSPLIT_CPU) {
         actualConditioningMode  = getActualConditioningMode(nodeAddress, selectedPosition)
     }
-    if(actualConditioningMode != -1)
-        updateHyperStatSplitUIPoints(equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
+    if(actualConditioningMode != -1) {
+        updateHyperStatSplitUIPoints(
+            equipId, "zone and sp and conditioning and mode",
+            actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName
+        )
+        val roomRef = HSUtil.getZoneIdFromEquipId(equipId)
+        DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
+    }
 }
 
 

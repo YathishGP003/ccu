@@ -91,7 +91,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         logicalPointsList = equip.getLogicalPointList()
         hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
         handleFanConditioningModes(equip.equipRef!!)
-        if (isZoneDead) {
+        if(isRFDead){
+            handleRFDead(equip)
+            return
+        } else if (isZoneDead) {
             handleDeadZone(equip)
             return
         }
@@ -559,7 +562,22 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }
-
+    private fun handleRFDead(equip: HyperStatCpuEquip) {
+        logIt("RF Signal is Dead ${equip.node}")
+        state = ZoneState.RFDEAD
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
+        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
+            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
+        }
+        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
+        if (curStatus != RFDead) {
+            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
+        }
+        equip.haystack.writeHisValByQuery(
+            "point and not ota and status and his and group == \"${equip.node}\"",
+            ZoneState.RFDEAD.ordinal.toDouble()
+        )
+    }
     private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip) {
         val isDoorOpen = isDoorOpenState(config,equip)
        logIt(" is Door Open ? $isDoorOpen")

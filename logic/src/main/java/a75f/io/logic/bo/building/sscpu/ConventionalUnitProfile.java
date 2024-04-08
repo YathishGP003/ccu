@@ -25,13 +25,13 @@ import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.AUTO;
 import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES;
@@ -85,7 +85,10 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 continue;
             double roomTemp = cpuDevice.getCurrentTemp();
             Equip cpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            if(isZoneDead()){
+            if (isRFDead()) {
+                handleRFDead(cpuDevice, node, cpuEquip);
+                continue;
+            } else if (isZoneDead()){
                 resetRelays(cpuEquip.getId(),node);
                 StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<String, Integer>(),ZoneTempState.TEMP_DEAD);
                 if(cpuDevice.getStatus() != state.ordinal())
@@ -461,6 +464,18 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
             StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),curState, relayStages, temperatureState);
         }
+    }
+
+    private void handleRFDead(ConventionalUnitLogicalMap cpuDevice, short node, Equip cpuEquip) {
+        StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<String, Integer>(),ZoneTempState.RF_DEAD);
+        if(cpuDevice.getStatus() != RFDEAD.ordinal()) {
+            cpuDevice.setStatus(RFDEAD.ordinal());
+        }
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", RFDead);
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) RFDEAD.ordinal());
     }
 
     @Override

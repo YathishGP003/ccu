@@ -4,6 +4,7 @@ import a75.io.algos.vav.VavTRSystem
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.DomainName.coolingLoopOutput
 import a75f.io.domain.api.DomainName.equipScheduleStatus
 import a75f.io.domain.api.DomainName.equipStatusMessage
@@ -36,6 +37,7 @@ import a75f.io.logic.bo.building.system.handleHumidityOperation
 import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.bo.building.system.operateDamper
 import a75f.io.logic.bo.building.system.setOccupancyMode
+import a75f.io.logic.bo.building.system.updateAutoCommissionOutput
 import a75f.io.logic.bo.building.system.updateOperatingMode
 import a75f.io.logic.bo.building.system.updatePointHistoryAndDefaultValue
 import a75f.io.logic.bo.building.system.updatePointValue
@@ -95,10 +97,10 @@ class VavExternalAhu : VavSystemProfile() {
     }
 
     override fun isOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
 
     override fun isOutsideTempHeatingLockoutEnabled(hayStack: CCUHsApi): Boolean =
-        Domain.readDefaultValByDomain(useOutsideTempLockoutCooling) > 0
+        Domain.readDefaultValByDomain(useOutsideTempLockoutHeating) > 0
 
     override fun setOutsideTempCoolingLockoutEnabled(hayStack: CCUHsApi, enabled: Boolean) {
         updatePointHistoryAndDefaultValue(useOutsideTempLockoutCooling, if (enabled) 1.0 else 0.0)
@@ -116,6 +118,10 @@ class VavExternalAhu : VavSystemProfile() {
         writePointForCcuUser(hayStack, vavOutsideTempHeatingLockout, value)
     }
 
+    override fun getStaticPressure(): Double {
+        return (trSystem as VavTRSystem).currentSp
+    }
+
     override fun doSystemControl() {
         if (trSystem != null) {
             trSystem.processResetResponse()
@@ -124,6 +130,7 @@ class VavExternalAhu : VavSystemProfile() {
         updateSystemPoints()
         setTrTargetVals()
     }
+    override fun getSystemSAT(): Int = (trSystem as VavTRSystem).currentSAT
 
     fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -148,6 +155,7 @@ class VavExternalAhu : VavSystemProfile() {
         if (equip["profile"]?.toString().contentEquals(ProfileType.vavExternalAHUController.name)) {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
+        removeSystemEquipModbus()
     }
 
     @Synchronized
@@ -170,18 +178,37 @@ class VavExternalAhu : VavSystemProfile() {
     override fun getStatusMessage(): String =
         if (getBasicVavConfigData().loopOutput > 0) SYSTEM_ON else SYSTEM_OFF
 
+    private fun updateCoolingLoop(equip: Equip) {
+        if (vavSystem.systemState == SystemController.State.COOLING) {
+            val satSpMax = getTunerByDomainName(equip, DomainName.satSPMax)
+            val satSpMin = getTunerByDomainName(equip, DomainName.satSPMin)
+            systemCoolingLoopOp =
+                ((satSpMax - systemSAT) * 100 / (satSpMax - satSpMin)).toInt().toDouble()
+            CcuLog.d(
+                L.TAG_CCU_SYSTEM,
+                "satSpMax :$satSpMax satSpMin: $satSpMin SAT: $systemSAT systemCoolingLoopOp : $systemCoolingLoopOp"
+            )
+        } else {
+            systemCoolingLoopOp = 0.0
+        }
+    }
     private fun calculateSetPoints(systemEquip: Equip) {
         val externalEquipId = getExternalEquipId()
         val vavConfig = getBasicVavConfigData()
+        updateLoopDirection(vavConfig, systemEquip)
+        updateCoolingLoop(systemEquip)
+        updateAutoCommissionOutput(vavConfig)
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
         val conditioningMode = getConditioningMode(systemEquip)
         val currentHumidity = VavSystemController.getInstance().getAverageSystemHumidity()
         val humidityHysteresis = getTunerByDomainName(systemEquip, vavHumidityHysteresis)
         val analogFanMultiplier = getTunerByDomainName(systemEquip, vavAnalogFanSpeedMultiplier)
         logIt(
-            " System is $occupancyMode conditioningMode : $conditioningMode" + " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}" + " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
+            " System is $occupancyMode conditioningMode : $conditioningMode"
+                    + " coolingLoop ${vavConfig.coolingLoop} heatingLoop ${vavConfig.heatingLoop}"
+                    + " weightedAverageCO2 ${vavConfig.weightedAverageCO2} loopOutput ${vavConfig.loopOutput}"
         )
-        updateLoopDirection(vavConfig, systemEquip)
+
         updateOperatingMode(
             systemEquip,
             getUpdatedOperatingMode().toDouble(),
@@ -204,10 +231,10 @@ class VavExternalAhu : VavSystemProfile() {
             externalEquipId,
             hayStack,
             externalSpList,
-            vavConfig,
             analogFanMultiplier,
             vavConfig.loopOutput,
-            conditioningMode
+            conditioningMode,
+            vavSystem
         )
         setOccupancyMode(systemEquip,
             externalEquipId,
@@ -246,7 +273,8 @@ class VavExternalAhu : VavSystemProfile() {
             externalSpList,
             humidityHysteresis,
             currentHumidity,
-            conditioningMode
+            conditioningMode,
+            vavConfig
         )
         updateSystemStatusPoints(systemEquip.id, statusMessage, equipStatusMessage)
         instance.modbusInterface?.writeSystemModbusRegister(externalEquipId, externalSpList)

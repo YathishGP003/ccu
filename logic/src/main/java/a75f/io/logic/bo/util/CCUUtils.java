@@ -62,12 +62,14 @@ public class CCUUtils
         if(equipList.size() == 0){
             return null;
         }
-        for( HashMap<Object, Object> equip : equipList){
-            HashMap<Object, Object> heartBeatPoint =
-                    hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip.get("id")+ "\"");
-            if(heartBeatPoint.size() > 0){
-                HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
-                return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+        for(HashMap<Object, Object> equip : equipList) {
+            if(isModbusHeartbeatRequired(equip, hayStack)) {
+                HashMap<Object, Object> heartBeatPoint =
+                        hayStack.readEntity("point and (heartbeat or heartBeat) and equipRef == \"" + equip.get("id") + "\"");
+                if(heartBeatPoint.size() > 0) {
+                    HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+                    return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+                }
             }
         }
         return null;
@@ -133,14 +135,16 @@ public class CCUUtils
         ArrayList<HashMap<Object, Object>> zoneList = ccuHsApi.readAllEntities("room");
         for(HashMap<Object, Object> zoneMap : zoneList){
             Zone zone =  new Zone.Builder().setHashMap(zoneMap).build();
-            ccuHsApi.updateZone(zone, zone.getId());
+            if(zone != null && zone.getCcuRef() == null)
+                ccuHsApi.updateZone(zone, zone.getId());
         }
         ArrayList<HashMap<Object, Object>> zoneOccupancyPointList = ccuHsApi.readAllEntities("zone and occupancy and " +
                 "state");
 
         for(HashMap<Object, Object> zoneOccupancyPoint : zoneOccupancyPointList){
             Point point = new Point.Builder().setHashMap(zoneOccupancyPoint).build();
-            ccuHsApi.updatePoint(point, point.getId());
+            if(point != null && point.getCcuRef() == null)
+                ccuHsApi.updatePoint(point, point.getId());
         }
 
         ArrayList<HashMap<Object, Object>> entityList = ccuHsApi.readAllEntities("equip and not tuner");
@@ -150,19 +154,22 @@ public class CCUUtils
             ArrayList<HashMap<Object, Object>> equipPoints = ccuHsApi.readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
             for(HashMap<Object, Object> equipPoint : equipPoints){
                 Point point = new Point.Builder().setHashMap(equipPoint).build();
-                ccuHsApi.updatePoint(point, point.getId());
+                if(point != null && point.getCcuRef() == null)
+                    ccuHsApi.updatePoint(point, point.getId());
             }
         }
 
         ArrayList<HashMap<Object, Object>> deviceList = ccuHsApi.readAllEntities("device and not ccu");
         for(HashMap<Object, Object> deviceMap : deviceList){
             Device device = new Device.Builder().setHashMap(deviceMap).build();
-            ccuHsApi.updateDevice(device, device.getId());
+            if(device != null && device.getCcuRef() == null)
+                ccuHsApi.updateDevice(device, device.getId());
             ArrayList<HashMap<Object, Object>> devicePoints =
                     ccuHsApi.readAllEntities("point and deviceRef == \"" + device.getId()+"\"");
             for(HashMap<Object, Object> devicePoint : devicePoints){
                 RawPoint point = new RawPoint.Builder().setHashMap(devicePoint).build();
-                ccuHsApi.updatePoint(point, point.getId());
+                if(point != null && point.getCcuRef() == null)
+                    ccuHsApi.updatePoint(point, point.getId());
             }
         }
         String ccuId = CCUHsApi.getInstance().readEntity("ccu").get("id").toString();
@@ -170,7 +177,8 @@ public class CCUUtils
                 "\"");
         for(HashMap<Object, Object> settingPoint : settingPoints){
             SettingPoint point = new SettingPoint.Builder().setHashMap(settingPoint).build();
-            ccuHsApi.updateSettingPoint(point, point.getId());
+            if(point != null && point.getCcuRef() == null)
+                ccuHsApi.updateSettingPoint(point, point.getId());
         }
 
         ArrayList<HashMap<Object, Object>> zoneScheduleList = CCUHsApi.getInstance().readAllEntities("zone and not " +
@@ -178,7 +186,8 @@ public class CCUUtils
         for(HashMap<Object, Object> zoneSchedule : zoneScheduleList){
             zoneSchedule.put("ccuRef", ccuHsApi.getCcuId());
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.get("id").toString());
-            CCUHsApi.getInstance().updateZoneSchedule(schedule, zoneSchedule.get("roomRef").toString());
+            if(schedule != null && schedule.getCcuRef() == null)
+                CCUHsApi.getInstance().updateZoneSchedule(schedule, zoneSchedule.get("roomRef").toString());
         }
         try{
 
@@ -221,6 +230,11 @@ public class CCUUtils
             PreferenceUtil.setCcuRefTagMigration(false);
         }
 
+        ArrayList<HashMap<Object, Object>> zoneSchedulePointList = CCUHsApi.getInstance().readAllEntities("point and zone and (schedulable or hvacMode) and not tuner and ccuRef and ccuRef!=\""+ccuId+"\"");
+        for(HashMap<Object, Object> zoneSchedulePoint: zoneSchedulePointList) {
+            Point point = new Point.Builder().setHashMap(zoneSchedulePoint).build();
+            ccuHsApi.updatePoint(point, point.getId());
+        }
     }
 
     public static boolean isCarrierEnvironment(Context context){
@@ -240,5 +254,13 @@ public class CCUUtils
             e.printStackTrace();
             return true;
         }
+    }
+
+    public static boolean isModbusHeartbeatRequired(HashMap<Object, Object> equip, CCUHsApi hayStack) {
+        if(equip.containsKey("equipRef")) {
+            HashMap<Object, Object> parentEquip = hayStack.readMapById(equip.get("equipRef").toString());
+            return !equip.get("group").toString().equals(parentEquip.get("group"));
+        }
+        return true;
     }
 }

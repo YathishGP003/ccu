@@ -330,7 +330,7 @@ public class OTNEquip {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("status").addMarker("otn").addMarker("his").addMarker("zone")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setEnums("deadband,cooling,heating,tempdead")
+                .setEnums("deadband,cooling,heating,tempdead,rfdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

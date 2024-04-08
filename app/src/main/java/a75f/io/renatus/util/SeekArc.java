@@ -1754,5 +1754,8 @@ public class SeekArc extends View
         invalidate();
 
     }
-
+    public int getTemperatureMode()
+    {
+        return ModeType.ordinal();
+    }
 }

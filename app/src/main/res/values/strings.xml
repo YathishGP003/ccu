@@ -85,7 +85,7 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
-<!--        <item>  VAV External AHU Controller</item>-->
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
@@ -100,7 +100,7 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
-<!--        <item>  VAV External AHU Controller</item>-->
+        <item>  VAV External AHU Controller</item>
         <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
@@ -1694,4 +1694,6 @@
 
     <string name="offline_description">Not connected to Cloud</string>
     <string name="system_profile">System Profile</string>
-</resources>
+    <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default named schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>
+
+    </resources>

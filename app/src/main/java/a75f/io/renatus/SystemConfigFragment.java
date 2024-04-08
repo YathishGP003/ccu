@@ -504,20 +504,23 @@ public class SystemConfigFragment extends Fragment {
     }
 
     private boolean isModbusEMRPaired(){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and roomRef ==\"SYSTEM\"").size() > 0;
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr" +
+                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").size() > 0;
     }
 
     private short getModbusEMRAddress() {
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and modbus and emr and roomRef ==\"SYSTEM\"");
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and modbus" +
+                " and emr and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")");
         return Short.parseShort(equipMap.get("group").toString());
     }
 
     private boolean isModbusBTUPaired(){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and btu and roomRef ==\"SYSTEM\"").size() > 0;
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and btu" +
+                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").size() > 0;
     }
 
     private short getModbusBTUAddress() {
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and modbus and btu and roomRef ==\"SYSTEM\"");
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and modbus and btu and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")");
         return Short.parseShort(equipMap.get("group").toString());
     }
 

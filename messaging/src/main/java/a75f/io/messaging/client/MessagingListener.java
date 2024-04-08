@@ -207,7 +207,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
         Message msg;
         try {
             msg = MessageBuilderKt.jsonToMessage(payload);
-            if (messageHandlerService.canIgnoreTheMessage(msg)) {
+            if (messageHandlerService.ignoreUpdateSchedule(payload) || messageHandlerService.canIgnoreTheMessage(msg) ) {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Ignore Message !"+payload);
                 return;
             }

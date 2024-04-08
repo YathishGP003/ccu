@@ -34,11 +34,13 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.bo.util.DemandResponseMode;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
@@ -71,6 +73,8 @@ public class UpdatePointHandler implements MessageHandler
                 zoneDataInterface.refreshScreen("", true);
             }
             return;
+        } else if (hayStack.readMapById(pointUid).containsKey(Tags.TUNER)) {
+            TunerUtil.refreshEquipTuners();
         }
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
@@ -122,6 +126,9 @@ public class UpdatePointHandler implements MessageHandler
                 && !localPoint.getMarkers().contains(Tags.TUNER)) {
             HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
+            if (localPoint.getMarkers().contains(Tags.USERINTENT) && localPoint.getMarkers().contains(Tags.CONDITIONING)) {
+                DesiredTempDisplayMode.setModeTypeOnUserIntentChange(localPoint.getRoomRef(), CCUHsApi.getInstance());
+            }
             if (localPoint.getMarkers().contains(Tags.VRV)) {
                 VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
             }
@@ -158,6 +165,10 @@ public class UpdatePointHandler implements MessageHandler
             TrueCFMVAVConfigHandler.updateVAVConfigPoint(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();
             return;
+        }
+
+        if (HSUtil.isVAVZonePriorityConfig(pointUid, CCUHsApi.getInstance())) {
+            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint, hayStack);
         }
 
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){

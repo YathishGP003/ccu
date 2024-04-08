@@ -6,7 +6,9 @@ package a75f.io.renatus.hyperstat.ui
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.*
@@ -27,6 +29,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip.Companion.getHyperStatEquipRef
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
 import a75f.io.renatus.R
@@ -272,11 +275,14 @@ private fun handleConditionMode(
         // 2 Pipe profile will be always has all conditioning modes
         actualConditioningMode = StandaloneConditioningMode.values()[selectedPosition].ordinal
     }
-    if(actualConditioningMode != -1)
-        updateHyperStatUIPoints(equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(),
-                CCUHsApi.getInstance().ccuUserName)
-}
+    if(actualConditioningMode != -1) {
+        updateHyperStatUIPoints(
+            equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(),
+            CCUHsApi.getInstance().ccuUserName
+        )
 
+    }
+}
 
 // Save the fan mode in cache
 private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: String , profileType: ProfileType) {

@@ -66,7 +66,9 @@ class HyperStatReconfigureUtil {
             val equip = getEquip(configPoint.equipRef, haystack)
             val configType = configType(configPoint.markers)
             val portType = portType(configPoint.markers)
-            updateAnalogActuatorType(configPoint, equip, haystack, portType!!, configType!!)
+            if(configType != null && portType != null) {
+                updateAnalogActuatorType(configPoint, equip, haystack, portType!!, configType!!)
+            }
             Log.i(L.TAG_CCU_HSCPU, "Reconfiguration change Updated : $configPointId -> $updatedConfigValue")
             haystack.scheduleSync()
         }

@@ -17,6 +17,8 @@ import android.util.Log;
 
 import com.google.common.collect.EvictingQueue;
 
+import org.projecthaystack.UnknownRecException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -104,9 +106,15 @@ public class DabSystemController extends SystemController
     
     
     Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
     
     private DabSystemController()
     {
+        pendingTunerChange = false;
+
         proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
         integralGain = TunerUtil.readTunerValByQuery("system and dab and igain");
         proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and dab and pspread");
@@ -210,7 +218,9 @@ public class DabSystemController extends SystemController
         hasTi = false;
         weightedAverageChangeoverLoadSum = 0;
         weightedAverageChangeoverLoad = 0;
-    
+
+        if (hasPendingTunerChange()) refreshPITuners();
+
         Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
             currSystemOccupancy == Occupancy.PRECONDITIONING ||
@@ -224,6 +234,23 @@ public class DabSystemController extends SystemController
             }
         }
         currSystemOccupancy = occupancy;
+    }
+
+    private void refreshPITuners() {
+        proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
+        integralGain = TunerUtil.readTunerValByQuery("system and dab and igain");
+        proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and dab and pspread");
+        integralMaxTimeout = (int)TunerUtil.readTunerValByQuery("system and dab and itimeout");
+
+        CcuLog.i(L.TAG_CCU_SYSTEM, "proportionalGain "+proportionalGain+" integralGain "+integralGain
+                +" proportionalSpread "+proportionalSpread+" integralMaxTimeout "+integralMaxTimeout);
+
+        piController.setIntegralGain(integralGain);
+        piController.setProportionalGain(proportionalGain);
+        piController.setMaxAllowedError(proportionalSpread);
+        piController.setIntegralMaxTimeout(integralMaxTimeout);
+
+        pendingTunerChange = false;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
@@ -698,20 +725,24 @@ public class DabSystemController extends SystemController
 
             double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
             double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
-            HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
-                                                            .readEntity("point and system and cm and cooling" +
-                                                                    " and desired and temp and equipRef == \"" +
-                                                                    L.ccu().systemProfile.getSystemEquipRef() + "\""
-            );
-            CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
-            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance()
-                                                            .readEntity("point and system and cm and " +
-                                                                        "heating and desired and temp and equipRef == \"" +
-                                                                        L.ccu().systemProfile.getSystemEquipRef() + "\""
-            );
-            CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
-        }catch (Exception e){
-            e.printStackTrace();
+
+            String coolingPointId = CCUHsApi.getInstance().readId("point and system and cm and cooling" +
+                    " and desired and temp and equipRef == \"" +
+                    L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+            String heatingPointId = CCUHsApi.getInstance().readId("point and system and cm and heating" +
+                    " and desired and temp and equipRef == \"" +
+                    L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+            CCUHsApi.getInstance().writeHisValById(coolingPointId, desiredTempCooling);
+            CCUHsApi.getInstance().writeDefaultValById(coolingPointId, desiredTempCooling);
+
+
+            CCUHsApi.getInstance().writeHisValById(heatingPointId, desiredTempHeating);
+            CCUHsApi.getInstance().writeDefaultValById(heatingPointId, desiredTempHeating);
+
+        }catch (NullPointerException | UnknownRecException e){
+            CcuLog.e(L.TAG_CCU_SYSTEM, "Id for desired temp not found in haystack");
         }
     }
     

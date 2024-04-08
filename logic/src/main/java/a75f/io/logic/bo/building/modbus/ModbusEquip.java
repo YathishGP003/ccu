@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.modbus;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
 import java.util.ArrayList;
@@ -73,7 +74,8 @@ public class ModbusEquip {
             modbusEquipType = modbusEquipTypes.get(0);
         }
         String modbusName = equipmentInfo.getName();
-        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + equipmentInfo.getSlaveId();
+        String equipDisplayName = equipmentInfo.getEquipDisplayName();
+        String equipDis = siteDis + "-"+modbusName+"-"+equipDisplayName+"-"+ equipmentInfo.getSlaveId();
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
@@ -191,20 +193,32 @@ public class ModbusEquip {
                         logicalParamPoint.setUnit(marker.getTagValue());
                         physicalParamPoint.setUnit(marker.getTagValue());
                     }
-                    if(marker.getTagName().contains("hisInterpolate")){
+                    else if(marker.getTagName().contains("hisInterpolate")){
                         logicalParamPoint.setHisInterpolate(marker.getTagValue());
                     }
-                    if(marker.getTagName().contains("minVal")){
+                    else if(marker.getTagName().contains("minVal")){
                         logicalParamPoint.setMinVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("maxVal")){
+                    else if(marker.getTagName().contains("maxVal")){
                         logicalParamPoint.setMaxVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("incrementVal")){
+                    else if(marker.getTagName().contains("incrementVal")){
                         logicalParamPoint.setIncrementVal(String.valueOf(marker.getTagValue()));
                     }
-                    if(marker.getTagName().contains("cell")){
+                    else if(marker.getTagName().contains("cell")){
                         logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
+                    }
+                    else if(!marker.getTagName().contains("kind")) {
+                        if(isInt(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                        } else if(isLong(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Long.parseLong(marker.getTagValue())));
+                        } else if(isDouble(marker.getTagValue())) {
+                            logicalParamPoint.addTag(marker.getTagName(), HNum.make(Double.parseDouble(marker.getTagValue())));
+                        } else {
+                            logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                        }
+
                     }
 
                 }else{
@@ -220,20 +234,31 @@ public class ModbusEquip {
                             logicalParamPoint.setUnit(marker.getTagValue());
                             physicalParamPoint.setUnit(marker.getTagValue());
                         }
-                        if (marker.getTagName().contains("hisInterpolate")) {
+                        else if (marker.getTagName().contains("hisInterpolate")) {
                             logicalParamPoint.setHisInterpolate(marker.getTagValue());
                         }
-                        if(marker.getTagName().contains("minVal")){
+                        else if(marker.getTagName().contains("minVal")){
                             logicalParamPoint.setMinVal(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("maxVal")){
+                        else if(marker.getTagName().contains("maxVal")){
                             logicalParamPoint.setMaxVal(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("incrementVal")){
-                            logicalParamPoint.setHisInterpolate(String.valueOf(marker.getTagValue()));
+                        else if(marker.getTagName().contains("incrementVal")){
+                            logicalParamPoint.setIncrementVal(String.valueOf(marker.getTagValue()));
                         }
-                        if(marker.getTagName().contains("cell")){
+                        else if(marker.getTagName().contains("cell")){
                             logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
+                        }
+                        else if(!marker.getTagName().contains("kind")) {
+                            if(isInt(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Integer.parseInt(marker.getTagValue())));
+                            } else if(isLong(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Long.parseLong(marker.getTagValue())));
+                            } else if(isDouble(marker.getTagValue())) {
+                                logicalParamPoint.addTag(marker.getTagName(), HNum.make(Double.parseDouble(marker.getTagValue())));
+                            } else {
+                                logicalParamPoint.addTag(marker.getTagName(), HStr.make(marker.getTagValue()));
+                            }
                         }
                     } else {
                         logicalParamPoint.addMarker(marker.getTagName());
@@ -366,16 +391,6 @@ public class ModbusEquip {
         return false;
     }
 
-    public List<Parameter> getProfileConfiguration(){
-        if(configuredParams != null && (configuredParams.size() > 0))
-            return configuredParams;
-        else {
-            //TODO need to fetch all configured data
-
-            return null;
-        }
-    }
-
     public static boolean isEquipTypeInUpperCase(String str) {
         String[] words = str.split("\\s+");
 
@@ -386,5 +401,32 @@ public class ModbusEquip {
         }
 
         return true;
+    }
+
+    public static boolean isDouble(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isLong(String str) {
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isInt(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

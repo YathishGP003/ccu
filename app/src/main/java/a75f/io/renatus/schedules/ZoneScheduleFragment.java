@@ -28,6 +28,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -276,6 +277,10 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
         textViewaddEntry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(schedule.isNamedSchedule()){
+                    Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
                 Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
                 if(buildingOccupancyFragment != null){
@@ -316,6 +321,9 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
     {
         if (mScheduleId != null) {
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+            if(schedule == null){
+                schedule = CCUHsApi.getInstance().getDefaultNamedSchedule();
+            }
             updateUI();
         } else {
             ArrayList<Schedule> buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancySchedule();
@@ -868,6 +876,10 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
         textViewTemp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(schedule.isNamedSchedule()){
+                    Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 int clickedPosition = (int)v.getTag();
                 ArrayList<Schedule.Days> days = schedule.getDays();
                 try {

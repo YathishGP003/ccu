@@ -279,7 +279,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setFloorRef(floorRef).setHisInterpolate("cov")
             .addMarker("status").addMarker("his").addMarker("vrv").addMarker("logical").addMarker("zone")
             .setGroup(nodeAddr.toString())
-            .setEnums("deadband,cooling,heating,tempdead")
+            .setEnums("deadband,cooling,heating,tempdead,rfdead")
             .setTz(equip.tz)
             .build()
         val equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus)

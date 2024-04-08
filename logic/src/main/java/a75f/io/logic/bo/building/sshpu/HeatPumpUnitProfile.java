@@ -31,6 +31,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 public class HeatPumpUnitProfile extends ZoneProfile {
@@ -77,7 +78,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             Equip hpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
 
             Log.i("CPUC_Config", "updateZonePoints: "+isZoneDead());
-            if(isZoneDead()){
+            if (isRFDead()) {
+                handleRFDead(hpuDevice, node);
+                continue;
+            } else if (isZoneDead()){
                 resetRelays(hpuEquip.getId(),node,curHumidity, ZoneTempState.TEMP_DEAD);
                 hpuDevice.setStatus(TEMPDEAD.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
@@ -183,6 +187,18 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             /*if(hpuDevice.getStatus() != state.ordinal())
                 hpuDevice.setStatus(state.ordinal());*/
         }
+    }
+
+    private void handleRFDead(HeatPumpUnitEquip hpuDevice, short node) {
+        hpuDevice.setStatus(RFDEAD.ordinal());
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
+                " and writable and group == \"" + node + "\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
+                    " and group == \"" + node + "\"", RFDead);
+        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group" +
+                " == \"" + node + "\"", (double) RFDEAD.ordinal());
     }
 
     @Override

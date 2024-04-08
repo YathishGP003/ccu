@@ -22,32 +22,18 @@ public class UsbSerialUtil {
         if (deviceVID == 1003) {
             return true;
         }
-        
-        if (BuildConfig.BUILD_TYPE.equals("qa") ||
-            BuildConfig.BUILD_TYPE.equals("dev_qa") ||
-            BuildConfig.BUILD_TYPE.equals("dev") ||
-            BuildConfig.BUILD_TYPE.equals("local")) {
-            if (deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context)) {
-                return true;
-            }
-        }
-        return false;
+        // Enabled Biskit connection for all higher variants
+        return deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context);
     }
     
     public static boolean isModbusDevice(UsbDevice device, Context context) {
         int deviceVID = device.getVendorId();
     
-        if ((BuildConfig.BUILD_TYPE.equals("qa") ||
-                BuildConfig.BUILD_TYPE.equals("dev_qa") ||
-            BuildConfig.BUILD_TYPE.equals("dev") ||
-            BuildConfig.BUILD_TYPE.equals("local")) && (deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context))) {
+        if ((deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context))) {
             return false;
         }
 
-        if (deviceVID == 4292 || deviceVID == DEVICE_ID_FTDI) {
-            return true;
-        }
-        return false;
+        return deviceVID == 4292 || deviceVID == DEVICE_ID_FTDI;
     }
 
     public static boolean isSerialRetryRequired(CCUHsApi hayStack, Context context) {

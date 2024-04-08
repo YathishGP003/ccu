@@ -55,13 +55,17 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
+        val ccuHsApi = CCUHsApi.getInstance()
         doVavDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
-        if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
         }
-        if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
-            migrationForDRMode(CCUHsApi.getInstance())
+        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
+            migrationForDRMode(ccuHsApi)
+        }
+        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
+            migrateEquipStatusEnums(ccuHsApi)
         }
         if (!isMigrationRequired()) {
             return
@@ -82,9 +86,21 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    private fun migrateEquipStatusEnums(ccuHsApi: CCUHsApi) {
+        val equipStatusPointList = ccuHsApi.readAllEntities("status and not ota and not message" +
+                " and zone and his and enum")
+        equipStatusPointList.forEach{equipStatusMap ->
+            val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
+            if (!equipStatusPoint.enums.toString().contains("rfdead")) {
+                equipStatusPoint.enums = "deadband,cooling,heating,tempdead,rfdead"
+                hayStack.updatePoint(equipStatusPoint, equipStatusPoint.id)
+            }
+        }
+    }
+
     private fun migrationForDRMode(ccuHsApi: CCUHsApi) {
         val demandResponse = DemandResponseMode()
-        val systemProfile = ccuHsApi.readEntity("equip and system")
+        val systemProfile = ccuHsApi.readEntity("equip and system and not modbus")
         val displayName = systemProfile[Tags.DIS].toString()
         val siteRef = systemProfile[Tags.SITEREF].toString()
         val id = systemProfile[Tags.ID].toString()

@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 
 /**
  * Util class to handle remote reconfiguration changes for CPU profile.
@@ -338,6 +339,8 @@ public class ConventionalPackageUnitUtil {
             hayStack.writeDefaultValById(conditioningModeId, conditioningMode);
             hayStack.writeHisValById(conditioningModeId, conditioningMode);
             hayStack.clearPointArrayLevel(conditioningModeId, HayStackConstants.USER_APP_WRITE_LEVEL, false);
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(equip.getRoomRef(),
+                    CCUHsApi.getInstance());
         }
     }
     

@@ -429,7 +429,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("status").addMarker("his").addMarker("zone").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("deadband,cooling,heating,tempdead")
+                .setEnums("deadband,cooling,heating,tempdead,rfdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

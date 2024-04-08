@@ -1381,6 +1381,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
+        tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
     }
 
@@ -1394,6 +1395,7 @@ public class CCUHsApi
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
+        tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
     }
 
@@ -1410,6 +1412,8 @@ public class CCUHsApi
         CcuLog.d("CCU_HS", "deleteEntity: " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
+        tagsDb.clearHistory(HRef.copy(id));
+        HisItemCache.getInstance().delete(id);
         removeId(id);
     }
 
@@ -1534,9 +1538,6 @@ public class CCUHsApi
         } else if (entity.get("point") != null) {
             if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
-            }
-            if (entity.get("his") != null) {
-                tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntityItem(entity.get("id").toString());
             hsClient.clearPointFromWatch(HRef.copy(entity.get("id").toString()));
@@ -2169,7 +2170,20 @@ public class CCUHsApi
         for(HashMap<Object, Object> equipMap : equipMapList) {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             CCUHsApi.getInstance().updateEquip(equip, equip.getId());
-            updateCcuRefForDiagPoints(equip);
+            if( equip.getCcuRef() == null || equip.getCcuRef().isEmpty()) {
+                updateCcuRefForDiagPoints(equip);
+            }
+            updateCcuRefForDiagPointWhileMigration(equip);
+        }
+    }
+
+    private void updateCcuRefForDiagPointWhileMigration(Equip equip) {
+        ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
+        for(HashMap<Object, Object> equipPoint : equipPoints){
+            Point point = new Point.Builder().setHashMap(equipPoint).build();
+            if( point.getCcuRef() == null || point.getCcuRef().isEmpty()) {
+                updatePoint(point, point.getId());
+            }
         }
     }
     public void updateDiagGatewayRef(String systemEquipRef){
@@ -3033,7 +3047,15 @@ public class CCUHsApi
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
-        markItemsUnSynced(readAllEntities(Tags.POINT));
+
+        ArrayList<HashMap<Object, Object>> pointsForSync = new ArrayList<>();
+
+        readAllEntities(Tags.POINT).forEach( point -> {
+            if (point.get("equipRef") != null && !readMapById(point.get("equipRef").toString()).containsKey("tuner")) {
+                pointsForSync.add(point);
+            }
+        });
+        markItemsUnSynced(pointsForSync);
 
         syncStatusService.saveSyncStatus();
         syncEntityTree();
@@ -3486,5 +3508,13 @@ public class CCUHsApi
     public int getCacheSyncFrequency() {
         return context.getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("cacheSyncFrequency", 1);
+    }
+
+    public Schedule getDefaultNamedSchedule() {
+        HDict scheduleHGrid = tagsDb.read("default and named and schedule");
+        if(scheduleHGrid != null) {
+            return new Schedule.Builder().setHDict(scheduleHGrid).build();
+        }
+        return null;
     }
 }

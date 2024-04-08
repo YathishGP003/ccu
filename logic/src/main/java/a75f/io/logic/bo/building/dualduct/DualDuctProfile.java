@@ -58,6 +58,8 @@ public class DualDuctProfile extends ZoneProfile {
     public synchronized void updateDualDuctEquip(DualDuctProfileConfiguration config) {
         dualDuctEquip.updateEquip(config);
     }
+
+    public void setPendingTunerChange() { dualDuctEquip.setPendingTunerChange(); }
     
     @Override
     public ProfileType getProfileType()
@@ -90,15 +92,20 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public synchronized void updateZonePoints()
     {
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            updateRFDead();
+            return;
+        } else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
-        
+
         double setTempCooling = TemperatureProfileUtil.getDesiredTempCooling(dualDuctEquip.nodeAddr);
         double setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
         double roomTemp       = dualDuctEquip.getCurrentTemp();
-        
+
+        if (dualDuctEquip.hasPendingTunerChange()) dualDuctEquip.refreshPITuners();
+
         heatingDamperController = dualDuctEquip.heatingDamperController;
         coolingDamperController = dualDuctEquip.coolingDamperController;
         
@@ -136,13 +143,26 @@ public class DualDuctProfile extends ZoneProfile {
     
         Log.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" " +
                               "setTempHeating: "+setTempHeating+" ZoneState: "+state);
-    
+        CcuLog.i(L.TAG_CCU_ZONE, "Cooling PI Tuners: proportionalGain " + dualDuctEquip.coolingDamperController.getProportionalGain() + ", integralGain " + dualDuctEquip.coolingDamperController.getIntegralGain() +
+                ", proportionalSpread " + dualDuctEquip.coolingDamperController.getMaxAllowedError() + ", integralMaxTimeout " + dualDuctEquip.heatingDamperController.getIntegralMaxTimeout());
+        CcuLog.i(L.TAG_CCU_ZONE, "Heating PI Tuners: proportionalGain " + dualDuctEquip.heatingDamperController.getProportionalGain() + ", integralGain " + dualDuctEquip.coolingDamperController.getIntegralGain() +
+                ", proportionalSpread " + dualDuctEquip.heatingDamperController.getMaxAllowedError() + ", integralMaxTimeout " + dualDuctEquip.heatingDamperController.getIntegralMaxTimeout());
         CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: HeatingDamper CV " + heatingDamperController.getControlVariable() + " " +
                                  "currentPosition " +heatingDamper.currentPosition);
         CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: CoolingDamper CV " + coolingDamperController.getControlVariable() + " " +
                                  "currentPosition " +coolingDamper.currentPosition);
     }
-    
+
+    private void updateRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE, RFDead+" : " + dualDuctEquip.nodeAddr);
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
+                " and writable and group == \""+dualDuctEquip.nodeAddr+"\"");
+        if (!curStatus.equals(RFDead)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable " +
+                    "and group == \"" + dualDuctEquip.nodeAddr + "\"", RFDead);
+        }
+    }
+
     private void handleZoneCooling(double roomTemp, double setTempCooling) {
         if (state != COOLING)
         {
@@ -203,6 +223,10 @@ public class DualDuctProfile extends ZoneProfile {
         double voc = dualDuctEquip.getVOC();
         boolean  enabledCO2Control = dualDuctEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dualDuctEquip.getConfigNumVal("enable and iaq") > 0 ;
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         String   zoneId            = HSUtil.getZoneIdFromEquipId(dualDuctEquip.getId());
         Occupied occ               = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean  occupied          = (occ != null && occ.isOccupied());

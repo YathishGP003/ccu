@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu
 import a75f.io.logic.bo.building.system.getConfiguration
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.compose.ModelMetaData
 import a75f.io.renatus.compose.getModelListFromJson
@@ -140,6 +141,8 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         val modbusEquip =
             CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu")
 
+        if (PreferenceUtil.getIsNewExternalAhu()) modbusEquip.clear()
+
         if (modbusEquip != null && modbusEquip.isNotEmpty()) {
             configType.value = ConfigType.MODBUS
             modbusProfile = ModbusProfile()
@@ -183,7 +186,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun setCurrentConfig(config: ExternalAhuConfiguration) {
-        CcuLog.i(TAG, "setCurrentConfig")
         configModel.value.setPointControl = config.setPointControl.enabled
         configModel.value.dualSetPointControl = config.dualSetPointControl.enabled
         configModel.value.fanStaticSetPointControl = config.fanStaticSetPointControl.enabled
@@ -237,7 +239,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-
     private fun checkValidConfiguration(): Boolean {
         //TODO check validations for bacnet if configured as bacnet
         if (configType.value == ConfigType.MODBUS && (!isValidConfiguration())) return false
@@ -257,7 +258,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun setUpsModbusProfile(profileType: ProfileType) {
-        CcuLog.i(TAG, "setUpsModbusProfile")
         equipModel.value.equipDevice.value.slaveId = equipModel.value.slaveId.value
         val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
 
@@ -356,13 +356,9 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         return result
     }
 
-    private fun getModelIdByName(name: String): String {
-        return deviceModelList.find { it.name == name }!!.id
-    }
+    private fun getModelIdByName(name: String) = deviceModelList.find { it.name == name }!!.id
+    private fun getVersionByID(id: String) = deviceModelList.find { it.id == id }!!.version
 
-    private fun getVersionByID(id: String): String {
-        return deviceModelList.find { it.id == id }!!.version
-    }
 
     fun onSelectAllLeft(isSelected: Boolean) {
         if (equipModel.value.parameters.isNotEmpty()) {
@@ -397,13 +393,12 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
     fun onSelectAllLeftSubEquip(isSelected: Boolean, subEquip: MutableState<EquipModel>) {
         if (subEquip.value.parameters.isNotEmpty()) {
             subEquip.value.parameters.forEachIndexed { index, it ->
-                if (index % 2 != 0) {
+                if (index % 2 == 0) {
                     it.displayInUi.value = isSelected
                 }
             }
         }
     }
-
     fun updateSelectAllBoth() {
         var isAllSelected1 = true
         var isAllSelected2 = true
@@ -453,7 +448,6 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         equipModel.value.selectAllParameters_Right_subEquip[indexValue].displayInUi.value =
             isAllSelected
     }
-
     enum class ConfigType {
         BACNET, MODBUS
     }

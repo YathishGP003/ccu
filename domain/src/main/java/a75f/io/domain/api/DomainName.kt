@@ -405,7 +405,7 @@ object DomainName {
     const val smartnodeBypassDamper = "smartnodeBypassDamper"
 
     const val ductStaticPressureSensor = "ductStaticPressureSensor"
-    const val ductStaticPressureSetpoint = "ductStaticPressueSetpoint"
+    const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val pressureSensorType = "pressureSensorType"
     const val damperMinPosition = "damperMinPosition"
     const val damperMaxPosition = "damperMaxPosition"
@@ -474,6 +474,7 @@ object DomainName {
     const val weightedAverageChangeOverLoadMA  = "weightedAverageChangeOverLoadMA"
     const val weightedAverageCoolingLoadPostML  = "weightedAverageCoolingLoadPostML"
     const val weightedAverageHeatingLoadPostML  = "weightedAverageHeatingLoadPostML"
+    const val epidemicModeSystemState  = "epidemicModeSystemState"
 
 }
 

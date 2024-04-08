@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 
 /**
  * Util class to handle configuration changes of FCU profiles via Pubnub (Reconfig)
@@ -274,9 +275,8 @@ public class FanCoilUnitUtil {
                                                                              "and relay6 and equipRef == \"" + configPoint.getEquipRef() + "\"");
     
             double conditioningMode = conditioningRelay > 0 ? configVal : 0;
-            writePointFromJson(configPoint.getId(), conditioningRelay, msgObject, hayStack);
+            writePointFromJson(configPoint.getId(), conditioningMode, msgObject, hayStack);
             hayStack.writeHisValById(configPoint.getId(), conditioningMode);
-            
         }
     }
     
@@ -301,7 +301,8 @@ public class FanCoilUnitUtil {
             }
             writePointFromJson(configPoint.getId(), conditioningMode, msgObject, hayStack);
             hayStack.writeHisValById(configPoint.getId(), conditioningMode);
-            
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.getRoomRef(),
+                    CCUHsApi.getInstance());
         }
     }
     

@@ -182,7 +182,7 @@ class VavProfileViewModel : ViewModel() {
                         showToast("VAV Configuration saved successfully", context)
                         CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                         ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.value = false
+                        _isDialogOpen.postValue(false)
                     }
 
                 }
@@ -191,7 +191,7 @@ class VavProfileViewModel : ViewModel() {
                 // We don't know why this happens.
                 if (ProgressDialogUtils.isDialogShowing()) {
                     ProgressDialogUtils.hideProgressDialog()
-                    _isDialogOpen.value = false
+                    _isDialogOpen.postValue(false)
                 }
             }
         }

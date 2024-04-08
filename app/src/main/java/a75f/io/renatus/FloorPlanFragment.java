@@ -1596,6 +1596,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private boolean isModbusPairedSystem(){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and roomRef ==\"SYSTEM\"").size() > 0;
+        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr and" +
+                " (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").size() > 0;
     }
 }

@@ -405,7 +405,7 @@ public class HeatPumpUnitEquip{
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("status").addMarker("hpu").addMarker("his").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("deadband,cooling,heating,tempdead")
+                .setEnums("deadband,cooling,heating,tempdead,rfdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

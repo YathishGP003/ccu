@@ -383,6 +383,7 @@ public class OAOProfile
         switch (systemOccupancy) {
             case OCCUPIED:
             case FORCEDOCCUPIED:
+            case DEMAND_RESPONSE_OCCUPIED:
                 if(systemMode != SystemMode.OFF) {
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
@@ -397,6 +398,7 @@ public class OAOProfile
                 outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
             case UNOCCUPIED:
+            case DEMAND_RESPONSE_UNOCCUPIED:
                 if(epidemicState == EpidemicState.OFF)
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;

@@ -65,7 +65,11 @@ public abstract class VavProfile extends ZoneProfile {
     
     public static String TAG = VavProfile.class.getSimpleName().toUpperCase();
     public static final int REHEAT_THRESHOLD_HEATING_LOOP = 50;
-    
+
+    private boolean pendingTunerChange;
+    public boolean hasPendingTunerChange() { return pendingTunerChange; }
+    public void setPendingTunerChange() { pendingTunerChange = true; }
+
     //public HashMap<Short, VavEquip> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
@@ -153,6 +157,9 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     public void init() {
+
+        pendingTunerChange = false;
+
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init");
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         equipRef = equipMap.get("id").toString();
@@ -217,16 +224,66 @@ public abstract class VavProfile extends ZoneProfile {
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
 
-        satResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        co2ResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        spResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
-        hwstResetRequest.setImportanceMultiplier(ZonePriority.NORMAL.multiplier);
+        ZonePriority zonePriority = ZonePriority.values()[(int)vavEquip.getZonePriority().readPriorityVal()];
+        satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
 
         vavUnit.vavDamper.minPosition = 0;
         vavUnit.vavDamper.maxPosition = 100;
         damper = vavUnit.vavDamper; //This is not necessary. Keeping to maintain legacy code.
         valve = vavUnit.reheatValve;
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
+    }
+
+    public void updateZonePriority(int newPriority) {
+        ZonePriority zonePriority = ZonePriority.values()[(int)newPriority];
+        satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        co2ResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        spResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+        hwstResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
+    }
+
+    public void refreshPITuners() {
+
+        proportionalGain = vavEquip.getVavProportionalKFactor().readPriorityVal();
+        integralGain = vavEquip.getVavIntegralKfactor().readPriorityVal();
+        proportionalSpread = (int) vavEquip.getVavTemperatureProportionalRange().readPriorityVal();
+        integralMaxTimeout = (int) vavEquip.getVavTemperatureIntegralTime().readPriorityVal();
+
+        coolingLoop.setProportionalGain(proportionalGain);
+        coolingLoop.setIntegralGain(integralGain);
+        coolingLoop.setProportionalSpread(proportionalSpread);
+        coolingLoop.setIntegralMaxTimeout(integralMaxTimeout);
+
+        heatingLoop.setProportionalGain(proportionalGain);
+        heatingLoop.setIntegralGain(integralGain);
+        heatingLoop.setProportionalSpread(proportionalSpread);
+        heatingLoop.setIntegralMaxTimeout(integralMaxTimeout);
+
+        double cfmProportionalGain = (vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() > 0) ? vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal() : 0.5;
+        double cfmIntegralGain = (vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal() > 0) ? vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal() : 0.5;
+        int cfmProportionalSpread = (vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal() > 0.0) ? (int)vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal(): 200;
+        int cfmIntegralMaxTimeout = (vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal() > 0.0) ? (int)vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal() : 30;
+
+        cfmController.setProportionalGain(cfmProportionalGain);
+        cfmController.setIntegralGain(cfmIntegralGain);
+        cfmController.setProportionalSpread(cfmProportionalSpread);
+        cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
+
+        co2Target = (int) vavEquip.getVavZoneCo2Target().readPriorityVal();
+        co2Threshold = (int) vavEquip.getVavZoneCo2Threshold().readPriorityVal();
+        vocTarget = (int) vavEquip.getVavZoneVocTarget().readPriorityVal();
+        vocThreshold = (int) vavEquip.getVavZoneVocThreshold().readPriorityVal();
+
+        co2Loop.setCo2Target(co2Target);
+        co2Loop.setCo2Threshold(co2Threshold);
+        vocLoop.setVOCTarget(vocTarget);
+        vocLoop.setVOCThreshold(vocThreshold);
+
+        pendingTunerChange = false;
+
     }
 
     private void initializeCfmController(String equipId) {

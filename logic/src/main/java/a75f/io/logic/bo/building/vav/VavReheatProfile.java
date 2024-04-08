@@ -27,6 +27,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import org.projecthaystack.UnknownRecException;
@@ -68,7 +69,10 @@ public class VavReheatProfile extends VavProfile
             CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
             continue;
         }*/
-        if (isZoneDead()) {
+        if (isRFDead()) {
+            handleRFDead();
+            return;
+        }else if (isZoneDead()) {
             updateZoneDead();
             return;
         }
@@ -84,6 +88,14 @@ public class VavReheatProfile extends VavProfile
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
                                     "setTempHeating "+setTempHeating+" systemMode "+systemMode);
+
+        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
+                ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
+        if (vavEquip.getEnableCFMControl().readPriorityVal() > 0) {
+            CcuLog.i(L.TAG_CCU_ZONE, "CFM PI Tuners: cfmProportionalGain " + cfmController.getProportionalGain() + ", cfmIntegralGain " + cfmController.getIntegralGain() +
+                    ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
+        }
+
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -149,7 +161,8 @@ public class VavReheatProfile extends VavProfile
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
     }
-    
+
+
     private void logLoopParams(int node, double roomTemp, int loopOp) {
         
         CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
@@ -181,11 +194,19 @@ public class VavReheatProfile extends VavProfile
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
         }
     }
-    
+    private void handleRFDead() {
+        CcuLog.d(L.TAG_CCU_ZONE,"RF Signal Dead : equipRef: "+vavEquip.getEquipRef());
+        vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
+    }
+
     private void initLoopVariables() {
         dischargeSp = 0;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
+
+        if (hasPendingTunerChange()) refreshPITuners();
+
         setDamperLimits( (short) nodeAddr, damper);
     }
     
@@ -265,6 +286,10 @@ public class VavReheatProfile extends VavProfile
 
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0;
         boolean  enabledIAQControl = vavEquip.getEnableIAQControl().readDefaultVal() > 0;
+
+        if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
+        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
+
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied())

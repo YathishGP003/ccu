@@ -69,8 +69,10 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
         initLoopVariables()
 
         var bypassLoopOp = 0.0
-
-        if (isZoneDead) {
+        if (isRFDead) {
+            CcuLog.d("CCU_BYPASS", "Bypass Damper: RF Signal is dead")
+            return
+        }else if (isZoneDead) {
             CcuLog.d("CCU_BYPASS", "Bypass Damper: Zone is dead")
             return
         } else {

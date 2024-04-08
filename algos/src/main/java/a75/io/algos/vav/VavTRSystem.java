@@ -174,7 +174,7 @@ public class VavTRSystem extends TRSystem
         return (double) hwstTRProcessor.getSetPoint();
     }
     
-    private double getSatTRTunerVal(String trParam) {
+    public double getSatTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
         if((cdb == null) || (cdb.size() == 0)) {
@@ -215,7 +215,7 @@ public class VavTRSystem extends TRSystem
         //throw new IllegalStateException("Tuner not initialized");
     }
     
-    private double getSpTRTunerVal(String trParam) {
+    public double getSpTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
 
@@ -253,7 +253,7 @@ public class VavTRSystem extends TRSystem
         //throw new IllegalStateException("Tuner not initialized");
     }
     
-    private double getCO2TRTunerVal(String trParam) {
+    public double getCO2TRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
         if(cdb == null)

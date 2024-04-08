@@ -363,6 +363,8 @@ public class AboutFragment extends Fragment {
             selectedVersionSize.setVisibility(View.GONE);
             updateCCU.setTextColor(getGreyColor());
             updateCCU.setEnabled(false);
+            cancelUpdate.setTextColor(getGreyColor());
+            cancelUpdate.setEnabled(false);
         }
     }
 

@@ -6,6 +6,13 @@
 trigger:
 - none
 
+schedules:
+  - cron: '30 18 * * *' # This cron expression represents 12:00 AM IST
+    displayName: schedule trigger
+    branches:
+      include:
+        - main
+
 jobs:
 - job: Job_1
   displayName: Build APK QA

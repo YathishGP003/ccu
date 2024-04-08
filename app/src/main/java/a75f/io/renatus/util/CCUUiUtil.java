@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.color.MaterialColors;
 
@@ -27,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -36,7 +36,9 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 public class CCUUiUtil {
 
-
+    static final String AIROVERSE_PROD = "airoverse_prod";
+    static final String CARRIER_PROD = "carrier_prod";
+    static final String DAIKIN_PROD = "daikin_prod";
     public static int getPrimaryThemeColor(Context context){
         return MaterialColors.getColor(context, R.attr.orange_75f, Color.RED);
     }
@@ -203,7 +205,25 @@ public class CCUUiUtil {
         }
         return false;
     }
-
+    public static boolean isCurrentVersionHigherOrEqualToRequired(
+            String currentAppVersionWithPatch, String requiredVersionOfCCUWithPatch) {
+        if(requiredVersionOfCCUWithPatch == null){
+            return true;
+        }
+        String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
+        String[] requiredVersionVersionComponents = requiredVersionOfCCUWithPatch.split("\\.");
+        int minLength = Math.min(currentVersionComponents.length, requiredVersionVersionComponents.length);
+        for (int i = 0; i < minLength; i++) {
+            int currentVersion = Integer.parseInt(currentVersionComponents[i]);
+            int requiredVersionVersion = Integer.parseInt(requiredVersionVersionComponents[i]);
+            if ((currentVersion > requiredVersionVersion) || currentAppVersionWithPatch.equals(requiredVersionOfCCUWithPatch)) {
+                return true;
+            } else if (currentVersion < requiredVersionVersion) {
+                return false;
+            }
+        }
+        return false;
+    }
     public static boolean isCarrierThemeEnabled(Context context) {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment)) || PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.prefs_carrier_theme_key), false);
@@ -228,5 +248,21 @@ public class CCUUiUtil {
     }
     private static CustomSpinnerDropDownAdapter getAdapterValue(Context context,ArrayList values) {
         return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_dropdown_item, values);
+    }
+    public static int getPrimaryColor() {
+        int highlightColor;
+        if(BuildConfig.BUILD_TYPE.equals(AIROVERSE_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.airoverse_primary);
+        } else if(BuildConfig.BUILD_TYPE.equals(CARRIER_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.carrier_75f);
+        } else if(BuildConfig.BUILD_TYPE.equals(DAIKIN_PROD)){
+            highlightColor = ContextCompat.getColor(context, R.color.daikin_75f);
+        } else {
+            highlightColor = ContextCompat.getColor(context, R.color.renatus_75f_primary);
+        }
+        return highlightColor;
+    }
+    public static int getGreyColor() {
+        return ContextCompat.getColor(context, R.color.tuner_group);
     }
 }

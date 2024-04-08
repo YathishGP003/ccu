@@ -1,5 +1,11 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.util.CCUUiUtil.getCurrentCCUVersion;
+import static a75f.io.renatus.util.CCUUiUtil.getGreyColor;
+import static a75f.io.renatus.util.CCUUiUtil.getPrimaryColor;
+import static a75f.io.renatus.util.CCUUiUtil.isCCUNeedsToBeUpdated;
+import static a75f.io.renatus.util.CCUUiUtil.isCurrentVersionHigherOrEqualToRequired;
+
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -14,17 +20,20 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,18 +44,26 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -61,6 +78,7 @@ import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CustomSelectionAdapter;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
@@ -87,10 +105,6 @@ public class AboutFragment extends Fragment {
     TextView otpCountDown;
     @BindView(R.id.tvSiteId)
     TextView tvSiteId;
-    @BindView(R.id.download_size_about)
-    TextView downloadSize;
-    @BindView(R.id.download_size_abou)
-    TextView downloadSizeText;
     @BindView(R.id.latestVersion)
     TextView latestVersion;
     @BindView(R.id.update_ccu_screen)
@@ -112,8 +126,6 @@ public class AboutFragment extends Fragment {
     String versionLabelString;
     String fileSize;
     Long downloadTd;
-    @BindView((R.id.imageViewCancel))
-    ImageView cancel;
     @BindView(R.id.update_status)
     TextView updateStatus;
     @BindView(R.id.version_text)
@@ -127,6 +139,14 @@ public class AboutFragment extends Fragment {
     @BindView(R.id.connection_down_layout)
     LinearLayout connectionDownLayout;
     boolean isNotFirstInvocation ;
+    @BindView(R.id.selectVersionSpinner)
+    Spinner selectVersionSpinner;
+    @BindView(R.id.selectedVersionSize)
+    TextView selectedVersionSize;
+    @BindView(R.id.cancel_update)
+    TextView cancelUpdate;
+    @BindView(R.id.selectVesrionLayout)
+    LinearLayout selectVersionLayout;
 
 
     EditText code1;
@@ -142,6 +162,12 @@ public class AboutFragment extends Fragment {
     private AlertDialog.Builder builder;
     private AlertDialog alertDialog;
     TextView tvmessage;
+    private String selectedVersion;
+    private String SelectedVersionSize;
+    CustomSelectionAdapter<String> selectVersionValues;
+    private String nextUpdateVersionGlobal;
+    private String nextFinalUpdateVersionGlobal;
+
     public AboutFragment() {
 
     }
@@ -220,41 +246,138 @@ public class AboutFragment extends Fragment {
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         setOTPOnAboutPage();
-
         if(PreferenceUtil.getUpdateCCUStatus()){
             getRecommendedCCUDataFromPreference();
             startDownloadingApk();
         } else if(PreferenceUtil.isCCUInstalling()){
             installNewApk();
-        }else {
+        } else {
             checkIsCCUHasRecommendedVersion(getActivity());
         }
+        cancelUpdate.setOnClickListener(cancelOnClickListener);
         updateCCU.setOnClickListener(updateOnClickListener);
-        cancel.setOnClickListener(cancelOnClickListener);
-
        return rootView;
     }
 
     private void getRecommendedCCUDataFromPreference() {
         versionLabelString = PreferenceUtil.getStringPreference("versionLabel");
         fileSize = PreferenceUtil.getStringPreference("fileSize");
-        latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
-        downloadSize.setText(PreferenceUtil.getStringPreference("downloadSize"));
+        latestVersion.setText(getCurrentCCUVersion());
         totalFileSize.setText(PreferenceUtil.getStringPreference("downloadSize"));
+        selectedVersion = PreferenceUtil.getStringPreference("selectedVersion");
+        SelectedVersionSize = PreferenceUtil.getStringPreference("SelectedVersionSize");
+        nextFinalUpdateVersionGlobal = PreferenceUtil.getStringPreference("finalNextFinalUpdateVersion");
+        nextUpdateVersionGlobal = PreferenceUtil.getStringPreference("nextUpdateVersion");
+        restoreListOfVersion();
+    }
+
+    private HashMap<String, String > reStoreRecommendedVersionsWithRequiredVersion() {
+        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("recommendedVersionsWithRequiredVersion");
+        Gson gson = new Gson();
+        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
+    }
+    private HashMap<String, String > restoreVersionWithVersionLabel() {
+        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("versionWithVersionLabel");
+        Gson gson = new Gson();
+        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
+    }
+    private HashMap<String, String > reStoreVersionWithSize() {
+        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("versionWithSize");
+        Gson gson = new Gson();
+        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
+    }
+
+    private void restoreListOfVersion() {
+        String sortedListOfVersion = PreferenceUtil.getStringPreference("sortedListOfVersion");
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>() {}.getType();
+        List<String> restoredList = gson.fromJson(sortedListOfVersion, type);
+        selectVersionValues = new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, restoredList);
+        selectVersionValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        HashMap<String, String> recommendedVersionsWithRequiredVersion =
+                reStoreRecommendedVersionsWithRequiredVersion();
+        HashMap<String, String> versionWithVersionLabel = restoreVersionWithVersionLabel();
+        HashMap<String, String> versionWithSize = reStoreVersionWithSize();
+        new Handler(Looper.getMainLooper()).post(() -> {
+            selectVersionSpinner.setAdapter(selectVersionValues);
+            CCUUiUtil.setSpinnerDropDownColor(selectVersionSpinner, getContext());
+            if(selectedVersion.equals(PreferenceUtil.getStringPreference("recommendedVersion"))){
+                selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion+" Recommended"));
+            }else {
+                selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion + " "));
+            }            selectedVersionSize.setText(SelectedVersionSize);
+            selectVersionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    onSpinnerSelection(parent, position, CCUUiUtil.getCurrentCCUVersion(),
+                            recommendedVersionsWithRequiredVersion, versionWithVersionLabel, versionWithSize);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        });
+    }
+
+    private void onSpinnerSelection(AdapterView<?> parent, int position, String currentAppVersion,
+                                    HashMap<String, String> recommendedVersionsWithRequiredVersion,
+                                    HashMap<String, String> versionWithVersionLabel, HashMap<String,
+            String> versionWithSize) {
+        String selectedItem = (String) parent.getItemAtPosition(position);
+        String version = selectedItem.split("\\s+")[0];
+        if(position > 0) {
+            if (isCurrentVersionHigherOrEqualToRequired(currentAppVersion, recommendedVersionsWithRequiredVersion.get(version))) {
+                totalFileSize.setVisibility(View.VISIBLE);
+                selectedVersionSize.setVisibility(View.VISIBLE);
+                versionLabelString = versionWithVersionLabel.get(version);
+                cancelUpdate.setEnabled(true);
+                cancelUpdate.setTextColor(CCUUiUtil.getPrimaryColor());
+                if(progressBar.getVisibility() == View.VISIBLE){
+                    updateCCU.setTextColor(CCUUiUtil.getGreyColor());
+                    updateCCU.setEnabled(false);
+                }
+                else {
+                    updateCCU.setTextColor(CCUUiUtil.getPrimaryColor());
+                    updateCCU.setEnabled(true);
+                }
+                String totalFileSize1 = versionWithSize.get(version)+" MB";
+                totalFileSize.setText(totalFileSize1);
+                String size = versionWithSize.get(version)+" MB";
+                fileSize = versionWithSize.get(version);
+                selectedVersionSize.setText(size);
+                selectedVersion = version;
+                SelectedVersionSize = versionWithSize.get(version)+" MB";
+                PreferenceUtil.setStringPreference("selectedVersion", selectedVersion);
+                PreferenceUtil.setStringPreference("SelectedVersionSize", SelectedVersionSize);
+            } else {
+                updateCCU.setEnabled(false);
+                cancelUpdate.setEnabled(false);
+                updateCCU.setTextColor(getGreyColor());
+                cancelUpdate.setTextColor(getGreyColor());
+                generateUpgradeCCUError(version, nextFinalUpdateVersionGlobal
+                        == null ? nextUpdateVersionGlobal : nextFinalUpdateVersionGlobal);
+            }
+        } else {
+            selectedVersionSize.setVisibility(View.GONE);
+            updateCCU.setTextColor(getGreyColor());
+            updateCCU.setEnabled(false);
+        }
     }
 
     private void installNewApk() {
-        latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
+        PreferenceUtil.installCCU();
+        selectVersionLayout.setVisibility(View.GONE);
+        //latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
         linearLayout.setVisibility(View.VISIBLE);
-        downloadSizeText.setVisibility(View.GONE);
         updateAppText.setVisibility(View.GONE);
-        updateCCU.setVisibility(View.GONE);
         updateCCU.setVisibility(View.GONE);
         totalDownloadedSize.setVisibility(View.INVISIBLE);
         totalFileSize.setVisibility(View.INVISIBLE);
         downloadingText.setText("Installing..");
         progressBar.setVisibility(View.GONE);
-        cancel.setVisibility(View.GONE);
+
     }
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
@@ -269,20 +392,28 @@ public class AboutFragment extends Fragment {
 
     private void startDownloadingApk(){
         progressBar.setVisibility(View.VISIBLE);
-        cancel.setVisibility(View.VISIBLE);
+        //selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion+" "));
+        selectVersionSpinner.setEnabled(false);
         updateCCU.setEnabled(false);
-        updateAppText.setVisibility(View.GONE);
+        cancelUpdate.setEnabled(true);
+        updateCCU.setTextColor(getGreyColor());
+        cancelUpdate.setTextColor(getPrimaryColor());
         linearLayout.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
         connectivityIssues.setVisibility(View.GONE);
-        cancel.setEnabled(true);
-        cancel.setVisibility(View.VISIBLE);
     }
 
     View.OnClickListener updateOnClickListener = view -> {
-        startDownloadingApk();
-        PreferenceUtil.startUpdateCCU();
-        RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this, getActivity());
+        if(selectVersionSpinner.getSelectedItemPosition() > 0) {
+            selectVersionSpinner.setEnabled(false);
+            updateCCU.setEnabled(false);
+            updateCCU.setTextColor(getGreyColor());
+            cancelUpdate.setTextColor(getPrimaryColor());
+            selectedVersionSize.setVisibility(View.VISIBLE);
+            startDownloadingApk();
+            PreferenceUtil.startUpdateCCU();
+            RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this, getActivity());
+        }
     };
 
     public void cancelUpdateCCU(){
@@ -294,14 +425,24 @@ public class AboutFragment extends Fragment {
                 updateAppText.setVisibility(View.VISIBLE);
                 linearLayout.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
-                cancel.setEnabled(false);
-                cancel.setVisibility(View.GONE);
+                updateCCU.setTextColor(getGreyColor());
+                cancelUpdate.setTextColor(getGreyColor());
+                selectVersionSpinner.setEnabled(true);
+                selectVersionSpinner.setSelection(0);
+                selectedVersionSize.setVisibility(View.GONE);
+
             });
         }
         Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
         isNotFirstInvocation = false;
     }
     View.OnClickListener cancelOnClickListener = view -> {
+        selectVersionSpinner.setSelection(0);
+        selectVersionSpinner.setEnabled(true);
+        updateCCU.setEnabled(true);
+        updateCCU.setTextColor(getGreyColor());
+        cancelUpdate.setTextColor(getGreyColor());
+        selectedVersionSize.setVisibility(View.GONE);
         connectivityIssues.setVisibility(View.GONE);
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -311,56 +452,114 @@ public class AboutFragment extends Fragment {
             updateAppText.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
-            cancel.setEnabled(false);
-            cancel.setVisibility(View.GONE);
+
             Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
             isNotFirstInvocation = false;
         }
     };
-
     private void updateAboutFragmentUI(String response) {
         if (response != null) {
             try {
                 JSONArray array = new JSONArray(response);
+                String recommendedVersion = null;
+                HashMap<String, String> versionWithState = new HashMap<>();
+                HashMap<String, String> versionWithSize = new HashMap<>();
+                HashMap<String, String> recommendedVersionsWithRequiredVersion = new HashMap<>();
+                HashMap<String, String> versionWithVersionLabel = new HashMap<>();
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject jsonObject = array.getJSONObject(i);
+                    String majorVersion = jsonObject.getString("majorVersion");
+                    String minorVersion = jsonObject.getString("minorVersion");
+                    String patchVersion = jsonObject.getString("patchVersion");
+                    String size = jsonObject.getString("size");
+                    String ccuVersion = majorVersion + "." + minorVersion + "." + patchVersion;
+                    if (!jsonObject.isNull("requiredVersion")) {
+                        JSONObject requiredVersionJson = (JSONObject) jsonObject.get("requiredVersion");
+                        String requiredMajorVersion = requiredVersionJson.getString("majorVersion");
+                        String requiredMinorVersion = requiredVersionJson.getString("minorVersion");
+                        String requiredPatchVersion = requiredVersionJson.getString("patchVersion");
+                        String recommendedRequiredVersion = requiredMajorVersion
+                                + "." + requiredMinorVersion + "." + requiredPatchVersion;
+                        recommendedVersionsWithRequiredVersion.put(ccuVersion, recommendedRequiredVersion);
+                    }
                     if (jsonObject.getBoolean("recommended")) {
-                        String majorVersion = jsonObject.getString("majorVersion");
-                        String minorVersion = jsonObject.getString("minorVersion");
-                        String patchVersion = jsonObject.getString("patchVersion");
-                        versionLabelString = jsonObject.getString("versionLabel");
-                        fileSize = jsonObject.getString("size");
-                        isNotFirstInvocation = false;
-                        String size = jsonObject.get("size") +" MB";
-                        String recommendedVersion = majorVersion+"."+minorVersion+"."+patchVersion;
-                        PreferenceUtil.setStringPreference("recommendedVersion", recommendedVersion);
-                        PreferenceUtil.setStringPreference("downloadSize", size);
-                        PreferenceUtil.setStringPreference("versionLabel", versionLabelString);
-                        PreferenceUtil.setStringPreference("fileSize", fileSize);
-                        String currentAppVersion =  CCUUiUtil.getCurrentCCUVersion();
+                        versionWithState.put(ccuVersion, "Recommended");
+                        recommendedVersion = ccuVersion;
+                    } else if (jsonObject.getBoolean("deprecated")) {
+                        versionWithState.put(ccuVersion, "Deprecated");
+                    } else if (!jsonObject.getBoolean("deprecated")) {
+                        versionWithState.put(ccuVersion, "");
+                    }
+                    String versionLabelString = jsonObject.getString("versionLabel");
+                    versionWithSize.put(ccuVersion, size);
+                    versionWithVersionLabel.put(ccuVersion, versionLabelString);
+                }
 
-                        if (getActivity() != null) {
-                            new Handler(Looper.getMainLooper()).post(() ->  {
-                                if (CCUUiUtil.isCCUNeedsToBeUpdated(currentAppVersion, recommendedVersion)){
-                                    cancel.setEnabled(true);
-                                    updateScreenLayout.setVisibility(View.VISIBLE);
-                                    latestVersion.setText(recommendedVersion);
-                                    downloadSize.setText(size);
-                                    totalFileSize.setText(size);
-                                }else {
-                                    downloadSizeText.setVisibility(View.GONE);
-                                    updateStatus.setText("CCU is up to date");
-                                    updateAppText.setVisibility(View.GONE);
-                                    updateCCU.setVisibility(View.GONE);
-                                    verSionText.setVisibility(View.VISIBLE);
-                                    latest_version_text.setVisibility(View.GONE);
-                                    latestVersion.setText(currentAppVersion);
-                                }
-                            });
+                String currentAppVersion =  CCUUiUtil.getCurrentCCUVersion();
+                String nextUpdateVersion = getNextUpdateVersion(currentAppVersion, recommendedVersion,
+                        recommendedVersionsWithRequiredVersion);
+                String nextFinalUpdateVersion = null;
+                if(isCurrentVersionHigherOrEqualToRequired(currentAppVersion, nextUpdateVersion)) {
+                    for (Map.Entry<String, String> entry : recommendedVersionsWithRequiredVersion.entrySet()) {
+                        if (entry.getValue().equals(nextUpdateVersion)) {
+                            nextFinalUpdateVersion = entry.getKey();
+                            break;
                         }
                     }
                 }
-            } catch (JSONException e) {
+                PreferenceUtil.setStringPreference("nextUpdateVersion", nextUpdateVersion);
+                PreferenceUtil.setStringPreference("recommendedVersion", recommendedVersion);
+                PreferenceUtil.setStringPreference("finalNextFinalUpdateVersion", nextFinalUpdateVersion);
+                nextUpdateVersionGlobal = nextUpdateVersion;
+                nextFinalUpdateVersionGlobal = nextFinalUpdateVersion;
+
+                List<String> sortedListOfVersion = getSortedList(versionWithState, currentAppVersion);
+                sortedListOfVersion.add(0,"Select version");
+                storeSortedListOfVersion(sortedListOfVersion);
+                storeRecommendedVersionsWithRequiredVersion(recommendedVersionsWithRequiredVersion);
+                storeVersionWithVersionLabel(versionWithVersionLabel);
+                storeVersionWithSize(versionWithSize);
+                selectVersionValues = new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, sortedListOfVersion);
+                selectVersionValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                if (getActivity() != null) {
+                    nextUpdateVersionGlobal = nextUpdateVersion;
+                    nextFinalUpdateVersionGlobal = nextFinalUpdateVersion;
+                    String finalRecommendedVersion = recommendedVersion;
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        CCUUiUtil.setSpinnerDropDownColor(selectVersionSpinner, getContext());
+                        updateCCU.setTextColor(getGreyColor());
+                        cancelUpdate.setTextColor(getGreyColor());
+                        selectVersionSpinner.setAdapter(selectVersionValues);
+                        selectVersionSpinner.setSelection(0);
+                        selectVersionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                onSpinnerSelection(parent, position, currentAppVersion,
+                                        recommendedVersionsWithRequiredVersion, versionWithVersionLabel,
+                                        versionWithSize);
+                            }
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+
+                            }
+                        });
+                        if (isCCUNeedsToBeUpdated(currentAppVersion, finalRecommendedVersion)) {
+                            updateScreenLayout.setVisibility(View.VISIBLE);
+                            latestVersion.setText(currentAppVersion);
+                        } else {
+                            selectVersionLayout.setVisibility(View.GONE);
+                            updateStatus.setText("CCU is up to date");
+                            updateAppText.setVisibility(View.GONE);
+                            updateCCU.setVisibility(View.GONE);
+                            verSionText.setVisibility(View.VISIBLE);
+                            latest_version_text.setVisibility(View.GONE);
+                            latestVersion.setText(currentAppVersion);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                Log.i("Version management","Version management Exception ");
                 e.printStackTrace();
             }
         } else {
@@ -373,6 +572,69 @@ public class AboutFragment extends Fragment {
         }
     }
 
+    private void storeRecommendedVersionsWithRequiredVersion(HashMap<String, String>
+                                                                     recommendedVersionsWithRequiredVersion) {
+        Gson gson = new Gson();
+        String json = gson.toJson(recommendedVersionsWithRequiredVersion);
+        PreferenceUtil.setStringPreference("recommendedVersionsWithRequiredVersion", json);
+    }
+
+    private void storeSortedListOfVersion(List<String> sortedListOfVersion) {
+        Gson gson = new Gson();
+        String json = gson.toJson(sortedListOfVersion);
+        PreferenceUtil.setStringPreference("sortedListOfVersion", json);
+    }
+    private void storeVersionWithVersionLabel(HashMap<String, String>
+                                                                     recommendedVersionsWithRequiredVersion) {
+        Gson gson = new Gson();
+        String json = gson.toJson(recommendedVersionsWithRequiredVersion);
+        PreferenceUtil.setStringPreference("versionWithVersionLabel", json);
+    }
+
+    private void storeVersionWithSize(HashMap<String, String> sortedListOfVersion) {
+        Gson gson = new Gson();
+        String json = gson.toJson(sortedListOfVersion);
+        PreferenceUtil.setStringPreference("versionWithSize", json);
+    }
+    private String getNextUpdateVersion(String currentVersion, String recommendedVersion,
+                                        HashMap<String, String> recommendedWithRequiredVersion) {
+        String minRequiredVersion = recommendedWithRequiredVersion.get(recommendedVersion);
+        if(recommendedWithRequiredVersion.get(
+                recommendedVersion) == null){
+            return recommendedVersion;
+        }
+        if(isCurrentVersionHigherOrEqualToRequired(currentVersion, recommendedWithRequiredVersion.get(
+                recommendedVersion))) {
+            return recommendedWithRequiredVersion.get(recommendedVersion);
+        } else {
+            return getNextUpdateVersion(currentVersion,
+                    minRequiredVersion, recommendedWithRequiredVersion);
+        }
+    }
+    public void generateUpgradeCCUError(String version, String finalRecommendedVersion){
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+        View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.upgrade_ccu_error,null);
+        TextView toAchieveText = dialogView.findViewById(R.id.toAchieveUpgrade);
+        TextView pleaseUpgradeToText = dialogView.findViewById(R.id.pleaseUpgradeTo);
+        TextView gotIt = dialogView.findViewById(R.id.gotIt);
+        String text = "To achieve the upgrade to CCU version <b>" + version + "</b>" +
+                "\n you must ensure your CCU version is at least <b>" + finalRecommendedVersion + "</b>.";
+
+        toAchieveText.setText(Html.fromHtml(text));
+
+        String pleaseUpgradeText = "Please upgrade to <b>" + finalRecommendedVersion + "</b> first, and then proceed to \n" +
+                "upgrade to <b>" + version + "</b>.";
+
+        pleaseUpgradeToText.setText(Html.fromHtml(pleaseUpgradeText));
+
+        alertDialog.setView(dialogView);
+        gotIt.setOnClickListener(v -> {
+            alertDialog.dismiss();
+            selectVersionSpinner.setSelection(0);
+        });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
     private String getRecommendedCCUVersion(){
         String response = HttpUtil.executeJson(
                 RenatusServicesEnvironment.getInstance().getUrls().getRecommendedCCUVersion(),
@@ -830,6 +1092,44 @@ public class AboutFragment extends Fragment {
                     installNewApk();
                 }
             });
+        }
+    }
+    private List<String> getSortedList(Map<String, String> hashmaps, String currentAppVersion) {
+        List<String> stringList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : hashmaps.entrySet()) {
+            if(!isCurrentVersionHigherOrEqualToRequired(currentAppVersion, entry.getKey())) {
+                stringList.add(entry.getKey());
+            }
+        }
+        Collections.sort(stringList, new VersionComparator());
+        List<String> tempHash = new ArrayList<>();
+        for (String version : stringList) {
+            for (Map.Entry<String, String> entry : hashmaps.entrySet()) {
+                if (entry.getKey().equals(version)) {
+                    tempHash.add(entry.getKey() + " " + entry.getValue());
+                }
+            }
+        }
+        return tempHash;
+    }
+
+    static class VersionComparator implements Comparator<String> {
+        @Override
+        public int compare(String version1, String version2) {
+            String[] parts1 = version1.split("\\.");
+            String[] parts2 = version2.split("\\.");
+
+            int maxLength = Math.max(parts1.length, parts2.length);
+
+            for (int i = 0; i < maxLength; i++) {
+                int part1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
+                int part2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+
+                if (part1 != part2) {
+                    return part2 - part1;
+                }
+            }
+            return 0;
         }
     }
 }

@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:tag="ABOUT_FRAGMENT_TAG"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -86,7 +87,249 @@
                 android:textSize="18sp"
                 tools:text="CCUV2_SN_dev_181.50.0.1901101852" />
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/update_ccu_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="360dp">
+            <LinearLayout
+                android:id="@+id/connection_down_layout"
+                android:layout_width="480dp"
+                android:layout_height="wrap_content"
+                android:background="?orange_75f_secondary"
+                android:padding="25dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src = "@drawable/ic_alert">
+                </ImageView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="20dp"
+                    android:text="Please check your Internet connection and try again">
+                </TextView>
 
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_connection_up"
+                android:layout_width="550dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="?orange_75f_secondary"
+                android:padding="25dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:textAppearance="@style/label_values"
+                        android:id="@+id/update_status"
+                        style="@style/title_normal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="19.5dp"
+                        android:text="Please Update the app to continue">
+                    </TextView>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/version_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Version:"
+                        android:visibility="gone"
+                        android:textSize="18sp">
+                    </TextView>
+                    <TextView
+
+                        android:id="@+id/latest_version_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/current_version"
+                        android:textSize="16sp">
+                    </TextView>
+                    <TextView
+                        android:id="@+id/latestVersion"
+                        android:paddingTop="12dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/title_normal"
+                        android:textSize="16sp">
+                    </TextView>
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/selectVesrionLayout"
+                    android:layout_marginTop="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/selectVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select Version:"
+                        android:paddingTop="3dp"
+                        android:layout_gravity="center_vertical"
+                        style="@style/title_normal"
+                        android:textSize="16sp">
+                    </TextView>
+
+                    <Spinner
+                        android:id="@+id/selectVersionSpinner"
+                        style="@style/customSpinnerDownArrow"
+                        android:layout_gravity="left|center_vertical"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:dropDownWidth="wrap_content" />
+                    <TextView
+                        android:id="@+id/selectedVersionSize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        style="@style/title_normal"
+                        android:layout_gravity="center_vertical"
+                        android:paddingTop="3dp"
+                        android:textSize="16sp">
+                    </TextView>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/update_app_text"
+                    android:paddingTop="20px"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/cancel_update"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CANCEL   |"
+                        android:textSize="22sp"
+                        android:enabled="false"
+                        android:textColor="?orange_75f">
+                    </TextView>
+                    <TextView
+                        android:id="@+id/update_ccu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:text="   UPDATE APP"
+                        android:textSize="22sp"
+                        android:textColor="?orange_75f">
+                    </TextView>
+                    <!--<TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:id="@+id/download_size_abou"
+                        android:text="Download Size: ">
+                    </TextView>
+                    <TextView
+                        style="@style/title_normal"
+                        android:id="@+id/download_size_about"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:text="">
+                    </TextView>-->
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutId"
+                    android:layout_width="450dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:textSize="20sp"
+                        >
+
+                        <TextView
+                            android:id="@+id/downloading_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Downloading.. "
+                            android:textSize="16sp"></TextView>
+
+                        <TextView
+                            android:id="@+id/downloaded_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="16sp"></TextView>
+
+                        <TextView
+                            android:id="@+id/file_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="16sp"></TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progress_bar"
+                            android:layout_width="329dp"
+                            android:layout_height="wrap_content"
+                            app:indicatorColor="?orange_75f"
+                            app:trackColor="#F5F2F2"
+                            app:trackCornerRadius="10dp"
+                            app:trackThickness="15dp"
+                            android:paddingTop="10dp"
+                            android:visibility="gone">
+                        </com.google.android.material.progressindicator.LinearProgressIndicator>
+                        <ImageView
+                            android:id="@+id/imageViewCancel"
+                            android:layout_width="80dp"
+                            android:layout_height="40dp"
+                            android:paddingStart="53dp"
+                            android:layout_marginEnd="12dp"
+                            android:visibility="gone"
+                            android:src="@drawable/ic_baseline_close_24"
+                            app:tint="?orange_75f" />
+                    </LinearLayout>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/connectivityIssues"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src = "@drawable/ic_alert">
+                    </ImageView>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Connectivity issues "
+                        android:paddingStart="10dp"
+                        android:textSize="16sp"></TextView>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
         <LinearLayout
             android:id="@+id/updateLayout"
             android:layout_width="match_parent"
@@ -166,8 +409,7 @@
                 android:layout_weight="0.2"
                 android:padding="8dp"
                 app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
-                tools:ignore="ContentDescription"
-                app:tint="?orange_75f" />
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
         <LinearLayout
@@ -208,7 +450,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:layout_weight="0.40"
-                app:srcCompat="@drawable/icon_arrowright" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         </LinearLayout>
 
@@ -232,12 +474,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.40"
-                android:layout_marginEnd="-60dp"
+                android:layout_marginEnd="-130dp"
                 app:srcCompat="@drawable/icon_arrowright"
-                app:tint="?orange_75f" />
+                app:tint="?orange_75f"/>
 
         </LinearLayout>
-
 
     </LinearLayout>
 

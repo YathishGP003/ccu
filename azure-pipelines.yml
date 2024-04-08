@@ -11,7 +11,7 @@ schedules:
     displayName: CCU Scheduled Nightly Build
     branches:
       include:
-        - main
+        - master
 
 jobs:
 - job: Job_1

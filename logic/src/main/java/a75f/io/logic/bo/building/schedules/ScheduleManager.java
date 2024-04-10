@@ -407,90 +407,94 @@ public class ScheduleManager {
     public void updateLimitsAndDeadBand() {
 
         RxjavaUtil.executeBackground(()->{
+            try {
+                for (ZoneProfile profile : L.ccu().zoneProfiles) {
+                    Equip equip = profile.getEquip();
+                    String roomRef = equip.getRoomRef();
 
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
-            Equip equip = profile.getEquip();
-            String roomRef = equip.getRoomRef();
+                    if (profile instanceof ModbusProfile
+                            || profile instanceof HyperStatMonitoringProfile
+                            || profile instanceof PlcProfile
+                            || profile instanceof EmrProfile
+                    ) {
+                        continue;
+                    }
 
-            if (profile instanceof ModbusProfile
-                    || profile instanceof HyperStatMonitoringProfile
-                    || profile instanceof PlcProfile
-                    || profile instanceof EmrProfile
-            ) {
-                continue;
-            }
-
-            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
-                    .replace("@", ""));
-            if (equipSchedule == null) {
-                continue;
-            }
-            ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
-            if (!equipSchedule.getMarkers().contains("specialschedule")) {
-                if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
-                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
-                        updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
-                    Occupied occ = equipSchedule.getCurrentValues();
-                    if (occ == null)
-                        break;
-                    if (equipSchedule.getUnoccupiedZoneSetback() != null)
-                        occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
-                    int day = DateTime.now().dayOfWeek().get() - 1;
-                    Calendar calender = Calendar.getInstance();
-                    int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
-                    int min = calender.get(Calendar.MINUTE);
-                    int curTime = hrs + min;
-                    for (Schedule.Days d : mDays) {
-                        if (d.getDay() == day) {
-                            int startSchTime = (d.getSthh() * 60) + d.getStmm();
-                            int endSchTime = (d.getEthh() * 60) + d.getEtmm();
-                            if (curTime > startSchTime && curTime < endSchTime) {
-                                if(isHeatingOrCoolingLimitsNull(d)){
-                                    continue;
+                    Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
+                            .replace("@", ""));
+                    if (equipSchedule == null) {
+                        continue;
+                    }
+                    ArrayList<Schedule.Days> mDays = equipSchedule.getDays();
+                    if (!equipSchedule.getMarkers().contains("specialschedule")) {
+                        if (!equipSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
+                            if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                                updateUnOccupiedSetBackPoint(equipSchedule.getUnoccupiedZoneSetback(), roomRef);
+                            Occupied occ = equipSchedule.getCurrentValues();
+                            if (occ == null)
+                                break;
+                            if (equipSchedule.getUnoccupiedZoneSetback() != null)
+                                occ.setUnoccupiedZoneSetback(equipSchedule.getUnoccupiedZoneSetback());
+                            int day = DateTime.now().dayOfWeek().get() - 1;
+                            Calendar calender = Calendar.getInstance();
+                            int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+                            int min = calender.get(Calendar.MINUTE);
+                            int curTime = hrs + min;
+                            for (Schedule.Days d : mDays) {
+                                if (d.getDay() == day) {
+                                    int startSchTime = (d.getSthh() * 60) + d.getStmm();
+                                    int endSchTime = (d.getEthh() * 60) + d.getEtmm();
+                                    if (curTime > startSchTime && curTime < endSchTime) {
+                                        if (isHeatingOrCoolingLimitsNull(d)) {
+                                            continue;
+                                        }
+                                        saveUserLimitChange("max and heating ", (d.getHeatingUserLimitMax()).intValue(), roomRef);
+                                        saveUserLimitChange("min and heating ", (d.getHeatingUserLimitMin()).intValue(), roomRef);
+                                        saveUserLimitChange("max and cooling ", (d.getCoolingUserLimitMax()).intValue(), roomRef);
+                                        saveUserLimitChange("min and cooling ", (d.getCoolingUserLimitMin()).intValue(), roomRef);
+                                        saveDeadBandChange("heating", d.getHeatingDeadBand(), roomRef);
+                                        saveDeadBandChange("cooling", d.getCoolingDeadBand(), roomRef);
+                                    } else {
+                                        clearLevel10(roomRef);
+                                    }
                                 }
-                                saveUserLimitChange("max and heating ", (d.getHeatingUserLimitMax()).intValue(), roomRef);
-                                saveUserLimitChange("min and heating ", (d.getHeatingUserLimitMin()).intValue(), roomRef);
-                                saveUserLimitChange("max and cooling ", (d.getCoolingUserLimitMax()).intValue(), roomRef);
-                                saveUserLimitChange("min and cooling ", (d.getCoolingUserLimitMin()).intValue(), roomRef);
-                                saveDeadBandChange("heating", d.getHeatingDeadBand(), roomRef);
-                                saveDeadBandChange("cooling", d.getCoolingDeadBand(), roomRef);
-                            }else{
-                                clearLevel10(roomRef);
                             }
+                        } else {
+                            clearLevel10(roomRef);
+                            clearUnoccupiedSetbackChange(roomRef);
                         }
-                    }
-                } else {
-                        clearLevel10(roomRef);
-                        clearUnoccupiedSetbackChange(roomRef);
-                }
-            } else if (equipSchedule.getMarkers().contains("specialschedule")) {
-                Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
-                        replace("@", ""));
-                if (ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)) {
-                    for (Schedule.Days splsched : combinedSpecialSchedules) {
-                        int day = DateTime.now().dayOfWeek().get() - 1;
-                        Calendar calender = Calendar.getInstance();
-                        int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
-                        int min = calender.get(Calendar.MINUTE);
-                        int curTime = hrs + min;
-                        if (splsched.getDay() == day) {
-                            int startSchTime = (splsched.getSthh() * 60) + splsched.getStmm();
-                            int endSchTime = (splsched.getEthh() * 60) + splsched.getEtmm();
-                            if (curTime > startSchTime && curTime < endSchTime) {
-                                saveUserLimitChange("max and heating ", (splsched.getHeatingUserLimitMax()).intValue(), roomRef);
-                                saveUserLimitChange("min and heating ", (splsched.getHeatingUserLimitMin()).intValue(), roomRef);
-                                saveUserLimitChange("max and cooling ", (splsched.getCoolingUserLimitMax()).intValue(), roomRef);
-                                saveUserLimitChange("min and cooling ", (splsched.getCoolingUserLimitMin()).intValue(), roomRef);
-                                saveDeadBandChange("heating", splsched.getHeatingDeadBand(), roomRef);
-                                saveDeadBandChange("cooling", splsched.getCoolingDeadBand(), roomRef);
-                            } else{
-                                clearLevel10(roomRef);
+                    } else if (equipSchedule.getMarkers().contains("specialschedule")) {
+                        Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
+                                replace("@", ""));
+                        if (ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)) {
+                            for (Schedule.Days splsched : combinedSpecialSchedules) {
+                                int day = DateTime.now().dayOfWeek().get() - 1;
+                                Calendar calender = Calendar.getInstance();
+                                int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+                                int min = calender.get(Calendar.MINUTE);
+                                int curTime = hrs + min;
+                                if (splsched.getDay() == day) {
+                                    int startSchTime = (splsched.getSthh() * 60) + splsched.getStmm();
+                                    int endSchTime = (splsched.getEthh() * 60) + splsched.getEtmm();
+                                    if (curTime > startSchTime && curTime < endSchTime) {
+                                        saveUserLimitChange("max and heating ", (splsched.getHeatingUserLimitMax()).intValue(), roomRef);
+                                        saveUserLimitChange("min and heating ", (splsched.getHeatingUserLimitMin()).intValue(), roomRef);
+                                        saveUserLimitChange("max and cooling ", (splsched.getCoolingUserLimitMax()).intValue(), roomRef);
+                                        saveUserLimitChange("min and cooling ", (splsched.getCoolingUserLimitMin()).intValue(), roomRef);
+                                        saveDeadBandChange("heating", splsched.getHeatingDeadBand(), roomRef);
+                                        saveDeadBandChange("cooling", splsched.getCoolingDeadBand(), roomRef);
+                                    } else {
+                                        clearLevel10(roomRef);
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            } catch (Exception e){
+                CcuLog.e(TAG_CCU_SCHEDULER, "Update Limits and Dead band error !"+e);
+                e.printStackTrace();
             }
-        }
         });
     }
 

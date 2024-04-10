@@ -17,7 +17,12 @@ import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
+import io.seventyfivef.domainmodeler.common.point.ComparisonType
+import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 
 /**
  * Created by Manjunath K on 16-06-2023.
@@ -118,11 +123,11 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 updateRef(equipMap, profileConfiguration)
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(PointBuilderConfig( modelPointDef,
-                                        profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString()))
-                    val pointId = haystack.addPoint(hayStackPoint)
-                    hayStackPoint.id = pointId
-                    DomainManager.addPoint(hayStackPoint)
+                    if (toBeAddedForEquip(modelPointDef, equip.id)) {
+                        equipBuilder.createPoint(
+                            PointBuilderConfig(modelPointDef, profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString())
+                        )
+                    }
                 }
             }
         }
@@ -218,4 +223,49 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             equipMap["group"].toString())
         if (equipMap.containsKey("profile") && equipMap["profile"] != null) profileConfiguration.profileType = equipMap["profile"].toString()
     }
+
+
+    private fun toBeAddedForEquip(pointDef : ModelPointDef, equipRef : String) : Boolean {
+
+        if (pointDef is SeventyFiveFProfilePointDef) {
+            return when (pointDef.configuration.configType) {
+                PointConfiguration.ConfigType.BASE -> true // always add BASE points
+                PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(pointDef, equipRef)
+                PointConfiguration.ConfigType.DYNAMIC_SENSOR -> false // never add DYNAMIC_SENSOR points; they are created from the device layer
+                PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled(pointDef)
+                PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef)
+            }
+        }
+
+        return true
+    }
+
+    private fun isDependentPointEnabled(pointDef: SeventyFiveFProfilePointDef, equipRef : String) : Boolean {
+        // If a point is DEPENDENT, read the point it depends on from Haystack, then evaluate the config
+        val pointConfig = pointDef.configuration as DependentConfiguration
+        val configValue = haystack.readPointPriorityValByQuery("point and domainName == \"" + pointConfig.domainName + "\" and equipRef == \"" + equipRef + "\"")
+
+        if (configValue != null) {
+            return when (pointConfig.comparisonType) {
+                ComparisonType.EQUALS -> (pointConfig.value as Int) == configValue.toInt()
+                ComparisonType.NOT_EQUALS -> (pointConfig.value as Int) != configValue.toInt()
+                ComparisonType.GREATER_THAN -> (pointConfig.value as Int) > configValue.toInt()
+                ComparisonType.LESS_THAN -> (pointConfig.value as Int) < configValue.toInt()
+                ComparisonType.GREATER_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) >= configValue.toInt()
+                ComparisonType.LESS_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) <= configValue.toInt()
+            }
+        }
+        return true
+    }
+
+    private fun isAssociatedPointEnabled(pointDef: SeventyFiveFProfilePointDef) : Boolean {
+        // Not used in Profiles yet. Default to adding the point in all cases.
+        return true
+    }
+
+    private fun isAssociationPointEnabled(pointDef: SeventyFiveFProfilePointDef) : Boolean {
+        // Not used in Profiles yet. Default to adding the point in all cases.
+        return true
+    }
+
 }

@@ -626,20 +626,25 @@ public abstract class VavProfile extends ZoneProfile {
             DAB-calculated damper position is left as-is UNLESS measured airflow is less than minimum CFM setpoint
             (heating min CFM or the min CFM derived from DCV/IAQ control).
 
-            If this happens, DAB-calculated damper position (including DCV minimum position) is discarded
+            If this happens, DAB-calculated damper position (including DCV minimum position) is discarded.
+
+            When minimum CFM is being enforced (e.g. during Occupied), it will be written to the Haystack point. Otherwise, setpoint will be zero.
          */
         if (isMinCfmRequiredInDeadband) {
             if (currentCfm < effectiveMinCfm) {
                 cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
                 damper.currentPosition = (int)cfmLoopOp;
             }
+            vavEquip.getAirFlowSetpoint().writeHisVal(effectiveMinCfm);
         } else {
             if (state == HEATING || state == COOLING) {
                 cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
             } else {
                 cfmLoopOp = 0;
             }
+            vavEquip.getAirFlowSetpoint().writeHisVal(0);
         }
+
 
         CcuLog.i(L.TAG_CCU_ZONE,
                 " updateDamperSystemHeating cfmLoopOp "+cfmLoopOp+" Min CFM Heating:"+minCfmHeating+" Min CFM after DCV:"+effectiveMinCfm);
@@ -744,6 +749,7 @@ public abstract class VavProfile extends ZoneProfile {
 
         }
         damper.currentPosition = (int)cfmController.getLoopOutput(cfmSp, currentCfm);
+        vavEquip.getAirFlowSetpoint().writeHisVal(cfmSp);
     }
 
     private void updateDamperWhenSystemOff(CCUHsApi hayStack, String equipId, double currentCfm) {
@@ -751,6 +757,9 @@ public abstract class VavProfile extends ZoneProfile {
             cfmLoopState = State.OFF;
             cfmController.reset();
         }
+
+        vavEquip.getAirFlowSetpoint().writeHisVal(0.0);
+
         // Set dampers to 50% in SYSTEM=OFF so that they are not all closed when AHU starts up again.
         // 50% is below the threshold needed to trigger static pressure T&R requests (75%).
         damper.currentPosition = 50;

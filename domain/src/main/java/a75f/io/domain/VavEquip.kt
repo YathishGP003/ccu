@@ -62,6 +62,7 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val normalizedDamperCmd = Point(DomainName.normalizedDamperCmd, equipRef)
     val airVelocity = Point(DomainName.airVelocity, equipRef)
     val airFlowSensor = Point(DomainName.airFlowSensor, equipRef)
+    val airFlowSetpoint = Point(DomainName.airFlowSetpoint, equipRef)
 
 
     val zoneDynamicPriority = Point(DomainName.zoneDynamicPriority, equipRef)

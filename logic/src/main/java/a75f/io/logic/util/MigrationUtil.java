@@ -157,6 +157,11 @@ public class MigrationUtil {
             migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
         }
 
+        if (!PreferenceUtil.getVavReheatRelayActivationHysteresisValueMigration()) {
+            setVavReheatRelayActivationHysteresisDefaultValues(ccuHsApi);
+            PreferenceUtil.setVavReheatRelayActivationHysteresisValueMigration();
+        }
+
 //        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
@@ -520,6 +525,18 @@ public class MigrationUtil {
                 Equip equip = new Equip.Builder().setHashMap(equipMap).build();
                 fanSpeedLogicalPointMigration(equip, ccuHsApi);
                 analogOutConfigPointsMigration(equip, ccuHsApi);
+            }
+        }
+    }
+
+    private static void setVavReheatRelayActivationHysteresisDefaultValues(CCUHsApi ccuHsApi) {
+        // In 2.4 --> 2.5 migration, vavReheatRelayActivationHysteresis point was added for BuildingTuner and VAV terminal equips.
+        // But the terminal equip migration ran first, so this tuner did not get a default value (since there was no Level 17 tuner yet).
+        // This migration is included with the feature that starts using this tuner in algos, so there should be no operational issues from this.
+        ArrayList<HashMap<Object, Object>> vavZoneHysteresisList = ccuHsApi.readAllEntities("point and tuner and zone and domainName == \"vavReheatRelayActivationHysteresis\"");
+        if (!vavZoneHysteresisList.isEmpty()) {
+            for (HashMap<Object, Object> vavZoneHysteresis : vavZoneHysteresisList) {
+                ccuHsApi.writeDefaultTunerValById(vavZoneHysteresis.get("id").toString(), 10.0);
             }
         }
     }

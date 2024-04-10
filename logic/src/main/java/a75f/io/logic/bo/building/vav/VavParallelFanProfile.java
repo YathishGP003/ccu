@@ -113,6 +113,7 @@ public class VavParallelFanProfile extends VavProfile
 
 
     private void initLoopVariables(int node) {
+        dischargeSp = 0;
         setTempCooling = vavEquip.getDesiredTempCooling().readPriorityVal();
         setTempHeating = vavEquip.getDesiredTempHeating().readPriorityVal();
 
@@ -205,8 +206,7 @@ public class VavParallelFanProfile extends VavProfile
         double dischargeTemp = vavEquip.getDischargeAirTemp().readHisVal();
         double supplyAirTemp = vavEquip.getEnteringAirTemp().readHisVal();
         double maxDischargeTemp = vavEquip.getReheatZoneMaxDischargeTemp().readPriorityVal();
-        double dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
-        vavEquip.getDischargeAirTempSetpoint().writeHisVal(dischargeSp);
+        dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
         CcuLog.d(L.TAG_CCU_ZONE," dischargeTemp "+dischargeTemp+" dischargeSp " +dischargeSp+" supplyAirTemp "+supplyAirTemp);

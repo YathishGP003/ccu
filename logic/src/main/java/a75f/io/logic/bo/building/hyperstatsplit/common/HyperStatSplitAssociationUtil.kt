@@ -1009,6 +1009,12 @@ class HyperStatSplitAssociationUtil {
             if (isRelayEnabledAssociatedToFan(configuration.relay6State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay6State.association, fanEnabledStages)
 
+            if (isRelayEnabledAssociatedToFan(configuration.relay7State))
+                fanEnabledStages = updateSelectedFanLevel(configuration.relay7State.association, fanEnabledStages)
+
+            if (isRelayEnabledAssociatedToFan(configuration.relay8State))
+                fanEnabledStages = updateSelectedFanLevel(configuration.relay8State.association, fanEnabledStages)
+
             if (fanEnabledStages.first) fanLevel += 6
             if (fanEnabledStages.second) fanLevel += 7
             if (fanEnabledStages.third) fanLevel += 8

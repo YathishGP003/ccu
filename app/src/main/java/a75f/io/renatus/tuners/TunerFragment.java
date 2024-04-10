@@ -472,7 +472,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         }
 
                         //Update linked system tuner
-                        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
+                        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and (roomRef == \""+ "SYSTEM" +"\" or roomRef == \""+ "@SYSTEM" +"\")");
                         for (HashMap systemTunersMap : systemTuners) {
                             String systemTunerDis = systemTunersMap.get("dis").toString();
                             String systemTunerShortDis = systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1).trim();

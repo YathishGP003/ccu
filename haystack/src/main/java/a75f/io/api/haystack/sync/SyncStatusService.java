@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -279,6 +280,7 @@ public class SyncStatusService {
             CcuLog.d("CCU_HS_SYNC", "added entity");
             updateRefs(entity, builder);
             CcuLog.d("CCU_HS_SYNC", "updated refs");
+            updateLastModifiedDateTime(entity, builder);
             updatedDictList.add(builder.toDict());
             CcuLog.d("CCU_HS_SYNC", "updated dict refs");
         }
@@ -319,5 +321,11 @@ public class SyncStatusService {
             }
         }
         return true;
+    }
+
+    public void updateLastModifiedDateTime(HDict entity, HDictBuilder builder) {
+        if (entity.has("lastModifiedDateTime")) {
+            builder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
+        }
     }
 }

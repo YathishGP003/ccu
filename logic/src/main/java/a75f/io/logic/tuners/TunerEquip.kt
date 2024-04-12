@@ -209,7 +209,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
     }
 
     private fun doCutOverMigrationIfRequired(haystack: CCUHsApi) : Boolean {
-        val buildingEquip = haystack.readEntity("equip and tuner");
+        val buildingEquip = haystack.readEntity("equip and tuner")
         if (buildingEquip["domainName"]?.toString()?.isNotEmpty() == true) {
             CcuLog.i(Domain.LOG_TAG, "Building equip cut-over migration complete.")
         } else {

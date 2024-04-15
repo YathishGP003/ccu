@@ -292,7 +292,7 @@ fun calculateSATSetPoints(
     val isDualSetPointEnabled = isConfigEnabled(systemEquip, dualSetpointControlEnable)
     if (isDualSetPointEnabled) {
         val satSetPointLimits = getDualSetPointMinMax(systemEquip)
-        val coolingSatSetPointValue =
+        val coolingSetPoint =
             if (basicConfig.coolingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isCoolingLockoutActive) updateDefaultSetPoints(
                 systemEquip,
                 TempDirection.COOLING
@@ -303,7 +303,7 @@ fun calculateSATSetPoints(
                 basicConfig.coolingLoop.toDouble()
             )
 
-        val heatingSatSetPointValue =
+        val heatingSp =
             if (basicConfig.heatingLoop.toDouble() == 0.0 || L.ccu().systemProfile.isHeatingLockoutActive) updateDefaultSetPoints(
                 systemEquip,
                 TempDirection.HEATING
@@ -315,7 +315,7 @@ fun calculateSATSetPoints(
             )
         updateCoolingSetPoint(
             systemEquip,
-            coolingSatSetPointValue,
+            String.format("%.1f", coolingSetPoint).toDouble(),
             airTempCoolingSp,
             externalSpList,
             externalEquipId,
@@ -323,14 +323,14 @@ fun calculateSATSetPoints(
         )
         updateHeatingSetPoint(
             systemEquip,
-            heatingSatSetPointValue,
+            String.format("%.1f", heatingSp).toDouble(),
             airTempHeatingSp,
             externalSpList,
             externalEquipId,
             haystack
         )
         logIt(
-            "Dual SP  cooling MinMax (${satSetPointLimits.first.first}, ${satSetPointLimits.first.second})" + "heating MinMax (${satSetPointLimits.second.first}, ${satSetPointLimits.second.second})" + " coolingSatSetPointValue $coolingSatSetPointValue heatingSatSetPointValue $heatingSatSetPointValue"
+            "Dual SP  cooling MinMax (${satSetPointLimits.first.first}, ${satSetPointLimits.first.second})" + "heating MinMax (${satSetPointLimits.second.first}, ${satSetPointLimits.second.second})" + " coolingSatSetPointValue $coolingSetPoint heatingSatSetPointValue $heatingSp"
         )
     } else {
         val satSetPointLimits = getDualSetPointMinMax(systemEquip)
@@ -340,7 +340,7 @@ fun calculateSATSetPoints(
         if (loopRunningDirection == TempDirection.HEATING) isLockoutActive =
             L.ccu().systemProfile.isHeatingLockoutActive
         logIt("isLockoutActive:$isLockoutActive ")
-        val satSetPointValue: Double =
+        var satSetPointValue: Double =
             if (basicConfig.loopOutput == 0.0 || isLockoutActive) updateDefaultSetPoints(
                 systemEquip,
                 loopRunningDirection
@@ -355,9 +355,10 @@ fun calculateSATSetPoints(
                 satSetPointLimits.second.second,
                 basicConfig.loopOutput
             )
+
         updateSetPoint(
             systemEquip,
-            satSetPointValue,
+            String.format("%.1f", satSetPointValue).toDouble(),
             supplyAirflowTemperatureSetpoint,
             externalSpList,
             externalEquipId,
@@ -452,7 +453,7 @@ private fun updateDspSetPoint(
 ) {
     val min = Domain.getPointByDomain(systemEquip, systemStaticPressureMinimum)
     val max = Domain.getPointByDomain(systemEquip, systemStaticPressureMaximum)
-    var dspSetPoint: Double = mapToSetPoint(min, max, fanLoop).coerceIn(0.0, max)
+    var dspSetPoint: Double =  String.format("%.1f",mapToSetPoint(min, max, fanLoop).coerceIn(0.0, max)).toDouble()
     dspSetPoint = (dspSetPoint * 100.0).roundToInt() / 100.0
     updatePointValue(systemEquip, ductStaticPressureSetpoint, dspSetPoint)
     updatePointValue(systemEquip, fanLoopOutput, fanLoop)
@@ -837,7 +838,6 @@ fun getOperatingMode(equipName: String): String {
             " Off"
         }
     }
-
 
 }
 

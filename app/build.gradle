@@ -297,6 +297,7 @@ dependencies {
     implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation(group: 'io.seventyfivef', name: 'haystack-java-lib', version: '1.1.13')
 
 }
 

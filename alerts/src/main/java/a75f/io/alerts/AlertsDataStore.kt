@@ -185,6 +185,11 @@ class AlertsDataStore @JvmOverloads constructor(
       for (a in getActiveAlerts()) {
          // We do not allow adding alerts if there is already an active alert of the same type (title) and same equip (same test/requirement as on server)
          // CCU Crash alert can be added if there is an existing crash alert.
+
+         if(a.blockId != null && a.blockId == alert.blockId && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH"){
+            return
+         }
+
          if (a.mTitle == alert.mTitle && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH") {
             return
          }
@@ -200,6 +205,14 @@ class AlertsDataStore @JvmOverloads constructor(
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.isFixed, false)
          .equal(Alert_.mTitle, "CCU IN SAFE MODE")
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getAlertsByCreator(creator: String): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.creator, creator)
          .orderDesc(Alert_.startTime)
       return alertQuery.build().find()
    }

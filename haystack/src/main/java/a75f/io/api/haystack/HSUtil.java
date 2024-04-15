@@ -176,6 +176,10 @@ public class HSUtil
     public static Equip getEquipInfo(String equipId) {
         return getEquip( CCUHsApi.getInstance(), equipId);
     }
+
+    public static HDict getEquipDict(CCUHsApi hayStack, String equipId) {
+        return hayStack.readHDictById(equipId);
+    }
     
     public static Equip getEquip(CCUHsApi hayStack, String equipId) {
         HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);

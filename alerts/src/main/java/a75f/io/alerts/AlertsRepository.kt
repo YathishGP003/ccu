@@ -1,5 +1,6 @@
 package a75f.io.alerts
 
+import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
 import a75f.io.alerts.cloud.AlertsService
 import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.alerts.model.AlertDefProgress.Partial
@@ -123,6 +124,8 @@ class AlertsRepository(
 
    fun getActiveCrashAlert() = dataStore.getActiveCrashAlert()
 
+   fun getAlertsByCreator(creator: String): List<Alert> = dataStore.getAlertsByCreator(creator)
+
    /**
     * @return Looks like this returns all alerts with severity not equal to an INTERNAL status
     */
@@ -200,6 +203,29 @@ class AlertsRepository(
             alert.setFixed(true)
             alert.setEndTime(DateTime().millis)
          }
+         addAlert(alert)
+      }
+   }
+
+   fun generateAlertBlockly(title: String, msg: String, equipRef: String, creator: String, blockId: String) {
+      val alertDef = alertDefsMap[title]
+
+      if (alertDef == null) {
+         CcuLog.w(TAG_CCU_ALERTS, "In generateAlert(), no alert definition found for $title")
+         return
+      }
+      val ccuId = haystack.ccuRef.toVal()
+
+      if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
+         alertDef.alert.setmMessage(msg)
+         alertDef.alert.setmNotificationMsg(msg)
+         val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
+         if (isOtaAlert(title)){
+            alert.setFixed(true)
+            alert.setEndTime(DateTime().millis)
+         }
+         alert.setCreator(creator)
+         alert.setBlockId(blockId)
          addAlert(alert)
       }
    }

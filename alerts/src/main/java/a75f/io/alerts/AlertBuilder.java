@@ -38,15 +38,20 @@ public class AlertBuilder
         alert.ccuName = haystack.getCcuName();
         if (equipRef != null && !Objects.equals(equipRef, "")) {
             alert.equipId = equipRef.replaceFirst("@","");
-
-            Equip equip = HSUtil.getEquipInfo(equipRef);
-            String zoneRef = equip.getRoomRef();
-            String floorRef = equip.getFloorRef();
-            alert.equipName = equip.getDisplayName();
-            alert.zoneId = zoneRef.replaceFirst("@","");
-            alert.zoneName = HSUtil.getDis(zoneRef);
-            alert.floorId = floorRef.replaceFirst("@","");
-            alert.floorName = HSUtil.getDis(floorRef);
+            if(HSUtil.getEquipDict(CCUHsApi.getInstance(), equipRef) != null){
+                Equip equip = HSUtil.getEquipInfo(equipRef);
+                String zoneRef = equip.getRoomRef();
+                if(zoneRef != null){
+                    alert.zoneId = zoneRef.replaceFirst("@","");
+                    alert.zoneName = HSUtil.getDis(zoneRef);
+                }
+                String floorRef = equip.getFloorRef();
+                if(floorRef != null){
+                    alert.floorId = floorRef.replaceFirst("@","");
+                    alert.floorName = HSUtil.getDis(floorRef);
+                }
+                alert.equipName = equip.getDisplayName();
+            }
         }
         return alert;
     }

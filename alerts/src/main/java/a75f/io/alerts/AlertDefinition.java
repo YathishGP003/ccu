@@ -4,17 +4,27 @@ package a75f.io.alerts;
  * Created by samjithsadasivan on 4/23/18.
  */
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+
+import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.jetbrains.annotations.Nullable;
+import org.mozilla.javascript.RhinoException;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertScope;
 import a75f.io.alerts.model.AlertScopeEquip;
 import a75f.io.api.haystack.Alert;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 /**
  * The format for alerts defined in json.
@@ -65,6 +75,11 @@ public class AlertDefinition
     public Alert                  alert;
     public boolean                custom;
     public AlertScope             alertScope;
+    @SerializedName("alertBuilder")
+    public AlertJs alertBuilder;
+
+    @SerializedName("emitter")
+    public String emitter;
 
     public AlertDefinition(){
     
@@ -215,5 +230,33 @@ public class AlertDefinition
                                 .collect(Collectors.toList()));
         });
         return mutedEquipIds;
+    }
+
+
+
+    void evaluateJs(AlertDefinition def, String javascriptSnippet, Context mContext, AlertJsUtil alertJsUtil) {
+
+        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
+        rhino.setOptimizationLevel(-1);
+        Scriptable scope = rhino.initStandardObjects();
+
+        scope.put("print", scope,  org.mozilla.javascript.Context.javaToJS(new AlertProcessor.ConsolePrint(), scope));
+
+
+        Object jsObject = org.mozilla.javascript.Context.javaToJS(HaystackService.getInstance(), scope);
+        ScriptableObject.putProperty(scope, "haystack", jsObject);
+
+        Object alertJsUtilJsObject = org.mozilla.javascript.Context.javaToJS(alertJsUtil, scope);
+        ScriptableObject.putProperty(scope, "alerts", alertJsUtilJsObject);
+
+        ScriptableObject.putProperty(scope, "ctx", mContext);
+        try {
+            rhino.evaluateString(scope, javascriptSnippet, "JavaScript", 1, null);
+        } catch (RhinoException exception) {
+            exception.printStackTrace();
+            CcuLog.i(TAG_CCU_ALERTS, exception.getMessage());
+        } finally {
+            org.mozilla.javascript.Context.exit();
+        }
     }
 }

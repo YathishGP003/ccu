@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
 
 import android.app.AlarmManager;
@@ -173,5 +174,9 @@ public class RenatusApp extends UtilityApplication
 		NotificationHandler.clearAllNotifications();
 		android.os.Process.killProcess(android.os.Process.myPid());
 		System.exit(0);
+	}
+
+	public void debugLog(String tag, String value){
+		Log.d(TAG_CCU_ALERTS, "tag =>"+tag+"<==value==>"+value);
 	}
 }

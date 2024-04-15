@@ -217,11 +217,22 @@ public class AlertsFragment extends Fragment
 		super.onStop();
 	}
 	private void setAlertList() {
-		alertList.clear();
-		AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
-			if(alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
-		});
-		adapter = new AlertAdapter(alertList,getActivity());
-		listView.setAdapter(adapter);
+		if(alertList != null) {
+			alertList.clear();
+			AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
+				if (alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
+			});
+			adapter = new AlertAdapter(alertList, getActivity());
+			listView.setAdapter(adapter);
+		}
+	}
+
+	@Override
+	public void setMenuVisibility(boolean menuVisible) {
+		super.setMenuVisibility(menuVisible);
+		if (menuVisible) {
+			CcuLog.d("CCU_ALERTS", "menuVisible is visible");
+			setAlertList();
+		}
 	}
 }

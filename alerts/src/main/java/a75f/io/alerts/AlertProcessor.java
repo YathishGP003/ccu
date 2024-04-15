@@ -2,8 +2,18 @@ package a75f.io.alerts;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import org.mozilla.javascript.RhinoException;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +22,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertDefOccurrence;
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
+//import org.mozilla.javascript.Context;
 
 /**
  * Created by samjithsadasivan on 4/24/18.
@@ -29,9 +41,14 @@ public class AlertProcessor
     // Parses a String into a list of AlertDefinitions
     AlertParser parser;
 
+    public static final String TAG_CCU_ALERTS = "CCU_ALERTS";
+
     private final SharedPreferences defaultSharedPrefs;
 
+    private Context mContext;
+
     AlertProcessor(Context c) {
+        mContext  = c;
         this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
 
         // great candidate for DI when we have it:
@@ -45,6 +62,10 @@ public class AlertProcessor
      * Called from AlertRepo upon AlertProcessJob.doJob.
      */
     public List<AlertDefOccurrence> evaluateAlertDefinitions(List<AlertDefinition> alertDefs) {
+
+        //AlertManager.getInstance().fixAlert("CCU IN SAFE MODE", "CCU is in safe mode", false);
+
+        mapOfPastAlerts.clear();
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
 
         // Exit without processing alert defs if registration is not yet complete
@@ -53,27 +74,109 @@ public class AlertProcessor
         }
 
         for (AlertDefinition def : alertDefs) {
-            boolean doProcess = inspectAlertDef(def, occurrences);
-            if (!doProcess) {
-                continue;
+            try{
+                boolean doProcess = inspectAlertDef(def, occurrences);
+                if (!doProcess) {
+                    continue;
+                }
+
+                if(isInAutoCommissioningMode() && suppressAlert(def)) {
+                    CcuLog.d(TAG_CCU_ALERTS, "In AutoCommissioning mode ");
+                    continue;
+                }
+                Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
+                if(def.alertBuilder != null){
+                    // new alert defination found use rhino processor to generate alert
+                    CcuLog.d(TAG_CCU_ALERTS, "new alert defination found evaluating alert-->"+def.alert.mTitle);
+                    //String jsForTesting = loadLocalJs(mContext, "test1.js");
+                    //String jsForTesting = loadLocalJs(mContext, def.alertBuilder.getSnippet());
+                    String jsForTesting = def.alertBuilder.getSnippet();
+                    //evaluateJs(def.alertBuilder);
+                    alertJsUtil.def = def;
+                    def.evaluateJs(def, jsForTesting, mContext, alertJsUtil);
+                }else {
+                    def.evaluate(defaultSharedPrefs);
+
+                    if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
+                        List<AlertDefOccurrence> retunredList = processForEquips(def);
+                        occurrences.addAll(retunredList);
+                    } else {
+                        occurrences.add(process(def));
+                    }
+                }
+            }catch (Exception e) {
+                Log.e(TAG_CCU_ALERTS, "Error in evaluating alert defination-->" + def.alert.mTitle);
+                e.printStackTrace();
+            }
+        }
+        CcuLog.d("CCU_ALERTS", "evaluateAlertDefinitions - end");
+
+        // this change is there if next time alert is not there then it will be fixed,
+        // suppose alerts A, B, C are there in db and now only A, C are triggered then B will be fixed
+        AlertManager.getInstance().getActiveAlertsByCreator("blockly").forEach(alert -> {
+            String keyFromDb = alert.blockId+":@"+alert.equipId;
+            if (!mapOfPastAlerts.containsKey(keyFromDb)) {
+                //AlertManager.getInstance().deleteAlert(alert);
+                AlertManager.getInstance().fixAlert(alert);
+            }
+        });
+
+        mapOfPastAlerts.forEach((k, v) -> {
+            Alert tempAlert = (Alert) v;
+            AlertManager.getInstance().generateAlertBlockly(tempAlert.mTitle, tempAlert.mMessage, tempAlert.equipId, "blockly", tempAlert.blockId);
+        });
+        return occurrences;
+    }
+
+    HashMap mapOfPastAlerts = new HashMap<String, Alert>();
+    AlertJsUtil alertJsUtil = new AlertJsUtil(new AlertJsCallback() {
+        @Override
+        public boolean triggerAlert(String blockId, String notificationMsg, String message, String entityId, Object contextHelper, AlertDefinition def) {
+
+            HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(entityId);
+            if(map == null || map.isEmpty()){
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@ invalid id->"+entityId);
+                return false;
+            }else{
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
+                Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
+                alert.blockId = blockId;
+                mapOfPastAlerts.put(blockId+":"+entityId, alert);
+                return true;
+            }
+        }
+    });
+
+    private String loadLocalJs(Context context, String fileName){
+        return readTextFileFromAssets(context, fileName);
+    }
+
+    public static String readTextFileFromAssets(Context context, String fileName) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            AssetManager assetManager = context.getAssets();
+            InputStream inputStream = assetManager.open(fileName);
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
             }
 
-           if(isInAutoCommissioningMode() && suppressAlert(def)) {
-               Log.d("CCU_ALERTS", "In AutoCommissioning mode ");
-               continue;
-           }
-           Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
-           def.evaluate(defaultSharedPrefs);
-
-           if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
-               List<AlertDefOccurrence> retunredList = processForEquips(def);
-               occurrences.addAll(retunredList);
-           } else {
-               occurrences.add(process(def));
-           }
-
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return occurrences;
+
+        return stringBuilder.toString();
+    }
+
+    public static class ConsolePrint {
+        public void print(String message) {
+            System.out.println(message);
+        }
     }
 
     private boolean suppressAlert(AlertDefinition def) {
@@ -84,7 +187,7 @@ public class AlertProcessor
                         conditional.value.equalsIgnoreCase("system and building and limit and max")) &&
                         (!def.alert.getmSeverity().toString().equalsIgnoreCase("SEVERE"))) {
                     isAlertMatches = true;
-                    Log.d("CCU_ALERTS", ""+def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
+                    CcuLog.d("CCU_ALERTS", ""+def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
                 }
             }
             return isAlertMatches;
@@ -117,6 +220,10 @@ public class AlertProcessor
             }
         }
         return buildOccurrence(def, result, false, null, null);
+    }
+
+    private AlertDefOccurrence processJsDef(AlertDefinition def) {
+        return buildOccurrence(def, true, false, null, null);
     }
     
     /**
@@ -230,6 +337,9 @@ public class AlertProcessor
                 .map(conditional -> conditional.grpOperation)
                 .distinct()
                 .collect(Collectors.toList());
+        if(!def.emitter.equalsIgnoreCase("CCU")){
+            return false;
+        }
 
         boolean isMuted = false;
         String evaluationString = "";

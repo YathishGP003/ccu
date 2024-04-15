@@ -127,6 +127,11 @@ public class AlertManager
         repo.generateAlert(title,msg, equipRef);
     }
 
+    public void generateAlertBlockly(String title, String msg, String equipRef, String creator, String blockId){
+        if (! repoCheck()) return;
+        repo.generateAlertBlockly(title,msg, equipRef, creator, blockId);
+    }
+
     public void generateCMDeadAlert(String title, String msg){
         if (! repoCheck()) return;
         repo.generateCMDeadAlert(title,msg);
@@ -146,6 +151,12 @@ public class AlertManager
         if (! repoCheck()) return Collections.emptyList();
 
         return repo.getActiveAlerts();
+    }
+
+    public List<Alert> getActiveAlertsByCreator(String creator) {
+        if (! repoCheck()) return Collections.emptyList();
+
+        return repo.getAlertsByCreator(creator);
     }
 
     public List<Alert> getUnsyncedAlerts() {

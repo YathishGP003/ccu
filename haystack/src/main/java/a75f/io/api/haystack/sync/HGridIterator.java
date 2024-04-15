@@ -12,7 +12,7 @@ public class HGridIterator {
     private     HGrid mGrid;
     private int   index = 0;
     
-    HGridIterator(HGrid grid) {
+    public HGridIterator(HGrid grid) {
         mGrid = grid;
     }
     

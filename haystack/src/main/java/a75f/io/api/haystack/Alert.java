@@ -54,6 +54,26 @@ public class Alert
     // true if the alert has been synced (created or updated) with server
     public boolean syncStatus;
 
+    public String creator;
+
+    public String blockId;
+
+    public String getBlockId() {
+        return blockId;
+    }
+
+    public void setBlockId(String blockId) {
+        this.blockId = blockId;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
     public String getmAlertType()
     {
         return mAlertType;

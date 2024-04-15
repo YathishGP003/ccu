@@ -2936,6 +2936,24 @@ public class CCUHsApi
         return rowList;
     }
 
+    public List<HashMap> HGridToListPlainString(HGrid grid) {
+        List<HashMap> rowList = new ArrayList<>();
+        if (grid != null) {
+            Iterator it = grid.iterator();
+            while (it != null && it.hasNext()) {
+                HashMap<String, String> map = new HashMap<>();
+                HRow r   = (HRow) it.next();
+                HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+                while (ri!= null && ri.hasNext()) {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey().toString(), m.getValue().toString());
+                }
+                rowList.add(map);
+            }
+        }
+        return rowList;
+    }
+
     public boolean hasEntitySynced(String id) {
         return syncStatusService.hasEntitySynced(id);
     }

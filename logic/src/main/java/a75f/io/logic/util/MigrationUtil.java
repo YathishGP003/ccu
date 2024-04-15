@@ -115,7 +115,7 @@ public class MigrationUtil {
 
         if(!PreferenceUtil.getCcuRefTagMigration()){
             Log.i(TAG, "ccuRef migration started");
-            CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
+            CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), false);
             PreferenceUtil.setCcuRefTagMigration(true);
             Log.i(TAG, "ccuRef migration completed");
         }

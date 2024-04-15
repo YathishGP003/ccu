@@ -506,7 +506,7 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
                 CCUHsApi.getInstance().updateDeviceRefOfSettingPoints(localId);
-                CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
+                CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
 
                 handleRegistrationAsync(installerEmail);
             }

@@ -20,9 +20,11 @@ import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerUtil
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -35,6 +37,8 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -67,6 +71,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             migrateEquipStatusEnums(ccuHsApi)
         }
+        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty() &&
+            !PreferenceUtil.getSingleDualMigrationStatus()) {
+            migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi)
+            PreferenceUtil.setSingleDualMigrationStatus()
+        }
         if (!isMigrationRequired()) {
             return
         }
@@ -85,6 +94,24 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             schedulerRevamp.doMigration()
         }
     }
+
+    private fun migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi: CCUHsApi) {
+        val standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
+        val roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips)
+        roomRefs.forEach{roomRef ->
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, ccuHsApi)
+        }
+    }
+
+    private fun getRoomRefsForAllStandaloneProfiles(standaloneEquips: ArrayList<HashMap<Any, Any>>):
+            List<String> {
+        val roomRefs: MutableList<String> = mutableListOf()
+        standaloneEquips.forEach {standaloneEquip ->
+            roomRefs.add(standaloneEquip["roomRef"].toString());
+        }
+        return roomRefs.distinct()
+    }
+
 
     private fun migrateEquipStatusEnums(ccuHsApi: CCUHsApi) {
         val equipStatusPointList = ccuHsApi.readAllEntities("status and not ota and not message" +

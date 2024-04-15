@@ -107,6 +107,7 @@ public class PreferenceUtil {
     public static final String UPDATE_HIS_ITEMS = "updateHisItems";
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
+    public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
 
@@ -871,6 +872,13 @@ public class PreferenceUtil {
 
     public static void setModulatingFanSpeedMigrationStatus() {
         setBooleanPreference(MODULATING_FANSPEED_MIGRATION, true);
+    }
+    public static boolean getSingleDualMigrationStatus() {
+        return getBooleanPreference(SINGLE_DUAL_MIGRATION);
+    }
+
+    public static void setSingleDualMigrationStatus() {
+        setBooleanPreference(SINGLE_DUAL_MIGRATION, true);
     }
 
     public static boolean getVavReheatRelayActivationHysteresisValueMigration() {

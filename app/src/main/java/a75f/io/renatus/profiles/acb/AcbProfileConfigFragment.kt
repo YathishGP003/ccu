@@ -132,7 +132,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                     DropDownWithLabel(
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
-                        previewWidth = 160,
+                        previewWidth = 165,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.damperType.toInt(),
@@ -159,8 +159,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Shape",
                             list = viewModel.damperShapesList,
-                            previewWidth = 130,
-                            expandedWidth = 130,
+                            previewWidth = 135,
+                            expandedWidth = 136,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
@@ -184,7 +184,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         expandedWidth = 160,
                         onSelected = {selectedIndex -> viewModel.viewState.valveType = selectedIndex.toDouble()},
                         defaultSelection = viewModel.viewState.valveType.toInt(),
-                        spacerLimit = 205,
+                        spacerLimit = 209,
                         heightValue = 268
                     )
                     Spacer(modifier=Modifier.width(87.dp))
@@ -195,7 +195,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.zonePriority.toInt(),
-                        spacerLimit = 132,
+                        spacerLimit = 139,
                         heightValue = 211
                     )
                 }
@@ -209,7 +209,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         Spacer(modifier = Modifier.width(160.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
-                    Spacer(modifier=Modifier.width(63.dp))
+                    Spacer(modifier=Modifier.width(67.dp))
                     Row{
                         HeaderTextView(text = "Relay 1",padding=0)
                         Spacer(modifier = Modifier.width(180.dp))
@@ -226,7 +226,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         label = "Thermistor-2",
                         list = viewModel.condensateSensorTypesList,
                         previewWidth = 160,
-                        expandedWidth = 272,
+                        expandedWidth = 277,
                         onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
                         defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
                         spacerLimit = 175,
@@ -303,7 +303,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,
-                                spacerLimit = 170,
+                                spacerLimit = 175,
                                 heightValue = 272
                             )
                         }

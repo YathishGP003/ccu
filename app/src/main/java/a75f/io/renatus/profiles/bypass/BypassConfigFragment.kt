@@ -164,8 +164,8 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Pressure Sensor",
                             list = viewModel.pressureSensorTypesList,
-                            previewWidth = 150,
-                            expandedWidth = 150,
+                            previewWidth = 165,
+                            expandedWidth = 165,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSensorType =
                                     selectedIndex.toDouble()
@@ -174,12 +174,12 @@ class BypassConfigFragment : BaseDialogFragment() {
                             spacerLimit = 46,
                             heightValue = 130
                         )
-                        Spacer(modifier=Modifier.width(79.dp))
+                        Spacer(modifier=Modifier.width(64.dp))
                         DropDownWithLabel(
                             label = "Damper Type",
                             list = viewModel.damperTypesList,
-                            previewWidth = 150,
-                            expandedWidth = 155,
+                            previewWidth = 165,
+                            expandedWidth = 160,
                             onSelected = { selectedIndex -> viewModel.viewState.damperType =
                                 selectedIndex.toDouble()
                             },
@@ -202,7 +202,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Damper Min",
                             list = viewModel.damperMinPosList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMinPosition =
@@ -212,11 +212,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                             spacerLimit = 84,
                             heightValue = 270
                         )
-                        Spacer(modifier=Modifier.width(79.dp))
+                        Spacer(modifier=Modifier.width(64.dp))
                         DropDownWithLabel(
                             label = "Damper Max",
                             list = viewModel.damperMaxPosList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex -> viewModel.viewState.damperMaxPosition =
                                 selectedIndex.toDouble()
@@ -241,7 +241,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             DropDownWithLabel(
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMinValList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMinVal =
@@ -251,11 +251,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 spacerLimit = 43,
                                 heightValue = 260
                             )
-                            Spacer(modifier=Modifier.width(79.dp));
+                            Spacer(modifier=Modifier.width(64.dp));
                             DropDownWithLabel(
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMaxValList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex -> viewModel.viewState.pressureSensorMaxVal =
                                     selectedIndex.toDouble()
@@ -279,7 +279,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             DropDownWithLabel(
                                 label = "Sensor Min",
                                 list = viewModel.sensorMinVoltageList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMinVoltage =
@@ -289,11 +289,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 spacerLimit = 97,
                                 heightValue = 270
                             )
-                            Spacer(modifier=Modifier.width(80.dp));
+                            Spacer(modifier=Modifier.width(65.dp));
                             DropDownWithLabel(
                                 label = "Sensor Max",
                                 list = viewModel.sensorMaxVoltageList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex -> viewModel.viewState.sensorMaxVoltage =
                                     selectedIndex.toDouble()
@@ -318,18 +318,18 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "SAT Min",
                             list = viewModel.satMinThresholdList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex -> viewModel.viewState.satMinThreshold = viewModel.satMinThresholdList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.satMinThresholdList.indexOf(("%.0f").format(viewModel.viewState.satMinThreshold)),
                             spacerLimit = 126,
                             heightValue = 270
                         )
-                        Spacer(modifier=Modifier.width(82.dp))
+                        Spacer(modifier=Modifier.width(67.dp))
                         DropDownWithLabel(
                             label = "SAT Max",
                             list = viewModel.satMaxThresholdList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex -> viewModel.viewState.satMaxThreshold = viewModel.satMaxThresholdList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.satMaxThresholdList.indexOf(("%.0f").format(viewModel.viewState.satMaxThreshold)),
@@ -351,7 +351,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Expected Pressure",
                             list = viewModel.expectedPressureErrorList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex -> viewModel.viewState.expectedPressureError = viewModel.expectedPressureErrorList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.expectedPressureErrorList.indexOf(("%.1f").format(viewModel.viewState.expectedPressureError)),
@@ -359,11 +359,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                             heightValue = 270
 
                         )
-                        Spacer(modifier=Modifier.width(80.dp))
+                        Spacer(modifier=Modifier.width(65.dp))
                         DropDownWithLabel(
                             label = "Pressure Setpoint",
                             list = viewModel.pressureSetpointsList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex -> viewModel.viewState.pressureSetpoint = viewModel.pressureSetpointsList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.pressureSetpointsList.indexOf(("%.1f").format(viewModel.viewState.pressureSetpoint)),
@@ -392,8 +392,8 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Pressure Sensor",
                             list = viewModel.pressureSensorTypesList,
-                            previewWidth = 150,
-                            expandedWidth = 150,
+                            previewWidth = 165,
+                            expandedWidth = 165,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSensorType =
                                     selectedIndex.toDouble()
@@ -402,12 +402,12 @@ class BypassConfigFragment : BaseDialogFragment() {
                             spacerLimit = 46,
                             heightValue = 130
                         )
-                        Spacer(modifier = Modifier.width(79.dp))
+                        Spacer(modifier = Modifier.width(64.dp))
                         DropDownWithLabel(
                             label = "Damper Type",
                             list = viewModel.damperTypesList,
-                            previewWidth = 150,
-                            expandedWidth = 155,
+                            previewWidth = 165,
+                            expandedWidth = 160,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperType =
                                     selectedIndex.toDouble()
@@ -440,7 +440,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Damper Min",
                             list = viewModel.damperMinPosList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMinPosition =
@@ -450,11 +450,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                             spacerLimit = 84,
                             heightValue = 270
                         )
-                        Spacer(modifier = Modifier.width(79.dp))
+                        Spacer(modifier = Modifier.width(64.dp))
                         DropDownWithLabel(
                             label = "Damper Max",
                             list = viewModel.damperMaxPosList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMaxPosition =
@@ -486,7 +486,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             DropDownWithLabel(
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMinValList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMinVal =
@@ -496,11 +496,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 spacerLimit = 43,
                                 heightValue = 260
                             )
-                            Spacer(modifier = Modifier.width(79.dp));
+                            Spacer(modifier = Modifier.width(64.dp));
                             DropDownWithLabel(
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMaxValList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMaxVal =
@@ -531,7 +531,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             DropDownWithLabel(
                                 label = "Sensor Min",
                                 list = viewModel.sensorMinVoltageList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMinVoltage =
@@ -541,11 +541,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 spacerLimit = 97,
                                 heightValue = 270
                             )
-                            Spacer(modifier = Modifier.width(80.dp));
+                            Spacer(modifier = Modifier.width(65.dp));
                             DropDownWithLabel(
                                 label = "Sensor Max",
                                 list = viewModel.sensorMaxVoltageList,
-                                previewWidth = 150,
+                                previewWidth = 165,
                                 expandedWidth = 150,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMaxVoltage =
@@ -577,7 +577,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "SAT Min",
                             list = viewModel.satMinThresholdList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.satMinThreshold =
@@ -591,11 +591,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                             spacerLimit = 126,
                             heightValue = 270
                         )
-                        Spacer(modifier = Modifier.width(82.dp))
+                        Spacer(modifier = Modifier.width(67.dp))
                         DropDownWithLabel(
                             label = "SAT Max",
                             list = viewModel.satMaxThresholdList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.satMaxThreshold =
@@ -630,7 +630,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Expected Pressure",
                             list = viewModel.expectedPressureErrorList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.expectedPressureError =
@@ -646,11 +646,11 @@ class BypassConfigFragment : BaseDialogFragment() {
                             heightValue = 270
 
                         )
-                        Spacer(modifier = Modifier.width(80.dp))
+                        Spacer(modifier = Modifier.width(65.dp))
                         DropDownWithLabel(
                             label = "Pressure Setpoint",
                             list = viewModel.pressureSetpointsList,
-                            previewWidth = 150,
+                            previewWidth = 165,
                             expandedWidth = 150,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSetpoint =

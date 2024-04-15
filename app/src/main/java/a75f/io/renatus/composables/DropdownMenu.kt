@@ -1,9 +1,11 @@
 package a75f.io.renatus.composables
 
 import a75f.io.renatus.R
+import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.HeaderTextViewNew
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -41,6 +43,8 @@ import androidx.compose.ui.unit.sp
 fun DropDownWithLabel(
     label: String, list: List<String>, previewWidth: Int = 80, expandedWidth: Int = 100,
     onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int=275) {
+
+    var modifiedList = ComposeUtil.getModifiedList(list)
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
             HeaderTextView(text = label, padding = paddingLimit)
@@ -56,7 +60,7 @@ fun DropDownWithLabel(
             Column() {
                 Row {
                     Text(
-                        list[defaultSelection],
+                        modifiedList[defaultSelection],
                         modifier = Modifier.width((previewWidth ).dp).height(35.dp)
                             .clickable(onClick = { expanded = true }),
                         fontSize = 22.sp,
@@ -79,11 +83,8 @@ fun DropDownWithLabel(
                 modifier = Modifier
                     .width(expandedWidth.dp)
                     .height(heightValue.dp)
-                /*.background(
-                    Color.Gray
-                )*/
             ) {
-                list.forEachIndexed { index, s ->
+                modifiedList.forEachIndexed { index, s ->
                     DropdownMenuItem(onClick = {
                         selectedIndex = index
                         expanded = false

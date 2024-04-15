@@ -138,7 +138,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     DropDownWithLabel(
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
-                        previewWidth = 160,
+                        previewWidth = 165,
                         expandedWidth = 160,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.damperType.toInt(),
@@ -165,8 +165,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         DropDownWithLabel(
                             label = "Shape",
                             list = viewModel.damperShapesList,
-                            previewWidth = 130,
-                            expandedWidth = 130,
+                            previewWidth = 135,
+                            expandedWidth = 136,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
@@ -186,8 +186,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     DropDownWithLabel(
                         label = "Reheat Type",
                         list = viewModel.reheatTypesList,
-                        previewWidth = 160,
-                        expandedWidth = 160,
+                        previewWidth = 165,
+                        expandedWidth = 165,
                         onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex.toDouble()},
                         defaultSelection = viewModel.viewState.reheatType.toInt(),
                         spacerLimit = 188,
@@ -201,7 +201,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         expandedWidth = 120,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.zonePriority.toInt(),
-                        spacerLimit = 132,
+                        spacerLimit = 136,
                         heightValue = 211
                     )
                 }
@@ -215,10 +215,10 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         Spacer(modifier = Modifier.width(160.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
-                    Spacer(modifier=Modifier.width(60.dp))
+                    Spacer(modifier=Modifier.width(63.dp))
                     Row {
                         HeaderTextView(text = "Thermistor-2",padding=0)
-                        Spacer(modifier = Modifier.width(110.dp))
+                        Spacer(modifier = Modifier.width(115.dp))
                         LabelTextView(text = "Supply Airflow")
                     }
                 }
@@ -231,7 +231,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         when(viewModel.viewState.reheatType){
                             0.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(195.dp))
+                                Spacer(modifier=Modifier.width(186.dp))
                                 LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             1.0->{
@@ -256,42 +256,42 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                             }
                             5.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(195.dp))
+                                Spacer(modifier=Modifier.width(186.dp))
                                 LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             6.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(195.dp))
+                                Spacer(modifier=Modifier.width(186.dp))
                                 LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                             7.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(195.dp))
+                                Spacer(modifier=Modifier.width(186.dp))
                                 LabelTextView(text = "Staged Electric Heater", widthValue = 250)
                             }
                         }
                     }
                     when(viewModel.viewState.reheatType)
                     {
-                        0.0->Spacer(modifier=Modifier.width(42.dp))
+                        0.0->Spacer(modifier=Modifier.width(55.dp))
                         1.0->Spacer(modifier=Modifier.width(60.dp))
                         2.0->Spacer(modifier=Modifier.width(60.dp))
                         3.0->Spacer(modifier=Modifier.width(60.dp))
                         4.0->Spacer(modifier=Modifier.width(60.dp))
-                        5.0->Spacer(modifier=Modifier.width(42.dp))
-                        6.0->Spacer(modifier=Modifier.width(42.dp))
-                        7.0->Spacer(modifier=Modifier.width(42.dp))
+                        5.0->Spacer(modifier=Modifier.width(55.dp))
+                        6.0->Spacer(modifier=Modifier.width(55.dp))
+                        7.0->Spacer(modifier=Modifier.width(55.dp))
                     }
                     Row{
                         when (viewModel.profileType){
                             ProfileType.VAV_SERIES_FAN ->{
                                 HeaderTextView(text="Relay 2",padding=0)
-                                Spacer(modifier=Modifier.width(218.dp))
+                                Spacer(modifier=Modifier.width(222.dp))
                                 LabelTextView(text = "Series Fan")
                             }
                             ProfileType.VAV_PARALLEL_FAN ->{
                                 HeaderTextView(text="Relay 2",padding=0)
-                                Spacer(modifier=Modifier.width(204.dp))
+                                Spacer(modifier=Modifier.width(208.dp))
                                 LabelTextView(text="Parallel Fan")
                             }
                             else ->{
@@ -368,7 +368,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,
-                                spacerLimit = 173,
+                                spacerLimit = 180,
                                 heightValue = 272
                             )
                         }

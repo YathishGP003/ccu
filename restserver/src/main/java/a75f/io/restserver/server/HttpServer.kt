@@ -166,8 +166,9 @@ class HttpServer {
                                 )
                             }
                         } else {
-                            call.respond(HttpStatusCode.OK, BaseResponse(CCUHsApi.getInstance()
-                                .readHisValById(query)))
+                            val hisItem = CCUHsApi.getInstance().readHisValById(query)
+                            CcuLog.i(HTTP_SERVER, "his item present -> $hisItem")
+                            call.respond(HttpStatusCode.OK, BaseResponse(hisItem))
                         }
                     }else{
                         call.respond(HttpStatusCode.NotFound)

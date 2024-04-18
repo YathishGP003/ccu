@@ -1,5 +1,6 @@
 package a75f.io.domain.logic
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
@@ -7,7 +8,6 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.BuildConfig
 import a75f.io.domain.api.Domain
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
@@ -131,6 +131,26 @@ open class DefaultEquipBuilder : EquipBuilder {
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
         }
 
+
+
+        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER && it.name.lowercase() == "bacnetid" }.forEach{ tag ->
+            tag.defaultValue?.let {
+                val smartNodeAddressBand = getSmartNodeBand()?.toInt()
+                if(smartNodeAddressBand != null && pointConfig.configuration?.nodeAddress != null) {
+                    val nodeAdd = pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
+                    val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
+                    pointBuilder.setBacnetId(bacnetId.toInt())
+                }
+            }
+        }
+
+        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() == "bacnettype" }.forEach{ tag ->
+            tag.defaultValue?.let {
+                val bacnetType = tag.defaultValue.toString()
+                pointBuilder.setBacnetType(bacnetType)
+            }
+        }
+
         pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
             tag.defaultValue?.let {
                 pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
@@ -175,5 +195,21 @@ open class DefaultEquipBuilder : EquipBuilder {
                 dis
             }
         return displayName
+    }
+
+    open fun getSmartNodeBand(): String? {
+        val device = CCUHsApi.getInstance().readEntity("device and addr")
+        CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
+        if (device != null && device.size > 0 && device["modbus"] == null && device["addr"] != null) {
+            val nodeAdd = device["addr"].toString()
+            return nodeAdd.substring(0, nodeAdd.length - 2) + "00"
+        } else {
+            val band = CCUHsApi.getInstance().readEntity("point and snband")
+            CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
+            if (band != null && band.size > 0 && band["val"] != null) {
+                return band["val"].toString()
+            }
+        }
+        return null
     }
 }

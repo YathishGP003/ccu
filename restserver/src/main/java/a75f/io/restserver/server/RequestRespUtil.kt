@@ -77,15 +77,19 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 try {
                     bacnetId = getBacNetId(bacnetId, group, extractedGroup, extractedEquipRef)
                     if (bacnetId != "0.0") {
-                        hDictBuilder.add("bacnetId", bacnetId.toLong())
+                        // todo : once bacapp is fixed this may be required
+                        //hDictBuilder.add("bacnetId", bacnetId.toLong())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
             } else {
+                if(extractedGroup.isEmpty()){
+                    extractedGroup = getGroupFromEquipRef(extractedEquipRef)
+                }
                 if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
-                    hDictBuilder.add("dis", "${profileName}_$lastLiteralFromDis")
+                    hDictBuilder.add("dis", "${profileName}_${extractedGroup}_$lastLiteralFromDis")
                 } else {
                     hDictBuilder.add(
                         "dis",
@@ -113,12 +117,17 @@ fun getBacNetId(
     } else if (extractedGroup.isNotEmpty()) {
         tempId = bacnetId.replace(extractedGroup, "").trim()
     } else if (extractedEquipRef.isNotEmpty()) {
-        var tempExtractedEquipRef = extractedEquipRef.replace("@", "").trim()
-        val groupFromEquipRef =
-            CCUHsApi.getInstance().readMapById(tempExtractedEquipRef)["group"] as String
-        tempId = bacnetId.replace(groupFromEquipRef, "").trim()
+        tempId = bacnetId.replace(getGroupFromEquipRef(extractedEquipRef), "").trim()
     }
     return tempId
+}
+
+fun getGroupFromEquipRef(extractedEquipRef: String): String{
+    if(extractedEquipRef.isEmpty()){
+        return ""
+    }
+    var tempExtractedEquipRef = extractedEquipRef.replace("@", "").trim()
+    return CCUHsApi.getInstance().readMapById(tempExtractedEquipRef)["group"] as String
 }
 
 fun getEquipRefId(input: String): String {

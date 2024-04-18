@@ -3963,7 +3963,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
          we need to add the building occupancy for next week monday also **/
         if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
         {
-            systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
+            Interval nextWeekDaySystemInterval = ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule);
+            if(nextWeekDaySystemInterval!=null)
+            {
+                systemIntervals.add(nextWeekDaySystemInterval);
+            }
         }
 
         for (Interval z : zoneIntervals) {

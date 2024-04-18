@@ -377,8 +377,12 @@ public class NamedSchedule extends DialogFragment {
                 LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
                 // checking for overnight for sunday ,if it is has overnight sch for sunday
                 // we need to add the building occupancy for next week monday also
-                if (ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
-                    systemIntervals.add(ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule));
+                if (ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay)) {
+                    Interval nextWeekDaySystemInterval = ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule);
+                    if(nextWeekDaySystemInterval!=null) {
+                        systemIntervals.add(nextWeekDaySystemInterval);
+                    }
+                }
                 updateIntervalSpills(intervalSpills, zoneIntervals, systemIntervals);
                 if (!intervalSpills.isEmpty()) {
                     addIntervalSpillWarning(warningMessage, intervalSpills);

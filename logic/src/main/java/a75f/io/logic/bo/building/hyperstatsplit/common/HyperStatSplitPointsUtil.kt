@@ -2438,7 +2438,7 @@ class HyperStatSplitPointsUtil(
         )
         val operatingModeMarkers = arrayOf (
             Tags.MODE, Tags.HIS, Tags.SP,
-            Tags.ZONE,Tags.OPERATING,Tags.WRITABLE
+            Tags.ZONE,Tags.OPERATING
         )
 
         val operatingModePointEnums = "${OFF},${COOLING},${HEATING},${TEMPDEAD}"

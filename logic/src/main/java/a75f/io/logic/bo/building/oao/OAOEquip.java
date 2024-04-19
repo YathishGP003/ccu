@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.oao;
 
+import static a75f.io.logic.BacnetUtilKt.ANALOG_VALUE;
+import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -171,6 +174,7 @@ public class OAOEquip
                                               .setUnit("ppm")
                                               .setTz(tz)
                                               .build();
+        addBacnetTags(returnAirCO2, 95, ANALOG_VALUE, nodeAddr);
         String returnAirCO2Id = hayStack.addPoint(returnAirCO2);
     
         Point rtuCurrentTransformer = new Point.Builder()
@@ -197,6 +201,7 @@ public class OAOEquip
                                      .setUnit("\u00B0F")
                                      .setTz(tz)
                                      .build();
+        addBacnetTags(outsideAirTemperature, 43, ANALOG_VALUE, nodeAddr);
         String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
     
         Point weatherOutsideTemp = new Point.Builder()
@@ -236,6 +241,7 @@ public class OAOEquip
                                               .setUnit("\u00B0F")
                                               .setTz(tz)
                                               .build();
+        addBacnetTags(supplyAirTemperature, 1, ANALOG_VALUE, nodeAddr);
         String supplyAirTemperatureId = hayStack.addPoint(supplyAirTemperature);
     
         Point mixedAirTemperature = new Point.Builder()
@@ -249,6 +255,7 @@ public class OAOEquip
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();
+        addBacnetTags(mixedAirTemperature, 84, ANALOG_VALUE, nodeAddr);
         String mixedAirTemperatureId = hayStack.addPoint(mixedAirTemperature);
     
         Point mixedAirHumidity = new Point.Builder()
@@ -262,6 +269,7 @@ public class OAOEquip
                                             .setUnit("%")
                                             .setTz(tz)
                                             .build();
+        addBacnetTags(mixedAirHumidity, 86, ANALOG_VALUE, nodeAddr);
         String mixedAirHumidityId = hayStack.addPoint(mixedAirHumidity);
     
         Point outsideAirDamper = new Point.Builder()
@@ -275,6 +283,7 @@ public class OAOEquip
                                          .setUnit("%")
                                          .setTz(tz)
                                          .build();
+        addBacnetTags(outsideAirDamper, 88, ANALOG_VALUE, nodeAddr);
         String outsideAirDamperId = hayStack.addPoint(outsideAirDamper);
         Point returnAirDamper = new Point.Builder()
                                          .setDisplayName(SystemTuners.getDisplayNameFromVariation(siteDis+"-OAO-"+nodeAddr+"-returnAirDamper"))
@@ -287,6 +296,7 @@ public class OAOEquip
                                          .setUnit("%")
                                          .setTz(tz)
                                          .build();
+        addBacnetTags(returnAirDamper, 96, ANALOG_VALUE, nodeAddr);
         String returnAirDamperId = hayStack.addPoint(returnAirDamper);
     
         Point exhaustFanStage1 = new Point.Builder()

@@ -52,6 +52,7 @@ import java.util.UUID;
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.sync.SiloApiService;
 import a75f.io.constants.HttpConstants;
@@ -329,7 +330,7 @@ public class HClient extends HProj
       HRow r = (HRow) it.next();
       HVal rowId = r.get("id");
       sharedEntities.put(rowId, r);
-      sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+      sharedPointArrays.put(rowId, getValue(rowId.toString()));
 
       //sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
     }
@@ -357,6 +358,7 @@ public class HClient extends HProj
     if (w.id == null) throw new IllegalStateException("nothing subscribed yet");
     if (w.closed) throw new IllegalStateException("watch is closed");
 
+    CcuLog.i(Tags.BACNET_SUB_UN_SUB_POLL,"watchPoll - watchId->"+w.id+"-refresh->"+refresh);
     // grid meta
     HGridBuilder b = new HGridBuilder();
     b.meta().add("watchId", w.id);
@@ -368,9 +370,12 @@ public class HClient extends HProj
   }
 
   private HGrid pollChanges(HClientWatch w, boolean refresh) {
+
     List<HRef> allSubscribedIdsList = (List<HRef>) w.subscribedIds;
     HRef[] ids = allSubscribedIdsList.toArray(new HRef[0]);
     HGrid requestedGridData = CCUHsApi.getInstance().readHDictByIds(ids);
+
+    CcuLog.i(Tags.BACNET_SUB_UN_SUB_POLL,"pollChanges - subscribedIds->"+Arrays.toString(ids));
 
     if (refresh) {
       // send all
@@ -393,7 +398,7 @@ public class HClient extends HProj
         if(previousLastModifiedDateTime != null && lastModifiedDateTime != null){
           if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
             pIds.add(getDictFromHRow(r));
-            sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+            sharedPointArrays.put(rowId, getValue(rowId.toString()));
           }else{
             checkItemsWithInPointArray(pIds, idStr, r, rowId);
           }
@@ -406,7 +411,7 @@ public class HClient extends HProj
   }
 
   private void checkItemsWithInPointArray(ArrayList<HDict> pIds, String idStr, HRow r, HVal rowId) {
-    Double currentHighPriorityVal = CCUHsApi.getInstance().readPointPriorityVal(r.get(idStr).toString());
+    Double currentHighPriorityVal = getValue(r.get(idStr).toString());
     Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
     Log.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
     if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
@@ -415,6 +420,17 @@ public class HClient extends HProj
     } else {
       Log.d("CCU_HS", "no change in data");
     }
+  }
+
+  private Double getValue(String pointId){
+    Double currentHighPriorityVal;
+    HashMap<Object, Object> pointData = CCUHsApi.getInstance().readMapById(pointId);
+    if(pointData.containsKey("writable")){
+      currentHighPriorityVal = CCUHsApi.getInstance().readPointPriorityVal(pointId);
+    }else{
+      currentHighPriorityVal = CCUHsApi.getInstance().readHisValById(pointId);
+    }
+    return currentHighPriorityVal;
   }
 
   private HDict getDictFromHRow(HRow r) {

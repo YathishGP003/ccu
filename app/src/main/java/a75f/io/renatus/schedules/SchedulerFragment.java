@@ -76,6 +76,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.schedule.SpecialSchedule;
+import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
@@ -1464,7 +1465,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(schedule.isNamedSchedule()){
+                if(schedule.isNamedSchedule() && !OfflineModeUtilKt.isOfflineMode()){
                     Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
                     return;
                 }

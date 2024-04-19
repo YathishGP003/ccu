@@ -224,4 +224,6 @@ public class Tags
     public static final String ACTIVATION = "activation";
 
     public static final String BACNET = "bacnet";
+
+    public static final String BACNET_SUB_UN_SUB_POLL = "BACNET_SUB_UN_SUB_POLL";
 }

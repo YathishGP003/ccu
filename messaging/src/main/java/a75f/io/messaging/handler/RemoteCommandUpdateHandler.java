@@ -40,6 +40,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     private static SafeModeInterface safeModeInterface = null;
     public static final String DOWNLOAD_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
     public static final String DOWNLOAD_REMOTE_ACCESS_APP = "update_RemoteAcess";
+
+    public static final String UPDATE_CCU_LOG_LEVEL = "update_ccu_log_level";
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
@@ -130,6 +132,12 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
                                 break;
+                            case UPDATE_CCU_LOG_LEVEL:
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("loglevel").getAsString());
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("loglevel").getAsString());
+
                         }
                     }
                     break;

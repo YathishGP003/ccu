@@ -10,6 +10,7 @@ import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_MODUL
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL;
 import static a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL;
 
 
@@ -34,6 +35,7 @@ import com.stericson.RootTools.RootTools;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
@@ -47,6 +49,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
@@ -183,7 +186,39 @@ public class RemoteCommandHandlerUtil {
                 updateCCU(id, null, null);
                 setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessAppName, remoteAccessAppName));
                 break;
+            case UPDATE_CCU_LOG_LEVEL:
+                handleCCULogLevelChange(id);
+                break;
+
+
         }
+    }
+
+    private static void handleCCULogLevelChange(String logLevel) {
+        if(logLevel == null || logLevel.isEmpty()){
+            return;
+        }
+        double logLevelValue = -1;
+        switch (logLevel) {
+            case "verbose":
+                logLevelValue = 0.0;
+                break;
+            case "debug":
+                logLevelValue = 1.0;
+                break;
+            case "info":
+                logLevelValue = 2.0;
+                break;
+            case "warn":
+                logLevelValue = 3.0;
+                break;
+            case "error":
+                logLevelValue = 4.0;
+                break;
+        }
+        if(logLevelValue == -1)
+            return;
+        CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,logLevelValue);
     }
 
     private static void saveImportantDataBeforeSaveLogs() {

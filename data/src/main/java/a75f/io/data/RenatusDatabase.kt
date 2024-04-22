@@ -6,23 +6,35 @@ import a75f.io.data.message.Message
 import a75f.io.data.message.MessageDao
 import a75f.io.data.writablearray.WritableArray
 import a75f.io.data.writablearray.WritableArrayDao
+
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 import java.util.*
 
 
-@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 4, exportSchema = false)
+@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 5, exportSchema = false)
 @TypeConverters(Converters::class, WriteArrayTypeConverter::class)
 abstract class RenatusDatabase : RoomDatabase(){
     abstract fun messageDao(): MessageDao
     abstract fun entityDao(): EntityDao
 
     abstract fun writableArrayDao(): WritableArrayDao
+
+companion object {
+     val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE messages ADD COLUMN logLevel TEXT")
+        }
+    }
+}
+
 }
 
 class Converters {
@@ -121,6 +133,8 @@ class WriteArray() {
     fun setModifiedTime(setvalue: Long?, index: Int) {
         lastModifiedTime[index] = setvalue
     }
+
+
 }
 
 

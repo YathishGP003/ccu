@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
@@ -91,6 +92,7 @@ public class DiagEquip
         String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
 
         hsApi.addPoint(getDiagSafeModePoint(equipRef,equipDis,siteRef,tz));
+        addLogLevelPoint(hsApi);
 
         Point batteryLevel = new Point.Builder()
                                            .setDisplayName(equipDis+"-batteryLevel")
@@ -364,6 +366,7 @@ public class DiagEquip
         setDiagHisVal("safe and mode and status", Globals.getInstance().isSafeMode()? 1 : 0);
         updateFreeInternalStoragePoint();
         updateRemoteSessionStatusPoint();
+        setDiagHisVal("log and level", CCUHsApi.getInstance().readHisValByQuery(Queries.LOG_LEVEL_QUERY));
 
     }
 
@@ -397,5 +400,36 @@ public class DiagEquip
                 .setKind(Kind.NUMBER)
                 .setTz(tz)
                 .build();
+    }
+
+    public static void addLogLevelPoint(CCUHsApi hsApi) {
+        HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
+        if (diagEquipMap.isEmpty()) {
+            CcuLog.d(L.TAG_CCU," createLoglevel - DiagEquip does not exist. ");
+            return;
+        }
+
+        HashMap<Object,Object> logLevelPoint = CCUHsApi.getInstance().readEntity(Queries.LOG_LEVEL_QUERY);
+        if(!logLevelPoint.isEmpty()) {
+            return;
+        }
+
+        Equip diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
+
+        Point logLevel = new Point.Builder()
+                .setDisplayName("DiagEquip" + "-LogLevel")
+                .setEquipRef(diagEquip.getId())
+                .setSiteRef(diagEquip.getSiteRef())
+                .addMarker("diag").addMarker("log").addMarker("level")
+                .addMarker("cur").addMarker("sp").addMarker("his")
+                .setHisInterpolate("cov")
+                .setUnit("")
+                .setTz(diagEquip.getTz())
+                .setEnums("verbose,debug,info,warn,error")
+                .build();
+        String logLevelId = hsApi.addPoint(logLevel);
+        hsApi.writeHisValById(logLevelId, 4.0);
+
+
     }
 }

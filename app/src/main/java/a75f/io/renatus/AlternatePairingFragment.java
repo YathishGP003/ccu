@@ -101,25 +101,23 @@ public class AlternatePairingFragment extends BaseDialogFragment {
         if(CCUUiUtil.isCarrierThemeEnabled(requireContext())){
             // To update pairing address in carrier themed UI we need to add some extra margin
             // For Hyperstat profile we have added some extra margins as the image res didnt fit for SN and HS
+            int leftMargin;
+            int topMargin;
+
             if (mNodeType == NodeType.HYPER_STAT) {
-                int leftMargin = 507;
-                int topMargin = 295;
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
-                        dynamicNodeAddress.getLayoutParams();
-                params.leftMargin = leftMargin;
-                params.topMargin = topMargin;
-                dynamicNodeAddress.setLayoutParams(params);
+                leftMargin = 507;
+                topMargin = 295;
             }
             else {
-                int leftMargin = 490;
-                int topMargin = 275;
-
+                leftMargin = 490;
+                topMargin = 275;
+            }
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
                         dynamicNodeAddress.getLayoutParams();
                 params.leftMargin = leftMargin;
                 params.topMargin = topMargin;
                 dynamicNodeAddress.setLayoutParams(params);
-            }
+
         }
         dynamicNodeAddress.setText(mPairingAddress.toString());
         imageGoback.setOnClickListener( v -> {

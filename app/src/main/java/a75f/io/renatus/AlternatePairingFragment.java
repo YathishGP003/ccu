@@ -80,12 +80,13 @@ public class AlternatePairingFragment extends BaseDialogFragment {
         }
         else if (mNodeType == NodeType.HYPER_STAT) {
             title.setText(R.string.title_pair_hs_manual);
-            if (CCUUiUtil.isDaikinEnvironment(requireContext()))
+            if (CCUUiUtil.isDaikinEnvironment(requireContext())) {
                 imageView.setImageResource(R.drawable.manual_pairing_hyperstat_daikin);
-            else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+            } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
                 imageView.setImageResource(R.drawable.alternate_pairing_hyperstat_carrier);
-            else
+            } else {
                 imageView.setImageResource(R.drawable.manual_pairing_hyperstat);
+            }
         }
         else if (mNodeType == NodeType.HYPERSTATSPLIT) {
             title.setText(R.string.title_pair_hss_manual);
@@ -99,13 +100,26 @@ public class AlternatePairingFragment extends BaseDialogFragment {
 
         if(CCUUiUtil.isCarrierThemeEnabled(requireContext())){
             // To update pairing address in carrier themed UI we need to add some extra margin
-            int leftMargin = 490;
-            int topMargin = 275;
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
-                    dynamicNodeAddress.getLayoutParams();
-            params.leftMargin = leftMargin;
-            params.topMargin = topMargin;
-            dynamicNodeAddress.setLayoutParams(params);
+            // For Hyperstat profile we have added some extra margins as the image res didnt fit for SN and HS
+            if (mNodeType == NodeType.HYPER_STAT) {
+                int leftMargin = 507;
+                int topMargin = 295;
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                        dynamicNodeAddress.getLayoutParams();
+                params.leftMargin = leftMargin;
+                params.topMargin = topMargin;
+                dynamicNodeAddress.setLayoutParams(params);
+            }
+            else {
+                int leftMargin = 490;
+                int topMargin = 275;
+
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                        dynamicNodeAddress.getLayoutParams();
+                params.leftMargin = leftMargin;
+                params.topMargin = topMargin;
+                dynamicNodeAddress.setLayoutParams(params);
+            }
         }
         dynamicNodeAddress.setText(mPairingAddress.toString());
         imageGoback.setOnClickListener( v -> {

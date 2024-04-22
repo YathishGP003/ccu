@@ -39,7 +39,5 @@ data class Message(@PrimaryKey val messageId: String,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME)
     var autoCXStopTime: String? = "",
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_AUTO_CX_STATE)
-    var autoCXState: Int = 0,
-    @ColumnInfo(name = MESSAGE_ATTRIBUTE_LOG_LEVEL)
-                   var loglevel: String? = ""
+    var autoCXState: Int = 0
 )

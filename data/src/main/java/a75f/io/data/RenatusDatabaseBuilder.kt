@@ -18,6 +18,5 @@ object RenatusDatabaseBuilder {
             RenatusDatabase::class.java,
             "renatusDb"
         ).fallbackToDestructiveMigration()
-            .addMigrations(RenatusDatabase.MIGRATION_4_5)
-            .build()
+         .build()
 }

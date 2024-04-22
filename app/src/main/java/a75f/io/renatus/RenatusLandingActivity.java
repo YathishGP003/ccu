@@ -175,6 +175,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
                         }
                         floorMenu.setVisibility(View.VISIBLE);
+                        menuToggle.setVisibility(View.GONE);
                     }
                     btnTabs.setEnabled(true);
                 }

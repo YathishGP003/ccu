@@ -13,7 +13,7 @@ import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
-import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -22,7 +22,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,7 +59,6 @@ import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -113,7 +111,6 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
@@ -1050,14 +1047,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 prevPosition = currentPosition;
                 currentPosition = position;
-
                 adapter.setSelectedPosition(position);
+
                 CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
                 if(isItemSelectedEvent)
                     return;
 
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
-                   boolean isContainment = true;
                    namedScheduleView.setVisibility(View.GONE);
                    scheduleImageButton.setVisibility(View.VISIBLE);
 
@@ -1068,56 +1064,36 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                        vacationImageButton.setTag(mSchedule.getId());
                        specialScheduleImageButton.setTag(mSchedule.getId());
                    } else {
-
                        Zone zone = Schedule.getZoneforEquipId(equipId[0]);
-
                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
                                "not special and not vacation and roomRef " + "== " +zone.getId());
-
                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
-                       if (zone.hasSchedule()) {
+                       scheduleById.setDisabled(false);
 
-                           Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
-                           scheduleById.setDisabled(false);
-                           isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
-                           CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-                       } else {
-                           Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
+                       if(!zone.hasSchedule()) {
                            /* We are in a situation where there is a zone without a scheduleRef.
                             * There might have been an error scenario that prevented attaching the scheduleRef, but
                             * still created a schedule. Handle it before creating a new schedule again.
                             */
-                           scheduleById.setDisabled(false);
-                           HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
-                                   "not special and not vacation and roomRef " + "== " +zone.getId());
-                           if (!schedule.isEmpty()) {
-                               Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
-                               zone.setScheduleRef(schedule.get("id").toString());
-                           } else {
+                           if (scheduleHashmap.isEmpty()) {
                                DefaultSchedules.setDefaultCoolingHeatingTemp();
-                               zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                               DefaultSchedules.generateDefaultSchedule(true, zone.getId());
                            }
                        }
-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
-                                "not special and not vacation and roomRef " + "== " +zone.getId());
 
-                       HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-                       Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                       if (z != null) {
-                           z.setScheduleRef(schedule.get("id").toString());
-                           CCUHsApi.getInstance().updateZone(z, zoneId);
+                       ContainmentDialogClickListener containmentDialogClickListener = isForceTrimmed -> {
+                           if(isForceTrimmed) {
+                               transitionToZoneSchedules(zoneMap, scheduleById.getId(), zoneDetails);
+                           } else {
+                               scheduleSpinner.setSelection(prevPosition);
+                           }
+                       };
+
+                       boolean isContainment = checkContainment(scheduleById, containmentDialogClickListener);
+                       if(mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal() && isContainment) {
+                           CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                           transitionToZoneSchedules(zoneMap, scheduleById.getId(), zoneDetails);
                        }
-                       scheduleSpinner.setSelection(position);
-                       scheduleImageButton.setTag(scheduleById.getId());
-                       vacationImageButton.setTag(scheduleById.getId());
-                       scheduleImageButton.setVisibility(View.VISIBLE);
-                       CCUHsApi.getInstance().scheduleSync();
-                   }
-                   if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal()) {
-                       if (isContainment) {
-                           setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
-                       }
-                       mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                    }
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule Title
@@ -1761,13 +1737,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     prevPosition = currentPosition;
                     currentPosition = position;
                     adapter.setSelectedPosition(position);
+
                 if(isItemSelectedEvent)
                     return;
+
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
-                    boolean isContainment = true;
                     namedScheduleView.setVisibility(View.GONE);
                     scheduleImageButton.setVisibility(View.VISIBLE);
+
                     if (mSchedule.isZoneSchedule() ) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(mSchedule, zoneId);
@@ -1775,19 +1753,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         vacationImageButton.setTag(mSchedule.getId());
                         specialScheduleImageButton.setTag(mSchedule.getId());
                     } else {
-
                        Zone zone = Schedule.getZoneforEquipId(equipId);
-                       Schedule scheduleById = null;
-                       if (zone.hasSchedule()) {
-                           HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
-                                   "not special and not vacation and roomRef " + "== " +zone.getId());
-
-                            scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
-                            Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
-                            scheduleById.setDisabled(false);
-                            isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
-                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(scheduleById, zone.getId());
-                        } else {
+                       if (!zone.hasSchedule()) {
                             Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
                             /* We are in a situation where there is a zone without a scheduleRef.
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
@@ -1796,39 +1763,32 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
 
-                           if (!schedule.isEmpty()) {
-                               Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
-                               zone.setScheduleRef(schedule.get("id").toString());
-                           } else {
+                           if (schedule.isEmpty()) {
                                DefaultSchedules.setDefaultCoolingHeatingTemp();
-                               zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                               DefaultSchedules.generateDefaultSchedule(true, zone.getId());
                            }
-                           CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                       }
+                        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and not vacation and roomRef " + "== " +zone.getId());
 
-                           HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
-                                   "not special and not vacation and roomRef " + "== " +zone.getId());
-                           scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
-                       }
-                       HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
-                               "not special and not vacation and roomRef " + "== " +zone.getId());
+                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                        Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
+                        scheduleById.setDisabled(false);
+                        String scheduleId = scheduleById.getId();
 
-                       HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-                       Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                       if (z != null) {
-                           z.setScheduleRef(schedule.get("id").toString());
-                           CCUHsApi.getInstance().updateZone(z, zoneId);
-                       }
-                       scheduleImageButton.setTag(scheduleById.getId());
-                       vacationImageButton.setTag(scheduleById.getId());
-                       scheduleImageButton.setVisibility(View.VISIBLE);
-                       namedScheduleView.setVisibility(View.GONE);
-                       CCUHsApi.getInstance().scheduleSync();
-                   }
-                   if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
-                       if (isContainment) {
-                           setScheduleType(scheduleTypeId, ScheduleType.ZONE, openZoneMap);
-                       }
-                       mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
+                        ContainmentDialogClickListener containmentDialogClickListener = isForceTrimmed -> {
+                            if(isForceTrimmed) {
+                                transitionToZoneSchedules(openZoneMap, scheduleId, zoneDetails);
+                            } else {
+                                scheduleSpinner.setSelection(prevPosition);
+                            }
+                        };
+
+                        boolean isContainment = checkContainment(scheduleById, containmentDialogClickListener);
+                        if(mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal() && isContainment) {
+                            transitionToZoneSchedules(openZoneMap, scheduleId, zoneDetails);
+                            CCUHsApi.getInstance().updateZoneScheduleWithoutUpdatingLastModifiedTime(scheduleById, zone.getId());
+                        }
                    }
                 } else if (position == 1 && (mScheduleType != -1)) {
                     //No operation as it is a Named Schedule
@@ -3933,99 +3893,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
 
-    private boolean checkContainment(String scheduleTypeId, Schedule zoneSchedule, Spinner scheduleSpinner, ArrayList<HashMap> zoneMap) {
+    private boolean checkContainment(Schedule zoneSchedule, ContainmentDialogClickListener listener) {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
         if(zoneIntervals.isEmpty()) return true;
-        int size = zoneIntervals.size();
-
-        for (int i = 0; i < size; i++) {
-            Interval it = zoneIntervals.get(i);
-
-            LocalTime startTimeOfDay = it.getStart().toLocalTime();
-            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
-
-            // Check if the start time is after the end time and separating the overnight schedule
-            if (startTimeOfDay.isAfter(endTimeOfDay)) {
-                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
-                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
-            }
-        }
+        separateOvernightSchedules(zoneIntervals);
         //sorting the zoneInterval
         zoneIntervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
-        Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size()-1);
-        LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
-        Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
-        LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
-        /** checking for overnight for sunday ,if it is has overnight sch for sunday
-         we need to add the building occupancy for next week monday also **/
-        if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
-        {
-            Interval nextWeekDaySystemInterval = ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule);
-            if(nextWeekDaySystemInterval!=null)
-            {
-                systemIntervals.add(nextWeekDaySystemInterval);
-            }
-        }
-
-        for (Interval z : zoneIntervals) {
-            boolean add = true;
-            for (Interval s : systemIntervals) {
-                if (s.contains(z)) {
-                    add = false;
-                    break;
-                } else if (s.overlaps(z)) {
-                    add = false;
-                    for (Interval i : disconnectedIntervals(systemIntervals, z)) {
-                        if (!intervalSpills.contains(i)) {
-                            intervalSpills.add(i);
-                        }
-                    }
-
-                }
-            }
-            if (add) {
-                intervalSpills.add(z);
-                CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
-            }
-        }
-
-
+        updateSystemScheduleForSundayOvernight(zoneIntervals, systemIntervals, systemSchedule);
+        generateIntervalSpills(zoneIntervals, systemIntervals, intervalSpills);
         if (intervalSpills.size() > 0) {
-            StringBuilder spillZones = new StringBuilder();
-            for (Interval i : intervalSpills) {
-                spillZones.append(
-                    getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
-            }
-
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
-            builder.setMessage("Zone Schedule is outside building schedule currently set. " +
-                    "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
-                    .setCancelable(false)
-                    .setTitle("Schedule Errors")
-                    .setIcon(R.drawable.ic_dialog_alert)
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            scheduleSpinner.setSelection(0);
-                            dialog.dismiss();
-                        }
-
-                    })
-                    .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
-                            HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
-                            spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
-                            Log.d("CCU_UI ", "Fill spillsMap for zone "+zoneSchedule.getRoomRef());
-                            trimZoneSchedule(mSchedule, spillsMap);
-                            CCUHsApi.getInstance().scheduleSync();
-                        }
-                    });
-
-            AlertDialog alert = builder.create();
-            alert.show();
+            generateOccupancyContainmentBreachedDialog(intervalSpills, zoneSchedule, listener);
             return false;
         } else {
             return true;
@@ -4478,4 +4358,118 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
+    private void transitionToZoneSchedules(ArrayList<HashMap> zoneMap, String scheduleId, View zoneDetails) {
+        Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+        ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
+
+        String zoneId = zoneMap.get(0).get("roomRef").toString();
+        String scheduleTypeId = getScheduleTypeId(zoneMap.get(0).get("id").toString());
+
+        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+                "not special and not vacation and roomRef " + "== " + zoneMap.get(0).get("roomRef"));
+        HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+        Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+        if (z != null) {
+            z.setScheduleRef(schedule.get("id").toString());
+            CCUHsApi.getInstance().updateZone(z, zoneId);
+        }
+
+        scheduleSpinner.setSelection(0);
+        scheduleImageButton.setTag(scheduleId);
+        vacationImageButton.setTag(scheduleId);
+        scheduleImageButton.setVisibility(View.VISIBLE);
+        CCUHsApi.getInstance().scheduleSync();
+
+        setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+        mScheduleTypeMap.put(zoneMap.get(0).get("id").toString(), ScheduleType.ZONE.ordinal());
+    }
+
+    public void separateOvernightSchedules(ArrayList<Interval> zoneIntervals) {
+        int size = zoneIntervals.size();
+        for (int i = 0; i < size; i++) {
+            Interval it = zoneIntervals.get(i);
+
+            LocalTime startTimeOfDay = it.getStart().toLocalTime();
+            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
+
+            // Check if the start time is after the end time and separating the overnight schedule
+            if (startTimeOfDay.isAfter(endTimeOfDay)) {
+                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
+                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
+            }
+        }
+    }
+
+    private void updateSystemScheduleForSundayOvernight(ArrayList<Interval> zoneIntervals, ArrayList<Interval> systemIntervals, Schedule systemSchedule) {
+        Interval ZonelastInterval = zoneIntervals.get(zoneIntervals.size()-1);
+        LocalDate ZoneLastTimeOfDay = ZonelastInterval.getStart().toDateTime().toLocalDate();
+        Interval systemLastInterval = systemIntervals.get(systemIntervals.size()-1);
+        LocalDate systemLastTimeOfDay = systemLastInterval.getStart().toDateTime().toLocalDate();
+        /** checking for overnight for sunday ,if it is has overnight sch for sunday
+         we need to add the building occupancy for next week monday also **/
+        if(ZoneLastTimeOfDay.isAfter(systemLastTimeOfDay))
+        {
+            Interval nextWeekDaySystemInterval = ScheduleUtil.AddingNextWeekDayForOverNight(systemSchedule);
+            if(nextWeekDaySystemInterval!=null)
+            {
+                systemIntervals.add(nextWeekDaySystemInterval);
+            }
+        }
+    }
+
+    private void generateIntervalSpills(ArrayList<Interval> zoneIntervals, ArrayList<Interval> systemIntervals, ArrayList<Interval> intervalSpills) {
+        for (Interval z : zoneIntervals) {
+            boolean add = true;
+            for (Interval s : systemIntervals) {
+                if (s.contains(z)) {
+                    add = false;
+                    break;
+                } else if (s.overlaps(z)) {
+                    add = false;
+                    for (Interval i : disconnectedIntervals(systemIntervals, z)) {
+                        if (!intervalSpills.contains(i)) {
+                            intervalSpills.add(i);
+                        }
+                    }
+
+                }
+            }
+            if (add) {
+                intervalSpills.add(z);
+                CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
+            }
+        }
+    }
+
+    private void generateOccupancyContainmentBreachedDialog(ArrayList<Interval> intervalSpills, Schedule zoneSchedule, ContainmentDialogClickListener listener) {
+        StringBuilder spillZones = new StringBuilder();
+        for (Interval i : intervalSpills) {
+            spillZones.append(
+                    getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+        }
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
+        builder.setMessage("Zone Schedule is outside building schedule currently set. " +
+                        "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
+                .setCancelable(false)
+                .setTitle("Schedule Errors")
+                .setIcon(R.drawable.ic_dialog_alert)
+                .setNegativeButton("Cancel", (dialog, id) -> {
+                    listener.onDialogClick(false);
+                    dialog.dismiss();
+                })
+                .setPositiveButton("Force-Trim", (dialog, id) -> {
+                    HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
+                    spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                    trimZoneSchedule(zoneSchedule, spillsMap);
+                    listener.onDialogClick(true);
+                    CCUHsApi.getInstance().scheduleSync();
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+}
+
+interface ContainmentDialogClickListener {
+    void onDialogClick(Boolean isForceTrimmed);
 }

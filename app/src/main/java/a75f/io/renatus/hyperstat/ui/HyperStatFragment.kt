@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -20,6 +21,7 @@ import a75f.io.renatus.hyperstat.AnalogOutWidgets
 import a75f.io.renatus.hyperstat.RelayWidgets
 import a75f.io.renatus.hyperstat.StagedFanWidgets
 import a75f.io.renatus.hyperstat.viewModels.*
+import a75f.io.renatus.hyperstatsplit.viewModels.CpuEconViewModel
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
@@ -670,6 +672,19 @@ class HyperStatFragment : BaseDialogFragment() {
         var isHeatingStage3Enabled = false
         var isStagedFanEnabled = false
         var isDampSelected = false
+
+        // Update the isStagedFanEnabled variable
+        viewState.analogOutUis.forEachIndexed { index, analogOutState ->
+            with(analogOutUIs[index]) {
+
+                if (viewModel is CpuViewModel) {
+                    if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        isStagedFanEnabled = true
+                    }
+                }
+            }
+        }
+
         viewState.relays.forEachIndexed { index, relayState ->
             with(relayUIs[index]) {
                 switch.isChecked = relayState.enabled

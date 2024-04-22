@@ -57,10 +57,6 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
         messagePojo.autoCXState = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STATE)?.asInt?: 0
     }
 
-    if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL)){
-        messagePojo.loglevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LOG_LEVEL)?.asString
-    }
-
     return messagePojo
 }
 

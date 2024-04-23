@@ -564,8 +564,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
                         AlertDialog alert = builder.create();
                         alert.show();
-
-                        return;
+                        return false;
                     }
 
                             ProgressDialogUtils.showProgressDialog(SchedulerFragment.this.getActivity(),
@@ -594,6 +593,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             CCUHsApi.getInstance().syncEntityTree();
                             SchedulerFragment.this.loadSpecialSchedules();
                             ProgressDialogUtils.hideProgressDialog();
+                            return true;
                         });
         specialScheduleDialogFragment.show(fragmentTransaction, "popup");
     }

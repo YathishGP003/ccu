@@ -108,7 +108,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         return CCUHsApi.getInstance().getSystemSchedule(false).get(0);
     }
     public interface SpecialScheduleDialogListener{
-        void onClickSave(String scheduleName, DateTime startDate, DateTime endDate,
+        boolean onClickSave(String scheduleName, DateTime startDate, DateTime endDate,
                          double coolVal, double heatVal,
                          double coolingUserLimitMax,
                          double coolingUserLimitMin,
@@ -587,15 +587,15 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             heatingDeadBandVal = MasterControlUtil.getAdapterFarhenheitVal(heatingDeadBand.getSelectedItem().toString() );
         }
 
-        specialScheduleDialogListener.onClickSave(scheduleName, startDate, endDate,
-                rangeSeekBarView.getCoolValue(), rangeSeekBarView.getHeatValue(),
-                coolingUserLimitMaxVal,
-                coolingUserLimitMinVal,
-                heatingUserLimitMaxVal,
-                heatingUserLimitMinVal,
-                coolingDeadBandVal ,
-                heatingDeadBandVal );
-        dismiss();
+        boolean dismissDialog = specialScheduleDialogListener.onClickSave(scheduleName, startDate, endDate,
+                                    rangeSeekBarView.getCoolValue(), rangeSeekBarView.getHeatValue(),
+                                    coolingUserLimitMaxVal,
+                                    coolingUserLimitMinVal,
+                                    heatingUserLimitMaxVal,
+                                    heatingUserLimitMinVal,
+                                    coolingDeadBandVal ,
+                                    heatingDeadBandVal );
+        if(dismissDialog) { dismiss(); }
     }
 
     @Override

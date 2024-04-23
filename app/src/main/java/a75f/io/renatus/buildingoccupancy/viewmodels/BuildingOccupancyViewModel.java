@@ -142,7 +142,7 @@ public class BuildingOccupancyViewModel {
         BuildingOccupancy.Days runningUnoccupiedPeriod = new BuildingOccupancy.Days(occupiedTimeList.get(0).getDay(), 0,
                 0, 24, 0, false);
         for(BuildingOccupancy.Days occupiedTime : occupiedTimeList){
-            if(occupiedTime.getSthh() == runningUnoccupiedPeriod.getSthh() && occupiedTime.getSthh() == runningUnoccupiedPeriod.getSthh()){
+            if(occupiedTime.getSthh() == runningUnoccupiedPeriod.getSthh() && occupiedTime.getStmm() == runningUnoccupiedPeriod.getStmm()){
                 runningUnoccupiedPeriod.setSthh(occupiedTime.getEthh());
                 runningUnoccupiedPeriod.setStmm(occupiedTime.getEtmm());
             }

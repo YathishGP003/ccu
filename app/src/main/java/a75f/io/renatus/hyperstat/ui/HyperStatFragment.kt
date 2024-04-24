@@ -670,6 +670,19 @@ class HyperStatFragment : BaseDialogFragment() {
         var isHeatingStage3Enabled = false
         var isStagedFanEnabled = false
         var isDampSelected = false
+
+        viewState.analogOutUis.forEachIndexed { index, analogOutState ->
+            with(analogOutUIs[index]) {
+
+                if (viewModel is CpuViewModel) {
+                    if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                        isStagedFanEnabled = true
+                    }
+                }
+
+            }
+        }
+
         viewState.relays.forEachIndexed { index, relayState ->
             with(relayUIs[index]) {
                 switch.isChecked = relayState.enabled
@@ -709,6 +722,7 @@ class HyperStatFragment : BaseDialogFragment() {
                 }
             }
         }
+
         viewState.analogOutUis.forEachIndexed { index, analogOutState ->
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled

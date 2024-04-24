@@ -8,7 +8,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyUniversalInMappedToFilterNC
 
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip
 import a75f.io.logic.tuners.TunerUtil
@@ -228,9 +227,39 @@ class HSSplitHaystackUtil(
         )
     }
 
-    fun getOutsideDamperMinOpen(): Double {
+    fun getOutsideDamperMinOpenDuringRecirc(): Double {
         return haystack.readDefaultVal(
-            "point and outside and damper and min and open and equipRef == \"$equipRef\""
+            "point and outside and damper and min and open and recirc and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideDamperMinOpenDuringConditioning(): Double {
+        return haystack.readDefaultVal(
+            "point and outside and damper and min and open and conditioning and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideDamperMinOpenDuringFanLow(): Double {
+        return haystack.readDefaultVal(
+            "point and outside and damper and min and open and fan and low and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideDamperMinOpenDuringFanMedium(): Double {
+        return haystack.readDefaultVal(
+            "point and outside and damper and min and open and fan and medium and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getOutsideDamperMinOpenDuringFanHigh(): Double {
+        return haystack.readDefaultVal(
+            "point and outside and damper and min and open and fan and high and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getEconomizingLoopOutput(): Double {
+        return haystack.readHisValByQuery(
+            "point and economizing and loop and output and equipRef == \"$equipRef\""
         )
     }
 
@@ -535,6 +564,9 @@ class HSSplitHaystackUtil(
     fun isAutoAwayEnabled(): Boolean{
         return (readConfigStatus("auto and away").toInt() == 1)
     }
+    fun isPrePurgeEnabled(): Boolean{
+        return (readPointValue("prePurge and enabled and cpu and standalone and userIntent").toInt() == 1)
+    }
     fun getCo2DamperOpeningConfigValue(): Double{
         return haystack.readDefaultVal(
             "point and co2 and opening and rate and equipRef == \"$equipRef\"")
@@ -567,6 +599,11 @@ class HSSplitHaystackUtil(
     fun getPm2p5TargetConfigValue(): Double{
         return  haystack.readDefaultVal(
             "point and pm2p5 and target and equipRef == \"$equipRef\""
+        )
+    }
+    fun getDamperMinOpenConfigValue(): Double{
+        return haystack.readDefaultVal(
+            "prePurge and cpu and damper and open and min and cpu and equipRef == \"$equipRef\""
         )
     }
 
@@ -614,6 +651,16 @@ class HSSplitHaystackUtil(
         val fanStageValue = haystack.readEntity(query)
 
         return if (fanStageValue.isEmpty()) {
+            defaultValue.toDouble()
+        } else {
+            haystack.readDefaultVal(query)
+        }
+    }
+
+    fun getDamperMinOpenValue(defaultValue: Int): Double {
+        val query = "prePurge and cpu and damper and open and min and cpu and equipRef == \"$equipRef\""
+        val damperMinOpenVal = haystack.readEntity(query)
+        return if (damperMinOpenVal.isEmpty()) {
             defaultValue.toDouble()
         } else {
             haystack.readDefaultVal(query)

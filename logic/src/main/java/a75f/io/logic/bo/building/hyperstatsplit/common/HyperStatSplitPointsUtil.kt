@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.*
 import a75f.io.logic.ANALOG_VALUE
 import a75f.io.logic.BINARY_VALUE
-import a75f.io.logic.L
 import a75f.io.logic.MULTI_STATE_VALUE
 import a75f.io.logic.addBacnetTags
 import a75f.io.logic.bo.building.definitions.Port
@@ -398,7 +397,9 @@ class HyperStatSplitPointsUtil(
         (Also, no Return Air CO2.)
      */
     fun createZoneOAOPoints(
-        outsideDamperMinOpen: Double, exhaustFanStage1Threshold: Double,
+        outsideDamperMinOpenDuringRecirc: Double, outsideDamperMinOpenDuringConditioning: Double,
+        outsideDamperMinOpenDuringFanLow: Double, outsideDamperMinOpenDuringFanMedium: Double,
+        outsideDamperMinOpenDuringFanHigh: Double, exhaustFanStage1Threshold: Double,
         exhaustFanStage2Threshold: Double, exhaustFanHysteresis: Double
     ): MutableList<Pair<Point, Any>> {
 
@@ -511,16 +512,60 @@ class HyperStatSplitPointsUtil(
         )
         zoneOAOPointsList.add(Pair(weatherOutsideHumidityPoint, 0.0))
 
-        val outsideDamperMinOpenPointMarker = arrayOf(
-            "config", "oao", "writable", "outside", "damper", "min", "open" , "sp", "cpu", "his"
+        val outsideDamperMinOpenDuringRecircPointMarker = arrayOf(
+            "config", "oao", "writable", "outside", "damper", "min", "open", "recirc", "sp", "cpu", "his"
         )
-        val outsideDamperMinOpenPoint = createHaystackPointWithUnit(
-            "$equipDis-outsideDamperMinOpen",
-            outsideDamperMinOpenPointMarker,
+        val outsideDamperMinOpenDuringRecircPoint = createHaystackPointWithUnit(
+            "$equipDis-outsideDamperMinOpenDuringRecirc",
+            outsideDamperMinOpenDuringRecircPointMarker,
             "cov",
             "%"
         )
-        zoneOAOPointsList.add(Pair(outsideDamperMinOpenPoint, outsideDamperMinOpen))
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenDuringRecircPoint, outsideDamperMinOpenDuringRecirc))
+
+        val outsideDamperMinOpenDuringConditioningPointMarker = arrayOf(
+            "config", "oao", "writable", "outside", "damper", "min", "open", "conditioning", "sp", "cpu", "his"
+        )
+        val outsideDamperMinOpenDuringConditioningPoint = createHaystackPointWithUnit(
+            "$equipDis-outsideDamperMinOpenDuringConditioning",
+            outsideDamperMinOpenDuringConditioningPointMarker,
+            "cov",
+            "%"
+        )
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenDuringConditioningPoint, outsideDamperMinOpenDuringConditioning))
+
+        val outsideDamperMinOpenDuringFanLowPointMarker = arrayOf(
+            "config", "oao", "writable", "outside", "damper", "min", "open", "fan", "low", "sp", "cpu", "his"
+        )
+        val outsideDamperMinOpenDuringFanLowPoint = createHaystackPointWithUnit(
+            "$equipDis-outsideDamperMinOpenDuringFanLow",
+            outsideDamperMinOpenDuringFanLowPointMarker,
+            "cov",
+            "%"
+        )
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenDuringFanLowPoint, outsideDamperMinOpenDuringFanLow))
+
+        val outsideDamperMinOpenDuringFanMediumPointMarker = arrayOf(
+            "config", "oao", "writable", "outside", "damper", "min", "open", "fan", "medium", "sp", "cpu", "his"
+        )
+        val outsideDamperMinOpenDuringFanMediumPoint = createHaystackPointWithUnit(
+            "$equipDis-outsideDamperMinOpenDuringFanMedium",
+            outsideDamperMinOpenDuringFanMediumPointMarker,
+            "cov",
+            "%"
+        )
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenDuringFanMediumPoint, outsideDamperMinOpenDuringFanMedium))
+
+        val outsideDamperMinOpenDuringFanHighPointMarker = arrayOf(
+            "config", "oao", "writable", "outside", "damper", "min", "open", "fan", "high", "sp", "cpu", "his"
+        )
+        val outsideDamperMinOpenDuringFanHighPoint = createHaystackPointWithUnit(
+            "$equipDis-outsideDamperMinOpenDuringFanHigh",
+            outsideDamperMinOpenDuringFanHighPointMarker,
+            "cov",
+            "%"
+        )
+        zoneOAOPointsList.add(Pair(outsideDamperMinOpenDuringFanHighPoint, outsideDamperMinOpenDuringFanHigh))
 
         val exhaustFanStage1ThresholdPointMarker = arrayOf(
             "config", "oao", "writable", "exhaust", "fan", "stage1", "threshold" , "sp", "cpu"
@@ -1143,14 +1188,48 @@ class HyperStatSplitPointsUtil(
         return configUniversalInPointsList
     }
 
-    // Function to create autoaway and auto force occupy point
-    fun createAutoForceAutoAwayConfigPoints(
-        isAutoAwayEnabled: Boolean,
-        isAutoForcedOccupiedEnabled: Boolean
-
+    fun createPrePurgeConfigPoints(
+        prePurgeMinPosition: Double,
+        prePurgeEnabled: Boolean
     ): MutableList<Pair<Point, Any>> {
 
-        val autoForceAutoAwayConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
+        val prePurgeConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
+
+
+        val prePurgeEnabledPointMarkers = arrayOf(
+            "prePurge", "userIntent", "writable", "standalone", "cpu", "cur", "his", "zone", "enabled"
+        )
+        val prePurgeEnabledPoint = createHaystackPointWithEnums(
+            "$equipDis-prePurgeEnabled",
+            prePurgeEnabledPointMarkers,
+            "off,on"
+        )
+        prePurgeConfigPointsList.add(Pair(prePurgeEnabledPoint, if (prePurgeEnabled) 1.0 else 0.0))
+
+        if(prePurgeEnabled) {
+            val prePurgeOutsideDamperMinPosPointMarkers = arrayOf(
+                "cur", "his", "min", "outside", "prePurge", "open", "config", "damper", "writable", "standalone", "cpu"
+            )
+            val prePurgeOutsideDamperMinPosPoint = createHaystackPointWithUnit(
+                "$equipDis-prePurgeOutsideDamperMinPos",
+                prePurgeOutsideDamperMinPosPointMarkers,
+                "cov",
+                "%"
+            )
+
+            prePurgeConfigPointsList.add(Pair(prePurgeOutsideDamperMinPosPoint, prePurgeMinPosition))
+        }
+
+        return prePurgeConfigPointsList
+    }
+
+    // Function to create autoaway, auto force occupy and pre purge point
+    fun createAutoForceAutoAwayConfigPoints(
+        isAutoAwayEnabled: Boolean,
+        isAutoForcedOccupiedEnabled: Boolean,
+    ): MutableList<Pair<Point, Any>> {
+
+        val autoForceAAPConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val enableAutoForceOccupancyControlPointMarkers = arrayOf(
             "config", "writable", "zone", "auto", "occupancy", "enabled", "control", "forced","his","cmd"
@@ -1173,20 +1252,21 @@ class HyperStatSplitPointsUtil(
             "off,on"
         )
 
-        autoForceAutoAwayConfigPointsList.add(
+        autoForceAAPConfigPointsList.add(
             Pair(
                 enableAutoForceOccupancyControlPoint,
                 if (isAutoForcedOccupiedEnabled) 1.0 else 0.0
             )
         )
 
-        autoForceAutoAwayConfigPointsList.add(
+        autoForceAAPConfigPointsList.add(
             Pair(
                 enableAutoAwayControlPointPoint,
                 if (isAutoAwayEnabled) 1.0 else 0.0
             )
         )
-        return autoForceAutoAwayConfigPointsList
+
+        return autoForceAAPConfigPointsList
     }
 
     // Function which creates co2 Points
@@ -2113,6 +2193,25 @@ class HyperStatSplitPointsUtil(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz, universalInOrder,nodeAddress
                 )
             }
+            (HyperStatSplitAssociationUtil.isUniversalInAssociatedToDuctPressure10In(universalInState)) -> {
+
+                LogicalPointsUtil.createPointForDuctPressure(
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,
+                    min = "0", max = "10", inc = "0.01", unit = "inH₂O",LogicalPointsUtil.DuctPressureSensorType.DUCT_PRESSURE_0_10,nodeAddress
+                )
+            }
+            (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericFaultNC(universalInState)) -> {
+
+                LogicalPointsUtil.createPointForGenericFaultNC(
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
+                )
+            }
+            (HyperStatSplitAssociationUtil.isUniversalInAssociatedToGenericFaultNO(universalInState)) -> {
+
+                LogicalPointsUtil.createPointForGenericFaultNO(
+                    equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress
+                )
+            }
 
             else -> {
                 Point.Builder().build()
@@ -2541,7 +2640,7 @@ class HyperStatSplitPointsUtil(
                 return "$CURRENT_10,$CURRENT_20,$CURRENT_50,$CURRENT_100,$CURRENT_150," +
                         "$SUPPLY_AIR_TEMP,$MIXED_AIR_TEMP,$OUTSIDE_AIR_TEMP,$FILTER_NC," +
                         "$FILTER_NO,$CONDENSATE_NC,$CONDENSATE_NO,$PRESSURE_1,$PRESSURE_2,"+
-                        "$GENERIC_VOLTAGE,$GENERIC_RESISTANCE"
+                        "$GENERIC_VOLTAGE,$GENERIC_RESISTANCE,$PRESSURE_10,$GENERIC_FAULT_NC,$GENERIC_FAULT_NO"
             }
             else -> {}
         }
@@ -2602,6 +2701,110 @@ class HyperStatSplitPointsUtil(
     ): MutableList<Pair<Point, Any>> {
 
         val stagedFanConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
+
+        if(HyperStatSplitConfig.analogOut1State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut1State)){
+            val analog1RecirculateConfigPointMarkers = arrayOf(
+                "recirculate", "writable", "config", "zone", "sp", "analog1"
+            )
+            val analog1RecirculateConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-fanOutRecirculateAnalog1",
+                analog1RecirculateConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog1RecirculateConfigPoint, HyperStatSplitConfig.analogOut1State.voltageAtRecirculate)
+            )
+            val analog1DuringEconomizerConfigPointMarker = arrayOf(
+                "economizer", "writable", "config", "zone", "sp", "analog1"
+            )
+            val analog1DuringEconomizerConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-analog1DuringEconomizer",
+                analog1DuringEconomizerConfigPointMarker,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog1DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut1State.voltageDuringEconomizer)
+            )
+        }
+
+        if(HyperStatSplitConfig.analogOut2State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut2State)){
+            val analog2RecirculateConfigPointMarkers = arrayOf(
+                "recirculate", "writable", "config", "zone", "sp", "analog2"
+            )
+            val analog2RecirculateConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-fanOutRecirculateAnalog2",
+                analog2RecirculateConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog2RecirculateConfigPoint, HyperStatSplitConfig.analogOut2State.voltageAtRecirculate)
+            )
+            val analog2DuringEconomizerConfigPointMarkers = arrayOf(
+                "economizer", "writable", "config", "zone", "sp", "analog2"
+            )
+            val analog2DuringEconomizerConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-analog2DuringEconomizer",
+                analog2DuringEconomizerConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog2DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut2State.voltageDuringEconomizer)
+            )
+        }
+
+        if(HyperStatSplitConfig.analogOut3State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut3State)){
+            val analog3RecirculateConfigPointMarkers = arrayOf(
+                "recirculate", "writable", "config", "zone", "sp", "analog3"
+            )
+            val analog3RecirculateConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-fanOutRecirculateAnalog3",
+                analog3RecirculateConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog3RecirculateConfigPoint, HyperStatSplitConfig.analogOut3State.voltageAtRecirculate)
+            )
+            val analog3DuringEconomizerConfigPointMarkers = arrayOf(
+                "economizer", "writable", "config", "zone", "sp", "analog3"
+            )
+            val analog3DuringEconomizerConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-analog3DuringEconomizer",
+                analog3DuringEconomizerConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog3DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut3State.voltageDuringEconomizer)
+            )
+        }
+
+        if(HyperStatSplitConfig.analogOut4State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut4State)){
+            val analog4RecirculateConfigPointMarkers = arrayOf(
+                "recirculate", "writable", "config", "zone", "sp", "analog4"
+            )
+            val analog4RecirculateConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-fanOutRecirculateAnalog4",
+                analog4RecirculateConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog4RecirculateConfigPoint, HyperStatSplitConfig.analogOut4State.voltageAtRecirculate)
+            )
+            val analog4DuringEconomizerConfigPointMarkers = arrayOf(
+                "economizer", "writable", "config", "zone", "sp", "analog4"
+            )
+            val analog4DuringEconomizerConfigPoint = createHaystackPointWithUnit(
+                "$equipDis-analog4DuringEconomizer",
+                analog4DuringEconomizerConfigPointMarkers,
+                null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                Pair(analog4DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut4State.voltageDuringEconomizer)
+            )
+        }
 
         if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_1)) {
             val coolingStage1FanConfigPointMarkers = arrayOf(
@@ -2695,6 +2898,139 @@ class HyperStatSplitPointsUtil(
             )
         }
         return stagedFanConfigPointsList
+    }
+
+    /**
+     * Creates a recirculate configuration point with the specified parameters.
+     *
+     * @param pointName The name of the point.
+     * @param markers Array of markers for the point.
+     * @param fanState The state of the fan.
+     * @return A Pair representing the created point and its state.
+     */
+    private fun createRecirculateConfigPoint(
+        pointName: String,
+        markers: Array<String>,
+        fanState: Any
+    ): Pair<Point, Any> {
+        val fanConfigPoint = createHaystackPointWithUnit(pointName, markers, null, "V")
+        return Pair(fanConfigPoint, fanState)
+    }
+
+    /**
+     * Creates analog recirculate points based on the provided configuration and analog tag.
+     *
+     * @param recirculateValue recirculate value.
+     * @param analogTag The analog tag (e.g., "analog1", "analog2", "analog3").
+     * @return A list of pairs representing the created analog recirculate points.
+     */
+    fun createAnalogAtRecirculatePoint(recirculateValue: Double, analogTag: String): MutableList<Pair<Point, Any>> {
+
+        val analogAtRecirculationPointList: MutableList<Pair<Point, Any>> = LinkedList()
+        when (analogTag) {
+            "analog1" -> {
+                val analog1RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog1",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog1"), recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog1RecirculateConfigPoint)
+            }
+            "analog2" -> {
+                val analog2RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog2",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog2"), recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog2RecirculateConfigPoint)
+            }
+            "analog3" -> {
+                val analog3RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog3",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog3"), recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog3RecirculateConfigPoint)
+            }
+            "analog4" -> {
+                val analog4RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog4",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog4"), recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog4RecirculateConfigPoint)
+            }
+            else -> {
+            }
+        }
+        return analogAtRecirculationPointList
+    }
+
+    private fun createPrePurgeMinConfigPoint(
+        pointName: String,
+        markers: Array<String>,
+        minVal: Any
+    ): Pair<Point, Any> {
+        val prePurgeMinConfigPoint = createHaystackPointWithUnit(pointName, markers, "cov", "%")
+        return Pair(prePurgeMinConfigPoint, minVal)
+    }
+
+    /**
+     * Creates a list containing a single pair representing a pre-purge minimum position configuration point.
+     * This function is used to generate a configuration point for the minimum damper position during pre-purge.
+     *
+     * @param minVal The minimum damper position value for pre-purge.
+     * @return A mutable list containing a single pair representing the configuration point and its associated value.
+     */
+    fun createPrePurgeMinPoint(minVal: Double): MutableList<Pair<Point, Any>> {
+        val prePurgeMinPointList: MutableList<Pair<Point, Any>> = LinkedList()
+        val prePurgeMinConfigPoint = createPrePurgeMinConfigPoint(
+            "$equipDis-prePurgeOutsideDamperMinPos",
+            arrayOf("cur", "his", "min", "outside", "prePurge", "open", "config", "damper", "writable", "standalone", "cpu"), minVal
+        )
+        prePurgeMinPointList.add(prePurgeMinConfigPoint)
+        return prePurgeMinPointList
+    }
+
+    /**
+     * Creates analog during economizer points based on the provided configuration and analog tag.
+     *
+     * @param economizerValue The economizer value.
+     * @param analogTag The analog tag (e.g., "analog1", "analog2", "analog3").
+     * @return A list of pairs representing the created analog during economizer points.
+     */
+    fun createAnalogDuringEconomizerPoint(economizerValue: Double, analogTag: String): MutableList<Pair<Point, Any>> {
+
+        val analogDuringEconomizerPointList: MutableList<Pair<Point, Any>> = LinkedList()
+        when (analogTag) {
+            "analog1" -> {
+                val analog1DuringEconomizerConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-analog1DuringEconomizer",
+                    arrayOf("economizer", "writable", "config", "zone", "sp", "analog1"), economizerValue
+                )
+                analogDuringEconomizerPointList.add(analog1DuringEconomizerConfigPoint)
+            }
+            "analog2" -> {
+                val analog2DuringEconomizerConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-analog2DuringEconomizer",
+                    arrayOf("economizer", "writable", "config", "zone", "sp", "analog2"), economizerValue
+                )
+                analogDuringEconomizerPointList.add(analog2DuringEconomizerConfigPoint)
+            }
+            "analog3" -> {
+                val analog3DuringEconomizerConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-analog3DuringEconomizer",
+                    arrayOf("economizer", "writable", "config", "zone", "sp", "analog3"), economizerValue
+                )
+                analogDuringEconomizerPointList.add(analog3DuringEconomizerConfigPoint)
+            }
+            "analog4" -> {
+                val analog4DuringEconomizerConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-analog4DuringEconomizer",
+                    arrayOf("economizer", "writable", "config", "zone", "sp", "analog4"), economizerValue
+                )
+                analogDuringEconomizerPointList.add(analog4DuringEconomizerConfigPoint)
+            }
+            else -> {
+            }
+        }
+        return analogDuringEconomizerPointList
     }
 
     fun createStagedFanPoint(

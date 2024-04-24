@@ -129,18 +129,74 @@
                             android:layout_marginTop="30dp">
 
                             <TextView
-                                android:id="@+id/textOAMinOpen"
+                                android:id="@+id/textOAMinOpenDuringRecirc"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open"
-                                android:layout_toStartOf="@+id/oaDamperMinOpen"
+                                android:text="@string/label_oadamper_min_open_during_recirc"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringRecirc"
                                 android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
-                                android:id="@+id/oaDamperMinOpen"
+                                android:id="@+id/oaDamperMinOpenDuringRecirc"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textOAMinOpenDuringFanLow"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_oadamper_min_open_during_fan_low"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanLow"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/oaDamperMinOpenDuringFanLow"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textOAMinOpenDuringFanHigh"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_oadamper_min_open_during_fan_high"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanHigh"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/oaDamperMinOpenDuringFanHigh"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
@@ -320,6 +376,62 @@
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/customSpinnerForNumber"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textOAMinOpenDuringConditioning"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_oadamper_min_open_during_conditioning"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringConditioning"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/oaDamperMinOpenDuringConditioning"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textOAMinOpenDuringFanMedium"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_oadamper_min_open_during_fan_medium"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanMedium"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/oaDamperMinOpenDuringFanMedium"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 

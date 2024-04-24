@@ -16,6 +16,7 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
 
    var isEnableAutoForceOccupied = false
    var isEnableAutoAway = false
+   var isEnablePrePurge = false
 
    /*
       Addresses of each device on the sensor bus needs to be modeled here because they are part of the configuration screen.
@@ -38,10 +39,10 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var relay7State = RelayState(false, CpuEconRelayAssociation.EXHAUST_FAN_STAGE_1)
    var relay8State = RelayState(false, CpuEconRelayAssociation.EXHAUST_FAN_STAGE_2)
 
-   var analogOut1State = AnalogOutState(false, CpuEconAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
-   var analogOut3State = AnalogOutState(false, CpuEconAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
-   var analogOut4State = AnalogOutState(false, CpuEconAnalogOutAssociation.OAO_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut1State = AnalogOutState(false, CpuEconAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0, 4.0, 7.0)
+   var analogOut2State = AnalogOutState(false, CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0, 4.0, 7.0)
+   var analogOut3State = AnalogOutState(false, CpuEconAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0, 4.0, 7.0)
+   var analogOut4State = AnalogOutState(false, CpuEconAnalogOutAssociation.OAO_DAMPER, 2.0, 10.0,70.0,80.0,100.0, 4.0, 7.0)
 
    var universalIn1State = UniversalInState(false, UniversalInAssociation.SUPPLY_AIR_TEMPERATURE)
    var universalIn2State = UniversalInState(false, UniversalInAssociation.MIXED_AIR_TEMPERATURE)
@@ -59,7 +60,12 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    var heatingStage2FanState = 10
    var heatingStage3FanState = 10
 
-   var outsideDamperMinOpen = 0.0
+   var outsideDamperMinOpenDuringRecirc = 20.0
+   var outsideDamperMinOpenDuringConditioning = 10.0
+   var outsideDamperMinOpenDuringFanLow = 20.0
+   var outsideDamperMinOpenDuringFanMedium = 15.0
+   var outsideDamperMinOpenDuringFanHigh = 10.0
+
    var exhaustFanStage1Threshold = 50.0
    var exhaustFanStage2Threshold = 90.0
    var exhaustFanHysteresis = 5.0
@@ -73,6 +79,7 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
 
    // zonePm2p5Threshold has been removed
    var zonePm2p5Target = 25.0
+   var prePurgeMinOpen = 50.0
 
    var displayHumidity = true
    var displayVOC = false
@@ -85,6 +92,7 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
               "temperatureOffset: $temperatureOffset\n" +
               "isEnableAutoForcedOccupied: $isEnableAutoForceOccupied\n" +
               "isEnableAutoAway: $isEnableAutoAway\n\n" +
+              "isEnablePrePurge: $isEnablePrePurge\n\n" +
               "address0State: ${address0State.enabled}, ${address0State.association.name} \n" +
               "address1State: ${address1State.enabled}, ${address1State.association.name} \n" +
               "address2State: ${address2State.enabled}, ${address2State.association.name} \n" +
@@ -115,7 +123,11 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
               "heatingStage1FanState: $heatingStage1FanState\n" +
               "heatingStage2FanState: $heatingStage2FanState\n" +
               "heatingStage3FanState: $heatingStage3FanState\n\n" +
-              "outsideDamperMinOpen: $outsideDamperMinOpen\n" +
+              "outsideDamperMinOpenDuringRecirc: $outsideDamperMinOpenDuringRecirc\n" +
+              "outsideDamperMinOpenDuringConditioning: $outsideDamperMinOpenDuringConditioning\n" +
+              "outsideDamperMinOpenDuringFanLow: $outsideDamperMinOpenDuringFanLow\n" +
+              "outsideDamperMinOpenDuringFanMedium: $outsideDamperMinOpenDuringFanMedium\n" +
+              "outsideDamperMinOpenDuringFanHigh: $outsideDamperMinOpenDuringFanHigh\n" +
               "exhaustFanStage1Threshold: $exhaustFanStage1Threshold\n" +
               "exhaustFanStage2Threshold: $exhaustFanStage2Threshold\n" +
               "exhaustFanHysteresis: $exhaustFanHysteresis\n" +
@@ -155,6 +167,8 @@ data class AnalogOutState(
    val perAtFanLow: Double,
    val perAtFanMedium: Double,
    val perAtFanHigh: Double,
+   val voltageAtRecirculate: Double,
+   val voltageDuringEconomizer: Double
 )
 
 /*
@@ -231,7 +245,10 @@ enum class UniversalInAssociation {
    DUCT_PRESSURE_0_1,
    DUCT_PRESSURE_0_2,
    GENERIC_VOLTAGE,
-   GENERIC_RESISTANCE
+   GENERIC_RESISTANCE,
+   DUCT_PRESSURE_0_10,
+   GENERIC_FAULT_NC,
+   GENERIC_FAULT_NO
 }
 
 enum class CpuEconSensorBusTempAssociation {

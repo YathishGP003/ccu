@@ -16,7 +16,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
@@ -33,11 +32,14 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private var doorWindowSensorOpenStatus = false
+    private var runFanLowDuringDoorWindow = false
     private var compressorLoopOutput = 0
     override lateinit var occupancyStatus: Occupancy
+    private var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
     private val hyperStatHpuAlgorithm = HyperstatLoopController()
     lateinit var curState: ZoneState
-    
+
     private var analogOutputPoints: HashMap<Int, String> = HashMap()
     private var relayOutputPoints: HashMap<Int, String> = HashMap()
 
@@ -97,7 +99,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners)
         
         equip.hsHaystackUtil.updateOccupancyDetection()
-        runForDoorWindowSensor(config, equip)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
+        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(equip)
         runForKeyCardSensor(config, equip)
         equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,true,compressorLoopOutput)
         val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
@@ -141,6 +144,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         HyperStatUserIntentHandler.updateHyperStatStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState
         )
+        if(occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
+
         dumpOutput()
     }
 
@@ -317,7 +322,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
             }
             (HyperStatAssociationUtil.isHpuRelayAssociatedToFan(relayState)) -> {
-                if(fanLoopOutput != 0) {
+                // For title 24 compliance when doorwindow is open, run the lowest fan speed
+                if((fanLoopOutput != 0) || getDoorWindowFanOperationStatus()) {
                     runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
                 }
             }
@@ -570,7 +576,6 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         relayStages: HashMap<String, Int>,
         basicSettings: BasicSettings,
     ) {
-
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
             logIt( "Cond is Off , Fan is Auto  : ")
@@ -579,12 +584,23 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         }
         val highestStage = HyperStatAssociationUtil.getHpuHighestFanStage(config)
         val divider = if (highestStage == HpuRelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
+        val lowestStage = HyperStatAssociationUtil.getHpuLowestFanStage(config)
+
+        // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+        when(lowestStage) {
+            HpuRelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+            HpuRelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+            HpuRelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+            else -> {
+                // Do nothing
+            }
+        }
 
         when (relayAssociation.association) {
             HpuRelayAssociation.FAN_LOW_SPEED -> {
                 doFanLowSpeed(
                     logicalPointsList[whichPort]!!,null,null, basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider)
+                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider, getDoorWindowFanOperationStatus())
             }
             HpuRelayAssociation.FAN_MEDIUM_SPEED -> {
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal) &&
@@ -593,7 +609,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
                 doFanMediumSpeed(
                     logicalPointsList[whichPort]!!,null,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages)
+                    fanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages, getDoorWindowFanOperationStatus())
             }
             HpuRelayAssociation.FAN_HIGH_SPEED -> {
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal) &&
@@ -606,7 +622,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
                 doFanHighSpeed(
                     logicalPointsList[whichPort]!!,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages)
+                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages,getDoorWindowFanOperationStatus())
             }
             else -> return
         }
@@ -683,11 +699,35 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         }
     }
 
-    private fun runForDoorWindowSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip) {
+    /**
+     * Check for the flag which allows fan operation during door window
+     * @return true or false
+     */
+    private fun getDoorWindowFanOperationStatus(): Boolean {
+        return runFanLowDuringDoorWindow
+    }
 
+    /**
+     * Check if we should allow fan operation even when the door window is open
+     * @param equip HyperStatCpuEquip
+     * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
+     */
+    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatHpuEquip): Boolean {
+        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            return doorWindowSensorOpenStatus &&
+                    occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.VACATION
+        } else {
+            return doorWindowSensorOpenStatus
+        }
+    }
+
+    private fun runForDoorWindowSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip): Boolean {
         val isDoorOpen = isDoorOpenState(config,equip)
         logIt( " is Door Open ? $isDoorOpen")
         if (isDoorOpen) resetLoopOutputValues()
+        return isDoorOpen
     }
 
     private fun isDoorOpenState(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip): Boolean{

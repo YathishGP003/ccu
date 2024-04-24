@@ -70,7 +70,7 @@ public class DialogOAOProfile extends BaseDialogFragment
     private Button setButton;
     private Button unpairButton;
     private TextView titleTextView;
-    
+
     String floorRef;
     String zoneRef;
     
@@ -78,7 +78,11 @@ public class DialogOAOProfile extends BaseDialogFragment
     
     @BindView(R.id.oaDamperAtMin)         Spinner oaDamperAtMin;
     @BindView(R.id.returnDamperAtMin)     Spinner returnDamperAtMin;
-    @BindView(R.id.oaDamperMinOpen)       Spinner      oaDamperMinOpen;
+    @BindView(R.id.oaDamperMinOpenDuringRecirc)       Spinner      oaDamperMinOpenDuringRecirc;
+    @BindView(R.id.oaDamperMinOpenDuringConditioning)       Spinner      oaDamperMinOpenDuringConditioning;
+    @BindView(R.id.oaDamperMinOpenDuringFanLow)       Spinner      oaDamperMinOpenDuringFanLow;
+    @BindView(R.id.oaDamperMinOpenDuringFanMedium)       Spinner      oaDamperMinOpenDuringFanMedium;
+    @BindView(R.id.oaDamperMinOpenDuringFanHigh)       Spinner      oaDamperMinOpenDuringFanHigh;
     @BindView(R.id.exFanStage1Threshold)  Spinner      exFanStage1Threshold;
     @BindView(R.id.currentTransformerType)Spinner      currentTransformerType;
     @BindView(R.id.exFanHysteresis)       Spinner      exFanHysteresis;
@@ -172,7 +176,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         titleTextView = view.findViewById(R.id.textTitleFragment);
 
         titleTextView.setText("ECONOMIZER (OAO) "+"("+mSmartNodeAddress+")");
-        
+
         mProfile = L.ccu().oaoProfile;
         
         setButton.setOnClickListener(v -> {
@@ -233,8 +237,13 @@ public class DialogOAOProfile extends BaseDialogFragment
         for (int val = 0; val <= 100; val++) {
             percentArray.add(val);
         }
+
         ArrayAdapter<Integer> percentAdapter = getAdapterValue(percentArray);
-        oaDamperMinOpen.setAdapter(percentAdapter);
+        oaDamperMinOpenDuringRecirc.setAdapter(percentAdapter);
+        oaDamperMinOpenDuringConditioning.setAdapter(percentAdapter);
+        oaDamperMinOpenDuringFanLow.setAdapter(percentAdapter);
+        oaDamperMinOpenDuringFanMedium.setAdapter(percentAdapter);
+        oaDamperMinOpenDuringFanHigh.setAdapter(percentAdapter);
         returnDamperMinOpen.setAdapter(percentAdapter);
         exFanStage1Threshold.setAdapter(percentAdapter);
         exFanStage2Threshold.setAdapter(percentAdapter);
@@ -270,7 +279,11 @@ public class DialogOAOProfile extends BaseDialogFragment
             oaDamperAtMax.setSelection((int)mProfileConfig.outsideDamperAtMaxDrive);
             returnDamperAtMin.setSelection((int)mProfileConfig.returnDamperAtMinDrive);
             returnDamperAtMax.setSelection((int)mProfileConfig.returnDamperAtMaxDrive);
-            oaDamperMinOpen.setSelection((int)mProfileConfig.outsideDamperMinOpen);
+            oaDamperMinOpenDuringRecirc.setSelection((int)mProfileConfig.outsideDamperMinOpenDuringRecirc);
+            oaDamperMinOpenDuringConditioning.setSelection((int)mProfileConfig.outsideDamperMinOpenDuringConditioning);
+            oaDamperMinOpenDuringFanLow.setSelection((int)mProfileConfig.outsideDamperMinOpenDuringFanLow);
+            oaDamperMinOpenDuringFanMedium.setSelection((int)mProfileConfig.outsideDamperMinOpenDuringFanMedium);
+            oaDamperMinOpenDuringFanHigh.setSelection((int)mProfileConfig.outsideDamperMinOpenDuringFanHigh);
             returnDamperMinOpen.setSelection((int)mProfileConfig.returnDamperMinOpen);
             exFanStage1Threshold.setSelection((int)mProfileConfig.exhaustFanStage1Threshold);
             exFanStage2Threshold.setSelection((int)mProfileConfig.exhaustFanStage2Threshold);
@@ -285,7 +298,11 @@ public class DialogOAOProfile extends BaseDialogFragment
             oaDamperAtMax.setSelection(10);
             returnDamperAtMin.setSelection(2);
             returnDamperAtMax.setSelection(10);
-            oaDamperMinOpen.setSelection(0);
+            oaDamperMinOpenDuringRecirc.setSelection(20);
+            oaDamperMinOpenDuringConditioning.setSelection(10);
+            oaDamperMinOpenDuringFanLow.setSelection(20);
+            oaDamperMinOpenDuringFanMedium.setSelection(15);
+            oaDamperMinOpenDuringFanHigh.setSelection(10);
             returnDamperMinOpen.setSelection(0);
             exFanStage1Threshold.setSelection(50);
             exFanStage2Threshold.setSelection(90);
@@ -356,7 +373,11 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.enhancedVentilationMinDamperOpen = Double.parseDouble(enhancedVentilationOutsideDamperMinOpen.getSelectedItem().toString());
         oaoConfig.currentTranformerType = (double) CT_INDEX_START + currentTransformerType.getSelectedItemPosition();
         oaoConfig.usePerRoomCO2Sensing = roomCO2Sensing.isChecked();
-        oaoConfig.outsideDamperMinOpen = Double.parseDouble(oaDamperMinOpen.getSelectedItem().toString());
+        oaoConfig.outsideDamperMinOpenDuringRecirc = Double.parseDouble(oaDamperMinOpenDuringRecirc.getSelectedItem().toString());
+        oaoConfig.outsideDamperMinOpenDuringConditioning = Double.parseDouble(oaDamperMinOpenDuringConditioning.getSelectedItem().toString());
+        oaoConfig.outsideDamperMinOpenDuringFanLow = Double.parseDouble(oaDamperMinOpenDuringFanLow.getSelectedItem().toString());
+        oaoConfig.outsideDamperMinOpenDuringFanMedium = Double.parseDouble(oaDamperMinOpenDuringFanMedium.getSelectedItem().toString());
+        oaoConfig.outsideDamperMinOpenDuringFanHigh = Double.parseDouble(oaDamperMinOpenDuringFanHigh.getSelectedItem().toString());
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef,  NodeType.SMART_NODE);
@@ -375,7 +396,11 @@ public class DialogOAOProfile extends BaseDialogFragment
 
         CCUUiUtil.setSpinnerDropDownColor(oaDamperAtMin,getContext());
         CCUUiUtil.setSpinnerDropDownColor(returnDamperAtMin,getContext());
-        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpenDuringRecirc,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpenDuringConditioning,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpenDuringFanLow,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpenDuringFanMedium,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpenDuringFanHigh,getContext());
         CCUUiUtil.setSpinnerDropDownColor(exFanStage1Threshold,getContext());
         CCUUiUtil.setSpinnerDropDownColor(currentTransformerType,getContext());
         CCUUiUtil.setSpinnerDropDownColor(exFanHysteresis,getContext());
@@ -392,5 +417,5 @@ public class DialogOAOProfile extends BaseDialogFragment
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
-    
+
 }

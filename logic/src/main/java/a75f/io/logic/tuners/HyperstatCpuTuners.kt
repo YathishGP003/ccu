@@ -14,6 +14,8 @@ import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERST
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HUMIDITY_HISTERESIS_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_INTEGRAL_KFACTOR
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_INTEGRAL_KFACTOR_DEFAULT
+import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING
+import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_PROPORTIONAL_KFACTOR
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_PROPORTIONAL_KFACTOR_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_RELAY_ACTIVATION_HISTERESIS
@@ -282,6 +284,13 @@ class HyperstatCpuTuners {
             )
             listOfTunerPoints[integralKFactorPoint] = HYPERSTAT_INTEGRAL_KFACTOR_DEFAULT
 
+            // MinFanRuntimePostConditioning = 5 min
+            // min = 0 , max = 60 , Default = 5 , inc = 1  unit = min
+            val minFanRuntimePostConditioningMarkers = arrayOf("fan", "cur",  "runtime", "postconditioning", "min", "zone", "default")
+            val minFanRuntimePostConditioningPoint = createTunerPoint(
+                HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING, minFanRuntimePostConditioningMarkers, "0", "60", "1", "m", true
+            )
+            listOfTunerPoints[minFanRuntimePostConditioningPoint] = HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING_DEFAULT
 
             // Push Tuner points to haystack
             listOfTunerPoints.forEach { (point, defaultValue) ->

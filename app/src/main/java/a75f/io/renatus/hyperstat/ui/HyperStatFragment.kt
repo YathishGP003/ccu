@@ -225,7 +225,9 @@ class HyperStatFragment : BaseDialogFragment() {
                     findViewById(R.id.ao1FanConfig),
                     findViewById(R.id.ao1AtFanLowSpinner),
                     findViewById(R.id.ao1AtFanMediumSpinner),
-                    findViewById(R.id.ao1AtFanHighSpinner)
+                    findViewById(R.id.ao1AtFanHighSpinner),
+                    findViewById(R.id.ao1AtRecirculateLabel),
+                    findViewById(R.id.ao1AtRecirculateSpinner)
                 ),
                 AnalogOutWidgets(
                     findViewById(R.id.toggleAnalog2),
@@ -237,7 +239,9 @@ class HyperStatFragment : BaseDialogFragment() {
                     findViewById(R.id.ao2FanConfig),
                     findViewById(R.id.ao2AtFanLowSpinner),
                     findViewById(R.id.ao2AtFanMediumSpinner),
-                    findViewById(R.id.ao2AtFanHighSpinner)
+                    findViewById(R.id.ao2AtFanHighSpinner),
+                    findViewById(R.id.ao2AtRecirculateLabel),
+                    findViewById(R.id.ao2AtRecirculateSpinner)
                 ),
                 AnalogOutWidgets(
                     findViewById(R.id.toggleAnalog3),
@@ -249,7 +253,9 @@ class HyperStatFragment : BaseDialogFragment() {
                     findViewById(R.id.ao3FanConfig),
                     findViewById(R.id.ao3AtFanLowSpinner),
                     findViewById(R.id.ao3AtFanMediumSpinner),
-                    findViewById(R.id.ao3AtFanHighSpinner)
+                    findViewById(R.id.ao3AtFanHighSpinner),
+                    findViewById(R.id.ao3AtRecirculateLabel),
+                    findViewById(R.id.ao3AtRecirculateSpinner)
                 )
             )
 
@@ -404,6 +410,9 @@ class HyperStatFragment : BaseDialogFragment() {
             it.analogOutAtFanLow.adapter = adapter
             it.analogOutAtFanMedium.adapter = adapter
             it.analogOutAtFanHigh.adapter = adapter
+            val adapterRecirculateVal = getAdapterValue(analogVoltageAtSpinnerValues())
+            it.analogOutAtFanRecirculateSelector.adapter = adapterRecirculateVal
+            it.analogOutAtFanRecirculateSelector.setSelection(analogVoltageAtSpinnerValues().indexOf("4V"))
         }
 
         if (isViewModelCPUViewModel(viewModel)) {
@@ -502,6 +511,12 @@ class HyperStatFragment : BaseDialogFragment() {
             widgets.analogOutAtFanHigh.setOnItemSelected { position ->
                 viewModel.updateFanConfigSelected(3, index, position)
             }
+            widgets.analogOutAtFanRecirculateSelector.setOnItemSelected { position ->
+                viewModel.voltageDuringCirculation(
+                    index, position
+                )
+                pendingAnalogOutChange = true
+            }
 
             CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanLow, context)
@@ -509,6 +524,7 @@ class HyperStatFragment : BaseDialogFragment() {
             CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMinDamperSelector, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanHigh, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanMedium, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanRecirculateSelector, context)
 
         }
         airflowSensorSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -776,18 +792,31 @@ class HyperStatFragment : BaseDialogFragment() {
                     if (analogOutState.enabled && (analogOutState.association == CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
                                 analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
+                // In case of modulating fan speed, show/hide the recirculate fan speed
+                if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutAtFanRecirculateLabel.visibility = View.VISIBLE
+                    analogOutAtFanRecirculateSelector.visibility = View.VISIBLE
+                } else {
+                    analogOutAtFanRecirculateLabel.visibility = View.GONE
+                    analogOutAtFanRecirculateSelector.visibility = View.GONE
+                }
+
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))
                 analogOutAtFanHigh.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanHigh))
+                // Set the recirculate fan speed only if it is visible
+                if(analogOutAtFanRecirculateLabel.visibility == View.VISIBLE) {
+                    analogOutAtFanRecirculateSelector.setSelection(analogFanSpeedIndexFromValue(analogOutState.voltageAtRecirculate))
+                }
 
                 if (!isDampSelected && analogOutState.enabled)
                     isDampSelected = viewModel.isDamperSelected(analogOutState.association)
 
             }
             if (isViewModelCPUViewModel(viewModel)) {
-                stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+                stagedFanUIs.forEachIndexed { fanIndex, stagedFanWidgets ->
                     with(stagedFanWidgets) {
-                        selector.setSelection(viewState.stagedFanUis[index])
+                        selector.setSelection(viewState.stagedFanUis[fanIndex])
                     }
                 }
 

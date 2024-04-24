@@ -29,14 +29,14 @@ interface AnalogOutActions {
                            zoneCO2DamperOpeningRate: Double,
                            isDoorOpen: Boolean)
 
-    fun doAnalogFanAction( port: Port,
-                           fanLowPercent: Int,
-                           fanMediumPercent: Int,
-                           fanHighPercent: Int,
-                           fanMode: StandaloneFanStage,
-                           conditioningMode: StandaloneConditioningMode,
-                           fanLoopOutput: Int,
-                           analogOutStages: HashMap<String, Int>)
+    fun doAnalogFanAction(port: Port,
+                          fanLowPercent: Int,
+                          fanMediumPercent: Int,
+                          fanHighPercent: Int,
+                          fanMode: StandaloneFanStage,
+                          conditioningMode: StandaloneConditioningMode,
+                          fanLoopOutput: Int,
+                          analogOutStages: HashMap<String, Int>)
     fun doAnalogWaterValveAction( port: Port,
                                   fanMode: StandaloneFanStage,
                                   basicSettings: BasicSettings,

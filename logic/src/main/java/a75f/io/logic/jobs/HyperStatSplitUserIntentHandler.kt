@@ -3,6 +3,7 @@ package a75f.io.logic.jobs
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.AnalogOutput
@@ -46,7 +47,8 @@ class HyperStatSplitUserIntentHandler {
             outsideAirFinalLoopOutput: Int,
             condensateOverflow: Double,
             filterDirty: Double,
-            basicSettings: BasicSettings
+            basicSettings: BasicSettings,
+            epidemicState: EpidemicState
         ) {
             var status: String
             status = when (temperatureState) {
@@ -55,6 +57,10 @@ class HyperStatSplitUserIntentHandler {
                 ZoneTempState.EMERGENCY -> "Emergency "
                 ZoneTempState.NONE -> ""
                 ZoneTempState.FAN_OP_MODE_OFF -> "OFF "
+            }
+
+            if (epidemicState == EpidemicState.PREPURGE) {
+                status += "In Pre Purge "
             }
 
             if (portStages.containsKey(Stage.COOLING_1.displayName)

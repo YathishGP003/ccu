@@ -35,9 +35,20 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private var doorWindowSensorOpenStatus = false
+    private var runFanLowDuringDoorWindow = false
     private val defaultFanLoopOutput = 0.0
 
     override lateinit var occupancyStatus: Occupancy
+
+    // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
+    private var previousOccupancyStatus: Occupancy = Occupancy.NONE
+    private var occupancyBeforeDoorWindow: Occupancy = Occupancy.UNOCCUPIED
+    private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
+    private var previousFanLoopVal = 0
+    private var previousFanLoopValStaged = 0
+    private var fanLoopCounter = 0
+
     private val hyperstatCPUAlgorithm = HyperstatLoopController()
 
     lateinit var curState: ZoneState
@@ -123,10 +134,16 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners)
 
         equip.hsHaystackUtil.updateOccupancyDetection()
-        runForDoorWindowSensor(config, equip)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
+        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(equip)
+        // Updating the occupancy status happens one cycle later after update of doorWindowSensorOpenStatus.
+        // Once it is detected then reset the loop output values
+        if(occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputValues()
         runForKeyCardSensor(config, equip)
         equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
         val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
+
+        updateTitle24LoopCounter(hyperStatTuners, basicSettings)
 
         logIt(
             "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n"+
@@ -157,6 +174,46 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         HyperStatUserIntentHandler.updateHyperStatStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState
         )
+        updateTitle24Flags(basicSettings)
+    }
+
+    /**
+     * Updates the Title 24 flags by storing the current occupancy status and fan-loop output.
+     * The previous occupancy status and fan-loop output are updated for use in the next loop iteration.
+     * If the fan loop counter is greater than 0, it decrements the counter.
+     *
+     * @param basicSettings settings containing fan mode state.
+     */
+    private fun updateTitle24Flags(basicSettings: BasicSettings) {
+        // Store the fan-loop output/occupancy for usage in next loop
+        previousOccupancyStatus = occupancyStatus
+        if(occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
+        // Store the fan status so that when the zone goes from user defined fan state to unoccupied state, the fan protection can be offered
+        previousFanStageStatus = basicSettings.fanMode
+        // Store the fanloop output when the zone was not in UNOCCUPIED state
+        if(fanLoopCounter == 0) previousFanLoopVal = fanLoopOutput
+        if (fanLoopCounter > 0) fanLoopCounter--
+    }
+
+    /**
+     * Updates the Title 24 loop counter based on changes in occupancy and fan-loop output.
+     * If there is a change in occupancy and the fan-loop output is less than the previous value,
+     * the fan loop counter is set to the minimum fan runtime post conditioning specified by the tuners.
+     * If there is a change in occupancy and the fan-loop output is greater than the previous value,
+     * the fan loop counter is reset to zero.
+     *
+     * @param tuners The HyperStat profile tuners containing configuration parameters.
+     * @param basicSettings settings containing fan mode state.
+     */
+    private fun updateTitle24LoopCounter(tuners: HyperStatProfileTuners, basicSettings: BasicSettings) {
+        // Check if there is change in occupancy and the fan-loop output is less than the previous value,
+        // then offer the fan protection
+        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
+            (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+            fanLoopCounter = tuners.minFanRuntimePostConditioning
+        }
+        else if(occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+            fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents){
@@ -229,6 +286,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         hsTuners.relayActivationHysteresis = TunerUtil.getHysteresisPoint("relay and  activation", equip.equipRef!!).toInt()
         hsTuners.analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equip.equipRef!!)
         hsTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equip.equipRef!!).toInt()
+        hsTuners.minFanRuntimePostConditioning = TunerUtil.readTunerValByQuery("fan and cur and runtime and postconditioning and min", equip.equipRef!!).toInt()
         return hsTuners
     }
 
@@ -324,7 +382,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             (HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)) -> {
 
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
+                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings,
+                        previousFanLoopVal, fanLoopCounter)
                 } else {
                    resetPort(port)
                 }
@@ -412,7 +471,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private fun runRelayForFanSpeed(
         relayAssociation: RelayState, whichPort: Port, config: HyperStatCpuConfiguration,
         tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>, basicSettings: BasicSettings,
+        previousFanLoopVal: Int, fanProtectionCounter: Int
     ) {
+        var localFanLoopOutput = fanLoopOutput
         logIt(" $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
@@ -422,22 +483,36 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         }
         val highestStage = HyperStatAssociationUtil.getHighestFanStage(config)
         val divider = if (highestStage == CpuRelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
+        val fanEnabledMapped = HyperStatAssociationUtil.isAnyRelayAssociatedToFanEnabled(config)
+        val lowestStage = HyperStatAssociationUtil.getLowestFanStage(config)
+
+        if (fanEnabledMapped) setFanEnabledStatus(true) else setFanEnabledStatus(false)
+
+        if (lowestStage == CpuRelayAssociation.FAN_LOW_SPEED) setFanLowestFanLowStatus(true)
+        if (lowestStage == CpuRelayAssociation.FAN_MEDIUM_SPEED) setFanLowestFanMediumStatus(true)
+        if (lowestStage == CpuRelayAssociation.FAN_HIGH_SPEED) setFanLowestFanHighStatus(true)
+
+        // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+        // occupancy and decrease in fan loop output
+        if (fanProtectionCounter > 0) {
+            localFanLoopOutput = previousFanLoopVal
+        }
 
         when (relayAssociation.association) {
             CpuRelayAssociation.FAN_LOW_SPEED -> {
                 doFanLowSpeed(
                     logicalPointsList[whichPort]!!,null,null, basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider,getDoorWindowFanOperationStatus())
             }
             CpuRelayAssociation.FAN_MEDIUM_SPEED -> {
                 doFanMediumSpeed(
                     logicalPointsList[whichPort]!!,null,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages,getDoorWindowFanOperationStatus())
             }
             CpuRelayAssociation.FAN_HIGH_SPEED -> {
                 doFanHighSpeed(
                     logicalPointsList[whichPort]!!,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages,getDoorWindowFanOperationStatus())
             }
             else -> return
         }
@@ -456,10 +531,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 doAnalogHeating(port,basicSettings.conditioningMode,analogOutStages,heatingLoopOutput)
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
-                doAnalogFanAction(
+                doAnalogFanActionCpu(
                     port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
                     analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages
+                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages, previousFanLoopVal, fanLoopCounter
                 )
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
@@ -470,14 +545,35 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) -> {
                 doAnalogStagedFanAction(
                     port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
-                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
+                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode, HyperStatAssociationUtil.isAnyRelayAssociatedToFanEnabled(config),
+                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages, fanLoopCounter
                 )
             }
         }
     }
 
-    private fun doAnalogStagedFanAction(
+    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+        var voltage = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest cooling state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+        if(fanEnabledMapped && voltage == 0) {
+            voltage = getPercentageFromVoltageSelected(getLowestCoolingStateActivated().roundToInt())
+        }
+        return voltage
+    }
+
+
+    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+        var voltage = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest heating state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+        if (fanEnabledMapped && voltage == 0) {
+            voltage = getPercentageFromVoltageSelected(getLowestHeatingStateActivated().roundToInt())
+        }
+        return voltage
+    }
+
+    private fun doAnalogFanActionCpu(
         port: Port,
         fanLowPercent: Int,
         fanMediumPercent: Int,
@@ -486,6 +582,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         conditioningMode: StandaloneConditioningMode,
         fanLoopOutput: Int,
         analogOutStages: HashMap<String, Int>,
+        previousFanLoopVal: Int,
+        fanProtectionCounter: Int
     ) {
         if (fanMode != StandaloneFanStage.OFF) {
             var fanLoopForAnalog = 0
@@ -495,20 +593,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
-                if (conditioningMode == StandaloneConditioningMode.AUTO) {
-                    if (getOperatingMode() == 1.0) {
-                        fanLoopForAnalog =
-                            getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
-                    } else if (getOperatingMode() == 2.0) {
-                        fanLoopForAnalog =
-                            getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
-                    }
-                } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                    fanLoopForAnalog =
-                        getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
-                } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                    fanLoopForAnalog =
-                        getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                if (fanProtectionCounter > 0) {
+                    fanLoopForAnalog = previousFanLoopVal
                 }
             } else {
                 when {
@@ -534,9 +620,78 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            Log.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+        }
+    }
+
+     private fun doAnalogStagedFanAction(
+        port: Port,
+        fanLowPercent: Int,
+        fanMediumPercent: Int,
+        fanHighPercent: Int,
+        fanMode: StandaloneFanStage,
+        fanEnabledMapped: Boolean,
+        conditioningMode: StandaloneConditioningMode,
+        fanLoopOutput: Int,
+        analogOutStages: HashMap<String, Int>,
+        fanProtectionCounter: Int
+    ) {
+        var fanLoopForAnalog = 0
+
+        if (fanMode != StandaloneFanStage.OFF) {
+            if (fanMode == StandaloneFanStage.AUTO) {
+                if (conditioningMode == StandaloneConditioningMode.OFF) {
+                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    return
+                }
+                fanLoopForAnalog = fanLoopOutput
+                if (conditioningMode == StandaloneConditioningMode.AUTO) {
+                    if (getOperatingMode() == 1.0) {
+                        fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                    } else if (getOperatingMode() == 2.0) {
+                        fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                    }
+                } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                    fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                    fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                }
+
+                // Check if we need fan protection
+                if(fanProtectionCounter > 0  && fanLoopForAnalog < previousFanLoopValStaged) fanLoopForAnalog = previousFanLoopValStaged
+                else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mdoe
+                // Check Dead-band condition
+                if (fanLoopForAnalog == 0 || getDoorWindowFanOperationStatus()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                    fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
+                }
+            } else {
+                when {
+                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
+                            || fanMode == StandaloneFanStage.LOW_OCC
+                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
+                        fanLoopForAnalog = fanLowPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
+                        fanLoopForAnalog = fanMediumPercent
+                    }
+
+                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
+                            || fanMode == StandaloneFanStage.HIGH_OCC
+                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
+                        fanLoopForAnalog = fanHighPercent
+                    }
+                }
+                // Store just in case when we switch from current occupied to unoccupied mode
+                previousFanLoopValStaged = fanLoopForAnalog
+            }
+            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
+                fanLoopForAnalog
+            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
             Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed  analogSignal  $fanLoopForAnalog")
         }
-
     }
 
     private fun getOperatingMode(): Double {
@@ -578,10 +733,35 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             ZoneState.RFDEAD.ordinal.toDouble()
         )
     }
-    private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip) {
+
+    /**
+     * Check for the flag which allows fan operation during door window
+     * @return true or false
+     */
+    private fun getDoorWindowFanOperationStatus(): Boolean {
+        return runFanLowDuringDoorWindow
+    }
+
+    /**
+     * Check if we should allow fan operation even when the door window is open
+     * @param equip HyperStatCpuEquip
+     * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
+     */
+    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatCpuEquip): Boolean {
+        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            return doorWindowSensorOpenStatus &&
+                    occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.VACATION
+        } else {
+            return doorWindowSensorOpenStatus
+        }
+    }
+
+    private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean {
         val isDoorOpen = isDoorOpenState(config,equip)
        logIt(" is Door Open ? $isDoorOpen")
-        if (isDoorOpen) resetLoopOutputValues()
+        return isDoorOpen
     }
     
     private fun isDoorOpenState(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean{
@@ -750,6 +930,60 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             hsHaystackUtil.readPointValue("fan and heating and stage2")
         } else if (stageActive("heating and runtime and stage1")){
             hsHaystackUtil.readPointValue("fan and heating and stage1")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    /**
+     * Returns the value of the non zero activated analog recirculate stage based on the fan loop points.
+     * If no recirculate stage is activated, returns the default fan loop output value.
+     *
+     * @return the value of the first non zero activated recirculate stage or the default fan loop output value.
+     */
+    private fun getAnalogRecirculateValueActivated (): Double {
+        return if (hsHaystackUtil.readPointValue("recirculate and analog1") != 0.0) {
+            hsHaystackUtil.readPointValue("recirculate and analog1")
+        } else if (hsHaystackUtil.readPointValue("recirculate and analog2") != 0.0) {
+            hsHaystackUtil.readPointValue("recirculate and analog2")
+        } else if (hsHaystackUtil.readPointValue("recirculate and analog3") != 0.0) {
+            hsHaystackUtil.readPointValue("recirculate and analog3")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    /**
+     * Returns the value of the lowest activated cooling stage based on the fan loop points.
+     * If no cooling stage is activated, returns the default fan loop output value.
+     *
+     * @return the value of the lowest activated cooling stage or the default fan loop output value.
+     */
+    private fun getLowestCoolingStateActivated (): Double {
+        return if (hsHaystackUtil.readPointValue("fan and cooling and stage1") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else if (hsHaystackUtil.readPointValue("fan and cooling and stage2") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and cooling and stage2")
+        } else if (hsHaystackUtil.readPointValue("fan and cooling and stage3") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and cooling and stage3")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    /**
+     * Returns the value of the lowest activated heating stage based on the fan loop points.
+     * If no heating stage is activated, returns the default fan loop output value.
+     *
+     * @return the value of the lowest activated heating stage or the default fan loop output value.
+     */
+    private fun getLowestHeatingStateActivated (): Double {
+        return if (hsHaystackUtil.readPointValue("fan and heating and stage1") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and heating and stage1")
+        } else if (hsHaystackUtil.readPointValue("fan and heating and stage2") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and heating and stage2")
+        } else if (hsHaystackUtil.readPointValue("fan and heating and stage3") != 0.0) {
+            hsHaystackUtil.readPointValue("fan and heating and stage3")
         } else {
             defaultFanLoopOutput
         }

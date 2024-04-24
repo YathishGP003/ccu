@@ -18,6 +18,9 @@ import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERST
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_HUMIDITY_HISTERESIS_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_INTEGRAL_KFACTOR
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_INTEGRAL_KFACTOR_DEFAULT
+import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING
+import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING_DEFAULT
+import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_PREPURGE_RUNTIME_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_PROPORTIONAL_KFACTOR
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_PROPORTIONAL_KFACTOR_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_RELAY_ACTIVATION_HISTERESIS
@@ -288,6 +291,38 @@ class HyperstatSplitCpuEconTuners {
             )
             listOfTunerPoints[integralKFactorPoint] = HYPERSTAT_INTEGRAL_KFACTOR_DEFAULT
 
+            // MinFanRuntimePostConditioning = 5 min
+            // min = 0 , max = 60 , Default = 5 , inc = 1  unit = min
+            val minFanRuntimePostConditioningMarkers = arrayOf("fan", "cur", "runtime", "postconditioning", "min", "zone", "default")
+            val minFanRuntimePostConditioningPoint = createTunerPoint(
+                HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING, minFanRuntimePostConditioningMarkers, "0", "60", "1", "m", true
+            )
+            listOfTunerPoints[minFanRuntimePostConditioningPoint] = HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING_DEFAULT
+
+            // prePurgeRunTime = 120 min
+            // min = 0 , max = 360 , Default = 120 , inc = 1  unit = min
+            val prePurgeRunTimeMarkers = arrayOf("prePurge", "cur", "runtime", "zone", "default", "cpu", "standalone", "oao")
+            val prePurgeRunTimePoint = createTunerPoint(
+                "PrePurgeRunTime", prePurgeRunTimeMarkers, "0", "120", "1", "m", true
+            )
+            listOfTunerPoints[prePurgeRunTimePoint] = HYPERSTAT_PREPURGE_RUNTIME_DEFAULT
+
+            // prePurgeOccupiedTimeOffset = 180 min
+            // min = 0 , max = 360 , Default = 180 , inc = 1  unit = min
+            val prePurgeOccupiedTimeOffsetMarkers = arrayOf("prePurge", "offset", "cur", "time", "zone", "default", "occupied",
+                    "cpu", "standalone", "oao")
+            val prePurgeOccupiedTimeOffsetPoint = createTunerPoint(
+                "PrePurgeOccupiedTimeOffset", prePurgeOccupiedTimeOffsetMarkers, "0", "360", "1", "m", true
+            )
+            listOfTunerPoints[prePurgeOccupiedTimeOffsetPoint] = 180.0
+
+            // prePurgeFanSpeedTuner = 50%
+            // min = 0 , max = 100 , Default = 50 , inc = 1  unit = %
+            val prePurgeFanSpeedTunerMarkers = arrayOf("prePurge", "oao", "fan", "cur", "speed", "cpu", "standalone", "zone")
+            val prePurgeFanSpeedTunerPoint = createTunerPoint(
+                "PrePurgeFanSpeedTuner", prePurgeFanSpeedTunerMarkers, "0", "100", "1", "%", true
+            )
+            listOfTunerPoints[prePurgeFanSpeedTunerPoint] = 50.0
 
             // Push Tuner points to haystack
             listOfTunerPoints.forEach { (point, defaultValue) ->

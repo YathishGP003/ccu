@@ -135,6 +135,10 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         return
     }
 
+    fun getRoomRef(): String {
+        return roomRef!!
+    }
+
     fun initEquipReference(node: Short) {
         val equip = haystack.read("equip and $HYPERSTATSPLIT and group == \"$node\"")
         if (equip.isEmpty()) {
@@ -272,6 +276,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
              hyperStatSplitConfig.isEnableAutoForceOccupied, hyperStatSplitConfig.isEnableAutoAway
         )
 
+        val prePurgePointList: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createPrePurgeConfigPoints(
+            hyperStatSplitConfig.prePurgeMinOpen, hyperStatSplitConfig.isEnablePrePurge)
+
         val co2ConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil
             .createPointCO2ConfigPoint(
                  hyperStatSplitConfig.zoneCO2DamperOpeningRate,hyperStatSplitConfig.zoneCO2Threshold,hyperStatSplitConfig.zoneCO2Target
@@ -286,7 +293,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createConditioningLoopOutputPoints(false)
 
         val zoneOAOPoints: MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createZoneOAOPoints(
-            hyperStatSplitConfig.outsideDamperMinOpen, hyperStatSplitConfig.exhaustFanStage1Threshold,
+            hyperStatSplitConfig.outsideDamperMinOpenDuringRecirc, hyperStatSplitConfig.outsideDamperMinOpenDuringConditioning,
+            hyperStatSplitConfig.outsideDamperMinOpenDuringFanLow, hyperStatSplitConfig.outsideDamperMinOpenDuringFanMedium,
+            hyperStatSplitConfig.outsideDamperMinOpenDuringFanHigh, hyperStatSplitConfig.exhaustFanStage1Threshold,
             hyperStatSplitConfig.exhaustFanStage2Threshold, hyperStatSplitConfig.exhaustFanHysteresis)
 
         OAOTuners.updateStandaloneOaoTuners(
@@ -357,7 +366,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         )
 
         var allConfigPoints = arrayOf(
-            configPointsList, relayConfigPoints, analogOutConfigPoints,
+            configPointsList, prePurgePointList, relayConfigPoints, analogOutConfigPoints,
             universalInConfigPoints, sensorBusConfigPoints, userIntentPointsList,
             co2ConfigPointsList, loopOutputPoints, zoneOAOPoints, vocPmPointsList,deviceDisplayConfigPoints
         )
@@ -448,13 +457,22 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         updateTempOffset(existingConfiguration.temperatureOffset ,newConfiguration.temperatureOffset)
 
-        updateAutoAwayAutoForceOccupy(
+        updatePrePurgePoints(
+            existingConfiguration.prePurgeMinOpen, newConfiguration.prePurgeMinOpen,
+            existingConfiguration.isEnablePrePurge, newConfiguration.isEnablePrePurge
+        )
+
+        updateAutoAwayAutoForceOccupyPrePurge(
             existingConfiguration.isEnableAutoAway, newConfiguration.isEnableAutoAway,
-            existingConfiguration.isEnableAutoForceOccupied, newConfiguration.isEnableAutoForceOccupied,
+            existingConfiguration.isEnableAutoForceOccupied, newConfiguration.isEnableAutoForceOccupied
         )
 
         updateOAOValues(
-            existingConfiguration.outsideDamperMinOpen,newConfiguration.outsideDamperMinOpen,
+            existingConfiguration.outsideDamperMinOpenDuringRecirc,newConfiguration.outsideDamperMinOpenDuringRecirc,
+            existingConfiguration.outsideDamperMinOpenDuringConditioning,newConfiguration.outsideDamperMinOpenDuringConditioning,
+            existingConfiguration.outsideDamperMinOpenDuringFanLow,newConfiguration.outsideDamperMinOpenDuringFanLow,
+            existingConfiguration.outsideDamperMinOpenDuringFanMedium,newConfiguration.outsideDamperMinOpenDuringFanMedium,
+            existingConfiguration.outsideDamperMinOpenDuringFanHigh,newConfiguration.outsideDamperMinOpenDuringFanHigh,
             existingConfiguration.exhaustFanStage1Threshold,newConfiguration.exhaustFanStage1Threshold,
             existingConfiguration.exhaustFanStage2Threshold,newConfiguration.exhaustFanStage2Threshold,
             existingConfiguration.exhaustFanHysteresis,newConfiguration.exhaustFanHysteresis
@@ -495,10 +513,183 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         updateStagedFanConfigPoints(
             existingConfiguration, newConfiguration,
         )
-
-
+        updateAnalogEconomizerConfigPoints(
+            existingConfiguration, newConfiguration
+        )
     }
-    
+    /**
+     * Checks if the current stage has a new staged fan mapping based on the comparison of the new and existing analog output states.
+     *
+     * @param newAnalogOutState The new AnalogOutState object representing the state of the analog output.
+     * @param existingAnalogOutState The existing AnalogOutState object representing the state of the analog output.
+     * @return True if the current stage has a new staged fan mapping, false otherwise.
+     */
+    private fun checkCurrentStageHasNewStagedFanMapping(
+        newAnalogOutState: AnalogOutState,
+        existingAnalogOutState: AnalogOutState
+    ): Boolean {
+        return ((newAnalogOutState.enabled && !existingAnalogOutState.enabled) ||
+                (newAnalogOutState.enabled &&
+                        (newAnalogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED) &&
+                        (existingAnalogOutState.association != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED))
+                )
+    }
+
+    /**
+     * Updates the existing haystack point
+     *
+     * @param analogTag Tag for analog value
+     * @param analogVal value of recirculate
+     */
+    private fun updateAnalogRecirculatePoint(analogTag: String, analogVal: Double) {
+        val analogAtRecirculate = hsSplitHaystackUtil.readPointID("$analogTag and recirculate")
+        if (analogAtRecirculate != null)
+            updatePointValueChangeRequired(analogAtRecirculate, analogVal)
+    }
+
+    /**
+     * Create new point for analog recirculate
+     *
+     * @param analogTag Tag for analog ports
+     * @param analogVal Analog value
+     */
+    private fun createAnalogRecirculatePoint(analogTag: String, analogVal: Double) {
+        val analogAtRecirculatePoints : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createAnalogAtRecirculatePoint(analogVal, analogTag)
+        hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+            analogAtRecirculatePoints
+        ))
+        updateAnalogRecirculatePoint(analogTag, analogVal)
+    }
+
+    /**
+     * Remove the analog recirculate point
+     *
+     * @param analogTag Analog string tag
+     */
+    private fun removeAnalogRecirculatePointIfNotRequired(analogTag: String) {
+        val pointId = hsSplitHaystackUtil.readPointID("$analogTag and recirculate")
+        if (!pointId.isNullOrEmpty()) {
+            hsSplitHaystackUtil.removePoint(pointId)
+        }
+    }
+
+    private fun updateAnalogDuringEconomizerPoint(analogTag: String, analogVal: Double) {
+        val analogAtEconomizer = hsSplitHaystackUtil.readPointID("$analogTag and economizer")
+        if (analogAtEconomizer != null)
+            updatePointValueChangeRequired(analogAtEconomizer, analogVal)
+    }
+
+    /**
+     * Create new point for analog during economizer
+     *
+     * @param analogTag The analog tag.
+     * @param analogVal Analog value
+     */
+    private fun createAnalogDuringEconomizerPoint(analogTag: String, analogVal: Double) {
+        val analogAtEconomizerPoints : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createAnalogDuringEconomizerPoint(analogVal, analogTag)
+        hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+            analogAtEconomizerPoints
+        ))
+        updateAnalogDuringEconomizerPoint(analogTag, analogVal)
+    }
+
+    /**
+     * Remove the analog economizer point
+     *
+     * @param analogTag Analog string tag
+     */
+    private fun removeAnalogEconomizerPointIfNotRequired(analogTag: String) {
+        val pointId = hsSplitHaystackUtil.readPointID("$analogTag and economizer")
+        if (!pointId.isNullOrEmpty()) {
+            hsSplitHaystackUtil.removePoint(pointId)
+        }
+    }
+
+    /**
+     * Checks if there is a new economizer value in the analog output state.
+     *
+     * @param newAnalogOutState The new analog output state to compare.
+     * @param existingAnalogOutState The existing analog output state to compare against.
+     * @return True if there is a new economizer value, false otherwise.
+     */
+    private fun checkForNewEconomizerValue(
+            newAnalogOutState: AnalogOutState,
+            existingAnalogOutState: AnalogOutState
+    ): Boolean {
+        return (!HyperStatSplitAssociationUtil.isBothAnalogOutHasSameConfigs
+        (newAnalogOutState, existingAnalogOutState) &&
+                ((HyperStatSplitAssociationUtil.findChangeInAnalogOutConfig(
+                        newAnalogOutState, existingAnalogOutState) == AnalogOutChanges.ECONOMIZER) ||
+                HyperStatSplitAssociationUtil.findChangeInAnalogOutConfig(
+                        newAnalogOutState, existingAnalogOutState) == AnalogOutChanges.RECIRCULATE))
+    }
+
+    /**
+     * Updates the configuration points related to analog outputs for the recirculate stage based on changes
+     * between the existing configuration and the new configuration.
+     *
+     * @param existingConfiguration The existing HyperStatCpuConfiguration.
+     * @param newConfiguration The new HyperStatCpuConfiguration.
+     */
+    private fun updateAnalogEconomizerConfigPoints(
+        existingConfiguration: HyperStatSplitCpuEconConfiguration,
+        newConfiguration: HyperStatSplitCpuEconConfiguration
+    ) {
+        // Step 1: Create points for newly staged mapped fan
+        if (checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut1State, existingConfiguration.analogOut1State)) {
+            createAnalogRecirculatePoint("analog1", newConfiguration.analogOut1State.voltageAtRecirculate)
+            createAnalogDuringEconomizerPoint("analog1", newConfiguration.analogOut1State.voltageDuringEconomizer)
+        }
+        if(checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut2State, existingConfiguration.analogOut2State)) {
+            createAnalogRecirculatePoint("analog2", newConfiguration.analogOut2State.voltageAtRecirculate)
+            createAnalogDuringEconomizerPoint("analog2", newConfiguration.analogOut2State.voltageDuringEconomizer)
+        }
+        if(checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut3State, existingConfiguration.analogOut3State)) {
+            createAnalogRecirculatePoint("analog3", newConfiguration.analogOut3State.voltageAtRecirculate)
+            createAnalogDuringEconomizerPoint("analog3", newConfiguration.analogOut3State.voltageDuringEconomizer)
+        }
+        if(checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut4State, existingConfiguration.analogOut4State)) {
+            createAnalogRecirculatePoint("analog4", newConfiguration.analogOut4State.voltageAtRecirculate)
+            createAnalogDuringEconomizerPoint("analog4", newConfiguration.analogOut4State.voltageDuringEconomizer)
+        }
+
+        // Step 2: Delete unwanted analog out recirc and economizer points
+        if(!HyperStatSplitAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut1State)) {
+            removeAnalogRecirculatePointIfNotRequired("analog1")
+            removeAnalogEconomizerPointIfNotRequired("analog1")
+        }
+        if(!HyperStatSplitAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut2State)) {
+            removeAnalogRecirculatePointIfNotRequired("analog2")
+            removeAnalogEconomizerPointIfNotRequired("analog2")
+        }
+        if(!HyperStatSplitAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut3State)) {
+            removeAnalogRecirculatePointIfNotRequired("analog3")
+            removeAnalogEconomizerPointIfNotRequired("analog3")
+        }
+        if(!HyperStatSplitAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut4State)) {
+            removeAnalogRecirculatePointIfNotRequired("analog4")
+            removeAnalogEconomizerPointIfNotRequired("analog4")
+        }
+
+        // Step 3: Update the existing analog out recirc and economizer points
+        if(checkForNewEconomizerValue(newConfiguration.analogOut1State, existingConfiguration.analogOut1State)) {
+            updateAnalogRecirculatePoint("analog1", newConfiguration.analogOut1State.voltageAtRecirculate)
+            updateAnalogDuringEconomizerPoint("analog1", newConfiguration.analogOut1State.voltageDuringEconomizer)
+        }
+        if(checkForNewEconomizerValue(newConfiguration.analogOut2State, existingConfiguration.analogOut2State)) {
+            updateAnalogRecirculatePoint("analog2", newConfiguration.analogOut2State.voltageAtRecirculate)
+            updateAnalogDuringEconomizerPoint("analog2", newConfiguration.analogOut2State.voltageDuringEconomizer)
+        }
+        if(checkForNewEconomizerValue(newConfiguration.analogOut3State, existingConfiguration.analogOut3State)) {
+            updateAnalogRecirculatePoint("analog3", newConfiguration.analogOut3State.voltageAtRecirculate)
+            updateAnalogDuringEconomizerPoint("analog3", newConfiguration.analogOut3State.voltageDuringEconomizer)
+        }
+        if(checkForNewEconomizerValue(newConfiguration.analogOut4State, existingConfiguration.analogOut4State)) {
+            updateAnalogRecirculatePoint("analog4", newConfiguration.analogOut4State.voltageAtRecirculate)
+            updateAnalogDuringEconomizerPoint("analog4", newConfiguration.analogOut4State.voltageDuringEconomizer)
+        }
+    }
+
     private fun updateStagedFanConfigPoints(
         existingConfiguration: HyperStatSplitCpuEconConfiguration,
         newConfiguration: HyperStatSplitCpuEconConfiguration
@@ -641,16 +832,44 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     }
 
     private fun updateOAOValues(
-        oldOutsideDamperMinOpen: Double, newOutsideDamperMinOpen: Double,
+        oldOutsideDamperMinOpenDuringRecirc: Double, newOutsideDamperMinOpenDuringRecirc: Double,
+        oldOutsideDamperMinOpenDuringConditioning: Double, newOutsideDamperMinOpenDuringConditioning: Double,
+        oldOutsideDamperMinOpenDuringFanLow: Double, newOutsideDamperMinOpenDuringFanLow: Double,
+        oldOutsideDamperMinOpenDuringFanMedium: Double, newOutsideDamperMinOpenDuringFanMedium: Double,
+        oldOutsideDamperMinOpenDuringFanHigh: Double, newOutsideDamperMinOpenDuringFanHigh: Double,
         oldExhaustFanStage1Threshold: Double, newExhaustFanStage1Threshold: Double,
         oldExhaustFanStage2Threshold: Double, newExhaustFanStage2Threshold: Double,
         oldExhaustFanHysteresis: Double, newExhaustFanHysteresis: Double
     ) {
 
-        if (oldOutsideDamperMinOpen != newOutsideDamperMinOpen) {
-            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open") as String
-            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpen)
-            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpen)
+        if (oldOutsideDamperMinOpenDuringRecirc != newOutsideDamperMinOpenDuringRecirc) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open and recirc") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpenDuringRecirc)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpenDuringRecirc)
+        }
+
+        if (oldOutsideDamperMinOpenDuringConditioning != newOutsideDamperMinOpenDuringConditioning) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open and conditioning") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpenDuringConditioning)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpenDuringConditioning)
+        }
+
+        if (oldOutsideDamperMinOpenDuringFanLow != newOutsideDamperMinOpenDuringFanLow) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open and fan and low") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpenDuringFanLow)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpenDuringFanLow)
+        }
+
+        if (oldOutsideDamperMinOpenDuringFanMedium != newOutsideDamperMinOpenDuringFanMedium) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open and fan and medium") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpenDuringFanMedium)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpenDuringFanMedium)
+        }
+
+        if (oldOutsideDamperMinOpenDuringFanHigh != newOutsideDamperMinOpenDuringFanHigh) {
+            val pointId = hsSplitHaystackUtil.readPointID("outside and damper and min and open and fan and high") as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, newOutsideDamperMinOpenDuringFanHigh)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, newOutsideDamperMinOpenDuringFanHigh)
         }
 
         if (oldExhaustFanStage1Threshold != newExhaustFanStage1Threshold) {
@@ -685,8 +904,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.temperatureOffset = hsSplitHaystackUtil.getTempOffValue()
         config.isEnableAutoForceOccupied = hsSplitHaystackUtil.isAutoForceOccupyEnabled()
         config.isEnableAutoAway =  hsSplitHaystackUtil.isAutoAwayEnabled()
+        config.isEnablePrePurge = hsSplitHaystackUtil.isPrePurgeEnabled()
 
-        config.outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen()
+        config.outsideDamperMinOpenDuringRecirc = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringRecirc()
+        config.outsideDamperMinOpenDuringConditioning = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringConditioning()
+        config.outsideDamperMinOpenDuringFanLow = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanLow()
+        config.outsideDamperMinOpenDuringFanMedium = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanMedium()
+        config.outsideDamperMinOpenDuringFanHigh = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanHigh()
         config.exhaustFanStage1Threshold = hsSplitHaystackUtil.getExhaustFanStage1Threshold()
         config.exhaustFanStage2Threshold = hsSplitHaystackUtil.getExhaustFanStage2Threshold()
         config.exhaustFanHysteresis = hsSplitHaystackUtil.getExhaustFanHysteresis()
@@ -697,6 +921,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         config.zoneVOCThreshold = hsSplitHaystackUtil.getVocThresholdConfigValue()
         config.zoneVOCTarget = hsSplitHaystackUtil.getVocTargetConfigValue()
         config.zonePm2p5Target = hsSplitHaystackUtil.getPm2p5TargetConfigValue()
+        config.prePurgeMinOpen = hsSplitHaystackUtil.getDamperMinOpenValue(100)
 
         config.coolingStage1FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage1",7).toInt()
         config.coolingStage2FanState = hsSplitHaystackUtil.getFanStageValue("cooling and stage2",10).toInt()
@@ -773,6 +998,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         var ao1fanMedium = 80.0
         var ao1fanHigh = 100.0
 
+        var ao1AtRecirculate = 4.0
+        var ao1DuringEconomizer = 7.0
+
         if (ao1 == 1) {
             if (ao1AssociatedTo.toInt() != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
                 ao1MinVal = hsSplitHaystackUtil.readConfigPointValue(
@@ -798,6 +1026,12 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ao1fanHigh = hsSplitHaystackUtil.readConfigPointValue(
                     "analog1 and output and high"
                 )
+                ao1AtRecirculate = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog1 and recirculate"
+                )
+                ao1DuringEconomizer = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog1 and economizer"
+                )
             }
         }
         // Default Values
@@ -807,6 +1041,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         var ao2fanLow = 70.0
         var ao2fanMedium = 80.0
         var ao2fanHigh = 100.0
+
+        var ao2AtRecirculate = 4.0
+        var ao2DuringEconomizer = 7.0
 
         if (ao2 == 1) {
             if (ao2AssociatedTo.toInt() != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
@@ -833,6 +1070,12 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ao2fanHigh = hsSplitHaystackUtil.readConfigPointValue(
                     "analog2 and output and high"
                 )
+                ao2AtRecirculate = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog2 and recirculate"
+                )
+                ao2DuringEconomizer = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog2 and economizer"
+                )
             }
         }
 
@@ -842,6 +1085,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         var ao3fanLow = 70.0
         var ao3fanMedium = 80.0
         var ao3fanHigh = 100.0
+
+        var ao3AtRecirculate = 4.0
+        var ao3DuringEconomizer = 7.0
 
         if (ao3 == 1) {
             if (ao3AssociatedTo.toInt() != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
@@ -868,6 +1114,12 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ao3fanHigh = hsSplitHaystackUtil.readConfigPointValue(
                     "analog3 and output and high"
                 )
+                ao3AtRecirculate = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog3 and recirculate"
+                )
+                ao3DuringEconomizer = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog3 and economizer"
+                )
             }
         }
 
@@ -877,6 +1129,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         var ao4fanLow = 70.0
         var ao4fanMedium = 80.0
         var ao4fanHigh = 100.0
+
+        var ao4AtRecirculate = 4.0
+        var ao4DuringEconomizer = 7.0
 
         if (ao4 == 1) {
             if (ao4AssociatedTo.toInt() != CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
@@ -903,28 +1158,34 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 ao4fanHigh = hsSplitHaystackUtil.readConfigPointValue(
                     "analog4 and output and high"
                 )
+                ao4AtRecirculate = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog4 and recirculate"
+                )
+                ao4DuringEconomizer = hsSplitHaystackUtil.readConfigPointValue(
+                    "analog4 and economizer"
+                )
             }
         }
 
         config.analogOut1State = AnalogOutState(
             ao1 == 1,
             HyperStatSplitAssociationUtil.getAnalogOutAssociatedStage(ao1AssociatedTo.toInt()),
-            ao1MinVal, ao1MaxVal, ao1fanLow, ao1fanMedium, ao1fanHigh
+            ao1MinVal, ao1MaxVal, ao1fanLow, ao1fanMedium, ao1fanHigh, ao1AtRecirculate, ao1DuringEconomizer
         )
         config.analogOut2State = AnalogOutState(
             ao2 == 1,
             HyperStatSplitAssociationUtil.getAnalogOutAssociatedStage(ao2AssociatedTo.toInt()),
-            ao2MinVal, ao2MaxVal, ao2fanLow, ao2fanMedium, ao2fanHigh
+            ao2MinVal, ao2MaxVal, ao2fanLow, ao2fanMedium, ao2fanHigh, ao2AtRecirculate, ao2DuringEconomizer
         )
         config.analogOut3State = AnalogOutState(
             ao3 == 1,
             HyperStatSplitAssociationUtil.getAnalogOutAssociatedStage(ao3AssociatedTo.toInt()),
-            ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh
+            ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh, ao3AtRecirculate, ao3DuringEconomizer
         )
         config.analogOut4State = AnalogOutState(
             ao4 == 1,
             HyperStatSplitAssociationUtil.getAnalogOutAssociatedStage(ao4AssociatedTo.toInt()),
-            ao4MinVal, ao4MaxVal, ao4fanLow, ao4fanMedium, ao4fanHigh
+            ao4MinVal, ao4MaxVal, ao4fanLow, ao4fanMedium, ao4fanHigh, ao4AtRecirculate, ao4DuringEconomizer
         )
         return config
     }
@@ -1223,6 +1484,9 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val fanMediumPointId = hsSplitHaystackUtil.readPointID("$analogOutTag and output and medium")
         val fanHighPointId = hsSplitHaystackUtil.readPointID("$analogOutTag and output and high")
 
+        val analogAtRecirculate = hsSplitHaystackUtil.readPointID("$analogOutTag and recirculate")
+        val analogDuringEconomizer = hsSplitHaystackUtil.readPointID("$analogOutTag and economizer")
+
         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration changeIn $changeIn")
 
         // Do the update when change is found in configuration
@@ -1235,6 +1499,10 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
                 updatePointValueChangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
             if (fanLowPointId != null)
                 updatePointValueChangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+            if (analogAtRecirculate != null)
+                updatePointValueChangeRequired(analogAtRecirculate, analogOutState.voltageAtRecirculate)
+            if (analogDuringEconomizer != null)
+                updatePointValueChangeRequired(analogDuringEconomizer, analogOutState.voltageDuringEconomizer)
 
             if (minPointId != null) {
                 updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)

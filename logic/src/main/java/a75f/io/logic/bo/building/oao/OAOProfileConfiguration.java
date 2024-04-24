@@ -9,7 +9,11 @@ public class OAOProfileConfiguration extends BaseProfileConfiguration
     public double outsideDamperAtMaxDrive;
     public double returnDamperAtMinDrive;
     public double returnDamperAtMaxDrive;
-    public double outsideDamperMinOpen;
+    public double outsideDamperMinOpenDuringRecirc;
+    public double outsideDamperMinOpenDuringConditioning;
+    public double outsideDamperMinOpenDuringFanLow;
+    public double outsideDamperMinOpenDuringFanMedium;
+    public double outsideDamperMinOpenDuringFanHigh;
     public double returnDamperMinOpen;
     public double exhaustFanStage1Threshold;
     public double exhaustFanStage2Threshold;

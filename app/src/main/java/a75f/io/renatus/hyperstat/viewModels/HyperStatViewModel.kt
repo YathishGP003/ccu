@@ -164,6 +164,24 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
         )
     }
 
+    /**
+     * Updates the voltage value during circulation for a specific analog output.
+     *
+     * @param index The index of the analog output to be updated.
+     * @param position The position of the new voltage value.
+     */
+    override fun voltageDuringCirculation(index: Int, position: Int) {
+        val analogOuts = currentState.analogOutUis
+        val newAnalogOuts = analogOuts.updated(
+            index, analogOuts[index].copy(voltageAtRecirculate = analogVoltageFromIndex(position))
+        )
+        viewState.onNext(
+            currentState.copy(
+                analogOutUis = newAnalogOuts
+            )
+        )
+    }
+
     override fun updateFanConfigSelected(type: Int, index: Int, position: Int) {
         val analogOuts = currentState.analogOutUis
         val newAnalogOuts = when {

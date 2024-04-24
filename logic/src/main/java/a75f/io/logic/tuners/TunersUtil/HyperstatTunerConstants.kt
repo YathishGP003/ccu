@@ -25,6 +25,7 @@ class HyperstatTunerConstants {
 
         const val HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP: String = "AutoAwayZoneSetbackTemp"
         const val HYPERSTAT_TEMPERATURE_INTEGRAL_TIME: String = "TemperatureIntegralTime"
+        const val HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING: String = "MinFanRuntimePostConditioning"
 
 
         // Tuner Default values
@@ -46,6 +47,8 @@ class HyperstatTunerConstants {
         const val HYPERSTAT_AUTO_AWAY_ZONE_TIMER_DEFAULT = 30.0
         const val HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP_DEFAULT = 2.0
         const val HYPERSTAT_TEMPERATURE_INTEGRAL_TIME_DEFAULT = 30.0
+        const val HYPERSTAT_MIN_FAN_RUNTIME_POST_CONDITIONING_DEFAULT = 5.0
+        const val HYPERSTAT_PREPURGE_RUNTIME_DEFAULT = 120.0
 
 
     }

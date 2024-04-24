@@ -19,12 +19,15 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -114,7 +117,8 @@ public class OAOProfile
     public void doOAO() {
 
         systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and not purge and not enhanced and outside and damper and min and open");
+
+        double outsideDamperMinOpen = getEffectiveOutsideDamperMinOpen();
         doEpidemicControl();
         doEconomizing();
         doDcvControl(outsideDamperMinOpen);
@@ -135,7 +139,7 @@ public class OAOProfile
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
             }
             else {
-                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideDamperMinOpen : outsideAirLoopOutput;
+                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? 0 : outsideAirLoopOutput;
             }
             if (matTemp < outsideDamperMatTarget) {
                 setMatThrottle(true);
@@ -143,7 +147,13 @@ public class OAOProfile
         } else {
             outsideAirFinalLoopOutput = outsideDamperMinOpen;
         }
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen);
+
+        if (matThrottle) {
+            outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
+        } else {
+            outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen);
+        }
+
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
         returnAirFinalOutput = Math.max(returnDamperMinOpen ,(100 - outsideAirFinalLoopOutput));
@@ -217,6 +227,99 @@ public class OAOProfile
                 CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
         }
     }
+
+    private double getEffectiveOutsideDamperMinOpen() {
+
+        double outsideDamperMinOpenFromFan = 0.0;
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU ||
+                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||
+                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
+
+            DabStagedRtu dabStagedProfile = (DabStagedRtu)L.ccu().systemProfile;
+            if (dabStagedProfile.isStageEnabled(Stage.FAN_3) || dabStagedProfile.isStageEnabled(Stage.FAN_4) || dabStagedProfile.isStageEnabled(Stage.FAN_5)) {
+                // 3+ Stages mapped: Stage 1 = LOW, Stage 2 = MEDIUM, Stage 3+ = HIGH
+                if (dabStagedProfile.getStageStatus(Stage.FAN_3) > 0.0 || dabStagedProfile.getStageStatus(Stage.FAN_4) > 0.0 || dabStagedProfile.getStageStatus(Stage.FAN_5) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                } else if (dabStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                } else if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low");
+                }
+            } else if (dabStagedProfile.isStageEnabled(Stage.FAN_2)) {
+                // 2 stages mapped: Stage 2 = HIGH, Stage 1 = MEDIUM
+                if (dabStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                } else if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                }
+            } else if (dabStagedProfile.isStageEnabled(Stage.FAN_1)) {
+                // 1 stage mapped: Stage 1 = HIGH
+                if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                }
+            }
+        } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU ||
+                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||
+                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+
+            VavStagedRtu vavStagedProfile = (VavStagedRtu)L.ccu().systemProfile;
+            if (vavStagedProfile.isStageEnabled(Stage.FAN_3) || vavStagedProfile.isStageEnabled(Stage.FAN_4) || vavStagedProfile.isStageEnabled(Stage.FAN_5)) {
+                // 3+ Stages mapped: Stage 1 = LOW, Stage 2 = MEDIUM, Stage 3+ = HIGH
+                if (vavStagedProfile.getStageStatus(Stage.FAN_3) > 0.0 || vavStagedProfile.getStageStatus(Stage.FAN_4) > 0.0 || vavStagedProfile.getStageStatus(Stage.FAN_5) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                } else if (vavStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                } else if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low");
+                }
+            } else if (vavStagedProfile.isStageEnabled(Stage.FAN_2)) {
+                // 2 stages mapped: Stage 2 = HIGH, Stage 1 = MEDIUM
+                if (vavStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                } else if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                }
+            } else if (vavStagedProfile.isStageEnabled(Stage.FAN_1)) {
+                // 1 stage mapped: Stage 1 = HIGH
+                if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
+                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                }
+            }
+
+        }
+
+        double outsideDamperMinOpenFromConditioning = 0.0;
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
+            DabAdvancedHybridRtu dabHybridRtu = (DabAdvancedHybridRtu) L.ccu().systemProfile;
+            if (dabHybridRtu.isCoolingActive() || dabHybridRtu.isHeatingActive() || dabHybridRtu.isModulatingCoolingActive() || dabHybridRtu.isModulatingHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            } else {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+            }
+        } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+            VavAdvancedHybridRtu vavHybridRtu = (VavAdvancedHybridRtu) L.ccu().systemProfile;
+            if (vavHybridRtu.isCoolingActive() || vavHybridRtu.isHeatingActive() || vavHybridRtu.isModulatingCoolingActive() || vavHybridRtu.isModulatingHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            } else {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+            }
+        } else {
+            if (L.ccu().systemProfile.isCoolingActive() || L.ccu().systemProfile.isHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            } else {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+            }
+        }
+
+        Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
+        if (systemOccupancy.equals(Occupancy.OCCUPIED) || systemOccupancy.equals(Occupancy.FORCEDOCCUPIED)) {
+            return Math.max(outsideDamperMinOpenFromFan, outsideDamperMinOpenFromConditioning);
+        } else {
+            return 0;
+        }
+
+    }
+
     public void doEconomizing() {
 
         double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");

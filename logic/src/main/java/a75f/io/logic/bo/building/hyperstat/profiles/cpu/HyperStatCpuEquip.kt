@@ -295,8 +295,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                 allConfigPoints += stagedFanConfigPoints
             }
         }
-        Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
+        Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
 
     }
 
@@ -413,6 +413,96 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         updateStagedFanConfigPoints(
             existingConfiguration, newConfiguration,
         )
+        updateAnalogRecirculateConfigPoints(
+            existingConfiguration, newConfiguration
+        )
+    }
+
+    /**
+     * Checks if the current stage has a new staged fan mapping based on the comparison of the new and existing analog output states.
+     *
+     * @param newAnalogOutState The new AnalogOutState object representing the state of the analog output.
+     * @param existingAnalogOutState The existing AnalogOutState object representing the state of the analog output.
+     * @return True if the current stage has a new staged fan mapping, false otherwise.
+     */
+    private fun checkCurrentStageHasNewStagedFanMapping(
+            newAnalogOutState: AnalogOutState,
+            existingAnalogOutState: AnalogOutState
+    ): Boolean {
+        return ((newAnalogOutState.enabled && !existingAnalogOutState.enabled) ||
+                (newAnalogOutState.enabled &&
+                        (newAnalogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) &&
+                        (existingAnalogOutState.association != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED))
+                )
+    }
+
+    private fun checkForNewRecirculateValue(
+            newAnalogOutState: AnalogOutState,
+            existingAnalogOutState: AnalogOutState
+    ): Boolean {
+        return (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
+        (newAnalogOutState, existingAnalogOutState) &&
+                (HyperStatAssociationUtil.findChangeInAnalogOutConfig(
+                        newAnalogOutState, existingAnalogOutState) == AnalogOutChanges.RECIRCULATE))
+    }
+
+    private fun updateAnalogRecirculatePoint(analogTag: String, analogVal: Double) {
+        val analogAtRecirculate = hsHaystackUtil.readPointID("$analogTag and recirculate")
+        if (analogAtRecirculate != null)
+            updatePointValueChangeRequired(analogAtRecirculate, analogVal)
+    }
+
+    private fun createNewRecirculatePoint(analogTag: String, analogVal: Double) {
+        val analogAtRecirculatePoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createAnalogAtRecirculatePoint(analogVal, analogTag)
+        hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+                analogAtRecirculatePoints
+        ))
+        updateAnalogRecirculatePoint(analogTag, analogVal)
+    }
+
+    private fun deleteRecirculatePointIfNotRequired(analogTag: String) {
+        val pointId = hsHaystackUtil.readPointID("$analogTag and recirculate")
+        if (!pointId.isNullOrEmpty()) {
+            hsHaystackUtil.removePoint(pointId)
+        }
+    }
+
+    /**
+     * Updates the configuration points related to analog outputs for the recirculate stage based on changes
+     * between the existing configuration and the new configuration.
+     *
+     * @param existingConfiguration The existing HyperStatCpuConfiguration.
+     * @param newConfiguration The new HyperStatCpuConfiguration.
+     */
+    private fun updateAnalogRecirculateConfigPoints(
+        existingConfiguration: HyperStatCpuConfiguration,
+        newConfiguration: HyperStatCpuConfiguration
+    ) {
+        // Step 1: Create points for newly staged mapped fan
+        if (checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut1State, existingConfiguration.analogOut1State)) {
+            createNewRecirculatePoint("analog1", newConfiguration.analogOut1State.voltageAtRecirculate)
+        }
+
+        if(checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut2State, existingConfiguration.analogOut2State)) {
+            createNewRecirculatePoint("analog2", newConfiguration.analogOut2State.voltageAtRecirculate)
+        }
+
+        if(checkCurrentStageHasNewStagedFanMapping(newConfiguration.analogOut3State, existingConfiguration.analogOut3State)) {
+            createNewRecirculatePoint("analog3", newConfiguration.analogOut3State.voltageAtRecirculate)
+        }
+
+        // Step 2: Delete stages if they are no longer in use
+        if(!HyperStatAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut1State)) deleteRecirculatePointIfNotRequired("analog1")
+        if(!HyperStatAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut2State)) deleteRecirculatePointIfNotRequired("analog2")
+        if(!HyperStatAssociationUtil.isAnalogAssociatedToStaged(newConfiguration.analogOut3State)) deleteRecirculatePointIfNotRequired("analog3")
+
+        // Step 3: Update the existing staged fan recirculate values
+        if(checkForNewRecirculateValue(newConfiguration.analogOut1State, existingConfiguration.analogOut1State))
+            updateAnalogRecirculatePoint("analog1", newConfiguration.analogOut1State.voltageAtRecirculate)
+        if(checkForNewRecirculateValue(newConfiguration.analogOut2State, existingConfiguration.analogOut2State))
+            updateAnalogRecirculatePoint("analog2", newConfiguration.analogOut2State.voltageAtRecirculate)
+        if(checkForNewRecirculateValue(newConfiguration.analogOut3State, existingConfiguration.analogOut3State))
+            updateAnalogRecirculatePoint("analog3", newConfiguration.analogOut3State.voltageAtRecirculate)
     }
 
     private fun updateStagedFanConfigPoints(
@@ -646,6 +736,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao1fanMedium = 80.0
         var ao1fanHigh = 100.0
 
+        var ao1AtRecirculate = 4.0
+
         if (ao1 == 1) {
             if (ao1AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
                 ao1MinVal = hsHaystackUtil.readConfigPointValue(
@@ -673,6 +765,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                     "analog1 and output and high"
                 )
             }
+            ao1AtRecirculate = hsHaystackUtil.readConfigPointValue(
+                "analog1 and recirculate"
+            )
         }
         // Default Values
         var ao2MinVal = 2.0
@@ -681,6 +776,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao2fanLow = 70.0
         var ao2fanMedium = 80.0
         var ao2fanHigh = 100.0
+
+        var ao2AtRecirculate = 4.0
 
         if (ao2 == 1) {
             if (ao2AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
@@ -709,6 +806,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                     "analog2 and output and high"
                 )
             }
+            ao2AtRecirculate = hsHaystackUtil.readConfigPointValue(
+                "analog2 and recirculate"
+            )
         }
 
         var ao3MinVal = 2.0
@@ -717,6 +817,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao3fanLow = 70.0
         var ao3fanMedium = 80.0
         var ao3fanHigh = 100.0
+
+        var ao3AtRecirculate = 4.0
 
         if (ao3 == 1) {
             if (ao3AssociatedTo.toInt() != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
@@ -745,22 +847,26 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                     "analog3 and output and high"
                 )
             }
+            ao3AtRecirculate = hsHaystackUtil.readConfigPointValue(
+                "analog3 and recirculate"
+            )
+
         }
 
         config.analogOut1State = AnalogOutState(
             ao1 == 1,
             HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao1AssociatedTo.toInt()),
-            ao1MinVal, ao1MaxVal, ao1fanLow, ao1fanMedium, ao1fanHigh
+            ao1MinVal, ao1MaxVal, ao1fanLow, ao1fanMedium, ao1fanHigh, ao1AtRecirculate
         )
         config.analogOut2State = AnalogOutState(
             ao2 == 1,
             HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao2AssociatedTo.toInt()),
-            ao2MinVal, ao2MaxVal, ao2fanLow, ao2fanMedium, ao2fanHigh
+            ao2MinVal, ao2MaxVal, ao2fanLow, ao2fanMedium, ao2fanHigh, ao2AtRecirculate
         )
         config.analogOut3State = AnalogOutState(
             ao3 == 1,
             HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao3AssociatedTo.toInt()),
-            ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh
+            ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh, ao3AtRecirculate
         )
         return config
     }
@@ -935,6 +1041,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         val fanMediumPointId = hsHaystackUtil.readPointID("$analogOutTag and output and medium")
         val fanHighPointId = hsHaystackUtil.readPointID("$analogOutTag and output and high")
 
+        val analogAtRecirculate = hsHaystackUtil.readPointID("$analogOutTag and recirculate")
+
         Log.i(L.TAG_CCU_HSCPU, "Reconfiguration changeIn $changeIn")
 
 
@@ -948,6 +1056,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                 updatePointValueChangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
             if (fanLowPointId != null)
                 updatePointValueChangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+            if (analogAtRecirculate != null)
+                updatePointValueChangeRequired(analogAtRecirculate, analogOutState.voltageAtRecirculate)
 
             if (minPointId != null) {
                 updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)
@@ -968,7 +1078,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         // Check if logical logical,min,max, fan config  Point exist
         // (This situation is when previous state was not enabled for this analog now it is enabled )
-        // SO there's a possibility that logical,min,max, fan config  id can be null
+        // SO there's a possibility that logical,min,max, fan config id can be null
 
         if (minPointId != null) hsHaystackUtil.removePoint(minPointId)
         if (maxPointId != null) hsHaystackUtil.removePoint(maxPointId)

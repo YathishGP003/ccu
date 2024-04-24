@@ -34,6 +34,8 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
     open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
     protected val haystack = CCUHsApi.getInstance()
 
+    abstract fun isHeatingActive() : Boolean
+    abstract fun isCoolingActive() : Boolean
 
     abstract fun getHyperStatSplitEquip(node: Short): HyperStatSplitEquip?
     abstract fun addNewEquip(node: Short, room: String, floor: String, baseConfig: BaseProfileConfiguration)

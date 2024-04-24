@@ -9,6 +9,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.renatus.R
+import a75f.io.renatus.hyperstat.viewModels.updated
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Application
 import android.content.Context
@@ -111,6 +112,12 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
+    override fun enablePrePurgeSwitchChanged(checked: Boolean) {
+        viewState.onNext(
+            currentState.copy(prePurgeEnabled = checked)
+        )
+    }
+
     override fun relaySwitchChanged(index: Int, checked: Boolean) {
         val relays = currentState.relays
         val newRelays = relays.updated(index, relays[index].copy(enabled = checked))
@@ -164,6 +171,48 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
                     index, analogOuts[index].copy(voltageAtMax = analogVoltageFromIndex(position))
                 )
             }
+        viewState.onNext(
+            currentState.copy(
+                analogOutUis = newAnalogOuts
+            )
+        )
+    }
+
+    /**
+     * Updates the voltage value during economizer for a specific analog output.
+     *
+     * @param index The index of the analog output to be updated.
+     * @param position The position of the new voltage value.
+     */
+    override fun voltageDuringEconomizer(index: Int, position: Int) {
+        val analogOuts = currentState.analogOutUis
+        val newAnalogOuts = analogOuts.updated(
+            index, analogOuts[index].copy(voltageDuringEconomizer = analogVoltageFromIndex(
+                position
+            )
+            )
+        )
+        viewState.onNext(
+            currentState.copy(
+                analogOutUis = newAnalogOuts
+            )
+        )
+    }
+
+    /**
+     * Updates the voltage value during circulation for a specific analog output.
+     *
+     * @param index The index of the analog output to be updated.
+     * @param position The position of the new voltage value.
+     */
+    override fun voltageDuringCirculation(index: Int, position: Int) {
+        val analogOuts = currentState.analogOutUis
+        val newAnalogOuts = analogOuts.updated(
+            index, analogOuts[index].copy(voltageAtRecirculate = analogVoltageFromIndex(
+                position
+            )
+            )
+        )
         viewState.onNext(
             currentState.copy(
                 analogOutUis = newAnalogOuts
@@ -263,10 +312,47 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         )
     }
 
-    override fun outsideDamperMinOpenSelect(position: Int) {
+    override fun outsideDamperMinOpenDuringRecircSelect(position: Int) {
         viewState.onNext(
             currentState.copy(
-                outsideDamperMinOpenPos = position
+                outsideDamperMinOpenDuringRecircPos = position
+            )
+        )
+
+    }
+
+    override fun outsideDamperMinOpenDuringConditioningSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                outsideDamperMinOpenDuringConditioningPos = position
+            )
+        )
+
+    }
+
+    override fun outsideDamperMinOpenDuringFanLowSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                outsideDamperMinOpenDuringFanLowPos = position
+            )
+        )
+
+    }
+
+    override fun outsideDamperMinOpenDuringFanMediumSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                outsideDamperMinOpenDuringFanMediumPos = position
+            )
+        )
+
+    }
+
+
+    override fun outsideDamperMinOpenDuringFanHighSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                outsideDamperMinOpenDuringFanHighPos = position
             )
         )
 
@@ -345,6 +431,14 @@ abstract class HyperStatSplitViewModel(application: Application) : AndroidViewMo
         viewState.onNext(
             currentState.copy(
                 zonePm2p5TargetPos = position
+            )
+        )
+    }
+
+    override fun prePurgeMinOpenSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                prePurgeMinOpenPos = position
             )
         )
     }
@@ -456,6 +550,7 @@ const val CO2Min = 0
 const val CO2Max = 4000
 
 const val INC = 10
+const val OA_MIN_INC = 5
 
 const val VOC_INC = 100
 const val PM_INC = 5
@@ -467,6 +562,9 @@ const val VOCMax = 10000
 const val PMMin = 0
 const val PMMax = 1000
 const val DISABLED = 65535.0
+
+const val PPMin = 0
+const val PPMax = 100
 fun analogVoltageIndexFromValue(voltage: Double) =
     offsetIndexFromValue(ANALOG_VOLTAGE_LIMIT_MIN, ANALOG_VOLTAGE_INC, voltage)
 
@@ -503,8 +601,20 @@ fun analogFanLevelSpeedValue(): Array<String?> {
     )
 }
 
-fun outsideDamperMinOpenValueFromIndex(index: Int): Double {
-    return if (index == 0) DISABLED else outsideDamperMinOpenValue()[index].toString().replace(" %", "").toDouble()
+fun outsideDamperMinOpenDuringRecircValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenDuringRecircValue()[index].toString().replace(" %", "").toDouble()
+}
+fun outsideDamperMinOpenDuringConditioningValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenDuringConditioningValue()[index].toString().replace(" %", "").toDouble()
+}
+fun outsideDamperMinOpenDuringFanLowValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenDuringFanLowValue()[index].toString().replace(" %", "").toDouble()
+}
+fun outsideDamperMinOpenDuringFanMediumValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenDuringFanMediumValue()[index].toString().replace(" %", "").toDouble()
+}
+fun outsideDamperMinOpenDuringFanHighValueFromIndex(index: Int): Double {
+    return if (index == 0) DISABLED else outsideDamperMinOpenDuringFanHighValue()[index].toString().replace(" %", "").toDouble()
 }
 fun exhaustFanStage1ThresholdValueFromIndex(index: Int): Double {
     return if (index == 0) DISABLED else exhaustFanStage1ThresholdValue()[index].toString().replace(" %", "").toDouble()
@@ -528,6 +638,9 @@ fun vocValueFromIndex(index: Int): Double{
 fun pm25ValueFromIndex(index: Int): Double{
     return if (index == 0) DISABLED else pmValues()[index].toString().replace(" ug/㎥","").toDouble()
 }
+fun prePurgeValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else prePurgeValues()[index].toString().replace(" %","").toDouble()
+}
 fun co2DCVDamperSetIndexFromValue(value: Double): Int {
     return if (value == DISABLED) 0 else offsetIndexFromValue(CO2Min, INC.toDouble(), value) + 1
 }
@@ -537,8 +650,20 @@ fun co2DCVOpeningDamperSetIndexFromValue(value: Double) =
 fun vocSetIndexFromValue(value: Double): Int{
     return if(value == DISABLED) 0 else offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)+1
 }
-fun outsideDamperMinOpenSetIndexFromValue(value: Double): Int{
-    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, INC.toDouble(), value)+1
+fun outsideDamperMinOpenDuringRecircSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, OA_MIN_INC.toDouble(), value)+1
+}
+fun outsideDamperMinOpenDuringConditioningSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, OA_MIN_INC.toDouble(), value)+1
+}
+fun outsideDamperMinOpenDuringFanLowSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, OA_MIN_INC.toDouble(), value)+1
+}
+fun outsideDamperMinOpenDuringFanMediumSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, OA_MIN_INC.toDouble(), value)+1
+}
+fun outsideDamperMinOpenDuringFanHighSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(oaMinOpenMin, OA_MIN_INC.toDouble(), value)+1
 }
 fun exhaustFanStage1ThresholdSetIndexFromValue(value: Double): Int{
     return if(value == DISABLED) 0 else offsetIndexFromValue(efStageThresholdMin, INC.toDouble(), value)+1
@@ -555,13 +680,48 @@ fun exhaustFanHysteresisSetIndexFromValue(value: Double): Int{
 fun pmSetIndexFromValue(value: Double): Int{
     return if(value == DISABLED) 0 else offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)+1
 }
-fun outsideDamperMinOpenValue(): Array<String?> {
-    val outsideDamperMinOpenList: MutableList<String?> = offsetSpinnerValues(
+fun prePurgeSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else (value.toInt() / 10)+1
+}
+fun outsideDamperMinOpenDuringRecircValue(): Array<String?> {
+    val outsideDamperMinOpenDuringRecircList: MutableList<String?> = offsetSpinnerValues(
         oaMinOpenMax, oaMinOpenMin,
-        INC.toDouble(), true, " %"
+        OA_MIN_INC.toDouble(), true, " %"
     ).toMutableList()
-    outsideDamperMinOpenList.add(0,"Disabled")
-    return outsideDamperMinOpenList.toTypedArray()
+    outsideDamperMinOpenDuringRecircList.add(0,"Disabled")
+    return outsideDamperMinOpenDuringRecircList.toTypedArray()
+}
+fun outsideDamperMinOpenDuringConditioningValue(): Array<String?> {
+    val outsideDamperMinOpenDuringConditioningList: MutableList<String?> = offsetSpinnerValues(
+        oaMinOpenMax, oaMinOpenMin,
+        OA_MIN_INC.toDouble(), true, " %"
+    ).toMutableList()
+    outsideDamperMinOpenDuringConditioningList.add(0,"Disabled")
+    return outsideDamperMinOpenDuringConditioningList.toTypedArray()
+}
+fun outsideDamperMinOpenDuringFanLowValue(): Array<String?> {
+    val outsideDamperMinOpenDuringFanLowList: MutableList<String?> = offsetSpinnerValues(
+        oaMinOpenMax, oaMinOpenMin,
+        OA_MIN_INC.toDouble(), true, " %"
+    ).toMutableList()
+    outsideDamperMinOpenDuringFanLowList.add(0,"Disabled")
+    return outsideDamperMinOpenDuringFanLowList.toTypedArray()
+}
+fun outsideDamperMinOpenDuringFanMediumValue(): Array<String?> {
+    val outsideDamperMinOpenDuringFanMediumList: MutableList<String?> = offsetSpinnerValues(
+        oaMinOpenMax, oaMinOpenMin,
+        OA_MIN_INC.toDouble(), true, " %"
+    ).toMutableList()
+    outsideDamperMinOpenDuringFanMediumList.add(0,"Disabled")
+    return outsideDamperMinOpenDuringFanMediumList.toTypedArray()
+}
+fun outsideDamperMinOpenDuringFanHighValue(): Array<String?> {
+    val outsideDamperMinOpenDuringFanHighList: MutableList<String?> = offsetSpinnerValues(
+        oaMinOpenMax, oaMinOpenMin,
+        OA_MIN_INC.toDouble(), true, " %"
+    ).toMutableList()
+    outsideDamperMinOpenDuringFanHighList.add(0,"Disabled")
+    return outsideDamperMinOpenDuringFanHighList.toTypedArray()
 }
 fun exhaustFanStage1ThresholdValue(): Array<String?> {
     val exhaustFanStage1ThresholdList: MutableList<String?> = offsetSpinnerValues(
@@ -620,3 +780,11 @@ fun pmValues(): Array<String?> {
     return pmList.toTypedArray()
 }
 
+fun prePurgeValues(): Array<String?> {
+    val prePurgeList: MutableList<String?> = offsetSpinnerValues(
+        PPMax, PPMin,
+        INC.toDouble(), true, " %"
+    ).toMutableList()
+    prePurgeList.add(0,"Disabled")
+    return prePurgeList.toTypedArray()
+}

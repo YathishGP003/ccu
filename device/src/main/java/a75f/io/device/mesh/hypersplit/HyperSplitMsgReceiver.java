@@ -486,7 +486,7 @@ public class HyperSplitMsgReceiver {
                     || rawPoint.getType().equals("7"));
     }
 
-    // If "analogType" == 14 (Generic Voltage), 0-4 (Current TX's), or 12-13 (Duct Pressures), process the point as 0-10V
+    // If "analogType" == 14 (Generic Voltage), 0-4 (Current TX's), or 12,13,16 (Duct Pressures), process the point as 0-10V
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToVoltage(RawPoint rawPoint) {
         return rawPoint.getEnabled()
@@ -497,23 +497,26 @@ public class HyperSplitMsgReceiver {
                     || rawPoint.getType().equals("4")
                     || rawPoint.getType().equals("12")
                     || rawPoint.getType().equals("13")
-                    || rawPoint.getType().equals("14"));
+                    || rawPoint.getType().equals("14")
+                    || rawPoint.getType().equals("16"));
     }
 
-    // If "analogType" == 9 (Filter NO) or 11 (Condensate NO), process the point as a normally open digital input.
+    // If "analogType" == 9 (Filter NO) or 11 (Condensate NO), or 18 (Generic fault NO) process the point as a normally open digital input.
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToDigitalInNO(RawPoint rawPoint) {
         return rawPoint.getEnabled()
                 && (rawPoint.getType().equals("9")
-                || rawPoint.getType().equals("11"));
+                || rawPoint.getType().equals("11")
+                || rawPoint.getType().equals("18"));
     }
 
-    // If "analogType" == 8 (Filter NC) or 10 (Condensate NC), process the point as a normally closed digital input.
+    // If "analogType" == 8 (Filter NC) or 10 (Condensate NC), or 17 (Generic fault NC), process the point as a normally closed digital input.
     // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
     private static boolean isUniversalInMappedToDigitalInNC(RawPoint rawPoint) {
         return rawPoint.getEnabled()
                 && (rawPoint.getType().equals("8")
-                || rawPoint.getType().equals("10"));
+                || rawPoint.getType().equals("10")
+                || rawPoint.getType().equals("17"));
     }
 
     // If "analogType" == 1 (Generic Resistance), process the point as a raw resistive input.

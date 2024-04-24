@@ -430,18 +430,52 @@ public class OAOEquip
                                                             .setUnit("V").setTz(tz).build();
         String outsideDamperAtMaxDriveId = CCUHsApi.getInstance().addPoint(outsideDamperAtMaxDrive );
         hayStack.writeDefaultValById(outsideDamperAtMaxDriveId, config.outsideDamperAtMaxDrive);
-    
-    
-        Point outsideDamperMinOpen   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpen"))
-                                                            .setEquipRef(equipRef)
-                                                            .setSiteRef(siteRef)
-                                                            .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("sp")
-                                                            .setGroup(String.valueOf(nodeAddr))
-                                                            .setUnit("%").setTz(tz).build();
-        String outsideDamperMinOpenId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpen  );
-        hayStack.writeDefaultValById(outsideDamperMinOpenId, config.outsideDamperMinOpen);
-        
-    
+
+        Point outsideDamperMinOpenDuringRecirc   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpenDuringRecirc"))
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("recirc").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%").setTz(tz).build();
+        String outsideDamperMinOpenDuringRecircId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpenDuringRecirc  );
+        hayStack.writeDefaultValById(outsideDamperMinOpenDuringRecircId, config.outsideDamperMinOpenDuringRecirc);
+
+        Point outsideDamperMinOpenDuringConditioning   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpenDuringConditioning"))
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("conditioning").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%").setTz(tz).build();
+        String outsideDamperMinOpenDuringConditioningId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpenDuringConditioning  );
+        hayStack.writeDefaultValById(outsideDamperMinOpenDuringConditioningId, config.outsideDamperMinOpenDuringConditioning);
+
+        Point outsideDamperMinOpenDuringFanLow   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpenDuringFanLow"))
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("fan").addMarker("low").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%").setTz(tz).build();
+        String outsideDamperMinOpenDuringFanLowId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpenDuringFanLow  );
+        hayStack.writeDefaultValById(outsideDamperMinOpenDuringFanLowId, config.outsideDamperMinOpenDuringFanLow);
+
+        Point outsideDamperMinOpenDuringFanMedium   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpenDuringFanMedium"))
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("fan").addMarker("medium").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%").setTz(tz).build();
+        String outsideDamperMinOpenDuringFanMediumId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpenDuringFanMedium  );
+        hayStack.writeDefaultValById(outsideDamperMinOpenDuringFanMediumId, config.outsideDamperMinOpenDuringFanMedium);
+
+        Point outsideDamperMinOpenDuringFanHigh   = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-outsideDamperMinOpenDuringFanHigh"))
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("fan").addMarker("high").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%").setTz(tz).build();
+        String outsideDamperMinOpenDuringFanHighId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpenDuringFanHigh  );
+        hayStack.writeDefaultValById(outsideDamperMinOpenDuringFanHighId, config.outsideDamperMinOpenDuringFanHigh);
+
         Point returnDamperAtMinDrive  = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-returnDamperAtMinDrive"))
                                                             .setEquipRef(equipRef)
                                                             .setSiteRef(siteRef)
@@ -581,6 +615,7 @@ public class OAOEquip
             hayStack.writeHisValueByIdWithoutCOV(enhancedVentilationMinDamperOpenId, 50.0);
         }
     }
+
     public double getHisVal(String tags) {
         if(tags.contains("outside") && tags.contains("air") && tags.contains("temp")){
             if(!OfflineModeUtilKt.isOATValid())
@@ -600,7 +635,11 @@ public class OAOEquip
         config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
         config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and min and drive");
         config.returnDamperAtMaxDrive =  getConfigNumVal("return and damper and max and drive");
-        config.outsideDamperMinOpen = getConfigNumVal("not purge and not enhanced and outside and damper and min and open");
+        config.outsideDamperMinOpenDuringRecirc = getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+        config.outsideDamperMinOpenDuringConditioning = getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+        config.outsideDamperMinOpenDuringFanLow = getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low");
+        config.outsideDamperMinOpenDuringFanMedium = getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+        config.outsideDamperMinOpenDuringFanHigh = getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
         config.returnDamperMinOpen = getConfigNumVal("return and damper and min and open");
         
         config.exhaustFanStage1Threshold = getConfigNumVal("exhaust and fan and stage1 and threshold") ;
@@ -629,7 +668,11 @@ public class OAOEquip
         setConfigNumVal("outside and damper and max and drive", config.outsideDamperAtMaxDrive);
         setConfigNumVal("return and damper and min and drive", config.returnDamperAtMinDrive);
         setConfigNumVal("return and damper and max and drive", config.returnDamperAtMaxDrive);
-        setConfigNumVal("not purge and not enhanced and outside and damper and min and open", config.outsideDamperMinOpen);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc", config.outsideDamperMinOpenDuringRecirc);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning", config.outsideDamperMinOpenDuringConditioning);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low", config.outsideDamperMinOpenDuringFanLow);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium", config.outsideDamperMinOpenDuringFanMedium);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high", config.outsideDamperMinOpenDuringFanHigh);
         setConfigNumVal("return and damper and min and open", config.returnDamperMinOpen);
         setConfigNumVal("exhaust and fan and stage1 and threshold", config.exhaustFanStage1Threshold);
         setConfigNumVal("exhaust and fan and stage2 and threshold", config.exhaustFanStage2Threshold);

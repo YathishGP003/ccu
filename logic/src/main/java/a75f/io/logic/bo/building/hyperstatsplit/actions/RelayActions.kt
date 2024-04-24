@@ -52,7 +52,8 @@ interface RelayActions {
                       fanLoopOutput: Int,
                       relayActivationHysteresis: Int,
                       relayStages: HashMap<String, Int>,
-                      divider: Int)
+                      divider: Int,
+                      prePurgeRunning: Boolean)
 
     fun doFanMediumSpeed(port: Port,
                          logicalPointId: String,
@@ -61,14 +62,16 @@ interface RelayActions {
                          fanLoopOutput: Int,
                          relayActivationHysteresis: Int,
                          divider: Int,
-                         relayStages: HashMap<String, Int>)
+                         relayStages: HashMap<String, Int>,
+                         prePurgeRunning: Boolean)
 
     fun doFanHighSpeed(port: Port,
                        logicalPointId: String,
                        fanMode: StandaloneFanStage,
                        fanLoopOutput: Int,
                        relayActivationHysteresis: Int,
-                       relayStages: HashMap<String, Int>)
+                       relayStages: HashMap<String, Int>,
+                       prePurgeRunning: Boolean)
 
     fun doFanEnabled( currentState: ZoneState,
                       whichPort: Port,

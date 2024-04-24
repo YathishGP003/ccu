@@ -82,6 +82,7 @@ class CpuEconReconfiguration {
                 temperatureOffset = original.temperatureOffset
                 isEnableAutoForceOccupied = original.isEnableAutoForceOccupied
                 isEnableAutoAway = original.isEnableAutoAway
+                isEnablePrePurge = original.isEnablePrePurge
                 address0State = original.address0State
                 address1State = original.address1State
                 address2State = original.address2State
@@ -113,6 +114,7 @@ class CpuEconReconfiguration {
                 zoneVOCThreshold = original.zoneVOCThreshold
                 zoneVOCTarget = original.zoneVOCTarget
                 zonePm2p5Target = original.zonePm2p5Target
+                prePurgeMinOpen = original.prePurgeMinOpen
             }
         }
 

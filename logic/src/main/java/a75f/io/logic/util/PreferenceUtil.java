@@ -100,6 +100,8 @@ public class PreferenceUtil {
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
     public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration";
+    public static final String TITLE_24_OAO_POINTS_MIGRATION = "title24OaoPointsMigration";
+    public static final String TITLE_24_HSS_POINTS_MIGRATION = "title24HssPointsMigration";
 
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
@@ -829,9 +831,24 @@ public class PreferenceUtil {
     public static void setSRMigrationPointUpdated() {
         setBooleanPreference(SR_MIGRATION_POINT, true);
     }
-
     public static void setZoneEquipConfigPointMigrationDone() {
         setBooleanPreference(ZONE_EQUIP_CONFIG_POINT_MIGRATION, true);
+    }
+
+    public static boolean isTitle24OaoPointsMigrationDone() {
+        return getBooleanPreference(TITLE_24_OAO_POINTS_MIGRATION);
+    }
+
+    public static void setTitle24OaoPointsMigrationDone() {
+        setBooleanPreference(TITLE_24_OAO_POINTS_MIGRATION, true);
+    }
+
+    public static boolean isTitle24HssPointsMigrationDone() {
+        return getBooleanPreference(TITLE_24_HSS_POINTS_MIGRATION);
+    }
+
+    public static void setTitle24HssPointsMigrationDone() {
+        setBooleanPreference(TITLE_24_HSS_POINTS_MIGRATION, true);
     }
 
     public static boolean getCarrierDabToVvtMigration() {

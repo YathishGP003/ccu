@@ -1,6 +1,5 @@
 package a75f.io.renatus.hyperstatsplit.viewModels
 
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.common.AnalogConfigState
@@ -18,7 +17,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAsso
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 
 import a75f.io.renatus.R
-import android.util.Log
 
 /**
  * Created for HyperStat by Manjunath K on 15-07-2022.
@@ -30,12 +28,17 @@ import android.util.Log
     val tempOffsetPosition: Int,
     val forceOccupiedEnabled: Boolean,
     val autoAwayEnabled: Boolean,
+    val prePurgeEnabled: Boolean,
     val relays: List<ConfigState>,
     val analogOutUis: List<AnalogConfigState>,
     val universalIns: List<ConfigState>,
     val sensorBusTemps: List<ConfigState>,
     val sensorBusPress: List<ConfigState>,
-    var outsideDamperMinOpenPos: Int,
+    var outsideDamperMinOpenDuringRecircPos: Int,
+    var outsideDamperMinOpenDuringConditioningPos: Int,
+    var outsideDamperMinOpenDuringFanLowPos: Int,
+    var outsideDamperMinOpenDuringFanMediumPos: Int,
+    var outsideDamperMinOpenDuringFanHighPos: Int,
     var exhaustFanStage1ThresholdPos: Int,
     var exhaustFanStage2ThresholdPos: Int,
     var exhaustFanHysteresisPos: Int,
@@ -45,6 +48,7 @@ import android.util.Log
     var zoneVocThresholdPos: Int,
     var zoneVocTargetPos: Int,
     var zonePm2p5TargetPos: Int,
+    val prePurgeMinOpenPos: Int,
     var isDisplayHumidityEnabled: Boolean,
     var isDisplayVOCEnabled: Boolean,
     var isDisplayPp2p5Enabled: Boolean,
@@ -73,6 +77,7 @@ import android.util.Log
             tempOffsetPosition = (tempOffsetSpinnerValues().indexOf(config.temperatureOffset.toString())),
             forceOccupiedEnabled = config.isEnableAutoForceOccupied,
             autoAwayEnabled = config.isEnableAutoAway,
+            prePurgeEnabled = config.isEnablePrePurge,
             relays = listOf(
                 ConfigState(config.relay1State.enabled, config.relay1State.association.ordinal),
                 ConfigState(config.relay2State.enabled, config.relay2State.association.ordinal),
@@ -100,6 +105,8 @@ import android.util.Log
                     config.analogOut1State.perAtFanLow,
                     config.analogOut1State.perAtFanMedium,
                     config.analogOut1State.perAtFanHigh,
+                    config.analogOut1State.voltageAtRecirculate,
+                    config.analogOut1State.voltageDuringEconomizer
                 ),
                 AnalogConfigState(
                     config.analogOut2State.enabled,
@@ -109,6 +116,8 @@ import android.util.Log
                     config.analogOut2State.perAtFanLow,
                     config.analogOut2State.perAtFanMedium,
                     config.analogOut2State.perAtFanHigh,
+                    config.analogOut2State.voltageAtRecirculate,
+                    config.analogOut2State.voltageDuringEconomizer
                 ),
                 AnalogConfigState(
                     config.analogOut3State.enabled,
@@ -118,6 +127,8 @@ import android.util.Log
                     config.analogOut3State.perAtFanLow,
                     config.analogOut3State.perAtFanMedium,
                     config.analogOut3State.perAtFanHigh,
+                    config.analogOut3State.voltageAtRecirculate,
+                    config.analogOut3State.voltageDuringEconomizer
                 ),
                 AnalogConfigState(
                     config.analogOut4State.enabled,
@@ -127,6 +138,8 @@ import android.util.Log
                     config.analogOut4State.perAtFanLow,
                     config.analogOut4State.perAtFanMedium,
                     config.analogOut4State.perAtFanHigh,
+                    config.analogOut4State.voltageAtRecirculate,
+                    config.analogOut4State.voltageDuringEconomizer
                 ),
 
                 ),
@@ -164,7 +177,11 @@ import android.util.Log
                     config.universalIn8State.association.ordinal
                 ),
             ),
-            outsideDamperMinOpenPos = outsideDamperMinOpenSetIndexFromValue(config.outsideDamperMinOpen),
+            outsideDamperMinOpenDuringRecircPos = outsideDamperMinOpenDuringRecircSetIndexFromValue(config.outsideDamperMinOpenDuringRecirc),
+            outsideDamperMinOpenDuringConditioningPos = outsideDamperMinOpenDuringConditioningSetIndexFromValue(config.outsideDamperMinOpenDuringConditioning),
+            outsideDamperMinOpenDuringFanLowPos = outsideDamperMinOpenDuringFanLowSetIndexFromValue(config.outsideDamperMinOpenDuringFanLow),
+            outsideDamperMinOpenDuringFanMediumPos = outsideDamperMinOpenDuringFanMediumSetIndexFromValue(config.outsideDamperMinOpenDuringFanMedium),
+            outsideDamperMinOpenDuringFanHighPos = outsideDamperMinOpenDuringFanHighSetIndexFromValue(config.outsideDamperMinOpenDuringFanHigh),
             exhaustFanStage1ThresholdPos = exhaustFanStage1ThresholdSetIndexFromValue(config.exhaustFanStage1Threshold),
             exhaustFanStage2ThresholdPos = exhaustFanStage2ThresholdSetIndexFromValue(config.exhaustFanStage2Threshold),
             exhaustFanHysteresisPos = exhaustFanHysteresisSetIndexFromValue(config.exhaustFanHysteresis),
@@ -174,6 +191,7 @@ import android.util.Log
             zoneVocThresholdPos = vocSetIndexFromValue(config.zoneVOCThreshold),
             zoneVocTargetPos = vocSetIndexFromValue(config.zoneVOCTarget),
             zonePm2p5TargetPos = pmSetIndexFromValue(config.zonePm2p5Target),
+            prePurgeMinOpenPos = prePurgeSetIndexFromValue(config.prePurgeMinOpen),
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
@@ -200,6 +218,7 @@ import android.util.Log
             temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
+            isEnablePrePurge = prePurgeEnabled
             relay1State = RelayState(
                 relays[0].enabled,
                 CpuEconRelayAssociation.values()[relays[0].association]
@@ -240,7 +259,9 @@ import android.util.Log
                 analogOutUis[0].voltageAtMax,
                 analogOutUis[0].perAtFanLow,
                 analogOutUis[0].perAtFanMedium,
-                analogOutUis[0].perAtFanHigh
+                analogOutUis[0].perAtFanHigh,
+                analogOutUis[0].voltageAtRecirculate,
+                analogOutUis[0].voltageDuringEconomizer
             )
             analogOut2State = AnalogOutState(
                 analogOutUis[1].enabled,
@@ -249,7 +270,9 @@ import android.util.Log
                 analogOutUis[1].voltageAtMax,
                 analogOutUis[1].perAtFanLow,
                 analogOutUis[1].perAtFanMedium,
-                analogOutUis[1].perAtFanHigh
+                analogOutUis[1].perAtFanHigh,
+                analogOutUis[1].voltageAtRecirculate,
+                analogOutUis[1].voltageDuringEconomizer
             )
             analogOut3State = AnalogOutState(
                 analogOutUis[2].enabled,
@@ -258,7 +281,9 @@ import android.util.Log
                 analogOutUis[2].voltageAtMax,
                 analogOutUis[2].perAtFanLow,
                 analogOutUis[2].perAtFanMedium,
-                analogOutUis[2].perAtFanHigh
+                analogOutUis[2].perAtFanHigh,
+                analogOutUis[2].voltageAtRecirculate,
+                analogOutUis[2].voltageDuringEconomizer
             )
             analogOut4State = AnalogOutState(
                 analogOutUis[3].enabled,
@@ -267,7 +292,9 @@ import android.util.Log
                 analogOutUis[3].voltageAtMax,
                 analogOutUis[3].perAtFanLow,
                 analogOutUis[3].perAtFanMedium,
-                analogOutUis[3].perAtFanHigh
+                analogOutUis[3].perAtFanHigh,
+                analogOutUis[3].voltageAtRecirculate,
+                analogOutUis[3].voltageDuringEconomizer
             )
 
             address0State = SensorBusTempState(sensorBusTemps[0].enabled, CpuEconSensorBusTempAssociation.values()[sensorBusTemps[0].association])
@@ -315,7 +342,12 @@ import android.util.Log
             heatingStage2FanState = stagedFanUis[4]
             heatingStage3FanState = stagedFanUis[5]
 
-            outsideDamperMinOpen = outsideDamperMinOpenValueFromIndex(outsideDamperMinOpenPos)
+            outsideDamperMinOpenDuringRecirc = outsideDamperMinOpenDuringRecircValueFromIndex(outsideDamperMinOpenDuringRecircPos)
+            outsideDamperMinOpenDuringConditioning = outsideDamperMinOpenDuringConditioningValueFromIndex(outsideDamperMinOpenDuringConditioningPos)
+            outsideDamperMinOpenDuringFanLow = outsideDamperMinOpenDuringFanLowValueFromIndex(outsideDamperMinOpenDuringFanLowPos)
+            outsideDamperMinOpenDuringFanMedium = outsideDamperMinOpenDuringFanMediumValueFromIndex(outsideDamperMinOpenDuringFanMediumPos)
+            outsideDamperMinOpenDuringFanHigh = outsideDamperMinOpenDuringFanHighValueFromIndex(outsideDamperMinOpenDuringFanHighPos)
+
             exhaustFanStage1Threshold = exhaustFanStage1ThresholdValueFromIndex(exhaustFanStage1ThresholdPos)
             exhaustFanStage2Threshold = exhaustFanStage2ThresholdValueFromIndex(exhaustFanStage2ThresholdPos)
             exhaustFanHysteresis = exhaustFanHysteresisFromIndex(exhaustFanHysteresisPos)
@@ -326,6 +358,7 @@ import android.util.Log
             zoneVOCThreshold = vocValueFromIndex(zoneVocThresholdPos)
             zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
             zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
+            prePurgeMinOpen = prePurgeValueFromIndex(prePurgeMinOpenPos)
             displayHumidity = isDisplayHumidityEnabled
             displayCo2 = isDisplayCo2Enabled
             displayVOC = isDisplayVOCEnabled
@@ -388,6 +421,9 @@ val UniversalInAssociation.displayName: Int
             UniversalInAssociation.DUCT_PRESSURE_0_2 -> R.string.duct_pressure_0_2
             UniversalInAssociation.GENERIC_VOLTAGE -> R.string.generic_voltage
             UniversalInAssociation.GENERIC_RESISTANCE -> R.string.generic_resistance
+            UniversalInAssociation.DUCT_PRESSURE_0_10 -> R.string.duct_pressure_0_10
+            UniversalInAssociation.GENERIC_FAULT_NO -> R.string.generic_fault_no
+            UniversalInAssociation.GENERIC_FAULT_NC -> R.string.generic_fault_nc
         }
     }
 

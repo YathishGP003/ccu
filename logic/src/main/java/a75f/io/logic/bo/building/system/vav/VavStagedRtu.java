@@ -686,7 +686,7 @@ public class VavStagedRtu extends VavSystemProfile
         return false;
     }
     
-    private double getStageStatus(Stage stage) {
+    public double getStageStatus(Stage stage) {
         if (stage.getValue() <= COOLING_5.getValue()) {
             return getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
         } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {

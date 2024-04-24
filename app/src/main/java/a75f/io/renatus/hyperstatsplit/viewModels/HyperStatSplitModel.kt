@@ -21,6 +21,7 @@ interface HyperStatSplitModel {
     fun tempOffsetSelected(newVal: Int)
     fun enableForceOccupiedSwitchChanged(checked: Boolean)
     fun enableAutoAwaySwitchChanged(checked: Boolean)
+    fun enablePrePurgeSwitchChanged(checked: Boolean)
     fun relaySwitchChanged(index: Int, checked: Boolean)
     fun relayMappingSelected(index: Int, position: Int)
     fun getRelayMapping():Array<String>
@@ -28,6 +29,8 @@ interface HyperStatSplitModel {
     fun analogOutMappingSelected(index: Int, position: Int)
     fun getAnalogOutMapping(): Array<String>
     fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int)
+    fun voltageDuringCirculation(index: Int, position: Int)
+    fun voltageDuringEconomizer(index: Int, position: Int)
     fun updateFanConfigSelected(type: Int, index: Int, position: Int)
     fun sensorBusTempSwitchChanged(index: Int, checked: Boolean)
     fun sensorBusTempMappingSelected(index: Int, position: Int)
@@ -37,7 +40,11 @@ interface HyperStatSplitModel {
     fun universalInMappingSelected(index: Int, position: Int)
     fun getUniversalInMapping(): Array<String>
     fun isDamperSelected(association: Int): Boolean
-    fun outsideDamperMinOpenSelect(position: Int)
+    fun outsideDamperMinOpenDuringRecircSelect(position: Int)
+    fun outsideDamperMinOpenDuringConditioningSelect(position: Int)
+    fun outsideDamperMinOpenDuringFanLowSelect(position: Int)
+    fun outsideDamperMinOpenDuringFanMediumSelect(position: Int)
+    fun outsideDamperMinOpenDuringFanHighSelect(position: Int)
     fun exhaustFanStage1ThresholdSelect(position: Int)
     fun exhaustFanStage2ThresholdSelect(position: Int)
     fun exhaustFanHysteresisSelect(position: Int)
@@ -47,6 +54,7 @@ interface HyperStatSplitModel {
     fun zoneVOCThresholdSelect(position: Int)
     fun zoneVOCTargetSelect(position: Int)
     fun zonePmTargetSelect(position: Int)
+    fun prePurgeMinOpenSelect(position: Int)
     fun onDisplayHumiditySelected(checked: Boolean)
     fun onDisplayCo2Selected(checked: Boolean)
     fun onDisplayVocSelected(checked: Boolean)

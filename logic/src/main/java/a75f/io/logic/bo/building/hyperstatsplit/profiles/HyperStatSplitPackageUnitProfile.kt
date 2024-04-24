@@ -15,6 +15,49 @@ import android.util.Log
 
 abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
 
+    private var fanEnabledStatus = false
+    /* Flags for checking if the current stage is lowest
+    *  Eg: If FAN MEDIUM and FAN HIGH is used, then FAN MEDIUM is the lowest stage */
+    private var lowestStageFanLow = false
+    private var lowestStageFanMedium = false
+    private var lowestStageFanHigh = false
+
+    /**
+     * Sets the enabled status of the fan.
+     *
+     * @param status `true` if the fan is enabled, `false` otherwise.
+     */
+    fun setFanEnabledStatus(status: Boolean) {
+        fanEnabledStatus = status
+    }
+
+    /**
+     * Sets the status of the lowest fan low stage.
+     *
+     * @param status `true` if the lowest fan low stage is enabled, `false` otherwise.
+     */
+    fun setFanLowestFanLowStatus(status: Boolean) {
+        lowestStageFanLow = status
+    }
+
+    /**
+     * Sets the status of the lowest fan medium stage.
+     *
+     * @param status `true` if the lowest fan low stage is enabled, `false` otherwise.
+     */
+    fun setFanLowestFanMediumStatus(status: Boolean) {
+        lowestStageFanMedium = status
+    }
+
+    /**
+     * Sets the status of the lowest fan medium stage.
+     *
+     * @param status `true` if the lowest fan medium stage is enabled, `false` otherwise.
+     */
+    fun setFanLowestFanHighStatus(status: Boolean) {
+        lowestStageFanHigh = status
+    }
+
     override fun doFanLowSpeed(
         port: Port,
         logicalPointId: String,
@@ -25,6 +68,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         relayActivationHysteresis: Int,
         relayStages: HashMap<String, Int>,
         divider: Int,
+        prePurgeRunning: Boolean
     ) {
 
         var relayState = -1.0
@@ -37,6 +81,12 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
                 val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
+
+            // For Title 24 compliance, set relay when one of the fan is mapped to enabled and loop > 0
+            if (fanEnabledStatus && (fanLoopOutput > 0) && lowestStageFanLow)
+                relayState = 1.0
+            else if(prePurgeRunning)
+                relayState = 1.0
 
         } else {
             relayState = 1.0
@@ -58,7 +108,8 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         fanLoopOutput: Int,
         relayActivationHysteresis: Int,
         divider: Int,
-        relayStages: HashMap<String, Int>
+        relayStages: HashMap<String, Int>,
+        prePurgeRunning: Boolean
     ) {
 
         var relayState = -1.0
@@ -71,6 +122,13 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
                 val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
+
+            // For Title 24 compliance, check if fanEnabled is mapped and fanMedium is the lowest
+            if (fanEnabledStatus && (fanLoopOutput > 0) && lowestStageFanMedium)
+                relayState = 1.0
+            else if(prePurgeRunning)
+                relayState = 1.0
+
         } else {
             relayState = if (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
                 || fanMode == StandaloneFanStage.MEDIUM_OCC
@@ -96,7 +154,8 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         fanMode: StandaloneFanStage,
         fanLoopOutput: Int,
         relayActivationHysteresis: Int,
-        relayStages: HashMap<String, Int>
+        relayStages: HashMap<String, Int>,
+        prePurgeRunning: Boolean
     ) {
         var relayState = -1.0
         if (fanMode == StandaloneFanStage.AUTO) {
@@ -108,6 +167,13 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
                 val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
+
+            // For Title 24 compliance, check if fanEnabled is mapped and fanHigh is the lowest
+            if (fanEnabledStatus && (fanLoopOutput > 0) && lowestStageFanHigh)
+                relayState = 1.0
+            else if(prePurgeRunning)
+                relayState = 1.0
+
         } else {
             relayState = if (fanMode == StandaloneFanStage.HIGH_CUR_OCC
                 || fanMode == StandaloneFanStage.HIGH_OCC

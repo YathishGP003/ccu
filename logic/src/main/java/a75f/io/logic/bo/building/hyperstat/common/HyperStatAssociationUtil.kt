@@ -236,6 +236,10 @@ class HyperStatAssociationUtil {
             }
         }
 
+        fun isAnalogAssociatedToStaged(analogOutState: AnalogOutState) : Boolean {
+            return (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
+        }
+
         private fun isAnalogInMapped(
             ai1: AnalogInState, ai2: AnalogInState, association: AnalogInAssociation
         ): Boolean{
@@ -273,6 +277,7 @@ class HyperStatAssociationUtil {
                 (analogOut1.association != analogOut2.association) -> return false
                 (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
                 (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
+                (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return false
                 (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                     when {
                         (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
@@ -291,6 +296,7 @@ class HyperStatAssociationUtil {
                     (analogOut1.association != analogOut2.association) -> return AnalogOutChanges.MAPPING
                     (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return AnalogOutChanges.MIN
                     (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return AnalogOutChanges.MAX
+                    (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return AnalogOutChanges.RECIRCULATE
                     (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                         when {
                             (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return AnalogOutChanges.LOW
@@ -552,6 +558,40 @@ class HyperStatAssociationUtil {
             return highestValue
         }
 
+        /**
+         * Determines the lowest fan stage based on the relay states in the given CPU configuration.
+         *
+         * @param configuration the CPU configuration to analyze.
+         * @return the lowest fan stage, represented as a [CpuRelayAssociation] value.
+         */
+        fun getLowestFanStage(configuration: HyperStatCpuConfiguration): CpuRelayAssociation {
+            var lowestValue = 0xFF
+            lowestValue = verifyFanStateLowValue(configuration.relay1State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay2State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay3State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay4State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay5State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay6State, lowestValue)
+
+            // If no fan is enabled, return highest enum value (DEHUMIDIFIER)
+            return CpuRelayAssociation.values().getOrNull(lowestValue) ?: CpuRelayAssociation.DEHUMIDIFIER
+        }
+
+        /**
+         * Verifies the lowest fan state value based on the given relay state and the current lowest value.
+         *
+         * @param state the relay state to verify.
+         * @param lowestValue the current lowest value.
+         * @return the updated lowest value, considering the relay state.
+         */
+        private fun verifyFanStateLowValue(state: RelayState, lowestValue: Int): Int {
+            if (state.enabled && isRelayAssociatedToFan(state)
+                && state.association.ordinal < lowestValue
+            )
+                return state.association.ordinal
+            return lowestValue
+        }
+
         fun getHighestFanStage(configuration: HyperStatCpuConfiguration): CpuRelayAssociation {
             var highestValue = 0
             highestValue = verifyFanState(configuration.relay1State, highestValue)
@@ -593,6 +633,40 @@ class HyperStatAssociationUtil {
             return highestValue
         }
 
+        /**
+         * Determines the lowest fan stage based on the relay states in the given CPU configuration.
+         *
+         * @param configuration the CPU configuration to analyze.
+         * @return the lowest fan stage, represented as a [CpuRelayAssociation] value.
+         */
+        fun getHpuLowestFanStage(configuration: HyperStatHpuConfiguration): HpuRelayAssociation {
+            var lowestValue = 0xFF
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay1State, lowestValue)
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay2State, lowestValue)
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay3State, lowestValue)
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay4State, lowestValue)
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay5State, lowestValue)
+            lowestValue = verifyHpuFanStateLowValue(configuration.relay6State, lowestValue)
+
+            // If no fan is enabled, return highest enum value (DEHUMIDIFIER)
+            return HpuRelayAssociation.values().getOrNull(lowestValue) ?: HpuRelayAssociation.DEHUMIDIFIER
+        }
+
+        /**
+         * Verifies the lowest fan state value based on the given relay state and the current lowest value.
+         *
+         * @param state the relay state to verify.
+         * @param lowestValue the current lowest value.
+         * @return the updated lowest value, considering the relay state.
+         */
+        private fun verifyHpuFanStateLowValue(state: HpuRelayState, lowestValue: Int): Int {
+            if (state.enabled && isHpuRelayAssociatedToFan(state)
+                && state.association.ordinal < lowestValue
+            )
+                return state.association.ordinal
+            return lowestValue
+        }
+
         fun getHpuHighestFanStage(configuration: HyperStatHpuConfiguration): HpuRelayAssociation {
             var highestValue = 0
             highestValue = verifyHpuFanState(configuration.relay1State, highestValue)
@@ -610,6 +684,40 @@ class HyperStatAssociationUtil {
             )
                 return state.association.ordinal
             return highestValue
+        }
+
+        /**
+         * Determines the lowest fan stage based on the relay states in the given CPU configuration.
+         *
+         * @param configuration the CPU configuration to analyze.
+         * @return the lowest fan stage, represented as a [CpuRelayAssociation] value.
+         */
+        fun getPipe2LowestFanStage(configuration: HyperStatPipe2Configuration): Pipe2RelayAssociation {
+            var lowestValue = 0xFF
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay1State, lowestValue)
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay2State, lowestValue)
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay3State, lowestValue)
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay4State, lowestValue)
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay5State, lowestValue)
+            lowestValue = verifyPipe2FanStateLowValue(configuration.relay6State, lowestValue)
+
+            // If no fan is enabled, return highest enum value (DEHUMIDIFIER)
+            return Pipe2RelayAssociation.values().getOrNull(lowestValue) ?: Pipe2RelayAssociation.DEHUMIDIFIER
+        }
+
+        /**
+         * Verifies the lowest fan state value based on the given relay state and the current lowest value.
+         *
+         * @param state the relay state to verify.
+         * @param lowestValue the current lowest value.
+         * @return the updated lowest value, considering the relay state.
+         */
+        private fun verifyPipe2FanStateLowValue(state: Pipe2RelayState, lowestValue: Int): Int {
+            if (state.enabled && isPipe2RelayAssociatedToFan(state)
+                && state.association.ordinal < lowestValue
+            )
+                return state.association.ordinal
+            return lowestValue
         }
 
         fun getPipe2HighestFanStage(configuration: HyperStatPipe2Configuration): Pipe2RelayAssociation {

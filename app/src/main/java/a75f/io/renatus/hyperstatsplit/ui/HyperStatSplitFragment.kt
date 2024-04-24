@@ -30,7 +30,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -67,6 +66,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var tempOffsetSelector: NumberPicker
     lateinit var forceOccupiedSwitch: CustomCCUSwitch
     lateinit var autoAwaySwitch: CustomCCUSwitch
+    lateinit var prePurgeSwitch: CustomCCUSwitch
 
     // 8 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -96,8 +96,17 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var llCo2Target: LinearLayout
     lateinit var llCo2Threshold: LinearLayout
 
-    lateinit var outsideDamperMinOpen: Spinner
-    lateinit var tvOutsideDamperMinOpen: TextView
+    lateinit var outsideDamperMinOpenDuringRecirc: Spinner
+    lateinit var tvOutsideDamperMinOpenDuringRecirc: TextView
+    lateinit var outsideDamperMinOpenDuringConditioning: Spinner
+    lateinit var tvOutsideDamperMinOpenDuringConditioning: TextView
+    lateinit var outsideDamperMinOpenDuringFanLow: Spinner
+    lateinit var tvOutsideDamperMinOpenDuringFanLow: TextView
+    lateinit var outsideDamperMinOpenDuringFanMedium: Spinner
+    lateinit var tvOutsideDamperMinOpenDuringFanMedium: TextView
+    lateinit var outsideDamperMinOpenDuringFanHigh: Spinner
+    lateinit var tvOutsideDamperMinOpenDuringFanHigh: TextView
+
     lateinit var exhaustFanStage1Threshold: Spinner
     lateinit var tvExhaustFanStage1Threshold: TextView
     lateinit var exhaustFanStage2Threshold: Spinner
@@ -110,6 +119,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     lateinit var zoneVOCTarget: Spinner
 
     lateinit var zonePMTarget: Spinner
+    lateinit var prePurgeMinOpenText: TextView
+    lateinit var prePurgeMinOpenSpinner: Spinner
 
     lateinit var displayHumidity: CustomCCUSwitch
     lateinit var displayVOC: CustomCCUSwitch
@@ -214,6 +225,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             tempOffsetSelector = findViewById(R.id.temperatureOffset)
             forceOccupiedSwitch = findViewById(R.id.toggleForceOccupied)
             autoAwaySwitch = findViewById(R.id.toggleAutoAway)
+            prePurgeSwitch = findViewById(R.id.togglePrePurge)
 
             relayUIs = listOf(
                 RelayWidgets(findViewById(R.id.toggleRelay1), findViewById(R.id.relay1Spinner)),
@@ -237,7 +249,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     findViewById(R.id.ao1FanConfig),
                     findViewById(R.id.ao1AtFanLowSpinner),
                     findViewById(R.id.ao1AtFanMediumSpinner),
-                    findViewById(R.id.ao1AtFanHighSpinner)
+                    findViewById(R.id.ao1AtFanHighSpinner),
+                    findViewById(R.id.ao1AtRecirculateLabel),
+                    findViewById(R.id.ao1AtRecirculateSpinner),
+                    findViewById(R.id.ao1DuringEconomizerLabel),
+                    findViewById(R.id.ao1DuringEconomizerSpinner)
                 ),
                 AnalogOutWidgets(
                     findViewById(R.id.toggleAnalog2),
@@ -249,7 +265,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     findViewById(R.id.ao2FanConfig),
                     findViewById(R.id.ao2AtFanLowSpinner),
                     findViewById(R.id.ao2AtFanMediumSpinner),
-                    findViewById(R.id.ao2AtFanHighSpinner)
+                    findViewById(R.id.ao2AtFanHighSpinner),
+                    findViewById(R.id.ao2AtRecirculateLabel),
+                    findViewById(R.id.ao2AtRecirculateSpinner),
+                    findViewById(R.id.ao2DuringEconomizerLabel),
+                    findViewById(R.id.ao2DuringEconomizerSpinner)
                 ),
                 AnalogOutWidgets(
                     findViewById(R.id.toggleAnalog3),
@@ -261,7 +281,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     findViewById(R.id.ao3FanConfig),
                     findViewById(R.id.ao3AtFanLowSpinner),
                     findViewById(R.id.ao3AtFanMediumSpinner),
-                    findViewById(R.id.ao3AtFanHighSpinner)
+                    findViewById(R.id.ao3AtFanHighSpinner),
+                    findViewById(R.id.ao3AtRecirculateLabel),
+                    findViewById(R.id.ao3AtRecirculateSpinner),
+                    findViewById(R.id.ao3DuringEconomizerLabel),
+                    findViewById(R.id.ao3DuringEconomizerSpinner)
                 ),
                 AnalogOutWidgets(
                     findViewById(R.id.toggleAnalog4),
@@ -273,7 +297,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     findViewById(R.id.ao4FanConfig),
                     findViewById(R.id.ao4AtFanLowSpinner),
                     findViewById(R.id.ao4AtFanMediumSpinner),
-                    findViewById(R.id.ao4AtFanHighSpinner)
+                    findViewById(R.id.ao4AtFanHighSpinner),
+                    findViewById(R.id.ao4AtRecirculateLabel),
+                    findViewById(R.id.ao4AtRecirculateSpinner),
+                    findViewById(R.id.ao4DuringEconomizerLabel),
+                    findViewById(R.id.ao4DuringEconomizerSpinner)
                 )
             )
 
@@ -314,8 +342,17 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                 StagedFanWidgets(findViewById(R.id.fanOutHeatingStage3Label), findViewById(R.id.fanOutHeatingStage3Spinner)),
             )
 
-            outsideDamperMinOpen = findViewById(R.id.outsideDamperMinOpenSpinner)
-            tvOutsideDamperMinOpen = findViewById(R.id.outsideDamperMinOpen)
+            outsideDamperMinOpenDuringRecirc = findViewById(R.id.outsideDamperMinOpenDuringRecircSpinner)
+            tvOutsideDamperMinOpenDuringRecirc = findViewById(R.id.outsideDamperMinOpenDuringRecirc)
+            outsideDamperMinOpenDuringConditioning = findViewById(R.id.outsideDamperMinOpenDuringConditioningSpinner)
+            tvOutsideDamperMinOpenDuringConditioning = findViewById(R.id.outsideDamperMinOpenDuringConditioning)
+            outsideDamperMinOpenDuringFanLow = findViewById(R.id.outsideDamperMinOpenDuringFanLowSpinner)
+            tvOutsideDamperMinOpenDuringFanLow = findViewById(R.id.outsideDamperMinOpenDuringFanLow)
+            outsideDamperMinOpenDuringFanMedium = findViewById(R.id.outsideDamperMinOpenDuringFanMediumSpinner)
+            tvOutsideDamperMinOpenDuringFanMedium = findViewById(R.id.outsideDamperMinOpenDuringFanMedium)
+            outsideDamperMinOpenDuringFanHigh = findViewById(R.id.outsideDamperMinOpenDuringFanHighSpinner)
+            tvOutsideDamperMinOpenDuringFanHigh = findViewById(R.id.outsideDamperMinOpenDuringFanHigh)
+
             exhaustFanStage1Threshold = findViewById(R.id.exhaustFanStage1ThresholdSpinner)
             tvExhaustFanStage1Threshold = findViewById(R.id.exhaustFanStage1Threshold)
             exhaustFanStage2Threshold = findViewById(R.id.exhaustFanStage2ThresholdSpinner)
@@ -334,6 +371,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
+            prePurgeMinOpenSpinner = findViewById(R.id.prePurgeMinOpenSpinner)
+            prePurgeMinOpenText = findViewById(R.id.prePurgeMinOpenLabel)
             llCo2Target = findViewById(R.id.lLC02Target)
             llCo2Threshold = findViewById(R.id.lLC02Threshold)
 
@@ -426,7 +465,12 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         // We want to set text size, but cannot do with our NumberPicker until API 29
         //val pickerTextSize = resources.getDimensionPixelSize(R.dimen.text_numberpicker_hyperstat)
 
-        val outsideDamperMinOpenAdapter = getAdapterValue(outsideDamperMinOpenValue())
+        val outsideDamperMinOpenDuringRecircAdapter = getAdapterValue(outsideDamperMinOpenDuringRecircValue())
+        val outsideDamperMinOpenDuringConditioningAdapter = getAdapterValue(outsideDamperMinOpenDuringConditioningValue())
+        val outsideDamperMinOpenDuringFanLowAdapter = getAdapterValue(outsideDamperMinOpenDuringFanLowValue())
+        val outsideDamperMinOpenDuringFanMediumAdapter = getAdapterValue(outsideDamperMinOpenDuringFanMediumValue())
+        val outsideDamperMinOpenDuringFanHighAdapter = getAdapterValue(outsideDamperMinOpenDuringFanHighValue())
+
         val exhaustFanStage1ThresholdAdapter = getAdapterValue(exhaustFanStage1ThresholdValue())
         val exhaustFanStage2ThresholdAdapter = getAdapterValue(exhaustFanStage2ThresholdValue())
         val exhaustFanHysteresisAdapter = getAdapterValue(exhaustFanHysteresisValue())
@@ -434,8 +478,14 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         val co2OpeningAdapter = getAdapterValue(co2DCVOpeningDamperValue())
         val vocAdapter = getAdapterValue(vocValues())
         val pmAdapter = getAdapterValue(pmValues())
+        val prePurgeAdapter = getAdapterValue(prePurgeValues())
 
-        outsideDamperMinOpen.adapter = outsideDamperMinOpenAdapter
+        outsideDamperMinOpenDuringRecirc.adapter = outsideDamperMinOpenDuringRecircAdapter
+        outsideDamperMinOpenDuringConditioning.adapter = outsideDamperMinOpenDuringConditioningAdapter
+        outsideDamperMinOpenDuringFanLow.adapter = outsideDamperMinOpenDuringFanLowAdapter
+        outsideDamperMinOpenDuringFanMedium.adapter = outsideDamperMinOpenDuringFanMediumAdapter
+        outsideDamperMinOpenDuringFanHigh.adapter = outsideDamperMinOpenDuringFanHighAdapter
+
         exhaustFanStage1Threshold.adapter = exhaustFanStage1ThresholdAdapter
         exhaustFanStage2Threshold.adapter = exhaustFanStage2ThresholdAdapter
         exhaustFanHysteresis.adapter = exhaustFanHysteresisAdapter
@@ -448,10 +498,16 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneVOCTarget.adapter = vocAdapter
 
         zonePMTarget.adapter = pmAdapter
+        prePurgeMinOpenSpinner.adapter = prePurgeAdapter
 
 
         // set default values
-        outsideDamperMinOpen.setSelection(outsideDamperMinOpen.adapter.count - 1)
+        outsideDamperMinOpenDuringRecirc.setSelection(outsideDamperMinOpenDuringRecirc.adapter.count - 1)
+        outsideDamperMinOpenDuringConditioning.setSelection(outsideDamperMinOpenDuringConditioning.adapter.count - 1)
+        outsideDamperMinOpenDuringFanLow.setSelection(outsideDamperMinOpenDuringFanLow.adapter.count - 1)
+        outsideDamperMinOpenDuringFanMedium.setSelection(outsideDamperMinOpenDuringFanMedium.adapter.count - 1)
+        outsideDamperMinOpenDuringFanHigh.setSelection(outsideDamperMinOpenDuringFanHigh.adapter.count - 1)
+
         exhaustFanStage1Threshold.setSelection(exhaustFanStage1Threshold.adapter.count - 1)
         exhaustFanStage2Threshold.setSelection(exhaustFanStage2Threshold.adapter.count - 1)
         exhaustFanHysteresis.setSelection(exhaustFanHysteresis.adapter.count - 1)
@@ -460,6 +516,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneVOCTarget.setSelection(zoneVOCTarget.adapter.count -1)
 
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
+        prePurgeMinOpenSpinner.setSelection(prePurgeMinOpenSpinner.adapter.count - 1)
 
         zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
         zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
@@ -471,6 +528,12 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             it.analogOutAtFanLow.adapter = adapter
             it.analogOutAtFanMedium.adapter = adapter
             it.analogOutAtFanHigh.adapter = adapter
+            val adapterRecirculateVal = getAdapterValue(analogVoltageAtSpinnerValues())
+            it.analogOutAtFanRecirculateSelector.adapter = adapterRecirculateVal
+            it.analogOutAtFanRecirculateSelector.setSelection(analogVoltageAtSpinnerValues().indexOf("4V"))
+            val adapterEconomizerVal = getAdapterValue(analogVoltageAtSpinnerValues())
+            it.analogOutDuringEconomizerSelector.adapter = adapterEconomizerVal
+            it.analogOutDuringEconomizerSelector.setSelection(analogVoltageAtSpinnerValues().indexOf("7V"))
         }
 
         if (viewModel is CpuEconViewModel) {
@@ -489,6 +552,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     private var pendingTempOffsetChange : Boolean = true
     private var pendingForceOccupiedChange : Boolean = true
     private var pendingAutoAwayChange : Boolean = true
+    private var pendingPrePurgeChange : Boolean = true
     private var pendingRelayChange : Boolean = true
     private var pendingAnalogOutChange : Boolean = true
     private var pendingSensorBusTempChange : Boolean = true
@@ -499,6 +563,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     private var pendingVocConfigChange : Boolean = true
     private var pendingPmConfigChange : Boolean = true
     private var pendingDisplayChange : Boolean = true
+    private var pendingPrePurgeValueChange: Boolean = true
 
     private fun setUpViewListeners() {
         tempOffsetSelector.setOnValueChangedListener { _, _, newVal ->
@@ -513,6 +578,10 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         autoAwaySwitch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAutoAwaySwitchChanged(isChecked)
             pendingAutoAwayChange = true
+        }
+        prePurgeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.enablePrePurgeSwitchChanged(isChecked)
+            pendingPrePurgeChange = true
         }
 
         relayUIs.forEachIndexed { index, widgets ->
@@ -554,6 +623,18 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             widgets.analogOutAtFanHigh.setOnItemSelected { position ->
                 viewModel.updateFanConfigSelected(3, index, position)
             }
+            widgets.analogOutAtFanRecirculateSelector.setOnItemSelected { position ->
+                viewModel.voltageDuringCirculation(
+                    index, position
+                )
+                pendingAnalogOutChange = true
+            }
+            widgets.analogOutDuringEconomizerSelector.setOnItemSelected { position ->
+                viewModel.voltageDuringEconomizer(
+                    index, position
+                )
+                pendingAnalogOutChange = true
+            }
 
             CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanLow, context)
@@ -561,6 +642,8 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             CCUUiUtil.setSpinnerDropDownColor(widgets.vAtMinDamperSelector, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanHigh, context)
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanMedium, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanRecirculateSelector, context)
+            CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutDuringEconomizerSelector, context)
         }
 
         sensorBusTemps.forEachIndexed { index, widgets ->
@@ -599,10 +682,27 @@ class HyperStatSplitFragment : BaseDialogFragment() {
             CCUUiUtil.setSpinnerDropDownColor(widgets.selector, context)
         }
 
-        outsideDamperMinOpen.setOnItemSelected {
-            position -> viewModel.outsideDamperMinOpenSelect(position)
+        outsideDamperMinOpenDuringRecirc.setOnItemSelected {
+            position -> viewModel.outsideDamperMinOpenDuringRecircSelect(position)
             pendingOaoConfigChange = true
         }
+        outsideDamperMinOpenDuringConditioning.setOnItemSelected {
+                position -> viewModel.outsideDamperMinOpenDuringConditioningSelect(position)
+            pendingOaoConfigChange = true
+        }
+        outsideDamperMinOpenDuringFanLow.setOnItemSelected {
+                position -> viewModel.outsideDamperMinOpenDuringFanLowSelect(position)
+            pendingOaoConfigChange = true
+        }
+        outsideDamperMinOpenDuringFanMedium.setOnItemSelected {
+                position -> viewModel.outsideDamperMinOpenDuringFanMediumSelect(position)
+            pendingOaoConfigChange = true
+        }
+        outsideDamperMinOpenDuringFanHigh.setOnItemSelected {
+                position -> viewModel.outsideDamperMinOpenDuringFanHighSelect(position)
+            pendingOaoConfigChange = true
+        }
+
         exhaustFanStage1Threshold.setOnItemSelected {
             position -> viewModel.exhaustFanStage1ThresholdSelect(position)
             pendingOaoConfigChange = true
@@ -641,6 +741,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zonePMTarget.setOnItemSelected {
             position ->viewModel.zonePmTargetSelect(position)
             pendingPmConfigChange = true
+        }
+
+        prePurgeMinOpenSpinner.setOnItemSelected {
+            position ->viewModel.prePurgeMinOpenSelect(position)
+            pendingPrePurgeValueChange = true
         }
 
         stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
@@ -730,6 +835,13 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         pendingAutoAwayChange = false
     }
 
+    private fun renderPrePurgeSwitch(viewState: ViewState) {
+        prePurgeSwitch.isChecked = viewState.prePurgeEnabled
+        prePurgeMinOpenSpinner.visibility = if (prePurgeSwitch.isChecked) View.VISIBLE else View.GONE
+        prePurgeMinOpenText.visibility = if (prePurgeSwitch.isChecked) View.VISIBLE else View.GONE
+        pendingPrePurgeChange = false
+    }
+
     private fun renderSensorBusTemp(viewState: ViewState) {
         viewState.sensorBusTemps.forEachIndexed { index, sensorBusState ->
             with(sensorBusTemps[index]) {
@@ -767,7 +879,12 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     private fun renderOaoConfig(viewState: ViewState) {
-        outsideDamperMinOpen.setSelection(viewState.outsideDamperMinOpenPos)
+        outsideDamperMinOpenDuringRecirc.setSelection(viewState.outsideDamperMinOpenDuringRecircPos)
+        outsideDamperMinOpenDuringConditioning.setSelection(viewState.outsideDamperMinOpenDuringConditioningPos)
+        outsideDamperMinOpenDuringFanLow.setSelection(viewState.outsideDamperMinOpenDuringFanLowPos)
+        outsideDamperMinOpenDuringFanMedium.setSelection(viewState.outsideDamperMinOpenDuringFanMediumPos)
+        outsideDamperMinOpenDuringFanHigh.setSelection(viewState.outsideDamperMinOpenDuringFanHighPos)
+
         exhaustFanStage1Threshold.setSelection(viewState.exhaustFanStage1ThresholdPos)
         exhaustFanStage2Threshold.setSelection(viewState.exhaustFanStage2ThresholdPos)
         exhaustFanHysteresis.setSelection(viewState.exhaustFanHysteresisPos)
@@ -794,6 +911,11 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
 
         pendingPmConfigChange = false
+    }
+
+    private fun renderPrePurgeValue(viewState: ViewState) {
+        prePurgeMinOpenSpinner.setSelection(viewState.prePurgeMinOpenPos)
+        pendingPrePurgeValueChange = false
     }
 
     private fun renderDisplayEnabled(viewState: ViewState) {
@@ -970,9 +1092,27 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     if (analogOutState.enabled && (analogOutState.association == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
                                 analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
+                // In case of modulating fan speed, show/hide the recirculate fan speed
+                if(analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                    analogOutAtFanRecirculateLabel.visibility = View.VISIBLE
+                    analogOutAtFanRecirculateSelector.visibility = View.VISIBLE
+                    analogOutDuringEconomizerLabel.visibility = View.VISIBLE
+                    analogOutDuringEconomizerSelector.visibility = View.VISIBLE
+                } else {
+                    analogOutAtFanRecirculateLabel.visibility = View.GONE
+                    analogOutAtFanRecirculateSelector.visibility = View.GONE
+                    analogOutDuringEconomizerLabel.visibility = View.GONE
+                    analogOutDuringEconomizerSelector.visibility = View.GONE
+                }
+
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))
                 analogOutAtFanHigh.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanHigh))
+                // Set the recirculate fan speed only if it is visible
+                if(analogOutAtFanRecirculateLabel.visibility == View.VISIBLE || analogOutDuringEconomizerLabel.visibility == View.VISIBLE) {
+                    analogOutAtFanRecirculateSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtRecirculate))
+                    analogOutDuringEconomizerSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageDuringEconomizer))
+                }
 
                 if (!isDampSelected && analogOutState.enabled)
                     isDampSelected = viewModel.isDamperSelected(analogOutState.association)
@@ -1047,11 +1187,19 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
         }
 
-        outsideDamperMinOpen.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        outsideDamperMinOpenDuringRecirc.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        outsideDamperMinOpenDuringConditioning.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        outsideDamperMinOpenDuringFanLow.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        outsideDamperMinOpenDuringFanMedium.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        outsideDamperMinOpenDuringFanHigh.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         exhaustFanStage1Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         exhaustFanStage2Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         exhaustFanHysteresis.visibility = if (isDampSelected) View.VISIBLE else View.GONE
-        tvOutsideDamperMinOpen.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpenDuringRecirc.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpenDuringConditioning.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpenDuringFanLow.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpenDuringFanMedium.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvOutsideDamperMinOpenDuringFanHigh.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvExhaustFanStage1Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvExhaustFanStage2Threshold.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvExhaustFanHysteresis.visibility = if (isDampSelected) View.VISIBLE else View.GONE
@@ -1103,6 +1251,9 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         if (pendingAutoAwayChange) {
             renderAutoAwaySwitch(viewState)
         }
+        if (pendingPrePurgeChange) {
+            renderPrePurgeSwitch(viewState)
+        }
         if (pendingRelayChange) {
             renderRelays(viewState)
         }
@@ -1129,6 +1280,9 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
         if (pendingPmConfigChange) {
             renderPmConfig(viewState)
+        }
+        if (pendingPrePurgeValueChange) {
+            renderPrePurgeValue(viewState)
         }
          if (pendingDisplayChange) {
             renderDisplayEnabled(viewState)
@@ -1382,12 +1536,17 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         CCUUiUtil.setSpinnerDropDownColor(zoneCO2Target, context)
         CCUUiUtil.setSpinnerDropDownColor(zoneCO2Threshold, context)
         CCUUiUtil.setSpinnerDropDownColor(zonePMTarget, context)
+        CCUUiUtil.setSpinnerDropDownColor(prePurgeMinOpenSpinner, context)
         CCUUiUtil.setSpinnerDropDownColor(zoneVOCTarget, context)
         CCUUiUtil.setSpinnerDropDownColor(zoneVOCThreshold, context)
         CCUUiUtil.setSpinnerDropDownColor(exhaustFanHysteresis, context)
         CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage1Threshold, context)
         CCUUiUtil.setSpinnerDropDownColor(exhaustFanStage2Threshold, context)
-        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpen, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpenDuringRecirc, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpenDuringConditioning, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpenDuringFanLow, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpenDuringFanMedium, context)
+        CCUUiUtil.setSpinnerDropDownColor(outsideDamperMinOpenDuringFanHigh, context)
     }
 
 }

@@ -301,6 +301,10 @@
     <string name="duct_pressure_0_2"> Duct Static Pressure (0-2\")</string>
     <string name="generic_voltage"> Generic 0-10V</string>
     <string name="generic_resistance"> Generic 1-100kOhm</string>
+    <string name="duct_pressure_0_10"> Duct Static Pressure (0-10\")</string>
+    <string name="generic_fault_nc"> Generic Fault (N/C)</string>
+    <string name="generic_fault_no"> Generic Fault (N/O)</string>
+
 
     <string name="sensorbus">SENSOR BUS</string>
     <string name="sensorbusaddress0"> Address 0</string>
@@ -326,6 +330,9 @@
         <item>  @string/duct_pressure_0_2 </item>
         <item>  @string/generic_voltage </item>
         <item>  @string/generic_resistance </item>
+        <item>  @string/duct_pressure_0_10 </item>
+        <item>  @string/generic_fault_nc </item>
+        <item>  @string/generic_fault_no </item>
     </string-array>
 
     <string-array name="hyperstatsplit_sensor_temp_selector">
@@ -983,7 +990,11 @@
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
     <string name="label_return_damper_at_min">Return Damper at Min Drive (V)</string>
     <string name="label_return_damper_at_max">Return Damper at Max Drive (V)</string>
-    <string name="label_oadamper_min_open">Outside Damper\nMin Open (%)</string>
+    <string name="label_oadamper_min_open_during_recirc">Outside Damper\nMin Open During\nRecirc (%)</string>
+    <string name="label_oadamper_min_open_during_conditioning">Outside Damper\nMin Open During\nConditioning (%)</string>
+    <string name="label_oadamper_min_open_during_fan_low">Outside Damper\nMin Open During\nFan Low (%)</string>
+    <string name="label_oadamper_min_open_during_fan_medium">Outside Damper\nMin Open During\nFan Medium (%)</string>
+    <string name="label_oadamper_min_open_during_fan_high">Outside Damper\nMin Open During\nFan High (%)</string>
     <string name="label_return_damper_min_open">Return Damper Min Open (%)</string>
     <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 \nThreshold (%)</string>
     <string name="label_exfan_stage2_threshold">Exhaust Fan Stage 2 \nThreshold (%)</string>
@@ -1400,6 +1411,16 @@
     <string name="hyperstat_analog_out4_at_medium_fan">Analog-out4 at\nFan Medium</string>
     <string name="hyperstat_analog_out4_at_high_fan">Analog-out4 at\nFan High</string>
 
+    <string name="hyperstat_analog_out1_at_recirculate">Analog-out1 at\nFan Recirculate</string>
+    <string name="hyperstat_analog_out2_at_recirculate">Analog-out2 at\nFan Recirculate</string>
+    <string name="hyperstat_analog_out3_at_recirculate">Analog-out3 at\nFan Recirculate</string>
+    <string name="hyperstat_analog_out4_at_recirculate">Analog-out4 at\nFan Recirculate</string>
+
+    <string name="hyperstat_analog_out1_during_economizer">Analog-out1\nDuring Economizer</string>
+    <string name="hyperstat_analog_out2_during_economizer">Analog-out2\nDuring Economizer</string>
+    <string name="hyperstat_analog_out3_during_economizer">Analog-out3\nDuring Economizer</string>
+    <string name="hyperstat_analog_out4_during_economizer">Analog-out4\nDuring Economizer</string>
+
     <string name="zoneCO2DamperOpeningRate">CO2 Damper\nOpening Rate</string>
     <string name="zoneCO2Threshold">CO2 Threshold</string>
     <string name="zoneCO2Target">CO2 Target</string>
@@ -1415,6 +1436,7 @@
     <string name="co2">CO2</string>
     <string name="voc">VOC</string>
     <string name="p2pm">PM2.5</string>
+    <string name="pre_purge_min_open">Pre Purge Min Open (%)</string>
 
 
     <string-array name="hyperstate_medium_high_fanmode">

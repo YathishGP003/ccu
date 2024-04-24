@@ -2,9 +2,11 @@ package a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
+import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
@@ -12,10 +14,20 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstatsplit.common.*
+import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
+import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitProfileTuners
+import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitLoopController
+import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitPackageUnitProfile
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.ScheduleManager
+import a75f.io.logic.bo.building.schedules.OccupancyHandler
+import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
@@ -63,6 +75,14 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private var outsideAirLoopOutput = 0
     private var outsideAirFinalLoopOutput = 0
     override lateinit var occupancyStatus: Occupancy
+
+    // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
+    private var previousOccupancyStatus: Occupancy = Occupancy.NONE
+    private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
+    private var previousFanLoopVal = 0
+    private var previousFanLoopValStaged = 0
+    private var fanLoopCounter = 0
+
     private val hyperstatSplitCPUEconAlgorithm = HyperstatSplitLoopController()
 
     private var economizingAvailable = false
@@ -70,6 +90,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private var matThrottle = false
 
     lateinit var curState: ZoneState
+    private var epidemicState = EpidemicState.OFF
+    private var prePurgeEnabled = false
+    private var prePurgeOpeningValue = 0.0
 
     override fun getProfileType() = ProfileType.HYPERSTATSPLIT_CPU
 
@@ -138,6 +161,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val exhaustFanStage1Threshold = hsSplitHaystackUtil.getExhaustFanStage1Threshold().toInt()
         val exhaustFanStage2Threshold = hsSplitHaystackUtil.getExhaustFanStage2Threshold().toInt()
         val exhaustFanHysteresis = hsSplitHaystackUtil.getExhaustFanHysteresis().toInt()
+        val outsideDamperMinOpen = getEffectiveOutsideDamperMinOpen()
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
@@ -164,13 +188,20 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         outsideAirCalculatedMinDamper = 0
         outsideAirLoopOutput = 0
         outsideAirFinalLoopOutput = 0
-        evaluateLoopOutputs(equip, userIntents, basicSettings, hyperStatSplitTuners, isCondensateTripped)
+        evaluateLoopOutputs(equip, userIntents, basicSettings, hyperStatSplitTuners, isCondensateTripped, outsideDamperMinOpen)
 
         equip.hsSplitHaystackUtil.updateOccupancyDetection()
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
         equip.hsSplitHaystackUtil.updateOaoLoopOutput(economizingLoopOutput, dcvLoopOutput, outsideAirLoopOutput, outsideAirFinalLoopOutput)
 
         val currentOperatingMode = equip.hsSplitHaystackUtil.getOccupancyModePointValue().toInt()
+
+        updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
+        prePurgeEnabled = hsSplitHaystackUtil.isPrePurgeEnabled()
+        prePurgeOpeningValue = TunerUtil.readTunerValByQuery(
+            "prePurge and oao and fan and cur and speed and cpu and standalone and zone",
+            equip.equipRef
+        )
 
         logIt(
             "Analog Fan speed multiplier  ${hyperStatSplitTuners.analogFanSpeedMultiplier} \n"+
@@ -204,17 +235,92 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         logIt("Equip Running : $curState")
 
-        val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState,
             economizingLoopOutput, dcvLoopOutput, outsideDamperMinOpen, outsideAirFinalLoopOutput,
-            equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus(), basicSettings
+            equip.hsSplitHaystackUtil.getCondensateOverflowStatus(), equip.hsSplitHaystackUtil.getFilterStatus(), basicSettings,
+            epidemicState
         )
 
         wasCondensateTripped = isCondensateTripped
 
         Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "processHyperStatSplitCpuEconProfile() complete")
+        updateTitle24Flags(basicSettings)
+    }
 
+    private fun getEffectiveOutsideDamperMinOpen(): Int {
+        var outsideDamperMinOpenFromConditioning : Double
+        if (isHeatingActive() || isCoolingActive() || hsSplitHaystackUtil.getEconomizingLoopOutput() > 0.0) {
+            outsideDamperMinOpenFromConditioning = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringConditioning()
+        } else {
+            outsideDamperMinOpenFromConditioning = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringRecirc()
+        }
+
+        var outsideDamperMinOpenFromFanStage : Double = 0.0
+        if (stageActive("fan and speed and high and cmd and not config")
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.HIGH_ALL_TIME.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.HIGH_CUR_OCC.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.HIGH_OCC.ordinal)
+        ) {
+            outsideDamperMinOpenFromFanStage = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanHigh()
+        } else if (stageActive("fan and speed and medium and cmd and not config")
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.MEDIUM_ALL_TIME.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.MEDIUM_CUR_OCC.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.MEDIUM_OCC.ordinal)
+        ) {
+            outsideDamperMinOpenFromFanStage = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanMedium()
+        } else if (stageActive("fan and speed and low and cmd and not config")
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.LOW_ALL_TIME.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.LOW_CUR_OCC.ordinal)
+            || hsSplitHaystackUtil.getCurrentFanMode().toInt().equals(StandaloneFanStage.LOW_OCC.ordinal)
+        ) {
+            outsideDamperMinOpenFromFanStage = hsSplitHaystackUtil.getOutsideDamperMinOpenDuringFanLow()
+        }
+
+        val zoneId = HSUtil.getZoneIdFromEquipId(equip?.id)
+        val occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
+        val isOccupied = if (occ == null) false else occ.isOccupied()
+        if (isOccupied) {
+            return Math.max(outsideDamperMinOpenFromConditioning.toInt(), outsideDamperMinOpenFromFanStage.toInt())
+        } else {
+            return 0
+        }
+
+    }
+
+    /**
+     * Updates the Title 24 flags by storing the current occupancy status and fan-loop output.
+     * The previous occupancy status and fan-loop output are updated for use in the next loop iteration.
+     * If the fan loop counter is greater than 0, it decrements the counter.
+     */
+    private fun updateTitle24Flags(basicSettings: BasicSettings) {
+        // Store the fan-loop output/occupancy for usage in next loop
+        previousOccupancyStatus = occupancyStatus
+        // Store the fan status so that when the zone goes from user defined fan state to unoccupied state, the fan protection can be offered
+        previousFanStageStatus = basicSettings.fanMode
+        // Store the fanloop output when the zone was not in UNOCCUPIED state
+        if(fanLoopCounter == 0) previousFanLoopVal = fanLoopOutput
+        if (fanLoopCounter > 0) fanLoopCounter--
+    }
+
+    /**
+     * Updates the Title 24 loop counter based on changes in occupancy and fan-loop output.
+     * If there is a change in occupancy and the fan-loop output is less than the previous value,
+     * the fan loop counter is set to the minimum fan runtime post conditioning specified by the tuners.
+     * If there is a change in occupancy and the fan-loop output is greater than the previous value,
+     * the fan loop counter is reset to zero.
+     *
+     * @param tuners The HyperStat profile tuners containing configuration parameters.
+     */
+    private fun updateTitle24LoopCounter(tuners: HyperStatSplitProfileTuners, basicSettings: BasicSettings) {
+        // Check if there is change in occupancy and the fan-loop output is less than the previous value,
+        // then offer the fan protection
+        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
+                (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+            fanLoopCounter = tuners.minFanRuntimePostConditioning
+        }
+        else if(occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+            fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
     }
 
     private fun handleChangeOfDirection(userIntents: UserIntents){
@@ -229,7 +335,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
-    private fun evaluateLoopOutputs(equip: HyperStatSplitCpuEconEquip, userIntents: UserIntents, basicSettings: BasicSettings, hyperStatSplitTuners: HyperStatSplitProfileTuners, isCondensateTripped: Boolean){
+    private fun evaluateLoopOutputs(equip: HyperStatSplitCpuEconEquip, userIntents: UserIntents, basicSettings: BasicSettings, hyperStatSplitTuners: HyperStatSplitProfileTuners, isCondensateTripped: Boolean, effectiveOutsideDamperMinOpen: Int){
 
         when (state) {
 
@@ -255,11 +361,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             fanLoopOutput = ((heatingLoopOutput * hyperStatSplitTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
 
-        evaluateOAOLoop(equip, basicSettings, isCondensateTripped)
+        evaluateOAOLoop(equip, basicSettings, isCondensateTripped, effectiveOutsideDamperMinOpen)
 
     }
 
-    private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip, basicSettings: BasicSettings, isCondensateTripped: Boolean) {
+    private fun evaluateOAOLoop(equip: HyperStatSplitCpuEconEquip, basicSettings: BasicSettings, isCondensateTripped: Boolean, effectiveOutsideDamperMinOpen: Int) {
 
         // If there's not an OAO damper mapped,
         if (!HyperStatSplitAssociationUtil.isAnyAnalogAssociatedToOAO(equip.getConfiguration())) {
@@ -288,7 +394,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         } else {
 
-            val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
             val oaoDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",equip.equipRef)
             val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
             val economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and temp", equip.equipRef)
@@ -296,7 +401,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
 
             doEconomizing(equip)
-            doDcv(equip, outsideDamperMinOpen)
+            doDcv(equip, effectiveOutsideDamperMinOpen)
 
             outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
 
@@ -307,18 +412,23 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             // If Conditioning Mode is AUTO or COOL_ONLY, run full economizer loop algo
             if (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                if (outsideAirLoopOutput > outsideDamperMinOpen) {
+                if (outsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
                     if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                         outsideAirFinalLoopOutput = (outsideAirLoopOutput - outsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else outsideAirLoopOutput
+                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) 0 else outsideAirLoopOutput
                     }
                     if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
-                    outsideAirFinalLoopOutput = outsideDamperMinOpen
+                    outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }
 
-                outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
+                if (matThrottle) {
+                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0)
+                } else {
+                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
+                }
+
                 outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
 
             }
@@ -332,20 +442,25 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             // If Conditioning Mode is HEAT_ONLY or OFF, ignore economizingLoopOutput and do DCV only.
             // Continue to use same the mixed air low-limit and high-limit as full economizing scenario.
             else {
-                val dcvOnlyOutsideAirLoopOutput = Math.max(dcvLoopOutput, outsideDamperMinOpen)
+                val dcvOnlyOutsideAirLoopOutput = Math.max(dcvLoopOutput, effectiveOutsideDamperMinOpen)
 
-                if (dcvOnlyOutsideAirLoopOutput > outsideDamperMinOpen) {
+                if (dcvOnlyOutsideAirLoopOutput > effectiveOutsideDamperMinOpen) {
                     if (matTemp < oaoDamperMatTarget && matTemp > oaoDamperMatMin) {
                         outsideAirFinalLoopOutput = (dcvOnlyOutsideAirLoopOutput - dcvOnlyOutsideAirLoopOutput * ((oaoDamperMatTarget - matTemp) / (oaoDamperMatTarget - oaoDamperMatMin))).toInt()
                     } else {
-                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) outsideDamperMinOpen else dcvOnlyOutsideAirLoopOutput
+                        outsideAirFinalLoopOutput = if (matTemp <= oaoDamperMatMin) 0 else dcvOnlyOutsideAirLoopOutput
                     }
                     if (matTemp < oaoDamperMatTarget) matThrottle = true
                 } else {
-                    outsideAirFinalLoopOutput = outsideDamperMinOpen
+                    outsideAirFinalLoopOutput = effectiveOutsideDamperMinOpen
                 }
 
-                outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen)
+                if (matThrottle) {
+                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0)
+                } else {
+                    outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , effectiveOutsideDamperMinOpen)
+                }
+
                 outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100)
 
                 Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Conditioning Mode is HEAT-ONLY or OFF. outsideAirFinalLoopOutput to consider DCV only.")
@@ -353,7 +468,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             }
 
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON," economizingLoopOutput "+economizingLoopOutput+" dcvLoopOutput "+dcvLoopOutput
-                    +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+" outsideDamperMinOpen "+outsideDamperMinOpen);
+                    +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+" effectiveOutsideDamperMinOpen "+effectiveOutsideDamperMinOpen);
 
             equip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput.toDouble())
             equip.setHisVal("oao and zone and logical and damper and actuator and cmd", outsideAirFinalLoopOutput.toDouble())
@@ -661,6 +776,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         hsSplitTuners.relayActivationHysteresis = TunerUtil.getHysteresisPoint("relay and  activation", equip.equipRef!!).toInt()
         hsSplitTuners.analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equip.equipRef!!)
         hsSplitTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equip.equipRef!!).toInt()
+        hsSplitTuners.minFanRuntimePostConditioning = TunerUtil.readTunerValByQuery("fan and cur and runtime and postconditioning and min", equip.equipRef!!).toInt()
         return hsSplitTuners
     }
 
@@ -788,7 +904,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             (HyperStatSplitAssociationUtil.isRelayAssociatedToFan(relayState)) -> {
 
                 if (basicSettings.fanMode != StandaloneFanStage.OFF && !isCondensateTripped) {
-                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
+                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings,
+                        previousFanLoopVal, fanLoopCounter)
                 } else {
                    resetPort(port)
                 }
@@ -940,7 +1057,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
     private fun runRelayForFanSpeed(
         relayAssociation: RelayState, whichPort: Port, config: HyperStatSplitCpuEconConfiguration,
         tuner: HyperStatSplitProfileTuners, relayStages: HashMap<String, Int>, basicSettings: BasicSettings,
+        previousFanLoopVal: Int, fanProtectionCounter: Int
     ) {
+        var localFanLoopOutput = fanLoopOutput
         logIt(" $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
@@ -950,25 +1069,42 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
         val highestStage = HyperStatSplitAssociationUtil.getHighestFanStage(config)
         val divider = if (highestStage == CpuEconRelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
+        val fanEnabledMapped = HyperStatSplitAssociationUtil.isAnyRelayAssociatedToFanEnabled(config)
+        val lowestStage = HyperStatSplitAssociationUtil.getLowestFanStage(config)
+
+        if (fanEnabledMapped) setFanEnabledStatus(true) else setFanEnabledStatus(false)
+
+        when(lowestStage) {
+            CpuEconRelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+            CpuEconRelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+            CpuEconRelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+            else -> {}
+        }
+
+        // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+        // occupancy and decrease in fan loop output
+        if (fanProtectionCounter > 0) {
+            localFanLoopOutput = previousFanLoopVal
+        }
 
         when (relayAssociation.association) {
             CpuEconRelayAssociation.FAN_LOW_SPEED -> {
                 doFanLowSpeed(
                     whichPort,
                     logicalPointsList[whichPort]!!,null,null, basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider, epidemicState == EpidemicState.PREPURGE)
             }
             CpuEconRelayAssociation.FAN_MEDIUM_SPEED -> {
                 doFanMediumSpeed(
                     whichPort,
                     logicalPointsList[whichPort]!!,null,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages, epidemicState == EpidemicState.PREPURGE)
             }
             CpuEconRelayAssociation.FAN_HIGH_SPEED -> {
                 doFanHighSpeed(
                     whichPort,
                     logicalPointsList[whichPort]!!,basicSettings.fanMode,
-                    fanLoopOutput,tuner.relayActivationHysteresis,relayStages)
+                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages, epidemicState == EpidemicState.PREPURGE)
             }
             else -> return
         }
@@ -997,10 +1133,10 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 if (!isCondensateTripped) {
-                    doAnalogFanAction(
-                        port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
+                    doAnalogFanActionCpuEcon(
+                        equip, port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
                         analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages
+                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages, previousFanLoopVal, fanLoopCounter
                     )
                 } else {
                     resetPort(port)
@@ -1010,7 +1146,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             (HyperStatSplitAssociationUtil.isAnalogOutAssociatedToOaoDamper(analogOutState)) -> {
                 if (!isCondensateTripped) {
                     doAnalogOAOAction(
-                        port,basicSettings.conditioningMode, analogOutStages, outsideAirFinalLoopOutput
+                        equip, port,basicSettings.conditioningMode, analogOutStages, outsideAirFinalLoopOutput
                     )
                 } else {
                     resetPort(port)
@@ -1021,8 +1157,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 if (!isCondensateTripped) {
                     doAnalogStagedFanAction(
                         port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
-                        analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
+                        analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode, HyperStatSplitAssociationUtil.isAnyRelayAssociatedToFanEnabled(config),
+                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages, fanLoopCounter
                     )
                 } else {
                     resetPort(port)
@@ -1031,7 +1167,23 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
-    private fun doAnalogStagedFanAction(
+    /**
+     * Performs analog fan action for the CPU.
+     * This function updates the logical point values for fan control based on various parameters such as fan mode, conditioning mode, and occupancy status.
+     * It also handles the Title 24 compliance by adjusting the fan runtime when transitioning from OCCUPIED to UNOCCUPIED status.
+     *
+     * @param port The port associated with the fan action.
+     * @param fanLowPercent The percentage of fan speed for the low stage.
+     * @param fanMediumPercent The percentage of fan speed for the medium stage.
+     * @param fanHighPercent The percentage of fan speed for the high stage.
+     * @param fanMode The mode of the fan (e.g., OFF, AUTO, LOW_CUR_OCC).
+     * @param conditioningMode The conditioning mode (e.g., OFF, COOLING, HEATING).
+     * @param fanLoopOutput The output value for the fan loop.
+     * @param analogOutStages A HashMap containing analog output stages.
+     * @param fanProtectionCounter In case of non zero value, retain the fan loop to previous value for few cycles.
+     */
+    private fun doAnalogFanActionCpuEcon(
+        equip: HyperStatSplitCpuEconEquip,
         port: Port,
         fanLowPercent: Int,
         fanMediumPercent: Int,
@@ -1040,6 +1192,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         conditioningMode: StandaloneConditioningMode,
         fanLoopOutput: Int,
         analogOutStages: HashMap<String, Int>,
+        previousFanLoopVal: Int,
+        fanProtectionCounter: Int
     ) {
         if (fanMode != StandaloneFanStage.OFF) {
             var fanLoopForAnalog = 0
@@ -1049,20 +1203,115 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
+                if (fanProtectionCounter > 0) {
+                    fanLoopForAnalog = previousFanLoopVal
+                }
+                if(epidemicState == EpidemicState.PREPURGE) {
+                    if(prePurgeEnabled && prePurgeOpeningValue > fanLoopForAnalog)
+                        fanLoopForAnalog = prePurgeOpeningValue.roundToInt()
+                }
+            } else {
+                when {
+                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
+                            || fanMode == StandaloneFanStage.LOW_OCC
+                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
+                        fanLoopForAnalog = fanLowPercent
+                    }
+                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_OCC
+                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
+                        fanLoopForAnalog = fanMediumPercent
+                    }
+                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
+                            || fanMode == StandaloneFanStage.HIGH_OCC
+                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
+                        fanLoopForAnalog = fanHighPercent
+                    }
+                }
+            }
+            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
+                fanLoopForAnalog
+            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+        }
+    }
+
+    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+        var voltage = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest cooling state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+        if(fanEnabledMapped && voltage == 0) {
+            voltage = getPercentageFromVoltageSelected(getLowestCoolingStateActivated().roundToInt())
+        }
+        return voltage
+    }
+
+
+    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+        var voltage = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest heating state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+        if (fanEnabledMapped && voltage == 0) {
+            voltage = getPercentageFromVoltageSelected(getLowestHeatingStateActivated().roundToInt())
+        }
+        return voltage
+    }
+
+    private fun doAnalogStagedFanAction(
+        port: Port,
+        fanLowPercent: Int,
+        fanMediumPercent: Int,
+        fanHighPercent: Int,
+        fanMode: StandaloneFanStage,
+        fanEnabledMapped: Boolean,
+        conditioningMode: StandaloneConditioningMode,
+        fanLoopOutput: Int,
+        analogOutStages: HashMap<String, Int>,
+        fanProtectionCounter: Int
+    ) {
+        var fanLoopForAnalog = 0
+        var logMsg = "" // This will be overwritten based on priority
+        if (fanMode != StandaloneFanStage.OFF) {
+            if (fanMode == StandaloneFanStage.AUTO) {
+                if (conditioningMode == StandaloneConditioningMode.OFF) {
+                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    return
+                }
+                fanLoopForAnalog = fanLoopOutput
                 if (conditioningMode == StandaloneConditioningMode.AUTO) {
                     if (getOperatingMode() == 1.0) {
-                        fanLoopForAnalog =
-                            getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                        fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                        logMsg = "Cooling"
                     } else if (getOperatingMode() == 2.0) {
-                        fanLoopForAnalog =
-                            getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                        fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                        logMsg = "Heating"
                     }
                 } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                    fanLoopForAnalog =
-                        getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                    fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                    logMsg = "Cooling"
                 } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                    fanLoopForAnalog =
-                        getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                    fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                    logMsg = "Heating"
+                }
+                // Check if we need fan protection
+                if(fanProtectionCounter > 0 && fanLoopForAnalog < previousFanLoopValStaged) {
+                    fanLoopForAnalog = previousFanLoopValStaged
+                    logMsg = "Fan Protection"
+                }
+                else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mode
+
+                // Check Dead-band condition
+                if (fanLoopForAnalog == 0) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                    fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
+                    logMsg = "Dead-band"
+                }
+                // The speed at which fan operates is determined by configuration parameter - "Analog-Out During Economizer"
+                if(economizingLoopOutput != 0) fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogEconomizerValueActivated().roundToInt())
+                if(epidemicState == EpidemicState.PREPURGE) {
+                    if(prePurgeEnabled) {
+                        fanLoopForAnalog = prePurgeOpeningValue.roundToInt()
+                        logMsg = "Pre-Purge"
+                    }
                 }
             } else {
                 when {
@@ -1084,13 +1333,14 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                         fanLoopForAnalog = fanHighPercent
                     }
                 }
+                // Store just in case when we switch from current occupied to unoccupied mode
+                previousFanLoopValStaged = fanLoopForAnalog
             }
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Staged Fan Speed  analogSignal  $fanLoopForAnalog")
+            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Staged Fan Speed($logMsg)  analogSignal  $fanLoopForAnalog")
         }
-
     }
 
     override fun doAnalogCooling(
@@ -1138,16 +1388,61 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     }
 
+    /**
+     * Handles the smart pre-purge control for the given HyperStatSplitCpuEconEquip.
+     * This function calculates the minimum damper open value based on pre-purge settings and occupancy status.
+     *
+     * @param equip The HyperStatSplitCpuEconEquip for which smart pre-purge control is to be handled.
+     * @return The minimum damper open value if the conditions for smart pre-purge control are met, null otherwise.
+     */
+    private fun handleSmartPrePurgeControl(equip: HyperStatSplitCpuEconEquip): Int? {
+        if(!prePurgeEnabled) {
+            epidemicState = EpidemicState.OFF
+            return null
+        }
+        val prePurgeRunTime = TunerUtil.readTunerValByQuery(
+            "prePurge and cur and runtime and zone and default and cpu and standalone and oao",
+            equip.equipRef
+        )
+        val prePurgeOccupiedTimeOffset: Double = TunerUtil.readTunerValByQuery(
+            "prePurge and offset and cur and time and zone and default and occupied and cpu and standalone and oao",
+            equip.equipRef
+        )
+        val oaoDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",equip.equipRef)
+        val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
+        val zoneId = equip.getRoomRef()
+        val occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
+        val minutesToOccupancy =
+            if (occuStatus != null) occuStatus.millisecondsUntilNextChange.toInt() / 60000 else -1
+        if (minutesToOccupancy != -1 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
+            matTemp > oaoDamperMatMin) {
+            val outsideAirCalculatedMinDamper = hsSplitHaystackUtil.getDamperMinOpenConfigValue()
+            epidemicState = EpidemicState.PREPURGE
+            return outsideAirCalculatedMinDamper.toInt()
+        } else {
+            epidemicState = EpidemicState.OFF
+        }
+        return null
+    }
+
+
     override fun doAnalogOAOAction(
+        equip: HyperStatSplitCpuEconEquip,
         port: Port,
         conditioningMode: StandaloneConditioningMode,
         analogOutStages: HashMap<String, Int>,
         outsideAirFinalLoopOutput: Int
     ) {
+        var localFinalLoopOutput: Int = outsideAirFinalLoopOutput
+        // Pre purge control
+        if(occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.VACATION) {
+            if(null != handleSmartPrePurgeControl(equip))
+                localFinalLoopOutput = handleSmartPrePurgeControl(equip)!!
+        }
         // Safeties are handled in the algo, not here.
         // If Condensate is tripped or conditioning mode is not appropriate, it will be reflected in the calculated outsideAirFinalLoopOutput.
-        updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
-        if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
+        updateLogicalPointIdValue(logicalPointsList[port]!!, localFinalLoopOutput.toDouble())
+        if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = localFinalLoopOutput
     }
 
     private fun handleDeadZone(equip: HyperStatSplitCpuEconEquip) {
@@ -1200,7 +1495,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         equip.hsSplitHaystackUtil.updateConditioningLoopOutput(0,0,0,false,0)
         equip.hsSplitHaystackUtil.updateOaoLoopOutput(0,0,0,0)
         resetAllLogicalPointValues()
-        val outsideDamperMinOpen = hsSplitHaystackUtil.getOutsideDamperMinOpen().toInt()
+        val outsideDamperMinOpen = getEffectiveOutsideDamperMinOpen()
         HyperStatSplitUserIntentHandler.updateHyperStatSplitStatus(
             equipId = equip.equipRef!!,
             portStages = HashMap(),
@@ -1210,7 +1505,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             outsideDamperMinOpen, outsideAirFinalLoopOutput,
             hsSplitHaystackUtil.getCondensateOverflowStatus(),
             hsSplitHaystackUtil.getFilterStatus(),
-            fetchBasicSettings(equip, false, hsSplitHaystackUtil.getCondensateOverflowStatus() > 0.0)
+            fetchBasicSettings(equip, false, hsSplitHaystackUtil.getCondensateOverflowStatus() > 0.0),
+            EpidemicState.OFF
         )
     }
 
@@ -1265,6 +1561,39 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
+    /**
+     * Returns the value of the non zero activated analog recirculate stage based on the fan loop points.
+     * If no recirculate stage is activated, returns the default fan loop output value.
+     *
+     * @return the value of the first non zero activated recirculate stage or the default fan loop output value.
+     */
+    private fun getAnalogRecirculateValueActivated (): Double {
+        return if (hsSplitHaystackUtil.readPointValue("recirculate and analog1") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("recirculate and analog1")
+        } else if (hsSplitHaystackUtil.readPointValue("recirculate and analog2") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("recirculate and analog2")
+        } else if (hsSplitHaystackUtil.readPointValue("recirculate and analog3") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("recirculate and analog3")
+        } else if (hsSplitHaystackUtil.readPointValue("recirculate and analog4") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("recirculate and analog4")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    private fun getAnalogEconomizerValueActivated (): Double {
+        return if (hsSplitHaystackUtil.readPointValue("economizer and analog1") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("economizer and analog1")
+        } else if (hsSplitHaystackUtil.readPointValue("economizer and analog2") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("economizer and analog2")
+        } else if (hsSplitHaystackUtil.readPointValue("economizer and analog3") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("economizer and analog3")
+        } else if (hsSplitHaystackUtil.readPointValue("economizer and analog4") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("economizer and analog4")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
 
     private fun getHeatingStateActivated (): Double {
         return if (stageActive("heating and runtime and stage3")) {
@@ -1273,6 +1602,31 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             hsSplitHaystackUtil.readPointValue("fan and heating and stage2")
         } else if (stageActive("heating and runtime and stage1")){
             hsSplitHaystackUtil.readPointValue("fan and heating and stage1")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    // Get the lowest cooling stage activated
+    private fun getLowestCoolingStateActivated (): Double {
+        return if (hsSplitHaystackUtil.readPointValue("fan and cooling and stage1") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else if (hsSplitHaystackUtil.readPointValue("fan and cooling and stage2") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage2")
+        } else if (hsSplitHaystackUtil.readPointValue("fan and cooling and stage3") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage3")
+        } else {
+            defaultFanLoopOutput
+        }
+    }
+
+    private fun getLowestHeatingStateActivated (): Double {
+        return if (hsSplitHaystackUtil.readPointValue("fan and heating and stage1") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage1")
+        } else if (hsSplitHaystackUtil.readPointValue("fan and heating and stage2") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage2")
+        } else if (hsSplitHaystackUtil.readPointValue("fan and heating and stage3") != 0.0) {
+            hsSplitHaystackUtil.readPointValue("fan and heating and stage3")
         } else {
             defaultFanLoopOutput
         }
@@ -1290,6 +1644,20 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val minVoltage = 0
         val maxVoltage = 10
         return (((voltageSelected - minVoltage).toDouble() / (maxVoltage - minVoltage)) * 100).roundToInt()
+    }
+
+    override fun isHeatingActive(): Boolean {
+        return stageActive("heating and runtime and stage1")
+                || stageActive("heating and runtime and stage2")
+                || stageActive("heating and runtime and stage3")
+                || hsSplitHaystackUtil.readHisVal("modulating and heating and output and not loop") > 0.0
+    }
+
+    override fun isCoolingActive(): Boolean {
+        return stageActive("cooling and runtime and stage1")
+                || stageActive("cooling and runtime and stage2")
+                || stageActive("cooling and runtime and stage3")
+                || hsSplitHaystackUtil.readHisVal("modulating and cooling and output and not loop") > 0.0
     }
 
 }

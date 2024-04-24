@@ -60,6 +60,7 @@ data class HyperStatSplitProfileTuners(
    var humidityHysteresis: Int = 5, //%
    var forcedOccupiedTimer: Int = 120, //(min)
    var autoAwayZoneTimer: Int = 30,
+   var minFanRuntimePostConditioning: Int = 5, // (min)
    var autoAwayZoneSetbackTemp: Int = 2, // (°F)
    var exhaustFanStage1Threshold: Int = 50, // %
    var exhaustFanStage2Threshold: Int = 90, // %
@@ -85,7 +86,7 @@ enum class PossibleFanMode{
 }
 
 enum class AnalogOutChanges{
-   NOCHANGE,ENABLED,MAPPING,MIN,MAX,LOW,MED,HIGH
+   NOCHANGE,ENABLED,MAPPING,MIN,MAX,LOW,MED,HIGH,RECIRCULATE,ECONOMIZER
 }
 
 
@@ -108,5 +109,7 @@ data class AnalogConfigState(
    val voltageAtMax: Double,    // create position to value mapping here.
    val perAtFanLow: Double,
    val perAtFanMedium: Double,
-   val perAtFanHigh: Double
+   val perAtFanHigh: Double,
+   val voltageAtRecirculate: Double,
+   val voltageDuringEconomizer: Double
 )

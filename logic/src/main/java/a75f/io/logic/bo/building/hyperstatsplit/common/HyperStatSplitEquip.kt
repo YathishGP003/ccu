@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -284,7 +283,49 @@ open class HyperStatSplitEquip {
         }
     }
 
-    fun updateAutoAwayAutoForceOccupy(
+    private fun getPrePurgeMinIdPointID() =
+        hsSplitHaystackUtil.readPointID("prePurge and damper and outside and open and cpu") as String
+
+    private fun updatePrePurgeMinPoint(minVal: Double) {
+        val prePurgeMinPointId = hsSplitHaystackUtil.readPointID("prePurge and open and outside and damper and cpu and standalone")
+        if (prePurgeMinPointId != null)
+            updatePointValueChangeRequired(prePurgeMinPointId, minVal)
+    }
+    fun updatePrePurgePoints(
+        oldPrePurgeMinVal: Double, newPrePurgeMinVal: Double,
+        oldPrePurgeEnabled: Boolean, newPrePurgeEnabled: Boolean
+    ) {
+        // Step 1: Check if the PrePurge is enabled or not
+        if(oldPrePurgeEnabled != newPrePurgeEnabled){
+            val prePurgeEnabledId = hsSplitHaystackUtil.readPointID(
+                "prePurge and userIntent and standalone and cpu and zone"
+            ) as String
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(prePurgeEnabledId, if (newPrePurgeEnabled) 1.0 else 0.0)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(prePurgeEnabledId, if (newPrePurgeEnabled) 1.0 else 0.0)
+
+            if(newPrePurgeEnabled){
+                val prePurgeMinPoint : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createPrePurgeMinPoint(newPrePurgeMinVal)
+                hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+                    prePurgeMinPoint
+                ))
+                updatePrePurgeMinPoint(newPrePurgeMinVal)
+            } else {
+                val prePurgeDamperId = getPrePurgeMinIdPointID()
+                if(prePurgeDamperId.isNotEmpty()) {
+                    hsSplitHaystackUtil.removePoint(prePurgeDamperId)
+                }
+            }
+        }
+
+        // Step 2: If pre purge is already enabled and no change in prePurgeEnabled, then check if the min value needs an update
+        if(oldPrePurgeEnabled == newPrePurgeEnabled && oldPrePurgeMinVal != newPrePurgeMinVal && oldPrePurgeEnabled) {
+            val prePurgeMinId = getPrePurgeMinIdPointID()
+            hyperStatSplitPointsUtil.addDefaultValueForPoint(prePurgeMinId, newPrePurgeMinVal)
+            hyperStatSplitPointsUtil.addDefaultHisValueForPoint(prePurgeMinId, newPrePurgeMinVal)
+        }
+    }
+
+    fun updateAutoAwayAutoForceOccupyPrePurge(
         oldAutoAwayEnabled: Boolean, newAutoAwayEnabled: Boolean,
         oldAutoForceOccupyEnabled: Boolean, newAutoForceOccupyEnabled: Boolean,
     ){

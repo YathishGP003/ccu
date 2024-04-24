@@ -82,9 +82,9 @@ class VavExternalAhu : VavSystemProfile() {
 
     override fun isHeatingAvailable(): Boolean = true
 
-    override fun isCoolingActive(): Boolean = true
+    override fun isCoolingActive(): Boolean = systemCoolingLoopOp > 0.0
 
-    override fun isHeatingActive(): Boolean = true
+    override fun isHeatingActive(): Boolean = systemHeatingLoopOp > 0.0
 
     override fun getCoolingLockoutVal(): Double {
         val systemEquip = Domain.getSystemEquipByDomainName(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)

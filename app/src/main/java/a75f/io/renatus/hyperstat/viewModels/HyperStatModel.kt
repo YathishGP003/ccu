@@ -27,6 +27,7 @@ interface HyperStatModel {
     fun analogOutMappingSelected(index: Int, position: Int)
     fun getAnalogOutMapping(): Array<String>
     fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int)
+    fun voltageDuringCirculation(index: Int, position: Int)
     fun updateFanConfigSelected(type: Int, index: Int, position: Int)
     fun analogInSwitchChanged(index: Int, checked: Boolean)
     fun analogInMappingSelected(index: Int, position: Int)

@@ -118,13 +118,33 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         return stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COOLING_3.ordinal()] > 0
                || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0;
     }
-    
+
+    // isCoolingActive() currently only covers cooling stages; this implementation is needed for status messages
+    // In Advanced Hybrid profile, this method covers modulating-only case.
+    public boolean isModulatingCoolingActive() {
+        if (getConfigVal("analog1 and output and enabled") > 0 || getConfigVal("analog4 and output and enabled") > 0) {
+            return systemCoolingLoopOp > 0;
+        }
+
+        return false;
+    }
+
     @Override
     public boolean isHeatingActive(){
         return stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[HEATING_3.ordinal()] > 0
                || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0;
     }
-    
+
+    // isHeatingActive() currently only covers heating stages; this implementation is needed for status messages
+    // In Advanced Hybrid profile, this method covers modulating-only case.
+    public boolean isModulatingHeatingActive() {
+        if (getConfigVal("analog3 and output and enabled") > 0 || getConfigVal("analog4 and output and enabled") > 0) {
+            return systemHeatingLoopOp > 0;
+        }
+
+        return false;
+    }
+
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
         //updateOutsideWeatherParams();

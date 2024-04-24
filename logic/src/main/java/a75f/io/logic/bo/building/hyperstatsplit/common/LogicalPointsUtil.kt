@@ -9,7 +9,6 @@ import a75f.io.logic.L
 import a75f.io.logic.addBacnetTags
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.common.LogicalPointsUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusPressAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
@@ -885,6 +884,10 @@ class LogicalPointsUtil {
                 pressureTag = "pressure2in"
                 name = "pressure2"
                 bacnetId = 90
+            } else if(sensorType == DuctPressureSensorType.DUCT_PRESSURE_0_10) {
+                pressureTag = "pressure10in"
+                name = "pressure10"
+                bacnetId = 91
             }
             val existingPoint = readDuctPressureSensor(equipRef,pressureTag)
             if(existingPoint.isEmpty()) {
@@ -959,6 +962,60 @@ class LogicalPointsUtil {
                 addPointToHaystack(builtPoint)
             }
             return Point.Builder().setHashMap(readFilterNO(equipRef)).build()
+        }
+
+        fun createPointForGenericFaultNC(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
+        ): Point {
+
+            val existingPoint = readGenericFaultNC(equipRef)
+            if(existingPoint.isEmpty()) {
+
+                val markers = arrayOf(
+                    "cur", "his", "zone", "standalone", "cpu", "generic", "sensor", "alarm", "normallyClosed"
+                )
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-genericFaultNC")
+                    .setGroup(nodeAddress)
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                    .setEnums("normal,fault")
+                markers.forEach { point.addMarker(it) }
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
+            }
+            return Point.Builder().setHashMap(readGenericFaultNC(equipRef)).build()
+        }
+
+        fun createPointForGenericFaultNO(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
+        ): Point {
+
+            val existingPoint = readGenericFaultNO(equipRef)
+            if(existingPoint.isEmpty()) {
+
+                val markers = arrayOf(
+                    "cur", "his", "zone", "standalone", "cpu", "generic", "sensor", "alarm", "normallyOpen"
+                )
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-genericFaultNO")
+                    .setGroup(nodeAddress)
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                    .setEnums("normal,fault")
+                markers.forEach { point.addMarker(it) }
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
+            }
+            return Point.Builder().setHashMap(readGenericFaultNO(equipRef)).build()
         }
 
         fun createPointForGenericVoltage(
@@ -1074,7 +1131,14 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "generic and resistance and sensor and order == $universalInOrder and equipRef == \"$equipRef\"")
         }
-
+        private fun readGenericFaultNC(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and sensor and alarm and normallyClosed and zone and equipRef == \"$equipRef\"")
+        }
+        private fun readGenericFaultNO(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and sensor and alarm and normallyOpen and zone and equipRef == \"$equipRef\"")
+        }
 
         /** Delete invalid logical points  ***/
         fun cleanCpuEconLogicalPoints(config: HyperStatSplitCpuEconConfiguration, equipRef: String){
@@ -1249,6 +1313,12 @@ class LogicalPointsUtil {
                     universalIn5State,universalIn6State,
                     universalIn7State,universalIn8State))
                 removePoint(readDuctPressureSensor(equipRef, "pressure2in"))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToDuctPressure0to10(
+                    universalIn1State,universalIn2State,
+                    universalIn3State,universalIn4State,
+                    universalIn5State,universalIn6State,
+                    universalIn7State,universalIn8State))
+                removePoint(readDuctPressureSensor(equipRef, "pressure10in"))
             if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToCondensateNO(
                     universalIn1State,universalIn2State,
                     universalIn3State,universalIn4State,
@@ -1276,7 +1346,21 @@ class LogicalPointsUtil {
                     universalIn7State,universalIn8State
                 ))
                 removePoint(readFilterNC(equipRef))
-            
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericFaultNC(
+                    universalIn1State,universalIn2State,
+                    universalIn3State,universalIn4State,
+                    universalIn5State,universalIn6State,
+                    universalIn7State,universalIn8State
+                ))
+                removePoint(readGenericFaultNC(equipRef))
+            if(!HyperStatSplitAssociationUtil.isAnyUniversalInMappedToGenericFaultNO(
+                    universalIn1State,universalIn2State,
+                    universalIn3State,universalIn4State,
+                    universalIn5State,universalIn6State,
+                    universalIn7State,universalIn8State
+                ))
+                removePoint(readGenericFaultNO(equipRef))
+
             // This is now a pain because multiple Generic Voltage/Resistance points can be mapped to one equip.
             // If a specific Generic Voltage/Resistance point is deleted, remove only that instance of the point.
             if((!(universalIn1State.enabled && universalIn1State.association == UniversalInAssociation.GENERIC_VOLTAGE)))
@@ -1407,6 +1491,6 @@ class LogicalPointsUtil {
         TRANSFORMER,TRANSFORMER_20,TRANSFORMER_50, TRANSFORMER_100, TRANSFORMER_150
     }
     enum class DuctPressureSensorType {
-        DUCT_PRESSURE_0_1, DUCT_PRESSURE_0_2
+        DUCT_PRESSURE_0_1, DUCT_PRESSURE_0_2, DUCT_PRESSURE_0_10
     }
 }

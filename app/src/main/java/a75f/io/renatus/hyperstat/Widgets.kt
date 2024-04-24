@@ -25,7 +25,9 @@ class AnalogOutWidgets(
     val analogOutFanConfig: View,
     val analogOutAtFanLow: Spinner,
     val analogOutAtFanMedium: Spinner,
-    val analogOutAtFanHigh: Spinner
+    val analogOutAtFanHigh: Spinner,
+    val analogOutAtFanRecirculateLabel: TextView,
+    val analogOutAtFanRecirculateSelector: Spinner
 )
 
 class AnalogInWidgets(

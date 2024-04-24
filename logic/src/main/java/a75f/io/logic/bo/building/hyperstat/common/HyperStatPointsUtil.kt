@@ -2458,6 +2458,54 @@ class HyperStatPointsUtil(
 
         val stagedFanConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
+        if(hyperStatConfig.analogOut1State.enabled &&
+                HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State)) {
+            val analog1RecirculateConfigPointMarkers = arrayOf(
+                    "recirculate", "writable", "config", "zone", "sp", "analog1"
+            )
+
+            val analog1RecirculateConfigPoint = createHaystackPointWithUnit(
+                    "$equipDis-fanOutRecirculateAnalog1",
+                    analog1RecirculateConfigPointMarkers,
+                    null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                    Pair(analog1RecirculateConfigPoint, hyperStatConfig.analogOut1State.voltageAtRecirculate)
+            )
+        }
+
+        if(hyperStatConfig.analogOut2State.enabled &&
+                HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2State)) {
+            val analog2RecirculateConfigPointMarkers = arrayOf(
+                    "recirculate", "writable", "config", "zone", "sp", "analog2"
+            )
+
+            val analog2RecirculateConfigPoint = createHaystackPointWithUnit(
+                    "$equipDis-fanOutRecirculateAnalog2",
+                    analog2RecirculateConfigPointMarkers,
+                    null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                    Pair(analog2RecirculateConfigPoint, hyperStatConfig.analogOut2State.voltageAtRecirculate)
+            )
+        }
+
+        if(hyperStatConfig.analogOut3State.enabled &&
+                HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3State)) {
+            val analog3RecirculateConfigPointMarkers = arrayOf(
+                    "recirculate", "writable", "config", "zone", "sp", "analog3"
+            )
+
+            val analog3RecirculateConfigPoint = createHaystackPointWithUnit(
+                    "$equipDis-fanOutRecirculateAnalog3",
+                    analog3RecirculateConfigPointMarkers,
+                    null, "V"
+            )
+            stagedFanConfigPointsList.add(
+                    Pair(analog3RecirculateConfigPoint, hyperStatConfig.analogOut3State.voltageAtRecirculate)
+            )
+        }
+
         if (HyperStatAssociationUtil.isStagedFanEnabled(hyperStatConfig, CpuRelayAssociation.COOLING_STAGE_1)) {
             val coolingStage1FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"
@@ -2557,6 +2605,63 @@ class HyperStatPointsUtil(
 
         return stagedFanConfigPointsList
     }
+
+    /**
+     * Creates a recirculate configuration point with the specified parameters.
+     *
+     * @param pointName The name of the point.
+     * @param markers Array of markers for the point.
+     * @param fanState The state of the fan.
+     * @return A Pair representing the created point and its state.
+     */
+    private fun createRecirculateConfigPoint(
+            pointName: String,
+            markers: Array<String>,
+            fanState: Any
+    ): Pair<Point, Any> {
+        val fanConfigPoint = createHaystackPointWithUnit(pointName, markers, null, "V")
+        return Pair(fanConfigPoint, fanState)
+    }
+
+    /**
+     * Creates analog recirculate points based on the provided configuration and analog tag.
+     *
+     * @param recirculateValue value to be added in the haystack
+     * @param analogTag The analog tag (e.g., "analog1", "analog2", "analog3").
+     * @return A list of pairs representing the created analog recirculate points.
+     */
+    fun createAnalogAtRecirculatePoint(recirculateValue: Double, analogTag: String): MutableList<Pair<Point, Any>> {
+
+
+        val analogAtRecirculationPointList: MutableList<Pair<Point, Any>> = LinkedList()
+        when (analogTag) {
+            "analog1" -> {
+                val analog1RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog1",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog1"),recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog1RecirculateConfigPoint)
+            }
+            "analog2" -> {
+                val analog2RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog2",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog2"),recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog2RecirculateConfigPoint)
+            }
+            "analog3" -> {
+                val analog3RecirculateConfigPoint = createRecirculateConfigPoint(
+                    "$equipDis-fanOutRecirculateAnalog3",
+                    arrayOf("recirculate", "writable", "config", "zone", "sp", "analog3"),recirculateValue
+                )
+                analogAtRecirculationPointList.add(analog3RecirculateConfigPoint)
+            }
+            else -> {
+            }
+        }
+        return analogAtRecirculationPointList
+    }
+
         fun createStagedFanPoint(
             newConfiguration: HyperStatCpuConfiguration,
             stage: CpuRelayAssociation

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.*
 import a75f.io.logic.bo.building.sensors.SensorType
 import android.util.Log
@@ -98,6 +99,9 @@ class HyperStatSplitAssociationUtil {
                 13 -> UniversalInAssociation.DUCT_PRESSURE_0_2
                 14 -> UniversalInAssociation.GENERIC_VOLTAGE
                 15 -> UniversalInAssociation.GENERIC_RESISTANCE
+                16 -> UniversalInAssociation.DUCT_PRESSURE_0_10
+                17 -> UniversalInAssociation.GENERIC_FAULT_NC
+                18 -> UniversalInAssociation.GENERIC_FAULT_NO
 
                 // assuming it never going to call
                 else -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
@@ -268,7 +272,18 @@ class HyperStatSplitAssociationUtil {
         fun isUniversalInAssociatedToGenericResistance(universalIn: UniversalInState): Boolean {
             return (universalIn.association == UniversalInAssociation.GENERIC_RESISTANCE)
         }
-
+        //Function which checks the Universal in is Associated  to DUCT_PRESSURE_0_10
+        fun isUniversalInAssociatedToDuctPressure10In(universalIn: UniversalInState): Boolean {
+            return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_10)
+        }
+        //Function which checks the Universal in is Associated  to GENERIC_FAULT_NO
+        fun isUniversalInAssociatedToGenericFaultNO(universalIn: UniversalInState): Boolean {
+            return (universalIn.association == UniversalInAssociation.GENERIC_FAULT_NO)
+        }
+        //Function which checks the Universal in is Associated  to GENERIC_FAULT_NC
+        fun isUniversalInAssociatedToGenericFaultNC(universalIn: UniversalInState): Boolean {
+            return (universalIn.association == UniversalInAssociation.GENERIC_FAULT_NC)
+        }
         fun isAnyRelayAssociatedToCoolingStage1(config: HyperStatSplitCpuEconConfiguration): Boolean {
             return isAnyRelayMapped(config,CpuEconRelayAssociation.COOLING_STAGE_1)
         }
@@ -380,6 +395,10 @@ class HyperStatSplitAssociationUtil {
                 (config.analogOut4State.enabled && config.analogOut4State.association == association) -> true
                 else -> false
             }
+        }
+
+        fun isAnalogAssociatedToStaged(analogOutState: AnalogOutState) : Boolean {
+            return (analogOutState.enabled && analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
         }
 
         private fun isUniversalInMapped(
@@ -529,6 +548,30 @@ class HyperStatSplitAssociationUtil {
             ui7: UniversalInState, ui8: UniversalInState,
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_2)
+        }
+        fun isAnyUniversalInMappedToDuctPressure0to10(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+        ): Boolean {
+            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_10)
+        }
+        fun isAnyUniversalInMappedToGenericFaultNO(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+        ): Boolean {
+            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_FAULT_NO)
+        }
+        fun isAnyUniversalInMappedToGenericFaultNC(
+            ui1: UniversalInState, ui2: UniversalInState,
+            ui3: UniversalInState, ui4: UniversalInState,
+            ui5: UniversalInState, ui6: UniversalInState,
+            ui7: UniversalInState, ui8: UniversalInState,
+        ): Boolean {
+            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_FAULT_NC)
         }
 
         private fun isUniversalInDuplicated(
@@ -688,18 +731,48 @@ class HyperStatSplitAssociationUtil {
                     uniIn5State, uniIn6State,
                     uniIn7State, uniIn8State,
                     UniversalInAssociation.DUCT_PRESSURE_0_2)
-                || (isUniversalInMapped(
+                || isUniversalInDuplicated(
                     uniIn1State, uniIn2State,
                     uniIn3State, uniIn4State,
                     uniIn5State, uniIn6State,
                     uniIn7State, uniIn8State,
-                    UniversalInAssociation.DUCT_PRESSURE_0_1) &&
-                        isUniversalInMapped(
-                            uniIn1State, uniIn2State,
-                            uniIn3State, uniIn4State,
-                            uniIn5State, uniIn6State,
-                            uniIn7State, uniIn8State,
-                            UniversalInAssociation.DUCT_PRESSURE_0_2))) return true
+                    UniversalInAssociation.DUCT_PRESSURE_0_10)
+                || (isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_1) &&
+                    isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_2)) ||
+                    (isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_2) &&
+                    isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_10)) ||
+                    (isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_1) &&
+                    isUniversalInMapped(
+                        uniIn1State, uniIn2State,
+                        uniIn3State, uniIn4State,
+                        uniIn5State, uniIn6State,
+                        uniIn7State, uniIn8State,
+                        UniversalInAssociation.DUCT_PRESSURE_0_10))) return true
 
             if(isSensorBusAddressAssociatedToDuctPressure(addr3State) &&
                         (isUniversalInMapped(
@@ -713,7 +786,13 @@ class HyperStatSplitAssociationUtil {
                             uniIn3State, uniIn4State,
                             uniIn5State, uniIn6State,
                             uniIn7State, uniIn8State,
-                            UniversalInAssociation.DUCT_PRESSURE_0_2))) return true
+                            UniversalInAssociation.DUCT_PRESSURE_0_2) ||
+                        isUniversalInMapped(
+                            uniIn1State, uniIn2State,
+                            uniIn3State, uniIn4State,
+                            uniIn5State, uniIn6State,
+                            uniIn7State, uniIn8State,
+                            UniversalInAssociation.DUCT_PRESSURE_0_10))) return true
 
             return false
         }
@@ -922,6 +1001,8 @@ class HyperStatSplitAssociationUtil {
                 (analogOut1.association != analogOut2.association) -> return false
                 (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
                 (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
+                (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return false
+                (analogOut1.voltageDuringEconomizer != analogOut2.voltageDuringEconomizer) -> return false
                 (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
                     when {
                         (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
@@ -940,6 +1021,8 @@ class HyperStatSplitAssociationUtil {
                     (analogOut1.association != analogOut2.association) -> return AnalogOutChanges.MAPPING
                     (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return AnalogOutChanges.MIN
                     (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return AnalogOutChanges.MAX
+                    (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return AnalogOutChanges.RECIRCULATE
+                    (analogOut1.voltageDuringEconomizer != analogOut2.voltageDuringEconomizer) -> return AnalogOutChanges.ECONOMIZER
                     (isAnalogOutAssociatedToFanSpeed(analogOut1)) -> {
                         when {
                             (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return AnalogOutChanges.LOW
@@ -1236,6 +1319,41 @@ class HyperStatSplitAssociationUtil {
             return highestValue
         }
 
+        /**
+         * Determines the lowest fan stage based on the relay states in the given CPU configuration.
+         *
+         * @param configuration the CPU configuration to analyze.
+         * @return the lowest fan stage, represented as a [CpuEconRelayAssociation] value.
+         */
+        fun getLowestFanStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
+            var lowestValue = 0xFF
+            lowestValue = verifyFanStateLowValue(configuration.relay1State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay2State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay3State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay4State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay5State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay6State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay7State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay8State, lowestValue)
+
+            return CpuEconRelayAssociation.values().getOrNull(lowestValue) ?: CpuEconRelayAssociation.DEHUMIDIFIER
+        }
+
+        /**
+         * Verifies the lowest fan state value based on the given relay state and the current lowest value.
+         *
+         * @param state the relay state to verify.
+         * @param lowestValue the current lowest value.
+         * @return the updated lowest value, considering the relay state.
+         */
+        private fun verifyFanStateLowValue(state: RelayState, lowestValue: Int): Int {
+            if (state.enabled && HyperStatSplitAssociationUtil.isRelayAssociatedToFan(state)
+                && state.association.ordinal < lowestValue
+            )
+                return state.association.ordinal
+            return lowestValue
+        }
+
         fun getHighestFanStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
             var highestValue = 0
             highestValue = verifyFanState(configuration.relay1State, highestValue)
@@ -1391,7 +1509,9 @@ class HyperStatSplitAssociationUtil {
                 UniversalInAssociation.DUCT_PRESSURE_0_2 -> "mV"
                 UniversalInAssociation.GENERIC_VOLTAGE -> "mV"
                 UniversalInAssociation.GENERIC_RESISTANCE -> "kOhm"
-
+                UniversalInAssociation.DUCT_PRESSURE_0_10 -> "mV"
+                UniversalInAssociation.GENERIC_FAULT_NC -> "kOhm"
+                UniversalInAssociation.GENERIC_FAULT_NO -> "kOhm"
             }
 
         }

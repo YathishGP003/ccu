@@ -83,6 +83,7 @@ import a75f.io.renatus.R
                     config.analogOut1State.perAtFanLow,
                     config.analogOut1State.perAtFanMedium,
                     config.analogOut1State.perAtFanHigh,
+                    config.analogOut1State.voltageAtRecirculate
                 ),
                 AnalogConfigState(
                     config.analogOut2State.enabled,
@@ -92,6 +93,7 @@ import a75f.io.renatus.R
                     config.analogOut2State.perAtFanLow,
                     config.analogOut2State.perAtFanMedium,
                     config.analogOut2State.perAtFanHigh,
+                    config.analogOut2State.voltageAtRecirculate
                 ),
 
                 AnalogConfigState(
@@ -102,6 +104,7 @@ import a75f.io.renatus.R
                     config.analogOut3State.perAtFanLow,
                     config.analogOut3State.perAtFanMedium,
                     config.analogOut3State.perAtFanHigh,
+                    config.analogOut3State.voltageAtRecirculate
                 ),
 
                 ),
@@ -150,6 +153,7 @@ import a75f.io.renatus.R
                     config.analogOut1State.perAtFanLow,
                     config.analogOut1State.perAtFanMedium,
                     config.analogOut1State.perAtFanHigh,
+                    0.0 // Unused
                 ),
                 AnalogConfigState(
                     config.analogOut2State.enabled,
@@ -159,6 +163,7 @@ import a75f.io.renatus.R
                     config.analogOut2State.perAtFanLow,
                     config.analogOut2State.perAtFanMedium,
                     config.analogOut2State.perAtFanHigh,
+                    0.0 // Unused
                 ),
 
                 AnalogConfigState(
@@ -169,6 +174,7 @@ import a75f.io.renatus.R
                     config.analogOut3State.perAtFanLow,
                     config.analogOut3State.perAtFanMedium,
                     config.analogOut3State.perAtFanHigh,
+                    0.0 // Unused
                 ),
 
                 ),
@@ -214,6 +220,7 @@ import a75f.io.renatus.R
                     config.analogOut1State.perAtFanLow,
                     config.analogOut1State.perAtFanMedium,
                     config.analogOut1State.perAtFanHigh,
+                    0.0 // Unused
                 ),
                 AnalogConfigState(
                     config.analogOut2State.enabled,
@@ -223,6 +230,7 @@ import a75f.io.renatus.R
                     config.analogOut2State.perAtFanLow,
                     config.analogOut2State.perAtFanMedium,
                     config.analogOut2State.perAtFanHigh,
+                    0.0 // Unused
                 ),
 
                 AnalogConfigState(
@@ -233,6 +241,7 @@ import a75f.io.renatus.R
                     config.analogOut3State.perAtFanLow,
                     config.analogOut3State.perAtFanMedium,
                     config.analogOut3State.perAtFanHigh,
+                    0.0 // Unused
                 ),
                 ),
             airflowTempSensorEnabled = config.isEnableAirFlowTempSensor,
@@ -286,19 +295,22 @@ import a75f.io.renatus.R
                 analogOutUis[0].enabled,
                 CpuAnalogOutAssociation.values()[analogOutUis[0].association],
                 analogOutUis[0].voltageAtMin,analogOutUis[0].voltageAtMax,
-                analogOutUis[0].perAtFanLow,analogOutUis[0].perAtFanMedium,analogOutUis[0].perAtFanHigh
+                analogOutUis[0].perAtFanLow,analogOutUis[0].perAtFanMedium,analogOutUis[0].perAtFanHigh,
+                analogOutUis[0].voltageAtRecirculate
             )
             analogOut2State = AnalogOutState(
                 analogOutUis[1].enabled,
                 CpuAnalogOutAssociation.values()[analogOutUis[1].association],
                 analogOutUis[1].voltageAtMin,analogOutUis[1].voltageAtMax,
-                analogOutUis[1].perAtFanLow,analogOutUis[1].perAtFanMedium,analogOutUis[1].perAtFanHigh
+                analogOutUis[1].perAtFanLow,analogOutUis[1].perAtFanMedium,analogOutUis[1].perAtFanHigh,
+                analogOutUis[1].voltageAtRecirculate
             )
             analogOut3State = AnalogOutState(
                 analogOutUis[2].enabled,
                 CpuAnalogOutAssociation.values()[analogOutUis[2].association],
                 analogOutUis[2].voltageAtMin,analogOutUis[2].voltageAtMax,
-                analogOutUis[2].perAtFanLow,analogOutUis[2].perAtFanMedium,analogOutUis[2].perAtFanHigh
+                analogOutUis[2].perAtFanLow,analogOutUis[2].perAtFanMedium,analogOutUis[2].perAtFanHigh,
+                analogOutUis[2].voltageAtRecirculate
             )
             analogIn1State = AnalogInState(analogIns[0].enabled,AnalogInAssociation.values()[analogIns[0].association])
             analogIn2State = AnalogInState(analogIns[1].enabled,AnalogInAssociation.values()[analogIns[1].association])

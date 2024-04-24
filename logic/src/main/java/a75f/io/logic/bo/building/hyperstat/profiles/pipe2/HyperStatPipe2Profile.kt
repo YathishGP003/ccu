@@ -15,7 +15,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
@@ -39,11 +38,13 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private var doorWindowSensorOpenStatus = false
+    private var runFanLowDuringDoorWindow = false
     lateinit var curState: ZoneState
-
 
     private var analogOutputPoints: HashMap<Int, String> = HashMap()
     private var relayOutputPoints: HashMap<Int, String> = HashMap()
+    private var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
 
     override fun getHyperStatEquip(node: Short): HyperStatEquip {
         return pipe2DeviceMap[node] as HyperStatPipe2Equip
@@ -174,7 +175,10 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         runRelayOperations(equip, config, hyperStatTuners, userIntents, basicSettings, relayStages,analogOutStages)
         runAnalogOutOperations(equip, config, basicSettings, analogOutStages,userIntents)
         runAlgorithm(equip, basicSettings, hyperStatTuners, relayStages,analogOutStages, config,userIntents)
-        runForDoorWindowSensor(config, equip,analogOutStages,relayStages)
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip,analogOutStages,relayStages)
+        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(equip)
+        // Run the title 24 fan operation after the reset of all PI output is done
+        doFanOperationTitle24(hyperStatTuners, basicSettings, relayStages, userIntents, analogOutStages, config)
         runForKeycardSensor(config, equip)
 
         setOperatingMode(currentTemp,averageDesiredTemp,basicSettings,equip)
@@ -188,6 +192,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         HyperStatUserIntentHandler.updateHyperStatStatus(
                 equip.equipRef!!, relayStages, analogOutStages, temperatureState
         )
+        if(occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
+
         dumpOutput()
     }
 
@@ -482,7 +488,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                         operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
                     } else {
-                        if(heatingLoopOutput > 0) {
+                        // For title 24 compliance when doorwindow is open, run the lowest fan speed
+                        if((heatingLoopOutput > 0) || getDoorWindowFanOperationStatus()) {
                             doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                         } else {
                             resetFan(relayStages,analogOutStages,basicSettings)
@@ -670,6 +677,47 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
+    /**
+     * Executes fan operations based on Title 24 compliance rules when in AUTO mode and door/window sensors are open.
+     * This function checks the lowest configured fan speed and runs the corresponding fan stages accordingly.
+     * If the door or window is open and in one of the occupied mode,
+     * it ensures that the fan operates at the lowest configured speed to comply with regulations.
+     *
+     * @param tuner The HyperStat profile tuners containing specific runtime parameters.
+     * @param basicSettings The basic settings for the HVAC system.
+     * @param relayStages A hashmap of relay stages representing the current state of fan relays.
+     * @param userIntents The user intents that may influence fan operation.
+     * @param analogOutStages A hashmap of analog output stages representing fan speeds.
+     * @param configuration The HyperStat Pipe2 configuration defining the setup.
+     */
+    private fun doFanOperationTitle24(tuner: HyperStatProfileTuners,
+                                      basicSettings: BasicSettings,
+                                      relayStages: HashMap<String, Int>,
+                                      userIntents: UserIntents,
+                                      analogOutStages: HashMap<String, Int>,
+                                      configuration: HyperStatPipe2Configuration) {
+        if(basicSettings.fanMode == StandaloneFanStage.AUTO && getDoorWindowFanOperationStatus()) {
+            val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
+
+            // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+            when (lowestStage) {
+                Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+                Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+                Pipe2RelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+                else -> {
+                    // Do nothing
+                }
+            }
+
+            // When door window open, run the lowest fan speed. Anyhow the fanloop output is 0, this will be
+            // handled in the following APIs
+            runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+            runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+            runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+            runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
+        }
+    }
+
     private fun doFanOperation(
         tuner: HyperStatProfileTuners,
         basicSettings: BasicSettings,
@@ -680,11 +728,23 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         equip: HyperStatPipe2Equip
     ) {
       logIt(" Fan operation is running")
+        val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
+
+        // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+        when(lowestStage) {
+            Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+            Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+            Pipe2RelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+            else -> {
+                // Do nothing
+            }
+        }
+
         if( basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
             if (basicSettings.fanMode != StandaloneFanStage.AUTO) {
-                runFanHigh(tuner, basicSettings, relayStages)
-                runFanMedium(tuner, basicSettings, relayStages, configuration)
-                runFanLow(tuner, basicSettings, relayStages, configuration)
+                runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                 runAnalogFanSpeed(configuration,userIntents,analogOutStages,basicSettings)
             } else {
                 resetFan(relayStages,analogOutStages,basicSettings)
@@ -696,34 +756,35 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 && supplyWaterTempTh2 in coolingThreshold .. heatingThreshold
                 && currentTemp > userIntents.zoneCoolingTargetTemperature) {
                 resetFan(relayStages,analogOutStages,basicSettings)
-            } else {
+            }
+            else {
                 if ( basicSettings.fanMode != StandaloneFanStage.AUTO && basicSettings.fanMode != StandaloneFanStage.OFF ) {
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                    runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                     return
                 }
                 if (equip.waterSamplingStartTime == 0L && (relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal) &&
                             getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!) == 1.0)) {
 
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                    runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                 }
                 else if(equip.waterSamplingStartTime == 0L &&  analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal) &&
                     getCurrentLogicalPointStatus(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!) > 1.0){
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                    runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                 }
                 else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
                     && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0){
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                    runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(
                         configuration,
                         userIntents,
@@ -733,9 +794,9 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 }
                 else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
                     && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
+                    runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(
                         configuration,
                         userIntents,
@@ -754,7 +815,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         tuner: HyperStatProfileTuners,
         basicSettings: BasicSettings,
         relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration
+        configuration: HyperStatPipe2Configuration,
+        fanLoop: Int
     ) {
         if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)) {
             val highestStage =
@@ -766,10 +828,11 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_MEDIUM_SPEED),
                 getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_HIGH_SPEED),
                 basicSettings.fanMode,
-                fanLoopOutput,
+                fanLoop,
                 tuner.relayActivationHysteresis,
                 relayStages,
-                divider
+                divider,
+                getDoorWindowFanOperationStatus()
             )
         }
     }
@@ -778,7 +841,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         tuner: HyperStatProfileTuners,
         basicSettings: BasicSettings,
         relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration
+        configuration: HyperStatPipe2Configuration,
+        fanLoop: Int
     ) {
         if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal)) {
 
@@ -790,10 +854,11 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 relayOutputPoints[Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!,
                 getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_HIGH_SPEED),
                 basicSettings.fanMode,
-                fanLoopOutput,
+                fanLoop,
                 tuner.relayActivationHysteresis,
                 divider,
-                relayStages
+                relayStages,
+                getDoorWindowFanOperationStatus()
             )
         }
     }
@@ -801,15 +866,17 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     private fun runFanHigh(
         tuner: HyperStatProfileTuners,
         basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>
+        relayStages: HashMap<String, Int>,
+        fanLoop: Int,
     ) {
         if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal)) {
             doFanHighSpeed(
                 relayOutputPoints[Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal]!!,
                 basicSettings.fanMode,
-                fanLoopOutput,
+                fanLoop,
                 tuner.relayActivationHysteresis,
-                relayStages
+                relayStages,
+                getDoorWindowFanOperationStatus()
             )
         }
     }
@@ -1256,12 +1323,36 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         )
     }
 
+    /**
+     * Check for the flag which allows fan operation during door window
+     * @return true or false
+     */
+    private fun getDoorWindowFanOperationStatus(): Boolean {
+        return runFanLowDuringDoorWindow
+    }
+
+    /**
+     * Check if we should allow fan operation even when the door window is open
+     * @param equip HyperStatCpuEquip
+     * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
+     */
+    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatPipe2Equip): Boolean {
+        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            return doorWindowSensorOpenStatus &&
+                    occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                    occupancyBeforeDoorWindow != Occupancy.VACATION
+        } else {
+            return doorWindowSensorOpenStatus
+        }
+    }
+
     private fun runForDoorWindowSensor(
         config: HyperStatPipe2Configuration,
         equip: HyperStatPipe2Equip,
         analogOutStages: HashMap<String, Int>,
         relayStages: HashMap<String, Int>
-    ) {
+    ): Boolean {
 
         val isDoorOpen = isDoorOpenState(config,equip)
         logIt( " is Door Open ? $isDoorOpen")
@@ -1271,6 +1362,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             analogOutStages.clear()
             relayStages.clear()
         }
+        return isDoorOpen
     }
 
     private fun resetLoopOutputValues() {

@@ -71,6 +71,20 @@
                     android:id="@+id/toggleAutoAway"
                     style="@style/ToggleButton_HyperStat"
                     layout="@layout/custom_ccu_switch"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pre Purge"
+                    android:layout_marginStart="135dp"
+                    android:layout_marginEnd="10dp"
+                    android:textAppearance="@style/text_label" />
+
+                <include
+                    android:id="@+id/togglePrePurge"
+                    style="@style/ToggleButton_HyperStat"
+                    layout="@layout/custom_ccu_switch"/>
+
             </LinearLayout>
 
             <TableLayout
@@ -1782,6 +1796,96 @@
 
         </LinearLayout>
 
+        <!-- ... OA Damper Min Open Config (Recirc/Conditioning) ... -->
+        <LinearLayout
+            android:id="@+id/oaMinOpenConfigRecircConditioning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="250dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/outsideDamperMinOpenDuringRecirc"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_oadamper_min_open_during_recirc" />
+
+                <Spinner
+                    android:id="@+id/outsideDamperMinOpenDuringRecircSpinner"
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:dropDownWidth="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/outsideDamperMinOpenDuringConditioning"
+                    android:layout_weight="1"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:gravity="center_vertical"
+                    android:text="@string/label_oadamper_min_open_during_conditioning" />
+
+                <Spinner
+                    android:id="@+id/outsideDamperMinOpenDuringConditioningSpinner"
+                    android:layout_weight="0.5"
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:dropDownWidth="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ... OA Damper Min Open Config (Fan Low/Medium) ... -->
+        <LinearLayout
+            android:id="@+id/oaMinOpenConfigFanLowMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="250dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/outsideDamperMinOpenDuringFanLow"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/label_oadamper_min_open_during_fan_low" />
+
+                <Spinner
+                    android:id="@+id/outsideDamperMinOpenDuringFanLowSpinner"
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:dropDownWidth="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/outsideDamperMinOpenDuringFanMedium"
+                    android:layout_weight="1"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:gravity="center_vertical"
+                    android:text="@string/label_oadamper_min_open_during_fan_medium" />
+
+                <Spinner
+                    android:id="@+id/outsideDamperMinOpenDuringFanMediumSpinner"
+                    android:layout_weight="0.5"
+                    style="@style/FanPositionSpinner_HyperStat"
+                    android:dropDownWidth="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- ... OA Damper Config ... -->
         <LinearLayout
             android:id="@+id/oaMinOpenConfig"
@@ -1797,12 +1901,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/outsideDamperMinOpen"
+                    android:id="@+id/outsideDamperMinOpenDuringFanHigh"
                     style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/label_oadamper_min_open" />
+                    android:text="@string/label_oadamper_min_open_during_fan_high" />
 
                 <Spinner
-                    android:id="@+id/outsideDamperMinOpenSpinner"
+                    android:id="@+id/outsideDamperMinOpenDuringFanHighSpinner"
                     style="@style/FanPositionSpinner_HyperStat"
                     android:dropDownWidth="wrap_content"/>
             </LinearLayout>
@@ -1872,8 +1976,149 @@
                     android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
+            <!-- ... Analog at recirculate ... -->
+            <LinearLayout
+                android:id="@+id/aoRecirculate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <!-- ... CO2 Config ... -->
+                <LinearLayout
+                    android:id="@+id/ao1atRecirculate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao1AtRecirculateLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out1_at_recirculate" />
+
+                    <Spinner
+                        android:id="@+id/ao1AtRecirculateSpinner"
+                        style="@style/ThresoldSpinner"
+                        android:layout_marginStart="73dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao2atRecirculate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/ao2AtRecirculateLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out2_at_recirculate" />
+
+                    <Spinner
+                        android:id="@+id/ao2AtRecirculateSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao3atRecirculate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao3AtRecirculateLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out3_at_recirculate" />
+
+                    <Spinner
+                        android:id="@+id/ao3AtRecirculateSpinner"
+                        style="@style/ThresoldSpinner" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao4atRecirculate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao4AtRecirculateLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out4_at_recirculate" />
+
+                    <Spinner
+                        android:id="@+id/ao4AtRecirculateSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Analog out during Economizer -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/ao1DuringEconomizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao1DuringEconomizerLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out1_during_economizer" />
+
+                    <Spinner
+                        android:id="@+id/ao1DuringEconomizerSpinner"
+                        style="@style/ThresoldSpinner"
+                        android:layout_marginStart="73dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao2DuringEconomizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/ao2DuringEconomizerLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out2_during_economizer" />
+
+                    <Spinner
+                        android:id="@+id/ao2DuringEconomizerSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao3DuringEconomizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao3DuringEconomizerLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out3_during_economizer" />
+
+                    <Spinner
+                        android:id="@+id/ao3DuringEconomizerSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ao4DuringEconomizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/ao4DuringEconomizerLabel"
+                        style="@style/FanPositionLabel_HyperStat"
+                        android:text="@string/hyperstat_analog_out4_during_economizer" />
+
+                    <Spinner
+                        android:id="@+id/ao4DuringEconomizerSpinner"
+                        style="@style/ThresoldSpinner" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ... CO2 Config ... -->
         <LinearLayout
             android:id="@+id/dcvCo2Config"
             android:layout_width="match_parent"
@@ -2030,7 +2275,24 @@
                     style="@style/FanPositionSpinner_HyperStat"
                     android:visibility="invisible" /> />
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:id="@+id/prePurgeMinOpen">
+                <TextView
+                    android:id="@+id/prePurgeMinOpenLabel"
+                    android:text="@string/pre_purge_min_open"
+                    style="@style/FanPositionLabel_HyperStat"/>
+                <Spinner
+                    android:id="@+id/prePurgeMinOpenSpinner"
+                    style="@style/FanPositionSpinner_HyperStat"/>
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

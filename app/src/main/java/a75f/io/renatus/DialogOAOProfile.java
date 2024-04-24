@@ -69,6 +69,7 @@ public class DialogOAOProfile extends BaseDialogFragment
     
     private Button setButton;
     private Button unpairButton;
+    private TextView titleTextView;
     
     String floorRef;
     String zoneRef;
@@ -168,6 +169,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         setButton = view.findViewById(R.id.setBtn);
         unpairButton = view.findViewById(R.id.unpairBtn);
         unpairButton.setVisibility((ccu().oaoProfile != null) ? VISIBLE : GONE);
+        titleTextView = view.findViewById(R.id.textTitleFragment);
+
+        titleTextView.setText("ECONOMIZER (OAO) "+"("+mSmartNodeAddress+")");
         
         mProfile = L.ccu().oaoProfile;
         

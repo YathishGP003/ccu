@@ -18,19 +18,19 @@
 
         <ImageView
             android:id="@+id/icon_system_profile"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="30px"
+            android:layout_height="30px"
             android:layout_marginEnd="16dp"
-            android:tint="@color/black"
             app:srcCompat="@drawable/ic_system_profile"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/text_system_profile"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="40dp"
+            android:paddingStart="15dp"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="8dp"
@@ -49,19 +49,19 @@
 
         <ImageView
             android:id="@+id/icon_oao"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="30px"
+            android:layout_height="30px"
             android:layout_marginEnd="16dp"
-            android:tint="@color/black"
             app:srcCompat="@drawable/ic_sysconfig_oao"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/text_oao"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="40dp"
+            android:paddingStart="15dp"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="8dp"
@@ -80,19 +80,19 @@
 
         <ImageView
             android:id="@+id/icon_bypass"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="30px"
+            android:layout_height="30px"
             android:layout_marginEnd="16dp"
-            android:tint="@color/black"
             app:srcCompat="@drawable/ic_sysconfig_bypass"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/text_bypass"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="40dp"
+            android:paddingStart="15dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:text="@string/txt_bypass" />
@@ -110,23 +110,23 @@
 
         <ImageView
             android:id="@+id/icon_energy_meter"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="30px"
+            android:layout_height="30px"
             android:layout_marginEnd="16dp"
-            android:tint="@color/black"
             app:srcCompat="@drawable/ic_sysconfig_emr"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/text_energy_meter"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="40dp"
+            android:paddingStart="15dp"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="8dp"
-            android:text="@string/txt_energy_meter"
+            android:text="@string/title_modbusenergymeter"
             android:textColor="@android:color/black" />
 
     </LinearLayout>
@@ -142,11 +142,11 @@
 
         <ImageView
             android:id="@+id/icon_btu_meter"
-            android:layout_width="28dp"
-            android:layout_height="24dp"
+            android:layout_width="30px"
+            android:layout_height="30px"
             android:layout_marginEnd="16dp"
-            android:tint="@color/black"
             app:srcCompat="@drawable/ic_sysconfig_btu_meter"
+            app:tint="@color/black"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -154,7 +154,7 @@
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="40dp"
+            android:paddingStart="15dp"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="8dp"

@@ -8,23 +8,26 @@
     <!--Master fragment-->
     <FrameLayout
         android:id="@+id/sysConfigMasterContainer"
-        android:layout_width="290.dp"
+        android:layout_width="355dp"
         android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/fragment_system_config"
-        android:name="a75f.io.renatus.SystemConfigMenuFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <fragment
+            android:id="@+id/fragment_system_config"
+            android:name="a75f.io.renatus.SystemConfigMenuFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </FrameLayout>
+
 
     <!--Detail layout -->
     <FrameLayout
         android:id="@+id/sysConfigFlContent"
-        android:layout_width="1200.dp"
+        android:layout_width="1200dp"
         android:layout_height="match_parent"
         android:layout_marginLeft="56dp"
-        android:paddingStart="50dp" />
+        android:paddingStart="50dp">
+    </FrameLayout>
+
 
 </androidx.slidingpanelayout.widget.SlidingPaneLayout>

@@ -1,17 +1,15 @@
 package a75f.io.renatus;
 
-import static a75f.io.renatus.UtilityApplication.context;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,27 +18,17 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.slidingpanelayout.widget.SlidingPaneLayout;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.domain.api.DomainName;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
-import a75f.io.renatus.registration.CreateNewSite;
-import a75f.io.renatus.registration.InstallerOptions;
-import a75f.io.renatus.registration.Security;
-import a75f.io.renatus.registration.WifiFragment;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,8 +75,9 @@ public class SystemConfigFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         slidingSysPane = view.findViewById(R.id.sysConfig_sliding_pane);
-        slidingSysPane.closePane();
         slidingSysPane.setSliderFadeColor(getResources().getColor(android.R.color.transparent));
+        slidingSysPane.setBackground(getResources().getDrawable(R.drawable.border_background_collapsed));
+        slidingSysPane.setPanelSlideListener(new SlidingPanelListener(slidingSysPane));
 
         fragmentClass = SystemProfileFragment.class;
         try {
@@ -96,7 +85,6 @@ public class SystemConfigFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);

@@ -19,8 +19,6 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ParameterLabel(filterValue : String ="") {
-    Log.d("Pree","parameter method")
-    Log.d("Pree","value of filter-"+filterValue)
     if(filterValue=="btu"||filterValue=="emr"){
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.weight(2f)) { SubTitle(PARAMETER) }

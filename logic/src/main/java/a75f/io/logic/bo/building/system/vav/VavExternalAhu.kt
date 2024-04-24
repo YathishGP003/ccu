@@ -311,7 +311,7 @@ class VavExternalAhu : VavSystemProfile() {
         }
     }
     private fun getBasicVavConfigData() = BasicConfig(
-        coolingLoop = if (vavSystem.coolingSignal <= 0) 0 else vavSystem.coolingSignal,
+        coolingLoop = systemCoolingLoopOp.toInt().coerceIn(0,100),
         heatingLoop = if (vavSystem.heatingSignal <= 0) 0 else vavSystem.heatingSignal,
         loopOutput = if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble(),
         weightedAverageCO2 = weightedAverageCO2,

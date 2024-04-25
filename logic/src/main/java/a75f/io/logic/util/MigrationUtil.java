@@ -169,6 +169,11 @@ public class MigrationUtil {
             PreferenceUtil.setVavReheatRelayActivationHysteresisValueMigration();
         }
 
+        if (!PreferenceUtil.getHssOpModeWritableMarkerMigration()) {
+            removeHyperStatSplitOperatingModeWritableMarker(ccuHsApi);
+            PreferenceUtil.setHssOpModeWritableMarkerMigration();
+        }
+
 //        addDefaultMarkerTagsToHyperStatTunerPoints(CCUHsApi.getInstance());
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
@@ -2012,6 +2017,20 @@ public class MigrationUtil {
         });
     }
 
+    private static void removeHyperStatSplitOperatingModeWritableMarker(CCUHsApi hayStack) {
+         // Right now, there's not a good way to differentiate HSS and HS op mode via tags. That makes the queries a bit more complicated than usual.
+        ArrayList<HashMap<Object, Object>> hssEquips = hayStack.readAllEntities("equip and hyperstatsplit");
+        hssEquips.forEach(equip -> {
+            if (equip.containsKey("id") && equip.get("id") != null) {
+                HashMap<Object, Object> opModeMap = hayStack.readEntity("operating and mode and writable and equipRef == \"" + equip.get("id") + "\"");
+                if (!(opModeMap == null || opModeMap.isEmpty())) {
+                    opModeMap.remove("writable");
+                    Point opModePoint = new Point.Builder().setHashMap(opModeMap).build();
+                    hayStack.updatePoint(opModePoint, opModeMap.get("id").toString());
+                }
+            }
+        });
+    }
 
     private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {
 

@@ -1450,7 +1450,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
        logIt("Zone is Dead ${equip.node}")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
-        equip.hsSplitHaystackUtil.setProfilePoint("operating and mode", 0.0)
+        equip.hsSplitHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
         if (equip.hsSplitHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
             equip.hsSplitHaystackUtil.setEquipStatus(state.ordinal.toDouble())
         val curStatus = equip.hsSplitHaystackUtil.getEquipLiveStatus()

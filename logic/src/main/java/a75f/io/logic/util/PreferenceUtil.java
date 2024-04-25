@@ -112,6 +112,7 @@ public class PreferenceUtil {
     public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
+    public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -904,6 +905,14 @@ public class PreferenceUtil {
 
     public static void setVavReheatRelayActivationHysteresisValueMigration() {
         setBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION, true);
+    }
+
+    public static boolean getHssOpModeWritableMarkerMigration() {
+        return getBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION);
+    }
+
+    public static void setHssOpModeWritableMarkerMigration() {
+        setBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION, true);
     }
 
 }

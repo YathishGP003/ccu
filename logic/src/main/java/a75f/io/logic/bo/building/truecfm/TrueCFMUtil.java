@@ -83,7 +83,7 @@ public class TrueCFMUtil {
         double ductArea = getDuctCrossSectionArea(hayStack, equipRef, damperOrder);
         double airflowCfm = flowVelocity * ductArea;
         hayStack.writeHisValByQuery("air and velocity and equipRef == \""+equipRef+"\"", flowVelocity);
-        hayStack.writeHisValByQuery("air and flow and sensor and equipRef == \""+equipRef+"\"", airflowCfm);
+        hayStack.writeHisValByQuery("air and flow and (sensor or (dab and trueCfm)) and equipRef == \""+equipRef+"\"", airflowCfm);
         CcuLog.i(L.TAG_CCU_ZONE,"flowVelocity " + flowVelocity + " ductArea "
                                             + ductArea+" airflowCfm "+airflowCfm);
         return airflowCfm;

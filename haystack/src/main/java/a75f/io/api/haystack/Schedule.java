@@ -1970,7 +1970,8 @@ public class Schedule extends Entity
                 .add("id", HRef.copy(getId()))
                 .add("kind", getKind())
                 .add("dis", getDis())
-                .add("days", hList);
+                .add("days", hList)
+                .add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
 
         if(mSiteId != null)
             defaultSchedule.add("siteRef", HRef.copy(mSiteId));
@@ -1992,6 +1993,9 @@ public class Schedule extends Entity
         {
             defaultSchedule.add(marker);
         }
+
+        if(getUnoccupiedZoneSetback() != null)
+            defaultSchedule.add("unoccupiedZoneSetback", getUnoccupiedZoneSetback());
 
         return defaultSchedule.toDict();
     }
@@ -2049,18 +2053,39 @@ public class Schedule extends Entity
                 hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
             if (day.mVal != null)
                 hDictDay.add("curVal", HNum.make(day.getVal()));
+
+
+            //add default value if the days value is null as all zone schedule should have these values
             if (day.heatingUserLimitMin != null)
                 hDictDay.add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(day.getHeatingUserLimitMin()));
+            else
+                hDictDay.add(Tags.HEATING_USER_LIMIT_MIN, 67.0);
+
             if (day.heatingUserLimitMax != null)
                 hDictDay.add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(day.getHeatingUserLimitMax()));
+            else
+                hDictDay.add(Tags.HEATING_USER_LIMIT_MAX, 72.0);
+
             if (day.coolingUserLimitMin != null)
                 hDictDay.add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(day.getCoolingUserLimitMin()));
+            else
+                hDictDay.add(Tags.COOLING_USER_LIMIT_MIN, 72.0);
+
             if (day.coolingUserLimitMax != null)
                 hDictDay.add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(day.getCoolingUserLimitMax()));
+            else
+                hDictDay.add(Tags.COOLING_USER_LIMIT_MAX, 77.0);
+
             if (day.coolingDeadBand != null)
                 hDictDay.add(Tags.COOLING_DEADBAND, HNum.make(day.getCoolingDeadBand()));
+            else
+                hDictDay.add(Tags.COOLING_DEADBAND, 2.0);
+
             if (day.heatingDeadBand != null)
                 hDictDay.add(Tags.HEATING_DEADBAND, HNum.make(day.getHeatingDeadBand()));
+            else
+                hDictDay.add(Tags.HEATING_DEADBAND, 2.0);
+
 
             //need boolean & string support
             if (day.mSunset) hDictDay.add("sunset", day.mSunset);
@@ -2073,7 +2098,6 @@ public class Schedule extends Entity
         HDictBuilder defaultSchedule = new HDictBuilder()
                                                .add("id", HRef.copy(getId()))
                                                .add("kind", getKind())
-
                                                .add("dis", "Zone Schedule")
                                                .add("days", hList)
                                                .add("roomRef",HRef.copy(roomRef))
@@ -2082,6 +2106,8 @@ public class Schedule extends Entity
 
         if(getUnoccupiedZoneSetback() != null)
             defaultSchedule.add("unoccupiedZoneSetback", getUnoccupiedZoneSetback());
+        else
+            defaultSchedule.add("unoccupiedZoneSetback", 5.0);
 
         if (getCreatedDateTime() != null) {
             defaultSchedule.add("createdDateTime", getCreatedDateTime());

@@ -71,7 +71,7 @@ public class DefaultSchedules {
             defaultSchedule.add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
             defaultSchedule.add(Tags.FOLLOW_BUILDING);
             defaultSchedule.add(Tags.UNOCCUPIED_ZONE_SETBACK, getZoneScheduablePoint(Queries.ZONE_UNOCCUPIED_ZONE_SETBACK,
-                    zoneId));
+                    zoneId) == null ? 5.0 : getZoneScheduablePoint(Queries.ZONE_UNOCCUPIED_ZONE_SETBACK, zoneId));
 
         }
         
@@ -91,15 +91,17 @@ public class DefaultSchedules {
                 .add("heatVal", HNum.make(DEFAULT_HEATING_TEMP));
         if (zoneId != null) {
             hDictDay.add(Tags.HEATING_USER_LIMIT_MIN, getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MIN,
-                    zoneId));
+                    zoneId) == null ? 67.0 : getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MIN, zoneId));
             hDictDay.add(Tags.HEATING_USER_LIMIT_MAX, getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MAX,
-                            zoneId));
+                    zoneId) == null ? 72.0 : getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MAX, zoneId));
             hDictDay.add(Tags.COOLING_USER_LIMIT_MIN, getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MIN,
-                            zoneId));
+                    zoneId) == null ? 72.0 : getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MIN, zoneId));
             hDictDay.add(Tags.COOLING_USER_LIMIT_MAX, getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MAX
-                            , zoneId));
-            hDictDay.add(Tags.COOLING_DEADBAND, getZoneScheduablePoint(Queries.ZONE_COOLING_DEADBAND, zoneId));
-            hDictDay.add(Tags.HEATING_DEADBAND, getZoneScheduablePoint(Queries.ZONE_HEATING_DEADBAND, zoneId));
+                    , zoneId) == null ? 77.0 : getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MAX, zoneId));
+            hDictDay.add(Tags.COOLING_DEADBAND, getZoneScheduablePoint(Queries.ZONE_COOLING_DEADBAND, zoneId) == null
+                    ? 2.0 : getZoneScheduablePoint(Queries.ZONE_COOLING_DEADBAND, zoneId));
+            hDictDay.add(Tags.HEATING_DEADBAND, getZoneScheduablePoint(Queries.ZONE_HEATING_DEADBAND, zoneId) == null ?
+                    2.0 : getZoneScheduablePoint(Queries.ZONE_HEATING_DEADBAND, zoneId));
         }
         return hDictDay.toDict();
     }

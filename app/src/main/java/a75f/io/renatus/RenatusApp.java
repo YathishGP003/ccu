@@ -129,7 +129,7 @@ public class RenatusApp extends UtilityApplication
 						Log.d(TAG_CCU_DOWNLOAD, output.trim() + " (" + p.exitValue() + ")");
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
-						closeApp();
+						restartApp();
 					}
 				} catch (IOException e) {
 					Log.e(TAG_CCU_DOWNLOAD, e.getMessage());
@@ -161,10 +161,14 @@ public class RenatusApp extends UtilityApplication
 		}
 	}
 
-	public static void closeApp() {
+	public static void restartApp() {
 		AlertManager.getInstance().clearAlertsWhenAppClose();
 		AlertManager.getInstance().getRepo().setRestartAppToTrue();
 		CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
+		closeApp();
+	}
+
+	public static void closeApp() {
 		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);

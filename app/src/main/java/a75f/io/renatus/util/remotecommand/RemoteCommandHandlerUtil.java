@@ -87,7 +87,7 @@ public class RemoteCommandHandlerUtil {
         switch (commands) {
             case RESTART_CCU:
                 AlertManager.getInstance().generateAlert(AlertsConstantsKt.CCU_RESTART, "CCU Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
-                RenatusApp.closeApp();
+                RenatusApp.restartApp();
                 break;
             case RESTART_TABLET:
                 AlertManager.getInstance().generateAlert(AlertsConstantsKt.DEVICE_RESTART, "Tablet Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());

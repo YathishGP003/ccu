@@ -201,11 +201,11 @@ public class Pulse
 							if (isTh2Enabled && isSse) {
 								th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+								hayStack.writeHisValById(logPoint.get("id").toString(), th2TempVal);
 							} else if (isTh2Enabled && isAcb) {
 								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
-								hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 								if (oldCondensateSensor != curCondensateSensor) {
 									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
 								}
@@ -214,10 +214,10 @@ public class Pulse
 								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
-								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 								if ((oldEntTempVal != curEntTempVal) && !isSse)
 									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curEntTempVal);
 							}
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							CcuLog.d(L.TAG_CCU_DEVICE,
 							         "regularSmartNodeUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," +
 							         logicalCurTempPoint + "," + isTh2Enabled + "," + logPointInfo.getMarkers().toString());

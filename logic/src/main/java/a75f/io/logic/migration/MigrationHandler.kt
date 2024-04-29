@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerUtil
@@ -67,14 +68,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             migrationForDRMode(ccuHsApi)
-        }
-        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             migrateEquipStatusEnums(ccuHsApi)
-        }
-        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty() &&
-            !PreferenceUtil.getSingleDualMigrationStatus()) {
-            migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi)
-            PreferenceUtil.setSingleDualMigrationStatus()
+            if(!PreferenceUtil.getSingleDualMigrationStatus()) {
+                migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi)
+                PreferenceUtil.setSingleDualMigrationStatus()
+            }
+
+            DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
         }
         if (!isMigrationRequired()) {
             return

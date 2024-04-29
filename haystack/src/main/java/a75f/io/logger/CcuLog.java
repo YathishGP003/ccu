@@ -6,6 +6,12 @@ package a75f.io.logger;
 
 import android.util.Log;
 
+import org.projecthaystack.UnknownRecException;
+
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
+
 /**
  * Helper class for a list (or tree) of LoggerNodes.
  *
@@ -19,11 +25,11 @@ public class CcuLog
 	// Grabbing the native values from Android's native logging facilities,
 	// to make for easy migration and interop.
 	public static final int NONE = -1;
-	public static final int VERBOSE = android.util.Log.VERBOSE;
-	public static final int DEBUG = android.util.Log.DEBUG;
-	public static final int INFO = android.util.Log.INFO;
-	public static final int WARN = android.util.Log.WARN;
-	public static final int ERROR = android.util.Log.ERROR;
+	public static final int VERBOSE = 0;
+	public static final int DEBUG = 1;
+	public static final int INFO = 2;
+	public static final int WARN = 3;
+	public static final int ERROR = 4;
 
 	// Stores the beginning of the LogNode topology.
 	private static LogNode mLogNode;
@@ -78,7 +84,8 @@ public class CcuLog
 	 *           to extract and print useful information.
 	 */
 	public static void v(String tag, String msg, Throwable tr) {
-		println(VERBOSE, tag, msg, tr);
+		if(getLogLevel() <= VERBOSE)
+			println(VERBOSE, tag, msg, tr);
 	}
 	
 	/**
@@ -101,7 +108,8 @@ public class CcuLog
 	 *           to extract and print useful information.
 	 */
 	public static void d(String tag, String msg, Throwable tr) {
-		println(DEBUG, tag, msg, tr);
+		if(getLogLevel() <= DEBUG)
+			println(DEBUG, tag, msg, tr);
 	}
 	
 	/**
@@ -123,7 +131,8 @@ public class CcuLog
 	 *           to extract and print useful information.
 	 */
 	public static void i(String tag, String msg, Throwable tr) {
-		println(INFO, tag, msg, tr);
+		if(getLogLevel() <= INFO)
+			println(INFO, tag, msg, tr);
 	}
 	
 	/**
@@ -145,7 +154,8 @@ public class CcuLog
 	 *           to extract and print useful information.
 	 */
 	public static void w(String tag, String msg, Throwable tr) {
-		println(WARN, tag, msg, tr);
+		if(getLogLevel() <= WARN)
+			println(WARN, tag, msg, tr);
 	}
 	
 	/**
@@ -178,7 +188,8 @@ public class CcuLog
 	 *           to extract and print useful information.
 	 */
 	public static void e(String tag, String msg, Throwable tr) {
-		println(ERROR, tag, msg, tr);
+		if(getLogLevel() <= ERROR)
+			println(ERROR, tag, msg, tr);
 	}
 	
 	/**
@@ -197,5 +208,19 @@ public class CcuLog
 			printLongMessage(tag, str.substring(4000));
 		} else
 			Log.i(tag, str);
+	}
+
+
+	private static int getLogLevel(){
+		double level = 4.0;
+		try {
+			HashMap<Object, Object>  entity = CCUHsApi.getInstance().readEntity("log and level and diag");
+			if(entity.isEmpty())
+				return (int) level;
+			return CCUHsApi.getInstance().readHisValById(entity.get("id").toString()).intValue();
+		} catch (IllegalStateException e) {
+			Log.e("CcuLog", "hayStack is not initialized");
+			return (int) level;
+		}
 	}
 }

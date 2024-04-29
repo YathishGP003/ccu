@@ -91,12 +91,6 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     @BindView(R.id.modbus75_img)
     ImageView modbus75Image;
 
-    @BindView(R.id.daikin_ccu)
-    ImageView daikinCcu;
-
-    @BindView(R.id.airoverse_modbus)
-    ImageView airoverseModbus;
-
     @BindView(R.id.hyperstatImageId)
     ImageView hyperStatImage;
 
@@ -345,29 +339,19 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     }
 
     private void configCCULogo(){
-
-        if(CCUUiUtil.isDaikinEnvironment(requireContext()))
-            daikinCcu.setVisibility(View.VISIBLE);
-        else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
-            daikinCcu.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carrier_ccu, null));
-            daikinCcu.setVisibility(View.VISIBLE);
-            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_image, null));
-            smartNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.smartnode_device_image, null));
+        if(CCUUiUtil.isDaikinEnvironment(requireContext())) {
+            ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_daikin, null));
+            modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_daikin, null));
+        } else if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+            ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_carrier, null));
+            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_carrier, null));
+            smartNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.smart_node_carrier, null));
             helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
-            hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.image_hs_split_carrier,null));
-
+            hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.hyperstat_split_carrier,null));
+            modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_carrier, null));
         } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
-            daikinCcu.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_ccu, null));
-            daikinCcu.setVisibility(View.VISIBLE);
-            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_hs, null));
-            airoverseModbus.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.airoverse_modbus, null));
-            modbus75Image.setVisibility(View.GONE);
-            airoverseModbus.setVisibility(View.VISIBLE);
-        } else {
-            hyperStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.hyperstat_device_75f, null));
-            ccu75Image.setVisibility(View.VISIBLE);
-            modbus75Image.setVisibility(View.VISIBLE);
+            ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_airoverse, null));
+            modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_airoverse, null));
         }
-
     }
 }

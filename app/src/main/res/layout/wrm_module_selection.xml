@@ -21,19 +21,18 @@
 
     <RelativeLayout
         android:id="@+id/layoutHeader"
-        android:layout_width="match_parent"
+        android:layout_width="980dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp">
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginBottom="65dp">
 
         <ImageView
             android:id="@+id/imageGoback"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_centerVertical="true"
-            android:layout_marginStart="64dp"
-            android:padding="2.5dp"
-            android:rotation="180"
-            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:srcCompat="@drawable/angle_left_solid"
             tools:ignore="ContentDescription"
             app:tint="?orange_75f" />
 
@@ -43,56 +42,54 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="180dp"
             android:fontFamily="@font/lato_bold"
+            android:textFontWeight="700"
             android:text="@string/title_smartnodemodule"
-            android:textAllCaps="true"
-            android:textColor="?orange_75f"
-            android:textSize="33.5sp"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            android:lineHeight="36sp"/>
 
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="200dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:scrollbarThumbVertical="@drawable/custom_thumb_scrollbar"
             android:overScrollMode="never">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="920dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <RelativeLayout
                     android:id="@+id/rl_vav_head"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp"
-                    android:minHeight="92dp">
+                    android:layout_height="wrap_content">
 
 
                     <RelativeLayout
                         android:id="@+id/rl_vav"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="180dp"
                         android:clickable="true"
-                        android:focusable="true"
-                        android:minHeight="92dp">
+                        android:focusable="true">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginEnd="190dp"
+                            android:layout_marginEnd="114dp"
+                            android:layout_marginVertical="20dp"
                             android:orientation="vertical">
 
                             <TextView
@@ -100,59 +97,61 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
                                 android:text="@string/title_vav"
-                                android:textAppearance="@style/title_normal" />
+                                android:textAppearance="@style/title_bold" />
 
                             <TextView
                                 android:id="@+id/textVAVdesc"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
                                 android:text="@string/desc_vav"
-                                android:textAppearance="@style/text_label" />
+                                android:textAppearance="@style/text_label_secondary" />
 
                         </LinearLayout>
 
                         <ImageView
                             android:id="@+id/imageViewArrow"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginEnd="92dp"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                            android:src="@drawable/next_arrow_button_enabled"
                             tools:ignore="ContentDescription"
                             app:tint="?orange_75f" />
 
                         <View
-                            android:layout_width="517dp"
-                            android:layout_height="0.1dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
                             android:layout_alignParentEnd="true"
                             android:layout_alignParentBottom="true"
-                            android:alpha="0.37"
-                            android:background="@color/text_color" />
+                            android:background="@color/listview_divider_color" />
                     </RelativeLayout>
 
                     <LinearLayout
-                        android:visibility="gone"
                         android:id="@+id/ll_vavmods"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/rl_vav"
                         android:animateLayoutChanges="true"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
                         <RelativeLayout
                             android:id="@+id/rl_vavNoFan"
                             android:layout_width="match_parent"
-                            android:layout_height="92dp"
-                            android:layout_marginStart="180dp">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="240dp"
+                                android:layout_marginEnd="154dp"
+                                android:layout_marginVertical="20dp"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -160,52 +159,52 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/vav_nofan"
-                                    android:textAppearance="@style/title_normal" />
+                                    android:textAppearance="@style/title_bold" />
 
                                 <TextView
                                     android:id="@+id/textNoFanDesc"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/desc_nofan"
-                                    android:textAppearance="@style/text_label" />
+                                    android:textAppearance="@style/text_label_secondary" />
 
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
                                 android:id="@+id/iv_vavNoFan"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="92dp"
-                                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                android:src="@drawable/next_arrow_button_enabled"
                                 tools:ignore="ContentDescription"
                                 app:tint="?orange_75f" />
 
-
                             <View
-                                android:layout_width="517dp"
-                                android:layout_height="0.1dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_alignParentBottom="true"
-                                android:alpha="0.37"
-                                android:background="@color/text_color" />
+                                android:background="@color/listview_divider_color" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:id="@+id/rl_vavSeriesFan"
                             android:layout_width="match_parent"
-                            android:layout_height="92dp"
-                            android:layout_marginStart="180dp"
-                            android:visibility="gone">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="240dp"
+                                android:layout_marginEnd="154dp"
+                                android:layout_marginVertical="20dp"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -213,50 +212,52 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/vav_seriesfan"
-                                    android:textAppearance="@style/title_normal" />
+                                    android:textAppearance="@style/title_bold" />
 
                                 <TextView
                                     android:id="@+id/textSeriesFanDesc"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/desc_seriesfan"
-                                    android:textAppearance="@style/text_label" />
+                                    android:textAppearance="@style/text_label_secondary" />
 
                             </LinearLayout>
 
                             <ImageView
                                 android:id="@+id/iv_vavSeriesFan"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="92dp"
-                                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                android:src="@drawable/next_arrow_button_enabled"
                                 tools:ignore="ContentDescription"
                                 app:tint="?orange_75f" />
 
                             <View
-                                android:layout_width="517dp"
-                                android:layout_height="0.1dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_alignParentBottom="true"
-                                android:alpha="0.37"
-                                android:background="@color/text_color" />
+                                android:background="@color/listview_divider_color" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:id="@+id/rl_vavParallelFan"
                             android:layout_width="match_parent"
-                            android:layout_height="92dp"
-                            android:layout_marginStart="180dp">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="240dp"
+                                android:layout_marginVertical="20dp"
+                                android:layout_marginEnd="154dp"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -264,36 +265,37 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/vav_parallelfan"
-                                    android:textAppearance="@style/title_normal" />
+                                    android:textAppearance="@style/title_bold" />
 
                                 <TextView
                                     android:id="@+id/textParallelDesc"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
                                     android:text="@string/desc_parallelfan"
-                                    android:textAppearance="@style/text_label" />
+                                    android:textAppearance="@style/text_label_secondary" />
 
                             </LinearLayout>
 
                             <ImageView
                                 android:id="@+id/iv_vavParallelFan"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginEnd="92dp"
-                                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                android:src="@drawable/next_arrow_button_enabled"
                                 tools:ignore="ContentDescription"
                                 app:tint="?orange_75f" />
 
                             <View
-                                android:layout_width="517dp"
-                                android:layout_height="0.1dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_alignParentBottom="true"
-                                android:alpha="0.37"
-                                android:background="@color/text_color" />
+                                android:background="@color/listview_divider_color" />
                         </RelativeLayout>
                     </LinearLayout>
                 </RelativeLayout>
@@ -301,15 +303,16 @@
                 <RelativeLayout
                     android:id="@+id/rl_acb"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -317,98 +320,234 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_acb"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textACBdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_acb"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:id="@+id/iv_vavACB"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        android:src="@drawable/next_arrow_button_enabled"
                         tools:ignore="ContentDescription"
                         app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/rl_dab"
+                    android:id="@+id/rl_dab_head"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:layout_marginTop="12dp">
+
+                    <RelativeLayout
+                        android:id="@+id/rl_dabTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="114dp"
+                            android:layout_marginVertical="20dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textDABTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
+                                android:text="@string/title_dab"
+                                android:textAppearance="@style/title_bold" />
+
+                            <TextView
+                                android:id="@+id/textDABTitleDesc"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
+                                android:text="@string/desc_dab"
+                                android:textAppearance="@style/text_label_secondary" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/dabImageViewArrow"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/next_arrow_button_enabled"
+                            tools:ignore="ContentDescription"
+                            app:tint="?orange_75f" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:background="@color/listview_divider_color" />
+                    </RelativeLayout>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:id="@+id/ll_dabmods"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
-                        android:orientation="vertical">
+                        android:layout_below="@+id/rl_dabTitle"
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
-                        <TextView
-                            android:id="@+id/textDAB"
-                            android:layout_width="wrap_content"
+                        <RelativeLayout
+                            android:id="@+id/rl_dabSingleDuct"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:text="@string/title_dab"
-                            android:textAppearance="@style/title_normal" />
+                            android:layout_marginTop="12dp">
 
-                        <TextView
-                            android:id="@+id/textDABdesc"
-                            android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="154dp"
+                                android:layout_marginVertical="20dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/textDabSingleDuct"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
+                                    android:text="@string/title_dab_single_duct"
+                                    android:textAppearance="@style/title_bold" />
+
+                                <TextView
+                                    android:id="@+id/textDabSingleDuctDesc"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
+                                    android:text="@string/desc_dab"
+                                    android:textAppearance="@style/text_label_secondary" />
+
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/ivDabSingleDuct"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/next_arrow_button_enabled"
+                                tools:ignore="ContentDescription"
+                                app:tint="?orange_75f" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_alignParentBottom="true"
+                                android:background="@color/listview_divider_color" />
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/rl_dabDualDuct"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/desc_dab"
-                            android:textAppearance="@style/text_label" />
+                            android:layout_marginTop="12dp">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="154dp"
+                                android:layout_marginVertical="20dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/textDabDualDuct"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
+                                    android:text="@string/dab_dual_duct_title"
+                                    android:textAppearance="@style/title_bold" />
+
+                                <TextView
+                                    android:id="@+id/textDabDualDuctDesc"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="end"
+                                    android:gravity="end|center_vertical"
+                                    android:text="@string/desc_dab_dual_duct"
+                                    android:textAppearance="@style/text_label_secondary" />
+
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/ivDabDualDuct"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/next_arrow_button_enabled"
+                                tools:ignore="ContentDescription"
+                                app:tint="?orange_75f" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_alignParentBottom="true"
+                                android:background="@color/listview_divider_color" />
+                        </RelativeLayout>
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
 
-                    <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
                 </RelativeLayout>
+
 
                 <RelativeLayout
                     android:id="@+id/rl_sse"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -416,42 +555,43 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_sse"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textSSEdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_sse"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:id="@+id/ivDabSingleDuct"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                         android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_light"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:visibility="gone">
 
                     <LinearLayout
@@ -459,7 +599,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -467,42 +608,43 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_lighting"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textLightdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_light"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_tempmonitor"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:visibility="gone">
 
                     <LinearLayout
@@ -510,7 +652,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -518,42 +661,43 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_tempmonitor"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textTempMonitordesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_tempmonitor"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_cpc"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:visibility="gone">
 
                     <LinearLayout
@@ -561,7 +705,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -569,49 +714,51 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_cpc"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textCPCdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_cpc"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_picontrol"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -619,49 +766,51 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_picontrol"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textPiControldesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_picontrol"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_energymeter"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -669,42 +818,43 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_energymeter"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textEnergyMeterdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_energymeter"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_iftt"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginStart="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:visibility="gone">
 
                     <LinearLayout
@@ -712,7 +862,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -720,36 +871,36 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_iftt"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textIFTTdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_iftt"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
 
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
             </LinearLayout>

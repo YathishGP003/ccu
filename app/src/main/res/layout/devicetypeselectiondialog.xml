@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -20,20 +21,20 @@
 
     <RelativeLayout
         android:id="@+id/layoutHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp">
+        android:layout_width="980dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginBottom="65dp">
 
         <ImageView
             android:id="@+id/imageGoback"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_centerVertical="true"
-            android:layout_marginStart="64dp"
-            android:padding="2.5dp"
-            android:rotation="180"
-            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
-            app:tint="?orange_75f" />
+            android:tint="?orange_75f"
+            app:srcCompat="@drawable/angle_left_solid"
+            tools:ignore="UseAppTint" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -41,556 +42,588 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="190dp"
             android:fontFamily="@font/lato_bold"
+            android:textFontWeight="700"
             android:text="@string/label_selectdevicetype"
-            android:textAllCaps="true"
-            android:textColor="?orange_75f"
-            android:textSize="33.5sp"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            android:lineHeight="36sp"/>
 
     </RelativeLayout>
-
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layoutHeader"
-        android:overScrollMode="never">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/layoutHeader"
-        android:layout_marginTop="30dp"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:id="@+id/rl_smartnode"
-            android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:layout_width="279dp"
-                android:layout_height="130dp"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/smart_helio_node" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="360dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textSN"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_sn"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:id="@+id/textSmartNode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_smartnode"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textHN"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_hn"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:id="@+id/textHelioNode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_helionode"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-
-            <ImageView
-                android:id="@+id/nextSN"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:layout_alignParentBottom="true"
-                android:alpha="0.37"
-                android:background="@color/text_color" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rl_hyperstatsplit"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:layout_width="279dp"
-                android:layout_height="62dp"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/image_hs_split_lg" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_hssplit"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_hyperstatsplit"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:layout_alignParentBottom="true"
-                android:alpha="0.37"
-                android:background="@color/text_color" />
-        </RelativeLayout>
-
-        <RelativeLayout
-           android:id="@+id/rl_hyperstat"
-           android:layout_width="match_parent"
-           android:layout_height="114dp"
-           android:layout_marginStart="440dp">
-
-            <!-- todo: replace with hyperstat image -->
-            <ImageView
-               android:layout_width="279dp"
-               android:layout_height="62dp"
-               android:layout_alignParentBottom="true"
-               android:src="@drawable/image_hyperstat" />
-
-            <LinearLayout
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_alignParentEnd="true"
-               android:layout_centerVertical="true"
-               android:layout_marginEnd="220dp"
-               android:orientation="vertical">
-
-                <TextView
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="end"
-                   android:text="@string/title_hs"
-                   android:textAppearance="@style/title_normal" />
-
-                <TextView
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:text="@string/title_hyperstat"
-                   android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-               android:layout_width="match_parent"
-               android:layout_height="0.1dp"
-               android:layout_alignParentBottom="true"
-               android:alpha="0.37"
-               android:background="@color/text_color" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rl_smartstat"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:layout_width="279dp"
-                android:layout_height="62dp"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/image_smartstat" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textSS"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_ss"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:id="@+id/textSmartStat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_smartstat"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/nextSS"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:layout_alignParentBottom="true"
-                android:alpha="0.37"
-                android:background="@color/text_color" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rl_wirelesstemp"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="279dp"
-                android:layout_height="83dp"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/image_wtm" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textWTM"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_wtm"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:id="@+id/textWirelessTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_wirelesstemp"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/nextWTM"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:layout_alignParentBottom="true"
-                android:alpha="0.37"
-                android:background="@color/text_color" />
-        </RelativeLayout>
-
-
-        <RelativeLayout
-            android:id="@+id/rl_ccu"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:id="@+id/ccu75_img"
-                android:visibility="gone"
-                android:layout_width="300dp"
-                android:layout_height="113dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/image_ccu" />
-            <ImageView
-                android:id="@+id/daikin_ccu"
-                android:layout_width="300dp"
-                android:layout_height="70dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="10dp"
-                android:visibility="gone"
-                android:src="@drawable/ccu" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textCCU"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_ccu"
-                    android:textAppearance="@style/title_normal" />
-
-                <TextView
-                    android:id="@+id/textCentralControl"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ccufullform"
-                    android:textAppearance="@style/text_label" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/nextCCU"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="96dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:layout_alignParentBottom="true"
-                android:alpha="0.37"
-                android:background="@color/text_color" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rlModbus"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:layout_width="300dp"
-                android:layout_height="90dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="10dp"
-                app:srcCompat="@drawable/ic_modbus" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="220dp"
-                android:layout_centerVertical="true"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/textMb"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/title_mb"
-                    android:textAppearance="@style/title_normal"/>
-
-                <TextView
-                    android:id="@+id/textModBus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_modbus"
-                    android:textAppearance="@style/text_label"/>
-
-            </LinearLayout>
-            <ImageView
-                android:id="@+id/nextMb"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="96dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:background="@color/text_color"
-                android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rlOTN"
-            android:layout_width="match_parent"
-            android:layout_height="114dp"
-            android:layout_marginStart="440dp">
-
-            <ImageView
-                android:layout_width="300dp"
-                android:layout_height="90dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="10dp"
-                app:srcCompat="@drawable/bpos_devicetype" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="220dp"
-                android:layout_centerVertical="true"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/textOTN"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/textotn"
-                    android:textAppearance="@style/title_normal"/>
-
-                <TextView
-                    android:id="@+id/descOTN"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/descotn"
-                    android:textAppearance="@style/text_label"/>
-
-            </LinearLayout>
-            <ImageView
-                android:id="@+id/nextOTN"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="96dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="?orange_75f" />
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.1dp"
-                android:background="@color/text_color"
-                android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
-        </RelativeLayout>
-
-        <RadioGroup
-            android:id="@+id/deviceTypeSelection"
-            android:layout_width="0dp"
+        android:layout_marginBottom="40dp"
+        android:overScrollMode="never"
+        android:scrollbarThumbVertical="@drawable/custom_thumb_scrollbar">
+        <LinearLayout
+            android:layout_width="920dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone">
+            android:layout_below="@+id/layoutHeader"
+            android:layout_marginStart="200dp"
+            android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/smartNode"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/rl_smartnode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/smartNodeId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/smart_node_75f" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textSN"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_sn"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:id="@+id/textSmartNode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_smartnode"
+                        android:textAppearance="@style/text_label_secondary" />
+
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nextSN"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_helioNode"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="70dp"
-                android:layout_marginTop="135dp"
-                android:text="@string/txt_smartnode"
-                android:textSize="@dimen/text_medium_xlarge" />
+                android:layout_marginTop="12dp">
 
+                <ImageView
+                    android:id="@+id/helioNodeId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/helio_node_75f" />
 
-            <RadioButton
-                android:id="@+id/smartstat"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textHN"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hn"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:id="@+id/textHelioNode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_helionode"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+                <ImageView
+                    android:id="@+id/nextHN"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_hyperstatsplit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="70dp"
-                android:layout_marginTop="200dp"
-                android:text="@string/txt_smartstat"
-                android:textSize="@dimen/text_medium_xlarge" />
+                android:layout_marginTop="12dp">
 
+                <ImageView
+                    android:id="@+id/hyperStatSplit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/hyperstat_split_75f" />
 
-        </RadioGroup>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
 
-        <RadioGroup
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hssplit"
+                        android:textAppearance="@style/title_bold" />
 
-            <RadioButton
-                android:id="@+id/hia"
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hyperstatsplit"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_hyperstat"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
-                android:layout_marginTop="150dp"
-                android:clickable="false"
-                android:focusable="false"
-                android:text="@string/txt_itm_hia"
-                android:textColor="@color/selection_gray" />
+                android:layout_marginTop="12dp">
 
+                <ImageView
+                    android:id="@+id/hyperstatImageId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/hyperstat_75f" />
 
-            <RadioButton
-                android:id="@+id/lpi"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hs"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_hyperstat"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_wirelesstemp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
-                android:layout_marginTop="180dp"
-                android:clickable="false"
-                android:focusable="false"
-                android:text="@string/txt_itm_lpi"
-                android:textColor="@color/selection_gray" />
-        </RadioGroup>
+                android:layout_marginTop="12dp"
+                android:visibility="gone">
 
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/otn_75f" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textWTM"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_wtm"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:id="@+id/textWirelessTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_wirelesstemp"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nextWTM"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_ccu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:id="@+id/ccu75_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/ccu_75f" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textCCU"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_ccu"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:id="@+id/textCentralControl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/ccufullform"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nextCCU"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rlModbus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:id="@+id/modbus75_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    app:srcCompat="@drawable/modbus_75f" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="114dp"
+                    android:layout_centerVertical="true"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/textExternalEquipment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_external"
+                        android:textAppearance="@style/title_bold"/>
+
+                    <TextView
+                        android:id="@+id/textModBus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_modbus"
+                        android:textAppearance="@style/text_label_secondary"/>
+
+                </LinearLayout>
+                <ImageView
+                    android:id="@+id/nextMb"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/listview_divider_color"
+                    android:layout_alignParentBottom="true"/>
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_smartstat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    android:src="@drawable/smartstat_75f" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="114dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textSS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_ss"
+                        android:textAppearance="@style/title_bold" />
+
+                    <TextView
+                        android:id="@+id/textSmartStat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/title_smartstat"
+                        android:textAppearance="@style/text_label_secondary" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nextSS"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/listview_divider_color" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rlOTN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="60dp"
+                    app:srcCompat="@drawable/otn_75f" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="114dp"
+                    android:layout_centerVertical="true"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/textOTN"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/textotn"
+                        android:textAppearance="@style/title_bold"/>
+
+                    <TextView
+                        android:id="@+id/descOTN"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@string/descotn"
+                        android:textAppearance="@style/text_label_secondary"/>
+
+                </LinearLayout>
+                <ImageView
+                    android:id="@+id/nextOTN"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/next_arrow_button_enabled"
+                    app:tint="?orange_75f" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/listview_divider_color"
+                    android:layout_alignParentBottom="true"/>
+            </RelativeLayout>
+
+
+            <RadioGroup
+                android:id="@+id/deviceTypeSelection"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="gone">
+
+                <RadioButton
+                    android:id="@+id/smartNode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="70dp"
+                    android:layout_marginTop="135dp"
+                    android:text="@string/txt_smartnode"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+
+                <RadioButton
+                    android:id="@+id/smartstat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="70dp"
+                    android:layout_marginTop="200dp"
+                    android:text="@string/txt_smartstat"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+
+            </RadioGroup>
+
+            <RadioGroup
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="gone">
+
+                <RadioButton
+                    android:id="@+id/hia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginTop="150dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:text="@string/txt_itm_hia"
+                    android:textColor="@color/selection_gray" />
+
+
+                <RadioButton
+                    android:id="@+id/lpi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginTop="180dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:text="@string/txt_itm_lpi"
+                    android:textColor="@color/selection_gray" />
+            </RadioGroup>
+
+        </LinearLayout>
     </ScrollView>
+
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -617,6 +650,5 @@
             android:text="@string/txt_pair" />
 
     </LinearLayout>
-
 
 </RelativeLayout>

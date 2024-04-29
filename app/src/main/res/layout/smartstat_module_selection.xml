@@ -21,19 +21,18 @@
 
     <RelativeLayout
         android:id="@+id/layoutHeader"
-        android:layout_width="match_parent"
+        android:layout_width="980dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp">
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginBottom="65dp">
 
         <ImageView
             android:id="@+id/imageGoback"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_centerVertical="true"
-            android:layout_marginStart="64dp"
-            android:padding="2.5dp"
-            android:rotation="180"
-            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
+            app:srcCompat="@drawable/angle_left_solid" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -41,46 +40,46 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="180dp"
             android:fontFamily="@font/lato_bold"
+            android:textFontWeight="700"
             android:text="@string/title_smartstatmodule"
-            android:textAllCaps="true"
-            android:textColor="?orange_75f"
-            android:textSize="33.5sp"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            android:lineHeight="36sp"/>
 
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
         android:layout_weight="1"
+        android:layout_marginStart="200dp"
+        android:layout_marginBottom="40dp"
         android:orientation="vertical">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollbarThumbVertical="@drawable/custom_thumb_scrollbar"
             android:overScrollMode="never">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="920dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
 
                 <RelativeLayout
                     android:id="@+id/rl_cpu"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp">
+                    android:layout_height="wrap_content">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -88,44 +87,41 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:layout_marginBottom="6dp"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_cpu"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textCPUdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_cpu"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        android:src="@drawable/next_arrow_button_enabled"
                         tools:ignore="ContentDescription"
                         app:tint="?orange_75f" />
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_commercial"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp"
                     android:visibility="gone">
 
                     <LinearLayout
@@ -133,8 +129,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginStart="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -142,51 +138,48 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_commercial"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textLightdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_commercial"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription"
-                        app:tint="?orange_75f" />
+                        android:src="@drawable/next_arrow_button_enabled" />
+
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_hpu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp">
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -194,51 +187,51 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_hpu"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/textHPUdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_hpu"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        tools:ignore="ContentDescription"
-                        app:tint="?orange_75f" />
+                        android:src="@drawable/next_arrow_button_enabled"
+                        app:tint="?orange_75f"
+                        tools:ignore="ContentDescription" />
+
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_2pipe"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp">
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -246,51 +239,50 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_2pipe"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/text2Pipedesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_2pipe"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        android:src="@drawable/next_arrow_button_enabled"
                         tools:ignore="ContentDescription"
                         app:tint="?orange_75f" />
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_4pipe"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp">
+                    android:layout_marginTop="12dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginEnd="190dp"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -298,41 +290,37 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/title_4pipe"
-                            android:textAppearance="@style/title_normal" />
+                            android:textAppearance="@style/title_bold" />
 
                         <TextView
                             android:id="@+id/text4Pipedesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:gravity="end"
+                            android:layout_gravity="end"
+                            android:gravity="end|center_vertical"
                             android:text="@string/desc_4pipe"
-                            android:textAppearance="@style/text_label" />
+                            android:textAppearance="@style/text_label_secondary" />
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="92dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        android:src="@drawable/next_arrow_button_enabled"
                         tools:ignore="ContentDescription"
                         app:tint="?orange_75f" />
                     <View
-                        android:layout_width="517dp"
-                        android:layout_height="0.1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentBottom="true"
-                        android:alpha="0.37"
-                        android:background="@color/text_color" />
+                        android:background="@color/listview_divider_color" />
                 </RelativeLayout>
-
-
             </LinearLayout>
-
         </ScrollView>
     </LinearLayout>
 

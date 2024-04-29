@@ -17,6 +17,7 @@
     <color name="primary">#673ab7</color>
     <color name="primary_dark">#000000</color>
     <color name="text_secondary">#D9000000</color>
+    <color name="text_disabled">#999999</color>
     <!--<color name="orange">#a0D77B64</color>-->
     <color name="orange_multi">#ececec</color>
     <color name="dark_gray">#1a1a1a</color>
@@ -81,6 +82,8 @@
     <color name="dark_text">#DE000000</color>
     <color name="title_color">#55565A</color>
     <color name="line_greycolor">#707070</color>
+    <color name="disable_element_color">#B6B6B6</color>
+    <color name="disable_module_text_color">#666666</color>
     <color name="hint_color">#5E000000</color>
     <color name="hint_textcolor">#99000000</color>
     <color name="input_textcolor">#B3000000</color>

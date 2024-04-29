@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 import android.app.Dialog;
+import android.graphics.PorterDuff;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,6 +19,11 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.domain.util.ModelLoader;
@@ -162,6 +169,10 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     ImageView iv_vavParallelFan;
 
     @Nullable
+    @BindView(R.id.iv_vavACB)
+    ImageView iv_vavACB;
+
+    @Nullable
     @BindView(R.id.textDABTitle)
     TextView textDABTitle;
 
@@ -227,6 +238,9 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
     @BindView(R.id.textTitleFragment)
     TextView     textTitleFragment;
+
+    private List<View> disableMenuViews;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -460,6 +474,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     public void onStart()
     {
         super.onStart();
+        disableMenuViews = new ArrayList<>();
         Dialog dialog = getDialog();
         if (dialog != null)
         {
@@ -471,24 +486,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.dabExternalAHUController){
-            //rlVAV.setEnabled(false);
-            //lt_VAVProfile.setEnabled(false);
-            rlVAVNoFan.setEnabled(false);
-            rlVAVSeriesFan.setEnabled(false);
-            rlVAVParallelFan.setEnabled(false);
-            rlACB.setEnabled(false);
 
-            textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textSeriesFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textSeriesFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textParallelFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textParallelDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-
-            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
-            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
-            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            disableMenuViews.addAll(Arrays.asList(
+                    rlVAVNoFan, rlVAVSeriesFan, rlVAVParallelFan, rlACB
+                    ,textNoFan, textNoFanDesc, textSeriesFan, textSeriesFanDesc, textParallelFan, textParallelDesc, textVAV, textVAVdesc, textACB, textACBdesc
+                    ,imageViewArrow, iv_vavNoFan, iv_vavSeriesFan, iv_vavParallelFan, iv_vavACB));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -505,15 +507,12 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.vavExternalAHUController){
-            rlDabSingleDuct.setEnabled(false);
-            rlDabDualDuct.setEnabled(false);
-            textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabDualDuct.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabSingleDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabDualDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
-            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            disableMenuViews.addAll(Arrays.asList(
+                    rlDabSingleDuct, rlDabDualDuct
+                    ,textDABTitle, textDABTitleDesc, textDabSingleDuct, textDabSingleDuctDesc, textDabDualDuct, textDabDualDuctDesc
+                    ,dabImageViewArrow, ivDabSingleDuct, ivDabDualDuct));
+
             dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -525,22 +524,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
 
         }/*Code to disable VAV as well as DAB profiles if Default System Profile is selected*/
         else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
-            rlVAVNoFan.setEnabled(false);
-            rlVAVSeriesFan.setEnabled(false);
-            rlVAVParallelFan.setEnabled(false);
-            rlACB.setEnabled(false);
 
-            textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textSeriesFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textSeriesFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textParallelFan.setTextColor(getResources().getColor(R.color.selection_gray));
-            textParallelDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-
-            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
-            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textACB.setTextColor(getResources().getColor(R.color.selection_gray));
-            textACBdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            disableMenuViews.addAll(Arrays.asList(
+                    rlVAVNoFan, rlVAVSeriesFan, rlVAVParallelFan, rlACB
+                    ,textNoFan, textNoFanDesc, textSeriesFan, textSeriesFanDesc, textParallelFan, textParallelDesc, textVAV, textVAVdesc, textACB, textACBdesc
+                    ,imageViewArrow, iv_vavNoFan, iv_vavSeriesFan, iv_vavParallelFan, iv_vavACB
+                    ,rlDabSingleDuct, rlDabDualDuct
+                    ,textDABTitle, textDABTitleDesc, textDabSingleDuct, textDabSingleDuctDesc, textDabDualDuct, textDabDualDuctDesc
+                    ,dabImageViewArrow, ivDabSingleDuct, ivDabDualDuct));
 
             imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -551,17 +542,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             iv_vavNoFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             iv_vavNoFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-
-
-            rlDabSingleDuct.setEnabled(false);
-            rlDabDualDuct.setEnabled(false);
-            textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabDualDuct.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabSingleDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDabDualDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
-
-            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
-            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
             dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -572,6 +552,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             ivDabDualDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
         }
+        setMenuViewsDisabled(disableMenuViews);
         setTitle();
     }
     
@@ -615,4 +596,18 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     {
         return ID;
     }
+
+    private void setMenuViewsDisabled(List<View> views) {
+        for (View view: views) {
+            if(view instanceof RelativeLayout) {
+                view.setEnabled(false);
+            } else if(view instanceof ImageView) {
+                ((ImageView) view).setColorFilter(ContextCompat.getColor(getActivity(), R.color.disable_element_color), PorterDuff.Mode.SRC_IN);
+            } else if(view instanceof TextView) {
+                ((TextView) view).setTextColor(getResources().getColor(R.color.text_disabled));
+            }
+        }
+    }
 }
+
+

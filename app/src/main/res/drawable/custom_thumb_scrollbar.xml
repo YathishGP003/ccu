@@ -1,0 +1,7 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="6dp" /> <!-- Adjust the radius for curved edges -->
+    <solid android:color="@android:color/transparent" /> <!-- Transparent background -->
+    <stroke
+        android:width="6dp"
+        android:color="#B6B6B6"/>
+</shape>

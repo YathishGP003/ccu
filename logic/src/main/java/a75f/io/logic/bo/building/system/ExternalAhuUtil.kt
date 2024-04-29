@@ -340,7 +340,7 @@ fun calculateSATSetPoints(
         if (loopRunningDirection == TempDirection.HEATING) isLockoutActive =
             L.ccu().systemProfile.isHeatingLockoutActive
         logIt("isLockoutActive:$isLockoutActive ")
-        var satSetPointValue: Double =
+        val satSetPointValue: Double =
             if (basicConfig.loopOutput == 0.0 || isLockoutActive) updateDefaultSetPoints(
                 systemEquip,
                 loopRunningDirection

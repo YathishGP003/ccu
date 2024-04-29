@@ -194,9 +194,9 @@ class VavExternalAhu : VavSystemProfile() {
     }
     private fun calculateSetPoints(systemEquip: Equip) {
         val externalEquipId = getExternalEquipId()
+        updateCoolingLoop(systemEquip)
         val vavConfig = getBasicVavConfigData()
         updateLoopDirection(vavConfig, systemEquip)
-        updateCoolingLoop(systemEquip)
         updateAutoCommissionOutput(vavConfig)
         val occupancyMode = ScheduleManager.getInstance().systemOccupancy
         val conditioningMode = getConditioningMode(systemEquip)
@@ -311,9 +311,9 @@ class VavExternalAhu : VavSystemProfile() {
         }
     }
     private fun getBasicVavConfigData() = BasicConfig(
-        coolingLoop = if (vavSystem.coolingSignal <= 0) 0 else vavSystem.coolingSignal,
+        coolingLoop = systemCoolingLoopOp.toInt().coerceIn(0,100),
         heatingLoop = if (vavSystem.heatingSignal <= 0) 0 else vavSystem.heatingSignal,
-        loopOutput = if (vavSystem.coolingSignal > 0) vavSystem.coolingSignal.toDouble() else vavSystem.heatingSignal.toDouble(),
+        loopOutput = if (systemCoolingLoopOp.toInt().coerceIn(0,100) > 0) systemCoolingLoopOp else vavSystem.heatingSignal.toDouble(),
         weightedAverageCO2 = weightedAverageCO2,
     )
 }

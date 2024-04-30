@@ -341,32 +341,37 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             boolean humidifier = getConfigVal("humidifier and type") == 0;
             
             double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-    
-            if (humidifier) {
-                //Humidification
-                int curSignal = (int)ControlMote.getRelayState("relay7");
-                if (humidity < targetMinHumidity) {
-                    signal = 1;
-                } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
-                    signal = 0;
-                } else {
-                    signal = curSignal;
-                }
-                setCmdSignal("humidifier",signal);
+            if(humidity == 0){
+                signal = 0;
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Humidity is 0");
             } else {
-                //Dehumidification
-                int curSignal = (int)ControlMote.getRelayState("relay7");
-                if (humidity > targetMaxHumidity) {
-                    signal = 1;
-                } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
-                    signal = 0;
+                if (humidifier) {
+                    //Humidification
+                    int curSignal = (int) ControlMote.getRelayState("relay7");
+                    if (humidity < targetMinHumidity) {
+                        signal = 1;
+                    } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
+                        signal = 0;
+                    } else {
+                        signal = curSignal;
+                    }
+                    setCmdSignal("humidifier", signal);
                 } else {
-                    signal = curSignal;
+                    //Dehumidification
+                    int curSignal = (int) ControlMote.getRelayState("relay7");
+                    if (humidity > targetMaxHumidity) {
+                        signal = 1;
+                    } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
+                        signal = 0;
+                    } else {
+                        signal = curSignal;
+                    }
+                    setCmdSignal("dehumidifier", signal);
                 }
-                setCmdSignal("dehumidifier",signal);
+                CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
+                        " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
             }
-            CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
-                                      " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
+
     
             ControlMote.setRelayState("relay7", signal);
         } else {

@@ -492,18 +492,25 @@ public class DabStagedRtu extends DabSystemProfile
                 case HUMIDIFIER:
                 case DEHUMIDIFIER:
                     if (systemMode == SystemMode.OFF ||
-                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
-                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION ||
-                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) {
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION ||
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ||
+                            ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.NONE) {
                         relayState = 0;
                     } else {
                         double humidity = getSystemController().getAverageSystemHumidity();
+
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal(
                             "target and min and inside and humidity");
                         double targetMaxHumidity = TunerUtil.readSystemUserIntentVal(
                             "target and max and inside and humidity");
                         double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis",
                                                                                   getSystemEquipRef());
+                        if(humidity == 0){
+                            relayState = 0;
+                            CcuLog.d(L.TAG_CCU_SYSTEM, "Humidity is 0");
+                            break;
+                        }
                         if (stage == HUMIDIFIER) {
                             currState = getCmdSignal("humidifier");
                             //Humidification

@@ -707,9 +707,11 @@ public abstract class SystemProfile
      * @return
      */
     public boolean isSystemOccupied() {
-         return ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.UNOCCUPIED &&
+        return ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.UNOCCUPIED &&
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.VACATION &&
-                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.AUTOAWAY;
+                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.AUTOAWAY &&
+                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.NONE;
     }
 
     public void reset() {

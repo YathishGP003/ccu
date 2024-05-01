@@ -115,6 +115,9 @@ open class HyperStatSplitEquip {
             val humidityPointId = hyperStatSplitPointsUtil.addPointToHaystack(humidityPointData)
             hyperStatSplitPointsUtil.addDefaultValueForPoint(humidityPointId, 0.0)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(humidityPointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, tempPort.name, tempPointId)
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, humidityPort.name, humidityPointId)
         }
 
     }
@@ -140,6 +143,8 @@ open class HyperStatSplitEquip {
 
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, pressPort.name, pointId)
         }
     }
 

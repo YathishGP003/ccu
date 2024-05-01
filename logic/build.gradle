@@ -63,7 +63,7 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo.dev.service.75f.io/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker.dev.service.75f.io/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage.dev.service.75f.io/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https:// alerts.dev.service.75f.io/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging.dev.service.75f.io/\"'
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'GATEWAY_API_BASE', '\"https://gateway-apis.dev.service.75f.io/\"'

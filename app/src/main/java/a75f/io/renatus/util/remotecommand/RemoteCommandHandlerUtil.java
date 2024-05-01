@@ -83,7 +83,7 @@ public class RemoteCommandHandlerUtil {
     private static long bacAppDownloadId = -1;
     private static long remoteAccessAppDownloadId = -1;
     private static String remoteAccessAppName;
-    private static final String remoteAccessAppPackageName = "com.hmdm.control";
+    private static final String remoteAccessAppPackageName = "io.seventyfivef.remoteaccess";
 
     public static void handleRemoteCommand(String commands, String cmdLevel, String id) {
         CcuLog.d("RemoteCommand", "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);

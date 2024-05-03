@@ -171,7 +171,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         profileEquip.setupDeviceAnalogIns(
             config.analogIn1State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
-            config.analogIn1State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
+            config.analogIn2State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.analogIn2State.association),
             masterPoints, hyperStatDevice
         )
 

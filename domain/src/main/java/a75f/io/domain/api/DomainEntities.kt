@@ -146,7 +146,7 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()
-        Domain.hayStack.writePoint(id, level, who, writableVal, duration )
+        Domain.hayStack.writePoint(id, level, who, writableVal, duration)
     }
 
 }

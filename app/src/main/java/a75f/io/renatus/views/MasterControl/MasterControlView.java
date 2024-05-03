@@ -275,8 +275,10 @@ public class MasterControlView extends LinearLayout {
         masterControl.temps[whichLimit] = val;
         if(whichLimit == MasterControl.MasterControlState.LOWER_BUILDING_LIMIT.ordinal()){
             Domain.buildingEquip.getBuildingLimitMin().writeVal(16, val);
+            Domain.buildingEquip.getBuildingLimitMin().writeHisVal(val);
         } else if(whichLimit == MasterControl.MasterControlState.UPPER_BUILDING_LIMIT.ordinal()){
             Domain.buildingEquip.getBuildingLimitMax().writeVal(16, val);
+            Domain.buildingEquip.getBuildingLimitMax().writeHisVal(val);
         } else if(whichLimit == MasterControl.MasterControlState.LOWER_HEATING_LIMIT.ordinal()){
             ArrayList<HashMap<Object, Object>> allHeatingLowerLimit =
                     CCUHsApi.getInstance().readAllEntities("schedulable and point and limit and max and heating and user");
@@ -316,6 +318,7 @@ public class MasterControlView extends LinearLayout {
         float val ;
         val = (float) MasterControlUtil.getAdapterFarhenheitVal(adapterVal);
         Domain.buildingEquip.getBuildingToZoneDifferential().writeVal(16, val);
+        Domain.buildingEquip.getBuildingToZoneDifferential().writeHisVal(val);
     }
 
 

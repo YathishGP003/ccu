@@ -39,7 +39,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;
     public static final String DOWNLOAD_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
-    public static final String DOWNLOAD_REMOTE_ACCESS_APP = "update_RemoteAcess";
+    public static final String DOWNLOAD_REMOTE_ACCESS_APP = "ota_update_remoteAccess";
 
     public static final String UPDATE_CCU_LOG_LEVEL = "update_ccu_log_level";
     /**

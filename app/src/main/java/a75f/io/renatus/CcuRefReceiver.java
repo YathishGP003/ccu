@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import org.projecthaystack.HRef;
 
 import java.util.Objects;
 
@@ -15,30 +18,31 @@ public class CcuRefReceiver extends BroadcastReceiver {
     private static final String SHARED_PREFERENCE_NAME = "remote_status_pref";
     @Override
     public void onReceive(Context context, Intent intent) {
-
         if (intent == null || intent.getAction() == null) {
             return;
         }
 
         if (Objects.requireNonNull(intent.getAction()).equals(REQUEST_CCU_REF_ACTION)) {
-
-            String pin = intent.getStringExtra("pin");
-
-            if (pin != null) {
-                SharedPreferences sharedPreferences = context.getSharedPreferences(
-                        SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("pin", pin);
-                editor.apply();
-            }
-            String ccuRef = CCUHsApi.getInstance().getCcuId();
-            String bearerToken = CCUHsApi.getInstance().getJwt();
             Intent responseIntent = new Intent(SEND_CCU_REF_ACTION);
-            responseIntent.putExtra("ccuRef", ccuRef);
-            responseIntent.putExtra("bearerToken", bearerToken);
-            responseIntent.putExtra("pin",pin);
-            context.sendBroadcast(responseIntent);
+            try {
+                CCUHsApi instance = CCUHsApi.getInstance();
+                String ccuId = instance.getCcuId();
+                String ccuName = instance.getCcuName();
+                HRef site = instance.getSiteIdRef();
+                String jwt = instance.getJwt();
 
+                if (ccuId != null && ccuName != null && site != null && jwt != null) {
+                    responseIntent.putExtra("ccuId", instance.getCcuId());
+                    responseIntent.putExtra("ccuName", instance.getCcuName());
+                    responseIntent.putExtra("siteId", instance.getSiteIdRef().toVal());
+                    responseIntent.putExtra("bearerToken", instance.getJwt());
+                    context.sendBroadcast(responseIntent);
+                } else {
+                    Log.w("CcuRefReceiver", "CCU information incomplete, not sending RAA broadcast");
+                }
+            } catch(Exception ex) {
+                Log.w("CcuRefReceiver", "Exception while attempting to broadcast CCU information: " + ex.getMessage());
+            }
         }
     }
 }

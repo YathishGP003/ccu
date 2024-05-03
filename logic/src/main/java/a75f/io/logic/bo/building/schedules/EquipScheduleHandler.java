@@ -148,9 +148,9 @@ public class EquipScheduleHandler implements Schedulable {
         if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                 AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil) ||
                 ForcedOccupied.isZoneForcedOccupied(equipRef)){
-            double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
+            double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT - setback +
                      demandResponseSetback, buildingLimitMax);
-            double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT -
+            double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT + setback -
                      demandResponseSetback, buildingLimitMin);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId,
                     HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);

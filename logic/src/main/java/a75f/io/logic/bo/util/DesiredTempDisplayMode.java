@@ -53,13 +53,27 @@ public class DesiredTempDisplayMode {
         ArrayList<Equip> zoneEquips = HSUtil.getEquips(roomRef);
         TemperatureMode modeType = getDesiredTempDisplayMode(zoneEquips, ccuHsApi);
         if (modeType.equals(DUAL)) {
-            TemperatureMode conditioningMode = getConditioningModeForZone(roomRef, ccuHsApi);
+            TemperatureMode modeToset = modeType;
+            //Check if any systemProfile is present in the zone
+            if(!hasSystemEquip(zoneEquips, ccuHsApi)){
+                modeToset = getConditioningModeForZone(roomRef, ccuHsApi);
+            }
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
-                    + roomRef + "\"", (double) conditioningMode.ordinal());
+                    + roomRef + "\"", (double) modeToset.ordinal());
         } else {
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeType.ordinal());
         }
+    }
+
+    private static boolean hasSystemEquip(ArrayList<Equip> zoneEquips, CCUHsApi ccuHsApi) {
+        for (Equip mEquip : zoneEquips) {
+            if (mEquip.getMarkers().contains(Tags.VAV) ||
+                    mEquip.getMarkers().contains(Tags.DAB)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static TemperatureMode getConditioningModeForZone(String roomRef, CCUHsApi ccuHsApi) {
